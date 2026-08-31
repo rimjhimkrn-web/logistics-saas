@@ -98,6 +98,72 @@ form button {
     <button type="submit" id="submitButton">Submit Shipment Request</button>
 
 </form>
+<script>
+    const shipmentForm = document.getElementById("shipmentForm");
+
+    shipmentForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+            const submitButton = document.getElementById("submitButton");
+
+                submitButton.disabled = true;
+                    submitButton.textContent = "Submitting...";
+
+                        const pickup_location = document.getElementById("pickup_location").value.trim();
+                            const delivery_location = document.getElementById("delivery_location").value.trim();
+                                const material_goods = document.getElementById("material_goods").value.trim();
+                                    const weight = document.getElementById("weight").value.trim();
+                                        const truck_type = document.getElementById("truck_type").value.trim();
+                                            const customer_name = document.getElementById("customer_name").value.trim();
+                                                const phone_number = document.getElementById("phone_number").value.trim();
+
+                                                    if (
+                                                            !pickup_location ||
+                                                                    !delivery_location ||
+                                                                            !material_goods ||
+                                                                                    !weight ||
+                                                                                            !truck_type ||
+                                                                                                    !customer_name ||
+                                                                                                            !phone_number
+                                                                                                                ) {
+                                                                                                                        alert("Please fill all fields.");
+                                                                                                                                submitButton.disabled = false;
+                                                                                                                                        submitButton.textContent = "Submit Shipment Request";
+                                                                                                                                                return;
+                                                                                                                                                    }
+
+                                                                                                                                                        const { data, error } = await supabaseClient
+                                                                                                                                                                .from("shipment_requests")
+                                                                                                                                                                        .insert([
+                                                                                                                                                                                    {
+                                                                                                                                                                                                    pickup_location: pickup_location,
+                                                                                                                                                                                                                    delivery_location: delivery_location,
+                                                                                                                                                                                                                                    material_goods: material_goods,
+                                                                                                                                                                                                                                                    weight: weight,
+                                                                                                                                                                                                                                                                    truck_type: truck_type,
+                                                                                                                                                                                                                                                                                    customer_name: customer_name,
+                                                                                                                                                                                                                                                                                                    phone_number: phone_number
+                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                        ])
+                                                                                                                                                                                                                                                                                                                                .select();
+
+                                                                                                                                                                                                                                                                                                                                    if (error) {
+                                                                                                                                                                                                                                                                                                                                            console.error("Supabase error:", error);
+                                                                                                                                                                                                                                                                                                                                                    alert("Shipment could not be submitted: " + error.message);
+
+                                                                                                                                                                                                                                                                                                                                                            submitButton.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                    submitButton.textContent = "Submit Shipment Request";
+                                                                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                                                                                                                                    alert("Shipment request submitted successfully!");
+
+                                                                                                                                                                                                                                                                                                                                                                                        shipmentForm.reset();
+
+                                                                                                                                                                                                                                                                                                                                                                                            submitButton.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                                                submitButton.textContent = "Submit Shipment Request";
+                                                                                                                                                                                                                                                                                                                                                                                                });
+                                                                                                                                                                                                                                                                                                                                                                                                </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 </body>
