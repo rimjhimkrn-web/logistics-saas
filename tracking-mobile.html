@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Track Shipment</title>
+            </head>
+            <body>
+
+                <h1>Track Shipment</h1>
+
+                    <input type="text" id="trackingInput" placeholder="Enter tracking number">
+                        <br><br>
+                            <button onclick="trackShipment()">Track</button>
+
+                                <div id="result"></div>
+
+                                    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+                                        </script>
+                                            <script>
+                                                    const supabase = window.supabase.createClient(
+                                                                'https://ebltviniygljwwseplph.supabase.co',
+                                                                            'sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa'
+                                                                                    );
+
+                                                                                            async function trackShipment() {
+                                                                                                        const input = document.getElementById('trackingInput');
+                                                                                                                    const result = document.getElementById('result');
+                                                                                                                                const trackingNumber = input.value.trim();
+
+                                                                                                                                            if (!trackingNumber) {
+                                                                                                                                                            result.innerHTML = 'Please enter a tracking number';
+                                                                                                                                                                            return;
+                                                                                                                                                                                        }
+
+                                                                                                                                                                                                    result.innerHTML = 'Loading...';
+
+                                                                                                                                                                                                                const { data, error } = await supabase
+                                                                                                                                                                                                                                .from('shipment_requests')
+                                                                                                                                                                                                                                                .select('*')
+                                                                                                                                                                                                                                                                .eq('tracking_number', trackingNumber)
+                                                                                                                                                                                                                                                                                .single();
+
+                                                                                                                                                                                                                                                                                            if (error) {
+                                                                                                                                                                                                                                                                                                            result.innerHTML = 'Not found';
+                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                                                                                    result.innerHTML = `
+                                                                                                                                                                                                                                                                                                                                                                    <h2>${data.tracking_number}</h2>
+                                                                                                                                                                                                                                                                                                                                                                                    <p>Status: ${data.status}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                    <p>Pickup: ${data.pickup_location}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                    <p>Delivery: ${data.delivery_location}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                    <p>Material: ${data.material || data.material_goods}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                `;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            </html>
