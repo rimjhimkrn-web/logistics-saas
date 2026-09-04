@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Customer Login</title>
+            </head>
+            <body>
+
+                <h1>Customer Login</h1>
+
+                    <form id="loginForm">
+                            <p>
+                                        <label>Email:</label><br>
+                                                    <input type="email" id="email" placeholder="your@email.com" required>
+                                                            </p>
+
+                                                                    <p>
+                                                                                <label>Password:</label><br>
+                                                                                            <input type="password" id="password" placeholder="Enter password" required>
+                                                                                                    </p>
+
+                                                                                                            <button type="submit">Login</button>
+                                                                                                                </form>
+
+                                                                                                                    <div id="message"></div>
+
+                                                                                                                        <br>
+                                                                                                                            <a href="index.html">Back to Home</a>
+                                                                                                                                <br>
+                                                                                                                                    <a href="customer-signup.html">Don't have an account? Sign Up</a>
+
+                                                                                                                                        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+                                                                                                                                            </script>
+                                                                                                                                                <script>
+                                                                                                                                                        const supabase = window.supabase.createClient(
+                                                                                                                                                                    'https://ebltviniygljwwseplph.supabase.co',
+                                                                                                                                                                                'sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa'
+                                                                                                                                                                                        );
+
+                                                                                                                                                                                                const form = document.getElementById('loginForm');
+                                                                                                                                                                                                        const message = document.getElementById('message');
+
+                                                                                                                                                                                                                form.addEventListener('submit', async function(e) {
+                                                                                                                                                                                                                            e.preventDefault();
+
+                                                                                                                                                                                                                                        const email = document.getElementById('email').value.trim();
+                                                                                                                                                                                                                                                    const password = document.getElementById('password').value.trim();
+
+                                                                                                                                                                                                                                                                if (!email || !password) {
+                                                                                                                                                                                                                                                                                message.innerHTML = '⚠️ Please enter email and password';
+                                                                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                                                                                                                        message.innerHTML = '⏳ Logging in...';
+
+                                                                                                                                                                                                                                                                                                                                    const { data, error } = await supabase.auth.signInWithPassword({
+                                                                                                                                                                                                                                                                                                                                                    email: email,
+                                                                                                                                                                                                                                                                                                                                                                    password: password
+                                                                                                                                                                                                                                                                                                                                                                                });
+
+                                                                                                                                                                                                                                                                                                                                                                                            if (error) {
+                                                                                                                                                                                                                                                                                                                                                                                                            message.innerHTML = '❌ ' + error.message;
+                                                                                                                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    message.innerHTML = '✅ Login successful! Redirecting...';
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            // Redirect to customer dashboard
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        setTimeout(() => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        window.location.href = 'customer-dashboard.html';
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }, 1500);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </html>
