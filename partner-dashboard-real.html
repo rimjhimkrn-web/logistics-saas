@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+            <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Partner Dashboard</title>
+    </head>
+    <body>
+
+            <h1>Partner Dashboard</h1>
+
+                <div id="result">Loading partners...</div>
+
+                    <br>
+                        <a href="index.html">Back to Home</a>
+
+                            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+                            </script>
+                                <script>
+                                            const supabase = window.supabase.createClient(
+                                                            'https://ebltviniygljwwseplph.supabase.co',
+                                                                        'sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa'
+                                            );
+
+                                                    async function loadPartners() {
+                                                                    const result = document.getElementById('result');
+
+                                                                                const { data, error } = await supabase
+                                                                                                .from('partners')
+                                                                                                                .select('*');
+
+                                                                                                                            if (error) {
+                                                                                                                                                result.innerHTML = 'Error: ' + error.message;
+                                                                                                                                                                return;
+                                                                                                                            }
+
+                                                                                                                                        if (!data || data.length === 0) {
+                                                                                                                                                            result.innerHTML = 'No partners found.';
+                                                                                                                                                                            return;
+                                                                                                                                        }
+
+                                                                                                                                                    let html = '<h2>Partners List</h2>';
+                                                                                                                                                                data.forEach(p => {
+                                                                                                                                                                                    html += `
+                                                                                                                                                                                                        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+                                                                                                                                                                                                                                    <strong>${p.name}</strong><br>
+                                                                                                                                                                                                                                                            Contact: ${p.contact_person || 'N/A'}
+                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                        `;
+                                                                                                                                                                                                    });
+
+                                                                                                                                                                                                                result.innerHTML = html;
+                                                                                                                                                                                                }
+
+                                                                                                                                                                                                        loadPartners();
+                                                                                                                                                                                            </script>
+
+                                                                                                                                                                                        </body>
+                                                                                                                                                                                        </html>
+                                                                                                                                                                })
+                                                                                                                                        }
+                                                                                                                            }
+                                                    }
+                                            )
