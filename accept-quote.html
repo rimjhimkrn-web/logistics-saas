@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <title>Accept Quotation</title>
+
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+        <style>
+            body {
+                  font-family: Arial, sans-serif;
+                        padding: 30px;
+                              max-width: 500px;
+                                    margin: auto;
+                                        }
+
+                                            input, button {
+                                                  width: 100%;
+                                                        padding: 12px;
+                                                              margin-top: 10px;
+                                                                    box-sizing: border-box;
+                                                                        }
+
+                                                                            button {
+                                                                                  cursor: pointer;
+                                                                                      }
+
+                                                                                          #result {
+                                                                                                margin-top: 20px;
+                                                                                                      font-weight: bold;
+                                                                                                          }
+                                                                                                            </style>
+                                                                                                            </head>
+
+                                                                                                            <body>
+
+                                                                                                              <h2>Accept Quotation</h2>
+
+                                                                                                                <input
+                                                                                                                    type="text"
+                                                                                                                        id="tracking"
+                                                                                                                            placeholder="Enter Tracking Number"
+                                                                                                                              >
+
+                                                                                                                                <button onclick="acceptQuote()">Accept Quotation</button>
+
+                                                                                                                                  <div id="result"></div>
+
+                                                                                                                                    <script>
+                                                                                                                                        const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+                                                                                                                                            const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+
+                                                                                                                                                const supabaseClient = supabase.createClient(
+                                                                                                                                                      SUPABASE_URL,
+                                                                                                                                                            SUPABASE_PUBLISHABLE_KEY
+                                                                                                                                                                );
+
+                                                                                                                                                                    async function acceptQuote() {
+
+                                                                                                                                                                          const result = document.getElementById("result");
+                                                                                                                                                                                const tracking = document.getElementById("tracking").value.trim();
+
+                                                                                                                                                                                      if (!tracking) {
+                                                                                                                                                                                              result.innerText = "Please enter tracking number.";
+                                                                                                                                                                                                      return;
+                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                  const { data: userData, error: userError } =
+                                                                                                                                                                                                                          await supabaseClient.auth.getUser();
+
+                                                                                                                                                                                                                                if (userError || !userData.user) {
+                                                                                                                                                                                                                                        result.innerText = "Please login first.";
+                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                                      }
+
+                                                                                                                                                                                                                                                            const { data: shipment, error: shipmentError } =
+                                                                                                                                                                                                                                                                    await supabaseClient
+                                                                                                                                                                                                                                                                              .from("shipment_requests")
+                                                                                                                                                                                                                                                                                        .select("tracking_number, quoted_price, quote_status")
+                                                                                                                                                                                                                                                                                                  .eq("tracking_number", tracking)
+                                                                                                                                                                                                                                                                                                            .eq("customer_id", userData.user.id)
+                                                                                                                                                                                                                                                                                                                      .single();
+
+                                                                                                                                                                                                                                                                                                                            if (shipmentError || !shipment) {
+                                                                                                                                                                                                                                                                                                                                    result.innerText = "Shipment not found.";
+                                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                                  }
+
+                                                                                                                                                                                                                                                                                                                                                        if (!shipment.quoted_price) {
+                                                                                                                                                                                                                                                                                                                                                                result.innerText = "Quotation is not available yet.";
+                                                                                                                                                                                                                                                                                                                                                                        return;
+                                                                                                                                                                                                                                                                                                                                                                              }
+
+                                                                                                                                                                                                                                                                                                                                                                                    if (shipment.quote_status === "accepted") {
+                                                                                                                                                                                                                                                                                                                                                                                            result.innerText = "Quotation is already accepted.";
+                                                                                                                                                                                                                                                                                                                                                                                                    return;
+                                                                                                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                const { error: updateError } =
+                                                                                                                                                                                                                                                                                                                                                                                                                        await supabaseClient
+                                                                                                                                                                                                                                                                                                                                                                                                                                  .from("shipment_requests")
+                                                                                                                                                                                                                                                                                                                                                                                                                                            .update({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        quote_status: "accepted"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            .eq("tracking_number", tracking)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      .eq("customer_id", userData.user.id);
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (updateError) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    result.innerText = "Error: " + updateError.message;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        result.innerText = "Quotation accepted successfully!";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </html>
