@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>My Shipment Quotation</title>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+          <style>
+              body {
+                    font-family: Arial, sans-serif;
+                          background: #f4f6f8;
+                                padding: 20px;
+                                    }
+
+                                        .box {
+                                              max-width: 500px;
+                                                    margin: auto;
+                                                          background: white;
+                                                                padding: 20px;
+                                                                      border-radius: 10px;
+                                                                          }
+
+                                                                              input, button {
+                                                                                    width: 100%;
+                                                                                          padding: 12px;
+                                                                                                margin-top: 10px;
+                                                                                                      box-sizing: border-box;
+                                                                                                          }
+
+                                                                                                              button {
+                                                                                                                    background: #2563eb;
+                                                                                                                          color: white;
+                                                                                                                                border: 0;
+                                                                                                                                      border-radius: 6px;
+                                                                                                                                          }
+
+                                                                                                                                              .result {
+                                                                                                                                                    margin-top: 20px;
+                                                                                                                                                          padding: 15px;
+                                                                                                                                                                background: #f8fafc;
+                                                                                                                                                                      border-radius: 8px;
+                                                                                                                                                                          }
+
+                                                                                                                                                                              .price {
+                                                                                                                                                                                    font-size: 24px;
+                                                                                                                                                                                          font-weight: bold;
+                                                                                                                                                                                                margin-top: 8px;
+                                                                                                                                                                                                    }
+
+                                                                                                                                                                                                        #message {
+                                                                                                                                                                                                              margin-top: 15px;
+                                                                                                                                                                                                                    font-weight: bold;
+                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                          </style>
+                                                                                                                                                                                                                          </head>
+
+                                                                                                                                                                                                                          <body>
+
+                                                                                                                                                                                                                          <div class="box">
+
+                                                                                                                                                                                                                            <h2>My Shipment Quotation</h2>
+
+                                                                                                                                                                                                                              <input
+                                                                                                                                                                                                                                  id="tracking"
+                                                                                                                                                                                                                                      placeholder="Enter Tracking Number"
+                                                                                                                                                                                                                                        >
+
+                                                                                                                                                                                                                                          <button onclick="checkQuote()">View Quotation</button>
+
+                                                                                                                                                                                                                                            <div id="message"></div>
+
+                                                                                                                                                                                                                                              <div id="result" class="result" style="display:none;">
+                                                                                                                                                                                                                                                  <div>Tracking Number</div>
+                                                                                                                                                                                                                                                      <strong id="trackingResult"></strong>
+
+                                                                                                                                                                                                                                                          <br><br>
+
+                                                                                                                                                                                                                                                              <div>Quotation Status</div>
+                                                                                                                                                                                                                                                                  <strong id="statusResult"></strong>
+
+                                                                                                                                                                                                                                                                      <br><br>
+
+                                                                                                                                                                                                                                                                          <div>Quoted Price</div>
+                                                                                                                                                                                                                                                                              <div id="priceResult" class="price"></div>
+                                                                                                                                                                                                                                                                                </div>
+
+                                                                                                                                                                                                                                                                                </div>
+
+                                                                                                                                                                                                                                                                                <script>
+
+                                                                                                                                                                                                                                                                                const SUPABASE_URL =
+                                                                                                                                                                                                                                                                                "https://ebltviniygljwwseplph.supabase.co";
+
+                                                                                                                                                                                                                                                                                const SUPABASE_PUBLISHABLE_KEY =
+                                                                                                                                                                                                                                                                                "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+
+                                                                                                                                                                                                                                                                                const supabaseClient = supabase.createClient(
+                                                                                                                                                                                                                                                                                  SUPABASE_URL,
+                                                                                                                                                                                                                                                                                    SUPABASE_PUBLISHABLE_KEY
+                                                                                                                                                                                                                                                                                    );
+
+                                                                                                                                                                                                                                                                                    async function checkQuote() {
+
+                                                                                                                                                                                                                                                                                      const tracking =
+                                                                                                                                                                                                                                                                                          document.getElementById("tracking").value.trim();
+
+                                                                                                                                                                                                                                                                                            const message =
+                                                                                                                                                                                                                                                                                                document.getElementById("message");
+
+                                                                                                                                                                                                                                                                                                  const result =
+                                                                                                                                                                                                                                                                                                      document.getElementById("result");
+
+                                                                                                                                                                                                                                                                                                        result.style.display = "none";
+
+                                                                                                                                                                                                                                                                                                          if (!tracking) {
+                                                                                                                                                                                                                                                                                                              message.textContent =
+                                                                                                                                                                                                                                                                                                                    "Please enter your tracking number.";
+                                                                                                                                                                                                                                                                                                                        return;
+                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                            message.textContent = "Checking quotation...";
+
+                                                                                                                                                                                                                                                                                                                              const { data: userData, error: userError } =
+                                                                                                                                                                                                                                                                                                                                  await supabaseClient.auth.getUser();
+
+                                                                                                                                                                                                                                                                                                                                    if (userError || !userData.user) {
+                                                                                                                                                                                                                                                                                                                                        message.textContent =
+                                                                                                                                                                                                                                                                                                                                              "Please login first.";
+                                                                                                                                                                                                                                                                                                                                                  return;
+                                                                                                                                                                                                                                                                                                                                                    }
+
+                                                                                                                                                                                                                                                                                                                                                      const { data, error } = await supabaseClient
+                                                                                                                                                                                                                                                                                                                                                          .from("shipment_requests")
+                                                                                                                                                                                                                                                                                                                                                              .select(
+                                                                                                                                                                                                                                                                                                                                                                    "tracking_number, quoted_price, quote_status"
+                                                                                                                                                                                                                                                                                                                                                                        )
+                                                                                                                                                                                                                                                                                                                                                                            .eq("tracking_number", tracking)
+                                                                                                                                                                                                                                                                                                                                                                                .eq("customer_id", userData.user.id)
+                                                                                                                                                                                                                                                                                                                                                                                    .single();
+
+                                                                                                                                                                                                                                                                                                                                                                                      if (error) {
+                                                                                                                                                                                                                                                                                                                                                                                          message.textContent =
+                                                                                                                                                                                                                                                                                                                                                                                                "Quotation not found.";
+                                                                                                                                                                                                                                                                                                                                                                                                    return;
+                                                                                                                                                                                                                                                                                                                                                                                                      }
+
+                                                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("trackingResult").textContent =
+                                                                                                                                                                                                                                                                                                                                                                                                            data.tracking_number;
+
+                                                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("statusResult").textContent =
+                                                                                                                                                                                                                                                                                                                                                                                                                  data.quote_status || "Pending";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                    if (data.quoted_price !== null) {
+                                                                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("priceResult").textContent =
+                                                                                                                                                                                                                                                                                                                                                                                                                              "₹" + Number(data.quoted_price).toLocaleString("en-IN");
+                                                                                                                                                                                                                                                                                                                                                                                                                                } else {
+                                                                                                                                                                                                                                                                                                                                                                                                                                    document.getElementById("priceResult").textContent =
+                                                                                                                                                                                                                                                                                                                                                                                                                                          "Not quoted yet";
+                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                              message.textContent = "";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                result.style.display = "block";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                </html>
