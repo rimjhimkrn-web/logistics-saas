@@ -3,95 +3,90 @@
 <head>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Quotation</title>
+      <title>Shipment Quotation</title>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="config.js"></script>
 
-          <style>
-              body {
-                    font-family: Arial, sans-serif;
-                          background: #f4f6f8;
-                                padding: 20px;
-                                    }
+            <style>
+                body {
+                      font-family: Arial, sans-serif;
+                            background: #f4f6f8;
+                                  padding: 20px;
+                                      }
 
-                                        .box {
-                                              max-width: 500px;
-                                                    margin: auto;
-                                                          background: white;
-                                                                padding: 20px;
-                                                                      border-radius: 10px;
-                                                                          }
+                                          .box {
+                                                max-width: 500px;
+                                                      margin: auto;
+                                                            background: white;
+                                                                  padding: 20px;
+                                                                        border-radius: 10px;
+                                                                            }
 
-                                                                              input, button {
-                                                                                    width: 100%;
-                                                                                          padding: 12px;
-                                                                                                margin-top: 10px;
-                                                                                                      box-sizing: border-box;
-                                                                                                          }
+                                                                                input, button {
+                                                                                      width: 100%;
+                                                                                            padding: 12px;
+                                                                                                  margin-top: 10px;
+                                                                                                        box-sizing: border-box;
+                                                                                                            }
 
-                                                                                                              button {
-                                                                                                                    background: #2563eb;
-                                                                                                                          color: white;
-                                                                                                                                border: none;
-                                                                                                                                      border-radius: 6px;
-                                                                                                                                          }
+                                                                                                                button {
+                                                                                                                      background: #2563eb;
+                                                                                                                            color: white;
+                                                                                                                                  border: 0;
+                                                                                                                                        border-radius: 6px;
+                                                                                                                                            }
 
-                                                                                                                                              #message {
-                                                                                                                                                    margin-top: 15px;
-                                                                                                                                                          font-weight: bold;
-                                                                                                                                                              }
-                                                                                                                                                                </style>
-                                                                                                                                                                </head>
+                                                                                                                                                #message {
+                                                                                                                                                      margin-top: 15px;
+                                                                                                                                                            font-weight: bold;
+                                                                                                                                                                }
+                                                                                                                                                                  </style>
+                                                                                                                                                                  </head>
 
-                                                                                                                                                                <body>
+                                                                                                                                                                  <body>
 
-                                                                                                                                                                <div class="box">
-                                                                                                                                                                  <h2>Shipment Quotation</h2>
+                                                                                                                                                                  <div class="box">
+                                                                                                                                                                    <h2>Shipment Quotation</h2>
 
-                                                                                                                                                                    <input id="tracking" placeholder="Tracking Number">
-                                                                                                                                                                      <input id="price" type="number" placeholder="Quoted Price (₹)">
+                                                                                                                                                                      <input id="tracking" placeholder="Tracking Number">
+                                                                                                                                                                        <input id="price" type="number" placeholder="Quoted Price (₹)">
 
-                                                                                                                                                                        <button onclick="saveQuote()">Save Quotation</button>
+                                                                                                                                                                          <button onclick="saveQuote()">Save Quotation</button>
 
-                                                                                                                                                                          <div id="message"></div>
-                                                                                                                                                                          </div>
+                                                                                                                                                                            <div id="message"></div>
+                                                                                                                                                                            </div>
 
-                                                                                                                                                                          <script>
-                                                                                                                                                                          const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-                                                                                                                                                                          const SUPABASE_KEY = "sb_publishable_8xzZUebYp_nIxVRWEQdiw_2H4RkHAa";
+                                                                                                                                                                            <script>
 
-                                                                                                                                                                          const supabaseClient = supabase.createClient(
-                                                                                                                                                                            SUPABASE_URL,
-                                                                                                                                                                              SUPABASE_KEY
-                                                                                                                                                                              );
+                                                                                                                                                                            async function saveQuote() {
 
-                                                                                                                                                                              async function saveQuote() {
+                                                                                                                                                                              const tracking = document.getElementById("tracking").value.trim();
+                                                                                                                                                                                const price = document.getElementById("price").value;
+                                                                                                                                                                                  const message = document.getElementById("message");
 
-                                                                                                                                                                                const tracking = document.getElementById("tracking").value.trim();
-                                                                                                                                                                                  const price = document.getElementById("price").value;
-                                                                                                                                                                                    const message = document.getElementById("message");
+                                                                                                                                                                                    if (!tracking || !price) {
+                                                                                                                                                                                        message.textContent = "Please enter tracking number and price.";
+                                                                                                                                                                                            return;
+                                                                                                                                                                                              }
 
-                                                                                                                                                                                      if (!tracking || !price) {
-                                                                                                                                                                                          message.textContent = "Please enter tracking number and price.";
-                                                                                                                                                                                              return;
-                                                                                                                                                                                                }
+                                                                                                                                                                                                const { error } = await supabaseClient
+                                                                                                                                                                                                    .from("shipment_requests")
+                                                                                                                                                                                                        .update({
+                                                                                                                                                                                                              quoted_price: Number(price),
+                                                                                                                                                                                                                    quote_status: "quoted"
+                                                                                                                                                                                                                        })
+                                                                                                                                                                                                                            .eq("tracking_number", tracking);
 
-                                                                                                                                                                                                  const { error } = await supabaseClient
-                                                                                                                                                                                                      .from("shipment_requests")
-                                                                                                                                                                                                          .update({
-                                                                                                                                                                                                                quoted_price: Number(price),
-                                                                                                                                                                                                                      quote_status: "quoted"
-                                                                                                                                                                                                                          })
-                                                                                                                                                                                                                              .eq("tracking_number", tracking);
+                                                                                                                                                                                                                              if (error) {
+                                                                                                                                                                                                                                  message.textContent = "Error: " + error.message;
+                                                                                                                                                                                                                                      return;
+                                                                                                                                                                                                                                        }
 
-                                                                                                                                                                                                                                if (error) {
-                                                                                                                                                                                                                                    message.textContent = "Error: " + error.message;
-                                                                                                                                                                                                                                        return;
+                                                                                                                                                                                                                                          message.textContent = "Quotation saved successfully!";
                                                                                                                                                                                                                                           }
 
-                                                                                                                                                                                                                                            message.textContent = "Quotation saved successfully!";
-                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                            </script>
+                                                                                                                                                                                                                                          </script>
 
-                                                                                                                                                                                                                                            </body>
-                                                                                                                                                                                                                                            </html>
+                                                                                                                                                                                                                                          </body>
+                                                                                                                                                                                                                                          </html>
