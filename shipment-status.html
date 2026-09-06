@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipment Status</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family:Arial,sans-serif;
+    background:#f4f7fb;
+      margin:0;
+        padding:20px;
+        }
+
+        .container{
+          max-width:600px;
+            margin:auto;
+            }
+
+            .card{
+              background:white;
+                padding:25px;
+                  border-radius:12px;
+                    box-shadow:0 3px 12px rgba(0,0,0,.08);
+                    }
+
+                    h1{
+                      margin-top:0;
+                      }
+
+                      .tracking{
+                        font-weight:bold;
+                          margin-bottom:25px;
+                          }
+
+                          .step{
+                            display:flex;
+                              align-items:center;
+                                margin:18px 0;
+                                }
+
+                                .circle{
+                                  width:32px;
+                                    height:32px;
+                                      border-radius:50%;
+                                        background:#ddd;
+                                          display:flex;
+                                            align-items:center;
+                                              justify-content:center;
+                                                margin-right:15px;
+                                                  font-weight:bold;
+                                                  }
+
+                                                  .step.done .circle{
+                                                    background:#22c55e;
+                                                      color:white;
+                                                      }
+
+                                                      .step.current .circle{
+                                                        background:#2563eb;
+                                                          color:white;
+                                                          }
+
+                                                          .step-text{
+                                                            font-size:16px;
+                                                            }
+
+                                                            .loading{
+                                                              text-align:center;
+                                                                padding:30px;
+                                                                }
+
+                                                                .error{
+                                                                  color:#dc2626;
+                                                                  }
+                                                                  </style>
+                                                                  </head>
+
+                                                                  <body>
+
+                                                                  <div class="container">
+                                                                    <div class="card">
+
+                                                                        <h1>Shipment Status</h1>
+
+                                                                            <div id="loading" class="loading">
+                                                                                  Loading shipment...
+                                                                                      </div>
+
+                                                                                          <div id="content" style="display:none;">
+
+                                                                                                <div class="tracking">
+                                                                                                        Tracking Number: <span id="trackingNumber"></span>
+                                                                                                              </div>
+
+                                                                                                                    <div id="timeline"></div>
+
+                                                                                                                        </div>
+
+                                                                                                                            <div id="error" class="error"></div>
+
+                                                                                                                              </div>
+                                                                                                                              </div>
+
+                                                                                                                              <script>
+
+                                                                                                                              const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+
+                                                                                                                              const SUPABASE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+
+                                                                                                                              const supabaseClient = supabase.createClient(
+                                                                                                                                SUPABASE_URL,
+                                                                                                                                  SUPABASE_KEY
+                                                                                                                                  );
+
+                                                                                                                                  const steps = [
+                                                                                                                                    {key:"new", label:"New"},
+                                                                                                                                      {key:"assigned", label:"Assigned"},
+                                                                                                                                        {key:"pickup", label:"Pickup"},
+                                                                                                                                          {key:"transit", label:"In Transit"},
+                                                                                                                                            {key:"delivered", label:"Delivered"}
+                                                                                                                                            ];
+
+                                                                                                                                            function getStep(status){
+
+                                                                                                                                              status = String(status || "").toLowerCase();
+
+                                                                                                                                                if(status === "accepted") return 1;
+
+                                                                                                                                                  if(status === "picked_up") return 2;
+
+                                                                                                                                                    if(status === "in_transit") return 3;
+
+                                                                                                                                                      if(status === "cancelled") return -1;
+
+                                                                                                                                                        const index = steps.findIndex(x => x.key === status);
+
+                                                                                                                                                          return index;
+                                                                                                                                                          }
+
+                                                                                                                                                          async function loadShipment(){
+
+                                                                                                                                                            const params = new URLSearchParams(window.location.search);
+
+                                                                                                                                                              const tracking = params.get("tracking");
+
+                                                                                                                                                                if(!tracking){
+                                                                                                                                                                    document.getElementById("loading").style.display="none";
+                                                                                                                                                                        document.getElementById("error").textContent =
+                                                                                                                                                                              "No tracking number provided.";
+                                                                                                                                                                                  return;
+                                                                                                                                                                                    }
+
+                                                                                                                                                                                      const {data,error} = await supabaseClient
+                                                                                                                                                                                          .from("shipment_requests")
+                                                                                                                                                                                              .select("tracking_number,status")
+                                                                                                                                                                                                  .eq("tracking_number",tracking)
+                                                                                                                                                                                                      .single();
+
+                                                                                                                                                                                                        if(error || !data){
+
+                                                                                                                                                                                                            document.getElementById("loading").style.display="none";
+
+                                                                                                                                                                                                                document.getElementById("error").textContent =
+                                                                                                                                                                                                                      "Shipment not found.";
+
+                                                                                                                                                                                                                          return;
+                                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                              document.getElementById("loading").style.display="none";
+                                                                                                                                                                                                                                document.getElementById("content").style.display="block";
+
+                                                                                                                                                                                                                                  document.getElementById("trackingNumber").textContent =
+                                                                                                                                                                                                                                      data.tracking_number;
+
+                                                                                                                                                                                                                                        const current = getStep(data.status);
+
+                                                                                                                                                                                                                                          const timeline = document.getElementById("timeline");
+
+                                                                                                                                                                                                                                            timeline.innerHTML="";
+
+                                                                                                                                                                                                                                              steps.forEach((step,index)=>{
+
+                                                                                                                                                                                                                                                  const div=document.createElement("div");
+
+                                                                                                                                                                                                                                                      let className="step";
+
+                                                                                                                                                                                                                                                          if(current >= index){
+                                                                                                                                                                                                                                                                className += " done";
+                                                                                                                                                                                                                                                                    }
+
+                                                                                                                                                                                                                                                                        if(current === index){
+                                                                                                                                                                                                                                                                              className += " current";
+                                                                                                                                                                                                                                                                                  }
+
+                                                                                                                                                                                                                                                                                      div.className=className;
+
+                                                                                                                                                                                                                                                                                          div.innerHTML=
+                                                                                                                                                                                                                                                                                                '<div class="circle">'+(index+1)+'</div>'+
+                                                                                                                                                                                                                                                                                                      '<div class="step-text">'+step.label+'</div>';
+
+                                                                                                                                                                                                                                                                                                          timeline.appendChild(div);
+
+                                                                                                                                                                                                                                                                                                            });
+
+                                                                                                                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                                                                                                            loadShipment();
+
+                                                                                                                                                                                                                                                                                                            </script>
+
+                                                                                                                                                                                                                                                                                                            </body>
+                                                                                                                                                                                                                                                                                                            </html>
