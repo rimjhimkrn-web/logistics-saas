@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>KRIM Logistics - POD</title>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="config.js"></script>
+
+        <style>
+            body{
+                  font-family:Arial,sans-serif;
+                    background:#f4f7fb;
+                      margin:0;
+                        padding:20px;
+                          color:#172033;
+            }
+            .card{
+                  max-width:500px;
+                    margin:30px auto;
+                      background:white;
+                        padding:25px;
+                          border-radius:15px;
+                            box-shadow:0 3px 15px #0001;
+            }
+            h2{margin-top:0}
+            label{
+                  display:block;
+                    margin-top:15px;
+                      margin-bottom:6px;
+                        font-weight:bold;
+            }
+            input,select,button{
+                  width:100%;
+                    padding:12px;
+                      box-sizing:border-box;
+                        border-radius:8px;
+                          border:1px solid #ccc;
+                            font-size:15px;
+            }
+            button{
+                  margin-top:20px;
+                    background:#0b5ed7;
+                      color:white;
+                        border:0;
+                          font-weight:bold;
+            }
+            button:disabled{opacity:.6}
+            #msg{
+                  margin-bottom:15px;
+                    padding:10px;
+                      border-radius:8px;
+                        display:none;
+            }
+            .success{background:#dcfce7;color:#166534}
+            .error{background:#fee2e2;color:#991b1b}
+            .info{background:#dbeafe;color:#1e40af}
+            .small{
+                  font-size:13px;
+                    color:#64748b;
+                      margin-top:6px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="card">
+
+            <h2>KRIM Logistics</h2>
+            <p>Proof of Delivery Upload</p>
+
+            <div id="msg"></div>
+
+            <label>Shipment ID</label>
+            <input id="shipmentId" type="number" placeholder="Example: 11">
+
+            <label>Document Type</label>
+            <select id="documentType">
+                  <option value="proof_of_delivery">Proof of Delivery</option>
+                    <option value="delivery_receipt">Delivery Receipt</option>
+                      <option value="other">Other</option>
+            </select>
+
+            <label>Select POD File</label>
+            <input
+              id="file"
+                type="file"
+                  accept="image/*,.pdf"
+                  >
+
+                  <div class="small">
+                    JPG, PNG, WEBP or PDF — maximum 10 MB.
+                  </div>
+
+                  <label>Notes</label>
+                  <input
+                    id="notes"
+                      type="text"
+                        placeholder="Optional"
+                        >
+
+                        <button id="upload">Upload POD</button>
+
+                </div>
+
+                <script>
+
+                    const supabase = supabaseClient;
+
+                    const BUCKET = "pod-documents";
+
+                    function message(text,type){
+
+                          const box=document.getElementById("msg");
+
+                            box.textContent=text;
+                              box.className=type;
+                                box.style.display="block";
+                    }
+
+                    async function uploadPOD(){
+
+                          const button=document.getElementById("upload");
+
+                            try{
+
+                                    button.disabled=true;
+                                        button.textContent="Checking...";
+
+                                            /* Check login */
+
+                                                const {
+                                                          data:{session}
+                                                } = await supabase.auth.getSession();
+
+                                                    if(!session){
+                                                              throw new Error("Please login as a partner first.");
+                                                    }
+
+                                                        /* Find partner */
+
+                                                            const {
+                                                                      data:partner,
+                                                                            error:partnerError
+                                                            } = await supabase
+                                                                  .from("partners")
+                                                                        .select("id,name")
+                                                                              .eq("user_id",session.user.id)
+                                                                                    .maybeSingle();
+
+                                                                                        if(partnerError) throw partnerError;
+
+                                                                                            if(!partner){
+                                                                                                      throw new Error("Partner account not found.");
+                                                                                            }
+
+                                                                                                const shipmentId=
+                                                                                                      document.getElementById("shipmentId").value;
+
+                                                                                                          const file=
+                                                                                                                document.getElementById("file").files[0];
+
+                                                                                                                    const documentType=
+                                                                                                                          document.getElementById("documentType").value;
+
+                                                                                                                              const notes=
+                                                                                                                                    document.getElementById("notes").value.trim();
+
+                                                                                                                                        if(!shipmentId){
+                                                                                                                                                  throw new Error("Enter Shipment ID.");
+                                                                                                                                        }
+
+                                                                                                                                            if(!file){
+                                                                                                                                                      throw new Error("Select a POD file.");
+                                                                                                                                            }
+
+                                                                                                                                                if(file.size > 10*1024*1024){
+                                                                                                                                                          throw new Error("File must be smaller than 10 MB.");
+                                                                                                                                                }
+
+                                                                                                                                                    /* Verify shipment belongs to this partner */
+
+                                                                                                                                                        button.textContent="Checking shipment...";
+
+                                                                                                                                                            const {
+                                                                                                                                                                      data:shipment,
+                                                                                                                                                                            error:shipmentError
+                                                                                                                                                            } = await supabase
+                                                                                                                                                                  .from("shipment_requests")
+                                                                                                                                                                        .select("id,partner_id")
+                                                                                                                                                                              .eq("id",shipmentId)
+                                                                                                                                                                                    .eq("partner_id",partner.id)
+                                                                                                                                                                                          .maybeSingle();
+
+                                                                                                                                                                                              if(shipmentError) throw shipmentError;
+
+                                                                                                                                                                                                  if(!shipment){
+                                                                                                                                                                                                          throw new Error(
+                                                                                                                                                                                                                    "This shipment is not assigned to you."
+                                                                                                                                                                                                          );
+                                                                                                                                                                                                  }
+
+                                                                                                                                                                                                      /* Unique file name */
+
+                                                                                                                                                                                                          const extension =
+                                                                                                                                                                                                                file.name.includes(".")
+                                                                                                                                                                                                                      ? "."+file.name.split(".").pop()
+                                                                                                                                                                                                                            : "";
+
+                                                                                                                                                                                                                                const fileName =
+                                                                                                                                                                                                                                      crypto.randomUUID()+extension;
+
+                                                                                                                                                                                                                                          const filePath =
+                                                                                                                                                                                                                                                "shipments/"
+                                                                                                                                                                                                                                                      +shipmentId+"/"
+                                                                                                                                                                                                                                                            +fileName;
+
+                                                                                                                                                                                                                                                                /* Upload */
+
+                                                                                                                                                                                                                                                                    button.textContent="Uploading...";
+
+                                                                                                                                                                                                                                                                        const {
+                                                                                                                                                                                                                                                                                  error:uploadError
+                                                                                                                                                                                                                                                                        } = await supabase
+                                                                                                                                                                                                                                                                              .storage
+                                                                                                                                                                                                                                                                                    .from(BUCKET)
+                                                                                                                                                                                                                                                                                          .upload(
+                                                                                                                                                                                                                                                                                                    filePath,
+                                                                                                                                                                                                                                                                                                            file,
+                                                                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                                                                                  upsert:false,
+                                                                                                                                                                                                                                                                                                                                            contentType:file.type
+                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                          );
+
+                                                                                                                                                                                                                                                                                              if(uploadError) throw uploadError;
+
+                                                                                                                                                                                                                                                                                                  /* Save database record */
+
+                                                                                                                                                                                                                                                                                                      button.textContent="Saving POD...";
+
+                                                                                                                                                                                                                                                                                                          const {
+                                                                                                                                                                                                                                                                                                                  error:dbError
+                                                                                                                                                                                                                                                                                                          } = await supabase
+                                                                                                                                                                                                                                                                                                                .from("shipment_pod_documents")
+                                                                                                                                                                                                                                                                                                                      .insert({
+                                                                                                                                                                                                                                                                                                                                shipment_id:Number(shipmentId),
+                                                                                                                                                                                                                                                                                                                                        partner_id:partner.id,
+                                                                                                                                                                                                                                                                                                                                                uploaded_by:session.user.id,
+                                                                                                                                                                                                                                                                                                                                                        file_path:filePath,
+                                                                                                                                                                                                                                                                                                                                                                file_name:file.name,
+                                                                                                                                                                                                                                                                                                                                                                        file_type:file.type,
+                                                                                                                                                                                                                                                                                                                                                                                file_size:file.size,
+                                                                                                                                                                                                                                                                                                                                                                                        document_type:documentType,
+                                                                                                                                                                                                                                                                                                                                                                                                status:"uploaded",
+                                                                                                                                                                                                                                                                                                                                                                                                        notes:notes || null
+                                                                                                                                                                                                                                                                                                                      });
+
+                                                                                                                                                                                                                                                                                                                          if(dbError){
+
+                                                                                                                                                                                                                                                                                                                                  /* Remove file if database record failed */
+
+                                                                                                                                                                                                                                                                                                                                        await supabase
+                                                                                                                                                                                                                                                                                                                                                .storage
+                                                                                                                                                                                                                                                                                                                                                        .from(BUCKET)
+                                                                                                                                                                                                                                                                                                                                                                .remove([filePath]);
+
+                                                                                                                                                                                                                                                                                                                                                                      throw dbError;
+                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                              message(
+                                                                                                                                                                                                                                                                                                                                      "POD uploaded successfully for Shipment #"+shipmentId,
+                                                                                                                                                                                                                                                                                                                                            "success"
+                                                                                                                                                                                                                                                                                                                              );
+
+                                                                                                                                                                                                                                                                                                                                  document.getElementById("shipmentId").value="";
+                                                                                                                                                                                                                                                                                                                                      document.getElementById("file").value="";
+                                                                                                                                                                                                                                                                                                                                          document.getElementById("notes").value="";
+
+                                                                                                                                                                                                                                                                                                                        }catch(error){
+
+                                                                                                                                                                                                                                                                                                                                console.error(error);
+
+                                                                                                                                                                                                                                                                                                                                    message(
+                                                                                                                                                                                                                                                                                                                                              error.message || "POD upload failed.",
+                                                                                                                                                                                                                                                                                                                                                    "error"
+                                                                                                                                                                                                                                                                                                                                    );
+
+                                                                                                                                                                                                                                                                                                                        }finally{
+
+                                                                                                                                                                                                                                                                                                                                button.disabled=false;
+                                                                                                                                                                                                                                                                                                                                    button.textContent="Upload POD";
+                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                    }
+
+                                                                                                                                                                                                                                                                                                                    document
+                                                                                                                                                                                                                                                                                                                      .getElementById("upload")
+                                                                                                                                                                                                                                                                                                                        .addEventListener("click",uploadPOD);
+
+                                                                                                                                                                                                                                                                                                                </script>
+
+                                                                                                                                                                                                                                                                                                            </body>
+                                                                                                                                                                                                                                                                                                            </html>
+                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                                    )
+                                                                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                                                                              )
+                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                      })
+                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                          )
+                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                          )
+                                                                                                                                                                                                  }
+                                                                                                                                                            }
+                                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                            }
+                                                            }
+                                                    }
+                                                }
+                            }
+                    }
+                    }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
