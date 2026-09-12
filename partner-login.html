@@ -1,85 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Partner Login</title>
-            </head>
-            <body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-                <h1>🚚 Partner Login</h1>
+<title>Partner Login | KRIM Logistics</title>
 
-                    <form id="loginForm">
-                            <p>
-                                        <label>Email:</label><br>
-                                                    <input type="email" id="email" placeholder="partner@email.com" required>
-                                                            </p>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
-                                                                    <p>
-                                                                                <label>Password:</label><br>
-                                                                                            <input type="password" id="password" placeholder="Enter password" required>
-                                                                                                    </p>
+<style>
+*{box-sizing:border-box}
 
-                                                                                                            <button type="submit">Login</button>
-                                                                                                                </form>
+body{
+  margin:0;
+    font-family:Arial,sans-serif;
+      background:#f4f7fb;
+      }
 
-                                                                                                                    <div id="message"></div>
+      .container{
+        max-width:430px;
+          margin:60px auto;
+            padding:20px;
+            }
 
-                                                                                                                        <br>
-                                                                                                                            <a href="index.html">Back to Home</a>
-                                                                                                                                <br>
-                                                                                                                                    <a href="partner-signup.html">Don't have an account? Sign Up</a>
+            .card{
+              background:white;
+                padding:28px;
+                  border-radius:14px;
+                    box-shadow:0 5px 20px rgba(0,0,0,.08);
+                    }
 
-                                                                                                                                        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-                                                                                                                                            </script>
-                                                                                                                                                <script>
-                                                                                                                                                        const supabase = window.supabase.createClient(
-                                                                                                                                                                    'https://ebltviniygljwwseplph.supabase.co',
-                                                                                                                                                                                'sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa'
-                                                                                                                                                                                        );
+                    .logo{
+                      text-align:center;
+                        color:#1261d6;
+                          font-size:28px;
+                            font-weight:bold;
+                            }
 
-                                                                                                                                                                                                const form = document.getElementById('loginForm');
-                                                                                                                                                                                                        const message = document.getElementById('message');
+                            .subtitle{
+                              text-align:center;
+                                color:#666;
+                                  margin:8px 0 25px;
+                                  }
 
-                                                                                                                                                                                                                form.addEventListener('submit', async function(e) {
-                                                                                                                                                                                                                            e.preventDefault();
+                                  label{
+                                    display:block;
+                                      margin:15px 0 6px;
+                                        font-weight:bold;
+                                        }
 
-                                                                                                                                                                                                                                        const email = document.getElementById('email').value.trim();
-                                                                                                                                                                                                                                                    const password = document.getElementById('password').value.trim();
+                                        input{
+                                          width:100%;
+                                            padding:13px;
+                                              border:1px solid #ccc;
+                                                border-radius:8px;
+                                                  font-size:15px;
+                                                  }
 
-                                                                                                                                                                                                                                                                if (!email || !password) {
-                                                                                                                                                                                                                                                                                message.innerHTML = '⚠️ Please enter email and password';
-                                                                                                                                                                                                                                                                                                return;
-                                                                                                                                                                                                                                                                                                            }
+                                                  button{
+                                                    width:100%;
+                                                      margin-top:22px;
+                                                        padding:14px;
+                                                          border:0;
+                                                            border-radius:8px;
+                                                              background:#1261d6;
+                                                                color:white;
+                                                                  font-size:16px;
+                                                                    font-weight:bold;
+                                                                      cursor:pointer;
+                                                                      }
 
-                                                                                                                                                                                                                                                                                                                        message.innerHTML = '⏳ Logging in...';
+                                                                      button:disabled{
+                                                                        background:#999;
+                                                                        }
 
-                                                                                                                                                                                                                                                                                                                                    const { data, error } = await supabase.auth.signInWithPassword({
-                                                                                                                                                                                                                                                                                                                                                    email: email,
-                                                                                                                                                                                                                                                                                                                                                                    password: password
-                                                                                                                                                                                                                                                                                                                                                                                });
+                                                                        .message{
+                                                                          display:none;
+                                                                            margin-top:18px;
+                                                                              padding:13px;
+                                                                                border-radius:8px;
+                                                                                  line-height:1.5;
+                                                                                  }
 
-                                                                                                                                                                                                                                                                                                                                                                                            if (error) {
-                                                                                                                                                                                                                                                                                                                                                                                                            message.innerHTML = '❌ ' + error.message;
-                                                                                                                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                  .success{
+                                                                                    display:block;
+                                                                                      background:#dcfce7;
+                                                                                        color:#166534;
+                                                                                        }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                    // Check if user has partner role
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                const role = data.user?.user_metadata?.role;
+                                                                                        .error{
+                                                                                          display:block;
+                                                                                            background:#fee2e2;
+                                                                                              color:#991b1b;
+                                                                                              }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (role !== 'partner') {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            await supabase.auth.signOut();
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            message.innerHTML = '❌ This account is not registered as a partner.';
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+                                                                                              .signup{
+                                                                                                text-align:center;
+                                                                                                  margin-top:20px;
+                                                                                                  }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    message.innerHTML = '✅ Login successful! Redirecting...';
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            setTimeout(() => {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            window.location.href = 'partner-dashboard-auth.html';
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }, 1500);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </script>
+                                                                                                  .signup a{
+                                                                                                    color:#1261d6;
+                                                                                                      font-weight:bold;
+                                                                                                        text-decoration:none;
+                                                                                                        }
+                                                                                                        </style>
+                                                                                                        </head>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </body>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </html>
+                                                                                                        <body>
+
+                                                                                                        <div class="container">
+
+                                                                                                        <div class="card">
+
+                                                                                                        <div class="logo">KRIM Logistics</div>
+
+                                                                                                        <div class="subtitle">Partner Login</div>
+
+                                                                                                        <form id="loginForm">
+
+                                                                                                        <label>Email</label>
+
+                                                                                                        <input
+                                                                                                          type="email"
+                                                                                                            id="email"
+                                                                                                              placeholder="Enter your email"
+                                                                                                                required
+                                                                                                                >
+
+                                                                                                                <label>Password</label>
+
+                                                                                                                <input
+                                                                                                                  type="password"
+                                                                                                                    id="password"
+                                                                                                                      placeholder="Enter your password"
+                                                                                                                        required
+                                                                                                                        >
+
+                                                                                                                        <button id="loginButton" type="submit">
+                                                                                                                        Login
+                                                                                                                        </button>
+
+                                                                                                                        </form>
+
+                                                                                                                        <div id="message" class="message"></div>
+
+                                                                                                                        <div class="signup">
+                                                                                                                        New partner?
+                                                                                                                        <a href="partner-signup.html">Create Partner Account</a>
+                                                                                                                        </div>
+
+                                                                                                                        </div>
+
+                                                                                                                        </div>
+
+                                                                                                                        <script>
+
+                                                                                                                        const form = document.getElementById("loginForm");
+                                                                                                                        const button = document.getElementById("loginButton");
+                                                                                                                        const message = document.getElementById("message");
+
+                                                                                                                        function showMessage(text,type){
+
+                                                                                                                          message.textContent = text;
+                                                                                                                            message.className = "message " + type;
+
+                                                                                                                            }
+
+                                                                                                                            form.addEventListener("submit", async function(e){
+
+                                                                                                                              e.preventDefault();
+
+                                                                                                                                button.disabled = true;
+                                                                                                                                  button.textContent = "Logging in...";
+
+                                                                                                                                    const email =
+                                                                                                                                        document.getElementById("email").value.trim();
+
+                                                                                                                                          const password =
+                                                                                                                                              document.getElementById("password").value;
+
+                                                                                                                                                try{
+
+                                                                                                                                                    const { data, error } =
+                                                                                                                                                          await supabaseClient.auth.signInWithPassword({
+                                                                                                                                                                  email: email,
+                                                                                                                                                                          password: password
+                                                                                                                                                                                });
+
+                                                                                                                                                                                    if(error){
+                                                                                                                                                                                          throw error;
+                                                                                                                                                                                              }
+
+                                                                                                                                                                                                  showMessage(
+                                                                                                                                                                                                        "Login successful. Partner account is active.",
+                                                                                                                                                                                                              "success"
+                                                                                                                                                                                                                  );
+
+                                                                                                                                                                                                                      button.textContent = "Logged In";
+
+                                                                                                                                                                                                                        }catch(error){
+
+                                                                                                                                                                                                                            console.error(error);
+
+                                                                                                                                                                                                                                showMessage(
+                                                                                                                                                                                                                                      error.message || "Login failed.",
+                                                                                                                                                                                                                                            "error"
+                                                                                                                                                                                                                                                );
+
+                                                                                                                                                                                                                                                    button.disabled = false;
+                                                                                                                                                                                                                                                        button.textContent = "Login";
+
+                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                          });
+
+                                                                                                                                                                                                                                                          </script>
+
+                                                                                                                                                                                                                                                          </body>
+                                                                                                                                                                                                                                                          </html>
