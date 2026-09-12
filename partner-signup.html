@@ -1,386 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <title>Partner Signup | KRIM Logistics</title>
-
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script src="config.js"></script>
-
-        <style>
-            *{
-                  box-sizing:border-box;
-            }
-
-            body{
-                  margin:0;
-                    font-family:Arial, sans-serif;
-                      background:#f4f7fb;
-                        color:#1f2937;
-            }
-
-            .container{
-                  width:100%;
-                    max-width:450px;
-                      margin:40px auto;
-                        padding:20px;
-            }
-
-            .card{
-                  background:white;
-                    padding:25px;
-                      border-radius:14px;
-                        box-shadow:0 5px 20px rgba(0,0,0,.08);
-            }
-
-            .logo{
-                  text-align:center;
-                    color:#1261d6;
-                      font-size:28px;
-                        font-weight:bold;
-                          margin-bottom:5px;
-            }
-
-            .subtitle{
-                  text-align:center;
-                    color:#666;
-                      margin-bottom:25px;
-            }
-
-            label{
-                  display:block;
-                    margin-top:15px;
-                      margin-bottom:6px;
-                        font-weight:bold;
-            }
-
-            input{
-                  width:100%;
-                    padding:13px;
-                      border:1px solid #d1d5db;
-                        border-radius:8px;
-                          font-size:15px;
-            }
-
-            input:focus{
-                  outline:none;
-                    border-color:#1261d6;
-            }
-
-            button{
-                  width:100%;
-                    margin-top:22px;
-                      padding:14px;
-                        border:0;
-                          border-radius:8px;
-                            background:#1261d6;
-                              color:white;
-                                font-size:16px;
-                                  font-weight:bold;
-                                    cursor:pointer;
-            }
-
-            button:disabled{
-                  background:#9ca3af;
-                    cursor:not-allowed;
-            }
-
-            .message{
-                  margin-top:18px;
-                    padding:12px;
-                      border-radius:8px;
-                        display:none;
-                          font-size:14px;
-            }
-
-            .success{
-                  display:block;
-                    background:#dcfce7;
-                      color:#166534;
-            }
-
-            .error{
-                  display:block;
-                    background:#fee2e2;
-                      color:#991b1b;
-            }
-
-            .login{
-                  text-align:center;
-                    margin-top:20px;
-            }
-
-            .login a{
-                  color:#1261d6;
-                    text-decoration:none;
-                      font-weight:bold;
-            }
-        </style>
-    </head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partner Signup - KRIM Logistics</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+      font-family: Arial, sans-serif;
+        background: #f4f7fb;
+        }
+
+        .container {
+          max-width: 450px;
+            margin: 40px auto;
+              padding: 20px;
+              }
+
+              .card {
+                background: white;
+                  padding: 25px;
+                    border-radius: 14px;
+                      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+                      }
+
+                      .logo {
+                        text-align: center;
+                          font-size: 28px;
+                            font-weight: bold;
+                              color: #1261d6;
+                              }
+
+                              .title {
+                                text-align: center;
+                                  margin: 8px 0 25px;
+                                    color: #555;
+                                    }
+
+                                    label {
+                                      display: block;
+                                        margin-top: 15px;
+                                          margin-bottom: 6px;
+                                            font-weight: bold;
+                                            }
+
+                                            input {
+                                              width: 100%;
+                                                padding: 13px;
+                                                  border: 1px solid #ccc;
+                                                    border-radius: 8px;
+                                                      font-size: 15px;
+                                                      }
+
+                                                      button {
+                                                        width: 100%;
+                                                          padding: 14px;
+                                                            margin-top: 22px;
+                                                              border: none;
+                                                                border-radius: 8px;
+                                                                  background: #1261d6;
+                                                                    color: white;
+                                                                      font-size: 16px;
+                                                                        font-weight: bold;
+                                                                        }
+
+                                                                        button:disabled {
+                                                                          background: #999;
+                                                                          }
+
+                                                                          .message {
+                                                                            margin-top: 18px;
+                                                                              padding: 14px;
+                                                                                border-radius: 8px;
+                                                                                  display: none;
+                                                                                    line-height: 1.5;
+                                                                                    }
+
+                                                                                    .success {
+                                                                                      display: block;
+                                                                                        background: #dcfce7;
+                                                                                          color: #166534;
+                                                                                          }
+
+                                                                                          .error {
+                                                                                            display: block;
+                                                                                              background: #fee2e2;
+                                                                                                color: #991b1b;
+                                                                                                }
+
+                                                                                                .login-button {
+                                                                                                  display: none;
+                                                                                                    background: #16a34a;
+                                                                                                    }
+
+                                                                                                    .login-link {
+                                                                                                      text-align: center;
+                                                                                                        margin-top: 20px;
+                                                                                                        }
+
+                                                                                                        .login-link a {
+                                                                                                          color: #1261d6;
+                                                                                                            font-weight: bold;
+                                                                                                              text-decoration: none;
+                                                                                                              }
+                                                                                                              </style>
+                                                                                                              </head>
+
+                                                                                                              <body>
+
+                                                                                                              <div class="container">
+
+                                                                                                              <div class="card">
+
+                                                                                                              <div class="logo">KRIM Logistics</div>
+
+                                                                                                              <div class="title">
+                                                                                                              Partner Registration
+                                                                                                              </div>
+
+                                                                                                              <form id="signupForm">
+
+                                                                                                              <label>Company Name</label>
+                                                                                                              <input
+                                                                                                                type="text"
+                                                                                                                  id="company"
+                                                                                                                    required
+                                                                                                                      placeholder="Company name">
 
-    <body>
+                                                                                                                      <label>Contact Person</label>
+                                                                                                                      <input
+                                                                                                                        type="text"
+                                                                                                                          id="contact"
+                                                                                                                            required
+                                                                                                                              placeholder="Contact person">
 
-        <div class="container">
+                                                                                                                              <label>Phone Number</label>
+                                                                                                                              <input
+                                                                                                                                type="tel"
+                                                                                                                                  id="phone"
+                                                                                                                                    required
+                                                                                                                                      placeholder="Phone number">
 
-              <div class="card">
+                                                                                                                                      <label>Email</label>
+                                                                                                                                      <input
+                                                                                                                                        type="email"
+                                                                                                                                          id="email"
+                                                                                                                                            required
+                                                                                                                                              placeholder="Email address">
 
-                    <div class="logo">KRIM Logistics</div>
+                                                                                                                                              <label>Password</label>
+                                                                                                                                              <input
+                                                                                                                                                type="password"
+                                                                                                                                                  id="password"
+                                                                                                                                                    required
+                                                                                                                                                      placeholder="Minimum 6 characters">
 
-                        <div class="subtitle">
-                                  Partner Registration
-                        </div>
+                                                                                                                                                      <label>Confirm Password</label>
+                                                                                                                                                      <input
+                                                                                                                                                        type="password"
+                                                                                                                                                          id="confirmPassword"
+                                                                                                                                                            required
+                                                                                                                                                              placeholder="Confirm password">
 
-                            <form id="signupForm">
+                                                                                                                                                              <button
+                                                                                                                                                                type="submit"
+                                                                                                                                                                  id="signupButton">
+                                                                                                                                                                    Create Partner Account
+                                                                                                                                                                    </button>
 
-                                      <label>Company Name</label>
-                                            <input
-                                                    type="text"
-                                                            id="company"
-                                                                    placeholder="Enter company name"
-                                                                            required
-                                                                                  >
+                                                                                                                                                                    </form>
 
-                                                                                        <label>Contact Person</label>
-                                                                                              <input
-                                                                                                      type="text"
-                                                                                                              id="contact"
-                                                                                                                      placeholder="Enter contact person"
-                                                                                                                              required
-                                                                                                                                    >
+                                                                                                                                                                    <div id="message" class="message"></div>
 
-                                                                                                                                          <label>Phone Number</label>
-                                                                                                                                                <input
-                                                                                                                                                        type="tel"
-                                                                                                                                                                id="phone"
-                                                                                                                                                                        placeholder="Enter phone number"
-                                                                                                                                                                                required
-                                                                                                                                                                                      >
+                                                                                                                                                                    <button
+                                                                                                                                                                      type="button"
+                                                                                                                                                                        id="loginButton"
+                                                                                                                                                                          class="login-button"
+                                                                                                                                                                            onclick="window.location.href='partner-login.html'">
+                                                                                                                                                                              Go to Partner Login
+                                                                                                                                                                              </button>
 
-                                                                                                                                                                                            <label>Email</label>
-                                                                                                                                                                                                  <input
-                                                                                                                                                                                                          type="email"
-                                                                                                                                                                                                                  id="email"
-                                                                                                                                                                                                                          placeholder="Enter email"
-                                                                                                                                                                                                                                  required
-                                                                                                                                                                                                                                        >
+                                                                                                                                                                              <div class="login-link">
+                                                                                                                                                                              Already registered?
+                                                                                                                                                                              <a href="partner-login.html">Partner Login</a>
+                                                                                                                                                                              </div>
 
-                                                                                                                                                                                                                                              <label>Password</label>
-                                                                                                                                                                                                                                                    <input
-                                                                                                                                                                                                                                                            type="password"
-                                                                                                                                                                                                                                                                    id="password"
-                                                                                                                                                                                                                                                                            placeholder="Minimum 6 characters"
-                                                                                                                                                                                                                                                                                    required
-                                                                                                                                                                                                                                                                                          >
+                                                                                                                                                                              </div>
 
-                                                                                                                                                                                                                                                                                                <label>Confirm Password</label>
-                                                                                                                                                                                                                                                                                                      <input
-                                                                                                                                                                                                                                                                                                              type="password"
-                                                                                                                                                                                                                                                                                                                      id="confirmPassword"
-                                                                                                                                                                                                                                                                                                                              placeholder="Confirm password"
-                                                                                                                                                                                                                                                                                                                                      required
-                                                                                                                                                                                                                                                                                                                                            >
+                                                                                                                                                                              </div>
 
-                                                                                                                                                                                                                                                                                                                                                  <button type="submit" id="signupButton">
-                                                                                                                                                                                                                                                                                                                                                            Create Partner Account
-                                                                                                                                                                                                                                                                                                                                                  </button>
+                                                                                                                                                                              <script>
 
-                                                                                                                                                                                                                                                                                                                                                </form>
+                                                                                                                                                                              const form = document.getElementById("signupForm");
+                                                                                                                                                                              const button = document.getElementById("signupButton");
+                                                                                                                                                                              const message = document.getElementById("message");
+                                                                                                                                                                              const loginButton = document.getElementById("loginButton");
 
-                                                                                                                                                                                                                                                                                                                                                    <div id="message" class="message"></div>
+                                                                                                                                                                              function showMessage(text, type) {
+                                                                                                                                                                                message.textContent = text;
+                                                                                                                                                                                  message.className = "message " + type;
+                                                                                                                                                                                  }
 
-                                                                                                                                                                                                                                                                                                                                                        <div class="login">
-                                                                                                                                                                                                                                                                                                                                                                  Already have an account?
-                                                                                                                                                                                                                                                                                                                                                                        <a href="partner-login.html">Partner Login</a>
-                                                                                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                  form.addEventListener("submit", async function(e) {
 
-                                                                                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                    e.preventDefault();
 
-                                                                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                      button.disabled = true;
+                                                                                                                                                                                        button.textContent = "Creating Account...";
 
-                                                                                                                                                                                                                                                                                                                                                <script>
+                                                                                                                                                                                          const company =
+                                                                                                                                                                                              document.getElementById("company").value.trim();
 
-                                                                                                                                                                                                                                                                                                                                                    const form = document.getElementById("signupForm");
-                                                                                                                                                                                                                                                                                                                                                    const button = document.getElementById("signupButton");
-                                                                                                                                                                                                                                                                                                                                                    const message = document.getElementById("message");
+                                                                                                                                                                                                const contact =
+                                                                                                                                                                                                    document.getElementById("contact").value.trim();
 
-                                                                                                                                                                                                                                                                                                                                                    function showMessage(text, type){
+                                                                                                                                                                                                      const phone =
+                                                                                                                                                                                                          document.getElementById("phone").value.trim();
 
-                                                                                                                                                                                                                                                                                                                                                          message.textContent = text;
+                                                                                                                                                                                                            const email =
+                                                                                                                                                                                                                document.getElementById("email").value.trim();
 
-                                                                                                                                                                                                                                                                                                                                                            message.className = "message " + type;
+                                                                                                                                                                                                                  const password =
+                                                                                                                                                                                                                      document.getElementById("password").value;
 
-                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                        const confirmPassword =
+                                                                                                                                                                                                                            document.getElementById("confirmPassword").value;
 
-                                                                                                                                                                                                                                                                                                                                                    form.addEventListener("submit", async function(event){
 
-                                                                                                                                                                                                                                                                                                                                                          event.preventDefault();
+                                                                                                                                                                                                                              if (password.length < 6) {
 
-                                                                                                                                                                                                                                                                                                                                                            message.style.display = "none";
+                                                                                                                                                                                                                                  showMessage(
+                                                                                                                                                                                                                                        "Password must contain at least 6 characters.",
+                                                                                                                                                                                                                                              "error"
+                                                                                                                                                                                                                                                  );
 
-                                                                                                                                                                                                                                                                                                                                                              const company =
-                                                                                                                                                                                                                                                                                                                                                                  document.getElementById("company").value.trim();
+                                                                                                                                                                                                                                                      button.disabled = false;
+                                                                                                                                                                                                                                                          button.textContent = "Create Partner Account";
 
-                                                                                                                                                                                                                                                                                                                                                                    const contact =
-                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("contact").value.trim();
+                                                                                                                                                                                                                                                              return;
+                                                                                                                                                                                                                                                                }
 
-                                                                                                                                                                                                                                                                                                                                                                          const phone =
-                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("phone").value.trim();
 
-                                                                                                                                                                                                                                                                                                                                                                                const email =
-                                                                                                                                                                                                                                                                                                                                                                                    document.getElementById("email").value.trim();
+                                                                                                                                                                                                                                                                  if (password !== confirmPassword) {
 
-                                                                                                                                                                                                                                                                                                                                                                                      const password =
-                                                                                                                                                                                                                                                                                                                                                                                          document.getElementById("password").value;
+                                                                                                                                                                                                                                                                      showMessage(
+                                                                                                                                                                                                                                                                            "Passwords do not match.",
+                                                                                                                                                                                                                                                                                  "error"
+                                                                                                                                                                                                                                                                                      );
 
-                                                                                                                                                                                                                                                                                                                                                                                            const confirmPassword =
-                                                                                                                                                                                                                                                                                                                                                                                                document.getElementById("confirmPassword").value;
+                                                                                                                                                                                                                                                                                          button.disabled = false;
+                                                                                                                                                                                                                                                                                              button.textContent = "Create Partner Account";
 
+                                                                                                                                                                                                                                                                                                  return;
+                                                                                                                                                                                                                                                                                                    }
 
-                                                                                                                                                                                                                                                                                                                                                                                                  if(password.length < 6){
 
-                                                                                                                                                                                                                                                                                                                                                                                                        showMessage(
-                                                                                                                                                                                                                                                                                                                                                                                                                  "Password must be at least 6 characters.",
-                                                                                                                                                                                                                                                                                                                                                                                                                        "error"
-                                                                                                                                                                                                                                                                                                                                                                                                        );
+                                                                                                                                                                                                                                                                                                      try {
 
-                                                                                                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                                                                                          const { data, error } =
+                                                                                                                                                                                                                                                                                                                await supabaseClient.auth.signUp({
 
+                                                                                                                                                                                                                                                                                                                        email: email,
 
-                                                                                                                                                                                                                                                                                                                                                                                                    if(password !== confirmPassword){
+                                                                                                                                                                                                                                                                                                                                password: password,
 
-                                                                                                                                                                                                                                                                                                                                                                                                            showMessage(
-                                                                                                                                                                                                                                                                                                                                                                                                                      "Passwords do not match.",
-                                                                                                                                                                                                                                                                                                                                                                                                                            "error"
-                                                                                                                                                                                                                                                                                                                                                                                                            );
+                                                                                                                                                                                                                                                                                                                                        options: {
+                                                                                                                                                                                                                                                                                                                                                  data: {
+                                                                                                                                                                                                                                                                                                                                                              account_type: "partner",
+                                                                                                                                                                                                                                                                                                                                                                          company_name: company,
+                                                                                                                                                                                                                                                                                                                                                                                      contact_person: contact,
+                                                                                                                                                                                                                                                                                                                                                                                                  phone: phone
+                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                                                    }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                return;
-                                                                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                          });
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                      button.disabled = true;
-                                                                                                                                                                                                                                                                                                                                                                                                        button.textContent = "Creating Account...";
+                                                                                                                                                                                                                                                                                                                                                                                                                              if (error) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                    throw error;
+                                                                                                                                                                                                                                                                                                                                                                                                                                        }
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                          try{
+                                                                                                                                                                                                                                                                                                                                                                                                                                            showMessage(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                  "Partner account created successfully! Please login using your email and password.",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        "success"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            );
 
-                                                                                                                                                                                                                                                                                                                                                                                                                const result =
-                                                                                                                                                                                                                                                                                                                                                                                                                      await supabaseClient.auth.signUp({
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                email: email,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                loginButton.style.display = "block";
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                        password: password,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                    button.style.display = "none";
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                options: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        form.reset();
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                              data: {
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            account_type: "partner",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                          } catch (error) {
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        company_name: company,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                              console.error(error);
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    contact_person: contact,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  showMessage(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        error.message || "Unable to create account. Please try again.",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              "error"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  );
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                phone: phone
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      button.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          button.textContent = "Create Partner Account";
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            });
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                        });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </script>
 
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            if(result.error){
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      throw result.error;
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                showMessage(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                          "Partner account created successfully.",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "success"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                );
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    form.reset();
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                        if(result.data.session){
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  setTimeout(function(){
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            window.location.href =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      "partner-login.html";
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }, 1000);
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }else{
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          showMessage(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    "Account created. Please check your email to verify your account, then login.",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "success"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          );
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                button.disabled = false;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      button.textContent = "Create Partner Account";
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }catch(error){
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    console.error(error);
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        showMessage(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  error.message || "Signup failed. Please try again.",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        "error"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        );
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            button.disabled = false;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                button.textContent = "Create Partner Account";
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                        });
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </script>
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                </body>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                </html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  })
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                )
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                                                                                                                                                                      })
-                                                                                                                                                                                                                                                                                                                                                                                                          }
-                                                                                                                                                                                                                                                                                                                                                                                                            )
-                                                                                                                                                                                                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                                                                                                                                                                                                        )
-                                                                                                                                                                                                                                                                                                                                                                                                  }
-                                                                                                                                                                                                                                                                                                                                                    })
-                                                                                                                                                                                                                                                                                                                                                    }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
-            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </html>
