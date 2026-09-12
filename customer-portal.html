@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KRIM Logistics | Customer Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f5f8fc;
+color:#172033;
+}
+
+header{
+background:#0b5ed7;
+color:white;
+padding:16px;
+}
+
+.header{
+max-width:1000px;
+margin:auto;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo{
+font-size:21px;
+font-weight:bold;
+}
+
+.logout{
+background:white;
+color:#0b5ed7;
+border:0;
+padding:9px 14px;
+border-radius:8px;
+font-weight:bold;
+}
+
+main{
+max-width:1000px;
+margin:auto;
+padding:20px 15px;
+}
+
+.welcome{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:18px;
+box-shadow:0 3px 12px rgba(0,0,0,.06);
+}
+
+h1{
+margin:0 0 8px;
+font-size:24px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+.card{
+background:white;
+padding:18px;
+border-radius:14px;
+box-shadow:0 3px 12px rgba(0,0,0,.05);
+text-decoration:none;
+color:#172033;
+}
+
+.card strong{
+display:block;
+font-size:17px;
+margin-bottom:6px;
+}
+
+.card span{
+font-size:13px;
+color:#667085;
+}
+
+.primary{
+background:#0b5ed7;
+color:white;
+}
+
+.primary span{
+color:white;
+opacity:.9;
+}
+
+.section{
+margin-top:22px;
+}
+
+.section h2{
+font-size:19px;
+}
+
+.shipment{
+background:white;
+padding:15px;
+border-radius:12px;
+margin-bottom:10px;
+border:1px solid #e5e7eb;
+}
+
+.route{
+font-weight:bold;
+font-size:16px;
+}
+
+.status{
+display:inline-block;
+margin-top:8px;
+padding:5px 9px;
+border-radius:20px;
+background:#e9f2ff;
+color:#0b5ed7;
+font-size:12px;
+font-weight:bold;
+}
+
+.small{
+font-size:12px;
+color:#667085;
+margin-top:6px;
+}
+
+.empty{
+background:white;
+padding:25px;
+border-radius:12px;
+text-align:center;
+color:#667085;
+}
+
+.ai{
+background:#eef5ff;
+border:1px solid #cfe0ff;
+}
+
+@media(max-width:600px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+h1{
+font-size:21px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="header">
+
+<div>
+<div class="logo">KRIM Logistics</div>
+<div style="font-size:12px;">
+Customer Portal
+</div>
+</div>
+
+<button class="logout" onclick="logout()">
+Logout
+</button>
+
+</div>
+
+</header>
+
+
+<main>
+
+
+<!-- WELCOME -->
+
+<div class="welcome">
+
+<h1 id="welcome">
+Welcome to KRIM
+</h1>
+
+<div style="color:#667085;font-size:14px;">
+Your logistics services, shipments, quotes and payments in one place.
+</div>
+
+</div>
+
+
+<!-- MAIN SERVICES -->
+
+<div class="grid">
+
+<a class="card primary" href="create-shipment.html">
+
+<strong>🚚 New Shipment</strong>
+
+<span>
+Create a new transportation request
+</span>
+
+</a>
+
+
+<a class="card" href="customer-tracking-dashboard.html">
+
+<strong>📦 My Shipments</strong>
+
+<span>
+View and track your shipments
+</span>
+
+</a>
+
+
+<a class="card" href="customer-quotation.html">
+
+<strong>💰 Quotations</strong>
+
+<span>
+View your available shipment quotes
+</span>
+
+</a>
+
+
+<a class="card" href="accept-quote.html">
+
+<strong>✅ Accept Quote</strong>
+
+<span>
+Accept an approved logistics quote
+</span>
+
+</a>
+
+
+<a class="card" href="payment.html">
+
+<strong>💳 Payment</strong>
+
+<span>
+Complete shipment payment
+</span>
+
+</a>
+
+
+<a class="card" href="customer-payment-status.html">
+
+<strong>🧾 Payment Status</strong>
+
+<span>
+Check your payment history and status
+</span>
+
+</a>
+
+
+<a class="card" href="customer-tracking-dashboard.html">
+
+<strong>🔎 Track Shipment</strong>
+
+<span>
+Track your shipment using tracking information
+</span>
+
+</a>
+
+
+<a class="card" href="contact.html">
+
+<strong>📞 Support</strong>
+
+<span>
+Contact KRIM Logistics
+</span>
+
+</a>
+
+</div>
+
+
+<!-- AI -->
+
+<div class="section">
+
+<h2>🤖 KRIM AI Assistant</h2>
+
+<div class="card ai">
+
+<strong>AI Logistics Assistant</strong>
+
+<span>
+Coming next: ask KRIM about shipments, quotes,
+tracking, delivery updates and logistics requirements.
+</span>
+
+</div>
+
+</div>
+
+
+<!-- MY SHIPMENTS -->
+
+<div class="section">
+
+<h2>📦 Recent Shipments</h2>
+
+<div id="shipments">
+
+<div class="empty">
+Loading shipments...
+</div>
+
+</div>
+
+</div>
+
+
+</main>
+
+
+<script>
+
+const client =
+(typeof supabaseClient !== "undefined")
+? supabaseClient
+: supabase.createClient(
+SUPABASE_URL,
+SUPABASE_PUBLISHABLE_KEY
+);
+
+
+async function loadCustomer(){
+
+const {
+data:{session}
+}=await client.auth.getSession();
+
+
+if(!session){
+
+window.location.href="customer-login.html";
+
+return;
+
+}
+
+
+const user=session.user;
+
+
+const name=
+user.user_metadata?.full_name
+||
+user.email?.split("@")[0]
+||
+"Customer";
+
+
+document.getElementById("welcome").textContent=
+"Welcome, "+name;
+
+
+const {
+data,
+error
+}=await client
+.from("shipment_requests")
+.select(`
+id,
+pickup_location,
+delivery_location,
+material_goods,
+weight,
+truck_type,
+status,
+tracking_number,
+quoted_price,
+quote_status,
+created_at
+`)
+.eq("customer_id",user.id)
+.order("created_at",{ascending:false});
+
+
+if(error){
+
+document.getElementById("shipments").innerHTML=`
+
+<div class="empty">
+
+Unable to load shipments.
+
+Please refresh and try again.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+if(!data || data.length===0){
+
+document.getElementById("shipments").innerHTML=`
+
+<div class="empty">
+
+No shipments yet.
+
+<br><br>
+
+<a href="create-shipment.html"
+style="
+background:#0b5ed7;
+color:white;
+padding:10px 14px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+">
+
+Create Shipment
+
+</a>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+document.getElementById("shipments").innerHTML=
+
+data.map(function(s){
+
+return `
+
+<div class="shipment">
+
+<div class="route">
+
+${escapeHTML(s.pickup_location)}
+→
+${escapeHTML(s.delivery_location)}
+
+</div>
+
+
+<div class="small">
+
+Tracking:
+<strong>
+${escapeHTML(s.tracking_number || "Pending")}
+</strong>
+
+</div>
+
+
+<div class="small">
+
+${escapeHTML(s.material_goods || "")}
+•
+${escapeHTML(s.weight || "")}
+•
+${escapeHTML(s.truck_type || "")}
+
+</div>
+
+
+<div>
+
+<span class="status">
+
+${escapeHTML(s.status || "new")}
+
+</span>
+
+</div>
+
+
+${
+s.quoted_price != null
+
+?
+
+`
+
+<div class="small">
+
+Quote:
+₹${Number(
+s.quoted_price
+).toLocaleString("en-IN")}
+
+</div>
+
+`
+
+:
+
+""
+
+}
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+function escapeHTML(value){
+
+return String(value || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+async function logout(){
+
+await client.auth.signOut();
+
+window.location.href=
+"customer-login.html";
+
+}
+
+
+loadCustomer();
+
+</script>
+
+</body>
+</html>
