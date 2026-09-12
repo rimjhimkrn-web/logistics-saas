@@ -157,66 +157,89 @@ body{
 
                                                                                                                         <script>
 
-                                                                                                                        const form = document.getElementById("loginForm");
-                                                                                                                        const button = document.getElementById("loginButton");
-                                                                                                                        const message = document.getElementById("message");
+                                                                                                                            const form = document.getElementById("loginForm");
+                                                                                                                            const button = document.getElementById("loginButton");
+                                                                                                                            const message = document.getElementById("message");
 
-                                                                                                                        function showMessage(text,type){
+                                                                                                                            function showMessage(text, type) {
+                                                                                                                              message.textContent = text;
+                                                                                                                                message.className = "message " + type;
+                                                                                                                                }
 
-                                                                                                                          message.textContent = text;
-                                                                                                                            message.className = "message " + type;
+                                                                                                                                form.addEventListener("submit", async function(e) {
 
-                                                                                                                            }
+                                                                                                                                  e.preventDefault();
 
-                                                                                                                            form.addEventListener("submit", async function(e){
+                                                                                                                                    button.disabled = true;
+                                                                                                                                      button.textContent = "Logging in...";
 
-                                                                                                                              e.preventDefault();
+                                                                                                                                        const email =
+                                                                                                                                            document.getElementById("email").value.trim();
 
-                                                                                                                                button.disabled = true;
-                                                                                                                                  button.textContent = "Logging in...";
+                                                                                                                                              const password =
+                                                                                                                                                  document.getElementById("password").value;
 
-                                                                                                                                    const email =
-                                                                                                                                        document.getElementById("email").value.trim();
+                                                                                                                                                    try {
 
-                                                                                                                                          const password =
-                                                                                                                                              document.getElementById("password").value;
+                                                                                                                                                        const { data, error } =
+                                                                                                                                                              await supabaseClient.auth.signInWithPassword({
+                                                                                                                                                                      email: email,
+                                                                                                                                                                              password: password
+                                                                                                                                                                                    });
 
-                                                                                                                                                try{
+                                                                                                                                                                                        if (error) {
+                                                                                                                                                                                              throw error;
+                                                                                                                                                                                                  }
 
-                                                                                                                                                    const { data, error } =
-                                                                                                                                                          await supabaseClient.auth.signInWithPassword({
-                                                                                                                                                                  email: email,
-                                                                                                                                                                          password: password
-                                                                                                                                                                                });
+                                                                                                                                                                                                      const user = data.user;
 
-                                                                                                                                                                                    if(error){
-                                                                                                                                                                                          throw error;
-                                                                                                                                                                                              }
+                                                                                                                                                                                                          const { data: roleData, error: roleError } =
+                                                                                                                                                                                                                await supabaseClient
+                                                                                                                                                                                                                        .from("user_roles")
+                                                                                                                                                                                                                                .select("role")
+                                                                                                                                                                                                                                        .eq("user_id", user.id)
+                                                                                                                                                                                                                                                .maybeSingle();
 
-                                                                                                                                                                                                  showMessage(
-                                                                                                                                                                                                        "Login successful. Partner account is active.",
-                                                                                                                                                                                                              "success"
-                                                                                                                                                                                                                  );
+                                                                                                                                                                                                                                                    if (roleError) {
+                                                                                                                                                                                                                                                          throw roleError;
+                                                                                                                                                                                                                                                              }
 
-                                                                                                                                                                                                                      button.textContent = "Logged In";
+                                                                                                                                                                                                                                                                  if (!roleData || roleData.role !== "partner") {
 
-                                                                                                                                                                                                                        }catch(error){
+                                                                                                                                                                                                                                                                        await supabaseClient.auth.signOut();
 
-                                                                                                                                                                                                                            console.error(error);
+                                                                                                                                                                                                                                                                              throw new Error(
+                                                                                                                                                                                                                                                                                      "This account is not registered as a partner."
+                                                                                                                                                                                                                                                                                            );
+                                                                                                                                                                                                                                                                                                }
 
-                                                                                                                                                                                                                                showMessage(
-                                                                                                                                                                                                                                      error.message || "Login failed.",
-                                                                                                                                                                                                                                            "error"
-                                                                                                                                                                                                                                                );
+                                                                                                                                                                                                                                                                                                    showMessage(
+                                                                                                                                                                                                                                                                                                          "Login successful. Redirecting to Partner Portal...",
+                                                                                                                                                                                                                                                                                                                "success"
+                                                                                                                                                                                                                                                                                                                    );
 
-                                                                                                                                                                                                                                                    button.disabled = false;
-                                                                                                                                                                                                                                                        button.textContent = "Login";
+                                                                                                                                                                                                                                                                                                                        button.textContent = "Success";
 
-                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                            setTimeout(function() {
+                                                                                                                                                                                                                                                                                                                                  window.location.href = "partner.html";
+                                                                                                                                                                                                                                                                                                                                      }, 800);
 
-                                                                                                                                                                                                                                                          });
+                                                                                                                                                                                                                                                                                                                                        } catch (error) {
 
-                                                                                                                                                                                                                                                          </script>
+                                                                                                                                                                                                                                                                                                                                            console.error(error);
+
+                                                                                                                                                                                                                                                                                                                                                showMessage(
+                                                                                                                                                                                                                                                                                                                                                      error.message || "Login failed.",
+                                                                                                                                                                                                                                                                                                                                                            "error"
+                                                                                                                                                                                                                                                                                                                                                                );
+
+                                                                                                                                                                                                                                                                                                                                                                    button.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                        button.textContent = "Login";
+                                                                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                                                                          });
+
+                                                                                                                                                                                                                                                                                                                                                                          </script>
 
                                                                                                                                                                                                                                                           </body>
                                                                                                                                                                                                                                                           </html>
