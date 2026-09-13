@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <title>KRIM Logistics - Fleet</title>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="config.js"></script>
+
+            <style>
+                body {
+                      font-family: Arial;
+                            padding: 20px;
+                                  background: #f5f5f5;
+                                      }
+
+                                          .box {
+                                                max-width: 600px;
+                                                      margin: auto;
+                                                            background: white;
+                                                                  padding: 20px;
+                                                                        border-radius: 10px;
+                                                                            }
+
+                                                                                input, select, button {
+                                                                                      width: 100%;
+                                                                                            padding: 12px;
+                                                                                                  margin: 6px 0;
+                                                                                                        box-sizing: border-box;
+                                                                                                            }
+
+                                                                                                                button {
+                                                                                                                      background: black;
+                                                                                                                            color: white;
+                                                                                                                                  border: 0;
+                                                                                                                                        border-radius: 5px;
+                                                                                                                                            }
+
+                                                                                                                                                .truck {
+                                                                                                                                                      padding: 12px;
+                                                                                                                                                            margin-top: 10px;
+                                                                                                                                                                  border: 1px solid #ddd;
+                                                                                                                                                                        border-radius: 6px;
+                                                                                                                                                                            }
+                                                                                                                                                                              </style>
+                                                                                                                                                                              </head>
+
+                                                                                                                                                                              <body>
+
+                                                                                                                                                                              <div class="box">
+
+                                                                                                                                                                                <h1>KRIM Logistics</h1>
+                                                                                                                                                                                  <h2>Partner Fleet</h2>
+
+                                                                                                                                                                                    <input id="truck" placeholder="Truck Number">
+
+                                                                                                                                                                                      <input id="type" placeholder="Truck Type">
+
+                                                                                                                                                                                        <input id="capacity" placeholder="Capacity">
+
+                                                                                                                                                                                          <input id="driver" placeholder="Driver Name">
+
+                                                                                                                                                                                            <input id="phone" placeholder="Driver Phone">
+
+                                                                                                                                                                                              <select id="status">
+                                                                                                                                                                                                  <option value="available">Available</option>
+                                                                                                                                                                                                      <option value="busy">Busy</option>
+                                                                                                                                                                                                          <option value="offline">Offline</option>
+                                                                                                                                                                                                            </select>
+
+                                                                                                                                                                                                              <button onclick="addTruck()">Add Truck</button>
+
+                                                                                                                                                                                                                <p id="msg"></p>
+
+                                                                                                                                                                                                                  <hr>
+
+                                                                                                                                                                                                                    <h2>My Trucks</h2>
+
+                                                                                                                                                                                                                      <div id="list">Loading...</div>
+
+                                                                                                                                                                                                                      </div>
+
+                                                                                                                                                                                                                      <script>
+
+                                                                                                                                                                                                                      const db = supabase.createClient(
+                                                                                                                                                                                                                        SUPABASE_URL,
+                                                                                                                                                                                                                          SUPABASE_PUBLISHABLE_KEY
+                                                                                                                                                                                                                          );
+
+
+                                                                                                                                                                                                                          /* LOAD */
+
+                                                                                                                                                                                                                          async function load() {
+
+                                                                                                                                                                                                                            const result = await db
+                                                                                                                                                                                                                                .from("partner_fleet")
+                                                                                                                                                                                                                                    .select("*")
+                                                                                                                                                                                                                                        .order("id", { ascending: false });
+
+                                                                                                                                                                                                                                          if (result.error) {
+                                                                                                                                                                                                                                              document.getElementById("list").innerText =
+                                                                                                                                                                                                                                                    "Error loading trucks.";
+                                                                                                                                                                                                                                                        console.log(result.error);
+                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                              }
+
+                                                                                                                                                                                                                                                                if (!result.data.length) {
+                                                                                                                                                                                                                                                                    document.getElementById("list").innerText =
+                                                                                                                                                                                                                                                                          "No trucks added.";
+                                                                                                                                                                                                                                                                              return;
+                                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                                  let html = "";
+
+                                                                                                                                                                                                                                                                                    result.data.forEach(function(t) {
+
+                                                                                                                                                                                                                                                                                        html += `
+                                                                                                                                                                                                                                                                                              <div class="truck">
+                                                                                                                                                                                                                                                                                                      <b>Truck:</b> ${t.truck_number}<br>
+                                                                                                                                                                                                                                                                                                              <b>Type:</b> ${t.truck_type}<br>
+                                                                                                                                                                                                                                                                                                                      <b>Capacity:</b> ${t.capacity || "-"}<br>
+                                                                                                                                                                                                                                                                                                                              <b>Driver:</b> ${t.driver_name || "-"}<br>
+                                                                                                                                                                                                                                                                                                                                      <b>Phone:</b> ${t.driver_phone || "-"}<br>
+                                                                                                                                                                                                                                                                                                                                              <b>Status:</b> ${t.availability}
+                                                                                                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                                                                                                        `;
+
+                                                                                                                                                                                                                                                                                                                                                          });
+
+                                                                                                                                                                                                                                                                                                                                                            document.getElementById("list").innerHTML = html;
+                                                                                                                                                                                                                                                                                                                                                            }
+
+
+                                                                                                                                                                                                                                                                                                                                                            /* ADD */
+
+                                                                                                                                                                                                                                                                                                                                                            async function addTruck() {
+
+                                                                                                                                                                                                                                                                                                                                                              const truck =
+                                                                                                                                                                                                                                                                                                                                                                  document.getElementById("truck").value;
+
+                                                                                                                                                                                                                                                                                                                                                                    const type =
+                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("type").value;
+
+                                                                                                                                                                                                                                                                                                                                                                          const capacity =
+                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("capacity").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                const driver =
+                                                                                                                                                                                                                                                                                                                                                                                    document.getElementById("driver").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                      const phone =
+                                                                                                                                                                                                                                                                                                                                                                                          document.getElementById("phone").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                            const status =
+                                                                                                                                                                                                                                                                                                                                                                                                document.getElementById("status").value;
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                  if (!truck || !type) {
+
+                                                                                                                                                                                                                                                                                                                                                                                                      alert("Enter truck number and truck type.");
+
+                                                                                                                                                                                                                                                                                                                                                                                                          return;
+                                                                                                                                                                                                                                                                                                                                                                                                            }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                              /*
+                                                                                                                                                                                                                                                                                                                                                                                                                  TEMPORARY:
+                                                                                                                                                                                                                                                                                                                                                                                                                      Put your partner ID here.
+                                                                                                                                                                                                                                                                                                                                                                                                                        */
+
+                                                                                                                                                                                                                                                                                                                                                                                                                          const partnerId = 1;
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                            const result = await db
+                                                                                                                                                                                                                                                                                                                                                                                                                                .from("partner_fleet")
+                                                                                                                                                                                                                                                                                                                                                                                                                                    .insert({
+                                                                                                                                                                                                                                                                                                                                                                                                                                          partner_id: partnerId,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                truck_number: truck,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                      truck_type: type,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            capacity: capacity,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  driver_name: driver,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        driver_phone: phone,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                              availability: status
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    if (result.error) {
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        alert("Error adding truck.");
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            console.log(result.error);
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    alert("Truck added!");
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      document.getElementById("truck").value = "";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("type").value = "";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          document.getElementById("capacity").value = "";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            document.getElementById("driver").value = "";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("phone").value = "";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                load();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                load();
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </html>
