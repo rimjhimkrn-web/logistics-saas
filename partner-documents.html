@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <title>KRIM Logistics - Documents</title>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="config.js"></script>
+
+            <style>
+
+                body {
+                      font-family: Arial;
+                            background: #f5f5f5;
+                                  padding: 20px;
+                                      }
+
+                                          .box {
+                                                max-width: 600px;
+                                                      margin: auto;
+                                                            background: white;
+                                                                  padding: 20px;
+                                                                        border-radius: 10px;
+                                                                            }
+
+                                                                                input, select, button {
+                                                                                      width: 100%;
+                                                                                            padding: 12px;
+                                                                                                  margin: 6px 0;
+                                                                                                        box-sizing: border-box;
+                                                                                                            }
+
+                                                                                                                button {
+                                                                                                                      background: black;
+                                                                                                                            color: white;
+                                                                                                                                  border: 0;
+                                                                                                                                        border-radius: 5px;
+                                                                                                                                            }
+
+                                                                                                                                                .doc {
+                                                                                                                                                      border: 1px solid #ddd;
+                                                                                                                                                            padding: 12px;
+                                                                                                                                                                  margin-top: 10px;
+                                                                                                                                                                        border-radius: 6px;
+                                                                                                                                                                            }
+
+                                                                                                                                                                              </style>
+
+                                                                                                                                                                              </head>
+
+                                                                                                                                                                              <body>
+
+                                                                                                                                                                              <div class="box">
+
+                                                                                                                                                                                <h1>KRIM Logistics</h1>
+
+                                                                                                                                                                                  <h2>Partner Documents</h2>
+
+                                                                                                                                                                                    <select id="type">
+
+                                                                                                                                                                                        <option value="RC">RC</option>
+
+                                                                                                                                                                                            <option value="Insurance">Insurance</option>
+
+                                                                                                                                                                                                <option value="Permit">Permit</option>
+
+                                                                                                                                                                                                    <option value="Fitness">Fitness Certificate</option>
+
+                                                                                                                                                                                                        <option value="Driving Licence">Driving Licence</option>
+
+                                                                                                                                                                                                            <option value="Other">Other</option>
+
+                                                                                                                                                                                                              </select>
+
+                                                                                                                                                                                                                <input
+                                                                                                                                                                                                                    id="number"
+                                                                                                                                                                                                                        placeholder="Document Number"
+                                                                                                                                                                                                                          >
+
+                                                                                                                                                                                                                            <input
+                                                                                                                                                                                                                                id="expiry"
+                                                                                                                                                                                                                                    type="date"
+                                                                                                                                                                                                                                      >
+
+                                                                                                                                                                                                                                        <input
+                                                                                                                                                                                                                                            id="file"
+                                                                                                                                                                                                                                                placeholder="File name (optional)"
+                                                                                                                                                                                                                                                  >
+
+                                                                                                                                                                                                                                                    <button onclick="addDocument()">
+                                                                                                                                                                                                                                                        Add Document
+                                                                                                                                                                                                                                                          </button>
+
+                                                                                                                                                                                                                                                            <p id="message"></p>
+
+                                                                                                                                                                                                                                                              <hr>
+
+                                                                                                                                                                                                                                                                <h2>My Documents</h2>
+
+                                                                                                                                                                                                                                                                  <div id="list">
+                                                                                                                                                                                                                                                                      Loading...
+                                                                                                                                                                                                                                                                        </div>
+
+                                                                                                                                                                                                                                                                        </div>
+
+
+                                                                                                                                                                                                                                                                        <script>
+
+                                                                                                                                                                                                                                                                        const db = supabase.createClient(
+                                                                                                                                                                                                                                                                          SUPABASE_URL,
+                                                                                                                                                                                                                                                                            SUPABASE_PUBLISHABLE_KEY
+                                                                                                                                                                                                                                                                            );
+
+
+                                                                                                                                                                                                                                                                            /* LOAD DOCUMENTS */
+
+                                                                                                                                                                                                                                                                            async function loadDocuments() {
+
+                                                                                                                                                                                                                                                                              const result = await db
+                                                                                                                                                                                                                                                                                  .from("partner_documents")
+                                                                                                                                                                                                                                                                                      .select("*")
+                                                                                                                                                                                                                                                                                          .order("id", { ascending: false });
+
+
+                                                                                                                                                                                                                                                                                            if (result.error) {
+
+                                                                                                                                                                                                                                                                                                console.log(result.error);
+
+                                                                                                                                                                                                                                                                                                    document.getElementById("list").innerText =
+                                                                                                                                                                                                                                                                                                          "Error loading documents.";
+
+                                                                                                                                                                                                                                                                                                              return;
+                                                                                                                                                                                                                                                                                                                }
+
+
+                                                                                                                                                                                                                                                                                                                  if (!result.data.length) {
+
+                                                                                                                                                                                                                                                                                                                      document.getElementById("list").innerText =
+                                                                                                                                                                                                                                                                                                                            "No documents added.";
+
+                                                                                                                                                                                                                                                                                                                                return;
+                                                                                                                                                                                                                                                                                                                                  }
+
+
+                                                                                                                                                                                                                                                                                                                                    let html = "";
+
+
+                                                                                                                                                                                                                                                                                                                                      result.data.forEach(function(doc) {
+
+                                                                                                                                                                                                                                                                                                                                          html += `
+
+                                                                                                                                                                                                                                                                                                                                                <div class="doc">
+
+                                                                                                                                                                                                                                                                                                                                                        <b>Type:</b> ${doc.document_type}<br>
+
+                                                                                                                                                                                                                                                                                                                                                                <b>Number:</b>
+                                                                                                                                                                                                                                                                                                                                                                        ${doc.document_number || "-"}<br>
+
+                                                                                                                                                                                                                                                                                                                                                                                <b>Expiry:</b>
+                                                                                                                                                                                                                                                                                                                                                                                        ${doc.expiry_date || "-"}<br>
+
+                                                                                                                                                                                                                                                                                                                                                                                                <b>Status:</b>
+                                                                                                                                                                                                                                                                                                                                                                                                        ${doc.status}
+
+                                                                                                                                                                                                                                                                                                                                                                                                              </div>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                  `;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                    });
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                      document.getElementById("list").innerHTML = html;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                      }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                      /* ADD DOCUMENT */
+
+                                                                                                                                                                                                                                                                                                                                                                                                                      async function addDocument() {
+
+                                                                                                                                                                                                                                                                                                                                                                                                                        const type =
+                                                                                                                                                                                                                                                                                                                                                                                                                            document.getElementById("type").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                              const number =
+                                                                                                                                                                                                                                                                                                                                                                                                                                  document.getElementById("number").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                    const expiry =
+                                                                                                                                                                                                                                                                                                                                                                                                                                        document.getElementById("expiry").value;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                          const file =
+                                                                                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("file").value;
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    TEMPORARY PARTNER ID
+                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        const partnerId = 1;
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                          const result = await db
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              .from("partner_documents")
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  .insert({
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        partner_id: partnerId,
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                              document_type: type,
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    document_number: number,
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          expiry_date: expiry || null,
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                file_name: file || null,
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      status: "pending"
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          });
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (result.error) {
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                console.log(result.error);
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    alert("Error adding document.");
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        return;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            alert("Document added successfully.");
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              document.getElementById("number").value = "";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                document.getElementById("expiry").value = "";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  document.getElementById("file").value = "";
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    loadDocuments();
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    loadDocuments();
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </html>
