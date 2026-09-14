@@ -1,233 +1,664 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KRIM Logistics - Customer Workspace</title>
+
+<title>KRIM Logistics | Customer Workspace</title>
 
 <style>
+*{box-sizing:border-box}
+
 body{
-    margin:0;
-        font-family:Arial,sans-serif;
-            background:#f3f5f9;
-                color:#172033;
-                }
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#f5f7fa;
+color:#172033;
+}
 
-                header{
-                    background:#101827;
-                        color:white;
-                            padding:20px;
-                                text-align:center;
-                                }
+a{
+text-decoration:none;
+color:inherit;
+}
 
-                                header h2{
-                                    margin:0;
-                                    }
+.header{
+height:64px;
+background:#0b1220;
+color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 16px;
+position:sticky;
+top:0;
+z-index:5;
+}
 
-                                    header p{
-                                        margin:6px 0 0;
-                                            color:#b8c2d1;
-                                                font-size:13px;
-                                                }
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+}
 
-                                                main{
-                                                    max-width:900px;
-                                                        margin:auto;
-                                                            padding:20px;
-                                                            }
+.logo{
+width:38px;
+height:38px;
+background:#2563eb;
+border-radius:9px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:19px;
+font-weight:bold;
+}
 
-                                                            .welcome{
-                                                                background:#1d4ed8;
-                                                                    color:white;
-                                                                        padding:25px;
-                                                                            border-radius:10px;
-                                                                                margin-bottom:20px;
-                                                                                }
+.brand-name{
+font-size:17px;
+font-weight:bold;
+}
 
-                                                                                .welcome h1{
-                                                                                    margin:0 0 8px;
-                                                                                    }
+.brand-type{
+font-size:10px;
+color:#aeb9cc;
+margin-top:2px;
+}
 
-                                                                                    .welcome p{
-                                                                                        margin:0;
-                                                                                            line-height:1.5;
-                                                                                            }
+.user{
+width:36px;
+height:36px;
+border-radius:50%;
+background:#2563eb;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+}
 
-                                                                                            h3{
-                                                                                                margin-top:25px;
-                                                                                                }
+.nav{
+background:white;
+border-bottom:1px solid #e2e6ec;
+padding:10px 16px;
+overflow-x:auto;
+white-space:nowrap;
+}
 
-                                                                                                .box{
-                                                                                                    background:white;
-                                                                                                        padding:18px;
-                                                                                                            margin:12px 0;
-                                                                                                                border:1px solid #ddd;
-                                                                                                                    border-radius:8px;
-                                                                                                                    }
+.nav a{
+display:inline-block;
+padding:8px 11px;
+margin-right:4px;
+font-size:12px;
+font-weight:bold;
+border-radius:7px;
+color:#4b5565;
+}
 
-                                                                                                                    .box h4{
-                                                                                                                        margin:0 0 7px;
-                                                                                                                        }
+.nav a:hover{
+background:#edf4ff;
+color:#2563eb;
+}
 
-                                                                                                                        .box p{
-                                                                                                                            color:#667085;
-                                                                                                                                font-size:13px;
-                                                                                                                                }
+.main{
+max-width:1100px;
+margin:auto;
+padding:16px;
+}
 
-                                                                                                                                a{
-                                                                                                                                    display:inline-block;
-                                                                                                                                        background:#2563eb;
-                                                                                                                                            color:white;
-                                                                                                                                                text-decoration:none;
-                                                                                                                                                    padding:10px 14px;
-                                                                                                                                                        border-radius:6px;
-                                                                                                                                                            font-size:13px;
-                                                                                                                                                            }
+.hero{
+background:#0b1220;
+color:white;
+border-radius:15px;
+padding:24px;
+margin-bottom:18px;
+}
 
-                                                                                                                                                            .ai{
-                                                                                                                                                                background:#101827;
-                                                                                                                                                                    color:white;
-                                                                                                                                                                    }
+.hero-label{
+font-size:10px;
+font-weight:bold;
+color:#8db7ff;
+letter-spacing:1px;
+}
 
-                                                                                                                                                                    .ai p{
-                                                                                                                                                                        color:#c4ccda;
-                                                                                                                                                                        }
+.hero h1{
+font-size:27px;
+margin:8px 0;
+}
 
-                                                                                                                                                                        footer{
-                                                                                                                                                                            text-align:center;
-                                                                                                                                                                                padding:25px;
-                                                                                                                                                                                    color:#667085;
-                                                                                                                                                                                        font-size:12px;
-                                                                                                                                                                                        }
-                                                                                                                                                                                        </style>
-                                                                                                                                                                                        </head>
+.hero p{
+font-size:13px;
+color:#c5cede;
+max-width:650px;
+line-height:1.6;
+}
 
-                                                                                                                                                                                        <body>
+.button{
+display:inline-block;
+background:#2563eb;
+color:white;
+padding:10px 14px;
+border-radius:7px;
+font-size:12px;
+font-weight:bold;
+margin:4px 4px 0 0;
+}
 
-                                                                                                                                                                                        <header>
-                                                                                                                                                                                            <h2>KRIM Logistics</h2>
-                                                                                                                                                                                                <p>Customer Workspace</p>
-                                                                                                                                                                                                </header>
+.button.light{
+background:white;
+color:#172033;
+}
 
-                                                                                                                                                                                                <main>
+.section{
+margin-top:22px;
+}
 
-                                                                                                                                                                                                <div class="welcome">
-                                                                                                                                                                                                    <h1>Welcome</h1>
-                                                                                                                                                                                                        <p>
-                                                                                                                                                                                                                Manage your complete logistics journey from one place —
-                                                                                                                                                                                                                        shipment requests, quotations, payments, tracking,
-                                                                                                                                                                                                                                delivery and support.
-                                                                                                                                                                                                                                    </p>
-                                                                                                                                                                                                                                    </div>
+.section h2{
+font-size:19px;
+margin:0;
+}
+
+.section-text{
+font-size:12px;
+color:#718096;
+margin:4px 0 10px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+}
+
+.card{
+background:white;
+border:1px solid #e1e6ed;
+border-radius:12px;
+padding:16px;
+}
+
+.stat-number{
+font-size:22px;
+font-weight:bold;
+}
+
+.small{
+font-size:11px;
+color:#718096;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+}
+
+.module{
+background:white;
+border:1px solid #e1e6ed;
+border-radius:12px;
+padding:17px;
+}
+
+.module-icon{
+font-size:21px;
+}
+
+.module h3{
+font-size:15px;
+margin:8px 0 5px;
+}
+
+.module p{
+font-size:11px;
+line-height:1.5;
+color:#718096;
+}
+
+.open{
+font-size:11px;
+font-weight:bold;
+color:#2563eb;
+}
+
+.ai{
+background:#111a2b;
+color:white;
+}
+
+.ai p{
+color:#c5cede;
+}
+
+.footer{
+    margin-top:30px;
+    padding:20px 0;
+    border-top:1px solid #dce1e8;
+    font-size:10px;
+    color:#718096;
+    text-align:center;
+    line-height:1.6;
+    }
+
+@media(max-width:750px){
+
+.stats{
+grid-template-columns:repeat(2,1fr);
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.hero h1{
+font-size:23px;
+}
+
+.main{
+padding:12px;
+}
+
+.nav{
+padding:9px 10px;
+}
+
+}
+
+@media(min-width:751px){
+
+.nav{
+text-align:center;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+<div class="brand">
+
+<div class="logo">K</div>
+
+<div>
+<div class="brand-name">KRIM Logistics</div>
+<div class="brand-type">Customer Platform</div>
+</div>
+
+</div>
+
+<div class="user">C</div>
+
+</header>
 
 
-                                                                                                                                                                                                                                    <h3>Shipment</h3>
+<nav class="nav">
 
-                                                                                                                                                                                                                                    <div class="box">
-                                                                                                                                                                                                                                        <h4>Create Shipment</h4>
-                                                                                                                                                                                                                                            <p>Create a new transportation request.</p>
-                                                                                                                                                                                                                                                <a href="create-shipment.html">Create</a>
-                                                                                                                                                                                                                                                </div>
+<a href="customer-workspace.html">Overview</a>
 
-                                                                                                                                                                                                                                                <div class="box">
-                                                                                                                                                                                                                                                    <h4>My Shipments</h4>
-                                                                                                                                                                                                                                                        <p>View your shipment requests and current status.</p>
-                                                                                                                                                                                                                                                            <a href="customer-tracking-dashboard.html">View Shipments</a>
-                                                                                                                                                                                                                                                            </div>
+<a href="create-shipment.html">Create Shipment</a>
 
-                                                                                                                                                                                                                                                            <div class="box">
-                                                                                                                                                                                                                                                                <h4>Shipment Details</h4>
-                                                                                                                                                                                                                                                                    <p>View detailed shipment information.</p>
-                                                                                                                                                                                                                                                                        <a href="shipment-details.html">View Details</a>
-                                                                                                                                                                                                                                                                        </div>
+<a href="customer-tracking-dashboard.html">Shipments</a>
 
+<a href="shipment-details.html">Details</a>
 
-                                                                                                                                                                                                                                                                        <h3>Quotes & Payments</h3>
+<a href="customer-quotation.html">Quotes</a>
 
-                                                                                                                                                                                                                                                                        <div class="box">
-                                                                                                                                                                                                                                                                            <h4>Quotations</h4>
-                                                                                                                                                                                                                                                                                <p>Review quotations for your shipments.</p>
-                                                                                                                                                                                                                                                                                    <a href="customer-quotation.html">View Quotes</a>
-                                                                                                                                                                                                                                                                                    </div>
+<a href="accept-quote.html">Accept Quote</a>
 
-                                                                                                                                                                                                                                                                                    <div class="box">
-                                                                                                                                                                                                                                                                                        <h4>Accept Quote</h4>
-                                                                                                                                                                                                                                                                                            <p>Review and accept an available quotation.</p>
-                                                                                                                                                                                                                                                                                                <a href="accept-quote.html">Open</a>
-                                                                                                                                                                                                                                                                                                </div>
+<a href="customer-payment-status.html">Payments</a>
 
-                                                                                                                                                                                                                                                                                                <div class="box">
-                                                                                                                                                                                                                                                                                                    <h4>Payments</h4>
-                                                                                                                                                                                                                                                                                                        <p>Check payment status and payment options.</p>
-                                                                                                                                                                                                                                                                                                            <a href="customer-payment-status.html">Payments</a>
-                                                                                                                                                                                                                                                                                                            </div>
+<a href="notifications.html">Notifications</a>
+
+<a href="customer-support.html">Support</a>
+
+<a href="shipment-rating.html">Ratings</a>
+
+</nav>
 
 
-                                                                                                                                                                                                                                                                                                            <h3>Tracking & Delivery</h3>
-
-                                                                                                                                                                                                                                                                                                            <div class="box">
-                                                                                                                                                                                                                                                                                                                <h4>Track Shipment</h4>
-                                                                                                                                                                                                                                                                                                                    <p>Follow your shipment progress.</p>
-                                                                                                                                                                                                                                                                                                                        <a href="customer-tracking-dashboard.html">Track</a>
-                                                                                                                                                                                                                                                                                                                        </div>
-
-                                                                                                                                                                                                                                                                                                                        <div class="box">
-                                                                                                                                                                                                                                                                                                                            <h4>Delivery & POD</h4>
-                                                                                                                                                                                                                                                                                                                                <p>View delivery confirmation and available POD information.</p>
-                                                                                                                                                                                                                                                                                                                                    <a href="pod.html">View POD</a>
-                                                                                                                                                                                                                                                                                                                                    </div>
-
-                                                                                                                                                                                                                                                                                                                                    <div class="box">
-                                                                                                                                                                                                                                                                                                                                        <h4>Notifications</h4>
-                                                                                                                                                                                                                                                                                                                                            <p>View important shipment and account notifications.</p>
-                                                                                                                                                                                                                                                                                                                                                <a href="notifications.html">Notifications</a>
-                                                                                                                                                                                                                                                                                                                                                </div>
+<main class="main">
 
 
-                                                                                                                                                                                                                                                                                                                                                <h3>Support</h3>
+<section class="hero">
 
-                                                                                                                                                                                                                                                                                                                                                <div class="box">
-                                                                                                                                                                                                                                                                                                                                                    <h4>Customer Support</h4>
-                                                                                                                                                                                                                                                                                                                                                        <p>Get help with your shipment or account.</p>
-                                                                                                                                                                                                                                                                                                                                                            <a href="customer-support.html">Get Support</a>
-                                                                                                                                                                                                                                                                                                                                                            </div>
+<div class="hero-label">
+KRIM CUSTOMER PLATFORM
+</div>
 
-                                                                                                                                                                                                                                                                                                                                                            <div class="box">
-                                                                                                                                                                                                                                                                                                                                                                <h4>Rate Shipment</h4>
-                                                                                                                                                                                                                                                                                                                                                                    <p>Provide feedback after delivery.</p>
-                                                                                                                                                                                                                                                                                                                                                                        <a href="shipment-rating.html">Rate Shipment</a>
-                                                                                                                                                                                                                                                                                                                                                                        </div>
+<h1>
+Your logistics command center.
+</h1>
+
+<p>
+Manage your shipments, quotations, payments, tracking,
+delivery and support through one professional KRIM Logistics
+workspace.
+</p>
+
+<a class="button light" href="create-shipment.html">
+Create Shipment
+</a>
+
+<a class="button" href="customer-tracking-dashboard.html">
+Track Shipment
+</a>
+
+</section>
 
 
-                                                                                                                                                                                                                                                                                                                                                                        <h3>Account</h3>
+<section class="section">
 
-                                                                                                                                                                                                                                                                                                                                                                        <div class="box">
-                                                                                                                                                                                                                                                                                                                                                                            <h4>Customer Account</h4>
-                                                                                                                                                                                                                                                                                                                                                                                <p>Return to your customer login.</p>
-                                                                                                                                                                                                                                                                                                                                                                                    <a href="customer-login.html">Account</a>
-                                                                                                                                                                                                                                                                                                                                                                                    </div>
+<h2>Overview</h2>
+
+<div class="section-text">
+Your logistics activity at a glance.
+</div>
+
+<div class="stats">
+
+<div class="card">
+<div class="stat-number">—</div>
+<div class="small">Active Shipments</div>
+</div>
+
+<div class="card">
+<div class="stat-number">—</div>
+<div class="small">Pending Quotes</div>
+</div>
+
+<div class="card">
+<div class="stat-number">—</div>
+<div class="small">Pending Payments</div>
+</div>
+
+<div class="card">
+<div class="stat-number">—</div>
+<div class="small">Completed</div>
+</div>
+
+</div>
+
+</section>
 
 
-                                                                                                                                                                                                                                                                                                                                                                                    <h3>KRIM Intelligence</h3>
+<section class="section">
 
-                                                                                                                                                                                                                                                                                                                                                                                    <div class="box ai">
-                                                                                                                                                                                                                                                                                                                                                                                        <h4>KRIM AI</h4>
-                                                                                                                                                                                                                                                                                                                                                                                            <p>
-                                                                                                                                                                                                                                                                                                                                                                                                    Intelligent assistance for shipment information,
-                                                                                                                                                                                                                                                                                                                                                                                                            delivery questions and future logistics automation.
-                                                                                                                                                                                                                                                                                                                                                                                                                </p>
-                                                                                                                                                                                                                                                                                                                                                                                                                    <a href="#">Open KRIM AI</a>
-                                                                                                                                                                                                                                                                                                                                                                                                                    </div>
+<h2>Shipment Management</h2>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                    </main>
+<div class="section-text">
+Create and manage your transportation.
+</div>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                    <footer>
-                                                                                                                                                                                                                                                                                                                                                                                                                        <strong>KRIM Logistics</strong>
-                                                                                                                                                                                                                                                                                                                                                                                                                            <br><br>
-                                                                                                                                                                                                                                                                                                                                                                                                                                Next-generation logistics technology platform.
-                                                                                                                                                                                                                                                                                                                                                                                                                                    <br><br>
-                                                                                                                                                                                                                                                                                                                                                                                                                                        © 2026 KRIM Logistics
-                                                                                                                                                                                                                                                                                                                                                                                                                                        </footer>
+<div class="grid">
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                        </body>
-                                                                                                                                                                                                                                                                                                                                                                                                                                        </html>
+<a class="module" href="create-shipment.html">
+
+<div class="module-icon">📦</div>
+
+<h3>Create Shipment</h3>
+
+<p>
+Submit a new transportation request.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+
+<a class="module" href="customer-tracking-dashboard.html">
+
+<div class="module-icon">🚚</div>
+
+<h3>My Shipments</h3>
+
+<p>
+View your shipments and their current progress.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+
+<a class="module" href="shipment-details.html">
+
+<div class="module-icon">▣</div>
+
+<h3>Shipment Details</h3>
+
+<p>
+Review shipment information and operational details.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>Commercial</h2>
+
+<div class="section-text">
+Quotes and payment management.
+</div>
+
+<div class="grid">
+
+<a class="module" href="customer-quotation.html">
+
+<div class="module-icon">₹</div>
+
+<h3>Quotations</h3>
+
+<p>
+Review your transportation quotations.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+
+<a class="module" href="accept-quote.html">
+
+<div class="module-icon">✓</div>
+
+<h3>Accept Quote</h3>
+
+<p>
+Review and accept an available quotation.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+
+<a class="module" href="customer-payment-status.html">
+
+<div class="module-icon">💳</div>
+
+<h3>Payments</h3>
+
+<p>
+Check payment status and payment actions.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>Delivery & Service</h2>
+
+<div class="section-text">
+Everything after shipment booking.
+</div>
+
+<div class="grid">
+
+<a class="module" href="customer-tracking-dashboard.html">
+
+<div class="module-icon">📍</div>
+
+<h3>Tracking</h3>
+
+<p>
+Follow your shipment during transportation.
+</p>
+
+<div class="open">Track →</div>
+
+</a>
+
+
+<a class="module" href="notifications.html">
+
+<div class="module-icon">🔔</div>
+
+<h3>Notifications</h3>
+
+<p>
+Receive shipment, payment and service updates.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+
+<a class="module" href="customer-support.html">
+
+<div class="module-icon">◉</div>
+
+<h3>Support Center</h3>
+
+<p>
+Get assistance with your logistics requirements.
+</p>
+
+<div class="open">Open →</div>
+
+</a>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>Service Quality</h2>
+
+<div class="section-text">
+Share feedback about completed shipments.
+</div>
+
+<div class="grid">
+
+<a class="module" href="shipment-rating.html">
+
+<div class="module-icon">★</div>
+
+<h3>Shipment Rating</h3>
+
+<p>
+Rate your transportation experience after delivery.
+</p>
+
+<div class="open">Rate Shipment →</div>
+
+</a>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<div class="card ai">
+
+<h3>KRIM AI</h3>
+
+<p>
+Your future intelligent logistics assistant for shipment
+questions, operational insights, recommendations and
+permitted logistics actions.
+</p>
+
+<div class="button">
+KRIM Intelligence
+</div>
+
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>Account</h2>
+
+<div class="section-text">
+Customer account and platform access.
+</div>
+
+<div class="card">
+
+<h3>Customer Account</h3>
+
+<p class="small">
+Your profile, authentication, security and customer
+permissions will remain connected to the KRIM platform.
+</p>
+
+<a class="button" href="customer-login.html">
+Customer Login
+</a>
+
+</div>
+
+</section>
+
+
+<footer class="footer">
+
+<strong>KRIM Logistics</strong>
+
+<br><br>
+
+Global logistics technology platform.
+
+<br><br>
+
+<a href="privacy.html">Privacy</a>
+&nbsp; | &nbsp;
+<a href="terms.html">Terms</a>
+&nbsp; | &nbsp;
+<a href="customer-support.html">Support</a>
+
+<br><br>
+
+© 2026 KRIM Logistics. All rights reserved.
+
+</footer>
+
+
+</main>
+
+</body>
+</html>
