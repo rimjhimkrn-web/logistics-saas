@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Accept Quotation - KRIM Logistics">
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="config.js"></script>
+
+            <style>
+                body {
+                      font-family: Arial, sans-serif;
+                            background: #f4f7fb;
+                                  padding: 20px;
+                                      }
+
+                                          .box {
+                                                max-width: 450px;
+                                                      margin: 50px auto;
+                                                            background: white;
+                                                                  padding: 30px;
+                                                                        border-radius: 15px;
+                                                                              box-shadow: 0 5px 20px #ddd;
+                                                                                  }
+
+                                                                                      h1 {
+                                                                                            text-align: center;
+                                                                                                  color: #0b1f3a;
+                                                                                                      }
+
+                                                                                                          p {
+                                                                                                                font-size: 17px;
+                                                                                                                      margin: 18px 0;
+                                                                                                                          }
+
+                                                                                                                              button {
+                                                                                                                                    width: 100%;
+                                                                                                                                          padding: 15px;
+                                                                                                                                                background: #0b1f3a;
+                                                                                                                                                      color: white;
+                                                                                                                                                            border: 0;
+                                                                                                                                                                  border-radius: 8px;
+                                                                                                                                                                        font-size: 17px;
+                                                                                                                                                                              font-weight: bold;
+                                                                                                                                                                                  }
+
+                                                                                                                                                                                      button:disabled {
+                                                                                                                                                                                            opacity: .6;
+                                                                                                                                                                                                }
+
+                                                                                                                                                                                                    #message {
+                                                                                                                                                                                                          margin-top: 20px;
+                                                                                                                                                                                                                text-align: center;
+                                                                                                                                                                                                                      font-weight: bold;
+                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                            </style>
+                                                                                                                                                                                                                            </head>
+
+                                                                                                                                                                                                                            <body>
+
+                                                                                                                                                                                                                            <div class="box">
+
+                                                                                                                                                                                                                              <h1>KRIM Logistics</h1>
+
+                                                                                                                                                                                                                                <p>
+                                                                                                                                                                                                                                    <b>Tracking Number:</b>
+                                                                                                                                                                                                                                        TRK-000014
+                                                                                                                                                                                                                                          </p>
+
+                                                                                                                                                                                                                                            <p>
+                                                                                                                                                                                                                                                <b>Quotation:</b>
+                                                                                                                                                                                                                                                    ₹5,000
+                                                                                                                                                                                                                                                      </p>
+
+                                                                                                                                                                                                                                                        <p>
+                                                                                                                                                                                                                                                            <b>Current Status:</b>
+                                                                                                                                                                                                                                                                <span id="status">sent</span>
+                                                                                                                                                                                                                                                                  </p>
+
+                                                                                                                                                                                                                                                                    <button id="accept">
+                                                                                                                                                                                                                                                                        Accept Quote
+                                                                                                                                                                                                                                                                          </button>
+
+                                                                                                                                                                                                                                                                            <div id="message"></div>
+
+                                                                                                                                                                                                                                                                            </div>
+
+                                                                                                                                                                                                                                                                            <script>
+
+                                                                                                                                                                                                                                                                            const button = document.getElementById("accept");
+                                                                                                                                                                                                                                                                            const status = document.getElementById("status");
+                                                                                                                                                                                                                                                                            const message = document.getElementById("message");
+
+                                                                                                                                                                                                                                                                            button.onclick = async function () {
+
+                                                                                                                                                                                                                                                                              button.disabled = true;
+                                                                                                                                                                                                                                                                                button.innerText = "Accepting...";
+
+                                                                                                                                                                                                                                                                                  try {
+
+                                                                                                                                                                                                                                                                                      const { data, error } =
+                                                                                                                                                                                                                                                                                            await supabaseClient.rpc(
+                                                                                                                                                                                                                                                                                                    "accept_shipment_quote",
+                                                                                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                                                                                      p_shipment_id: 14
+                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                                                                                    );
+
+                                                                                                                                                                                                                                                                                                                                        if (error) {
+                                                                                                                                                                                                                                                                                                                                              throw error;
+                                                                                                                                                                                                                                                                                                                                                  }
+
+                                                                                                                                                                                                                                                                                                                                                      console.log("RPC result:", data);
+
+                                                                                                                                                                                                                                                                                                                                                          status.innerText = "accepted";
+
+                                                                                                                                                                                                                                                                                                                                                              message.innerText =
+                                                                                                                                                                                                                                                                                                                                                                    "Quotation accepted successfully!";
+
+                                                                                                                                                                                                                                                                                                                                                                        message.style.color = "green";
+
+                                                                                                                                                                                                                                                                                                                                                                            button.innerText =
+                                                                                                                                                                                                                                                                                                                                                                                  "Quotation Accepted";
+
+                                                                                                                                                                                                                                                                                                                                                                                      setTimeout(function () {
+                                                                                                                                                                                                                                                                                                                                                                                            window.location.href =
+                                                                                                                                                                                                                                                                                                                                                                                                    "payment.html?tracking=TRK-000014";
+                                                                                                                                                                                                                                                                                                                                                                                                        }, 1000);
+
+                                                                                                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                                                                                                            catch (error) {
+
+                                                                                                                                                                                                                                                                                                                                                                                                                console.log(error);
+
+                                                                                                                                                                                                                                                                                                                                                                                                                    message.innerText =
+                                                                                                                                                                                                                                                                                                                                                                                                                          "Acceptance failed: " + error.message;
+
+                                                                                                                                                                                                                                                                                                                                                                                                                              message.style.color = "red";
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                  button.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                                                                                      button.innerText = "Accept Quote";
+                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                        };
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                        </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                        </body>
+                                                                                                                                                                                                                                                                                                                                                                                                                                        </html>
