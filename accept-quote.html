@@ -2,117 +2,162 @@
 <html>
 <head>
   <meta charset="UTF-8">
-    <title>Accept Quotation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>KRIM Logistics - Accept Quote</title>
 
-      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="config.js"></script>
 
-        <style>
-            body {
-                  font-family: Arial, sans-serif;
-                        padding: 30px;
-                              max-width: 500px;
-                                    margin: auto;
-                                        }
+            <style>
+                body {
+                      font-family: Arial, sans-serif;
+                            background: #f4f7fb;
+                                  padding: 20px;
+                                      }
 
-                                            input, button {
-                                                  width: 100%;
-                                                        padding: 12px;
-                                                              margin-top: 10px;
-                                                                    box-sizing: border-box;
-                                                                        }
+                                          .box {
+                                                max-width: 500px;
+                                                      margin: 50px auto;
+                                                            background: white;
+                                                                  padding: 25px;
+                                                                        border-radius: 12px;
+                                                                              text-align: center;
+                                                                                    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+                                                                                        }
 
-                                                                            button {
-                                                                                  cursor: pointer;
-                                                                                      }
+                                                                                            button {
+                                                                                                  width: 100%;
+                                                                                                        padding: 14px;
+                                                                                                              background: #102a43;
+                                                                                                                    color: white;
+                                                                                                                          border: 0;
+                                                                                                                                border-radius: 7px;
+                                                                                                                                      font-size: 16px;
+                                                                                                                                            cursor: pointer;
+                                                                                                                                                }
 
-                                                                                          #result {
-                                                                                                margin-top: 20px;
-                                                                                                      font-weight: bold;
-                                                                                                          }
-                                                                                                            </style>
-                                                                                                            </head>
+                                                                                                                                                    #message {
+                                                                                                                                                          margin: 20px 0;
+                                                                                                                                                                font-weight: bold;
+                                                                                                                                                                    }
+                                                                                                                                                                      </style>
+                                                                                                                                                                      </head>
 
-                                                                                                            <body>
+                                                                                                                                                                      <body>
 
-                                                                                                              <h2>Accept Quotation</h2>
+                                                                                                                                                                      <div class="box">
 
-                                                                                                                <input
-                                                                                                                    type="text"
-                                                                                                                        id="tracking"
-                                                                                                                            placeholder="Enter Tracking Number"
-                                                                                                                              >
+                                                                                                                                                                        <h1>Accept Quotation</h1>
 
-                                                                                                                                <button onclick="acceptQuote()">Accept Quotation</button>
+                                                                                                                                                                          <p>Tracking Number</p>
+                                                                                                                                                                            <h2 id="tracking">Loading...</h2>
 
-                                                                                                                                  <div id="result"></div>
+                                                                                                                                                                              <p>Quoted Price</p>
+                                                                                                                                                                                <h2 id="price">₹0</h2>
 
-                                                                                                                                    <script>
-                                                                                                                                        const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-                                                                                                                                            const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+                                                                                                                                                                                  <button id="acceptBtn">Accept Quote</button>
 
-                                                                                                                                                const supabaseClient = supabase.createClient(
-                                                                                                                                                      SUPABASE_URL,
-                                                                                                                                                            SUPABASE_PUBLISHABLE_KEY
-                                                                                                                                                                );
+                                                                                                                                                                                    <div id="message"></div>
 
-                                                                                                                                                                    async function acceptQuote() {
+                                                                                                                                                                                    </div>
 
-                                                                                                                                                                          const result = document.getElementById("result");
-                                                                                                                                                                                const tracking = document.getElementById("tracking").value.trim();
+                                                                                                                                                                                    <script>
 
-                                                                                                                                                                                      if (!tracking) {
-                                                                                                                                                                                              result.innerText = "Please enter tracking number.";
-                                                                                                                                                                                                      return;
-                                                                                                                                                                                                            }
+                                                                                                                                                                                    const client = supabaseClient;
 
-                                                                                                                                                                                                                  const { data: userData, error: userError } =
-                                                                                                                                                                                                                          await supabaseClient.auth.getUser();
+                                                                                                                                                                                    let shipmentId = null;
+                                                                                                                                                                                    let trackingNumber = null;
 
-                                                                                                                                                                                                                                if (userError || !userData.user) {
-                                                                                                                                                                                                                                        result.innerText = "Please login first.";
-                                                                                                                                                                                                                                                return;
-                                                                                                                                                                                                                                                      }
+                                                                                                                                                                                    async function loadShipment() {
 
-                                                                                                                                                                                                                                                            const { data: shipment, error: shipmentError } =
-                                                                                                                                                                                                                                                                    await supabaseClient
-                                                                                                                                                                                                                                                                              .from("shipment_requests")
-                                                                                                                                                                                                                                                                                        .select("tracking_number, quoted_price, quote_status")
-                                                                                                                                                                                                                                                                                                  .eq("tracking_number", tracking)
-                                                                                                                                                                                                                                                                                                            .eq("customer_id", userData.user.id)
-                                                                                                                                                                                                                                                                                                                      .single();
+                                                                                                                                                                                      const params = new URLSearchParams(window.location.search);
 
-                                                                                                                                                                                                                                                                                                                            if (shipmentError || !shipment) {
-                                                                                                                                                                                                                                                                                                                                    result.innerText = "Shipment not found.";
-                                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                        trackingNumber = params.get("tracking") || "TRK-000014";
 
-                                                                                                                                                                                                                                                                                                                                                        if (!shipment.quoted_price) {
-                                                                                                                                                                                                                                                                                                                                                                result.innerText = "Quotation is not available yet.";
-                                                                                                                                                                                                                                                                                                                                                                        return;
-                                                                                                                                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                          document.getElementById("tracking").innerText = trackingNumber;
 
-                                                                                                                                                                                                                                                                                                                                                                                    if (shipment.quote_status === "accepted") {
-                                                                                                                                                                                                                                                                                                                                                                                            result.innerText = "Quotation is already accepted.";
-                                                                                                                                                                                                                                                                                                                                                                                                    return;
-                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                            const { data, error } = await client
+                                                                                                                                                                                                .from("shipment_requests")
+                                                                                                                                                                                                    .select("id,tracking_number,quoted_price,quote_status")
+                                                                                                                                                                                                        .eq("tracking_number", trackingNumber)
+                                                                                                                                                                                                            .maybeSingle();
 
-                                                                                                                                                                                                                                                                                                                                                                                                                const { error: updateError } =
-                                                                                                                                                                                                                                                                                                                                                                                                                        await supabaseClient
-                                                                                                                                                                                                                                                                                                                                                                                                                                  .from("shipment_requests")
-                                                                                                                                                                                                                                                                                                                                                                                                                                            .update({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                        quote_status: "accepted"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                  })
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            .eq("tracking_number", tracking)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      .eq("customer_id", userData.user.id);
+                                                                                                                                                                                                              if (error) {
+                                                                                                                                                                                                                  document.getElementById("message").innerText =
+                                                                                                                                                                                                                        "Error: " + error.message;
+                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                              }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            if (updateError) {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    result.innerText = "Error: " + updateError.message;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                if (!data) {
+                                                                                                                                                                                                                                    document.getElementById("message").innerText =
+                                                                                                                                                                                                                                          "Shipment not found.";
+                                                                                                                                                                                                                                              return;
+                                                                                                                                                                                                                                                }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        result.innerText = "Quotation accepted successfully!";
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </script>
+                                                                                                                                                                                                                                                  shipmentId = data.id;
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </body>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </html>
+                                                                                                                                                                                                                                                    document.getElementById("price").innerText =
+                                                                                                                                                                                                                                                        data.quoted_price
+                                                                                                                                                                                                                                                              ? "₹" + Number(data.quoted_price).toLocaleString("en-IN")
+                                                                                                                                                                                                                                                                    : "Price not available";
+
+                                                                                                                                                                                                                                                                      if (data.quote_status === "accepted") {
+                                                                                                                                                                                                                                                                          document.getElementById("message").innerText =
+                                                                                                                                                                                                                                                                                "Quotation already accepted.";
+
+                                                                                                                                                                                                                                                                                    document.getElementById("acceptBtn").innerText =
+                                                                                                                                                                                                                                                                                          "Proceed to Payment";
+                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                            }
+
+
+                                                                                                                                                                                                                                                                                            document.getElementById("acceptBtn").onclick = async function() {
+
+                                                                                                                                                                                                                                                                                              const button = document.getElementById("acceptBtn");
+                                                                                                                                                                                                                                                                                                const message = document.getElementById("message");
+
+                                                                                                                                                                                                                                                                                                  button.disabled = true;
+                                                                                                                                                                                                                                                                                                    button.innerText = "Processing...";
+                                                                                                                                                                                                                                                                                                      message.innerText = "";
+
+                                                                                                                                                                                                                                                                                                        if (!shipmentId) {
+                                                                                                                                                                                                                                                                                                            message.innerText = "Shipment not loaded.";
+                                                                                                                                                                                                                                                                                                                button.disabled = false;
+                                                                                                                                                                                                                                                                                                                    return;
+                                                                                                                                                                                                                                                                                                                      }
+
+                                                                                                                                                                                                                                                                                                                        const { error } = await client
+                                                                                                                                                                                                                                                                                                                            .from("shipment_requests")
+                                                                                                                                                                                                                                                                                                                                .update({
+                                                                                                                                                                                                                                                                                                                                      quote_status: "accepted"
+                                                                                                                                                                                                                                                                                                                                          })
+                                                                                                                                                                                                                                                                                                                                              .eq("id", shipmentId);
+
+                                                                                                                                                                                                                                                                                                                                                if (error) {
+                                                                                                                                                                                                                                                                                                                                                    message.innerText =
+                                                                                                                                                                                                                                                                                                                                                          "Could not accept quote: " + error.message;
+
+                                                                                                                                                                                                                                                                                                                                                              button.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                  button.innerText = "Accept Quote";
+                                                                                                                                                                                                                                                                                                                                                                      return;
+                                                                                                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                                                                                                          message.innerText = "Quotation accepted successfully!";
+
+                                                                                                                                                                                                                                                                                                                                                                            setTimeout(function() {
+
+                                                                                                                                                                                                                                                                                                                                                                                window.location.href =
+                                                                                                                                                                                                                                                                                                                                                                                      "payment.html?tracking=" +
+                                                                                                                                                                                                                                                                                                                                                                                            encodeURIComponent(trackingNumber);
+
+                                                                                                                                                                                                                                                                                                                                                                                              }, 800);
+
+                                                                                                                                                                                                                                                                                                                                                                                              };
+
+
+                                                                                                                                                                                                                                                                                                                                                                                              loadShipment();
+
+                                                                                                                                                                                                                                                                                                                                                                                              </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                              </body>
+                                                                                                                                                                                                                                                                                                                                                                                              </html>
