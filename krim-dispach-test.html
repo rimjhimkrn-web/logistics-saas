@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>KRIM Dispatch Test</title>
+      <title>KRIM Dispatch Engine Test</title>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         </head>
@@ -14,109 +14,141 @@
 
             <p id="status">Checking login...</p>
 
-              <button id="dispatchBtn" disabled>
-                  Test Dispatch Shipment 1
+              <button id="inspectBtn" disabled>
+                  Inspect Shipment 1
                     </button>
 
-                      <pre id="result"></pre>
+                      <button id="dispatchBtn" disabled>
+                          Test Dispatch Shipment 1
+                            </button>
 
-                      <script>
+                              <pre id="result"></pre>
 
-                      const SUPABASE_URL =
-                      "https://ebltviniygljwwseplph.supabase.co";
+                              <script>
 
-                      const SUPABASE_KEY =
-                      "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+                              const SUPABASE_URL =
+                              "https://ebltviniygljwwseplph.supabase.co";
 
-                      const supabaseClient =
-                      supabase.createClient(
-                        SUPABASE_URL,
-                          SUPABASE_KEY
-                          );
+                              const SUPABASE_KEY =
+                              "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
-                          const status =
-                          document.getElementById("status");
+                              const supabaseClient =
+                              supabase.createClient(
+                                SUPABASE_URL,
+                                  SUPABASE_KEY
+                                  );
 
-                          const button =
-                          document.getElementById("dispatchBtn");
+                                  const status =
+                                  document.getElementById("status");
 
-                          const result =
-                          document.getElementById("result");
+                                  const inspectBtn =
+                                  document.getElementById("inspectBtn");
 
+                                  const dispatchBtn =
+                                  document.getElementById("dispatchBtn");
 
-                          async function start() {
-
-                            const { data, error } =
-                                await supabaseClient.auth.getSession();
-
-                                  if (error) {
-
-                                      status.textContent =
-                                            "Login error: " + error.message;
-
-                                                return;
-                                                  }
-
-                                                    if (!data.session) {
-
-                                                        status.textContent =
-                                                              "❌ Please login to KRIM first.";
-
-                                                                  return;
-                                                                    }
-
-                                                                      status.textContent =
-                                                                          "✅ Logged in: " +
-                                                                              data.session.user.email;
-
-                                                                                button.disabled = false;
-                                                                                }
+                                  const result =
+                                  document.getElementById("result");
 
 
-                                                                                button.onclick = async function () {
+                                  async function start() {
 
-                                                                                  button.disabled = true;
+                                    const { data, error } =
+                                        await supabaseClient.auth.getSession();
 
-                                                                                    result.textContent =
-                                                                                        "Running dispatch operation...";
+                                          if (error) {
+                                              status.textContent =
+                                                    "Login error: " + error.message;
+                                                        return;
+                                                          }
 
-                                                                                          const { data, error } =
-                                                                                              await supabaseClient.rpc(
-                                                                                                    "krim_dispatch_shipment",
-                                                                                                          {
-                                                                                                                  p_shipment_id: 1,
-                                                                                                                          p_notes:
-                                                                                                                                    "Controlled dispatch execution test",
-                                                                                                                                            p_metadata: {}
-                                                                                                                                                  }
-                                                                                                                                                      );
+                                                            if (!data.session) {
+                                                                status.textContent =
+                                                                      "❌ Please login to KRIM first.";
+                                                                          return;
+                                                                            }
 
+                                                                              status.textContent =
+                                                                                  "✅ Logged in: " +
+                                                                                      data.session.user.email;
 
-                                                                                                                                                        if (error) {
-
-                                                                                                                                                            result.textContent =
-                                                                                                                                                                  "❌ FAILED\n\n" +
-                                                                                                                                                                        error.message;
-
-                                                                                                                                                                            button.disabled = false;
-
-                                                                                                                                                                                return;
-                                                                                                                                                                                  }
+                                                                                        inspectBtn.disabled = false;
+                                                                                          dispatchBtn.disabled = false;
+                                                                                          }
 
 
-                                                                                                                                                                                    result.textContent =
-                                                                                                                                                                                        "✅ SUCCESS\n\n" +
-                                                                                                                                                                                            "Shipment number:\n" +
-                                                                                                                                                                                                data.shipment_number +
-                                                                                                                                                                                                    "\n\n" +
-                                                                                                                                                                                                        "Shipment status:\n" +
-                                                                                                                                                                                                            data.status;
-                                                                                                                                                                                                            };
+                                                                                          inspectBtn.onclick = async function () {
+
+                                                                                            inspectBtn.disabled = true;
+
+                                                                                              result.textContent =
+                                                                                                  "Inspecting shipment...";
+
+                                                                                                    const { data, error } =
+                                                                                                        await supabaseClient
+                                                                                                              .from("krim_shipments")
+                                                                                                                    .select(
+                                                                                                                            "id,shipment_number,status,customer_organization_id"
+                                                                                                                                  )
+                                                                                                                                        .eq("id", 1)
+                                                                                                                                              .single();
+
+                                                                                                                                                if (error) {
+
+                                                                                                                                                    result.textContent =
+                                                                                                                                                          "❌ INSPECTION FAILED\n\n" +
+                                                                                                                                                                error.message;
+
+                                                                                                                                                                    inspectBtn.disabled = false;
+                                                                                                                                                                        return;
+                                                                                                                                                                          }
+
+                                                                                                                                                                            result.textContent =
+                                                                                                                                                                                "SHIPMENT STATE\n\n" +
+                                                                                                                                                                                    JSON.stringify(data, null, 2);
+
+                                                                                                                                                                                      inspectBtn.disabled = false;
+                                                                                                                                                                                      };
 
 
-                                                                                                                                                                                                            start();
+                                                                                                                                                                                      dispatchBtn.onclick = async function () {
 
-                                                                                                                                                                                                            </script>
+                                                                                                                                                                                        dispatchBtn.disabled = true;
 
-                                                                                                                                                                                                            </body>
-                                                                                                                                                                                                            </html>
+                                                                                                                                                                                          result.textContent =
+                                                                                                                                                                                              "Running dispatch operation...";
+
+                                                                                                                                                                                                const { data, error } =
+                                                                                                                                                                                                    await supabaseClient.rpc(
+                                                                                                                                                                                                          "krim_dispatch_shipment",
+                                                                                                                                                                                                                {
+                                                                                                                                                                                                                        p_shipment_id: 1,
+                                                                                                                                                                                                                                p_notes:
+                                                                                                                                                                                                                                          "Controlled dispatch execution test",
+                                                                                                                                                                                                                                                  p_metadata: {}
+                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                            );
+
+                                                                                                                                                                                                                                                              if (error) {
+
+                                                                                                                                                                                                                                                                  result.textContent =
+                                                                                                                                                                                                                                                                        "❌ DISPATCH FAILED\n\n" +
+                                                                                                                                                                                                                                                                              error.message;
+
+                                                                                                                                                                                                                                                                                  dispatchBtn.disabled = false;
+                                                                                                                                                                                                                                                                                      return;
+                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                          result.textContent =
+                                                                                                                                                                                                                                                                                              "✅ DISPATCH SUCCESS\n\n" +
+                                                                                                                                                                                                                                                                                                  JSON.stringify(data, null, 2);
+
+                                                                                                                                                                                                                                                                                                  };
+
+
+                                                                                                                                                                                                                                                                                                  start();
+
+                                                                                                                                                                                                                                                                                                  </script>
+
+                                                                                                                                                                                                                                                                                                  </body>
+                                                                                                                                                                                                                                                                                                  </html>
