@@ -29,102 +29,118 @@
                                                                                                       word-break: break-word;
                                                                                                           }
 
-                                                                                                              .success { color: green; }
-                                                                                                                  .error { color: red; }
-                                                                                                                    </style>
-                                                                                                                    </head>
+                                                                                                              .success {
+                                                                                                                    color: green;
+                                                                                                                        }
 
-                                                                                                                    <body>
+                                                                                                                            .error {
+                                                                                                                                  color: red;
+                                                                                                                                      }
+                                                                                                                                        </style>
+                                                                                                                                        </head>
 
-                                                                                                                    <h2>KRIM Lifecycle Diagnostic</h2>
+                                                                                                                                        <body>
 
-                                                                                                                    <div id="login">Checking login...</div>
+                                                                                                                                        <h2>KRIM Lifecycle Diagnostic</h2>
 
-                                                                                                                    <button id="testBtn">Test Dispatched → In Transit</button>
+                                                                                                                                        <div id="login">Checking login...</div>
 
-                                                                                                                    <pre id="result">Ready...</pre>
+                                                                                                                                        <button id="testBtn">
+                                                                                                                                          Test In Transit → Delivered
+                                                                                                                                          </button>
 
-                                                                                                                    <script>
-                                                                                                                    const SUPABASE_URL =
-                                                                                                                      "https://ebltviniygljwwseplph.supabase.co";
+                                                                                                                                          <pre id="result">Ready...</pre>
 
-                                                                                                                      const SUPABASE_KEY =
-                                                                                                                        "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+                                                                                                                                          <script>
+                                                                                                                                          const SUPABASE_URL =
+                                                                                                                                            "https://ebltviniygljwwseplph.supabase.co";
 
-                                                                                                                        const supabaseClient =
-                                                                                                                          supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                                                                                                                                            const SUPABASE_KEY =
+                                                                                                                                              "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
-                                                                                                                          const loginEl = document.getElementById("login");
-                                                                                                                          const resultEl = document.getElementById("result");
-                                                                                                                          const testBtn = document.getElementById("testBtn");
+                                                                                                                                              const supabaseClient =
+                                                                                                                                                supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                                                                                                                          async function checkLogin() {
-                                                                                                                            const {
-                                                                                                                                data: { user },
-                                                                                                                                    error
-                                                                                                                                      } = await supabaseClient.auth.getUser();
+                                                                                                                                                const loginEl =
+                                                                                                                                                  document.getElementById("login");
 
-                                                                                                                                        if (error || !user) {
-                                                                                                                                            loginEl.innerHTML =
-                                                                                                                                                  '<span class="error">❌ Not logged in</span>';
-                                                                                                                                                      testBtn.disabled = true;
-                                                                                                                                                          return;
-                                                                                                                                                            }
+                                                                                                                                                  const resultEl =
+                                                                                                                                                    document.getElementById("result");
 
-                                                                                                                                                              loginEl.innerHTML =
-                                                                                                                                                                  '<span class="success">✅ Logged in: ' +
-                                                                                                                                                                      user.email +
-                                                                                                                                                                          '</span>';
-                                                                                                                                                                          }
+                                                                                                                                                    const testBtn =
+                                                                                                                                                      document.getElementById("testBtn");
 
-                                                                                                                                                                          testBtn.onclick = async function () {
+                                                                                                                                                      async function checkLogin() {
 
-                                                                                                                                                                            resultEl.textContent =
-                                                                                                                                                                                "Testing dispatched → in_transit...";
+                                                                                                                                                        const {
+                                                                                                                                                            data: { user },
+                                                                                                                                                                error
+                                                                                                                                                                  } = await supabaseClient.auth.getUser();
+
+                                                                                                                                                                    if (error || !user) {
+
+                                                                                                                                                                        loginEl.innerHTML =
+                                                                                                                                                                              '<span class="error">❌ Not logged in</span>';
 
                                                                                                                                                                                   testBtn.disabled = true;
 
-                                                                                                                                                                                    try {
+                                                                                                                                                                                      return;
+                                                                                                                                                                                        }
 
-                                                                                                                                                                                        const { data, error } =
-                                                                                                                                                                                              await supabaseClient.rpc(
-                                                                                                                                                                                                      "krim_transition_shipment",
-                                                                                                                                                                                                              {
-                                                                                                                                                                                                                        p_shipment_id: 1,
-                                                                                                                                                                                                                                  p_to_status: "in_transit",
-                                                                                                                                                                                                                                            p_reason: "Shipment entered transit",
-                                                                                                                                                                                                                                                      p_metadata: {}
-                                                                                                                                                                                                                                                              }
-                                                                                                                                                                                                                                                                    );
+                                                                                                                                                                                          loginEl.innerHTML =
+                                                                                                                                                                                              '<span class="success">✅ Logged in: ' +
+                                                                                                                                                                                                  user.email +
+                                                                                                                                                                                                      '</span>';
+                                                                                                                                                                                                      }
 
-                                                                                                                                                                                                                                                                        if (error) {
+                                                                                                                                                                                                      testBtn.onclick = async function () {
 
-                                                                                                                                                                                                                                                                              resultEl.innerHTML =
-                                                                                                                                                                                                                                                                                      "❌ DATABASE ERROR\n\n" +
-                                                                                                                                                                                                                                                                                              "Message: " + (error.message || "") + "\n\n" +
-                                                                                                                                                                                                                                                                                                      "Code: " + (error.code || "") + "\n\n" +
-                                                                                                                                                                                                                                                                                                              "Details: " + (error.details || "") + "\n\n" +
-                                                                                                                                                                                                                                                                                                                      "Hint: " + (error.hint || "");
+                                                                                                                                                                                                        resultEl.textContent =
+                                                                                                                                                                                                            "Testing in_transit → delivered...";
 
-                                                                                                                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                              testBtn.disabled = true;
 
-                                                                                                                                                                                                                                                                                                                                    resultEl.innerHTML =
-                                                                                                                                                                                                                                                                                                                                          "✅ SUCCESS\n\n" +
-                                                                                                                                                                                                                                                                                                                                                JSON.stringify(data, null, 2);
+                                                                                                                                                                                                                try {
 
-                                                                                                                                                                                                                                                                                                                                                  } catch (err) {
+                                                                                                                                                                                                                    const { data, error } =
+                                                                                                                                                                                                                          await supabaseClient.rpc(
+                                                                                                                                                                                                                                  "krim_transition_shipment",
+                                                                                                                                                                                                                                          {
+                                                                                                                                                                                                                                                    p_shipment_id: 1,
+                                                                                                                                                                                                                                                              p_to_status: "delivered",
+                                                                                                                                                                                                                                                                        p_reason: "Shipment delivered",
+                                                                                                                                                                                                                                                                                  p_metadata: {}
+                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                );
 
-                                                                                                                                                                                                                                                                                                                                                      resultEl.innerHTML =
-                                                                                                                                                                                                                                                                                                                                                            "❌ JAVASCRIPT ERROR\n\n" +
-                                                                                                                                                                                                                                                                                                                                                                  err.message;
-                                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                    if (error) {
 
-                                                                                                                                                                                                                                                                                                                                                                      testBtn.disabled = false;
-                                                                                                                                                                                                                                                                                                                                                                      };
+                                                                                                                                                                                                                                                                                                          resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                                                  "❌ DATABASE ERROR\n\n" +
+                                                                                                                                                                                                                                                                                                                          "Message: " + (error.message || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                                                  "Code: " + (error.code || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                                                          "Details: " + (error.details || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                                                                  "Hint: " + (error.hint || "");
 
-                                                                                                                                                                                                                                                                                                                                                                      checkLogin();
-                                                                                                                                                                                                                                                                                                                                                                      </script>
+                                                                                                                                                                                                                                                                                                                                                        return;
+                                                                                                                                                                                                                                                                                                                                                            }
 
-                                                                                                                                                                                                                                                                                                                                                                      </body>
-                                                                                                                                                                                                                                                                                                                                                                      </html>
+                                                                                                                                                                                                                                                                                                                                                                resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                                                                                                      "✅ SUCCESS\n\n" +
+                                                                                                                                                                                                                                                                                                                                                                            JSON.stringify(data, null, 2);
+
+                                                                                                                                                                                                                                                                                                                                                                              } catch (err) {
+
+                                                                                                                                                                                                                                                                                                                                                                                  resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                                                                                                                        "❌ JAVASCRIPT ERROR\n\n" +
+                                                                                                                                                                                                                                                                                                                                                                                              err.message;
+                                                                                                                                                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                                                                                                                                                  testBtn.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                                                  };
+
+                                                                                                                                                                                                                                                                                                                                                                                                  checkLogin();
+                                                                                                                                                                                                                                                                                                                                                                                                  </script>
+
+                                                                                                                                                                                                                                                                                                                                                                                                  </body>
+                                                                                                                                                                                                                                                                                                                                                                                                  </html>
