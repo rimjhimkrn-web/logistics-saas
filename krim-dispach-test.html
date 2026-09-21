@@ -3,123 +3,128 @@
 <head>
   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>KRIM Dispatch Diagnostic</title>
+      <title>KRIM Lifecycle Diagnostic</title>
+
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        </head>
 
-        <body>
+          <style>
+              body {
+                    font-family: Arial, sans-serif;
+                          max-width: 700px;
+                                margin: 30px auto;
+                                      padding: 20px;
+                                          }
 
-        <h2>KRIM Dispatch Diagnostic</h2>
+                                              button {
+                                                    padding: 14px 18px;
+                                                          margin: 8px 0;
+                                                                width: 100%;
+                                                                      cursor: pointer;
+                                                                          }
 
-        <p id="status">Checking login...</p>
+                                                                              pre {
+                                                                                    background: #f4f4f4;
+                                                                                          padding: 15px;
+                                                                                                white-space: pre-wrap;
+                                                                                                      word-break: break-word;
+                                                                                                          }
 
-        <button id="testBtn" disabled>
-          Test Assigned → Dispatched
-          </button>
+                                                                                                              .success { color: green; }
+                                                                                                                  .error { color: red; }
+                                                                                                                    </style>
+                                                                                                                    </head>
 
-          <pre id="result"></pre>
+                                                                                                                    <body>
 
-          <script>
+                                                                                                                    <h2>KRIM Lifecycle Diagnostic</h2>
 
-          const SUPABASE_URL =
-          "https://ebltviniygljwwseplph.supabase.co";
+                                                                                                                    <div id="login">Checking login...</div>
 
-          const SUPABASE_KEY =
-          "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+                                                                                                                    <button id="testBtn">Test Dispatched → In Transit</button>
 
-          const supabaseClient =
-          supabase.createClient(
-            SUPABASE_URL,
-              SUPABASE_KEY
-              );
+                                                                                                                    <pre id="result">Ready...</pre>
 
-              const status =
-              document.getElementById("status");
+                                                                                                                    <script>
+                                                                                                                    const SUPABASE_URL =
+                                                                                                                      "https://ebltviniygljwwseplph.supabase.co";
 
-              const button =
-              document.getElementById("testBtn");
+                                                                                                                      const SUPABASE_KEY =
+                                                                                                                        "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
-              const result =
-              document.getElementById("result");
+                                                                                                                        const supabaseClient =
+                                                                                                                          supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+                                                                                                                          const loginEl = document.getElementById("login");
+                                                                                                                          const resultEl = document.getElementById("result");
+                                                                                                                          const testBtn = document.getElementById("testBtn");
 
-              async function start() {
+                                                                                                                          async function checkLogin() {
+                                                                                                                            const {
+                                                                                                                                data: { user },
+                                                                                                                                    error
+                                                                                                                                      } = await supabaseClient.auth.getUser();
 
-                const { data, error } =
-                    await supabaseClient.auth.getSession();
+                                                                                                                                        if (error || !user) {
+                                                                                                                                            loginEl.innerHTML =
+                                                                                                                                                  '<span class="error">❌ Not logged in</span>';
+                                                                                                                                                      testBtn.disabled = true;
+                                                                                                                                                          return;
+                                                                                                                                                            }
 
-                      if (error) {
-                          status.textContent =
-                                "Login error: " + error.message;
-                                    return;
-                                      }
+                                                                                                                                                              loginEl.innerHTML =
+                                                                                                                                                                  '<span class="success">✅ Logged in: ' +
+                                                                                                                                                                      user.email +
+                                                                                                                                                                          '</span>';
+                                                                                                                                                                          }
 
-                                        if (!data.session) {
-                                            status.textContent =
-                                                  "❌ Please login to KRIM first.";
-                                                      return;
-                                                        }
+                                                                                                                                                                          testBtn.onclick = async function () {
 
-                                                          status.textContent =
-                                                              "✅ Logged in: " +
-                                                                  data.session.user.email;
+                                                                                                                                                                            resultEl.textContent =
+                                                                                                                                                                                "Testing dispatched → in_transit...";
 
-                                                                    button.disabled = false;
-                                                                    }
+                                                                                                                                                                                  testBtn.disabled = true;
 
+                                                                                                                                                                                    try {
 
-                                                                    button.onclick = async function () {
+                                                                                                                                                                                        const { data, error } =
+                                                                                                                                                                                              await supabaseClient.rpc(
+                                                                                                                                                                                                      "krim_transition_shipment",
+                                                                                                                                                                                                              {
+                                                                                                                                                                                                                        p_shipment_id: 1,
+                                                                                                                                                                                                                                  p_to_status: "in_transit",
+                                                                                                                                                                                                                                            p_reason: "Shipment entered transit",
+                                                                                                                                                                                                                                                      p_metadata: {}
+                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                    );
 
-                                                                      button.disabled = true;
+                                                                                                                                                                                                                                                                        if (error) {
 
-                                                                        result.textContent =
-                                                                            "Testing direct shipment transition...";
+                                                                                                                                                                                                                                                                              resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                      "❌ DATABASE ERROR\n\n" +
+                                                                                                                                                                                                                                                                                              "Message: " + (error.message || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                      "Code: " + (error.code || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                              "Details: " + (error.details || "") + "\n\n" +
+                                                                                                                                                                                                                                                                                                                      "Hint: " + (error.hint || "");
 
-                                                                              try {
+                                                                                                                                                                                                                                                                                                                            return;
+                                                                                                                                                                                                                                                                                                                                }
 
-                                                                                  const { data, error } =
-                                                                                        await supabaseClient.rpc(
-                                                                                                "krim_transition_shipment",
-                                                                                                        {
-                                                                                                                  p_shipment_id: 1,
-                                                                                                                            p_to_status: "dispatched",
-                                                                                                                                      p_reason: "Direct dispatch diagnostic",
-                                                                                                                                                p_metadata: {}
-                                                                                                                                                        }
-                                                                                                                                                              );
+                                                                                                                                                                                                                                                                                                                                    resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                                                                          "✅ SUCCESS\n\n" +
+                                                                                                                                                                                                                                                                                                                                                JSON.stringify(data, null, 2);
 
-                                                                                                                                                                  if (error) {
+                                                                                                                                                                                                                                                                                                                                                  } catch (err) {
 
-                                                                                                                                                                        result.textContent =
-                                                                                                                                                                                "❌ DATABASE ERROR\n\n" +
-                                                                                                                                                                                        "Message: " + error.message +
-                                                                                                                                                                                                "\n\nCode: " + (error.code || "N/A") +
-                                                                                                                                                                                                        "\n\nDetails: " + (error.details || "N/A") +
-                                                                                                                                                                                                                "\n\nHint: " + (error.hint || "N/A");
+                                                                                                                                                                                                                                                                                                                                                      resultEl.innerHTML =
+                                                                                                                                                                                                                                                                                                                                                            "❌ JAVASCRIPT ERROR\n\n" +
+                                                                                                                                                                                                                                                                                                                                                                  err.message;
+                                                                                                                                                                                                                                                                                                                                                                    }
 
-                                                                                                                                                                                                                      button.disabled = false;
-                                                                                                                                                                                                                            return;
-                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                      testBtn.disabled = false;
+                                                                                                                                                                                                                                                                                                                                                                      };
 
-                                                                                                                                                                                                                                    result.textContent =
-                                                                                                                                                                                                                                          "✅ SUCCESS\n\n" +
-                                                                                                                                                                                                                                                JSON.stringify(data, null, 2);
+                                                                                                                                                                                                                                                                                                                                                                      checkLogin();
+                                                                                                                                                                                                                                                                                                                                                                      </script>
 
-                                                                                                                                                                                                                                                  } catch (e) {
-
-                                                                                                                                                                                                                                                      result.textContent =
-                                                                                                                                                                                                                                                            "❌ REQUEST ERROR\n\n" +
-                                                                                                                                                                                                                                                                  e.name + "\n\n" +
-                                                                                                                                                                                                                                                                        e.message;
-
-                                                                                                                                                                                                                                                                            button.disabled = false;
-                                                                                                                                                                                                                                                                              }
-                                                                                                                                                                                                                                                                              };
-
-
-                                                                                                                                                                                                                                                                              start();
-
-                                                                                                                                                                                                                                                                              </script>
-
-                                                                                                                                                                                                                                                                              </body>
-                                                                                                                                                                                                                                                                              </html>
+                                                                                                                                                                                                                                                                                                                                                                      </body>
+                                                                                                                                                                                                                                                                                                                                                                      </html>
