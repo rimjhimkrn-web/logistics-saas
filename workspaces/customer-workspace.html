@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="robots" content="noindex,nofollow">
+
+<title>Customer Command Centre | KRIM Logistics</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    background:#f5f7fb;
+    color:#172033;
+}
+
+body{
+    font-size:14px;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button,
+input,
+select{
+    font:inherit;
+}
+
+:root{
+    --krim-blue:#0b5cff;
+    --krim-blue-dark:#0848cc;
+    --krim-navy:#10213f;
+    --krim-text:#172033;
+    --krim-muted:#68758a;
+    --krim-line:#dfe5ee;
+    --krim-soft:#f7f9fc;
+    --krim-white:#ffffff;
+    --krim-green:#16834b;
+    --krim-red:#c9363e;
+    --krim-orange:#b86b00;
+    --header-height:68px;
+    --sidebar-width:250px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.krim-header{
+    position:fixed;
+    z-index:1000;
+    top:0;
+    left:0;
+    right:0;
+    height:var(--header-height);
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:0 20px;
+    background:#fff;
+    border-bottom:1px solid var(--krim-line);
+}
+
+.krim-menu-button{
+    display:none;
+    width:40px;
+    height:40px;
+    border:1px solid var(--krim-line);
+    border-radius:9px;
+    background:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.krim-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:230px;
+}
+
+.krim-logo{
+    width:38px;
+    height:38px;
+    display:grid;
+    place-items:center;
+    border-radius:9px;
+    background:var(--krim-blue);
+    color:#fff;
+    font-weight:900;
+    font-size:19px;
+}
+
+.krim-brand-name{
+    font-size:17px;
+    font-weight:850;
+    line-height:1;
+}
+
+.krim-brand-subtitle{
+    display:block;
+    margin-top:4px;
+    color:#8994a5;
+    font-size:7px;
+    font-weight:700;
+    letter-spacing:.09em;
+}
+
+.krim-global-search{
+    width:min(430px,38vw);
+}
+
+.krim-global-search input{
+    width:100%;
+    height:38px;
+    padding:0 13px;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+    outline:none;
+    background:#f8fafc;
+    color:var(--krim-text);
+    font-size:11px;
+}
+
+.krim-global-search input:focus{
+    border-color:var(--krim-blue);
+    background:#fff;
+}
+
+.krim-header-space{
+    flex:1;
+}
+
+.krim-header-actions{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.krim-header-button{
+    position:relative;
+    width:38px;
+    height:38px;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+    background:#fff;
+    cursor:pointer;
+    color:#536074;
+}
+
+.krim-notification-dot{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#e83d47;
+}
+
+.krim-user-button{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:38px;
+    padding:3px 9px 3px 4px;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+    background:#fff;
+    cursor:pointer;
+}
+
+.krim-avatar{
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:#eaf1ff;
+    color:var(--krim-blue);
+    font-size:10px;
+    font-weight:850;
+}
+
+.krim-user-label{
+    max-width:120px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:10px;
+    font-weight:750;
+}
+
+.krim-chevron{
+    font-size:9px;
+    color:#8994a5;
+}
+
+/* =========================================================
+   DROPDOWNS
+========================================================= */
+
+.krim-menu-wrapper{
+    position:relative;
+}
+
+.krim-dropdown{
+    position:absolute;
+    z-index:1200;
+    top:calc(100% + 8px);
+    right:0;
+    width:235px;
+    padding:7px;
+    background:#fff;
+    border:1px solid var(--krim-line);
+    border-radius:11px;
+    box-shadow:0 15px 40px rgba(20,35,60,.14);
+    display:none;
+}
+
+.krim-dropdown.open{
+    display:block;
+}
+
+.krim-dropdown-title{
+    padding:9px 10px;
+    color:#8a95a6;
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+}
+
+.krim-dropdown-item{
+    width:100%;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 10px;
+    border:0;
+    border-radius:7px;
+    background:#fff;
+    cursor:pointer;
+    text-align:left;
+    color:#4f5d72;
+    font-size:10px;
+}
+
+.krim-dropdown-item:hover{
+    background:#f1f5ff;
+    color:var(--krim-blue);
+}
+
+.krim-dropdown-item.active{
+    background:#eaf1ff;
+    color:var(--krim-blue);
+    font-weight:750;
+}
+
+.krim-dropdown-divider{
+    height:1px;
+    margin:6px 0;
+    background:#edf0f4;
+}
+
+.krim-signout{
+    color:#c9363e;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.krim-sidebar{
+    position:fixed;
+    z-index:900;
+    top:var(--header-height);
+    left:0;
+    bottom:0;
+    width:var(--sidebar-width);
+    overflow-y:auto;
+    padding:17px 11px;
+    background:#fff;
+    border-right:1px solid var(--krim-line);
+}
+
+.krim-sidebar-section{
+    margin-bottom:20px;
+}
+
+.krim-sidebar-title{
+    padding:0 10px 7px;
+    color:#8a95a6;
+    font-size:8px;
+    font-weight:850;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+}
+
+.krim-nav-link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:39px;
+    padding:0 10px;
+    border-radius:8px;
+    color:#526077;
+    font-size:10px;
+    font-weight:650;
+}
+
+.krim-nav-link:hover{
+    background:#f1f5ff;
+    color:var(--krim-blue);
+}
+
+.krim-nav-link.active{
+    background:#eaf1ff;
+    color:var(--krim-blue);
+    font-weight:800;
+}
+
+.krim-nav-icon{
+    width:17px;
+    text-align:center;
+    font-size:12px;
+}
+
+.krim-nav-arrow{
+    margin-left:auto;
+    color:#a0aaba;
+    font-size:10px;
+}
+
+.krim-nav-alert{
+    margin-left:auto;
+    min-width:17px;
+    height:17px;
+    padding:0 5px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:#e83d47;
+    color:#fff;
+    font-size:7px;
+    font-weight:800;
+}
+
+/* =========================================================
+   MOBILE DRAWER
+========================================================= */
+
+.krim-overlay{
+    display:none;
+}
+
+.krim-mobile-account{
+    display:none;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.krim-main{
+    min-height:100vh;
+    margin-left:var(--sidebar-width);
+    padding-top:var(--header-height);
+}
+
+.krim-content{
+    width:100%;
+    max-width:1600px;
+    margin:0 auto;
+    padding:27px;
+}
+
+.krim-breadcrumb{
+    margin-bottom:10px;
+    color:#8b96a7;
+    font-size:9px;
+}
+
+.krim-hero{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.krim-eyebrow{
+    margin-bottom:6px;
+    color:var(--krim-blue);
+    font-size:9px;
+    font-weight:850;
+    letter-spacing:.1em;
+}
+
+.krim-hero h1{
+    margin:0;
+    color:var(--krim-navy);
+    font-size:clamp(27px,3vw,39px);
+    line-height:1.1;
+    letter-spacing:-.035em;
+}
+
+.krim-hero p{
+    max-width:720px;
+    margin:9px 0 0;
+    color:var(--krim-muted);
+    font-size:11px;
+    line-height:1.55;
+}
+
+.krim-hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+}
+
+.krim-button{
+    min-height:38px;
+    padding:0 13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+    font-size:9px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.krim-button-primary{
+    border-color:var(--krim-blue);
+    background:var(--krim-blue);
+    color:#fff;
+}
+
+.krim-button-primary:hover{
+    background:var(--krim-blue-dark);
+}
+
+.krim-button-secondary{
+    background:#fff;
+    color:#4f5d72;
+}
+
+.krim-button-secondary:hover{
+    border-color:var(--krim-blue);
+    color:var(--krim-blue);
+}
+
+/* =========================================================
+   GLOBAL CONTEXT
+========================================================= */
+
+.krim-context{
+    display:grid;
+    grid-template-columns:1.8fr repeat(4,1fr);
+    gap:1px;
+    margin-bottom:16px;
+    overflow:hidden;
+    border:1px solid var(--krim-line);
+    border-radius:10px;
+    background:var(--krim-line);
+}
+
+.krim-context-item{
+    min-height:64px;
+    padding:11px 14px;
+    background:#fff;
+}
+
+.krim-context-label{
+    display:block;
+    color:#8994a5;
+    font-size:7px;
+    font-weight:850;
+    text-transform:uppercase;
+}
+
+.krim-context-value{
+    display:block;
+    margin-top:6px;
+    color:var(--krim-text);
+    font-size:10px;
+    font-weight:750;
+}
+
+/* =========================================================
+   KPI
+========================================================= */
+
+.krim-kpis{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:9px;
+    margin-bottom:16px;
+}
+
+.krim-kpi{
+    padding:14px;
+    background:#fff;
+    border:1px solid var(--krim-line);
+    border-radius:10px;
+}
+
+.krim-kpi-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.krim-kpi-label{
+    color:#7e899b;
+    font-size:8px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.krim-kpi-icon{
+    width:26px;
+    height:26px;
+    display:grid;
+    place-items:center;
+    border-radius:7px;
+    background:#edf3ff;
+    color:var(--krim-blue);
+    font-size:11px;
+}
+
+.krim-kpi-value{
+    margin-top:10px;
+    color:var(--krim-navy);
+    font-size:22px;
+    font-weight:850;
+}
+
+.krim-kpi-note{
+    margin-top:3px;
+    color:#8994a5;
+    font-size:8px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.krim-grid{
+    display:grid;
+    grid-template-columns:1.65fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+}
+
+.krim-panel{
+    overflow:hidden;
+    background:#fff;
+    border:1px solid var(--krim-line);
+    border-radius:10px;
+}
+
+.krim-panel-header{
+    min-height:57px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:0 15px;
+    border-bottom:1px solid #edf0f4;
+}
+
+.krim-panel-title{
+    color:var(--krim-navy);
+    font-size:11px;
+    font-weight:850;
+}
+
+.krim-panel-subtitle{
+    display:block;
+    margin-top:3px;
+    color:#8a95a6;
+    font-size:8px;
+    font-weight:500;
+}
+
+.krim-panel-link{
+    color:var(--krim-blue);
+    font-size:8px;
+    font-weight:800;
+}
+
+.krim-panel-body{
+    padding:14px;
+}
+
+/* =========================================================
+   SEARCH / TABLE
+========================================================= */
+
+.krim-toolbar{
+    display:flex;
+    gap:7px;
+    margin-bottom:11px;
+}
+
+.krim-toolbar input,
+.krim-toolbar select{
+    height:35px;
+    border:1px solid var(--krim-line);
+    border-radius:7px;
+    background:#fff;
+    color:#536074;
+    outline:none;
+    font-size:9px;
+}
+
+.krim-toolbar input{
+    flex:1;
+    padding:0 10px;
+}
+
+.krim-toolbar select{
+    padding:0 8px;
+}
+
+.krim-table-wrap{
+    overflow:auto;
+}
+
+.krim-table{
+    width:100%;
+    min-width:650px;
+    border-collapse:collapse;
+}
+
+.krim-table th{
+    padding:9px 8px;
+    background:#f8fafc;
+    color:#8994a5;
+    font-size:7px;
+    font-weight:850;
+    text-align:left;
+    text-transform:uppercase;
+}
+
+.krim-table td{
+    padding:10px 8px;
+    border-top:1px solid #edf0f4;
+    color:#5b687c;
+    font-size:8px;
+}
+
+.krim-table td strong{
+    color:var(--krim-text);
+}
+
+.krim-status{
+    display:inline-flex;
+    align-items:center;
+    min-height:21px;
+    padding:0 7px;
+    border-radius:11px;
+    background:#eaf8f0;
+    color:var(--krim-green);
+    font-size:7px;
+    font-weight:850;
+}
+
+.krim-empty{
+    padding:29px 15px;
+    border:1px dashed var(--krim-line);
+    border-radius:8px;
+    text-align:center;
+    color:#8994a5;
+    font-size:9px;
+    line-height:1.5;
+}
+
+/* =========================================================
+   ATTENTION
+========================================================= */
+
+.krim-attention-item{
+    display:flex;
+    gap:10px;
+    padding:12px 0;
+    border-bottom:1px solid #edf0f4;
+}
+
+.krim-attention-item:last-child{
+    border-bottom:0;
+}
+
+.krim-attention-icon{
+    flex:0 0 31px;
+    width:31px;
+    height:31px;
+    display:grid;
+    place-items:center;
+    border-radius:8px;
+    background:#fff4e5;
+    color:var(--krim-orange);
+}
+
+.krim-attention-content{
+    flex:1;
+}
+
+.krim-attention-title{
+    color:var(--krim-text);
+    font-size:9px;
+    font-weight:800;
+}
+
+.krim-attention-text{
+    margin-top:3px;
+    color:#8994a5;
+    font-size:8px;
+    line-height:1.4;
+}
+
+/* =========================================================
+   QUICK OPERATIONS
+========================================================= */
+
+.krim-action-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.krim-action-card{
+    min-height:76px;
+    padding:11px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+}
+
+.krim-action-card:hover{
+    border-color:#b9cdfc;
+    background:#f8faff;
+}
+
+.krim-action-icon{
+    color:var(--krim-blue);
+    font-size:14px;
+}
+
+.krim-action-title{
+    color:var(--krim-text);
+    font-size:8px;
+    font-weight:800;
+}
+
+/* =========================================================
+   DOMAINS
+========================================================= */
+
+.krim-domain-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.krim-domain{
+    min-height:78px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border:1px solid var(--krim-line);
+    border-radius:8px;
+}
+
+.krim-domain:hover{
+    border-color:#b9cdfc;
+    background:#f8faff;
+}
+
+.krim-domain-code{
+    color:#8a95a6;
+    font-size:7px;
+    font-weight:850;
+}
+
+.krim-domain-name{
+    color:var(--krim-text);
+    font-size:9px;
+    font-weight:800;
+}
+
+.krim-domain-description{
+    color:#8994a5;
+    font-size:7px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.krim-footer{
+    margin-top:26px;
+    padding:26px 0 10px;
+    border-top:1px solid var(--krim-line);
+}
+
+.krim-footer-grid{
+    display:grid;
+    grid-template-columns:2fr repeat(4,1fr);
+    gap:28px;
+}
+
+.krim-footer-title{
+    margin-bottom:9px;
+    color:var(--krim-navy);
+    font-size:10px;
+    font-weight:850;
+}
+
+.krim-footer-text{
+    max-width:300px;
+    color:#7d899b;
+    font-size:8px;
+    line-height:1.6;
+}
+
+.krim-footer-heading{
+    margin:0 0 9px;
+    color:#68758a;
+    font-size:8px;
+    font-weight:850;
+    text-transform:uppercase;
+}
+
+.krim-footer a{
+    display:block;
+    margin-bottom:7px;
+    color:#7d899b;
+    font-size:8px;
+}
+
+.krim-footer a:hover{
+    color:var(--krim-blue);
+}
+
+.krim-footer-bottom{
+    margin-top:22px;
+    padding-top:12px;
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    border-top:1px solid #edf0f4;
+    color:#8994a5;
+    font-size:7px;
+}
+
+/* =========================================================
+   MOBILE BOTTOM NAV
+========================================================= */
+
+.krim-mobile-bottom{
+    display:none;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1250px){
+
+    .krim-kpis{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .krim-domain-grid{
+        grid-template-columns:repeat(4,1fr);
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:1000px){
+
+    :root{
+        --sidebar-width:220px;
+    }
+
+    .krim-context{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-context-item:first-child{
+        grid-column:1/-1;
+    }
+
+    .krim-grid{
+        grid-template-columns:1fr;
+    }
+
+    .krim-domain-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:760px){
+
+    :root{
+        --header-height:62px;
+    }
+
+    .krim-header{
+        padding:0 11px;
+        gap:8px;
+    }
+
+    .krim-menu-button{
+        display:block;
+    }
+
+    .krim-brand{
+        min-width:auto;
+    }
+
+    .krim-brand-subtitle{
+        display:none;
+    }
+
+    .krim-global-search{
+        flex:1;
+        width:auto;
+    }
+
+    .krim-global-search input{
+        height:36px;
+        font-size:9px;
+    }
+
+    .krim-header-button{
+        display:none;
+    }
+
+    .krim-user-label,
+    .krim-chevron{
+        display:none;
+    }
+
+    .krim-user-button{
+        padding:3px;
+        border:0;
+    }
+
+    .krim-sidebar{
+        width:285px;
+        transform:translateX(-105%);
+        transition:transform .22s ease;
+        box-shadow:10px 0 35px rgba(20,35,60,.16);
+    }
+
+    .krim-sidebar.open{
+        transform:translateX(0);
+    }
+
+    .krim-overlay.open{
+        display:block;
+        position:fixed;
+        z-index:850;
+        inset:0;
+        background:rgba(15,25,40,.42);
+    }
+
+    .krim-main{
+        margin-left:0;
+    }
+
+    .krim-content{
+        padding:19px 13px 78px;
+    }
+
+    .krim-hero{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .krim-hero-actions{
+        width:100%;
+    }
+
+    .krim-hero-actions .krim-button{
+        flex:1;
+    }
+
+    .krim-kpis{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-domain-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-mobile-bottom{
+        position:fixed;
+        z-index:800;
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        right:0;
+        bottom:0;
+        left:0;
+        height:58px;
+        padding:4px 5px;
+        background:#fff;
+        border-top:1px solid var(--krim-line);
+        box-shadow:0 -5px 20px rgba(20,35,60,.08);
+    }
+
+    .krim-mobile-bottom a{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:3px;
+        border-radius:7px;
+        color:#788497;
+        font-size:7px;
+        font-weight:750;
+    }
+
+    .krim-mobile-bottom a.active{
+        background:#eaf1ff;
+        color:var(--krim-blue);
+    }
+
+    .krim-mobile-bottom span:first-child{
+        font-size:14px;
+    }
+}
+
+@media(max-width:520px){
+
+    body{
+        font-size:13px;
+    }
+
+    .krim-brand-name{
+        font-size:15px;
+    }
+
+    .krim-logo{
+        width:34px;
+        height:34px;
+    }
+
+    .krim-hero h1{
+        font-size:28px;
+    }
+
+    .krim-hero p{
+        font-size:10px;
+    }
+
+    .krim-context{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-context-item:first-child{
+        grid-column:1/-1;
+    }
+
+    .krim-kpis{
+        gap:7px;
+    }
+
+    .krim-kpi{
+        padding:11px;
+    }
+
+    .krim-kpi-value{
+        font-size:19px;
+    }
+
+    .krim-action-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-domain-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:1fr 1fr;
+        gap:20px;
+    }
+
+    .krim-footer-bottom{
+        flex-direction:column;
+        gap:6px;
+    }
+}
+
+@media(max-width:370px){
+
+    .krim-global-search{
+        display:none;
+    }
+
+    .krim-kpis{
+        grid-template-columns:1fr;
+    }
+
+    .krim-context{
+        grid-template-columns:1fr;
+    }
+
+    .krim-context-item:first-child{
+        grid-column:auto;
+    }
+
+    .krim-domain-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ======================================================
+     HEADER
+======================================================= -->
+
+<header class="krim-header">
+
+    <button
+        class="krim-menu-button"
+        id="krimMenuButton"
+        aria-label=
