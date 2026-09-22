@@ -1,0 +1,592 @@
+/* =========================================================
+   KRIM GLOBAL CORE DESIGN SYSTEM
+   Permanent foundation — KRIM Logistics
+   ========================================================= */
+
+:root {
+    --krim-primary: #0b5cff;
+    --krim-primary-dark: #0847c7;
+    --krim-primary-soft: #eaf1ff;
+
+    --krim-success: #168a52;
+    --krim-warning: #b77900;
+    --krim-danger: #c93636;
+    --krim-info: #2563eb;
+
+    --krim-bg: #f5f7fb;
+    --krim-surface: #ffffff;
+    --krim-surface-soft: #f8fafc;
+
+    --krim-text: #172033;
+    --krim-text-secondary: #596579;
+    --krim-text-muted: #7b8799;
+
+    --krim-border: #e3e8f0;
+    --krim-border-strong: #cfd7e4;
+
+    --krim-radius-sm: 8px;
+    --krim-radius-md: 12px;
+    --krim-radius-lg: 16px;
+    --krim-radius-xl: 20px;
+
+    --krim-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+    --krim-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --krim-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.10);
+
+    --krim-container: 1440px;
+
+    --krim-font:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--krim-bg);
+    color: var(--krim-text);
+    font-family: var(--krim-font);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+    max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 0.5rem;
+    color: var(--krim-text);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+h2 {
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+}
+
+h3 {
+    font-size: 1.25rem;
+}
+
+h4 {
+    font-size: 1.05rem;
+}
+
+p {
+    margin: 0 0 1rem;
+}
+
+.text-muted {
+    color: var(--krim-text-muted);
+}
+
+.text-secondary {
+    color: var(--krim-text-secondary);
+}
+
+.text-primary {
+    color: var(--krim-primary);
+}
+
+.text-success {
+    color: var(--krim-success);
+}
+
+.text-warning {
+    color: var(--krim-warning);
+}
+
+.text-danger {
+    color: var(--krim-danger);
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.krim-container {
+    width: min(100% - 32px, var(--krim-container));
+    margin-inline: auto;
+}
+
+.krim-section {
+    padding: 32px 0;
+}
+
+.krim-section-sm {
+    padding: 20px 0;
+}
+
+.krim-section-lg {
+    padding: 56px 0;
+}
+
+.krim-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.krim-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.krim-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.krim-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.krim-flex {
+    display: flex;
+}
+
+.krim-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.krim-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.krim-gap-sm {
+    gap: 8px;
+}
+
+.krim-gap-md {
+    gap: 16px;
+}
+
+.krim-gap-lg {
+    gap: 24px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.krim-card {
+    background: var(--krim-surface);
+    border: 1px solid var(--krim-border);
+    border-radius: var(--krim-radius-lg);
+    box-shadow: var(--krim-shadow-sm);
+    padding: 20px;
+}
+
+.krim-card:hover {
+    box-shadow: var(--krim-shadow-md);
+}
+
+.krim-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.krim-card-title {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.krim-card-subtitle {
+    margin: 4px 0 0;
+    color: var(--krim-text-muted);
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.krim-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--krim-radius-sm);
+    font-weight: 600;
+    line-height: 1;
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+.krim-btn:focus-visible {
+    outline: 3px solid rgba(11, 92, 255, 0.22);
+    outline-offset: 2px;
+}
+
+.krim-btn-primary {
+    background: var(--krim-primary);
+    color: #ffffff;
+}
+
+.krim-btn-primary:hover {
+    background: var(--krim-primary-dark);
+}
+
+.krim-btn-secondary {
+    background: #ffffff;
+    border-color: var(--krim-border-strong);
+    color: var(--krim-text);
+}
+
+.krim-btn-secondary:hover {
+    background: var(--krim-surface-soft);
+}
+
+.krim-btn-danger {
+    background: var(--krim-danger);
+    color: #ffffff;
+}
+
+.krim-btn-success {
+    background: var(--krim-success);
+    color: #ffffff;
+}
+
+.krim-btn-sm {
+    min-height: 36px;
+    padding-inline: 12px;
+    font-size: 0.875rem;
+}
+
+.krim-btn-lg {
+    min-height: 48px;
+    padding-inline: 20px;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.krim-form-group {
+    margin-bottom: 18px;
+}
+
+.krim-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--krim-text);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.krim-input,
+.krim-select,
+.krim-textarea {
+    width: 100%;
+    border: 1px solid var(--krim-border-strong);
+    border-radius: var(--krim-radius-sm);
+    background: #ffffff;
+    color: var(--krim-text);
+    padding: 11px 12px;
+    outline: none;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.krim-input,
+.krim-select {
+    min-height: 42px;
+}
+
+.krim-textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.krim-input:focus,
+.krim-select:focus,
+.krim-textarea:focus {
+    border-color: var(--krim-primary);
+    box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.12);
+}
+
+.krim-input::placeholder,
+.krim-textarea::placeholder {
+    color: #9aa5b5;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.krim-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.krim-badge-primary {
+    background: var(--krim-primary-soft);
+    color: var(--krim-primary);
+}
+
+.krim-badge-success {
+    background: #e8f7ef;
+    color: var(--krim-success);
+}
+
+.krim-badge-warning {
+    background: #fff4d9;
+    color: var(--krim-warning);
+}
+
+.krim-badge-danger {
+    background: #fdeaea;
+    color: var(--krim-danger);
+}
+
+.krim-badge-neutral {
+    background: #eef1f5;
+    color: var(--krim-text-secondary);
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.krim-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--krim-border);
+    border-radius: var(--krim-radius-md);
+    background: #ffffff;
+}
+
+.krim-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+}
+
+.krim-table th,
+.krim-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--krim-border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.krim-table th {
+    background: var(--krim-surface-soft);
+    color: var(--krim-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.krim-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.krim-table tbody tr:hover {
+    background: #fafcff;
+}
+
+/* =========================================================
+   ALERTS
+   ========================================================= */
+
+.krim-alert {
+    padding: 13px 15px;
+    border: 1px solid var(--krim-border);
+    border-radius: var(--krim-radius-md);
+    background: #ffffff;
+}
+
+.krim-alert-info {
+    border-color: #cfe0ff;
+    background: #f1f6ff;
+    color: #174ea6;
+}
+
+.krim-alert-success {
+    border-color: #ccebd9;
+    background: #effaf4;
+    color: #12643b;
+}
+
+.krim-alert-warning {
+    border-color: #f1dfb0;
+    background: #fff9e9;
+    color: #795400;
+}
+
+.krim-alert-danger {
+    border-color: #f1c8c8;
+    background: #fff2f2;
+    color: #9e2525;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.krim-loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+}
+
+.krim-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dbe4f3;
+    border-top-color: var(--krim-primary);
+    border-radius: 50%;
+    animation: krim-spin 0.8s linear infinite;
+}
+
+@keyframes krim-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+
+.krim-hidden {
+    display: none !important;
+}
+
+.krim-visible {
+    display: block !important;
+}
+
+.krim-text-center {
+    text-align: center;
+}
+
+.krim-text-right {
+    text-align: right;
+}
+
+.krim-w-full {
+    width: 100%;
+}
+
+.krim-mt-sm {
+    margin-top: 8px;
+}
+
+.krim-mt-md {
+    margin-top: 16px;
+}
+
+.krim-mt-lg {
+    margin-top: 24px;
+}
+
+.krim-mb-sm {
+    margin-bottom: 8px;
+}
+
+.krim-mb-md {
+    margin-bottom: 16px;
+}
+
+.krim-mb-lg {
+    margin-bottom: 24px;
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+:focus-visible {
+    outline: 3px solid rgba(11, 92, 255, 0.22);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+      }
