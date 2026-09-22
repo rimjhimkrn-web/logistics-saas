@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="KRIM Logistics customer workspace"
+    >
+
+    <meta
+        name="robots"
+        content="noindex, nofollow"
+    >
+
+    <title>Customer Workspace | KRIM Logistics</title>
+
+    <link rel="stylesheet" href="../core/krim-core.css">
+    <link rel="stylesheet" href="../core/krim-components.css">
+    <link rel="stylesheet" href="../core/krim-responsive.css">
+
+    <style>
+        .krim-customer-page {
+            min-height: 100vh;
+            background: var(--krim-bg);
+        }
+
+        .krim-customer-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--krim-surface);
+            border-bottom: 1px solid var(--krim-border);
+        }
+
+        .krim-customer-header-inner {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .krim-customer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .krim-customer-brand-mark {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: var(--krim-primary);
+            color: #fff;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .krim-customer-brand-name {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .krim-customer-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .krim-customer-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .krim-customer-avatar {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--krim-primary-soft);
+            color: var(--krim-primary);
+            font-weight: 700;
+        }
+
+        .krim-customer-main {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+
+        .krim-customer-hero {
+            margin-bottom: 28px;
+        }
+
+        .krim-customer-hero h1 {
+            margin: 10px 0 8px;
+        }
+
+        .krim-customer-hero p {
+            margin: 0;
+            color: var(--krim-text-muted);
+        }
+
+        .krim-customer-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .krim-customer-stat {
+            min-height: 130px;
+        }
+
+        .krim-customer-stat-label {
+            color: var(--krim-text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .krim-customer-stat-value {
+            margin-top: 10px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .krim-customer-stat-note {
+            margin-top: 6px;
+            color: var(--krim-text-muted);
+            font-size: 12px;
+        }
+
+        .krim-customer-sections {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 2fr)
+                minmax(300px, 1fr);
+            gap: 20px;
+        }
+
+        .krim-customer-card {
+            background: var(--krim-surface);
+            border: 1px solid var(--krim-border);
+            border-radius: var(--krim-radius-lg);
+            box-shadow: var(--krim-shadow-sm);
+            overflow: hidden;
+        }
+
+        .krim-customer-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--krim-border);
+        }
+
+        .krim-customer-card-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .krim-customer-card-body {
+            padding: 22px;
+        }
+
+        .krim-customer-actions {
+            display: grid;
+            gap: 12px;
+        }
+
+        .krim-customer-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 15px;
+            border: 1px solid var(--krim-border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition:
+                border-color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .krim-customer-action:hover {
+            border-color: var(--krim-primary);
+            transform: translateY(-1px);
+        }
+
+        .krim-customer-action-title {
+            font-weight: 700;
+        }
+
+        .krim-customer-action-note {
+            margin-top: 3px;
+            color: var(--krim-text-muted);
+            font-size: 12px;
+        }
+
+        .krim-customer-empty {
+            padding: 30px 10px;
+            text-align: center;
+            color: var(--krim-text-muted);
+        }
+
+        .krim-customer-status {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .krim-customer-status.is-visible {
+            display: block;
+        }
+
+        @media (max-width: 1100px) {
+
+            .krim-customer-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .krim-customer-sections {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 760px) {
+
+            .krim-customer-header-inner {
+                padding: 0 16px;
+            }
+
+            .krim-customer-main {
+                padding:
+                    24px 16px 40px;
+            }
+
+            .krim-customer-user-email {
+                display: none;
+            }
+
+        }
+
+        @media (max-width: 520px) {
+
+            .krim-customer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .krim-customer-header-right
+            .krim-btn {
+                display: none;
+            }
+
+            .krim-customer-card-header {
+                padding: 17px;
+            }
+
+            .krim-customer-card-body {
+                padding: 17px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="krim-customer-page">
+
+    <!-- =================================================
+         HEADER
+         ================================================= -->
+
+    <header class="krim-customer-header">
+
+        <div class="krim-customer-header-inner">
+
+            <a
+                href="../home.html"
+                class="krim-customer-brand"
+                aria-label="KRIM Logistics home"
+            >
+
+                <span class="krim-customer-brand-mark">
+                    K
+                </span>
+
+                <span class="krim-customer-brand-name">
+                    KRIM
+                </span>
+
+            </a>
+
+
+            <div class="krim-customer-header-right">
+
+                <span
+                    class="krim-badge krim-badge-success"
+                >
+                    Secure workspace
+                </span>
+
+                <div class="krim-customer-user">
+
+                    <span
+                        class="krim-customer-user-email"
+                        id="customer-email"
+                    >
+                        Loading...
+                    </span>
+
+                    <span
+                        class="krim-customer-avatar"
+                        id="customer-avatar"
+                        aria-hidden="true"
+                    >
+                        K
+                    </span>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="customer-signout"
+                    class="krim-btn krim-btn-secondary"
+                >
+                    Sign out
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =================================================
+         MAIN
+         ================================================= -->
+
+    <main class="krim-customer-main">
+
+        <section class="krim-customer-hero">
+
+            <span class="krim-badge krim-badge-info">
+                Customer workspace
+            </span>
+
+            <h1 id="customer-greeting">
+                Welcome to KRIM
+            </h1>
+
+            <p>
+                Manage shipments, quotes, tracking,
+                documents and logistics activity from
+                one global workspace.
+            </p>
+
+        </section>
+
+
+        <!-- STATUS -->
+
+        <div
+            id="customer-status"
+            class="krim-alert krim-customer-status"
+            role="alert"
+            aria-live="polite"
+        ></div>
+
+
+        <!-- =================================================
+             KPI GRID
+             ================================================= -->
+
+        <section
+            class="krim-customer-grid"
+            aria-label="Shipment overview"
+        >
+
+            <article class="krim-card krim-customer-stat">
+
+                <div class="krim-card-body">
+
+                    <div class="krim-customer-stat-label">
+                        Active shipments
+                    </div>
+
+                    <div
+                        class="krim-customer-stat-value"
+                        id="stat-active"
+                    >
+                        —
+                    </div>
+
+                    <div class="krim-customer-stat-note">
+                        Currently moving
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="krim-card krim-customer-stat">
+
+                <div class="krim-card-body">
+
+                    <div class="krim-customer-stat-label">
+                        In transit
+                    </div>
+
+                    <div
+                        class="krim-customer-stat-value"
+                        id="stat-transit"
+                    >
+                        —
+                    </div>
+
+                    <div class="krim-customer-stat-note">
+                        Active transport
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="krim-card krim-customer-stat">
+
+                <div class="krim-card-body">
+
+                    <div class="krim-customer-stat-label">
+                        Delivered
+                    </div>
+
+                    <div
+                        class="krim-customer-stat-value"
+                        id="stat-delivered"
+                    >
+                        —
+                    </div>
+
+                    <div class="krim-customer-stat-note">
+                        Completed shipments
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="krim-card krim-customer-stat">
+
+                <div class="krim-card-body">
+
+                    <div class="krim-customer-stat-label">
+                        Open exceptions
+                    </div>
+
+                    <div
+                        class="krim-customer-stat-value"
+                        id="stat-exceptions"
+                    >
+                        —
+                    </div>
+
+                    <div class="krim-customer-stat-note">
+                        Requiring attention
+                    </div>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             WORKSPACE SECTIONS
+             ================================================= -->
+
+        <section class="krim-customer-sections">
+
+            <!-- RECENT SHIPMENTS -->
+
+            <article class="krim-customer-card">
+
+                <div class="krim-customer-card-header">
+
+                    <h2>
+                        Recent shipments
+                    </h2>
+
+                    <a
+                        href="../domains/shipments.html"
+                        class="krim-auth-link"
+                    >
+                        View all
+                    </a>
+
+                </div>
+
+                <div
+                    class="krim-customer-card-body"
+                    id="recent-shipments"
+                >
+
+                    <div class="krim-customer-empty">
+                        Loading shipment activity...
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- QUICK ACTIONS -->
+
+            <article class="krim-customer-card">
+
+                <div class="krim-customer-card-header">
+
+                    <h2>
+                        Quick actions
+                    </h2>
+
+                </div>
+
+                <div class="krim-customer-card-body">
+
+                    <div class="krim-customer-actions">
+
+                        <a
+                            href="../domains/shipments.html"
+                            class="krim-customer-action"
+                        >
+
+                            <div>
+
+                                <div class="krim-customer-action-title">
+                                    Create shipment
+                                </div>
+
+                                <div class="krim-customer-action-note">
+                                    Start a new logistics request
+                                </div>
+
+                            </div>
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="../domains/quotes.html"
+                            class="krim-customer-action"
+                        >
+
+                            <div>
+
+                                <div class="krim-customer-action-title">
+                                    Request a quote
+                                </div>
+
+                                <div class="krim-customer-action-note">
+                                    Review available pricing
+                                </div>
+
+                            </div>
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="../domains/tracking.html"
+                            class="krim-customer-action"
+                        >
+
+                            <div>
+
+                                <div class="krim-customer-action-title">
+                                    Track shipment
+                                </div>
+
+                                <div class="krim-customer-action-note">
+                                    Monitor live movement
+                                </div>
+
+                            </div>
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+
+                        </a>
+
+
+                        <a
+                            href="../domains/ai.html"
+                            class="krim-customer-action"
+                        >
+
+                            <div>
+
+                                <div class="krim-customer-action-title">
+                                    Ask KRIM AI
+                                </div>
+
+                                <div class="krim-customer-action-note">
+                                    Get logistics assistance
+                                </div>
+
+                            </div>
+
+                            <span aria-hidden="true">
+                                →
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     SUPABASE
+     ===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<!-- =====================================================
+     KRIM PLATFORM SERVICES
+     ===================================================== -->
+
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    const emailElement =
+        document.getElementById(
+            "customer-email"
+        );
+
+    const avatarElement =
+        document.getElementById(
+            "customer-avatar"
+        );
+
+    const greetingElement =
+        document.getElementById(
+            "customer-greeting"
+        );
+
+    const statusElement =
+        document.getElementById(
+            "customer-status"
+        );
+
+    const signoutButton =
+        document.getElementById(
+            "customer-signout"
+        );
+
+
+    function showStatus(message, type) {
+
+        statusElement.className =
+            "krim-alert krim-customer-status is-visible";
+
+
+        if (type === "success") {
+
+            statusElement.classList.add(
+                "krim-alert-success"
+            );
+
+        } else {
+
+            statusElement.classList.add(
+                "krim-alert-danger"
+            );
+
+        }
+
+
+        KRIM_UI.setText(
+            statusElement,
+            message
+        );
+
+    }
+
+
+    async function loadWorkspace() {
+
+        try {
+
+            /*
+             * Require authentication.
+             */
+
+            const user =
+                await KRIM_SECURITY.requireUser({
+                    preserveReturnUrl: true
+                });
+
+
+            if (!user) {
+                return;
+            }
+
+
+            KRIM_SECURITY.disableSensitiveCaching();
+
+
+            /*
+             * User identity.
+             */
+
+            const email =
+                user.email ||
+                "KRIM User";
+
+
+            KRIM_UI.setText(
+                emailElement,
+                email
+            );
+
+
+            const initial =
+                email
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase() || "K";
+
+
+            KRIM_UI.setText(
+                avatarElement,
+                initial
+            );
+
+
+            KRIM_UI.setText(
+                greetingElement,
+                "Welcome to KRIM"
+            );
+
+
+            /*
+             * Load customer shipment information.
+             *
+             * The query is intentionally defensive:
+             * if the current database does not yet expose
+             * the expected customer relationship, the
+             * workspace remains usable instead of failing.
+             */
+
+            try {
+
+                const result =
+                    await KRIM_API.select(
+                        "krim_shipments",
+                        {
+                            columns: "*",
+                            limit: 100
+                        }
+                    );
+
+
+                const shipments =
+                    Array.isArray(result.data)
+                        ? result.data
+                        : [];
+
+
+                updateShipmentStats(
+                    shipments
+                );
+
+
+      
