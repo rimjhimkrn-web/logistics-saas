@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Customer Command Centre | KRIM Logistics</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{
+ margin:0;
+ min-height:100%;
+ font-family:Inter,Arial,sans-serif;
+ background:#f5f7fb;
+ color:#172033
+}
+body{font-size:14px}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+
+:root{
+ --blue:#0b5cff;
+ --blue-soft:#eaf1ff;
+ --dark:#172033;
+ --muted:#667085;
+ --line:#e2e7ef;
+ --white:#fff;
+ --green:#16834b;
+ --green-soft:#eaf8f0;
+ --orange:#b86b00;
+ --orange-soft:#fff4e5;
+ --red:#c9363e;
+ --red-soft:#fff0f1;
+ --header:66px;
+ --sidebar:235px
+}
+
+/* ================= HEADER ================= */
+
+.kr-header{
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ height:var(--header);
+ z-index:1000;
+ display:flex;
+ align-items:center;
+ gap:14px;
+ padding:0 18px;
+ background:#fff;
+ border-bottom:1px solid var(--line)
+}
+
+.kr-menu{
+ display:none;
+ width:38px;
+ height:38px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ background:#fff;
+ cursor:pointer
+}
+
+.kr-brand{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ min-width:215px
+}
+
+.kr-logo{
+ width:36px;
+ height:36px;
+ border-radius:9px;
+ display:grid;
+ place-items:center;
+ background:var(--blue);
+ color:#fff;
+ font-weight:900;
+ font-size:18px
+}
+
+.kr-brand strong{
+ display:block;
+ font-size:17px;
+ letter-spacing:-.02em
+}
+
+.kr-brand small{
+ display:block;
+ margin-top:2px;
+ color:#8a94a4;
+ font-size:8px;
+ letter-spacing:.08em
+}
+
+.kr-search{
+ width:min(390px,35vw)
+}
+
+.kr-search input{
+ width:100%;
+ height:38px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:0 12px;
+ background:#f8fafc;
+ outline:0;
+ font-size:12px
+}
+
+.kr-search input:focus{
+ border-color:var(--blue);
+ background:#fff
+}
+
+.kr-spacer{flex:1}
+
+.kr-header-actions{
+ display:flex;
+ align-items:center;
+ gap:7px
+}
+
+.kr-icon-btn{
+ width:38px;
+ height:38px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ background:#fff;
+ cursor:pointer;
+ color:#536074;
+ position:relative
+}
+
+.kr-notification-dot{
+ position:absolute;
+ top:5px;
+ right:5px;
+ width:7px;
+ height:7px;
+ border-radius:50%;
+ background:#e23b45;
+ border:1px solid #fff
+}
+
+.kr-account{
+ position:relative
+}
+
+.kr-account-btn{
+ height:38px;
+ display:flex;
+ align-items:center;
+ gap:8px;
+ padding:3px 9px 3px 4px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ background:#fff;
+ cursor:pointer
+}
+
+.kr-avatar{
+ width:29px;
+ height:29px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ background:var(--blue-soft);
+ color:var(--blue);
+ font-weight:800;
+ font-size:11px
+}
+
+.kr-account-btn span{
+ max-width:120px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+ font-size:11px;
+ font-weight:700
+}
+
+.kr-account-menu{
+ display:none;
+ position:absolute;
+ right:0;
+ top:45px;
+ width:205px;
+ padding:7px;
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:10px;
+ box-shadow:0 15px 35px rgba(23,32,51,.12);
+ z-index:1100
+}
+
+.kr-account.open .kr-account-menu{
+ display:block
+}
+
+.kr-account-menu a,
+.kr-account-menu button{
+ width:100%;
+ display:flex;
+ align-items:center;
+ gap:9px;
+ padding:10px;
+ border:0;
+ border-radius:7px;
+ background:transparent;
+ color:#536074;
+ text-align:left;
+ cursor:pointer;
+ font-size:11px
+}
+
+.kr-account-menu a:hover,
+.kr-account-menu button:hover{
+ background:#f5f7fb;
+ color:var(--blue)
+}
+
+.kr-account-menu .danger{
+ color:var(--red)
+}
+
+.kr-menu-title{
+ padding:8px 10px;
+ border-bottom:1px solid #edf0f4;
+ margin-bottom:5px
+}
+
+.kr-menu-title strong{
+ display:block;
+ font-size:11px
+}
+
+.kr-menu-title small{
+ color:var(--muted);
+ font-size:8px
+}
+
+/* ================= SIDEBAR ================= */
+
+.kr-sidebar{
+ position:fixed;
+ z-index:950;
+ top:var(--header);
+ bottom:0;
+ left:0;
+ width:var(--sidebar);
+ padding:17px 11px;
+ overflow:auto;
+ background:#fff;
+ border-right:1px solid var(--line)
+}
+
+.kr-section{
+ margin-bottom:18px
+}
+
+.kr-section-title{
+ padding:0 10px 7px;
+ color:#8b95a5;
+ font-size:9px;
+ font-weight:800;
+ text-transform:uppercase;
+ letter-spacing:.08em
+}
+
+.kr-nav{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ min-height:38px;
+ padding:0 10px;
+ border-radius:7px;
+ color:#536074;
+ font-size:11px;
+ font-weight:650
+}
+
+.kr-nav:hover,
+.kr-nav.active{
+ background:var(--blue-soft);
+ color:var(--blue)
+}
+
+.kr-nav-icon{
+ width:18px;
+ text-align:center;
+ font-size:13px
+}
+
+.kr-nav-arrow{
+ margin-left:auto;
+ color:#9aa3b1;
+ font-size:10px
+}
+
+/* ================= MAIN ================= */
+
+.kr-main{
+ margin-left:var(--sidebar);
+ padding-top:var(--header);
+ min-height:100vh
+}
+
+.kr-content{
+ max-width:1550px;
+ margin:auto;
+ padding:24px
+}
+
+.kr-breadcrumb{
+ color:#8a94a4;
+ font-size:10px;
+ margin-bottom:10px
+}
+
+.kr-hero{
+ display:flex;
+ align-items:flex-end;
+ justify-content:space-between;
+ gap:20px;
+ margin-bottom:18px
+}
+
+.kr-eyebrow{
+ color:var(--blue);
+ font-size:9px;
+ font-weight:800;
+ letter-spacing:.1em;
+ margin-bottom:5px
+}
+
+.kr-hero h1{
+ margin:0;
+ font-size:clamp(27px,3vw,38px);
+ line-height:1.05;
+ letter-spacing:-.045em
+}
+
+.kr-hero p{
+ max-width:680px;
+ margin:9px 0 0;
+ color:var(--muted);
+ font-size:12px;
+ line-height:1.55
+}
+
+.kr-actions{
+ display:flex;
+ gap:8px;
+ flex-wrap:wrap
+}
+
+.kr-btn{
+ min-height:38px;
+ padding:0 14px;
+ border-radius:8px;
+ border:1px solid var(--line);
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ gap:6px;
+ background:#fff;
+ color:#536074;
+ font-size:10px;
+ font-weight:800
+}
+
+.kr-btn.primary{
+ background:var(--blue);
+ border-color:var(--blue);
+ color:#fff
+}
+
+.kr-btn:hover{
+ transform:translateY(-1px)
+}
+
+/* ================= GLOBAL CONTEXT ================= */
+
+.kr-context{
+ display:grid;
+ grid-template-columns:2fr repeat(4,1fr);
+ gap:1px;
+ margin-bottom:16px;
+ overflow:hidden;
+ border:1px solid var(--line);
+ border-radius:10px;
+ background:var(--line)
+}
+
+.kr-context-item{
+ min-height:62px;
+ padding:11px 14px;
+ background:#fff
+}
+
+.kr-context-item small{
+ display:block;
+ color:#8a94a4;
+ font-size:8px;
+ text-transform:uppercase;
+ font-weight:800
+}
+
+.kr-context-item strong{
+ display:block;
+ margin-top:5px;
+ font-size:11px
+}
+
+/* ================= KPI ================= */
+
+.kr-kpis{
+ display:grid;
+ grid-template-columns:repeat(6,1fr);
+ gap:9px;
+ margin-bottom:16px
+}
+
+.kr-kpi{
+ padding:14px;
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:10px
+}
+
+.kr-kpi small{
+ color:#8a94a4;
+ font-size:8px;
+ font-weight:800;
+ text-transform:uppercase
+}
+
+.kr-kpi strong{
+ display:block;
+ margin-top:8px;
+ font-size:23px
+}
+
+.kr-kpi span{
+ display:block;
+ margin-top:3px;
+ color:#8a94a4;
+ font-size:8px
+}
+
+/* ================= PANELS ================= */
+
+.kr-grid{
+ display:grid;
+ grid-template-columns:1.7fr 1fr;
+ gap:14px;
+ margin-bottom:14px
+}
+
+.kr-panel{
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:10px;
+ overflow:hidden
+}
+
+.kr-panel-head{
+ min-height:58px;
+ padding:0 15px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ border-bottom:1px solid #edf0f4
+}
+
+.kr-panel-head strong{
+ font-size:12px
+}
+
+.kr-panel-head small{
+ display:block;
+ margin-top:3px;
+ color:#8a94a4;
+ font-size:8px
+}
+
+.kr-panel-head a{
+ color:var(--blue);
+ font-size:9px;
+ font-weight:800
+}
+
+.kr-panel-body{
+ padding:15px
+}
+
+/* ================= SHIPMENTS ================= */
+
+.kr-tools{
+ display:flex;
+ gap:7px;
+ margin-bottom:11px
+}
+
+.kr-tools input,
+.kr-tools select{
+ height:35px;
+ border:1px solid var(--line);
+ border-radius:7px;
+ background:#fff;
+ padding:0 10px;
+ font-size:10px;
+ outline:0
+}
+
+.kr-tools input{flex:1}
+
+.kr-table-wrap{
+ overflow:auto
+}
+
+.kr-table{
+ width:100%;
+ min-width:590px;
+ border-collapse:collapse
+}
+
+.kr-table th{
+ padding:9px;
+ background:#f8fafc;
+ color:#8a94a4;
+ font-size:8px;
+ text-align:left;
+ text-transform:uppercase
+}
+
+.kr-table td{
+ padding:11px 9px;
+ border-top:1px solid #edf0f4;
+ color:#536074;
+ font-size:9px
+}
+
+.kr-status{
+ display:inline-block;
+ padding:4px 7px;
+ border-radius:20px;
+ background:var(--green-soft);
+ color:var(--green);
+ font-size:8px;
+ font-weight:800
+}
+
+.kr-empty{
+ padding:26px 12px;
+ border:1px dashed var(--line);
+ border-radius:8px;
+ color:#8a94a4;
+ text-align:center;
+ font-size:9px;
+ line-height:1.5
+}
+
+/* ================= ATTENTION ================= */
+
+.kr-attention{
+ display:flex;
+ gap:10px;
+ padding:12px 0;
+ border-bottom:1px solid #edf0f4
+}
+
+.kr-attention:last-child{
+ border-bottom:0
+}
+
+.kr-attention-icon{
+ width:30px;
+ height:30px;
+ flex:0 0 30px;
+ display:grid;
+ place-items:center;
+ border-radius:7px;
+ background:var(--orange-soft);
+ color:var(--orange);
+ font-size:12px
+}
+
+.kr-attention strong{
+ font-size:10px
+}
+
+.kr-attention span{
+ display:block;
+ margin-top:3px;
+ color:#8a94a4;
+ font-size:8px;
+ line-height:1.45
+}
+
+/* ================= QUICK ACTIONS ================= */
+
+.kr-action-grid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:8px
+}
+
+.kr-action{
+ min-height:72px;
+ padding:10px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ display:flex;
+ flex-direction:column;
+ justify-content:space-between
+}
+
+.kr-action:hover{
+ border-color:var(--blue);
+ background:#f8faff
+}
+
+.kr-action i{
+ color:var(--blue);
+ font-size:15px;
+ font-style:normal
+}
+
+.kr-action strong{
+ font-size:9px
+}
+
+.kr-action small{
+ color:#8a94a4;
+ font-size:7px
+}
+
+/* ================= DOMAINS ================= */
+
+.kr-domains{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:8px
+}
+
+.kr-domain{
+ min-height:82px;
+ padding:10px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ display:flex;
+ flex-direction:column;
+ justify-content:space-between
+}
+
+.kr-domain:hover{
+ border-color:var(--blue);
+ background:#f8faff
+}
+
+.kr-domain small{
+ color:#8a94a4;
+ font-size:7px;
+ font-weight:800
+}
+
+.kr-domain strong{
+ font-size:9px
+}
+
+.kr-domain span{
+ color:#8a94a4;
+ font-size:8px
+}
+
+/* ================= FOOTER ================= */
+
+.kr-footer{
+ margin-top:25px;
+ padding-top:22px;
+ border-top:1px solid var(--line)
+}
+
+.kr-footer-grid{
+ display:grid;
+ grid-template-columns:2fr repeat(4,1fr);
+ gap:25px
+}
+
+.kr-footer h3{
+ margin:0;
+ font-size:12px
+}
+
+.kr-footer h4{
+ margin:0 0 9px;
+ font-size:9px
+}
+
+.kr-footer p{
+ max-width:330px;
+ color:#7d8797;
+ font-size:9px;
+ line-height:1.55
+}
+
+.kr-footer a{
+ display:block;
+ margin-bottom:7px;
+ color:#7d8797;
+ font-size:8px
+}
+
+.kr-footer a:hover{
+ color:var(--blue)
+}
+
+.kr-footer-bottom{
+ display:flex;
+ justify-content:space-between;
+ gap:15px;
+ margin-top:20px;
+ padding-top:12px;
+ border-top:1px solid #edf0f4;
+ color:#8a94a4;
+ font-size:8px
+}
+
+/* ================= MOBILE DRAWER ================= */
+
+.kr-overlay{
+ display:none
+}
+
+@media(max-width:1200px){
+ .kr-kpis{grid-template-columns:repeat(3,1fr)}
+ .kr-domains{grid-template-columns:repeat(4,1fr)}
+ .kr-footer-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:900px){
+ .kr-context{grid-template-columns:repeat(2,1fr)}
+ .kr-context-item:first-child{grid-column:1/-1}
+ .kr-grid{grid-template-columns:1fr}
+ .kr-domains{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:700px){
+
+ .kr-menu{
+  display:block
+ }
+
+ .kr-brand{
+  min-width:auto
+ }
+
+ .kr-brand small{
+  display:none
+ }
+
+ .kr-search{
+  flex:1;
+  width:auto
+ }
+
+ .kr-header-actions .kr-icon-btn{
+  display:none
+ }
+
+ .kr-account-btn span{
+  display:none
+ }
+
+ .kr-sidebar{
+  transform:translateX(-100%);
+  transition:transform .2s ease;
+  box-shadow:12px 0 30px rgba(0,0,0,.15)
+ }
+
+ .kr-sidebar.open{
+  transform:translateX(0)
+ }
+
+ .kr-overlay.open{
+  display:block;
+  position:fixed;
+  inset:0;
+  z-index:940;
+  background:rgba(0,0,0,.35)
+ }
+
+ .kr-main{
+  margin-left:0
+ }
+
+ .kr-content{
+  padding:18px 13px
+ }
+
+ .kr-hero{
+  align-items:flex-start;
+  flex-direction:column
+ }
+
+ .kr-actions{
+  width:100%
+ }
+
+ .kr-actions .kr-btn{
+  flex:1
+ }
+
+ .kr-footer-grid{
+  grid-template-columns:repeat(2,1fr)
+ }
+
+}
+
+@media(max-width:480px){
+
+ .kr-header{
+  padding:0 9px;
+  gap:7px
+ }
+
+ .kr-brand strong{
+  font-size:15px
+ }
+
+ .kr-search input{
+  font-size:10px
+ }
+
+ .kr-kpis{
+  grid-template-columns:repeat(2,1fr)
+ }
+
+ .kr-context{
+  grid-template-columns:1fr 1fr
+ }
+
+ .kr-context-item:first-child{
+  grid-column:1/-1
+ }
+
+ .kr-action-grid{
+  grid-template-columns:1fr 1fr
+ }
+
+ .kr-domains{
+  grid-template-columns:1fr 1fr
+ }
+
+ .kr-footer-grid{
+  grid-template-columns:1fr 1fr
+ }
+
+ .kr-footer-bottom{
+  flex-direction:column
+ }
+
+}
+
+@media(max-width:350px){
+
+ .kr-search{
+  display:none
+ }
+
+ .kr-kpis{
+  grid-template-columns:1fr
+ }
+
+ .kr-context{
+  grid-template-columns:1fr
+ }
+
+ .kr-context-item:first-child{
+  grid-column:auto
+ }
+
+ .kr-domains{
+  grid-template-columns:1fr
+ }
+
+ .kr-footer-grid{
+  grid-template-columns:1fr
+ }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="kr-header">
+
+<button class="kr-menu" id="krMenu" aria-label="Open navigation">
+☰
+</button>
+
+<a class="kr-brand" href="../home.html">
+ <span class="kr-logo">K</span>
+ <span>
+  <strong>KRIM</strong>
+  <small>GLOBAL LOGISTICS OPERATING SYSTEM</small>
+ </span>
+</a>
+
+<div class="kr-search">
+ <input
+  id="krSearch"
+  type="search"
+  placeholder="Search shipments, tracking, quotes, network..."
+  aria-label="Global search">
+</div>
+
+<div class="kr-spacer"></div>
+
+<div class="kr-header-actions">
+
+<button class="kr-icon-btn" title="Notifications">
+ 🔔
+ <span class="kr-notification-dot"></span>
+</button>
+
+<button class="kr-icon-btn" title="Help">
+ ?
+</button>
+
+<div class="kr-account" id="krAccount">
+
+<button class="kr-account-btn" id="krAccountButton">
+
+<span class="kr-avatar" id="krAvatar">K</span>
+
+<span id="krUserName">Customer</span>
+
+⌄
+
+</button>
+
+<div class="kr-account-menu">
+
+<div class="kr-menu-title">
+ <strong id="krMenuEmail">Customer</strong>
+ <small>Customer workspace</small>
+</div>
+
+<a href="#">👤 Profile</a>
+<a href="#">🔐 Security</a>
+
+<a href="#language">
+ 🌐 Language & Region
+</a>
+
+<a href="#">❔ Help & Support</a>
+
+<button class="danger" id="krSignOut">
+ ⇥ Sign out
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+
+<div class="kr-overlay" id="krOverlay"></div>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="kr-sidebar" id="krSidebar">
+
+<div class="kr-section">
+
+<div class="kr-section-title">Command</div>
+
+<a class="kr-nav active" href="customer-workspace.html">
+ <span class="kr-nav-icon">⌂</span>
+ Overview
+</a>
+
+<a class="kr-nav" href="../domains/shipments.html">
+ <span class="kr-nav-icon">▣</span>
+ Shipments
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/tracking.html">
+ <span class="kr-nav-icon">◎</span>
+ Tracking
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/exceptions.html">
+ <span class="kr-nav-icon">!</span>
+ Exceptions
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+</div>
+
+
+<div class="kr-section">
+
+<div class="kr-section-title">Commercial</div>
+
+<a class="kr-nav" href="../domains/quotes.html">
+ <span class="kr-nav-icon">◇</span>
+ Quotes
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/finance.html">
+ <span class="kr-nav-icon">$</span>
+ Finance
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/claims.html">
+ <span class="kr-nav-icon">⚖</span>
+ Claims
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+</div>
+
+
+<div class="kr-section">
+
+<div class="kr-section-title">Network</div>
+
+<a class="kr-nav" href="../domains/network.html">
+ <span class="kr-nav-icon">⌘</span>
+ Network
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/partners.html">
+ <span class="kr-nav-icon">♙</span>
+ Partners
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/capacity.html">
+ <span class="kr-nav-icon">▤</span>
+ Capacity
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/documents.html">
+ <span class="kr-nav-icon">▥</span>
+ Documents
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+</div>
+
+
+<div class="kr-section">
+
+<div class="kr-section-title">Intelligence</div>
+
+<a class="kr-nav" href="../domains/analytics.html">
+ <span class="kr-nav-icon">▥</span>
+ Analytics
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/integrations.html">
+ <span class="kr-nav-icon">⇄</span>
+ Integrations
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/ai.html">
+ <span class="kr-nav-icon">✦</span>
+ KRIM AI
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+</div>
+
+
+<div class="kr-section">
+
+<div class="kr-section-title">Governance</div>
+
+<a class="kr-nav" href="../domains/compliance.html">
+ <span class="kr-nav-icon">✓</span>
+ Compliance
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+<a class="kr-nav" href="../domains/claims.html">
+ <span class="kr-nav-icon">⚖</span>
+ Disputes
+ <span class="kr-nav-arrow">›</span>
+</a>
+
+</div>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="kr-main">
+
+<div class="kr-content">
+
+<div class="kr-breadcrumb">
+ KRIM / Customer / Command Centre
+</div>
+
+
+<section class="kr-hero">
+
+<div>
+
+<div class="kr-eyebrow">
+ CUSTOMER OPERATIONS
+</div>
+
+<h1>Global Command Centre</h1>
+
+<p>
+One customer operating environment for transportation,
+shipments, network visibility, commercial activity,
+compliance, finance, intelligence and support.
+</p>
+
+</div>
+
+
+<div class="kr-actions">
+
+<a class="kr-btn primary" href="../domains/shipments.html">
+ + New shipment
+</a>
+
+<a class="kr-btn" href="../domains/quotes.html">
+ ◇ Request quote
+</a>
+
+<a class="kr-btn" href="../domains/tracking.html">
+ ◎ Track shipment
+</a>
+
+</div>
+
+</section>
+
+
+<!-- ================= GLOBAL CONTEXT ================= -->
+
+<section class="kr-context">
+
+<div class="kr-context-item">
+ <small>Architecture</small>
+ <strong>Global · Multi-market</strong>
+</div>
+
+<div class="kr-context-item">
+ <small>Market</small>
+ <strong>🇮🇳 India</strong>
+</div>
+
+<div class="kr-context-item">
+ <small>Currency</small>
+ <strong>₹ INR</strong>
+</div>
+
+<div class="kr-context-item">
+ <small>Time zone</small>
+ <strong>Asia/Kolkata</strong>
+</div>
+
+<div class="kr-context-item">
+ <small>Language</small>
+ <strong>English · EN-IN</strong>
+</div>
+
+</section>
+
+
+<!-- ================= KPI ================= -->
+
+<section class="kr-kpis">
+
+<div class="kr-kpi">
+ <small>Active shipments</small>
+ <strong>—</strong>
+ <span>Live operational data</span>
+</div>
+
+<div class="kr-kpi">
+ <small>In transit</small>
+ <strong>—</strong>
+ <span>Current movement</span>
+</div>
+
+<div class="kr-kpi">
+ <small>Delivered</small>
+ <strong>—</strong>
+ <span>Completed lifecycle</span>
+</div>
+
+<div class="kr-kpi">
+ <small>Exceptions</small>
+ <strong>—</strong>
+ <span>Attention required</span>
+</div>
+
+<div class="kr-kpi">
+ <small>Open quotes</small>
+ <strong>—</strong>
+ <span>Commercial pipeline</span>
+</div>
+
+<div class="kr-kpi">
+ <small>Pending actions</small>
+ <strong>—</strong>
+ <span>Customer actions</span>
+</div>
+
+</section>
+
+
+<!-- ================= OPERATIONS ================= -->
+
+<section class="kr-grid">
+
+<article class="kr-panel">
+
+<div class="kr-panel-head">
+
+<div>
+ <strong>Shipment command</strong>
+ <small>Customer shipment portfolio</small>
+</div>
+
+<a href="../domains/shipments.html">View all →</a>
+
+</div>
+
+<div class="kr-panel-body">
+
+<div class="kr-tools">
+
+<input
+ type="search"
+ placeholder="Search shipment or tracking number">
+
+<select>
+ <option>All statuses</option>
+ <option>New</option>
+ <option>Confirmed</option>
+ <option>In transit</option>
+ <option>Delivered</option>
+ <option>Exception</option>
+</select>
+
+</div>
+
+<div class="kr-table-wrap">
+
+<table class="kr-table">
+
+<thead>
+<tr>
+<th>Shipment</th>
+<th>Route</th>
+<th>Status</th>
+<th>ETA</th>
+<th>Partner</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td colspan="5">
+
+<div class="kr-empty">
+Live shipment records will appear here
+when authorized customer data is connected.
+</div>
+
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</article>
+
+
+<article class="kr-panel">
+
+<div class="kr-panel-head">
+
+<div>
+ <strong>Attention centre</strong>
+ <small>Items requiring review</small>
+</div>
+
+<a href="../domains/excepti
