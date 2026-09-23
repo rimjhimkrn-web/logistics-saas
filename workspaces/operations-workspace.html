@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Operations Command Centre | KRIM</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#172033;font:13px Arial,sans-serif}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+:root{--b:#0b5cff;--bd:#dfe5ee;--muted:#728096;--w:#fff;--dark:#10233f;--g:#15945b;--o:#d98212;--r:#d9363e}
+
+.header{height:64px;position:fixed;inset:0 0 auto;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;padding:0 18px;z-index:20}
+.logo{width:34px;height:34px;border-radius:7px;background:var(--b);color:#fff;display:grid;place-items:center;font-weight:900}
+.brand{display:flex;align-items:center;gap:9px;min-width:195px}.brand b{font-size:17px}.brand small{display:block;font-size:7px;color:#8490a2;letter-spacing:.05em}
+.search{width:390px}.search input{width:100%;height:36px;border:1px solid var(--bd);border-radius:7px;padding:0 12px;background:#f8fafc}
+.spacer{flex:1}.top{display:flex;gap:7px}.top button,.account,.menu{height:36px;border:1px solid var(--bd);background:#fff;border-radius:7px;cursor:pointer}.top button{width:36px}
+.account{padding:3px 9px 3px 4px;display:flex;align-items:center;gap:7px;font-size:10px}.avatar{width:28px;height:28px;border-radius:50%;background:#eaf1ff;color:var(--b);display:grid;place-items:center;font-weight:bold}
+.menu{display:none;width:36px}
+
+.side{position:fixed;top:64px;bottom:0;left:0;width:220px;background:#fff;border-right:1px solid var(--bd);padding:15px 10px;overflow:auto;z-index:15}
+.st{font-size:8px;color:var(--b);font-weight:bold;margin:14px 9px 6px;text-transform:uppercase}
+.nav{height:34px;padding:0 9px;border-radius:7px;display:flex;align-items:center;gap:9px;color:#526077;font-size:10px}
+.nav:hover,.nav.active{background:#eaf1ff;color:var(--b)}
+.nav span{margin-left:auto}
+
+.main{margin-left:220px;padding-top:64px}.wrap{max-width:1500px;margin:auto;padding:22px}
+.crumb{font-size:8px;color:#8b96a7;margin-bottom:7px}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:end}
+.hero h1{margin:0;font-size:30px;letter-spacing:-1px}
+.hero p{margin:7px 0;color:var(--muted);font-size:11px;line-height:1.5;max-width:750px}
+.actions{display:flex;gap:7px}.btn{padding:10px 13px;border-radius:7px;border:1px solid var(--bd);background:#fff;font-size:9px;font-weight:bold}.primary{background:var(--b);color:#fff;border-color:var(--b)}
+
+.context{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:1px;background:var(--bd);margin:16px 0;border-radius:8px;overflow:hidden}
+.context div{background:#fff;padding:11px 13px}.context small{display:block;color:#8994a5;font-size:7px;text-transform:uppercase}.context b{display:block;margin-top:4px;font-size:10px}
+
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}
+.kpi,.card{background:#fff;border:1px solid var(--bd);border-radius:8px}
+.kpi{padding:12px}.kpi small{font-size:7px;color:#8994a5;text-transform:uppercase}.kpi b{display:block;font-size:20px;margin:8px 0 2px}.kpi span{font-size:7px;color:#8994a5}
+
+.grid{display:grid;grid-template-columns:1.7fr 1fr;gap:12px;margin-bottom:12px}
+.card{overflow:hidden}.head{min-height:51px;padding:0 13px;border-bottom:1px solid #edf0f4;display:flex;align-items:center;justify-content:space-between}
+.head b{font-size:11px}.head small{display:block;color:#8994a5;font-size:7px;margin-top:3px}.head a{color:var(--b);font-size:8px;font-weight:bold}.body{padding:13px}
+
+.tools{display:flex;gap:6px;margin-bottom:9px}.tools input,.tools select{height:32px;border:1px solid var(--bd);border-radius:6px;padding:0 9px;font-size:9px;background:#fff}.tools input{flex:1}
+.table{overflow:auto}table{width:100%;min-width:600px;border-collapse:collapse}
+th{text-align:left;background:#f8fafc;color:#8994a5;font-size:7px;padding:8px}
+td{border-top:1px solid #edf0f4;padding:9px 8px;font-size:8px;color:#526077}td b{color:#172033}
+.status{padding:4px 6px;border-radius:10px;background:#eaf1ff;color:var(--b);font-size:7px;font-weight:bold}
+.status.red{background:#fff0f0;color:var(--r)}.status.green{background:#eaf8f0;color:var(--g)}.status.orange{background:#fff5e8;color:var(--o)}
+.empty{text-align:center;padding:22px;border:1px dashed var(--bd);color:#8994a5;font-size:8px}
+
+.item{display:flex;gap:9px;padding:11px 0;border-bottom:1px solid #edf0f4}.item:last-child{border:0}
+.ico{width:28px;height:28px;border-radius:7px;background:#eaf1ff;color:var(--b);display:grid;place-items:center}
+.item b{font-size:9px}.item span{display:block;color:#8994a5;font-size:8px;margin-top:3px;line-height:1.4}
+
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.quick a,.domain{border:1px solid var(--bd);border-radius:7px;padding:11px;min-height:65px}
+.quick a:hover,.domain:hover{border-color:var(--b);background:#f8faff}.quick i{font-style:normal;color:var(--b);font-size:15px}.quick b{display:block;font-size:8px;margin-top:7px}
+
+.domains{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.domain{display:flex;flex-direction:column;justify-content:space-between}
+.domain small{font-size:6px;color:#8994a5}.domain b{font-size:8px;margin-top:8px}.domain span{font-size:7px;color:#8994a5;margin-top:3px}
+
+.footer{margin-top:22px;background:var(--dark);color:#fff;padding:25px 22px 12px;border-radius:8px 8px 0 0}
+.footgrid{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:20px}.footer b{font-size:10px}
+.footer p,.footer a{font-size:8px;color:#b9c5d6;line-height:1.5}.footer a{display:block;margin:5px 0}
+.footbottom{border-top:1px solid #30425d;margin-top:18px;padding-top:10px;display:flex;justify-content:space-between;font-size:7px;color:#aebbd0}
+
+.drop{position:fixed;right:18px;top:58px;width:190px;background:#fff;border:1px solid var(--bd);border-radius:8px;box-shadow:0 12px 30px #0002;padding:7px;display:none;z-index:40}
+.drop.open{display:block}.drop button{width:100%;text-align:left;border:0;background:#fff;padding:9px;border-radius:6px;font-size:9px}
+.drop hr{border:0;border-top:1px solid #edf0f4}.lang{right:65px}.overlay{display:none}
+
+@media(max-width:1150px){
+.kpis{grid-template-columns:repeat(3,1fr)}.domains{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:900px){
+.grid{grid-template-columns:1fr}.context{grid-template-columns:repeat(2,1fr)}
+.domains{grid-template-columns:repeat(3,1fr)}.footgrid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:700px){
+.menu{display:block}.brand{min-width:auto}.brand small{display:none}.search{flex:1;width:auto}.top .help{display:none}
+.side{transform:translateX(-105%);transition:.2s;box-shadow:8px 0 25px #0002}.side.open{transform:translateX(0)}
+.overlay.open{display:block;position:fixed;inset:64px 0 0;background:#0005;z-index:14}
+.main{margin-left:0}.wrap{padding:15px 12px}.hero{flex-direction:column;align-items:flex-start}
+.actions{width:100%}.actions .btn{flex:1;text-align:center}
+.context{grid-template-columns:1fr 1fr}.context div:first-child{grid-column:1/-1}
+.domains{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+.hero h1{font-size:24px}.kpis{grid-template-columns:repeat(2,1fr)}.quick{grid-template-columns:1fr 1fr}
+.footgrid{grid-template-columns:1fr 1fr}.footbottom{flex-direction:column;gap:5px}.account{padding-right:4px}.account .email{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+<button class="menu" id="menu">☰</button>
+
+<a class="brand" href="../home.html">
+<span class="logo">K</span>
+<span><b>KRIM</b><small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span>
+</a>
+
+<div class="search">
+<input id="search" placeholder="Search shipments, organizations, partners, events...">
+</div>
+
+<div class="spacer"></div>
+
+<div class="top">
+<button>🔔</button>
+<button class="help">?</button>
+<button class="account" id="account">
+<span class="avatar" id="avatar">O</span>
+<span class="email" id="email">Operations</span>⌄
+</button>
+</div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="side" id="side">
+
+<div class="st">Command</div>
+<a class="nav active" href="operations-workspace.html">⌂ Overview</a>
+<a class="nav" href="../domains/shipments.html">▣ Shipments <span>›</span></a>
+<a class="nav" href="../domains/tracking.html">◎ Tracking</a>
+<a class="nav" href="../domains/exceptions.html">⚠ Exceptions <span>›</span></a>
+
+<div class="st">Commercial</div>
+<a class="nav" href="../domains/quotes.html">◇ Quotes <span>›</span></a>
+<a class="nav" href="../domains/finance.html">$ Finance <span>›</span></a>
+<a class="nav" href="../domains/claims.html">⚖ Claims <span>›</span></a>
+
+<div class="st">Network</div>
+<a class="nav" href="../domains/network.html">⌘ Network <span>›</span></a>
+<a class="nav" href="../domains/partners.html">♙ Partners <span>›</span></a>
+<a class="nav" href="../domains/capacity.html">▤ Capacity</a>
+<a class="nav" href="../domains/documents.html">▤ Documents</a>
+
+<div class="st">Intelligence</div>
+<a class="nav" href="../domains/analytics.html">▥ Analytics <span>›</span></a>
+<a class="nav" href="../domains/integrations.html">⇄ Integrations</a>
+<a class="nav" href="../domains/ai.html">✦ KRIM AI</a>
+
+<div class="st">Governance</div>
+<a class="nav" href="../domains/compliance.html">✓ Compliance</a>
+<a class="nav" href="../domains/claims.html">⚖ Disputes</a>
+
+<div class="st">Platform</div>
+<a class="nav" href="../domains/integrations.html">◈ System integrations</a>
+<a class="nav" href="../domains/analytics.html">◉ Platform analytics</a>
+
+</aside>
+
+<div class="drop" id="accountMenu">
+<button>👤 Profile</button>
+<button>🛡 Security</button>
+<button>🌐 Language</button>
+<button>❔ Help & Support</button>
+<hr>
+<button id="signout">↪ Sign out</button>
+</div>
+
+<main class="main">
+<div class="wrap">
+
+<div class="crumb">KRIM / Operations / Command Centre</div>
+
+<section class="hero">
+<div>
+<div style="color:#0b5cff;font-size:8px;font-weight:bold">GLOBAL OPERATIONS</div>
+<h1>Operations Command Centre</h1>
+<p>Institutional operating environment for global shipment execution, network coordination, exceptions, compliance, finance, intelligence and platform operations.</p>
+</div>
+
+<div class="actions">
+<a class="btn primary" href="../domains/shipments.html">＋ New shipment</a>
+<a class="btn" href="../domains/network.html">⌘ Network</a>
+<a class="btn" href="../domains/exceptions.html">⚠ Exceptions</a>
+</div>
+</section>
+
+<section class="context">
+<div><small>Architecture</small><b>Global · Multi-market</b></div>
+<div><small>Active market</small><b>India</b></div>
+<div><small>Currency</small><b>INR</b></div>
+<div><small>Time zone</small><b>Asia/Kolkata</b></div>
+<div><small>Environment</small><b>Production</b></div>
+</section>
+
+<section class="kpis">
+<div class="kpi"><small>Active shipments</small><b>—</b><span>Global operations</span></div>
+<div class="kpi"><small>In transit</small><b>—</b><span>Current movement</span></div>
+<div class="kpi"><small>Exceptions</small><b>—</b><span>Attention required</span></div>
+<div class="kpi"><small>Open quotes</small><b>—</b><span>Commercial pipeline</span></div>
+<div class="kpi"><small>Network capacity</small><b>—</b><span>Available resources</span></div>
+<div class="kpi"><small>Pending actions</small><b>—</b><span>Operational queue</span></div>
+</section>
+
+<section class="grid">
+
+<article class="card">
+<div class="head">
+<div><b>Global shipment command</b><small>Cross-market operational portfolio</small></div>
+<a href="../domains/shipments.html">View all →</a>
+</div>
+
+<div class="body">
+<div class="tools">
+<input placeholder="Search shipment, tracking number or organization">
+<select>
+<option>All markets</option>
+<option>India</option>
+<option>UAE</option>
+<option>Singapore</option>
+<option>Europe</option>
+<option>United States</option>
+</select>
+</div>
+
+<div class="table">
+<table>
+<thead>
+<tr>
+<th>Shipment</th><th>Market</th><th>Route</th><th>Status</th><th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="5">
+<div class="empty">Authorized operational shipment records will appear here.</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</article>
+
+<article class="card">
+<div class="head">
+<div><b>Global attention centre</b><small>Operational items requiring action</small></div>
+<a href="../domains/exceptions.html">View all →</a>
+</div>
+
+<div class="body">
+<div class="item">
+<div class="ico" style="color:var(--r);background:#fff0f0">!</div>
+<div><b>Operational exceptions</b><span>Shipment delays, disruptions and route risks.</span></div>
+</div>
+
+<div class="item">
+<div class="ico">▤</div>
+<div><b>Compliance actions</b><span>Documents, customs and regulatory controls.</span></div>
+</div>
+
+<div class="item">
+<div class="ico" style="color:var(--o);background:#fff5e8">$</div>
+<div><b>Financial actions</b><span>Quotes, invoices and settlement events.</span></div>
+</div>
+
+<div class="item">
+<div class="ico">⌘</div>
+<div><b>Network actions</b><span>Capacity and partner coordination.</span></div>
+</div>
+</div>
+</article>
+
+</section>
+
+<section class="grid">
+
+<article class="card">
+<div class="head">
+<div><b>Operational controls</b><small>Core global workflows</small></div>
+</div>
+
+<div class="body">
+<div class="quick">
+<a href="../domains/shipments.html"><i>＋</i><b>Create shipment</b></a>
+<a href="../domains/network.html"><i>⌘</i><b>Manage network</b></a>
+<a href="../domains/capacity.html"><i>◎</i><b>Capacity</b></a>
+<a href="../domains/exceptions.html"><i>!</i><b>Exceptions</b></a>
+<a href="../domains/compliance.html"><i>✓</i><b>Compliance</b></a>
+<a href="../domains/ai.html"><i>✦</i><b>KRIM AI</b></a>
+</div>
+</div>
+</article>
+
+<article class="card">
+<div class="head">
+<div><b>Platform environment</b><small>Global KRIM operating status</small></div>
+</div>
+
+<div class="body">
+<div class="item">
+<div class="ico" style="color:var(--g);background:#eaf8f0">✓</div>
+<div><b>Secure operations</b><span>Authenticated privileged workspace with backend authorization.</span></div>
+</div>
+
+<div class="item">
+<div class="ico">◎</div>
+<div><b>Global market model</b><span>Countries, markets, currencies, time zones and regional rules.</span></div>
+</div>
+
+<div class="item">
+<div class="ico" style="color:var(--g);background:#eaf8f0">✓</div>
+<div><b>Event architecture</b><span>Workflows, events, notifications, webhooks and audit trails.</span></div>
+</div>
+</div>
+</article>
+
+</section>
+
+<section class="card">
+<div class="head">
+<div><b>KRIM operating domains</b><small>Global operations control environment</small></div>
+</div>
+
+<div class="body">
+<div class="domains">
+
+<a class="domain" href="../domains/shipments.html"><small>OPS</small><b>Shipments</b><span>Lifecycle</span></a>
+<a class="domain" href="../domains/tracking.html"><small>VIS</small><b>Tracking</b><span>Visibility</span></a>
+<a class="domain" href="../domains/quotes.html"><small>COM</small><b>Quotes</b><span>Commercial</span></a>
+<a class="domain" href="../domains/network.html"><small>NET</small><b>Network</b><span>Connectivity</span></a>
+<a class="domain" href="../domains/partners.html"><small>PRT</small><b>Partners</b><span>Ecosystem</span></a>
+<a class="domain" href="../domains/capacity.html"><small>CAP</small><b>Capacity</b><span>Resources</span></a>
+<a class="domain" href="../domains/documents.html"><small>DOC</small><b>Documents</b><span>Records</span></a>
+<a class="domain" href="../domains/compliance.html"><small>GOV</small><b>Compliance</b><span>Controls</span></a>
+<a class="domain" href="../domains/exceptions.html"><small>RSK</small><b>Exceptions</b><span>Risk</span></a>
+<a class="domain" href="../domains/claims.html"><small>CLM</small><b>Claims</b><span>Disputes</span></a>
+<a class="domain" href="../domains/finance.html"><small>FIN</small><b>Finance</b><span>Payments</span></a>
+<a class="domain" href="../domains/analytics.html"><small>INT</small><b>Analytics</b><span>Intelligence</span></a>
+<a class="domain" href="../domains/integrations.html"><small>API</small><b>Integrations</b><span>Connected systems</span></a>
+<a class="domain" href="../domains/ai.html"><small>AI</small><b>KRIM AI</b><span>Intelligence</span></a>
+
+</div>
+</div>
+</section>
+
+<footer class="footer">
+
+<div class="footgrid">
+
+<div>
+<b>KRIM Logistics</b>
+<p>Global logistics operating system connecting transportation, logistics networks, commercial workflows, intelligence, finance and compliance.</p>
+</div>
+
+<div>
+<b>Operations</b>
+<a href="../domains/shipments.html">Shipments</a>
+<a href="../domains/tracking.html">Tracking</a>
+<a href="../domains/network.html">Network</a>
+<a href="../domains/exceptions.html">Exceptions</a>
+</div>
+
+<div>
+<b>Enterprise</b>
+<a href="../domains/partners.html">Partners</a>
+<a href="../domains/capacity.html">Capacity</a>
+<a href="../domains/finance.html">Finance</a>
+<a href="../domains/analytics.html">Analytics</a>
+</div>
+
+<div>
+<b>Governance</b>
+<a href="../domains/compliance.html">Compliance</a>
+<a href="../trust/privacy.html">Privacy</a>
+<a href="../trust/terms.html">Terms</a>
+<a href="../trust/acceptable-use.html">Acceptable Use</a>
+</div>
+
+<div>
+<b>Platform</b>
+<a href="../domains/integrations.html">Integrations</a>
+<a href="../domains/ai.html">KRIM AI</a>
+<a href="../trust/cookies.html">Cookies</a>
+<a href="mailto:support@krimlogistics.com">Support</a>
+</div>
+
+</div>
+
+<div class="footbottom">
+<span>© 2026 KRIM Logistics. All rights reserved.</span>
+<span>Global Architecture · Operations</span>
+</div>
+
+</footer>
+
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+(function(){
+"use strict";
+
+const $=id=>document.getElementById(id);
+const side=$("side"),overlay=$("overlay");
+
+$("menu").onclick=()=>{
+side.classList.toggle("open");
+overlay.classList.toggle("open");
+};
+
+overlay.onclick=()=>{
+side.classList.remove("open");
+overlay.classList.remove("open");
+};
+
+const account=$("account"),menu=$("accountMenu");
+
+account.onclick=()=>{
+menu.classList.toggle("open");
+};
+
+document.addEventListener("click",e=>{
+if(!account.contains(e.target)&&!menu.contains(e.target))
+menu.classList.remove("open");
+});
+
+$("signout").onclick=async()=>{
+try{
+if(window.KRIM_AUTH)await KRIM_AUTH.signOut();
+}finally{
+location.href=window.KRIM_CONFIG?.routes?.auth?.login||"../auth/login.html";
+}
+};
+
+$("search").onkeydown=e=>{
+if(e.key==="Enter"&&e.target.value.trim())
+location.href="../domains/shipments.html?search="+encodeURIComponent(e.target.value.trim());
+};
+
+async function init(){
+try{
+if(window.KRIM_SECURITY?.requireUser){
+const u=await KRIM_SECURITY.requireUser({preserveReturnUrl:true});
+if(u){
+const email=u.email||"Operations";
+$("email").textContent=email;
+$("avatar").textContent=email.charAt(0).toUpperCase();
+}
+}
+}catch(e){
+console.error("KRIM operations authentication:",e);
+}
+}
+
+init();
+})();
+</script>
+
+</body>
+  </html>
