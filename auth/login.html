@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Sign In | KRIM Logistics</title>
+
+  <link rel="stylesheet" href="../core/krim-core.css">
+  <link rel="stylesheet" href="../core/krim-components.css">
+  <link rel="stylesheet" href="../core/krim-responsive.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(11, 92, 255, 0.10),
+          transparent 35%
+        ),
+        var(--krim-bg);
+    }
+
+    .krim-auth-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .krim-auth-header {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid var(--krim-border);
+    }
+
+    .krim-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--krim-text);
+      font-weight: 800;
+    }
+
+    .krim-brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--krim-primary);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .krim-brand-name {
+      font-size: 18px;
+    }
+
+    .krim-auth-note {
+      color: var(--krim-text-muted);
+      font-size: 13px;
+    }
+
+    .krim-auth-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 18px;
+    }
+
+    .krim-auth-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      border-radius: var(--krim-radius-lg);
+      box-shadow: var(--krim-shadow-lg);
+    }
+
+    .krim-auth-icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      background: rgba(11,92,255,.09);
+      font-size: 24px;
+    }
+
+    .krim-auth-card h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: -.03em;
+    }
+
+    .krim-auth-description {
+      margin: 0 0 26px;
+      color: var(--krim-text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .krim-form-group {
+      margin-bottom: 18px;
+    }
+
+    .krim-form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .krim-form-group input {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--krim-border);
+      border-radius: var(--krim-radius-sm);
+      background: #fff;
+      color: var(--krim-text);
+      font: inherit;
+      outline: none;
+    }
+
+    .krim-form-group input:focus {
+      border-color: var(--krim-primary);
+      box-shadow: 0 0 0 3px rgba(11,92,255,.10);
+    }
+
+    .krim-submit {
+      width: 100%;
+      min-height: 48px;
+    }
+
+    .krim-links {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .krim-links a {
+      color: var(--krim-primary);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .krim-links a:hover {
+      text-decoration: underline;
+    }
+
+    .krim-status {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .krim-status.is-visible {
+      display: block;
+    }
+
+    .krim-security-note {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--krim-border);
+      color: var(--krim-text-muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .krim-auth-footer {
+      padding: 18px 24px;
+      text-align: center;
+      color: var(--krim-text-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--krim-border);
+    }
+
+    @media (max-width: 520px) {
+      .krim-auth-header {
+        padding: 0 16px;
+      }
+
+      .krim-auth-note {
+        display: none;
+      }
+
+      .krim-auth-main {
+        padding: 28px 14px;
+      }
+
+      .krim-auth-card {
+        padding: 24px 18px;
+      }
+
+      .krim-links {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="krim-auth-page">
+
+  <header class="krim-auth-header">
+
+    <a
+      class="krim-brand"
+      href="../home.html"
+      aria-label="KRIM Logistics home"
+    >
+      <span class="krim-brand-mark">K</span>
+      <span class="krim-brand-name">KRIM Logistics</span>
+    </a>
+
+    <div class="krim-auth-note">
+      Secure Global Logistics Platform
+    </div>
+
+  </header>
+
+
+  <main class="krim-auth-main">
+
+    <section class="krim-auth-card">
+
+      <div class="krim-auth-icon">
+        🔐
+      </div>
+
+      <h1>Sign in to KRIM</h1>
+
+      <p class="krim-auth-description">
+        Access your KRIM Logistics workspace securely.
+      </p>
+
+
+      <div
+        id="statusBox"
+        class="krim-status"
+        role="alert"
+        aria-live="polite"
+      ></div>
+
+
+      <form id="loginForm" novalidate>
+
+        <div class="krim-form-group">
+
+          <label for="email">
+            Email address
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            autocomplete="username"
+            placeholder="you@example.com"
+            required
+          >
+
+        </div>
+
+
+        <div class="krim-form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            required
+          >
+
+        </div>
+
+
+        <button
+          id="submitButton"
+          type="submit"
+          class="krim-btn krim-btn-primary krim-submit"
+        >
+          Sign in
+        </button>
+
+      </form>
+
+
+      <div class="krim-links">
+
+        <a href="forgot-password.html">
+          Forgot password?
+        </a>
+
+        <a href="../home.html">
+          Back to KRIM
+        </a>
+
+      </div>
+
+
+      <div class="krim-security-note">
+        🔒 KRIM uses authenticated sessions and additional
+        security verification when required.
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer class="krim-auth-footer">
+    © <span id="currentYear"></span> KRIM Logistics ·
+    Global Logistics Operating System
+  </footer>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+
+<script>
+(function () {
+
+  "use strict";
+
+
+  const form =
+    document.getElementById("loginForm");
+
+  const emailInput =
+    document.getElementById("email");
+
+  const passwordInput =
+    document.getElementById("password");
+
+  const submitButton =
+    document.getElementById("submitButton");
+
+  const statusBox =
+    document.getElementById("statusBox");
+
+  const currentYear =
+    document.getElementById("currentYear");
+
+
+  currentYear.textContent =
+    new Date().getFullYear();
+
+
+  function showStatus(message, type) {
+
+    statusBox.textContent = message;
+
+    statusBox.className =
+      "krim-status is-visible " +
+      (
+        type === "success"
+          ? "krim-alert krim-alert-success"
+          : "krim-alert krim-alert-danger"
+      );
+  }
+
+
+  function setBusy(isBusy) {
+
+    submitButton.disabled = isBusy;
+
+    submitButton.textContent =
+      isBusy
+        ? "Signing in…"
+        : "Sign in";
+  }
+
+
+  form.addEventListener(
+    "submit",
+    async function (event) {
+
+      event.preventDefault();
+
+
+      const email =
+        emailInput.value.trim();
+
+      const password =
+        passwordInput.value;
+
+
+      if (!email || !password) {
+
+        showStatus(
+          "Please enter your email address and password.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      setBusy(true);
+
+
+      try {
+
+        /*
+         * Step 1:
+         * Authenticate with Supabase.
+         */
+        await window.KRIM_AUTH.signIn(
+          email,
+          password
+        );
+
+
+        /*
+         * Step 2:
+         * Check the actual authentication
+         * assurance level AFTER login.
+         */
+        const assurance =
+          await window.KRIM_AUTH.getAssuranceLevel();
+
+
+        /*
+         * AAL2 means MFA has been completed.
+         */
+        if (
+          assurance &&
+          assurance.currentLevel === "aal2"
+        ) {
+
+          showStatus(
+            "Sign in successful. Opening your workspace…",
+            "success"
+          );
+
+
+          window.location.replace(
+            "../workspaces/customer-workspace.html"
+          );
+
+          return;
+        }
+
+
+        /*
+         * AAL1 + nextLevel AAL2 means MFA
+         * is required.
+         *
+         * IMPORTANT:
+         * This is the critical routing fix.
+         */
+        if (
+          assurance &&
+          assurance.nextLevel === "aal2"
+        ) {
+
+          showStatus(
+            "Your account is signed in, but additional security verification is required.",
+            "error"
+          );
+
+
+          setTimeout(function () {
+
+            window.location.replace(
+              "mfa.html"
+            );
+
+          }, 500);
+
+          return;
+        }
+
+
+        /*
+         * If Supabase does not report a higher
+         * assurance requirement, proceed normally.
+         */
+        showStatus(
+          "Sign in successful. Opening your workspace…",
+          "success"
+        );
+
+
+        window.location.replace(
+          "../workspaces/customer-workspace.html"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "KRIM login error:",
+          error
+        );
+
+
+        showStatus(
+          error?.message ||
+          "Unable to sign in. Please check your credentials and try again.",
+          "error"
+        );
+
+
+        setBusy(false);
+      }
+
+    }
+  );
+
+})();
+</script>
+
+</body>
+</html>
