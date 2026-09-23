@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>KRIM Logistics — MFA Enrollment</title>
+
+  <link rel="stylesheet" href="../core/krim-core.css">
+  <link rel="stylesheet" href="../core/krim-components.css">
+  <link rel="stylesheet" href="../core/krim-responsive.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--krim-bg, #f5f7fb);
+    }
+
+    .mfa-page {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .mfa-card {
+      background: #fff;
+      border: 1px solid var(--krim-border, #e2e8f0);
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+
+    .mfa-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--krim-border, #e2e8f0);
+    }
+
+    .krim-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .krim-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0b5cff;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 750;
+      color: #0f172a;
+    }
+
+    .brand-subtitle {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .mfa-title {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.25;
+      color: #0f172a;
+    }
+
+    .mfa-description {
+      margin: 8px 0 0;
+      color: #64748b;
+      line-height: 1.55;
+    }
+
+    .mfa-body {
+      padding: 28px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .security-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 18px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef4ff;
+      color: #0b5cff;
+      font-size: 27px;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .qr-box {
+      width: min(280px, 100%);
+      min-height: 280px;
+      margin: 22px auto;
+      padding: 16px;
+      border: 1px solid #dbe3ef;
+      border-radius: 16px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-box img,
+    .qr-box svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .secret-box {
+      margin: 18px 0;
+      padding: 14px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #f8fafc;
+      text-align: center;
+    }
+
+    .secret-label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .secret-value {
+      display: block;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .form-group {
+      margin-top: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+      font-weight: 650;
+      color: #334155;
+    }
+
+    .code-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-align: center;
+      color: #0f172a;
+      outline: none;
+    }
+
+    .code-input:focus {
+      border-color: #0b5cff;
+      box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .actions > * {
+      flex: 1;
+    }
+
+    .status {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .status.success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px 0;
+      color: #64748b;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 12px;
+      border: 3px solid #dbe5f5;
+      border-top-color: #0b5cff;
+      border-radius: 50%;
+      animation: krim-spin 0.8s linear infinite;
+    }
+
+    @keyframes krim-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .mfa-footer {
+      padding: 18px 28px;
+      border-top: 1px solid var(--krim-border, #e2e8f0);
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .small-note {
+      margin-top: 14px;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 12px;
+      }
+
+      .mfa-header,
+      .mfa-body {
+        padding: 22px 18px;
+      }
+
+      .mfa-footer {
+        padding: 16px 18px;
+      }
+
+      .mfa-title {
+        font-size: 22px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="mfa-page">
+    <section class="mfa-card">
+
+      <header class="mfa-header">
+        <div class="krim-brand">
+          <div class="krim-mark">K</div>
+
+          <div>
+            <div class="brand-name">KRIM Logistics</div>
+            <div class="brand-subtitle">
+              Global Logistics Operating System
+            </div>
+          </div>
+        </div>
+
+        <h1 class="mfa-title">Secure your account</h1>
+
+        <p class="mfa-description">
+          Set up multi-factor authentication to protect your KRIM account
+          and access protected platform services.
+        </p>
+      </header>
+
+      <div class="mfa-body">
+
+        <!-- INITIAL LOADING -->
+        <section id="step-loading" class="step active">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div id="loading-message">
+              Checking your secure account session...
+            </div>
+          </div>
+        </section>
+
+        <!-- ENROLLMENT -->
+        <section id="step-enroll" class="step">
+
+          <div class="center">
+            <div class="security-icon">🛡️</div>
+
+            <h2>Set up your authenticator</h2>
+
+            <p class="mfa-description">
+              Scan the QR code with an authenticator application such as
+              Google Authenticator, Microsoft Authenticator, or another
+              compatible TOTP application.
+            </p>
+          </div>
+
+          <div id="qr-container" class="qr-box">
+            Preparing secure QR code...
+          </div>
+
+          <div class="secret-box">
+            <span class="secret-label">
+              Manual setup key
+            </span>
+
+            <span id="secret-value" class="secret-value">
+              —
+            </span>
+          </div>
+
+          <p class="small-note">
+            If your authenticator cannot scan the QR code, enter the manual
+            setup key instead. Keep this key private.
+          </p>
+
+          <div class="form-group">
+            <label
+              class="form-label"
+              for="verification-code"
+            >
+              Authentication code
+            </label>
+
+            <input
+              id="verification-code"
+              class="code-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              pattern="[0-9]{6}"
+              placeholder="000000"
+              aria-label="6-digit authentication code"
+            >
+          </div>
+
+          <div class="actions">
+            <button
+              id="verify-button"
+              class="krim-btn krim-btn-primary"
+              type="button"
+            >
+              Verify and activate
+            </button>
+
+            <button
+              id="signout-button"
+              class="krim-btn krim-btn-secondary"
+              type="button"
+            >
+              Cancel and sign out
+            </button>
+          </div>
+
+          <div
+            id="enroll-status"
+            class="status"
+            role="alert"
+          ></div>
+
+        </section>
+
+        <!-- ALREADY ENROLLED -->
+        <section id="step-complete" class="step">
+
+          <div class="center">
+            <div class="security-icon">✓</div>
+
+            <h2>MFA is already enabled</h2>
+
+            <p class="mfa-description">
+              A verified authenticator is already associated with this
+              account.
+            </p>
+
+            <div class="actions">
+              <button
+                id="continue-button"
+                class="krim-btn krim-btn-primary"
+                type="button"
+              >
+                Continue to security verification
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- EXISTING UNVERIFIED FACTOR -->
+        <section id="step-existing" class="step">
+
+          <div class="center">
+            <div class="security-icon">!</div>
+
+            <h2>Authenticator setup already started</h2>
+
+            <p class="mfa-description">
+              An unverified authenticator already exists for this account.
+              KRIM will not create a duplicate authenticator.
+            </p>
+
+            <p class="small-note">
+              Complete or remove the existing authenticator setup before
+              starting another enrollment.
+            </p>
+
+            <div class="actions">
+              <button
+                id="existing-signout-button"
+                class="krim-btn krim-btn-secondary"
+                type="button"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ERROR -->
+        <section id="step-error" class="step">
+
+          <div class="center">
+            <div class="security-icon">!</div>
+
+            <h2>MFA enrollment could not start</h2>
+
+            <p
+              id="fatal-error-message"
+              class="mfa-description"
+            >
+              Please try again.
+            </p>
+
+            <div class="actions">
+              <button
+                id="error-signout-button"
+                class="krim-btn krim-btn-secondary"
+                type="button"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+      <footer class="mfa-footer">
+        🔒 KRIM authentication security ·
+        Your verification code is processed securely and is not stored
+        by this page.
+        <br><br>
+        © 2026 KRIM Logistics
+      </footer>
+
+    </section>
+  </main>
+
+  <!-- Official Supabase JavaScript client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- KRIM permanent platform services -->
+  <script src="../platform/krim-config.js"></script>
+  <script src="../platform/krim-supabase.js"></script>
+  <script src="../platform/krim-auth.js"></script>
+  <script src="../platform/krim-api.js"></script>
+  <script src="../platform/krim-ui.js"></script>
+  <script src="../platform/krim-security.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      let enrolledFactorId = null;
+      let challengeId = null;
+
+      function get(id) {
+        return document.getElementById(id);
+      }
+
+      function showStep(id) {
+        document.querySelectorAll(".step").forEach(function (step) {
+          step.classList.remove("active");
+        });
+
+        const target = get(id);
+
+        if (target) {
+          target.classList.add("active");
+        }
+      }
+
+      function showStatus(message, type) {
+        const box = get("enroll-status");
+
+        if (!box) {
+          return;
+        }
+
+        box.textContent = message;
+        box.className = "status show " + (type || "info");
+      }
+
+      function setLoading(message) {
+        const element = get("loading-message");
+
+        if (element) {
+          element.textContent = message;
+        }
+      }
+
+      function normalizeError(error) {
+        if (!error) {
+          return "An unknown security error occurred.";
+        }
+
+        if (typeof error === "string") {
+          return error;
+        }
+
+        return (
+          error.message ||
+          error.error_description ||
+          error.error ||
+          "An unknown security error occurred."
+        );
+      }
+
+      function goToLogin() {
+        window.location.href = "../auth/login.html";
+      }
+
+      function goToWorkspace() {
+        window.location.href = "../workspaces/customer-workspace.html";
+      }
+
+      async function signOutAndLogin() {
+        try {
+          await window.KRIM_AUTH.signOut();
+        } finally {
+          goToLogin();
+        }
+      }
+
+      function renderQRCode(qrCode) {
+        const container = get("qr-container");
+
+        if (!container) {
+          return;
+        }
+
+        container.innerHTML = "";
+
+        if (!qrCode) {
+          container.textContent =
+            "QR code was not returned by the authentication service.";
+          return;
+        }
+
+        /*
+         * Supabase normally returns the TOTP QR code as a data URL.
+         * It may also return SVG markup depending on the client version.
+         */
+
+        if (
+          typeof qrCode === "string" &&
+          qrCode.trim().startsWith("<svg")
+        ) {
+          container.innerHTML = qrCode;
+          return;
+        }
+
+        const image = document.createElement("img");
+
+        image.alt =
+          "KRIM Logistics authenticator enrollment QR code";
+
+        image.src = qrCode;
+
+        image.onload = function () {
+          container.innerHTML = "";
+          container.appendChild(image);
+        };
+
+        image.onerror = function () {
+          container.textContent =
+            "The QR code could not be displayed. Use the manual setup key below.";
+        };
+
+        container.appendChild(image);
+      }
+
+      function validateCode(code) {
+        return /^[0-9]{6}$/.test(code);
+      }
+
+      async function verifyEnrollment() {
+        const button = get("verify-button");
+        const input = get("verification-code");
+
+        const code = input
+          ? input.value.trim()
+          : "";
+
+        if (!validateCode(code)) {
+          showStatus(
+            "Enter the current 6-digit authentication code from your authenticator application.",
+            "error"
+          );
+
+          if (input) {
+            input.focus();
+          }
+
+          return;
+        }
+
+        if (!enrolledFactorId || !challengeId) {
+          showStatus(
+            "The MFA enrollment session is incomplete. Please reload the page and try again.",
+            "error"
+          );
+
+          return;
+        }
+
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Verifying...";
+        }
+
+        showStatus(
+          "Verifying your authenticator securely...",
+          "info"
+        );
+
+        try {
+          const result =
+            await window.KRIM_AUTH.verifyMFA(
+              enrolledFactorId,
+              challengeId,
+              code
+            );
+
+          if (!result || !result.data) {
+            throw (
+              result && result.error
+                ? result.error
+                : new Error("MFA verification failed.")
+            );
+          }
+
+          showStatus(
+            "Authenticator verified. Confirming secure session...",
+            "success"
+          );
+
+          const assurance =
+            await window.KRIM_AUTH.getAssuranceLevel();
+
+          if (
+            !assurance ||
+            assurance.error ||
+            assurance.currentLevel !== "aal2"
+          ) {
+            throw new Error(
+              "Authenticator verification succeeded, but the secure AAL2 session could not be confirmed."
+            );
+          }
+
+          showStatus(
+            "MFA is active. Opening your protected KRIM workspace...",
+            "success"
+          );
+
+          setTimeout(goToWorkspace, 700);
+
+        } catch (error) {
+          console.error(
+            "[KRIM MFA enrollment] verification error:",
+            error
+          );
+
+          showStatus(
+            normalizeError(error),
+            "error"
+          );
+
+          if (button) {
+            button.disabled = false;
+            button.textContent = "Verify and activate";
+          }
+        }
+      }
+
+      async function enrollAuthenticator() {
+        try {
+          setLoading(
+            "Checking your secure account session..."
+          );
+
+          if (
+            !window.KRIM_SUPABASE ||
+            !window.KRIM_AUTH
+          ) {
+            throw new Error(
+              "KRIM authentication services are not available."
+            );
+          }
+
+          const sessionResult =
+            await window.KRIM_AUTH.getSession();
+
+          if (
+            !sessionResult ||
+            sessionResult.error ||
+            !sessionResult.session
+          ) {
+            goToLogin();
+            return;
+          }
+
+          setLoading(
+            "Checking your existing security factors..."
+          );
+
+          const factorResult =
+            await window.KRIM_AUTH.getMFAFactors();
+
+          if (!factorResult || factorResult.error) {
+            throw (
+              factorResult && factorResult.error
+                ? factorResult.error
+                : new Error(
+                    "Unable to read MFA factors."
+                  )
+            );
+          }
+
+          const factors =
+            factorResult.data || {};
+
+          const allFactors =
+            Array.isArray(factors.all)
+              ? factors.all
+              : [];
+
+          const verifiedFactors =
+            Array.isArray(factors.totp)
+              ? factors.totp.filter(function (factor) {
+                  return factor.status === "verified";
+                })
+              : [];
+
+          const unverifiedFactors =
+            Array.isArray(factors.totp)
+              ? factors.totp.filter(function (factor) {
+                  return factor.status === "unverified";
+                })
+              : [];
+
+          if (verifiedFactors.length > 0) {
+            showStep("step-complete");
+            return;
+          }
+
+          if (unverifiedFactors.length > 0) {
+            showStep("step-existing");
+            return;
+          }
+
+          setLoading(
+            "Creating your secure authenticator enrollment..."
+          );
+
+          const enrollResult =
+            await window.KRIM_SUPABASE.auth.mfa.enroll({
+              factorType: "totp",
+              friendlyName: "KRIM Authenticator"
+            });
+
+          if (
+            !enrollResult ||
+            enrollResult.error ||
+            !enrollResult.data
+          ) {
+            throw (
+              enrollResult && enrollResult.error
+                ? enrollResult.error
+                : new Error(
+                    "The authentication service did not return an MFA enrollment."
+                  )
+            );
+          }
+
+          const factor =
+            enrollResult.data;
+
+          enrolledFactorId =
+            factor.id || null;
+
+          if (!enrolledFactorId) {
+            throw new Error(
+              "MFA enrollment was created without a factor ID."
+            );
+          }
+
+          const totp =
+            factor.totp || {};
+
+          const qrCode =
+            totp.qr_code || null;
+
+          const secret =
+            totp.secret || null;
+
+          if (!qrCode && !sec
