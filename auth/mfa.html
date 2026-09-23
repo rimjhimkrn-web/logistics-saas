@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Security Verification | KRIM Logistics</title>
+
+  <link rel="stylesheet" href="../core/krim-core.css">
+  <link rel="stylesheet" href="../core/krim-components.css">
+  <link rel="stylesheet" href="../core/krim-responsive.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(11, 92, 255, 0.10),
+          transparent 35%
+        ),
+        var(--krim-bg);
+    }
+
+    .krim-mfa-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .krim-mfa-header {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid var(--krim-border);
+    }
+
+    .krim-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--krim-text);
+      font-weight: 800;
+    }
+
+    .krim-brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--krim-primary);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .krim-brand-name {
+      font-size: 18px;
+    }
+
+    .krim-mfa-header-note {
+      color: var(--krim-text-muted);
+      font-size: 13px;
+    }
+
+    .krim-mfa-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 18px;
+    }
+
+    .krim-mfa-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      border-radius: var(--krim-radius-lg);
+      box-shadow: var(--krim-shadow-lg);
+    }
+
+    .krim-mfa-icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      background: rgba(11,92,255,.09);
+      font-size: 24px;
+    }
+
+    .krim-mfa-card h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: -.03em;
+    }
+
+    .krim-mfa-description {
+      margin: 0 0 26px;
+      color: var(--krim-text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .krim-mfa-status {
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .krim-mfa-status.is-visible {
+      display: block;
+    }
+
+    .krim-code-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .krim-code-input {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 14px;
+      text-align: center;
+      letter-spacing: .35em;
+      font-size: 24px;
+      font-weight: 800;
+      border: 1px solid var(--krim-border);
+      border-radius: var(--krim-radius-sm);
+      background: #fff;
+      color: var(--krim-text);
+      outline: none;
+    }
+
+    .krim-code-input:focus {
+      border-color: var(--krim-primary);
+      box-shadow: 0 0 0 3px rgba(11,92,255,.10);
+    }
+
+    .krim-mfa-submit {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 18px;
+    }
+
+    .krim-signout {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 12px;
+    }
+
+    .krim-security-note {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--krim-border);
+      color: var(--krim-text-muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .krim-mfa-footer {
+      padding: 18px 24px;
+      text-align: center;
+      color: var(--krim-text-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--krim-border);
+    }
+
+    @media (max-width: 520px) {
+
+      .krim-mfa-header {
+        padding: 0 16px;
+      }
+
+      .krim-mfa-header-note {
+        display: none;
+      }
+
+      .krim-mfa-main {
+        padding: 28px 14px;
+      }
+
+      .krim-mfa-card {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="krim-mfa-page">
+
+  <header class="krim-mfa-header">
+
+    <a
+      class="krim-brand"
+      href="../home.html"
+      aria-label="KRIM Logistics home"
+    >
+      <span class="krim-brand-mark">K</span>
+      <span class="krim-brand-name">KRIM Logistics</span>
+    </a>
+
+    <div class="krim-mfa-header-note">
+      Multi-Factor Security
+    </div>
+
+  </header>
+
+
+  <main class="krim-mfa-main">
+
+    <section class="krim-mfa-card">
+
+      <div class="krim-mfa-icon">
+        🛡️
+      </div>
+
+      <h1>Verify your identity</h1>
+
+      <p class="krim-mfa-description">
+        Enter the 6-digit verification code from your
+        authenticator application to continue securely.
+      </p>
+
+
+      <div
+        id="statusBox"
+        class="krim-mfa-status"
+        role="alert"
+        aria-live="polite"
+      ></div>
+
+
+      <form id="mfaForm" novalidate>
+
+        <label
+          class="krim-code-label"
+          for="code"
+        >
+          Authentication code
+        </label>
+
+
+        <input
+          id="code"
+          class="krim-code-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          placeholder="000000"
+          required
+        >
+
+
+        <button
+          id="verifyButton"
+          class="krim-btn krim-btn-primary krim-mfa-submit"
+          type="submit"
+          disabled
+        >
+          Verify and continue
+        </button>
+
+      </form>
+
+
+      <button
+        id="signoutButton"
+        class="krim-btn krim-btn-secondary krim-signout"
+        type="button"
+      >
+        Cancel and sign out
+      </button>
+
+
+      <div class="krim-security-note">
+        🔒 Your verification code is processed through the
+        KRIM authentication service and is not stored by this page.
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <footer class="krim-mfa-footer">
+    © <span id="currentYear"></span> KRIM Logistics ·
+    Global Logistics Operating System
+  </footer>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+
+<script>
+(function () {
+
+  "use strict";
+
+
+  const form =
+    document.getElementById("mfaForm");
+
+  const codeInput =
+    document.getElementById("code");
+
+  const verifyButton =
+    document.getElementById("verifyButton");
+
+  const signoutButton =
+    document.getElementById("signoutButton");
+
+  const statusBox =
+    document.getElementById("statusBox");
+
+  const currentYear =
+    document.getElementById("currentYear");
+
+
+  let verifiedFactor = null;
+  let challengeId = null;
+
+
+  currentYear.textContent =
+    new Date().getFullYear();
+
+
+  function showStatus(message, type) {
+
+    statusBox.textContent = message;
+
+    statusBox.className =
+      "krim-mfa-status is-visible " +
+      (
+        type === "success"
+          ? "krim-alert krim-alert-success"
+          : "krim-alert krim-alert-danger"
+      );
+  }
+
+
+  function setBusy(isBusy) {
+
+    verifyButton.disabled = isBusy;
+
+    verifyButton.textContent =
+      isBusy
+        ? "Verifying…"
+        : "Verify and continue";
+  }
+
+
+  function updateButton() {
+
+    verifyButton.disabled =
+      !verifiedFactor ||
+      !challengeId ||
+      !/^\d{6}$/.test(
+        codeInput.value.trim()
+      );
+  }
+
+
+  async function initializeMFA() {
+
+    try {
+
+      if (!window.KRIM_AUTH) {
+        throw new Error(
+          "KRIM authentication service is unavailable."
+        );
+      }
+
+
+      /*
+       * Confirm that a signed-in session exists.
+       */
+      const session =
+        await window.KRIM_AUTH.getSession();
+
+
+      if (!session) {
+
+        showStatus(
+          "Your sign-in session is no longer available. Please sign in again.",
+          "error"
+        );
+
+        verifyButton.disabled = true;
+
+        setTimeout(function () {
+
+          window.location.replace(
+            "login.html"
+          );
+
+        }, 1200);
+
+        return;
+      }
+
+
+      /*
+       * If MFA has already been completed,
+       * there is nothing more to verify.
+       */
+      const assurance =
+        await window.KRIM_AUTH.getAssuranceLevel();
+
+
+      if (
+        assurance &&
+        assurance.currentLevel === "aal2"
+      ) {
+
+        window.location.replace(
+          "../workspaces/customer-workspace.html"
+        );
+
+        return;
+      }
+
+
+      /*
+       * Get MFA factors belonging to the
+       * currently authenticated user.
+       */
+      const factors =
+        await window.KRIM_AUTH.listMFAFactors();
+
+
+      const verifiedFactors =
+        Array.isArray(factors)
+          ? factors.filter(function (factor) {
+
+              return (
+                factor.factor_type === "totp" &&
+                factor.status === "verified"
+              );
+
+            })
+          : [];
+
+
+      if (!verifiedFactors.length) {
+
+        showStatus(
+          "No verified authenticator is available for this account. Please contact KRIM support or complete MFA enrollment.",
+          "error"
+        );
+
+        verifyButton.disabled = true;
+
+        return;
+      }
+
+
+      /*
+       * Use the first verified TOTP factor.
+       */
+      verifiedFactor =
+        verifiedFactors[0];
+
+
+      /*
+       * Create the MFA challenge.
+       */
+      const challenge =
+        await window.KRIM_AUTH.challengeMFA(
+          verifiedFactor.id
+        );
+
+
+      challengeId =
+        challenge.id;
+
+
+      updateButton();
+
+
+    } catch (error) {
+
+      console.error(
+        "KRIM MFA initialization error:",
+        error
+      );
+
+
+      showStatus(
+        error?.message ||
+        "Unable to initialize MFA verification. Please sign in again.",
+        "error"
+      );
+
+
+      verifyButton.disabled = true;
+    }
+
+  }
+
+
+  codeInput.addEventListener(
+    "input",
+    function () {
+
+      codeInput.value =
+        codeInput.value
+          .replace(/\D/g, "")
+          .slice(0, 6);
+
+      updateButton();
+    }
+  );
+
+
+  form.addEventListener(
+    "submit",
+    async function (event) {
+
+      event.preventDefault();
+
+
+      const code =
+        codeInput.value.trim();
+
+
+      if (!verifiedFactor || !challengeId) {
+
+        showStatus(
+          "The MFA challenge is not ready. Please reload and try again.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (!/^\d{6}$/.test(code)) {
+
+        showStatus(
+          "Enter the 6-digit authentication code.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      setBusy(true);
+
+
+      try {
+
+        /*
+         * Verify the exact challenge created
+         * for this authenticated session.
+         */
+        await window.KRIM_AUTH.verifyMFA(
+          verifiedFactor.id,
+          challengeId,
+          code
+        );
+
+
+        /*
+         * Confirm that Supabase now reports
+         * the required AAL2 level.
+         */
+        const assurance =
+          await window.KRIM_AUTH.getAssuranceLevel();
+
+
+        if (
+          !assurance ||
+          assurance.currentLevel !== "aal2"
+        ) {
+
+          throw new Error(
+            "MFA verification did not establish the required security level."
+          );
+        }
+
+
+        showStatus(
+          "Identity verified. Opening your workspace…",
+          "success"
+        );
+
+
+        setTimeout(function () {
+
+          window.location.replace(
+            "../workspaces/customer-workspace.html"
+          );
+
+        }, 500);
+
+
+      } catch (error) {
+
+        console.error(
+          "KRIM MFA verification error:",
+          error
+        );
+
+
+        showStatus(
+          error?.message ||
+          "The verification code is invalid or expired. Please try again.",
+          "error"
+        );
+
+
+        codeInput.value = "";
+
+        setBusy(false);
+
+        updateButton();
+      }
+
+    }
+  );
+
+
+  signoutButton.addEventListener(
+    "click",
+    async function () {
+
+      signoutButton.disabled = true;
+
+      signoutButton.textContent =
+        "Signing out…";
+
+
+      try {
+
+        await window.KRIM_AUTH.signOut();
+
+      } catch (error) {
+
+        console.error(
+          "KRIM sign-out error:",
+          error
+        );
+
+      } finally {
+
+        window.location.replace(
+          "login.html"
+        );
+
+      }
+
+    }
+  );
+
+
+  initializeMFA();
+
+})();
+</script>
+
+</body>
+  </html>
