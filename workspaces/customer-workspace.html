@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b5cff">
+
+<title>KRIM Dashboard</title>
+
+<style>
+:root{
+    --blue:#0b5cff;
+    --blue-dark:#0847c7;
+    --navy:#142033;
+    --text:#263246;
+    --muted:#738095;
+    --soft:#f5f7fa;
+    --line:#e2e7ef;
+    --white:#fff;
+    --green:#16834b;
+    --green-bg:#eef8f2;
+    --orange:#b86b00;
+    --orange-bg:#fff5e7;
+    --red:#c9363e;
+    --red-bg:#fff1f2;
+    --sidebar:238px;
+    --header:64px;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    min-height:100%;
+    background:var(--soft);
+    color:var(--text);
+    font-family:Inter,Arial,Helvetica,sans-serif;
+}
+
+body{
+    min-height:100vh;
+}
+
+button,
+input,
+select{
+    font:inherit;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.krim-header{
+    position:fixed;
+    z-index:1000;
+    top:0;
+    left:0;
+    right:0;
+
+    height:var(--header);
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:0 18px;
+
+    background:#fff;
+    border-bottom:1px solid var(--line);
+}
+
+.krim-menu{
+    display:none;
+
+    width:36px;
+    height:36px;
+
+    border:1px solid var(--line);
+    border-radius:8px;
+
+    background:#fff;
+
+    cursor:pointer;
+}
+
+.krim-brand{
+    width:215px;
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    flex-shrink:0;
+}
+
+.krim-logo{
+    width:35px;
+    height:35px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:9px;
+
+    background:var(--blue);
+    color:#fff;
+
+    font-weight:900;
+    font-size:17px;
+}
+
+.krim-brand-text strong{
+    display:block;
+
+    color:var(--navy);
+
+    font-size:17px;
+    line-height:1;
+}
+
+.krim-brand-text small{
+    display:block;
+
+    margin-top:4px;
+
+    color:#8b95a5;
+
+    font-size:7px;
+    font-weight:800;
+    letter-spacing:.08em;
+}
+
+.krim-search{
+    width:min(420px,38vw);
+}
+
+.krim-search input{
+    width:100%;
+    height:37px;
+
+    padding:0 12px;
+
+    border:1px solid var(--line);
+    border-radius:8px;
+
+    background:#f8fafc;
+    color:var(--text);
+
+    outline:none;
+
+    font-size:10px;
+}
+
+.krim-search input:focus{
+    border-color:var(--blue);
+    background:#fff;
+}
+
+.krim-header-space{
+    flex:1;
+}
+
+.krim-header-actions{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.krim-icon-button{
+    width:36px;
+    height:36px;
+
+    display:grid;
+    place-items:center;
+
+    border:1px solid var(--line);
+    border-radius:8px;
+
+    background:#fff;
+    color:#647084;
+
+    cursor:pointer;
+}
+
+.krim-user{
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:3px 10px 3px 4px;
+
+    border:1px solid var(--line);
+    border-radius:8px;
+
+    background:#fff;
+
+    cursor:pointer;
+}
+
+.krim-avatar{
+    width:29px;
+    height:29px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:#eaf1ff;
+    color:var(--blue);
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.krim-user-name{
+    max-width:150px;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    font-size:9px;
+    font-weight:800;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.krim-sidebar{
+    position:fixed;
+    z-index:900;
+
+    top:var(--header);
+    bottom:0;
+    left:0;
+
+    width:var(--sidebar);
+
+    padding:16px 10px;
+
+    overflow-y:auto;
+
+    background:#fff;
+    border-right:1px solid var(--line);
+}
+
+.krim-nav-section{
+    margin-bottom:18px;
+}
+
+.krim-nav-title{
+    padding:0 9px 7px;
+
+    color:#8b95a5;
+
+    font-size:7px;
+    font-weight:900;
+
+    letter-spacing:.1em;
+    text-transform:uppercase;
+}
+
+.krim-nav-link{
+    min-height:37px;
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:0 10px;
+
+    border-radius:7px;
+
+    color:#59667a;
+
+    font-size:10px;
+    font-weight:700;
+}
+
+.krim-nav-link:hover,
+.krim-nav-link.active{
+    background:#eaf1ff;
+    color:var(--blue);
+}
+
+.krim-nav-icon{
+    width:17px;
+    text-align:center;
+    font-weight:900;
+}
+
+/* =========================================================
+   MOBILE OVERLAY
+   ========================================================= */
+
+.krim-overlay{
+    display:none;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.krim-main{
+    min-height:100vh;
+
+    margin-left:var(--sidebar);
+    padding-top:var(--header);
+}
+
+.krim-content{
+    width:100%;
+    max-width:1600px;
+
+    margin:0 auto;
+
+    padding:24px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.krim-breadcrumb{
+    margin-bottom:9px;
+
+    color:#8b95a5;
+
+    font-size:8px;
+}
+
+.krim-hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+
+    gap:20px;
+
+    margin-bottom:20px;
+}
+
+.krim-eyebrow{
+    color:var(--blue);
+
+    font-size:8px;
+    font-weight:900;
+
+    letter-spacing:.12em;
+}
+
+.krim-hero h1{
+    margin:5px 0 0;
+
+    color:var(--navy);
+
+    font-size:clamp(28px,3vw,40px);
+    line-height:1.05;
+    letter-spacing:-.04em;
+}
+
+.krim-hero p{
+    max-width:720px;
+
+    margin:10px 0 0;
+
+    color:var(--muted);
+
+    font-size:11px;
+    line-height:1.6;
+}
+
+.krim-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+}
+
+.krim-button{
+    min-height:38px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0 14px;
+
+    border:1px solid var(--line);
+    border-radius:7px;
+
+    background:#fff;
+
+    color:#536074;
+
+    font-size:9px;
+    font-weight:900;
+
+    cursor:pointer;
+}
+
+.krim-button-primary{
+    border-color:var(--blue);
+    background:var(--blue);
+    color:#fff;
+}
+
+.krim-button-primary:hover{
+    background:var(--blue-dark);
+}
+
+/* =========================================================
+   CONTEXT
+   ========================================================= */
+
+.krim-context{
+    display:grid;
+    grid-template-columns:2fr repeat(4,1fr);
+
+    gap:1px;
+
+    overflow:hidden;
+
+    margin-bottom:15px;
+
+    border:1px solid var(--line);
+    border-radius:9px;
+
+    background:var(--line);
+}
+
+.krim-context-item{
+    min-height:59px;
+
+    padding:11px 13px;
+
+    background:#fff;
+}
+
+.krim-context-item small{
+    display:block;
+
+    color:#8b95a5;
+
+    font-size:7px;
+    font-weight:900;
+
+    text-transform:uppercase;
+}
+
+.krim-context-item strong{
+    display:block;
+
+    margin-top:5px;
+
+    color:var(--navy);
+
+    font-size:10px;
+}
+
+/* =========================================================
+   KPI
+   ========================================================= */
+
+.krim-kpis{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+
+    gap:9px;
+
+    margin-bottom:15px;
+}
+
+.krim-kpi{
+    min-height:105px;
+
+    padding:14px;
+
+    border:1px solid var(--line);
+    border-radius:9px;
+
+    background:#fff;
+}
+
+.krim-kpi small{
+    color:#8b95a5;
+
+    font-size:7px;
+    font-weight:900;
+
+    text-transform:uppercase;
+}
+
+.krim-kpi strong{
+    display:block;
+
+    margin-top:9px;
+
+    color:var(--navy);
+
+    font-size:23px;
+    font-weight:900;
+}
+
+.krim-kpi span{
+    display:block;
+
+    margin-top:4px;
+
+    color:#8b95a5;
+
+    font-size:7px;
+}
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.krim-grid{
+    display:grid;
+    grid-template-columns:1.65fr 1fr;
+
+    gap:14px;
+
+    margin-bottom:14px;
+}
+
+.krim-panel{
+    overflow:hidden;
+
+    border:1px solid var(--line);
+    border-radius:9px;
+
+    background:#fff;
+}
+
+.krim-panel-header{
+    min-height:55px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 14px;
+
+    border-bottom:1px solid #edf0f4;
+}
+
+.krim-panel-title strong{
+    display:block;
+
+    color:var(--navy);
+
+    font-size:11px;
+}
+
+.krim-panel-title small{
+    display:block;
+
+    margin-top:3px;
+
+    color:#8b95a5;
+
+    font-size:7px;
+}
+
+.krim-panel-link{
+    color:var(--blue);
+
+    font-size:8px;
+    font-weight:900;
+}
+
+.krim-panel-body{
+    padding:14px;
+}
+
+/* =========================================================
+   SHIPMENT TABLE
+   ========================================================= */
+
+.krim-tools{
+    display:flex;
+    gap:7px;
+
+    margin-bottom:10px;
+}
+
+.krim-tools input,
+.krim-tools select{
+    height:34px;
+
+    border:1px solid var(--line);
+    border-radius:6px;
+
+    background:#fff;
+    color:var(--text);
+
+    outline:none;
+
+    font-size:8px;
+}
+
+.krim-tools input{
+    flex:1;
+    min-width:0;
+
+    padding:0 10px;
+}
+
+.krim-tools select{
+    padding:0 8px;
+}
+
+.krim-table-wrap{
+    overflow-x:auto;
+}
+
+.krim-table{
+    width:100%;
+    min-width:620px;
+
+    border-collapse:collapse;
+}
+
+.krim-table th{
+    padding:8px;
+
+    background:#f8fafc;
+
+    color:#8b95a5;
+
+    font-size:7px;
+    font-weight:900;
+
+    text-align:left;
+    text-transform:uppercase;
+}
+
+.krim-table td{
+    padding:10px 8px;
+
+    border-top:1px solid #edf0f4;
+
+    color:#59667a;
+
+    font-size:8px;
+}
+
+.krim-table td strong{
+    color:var(--navy);
+}
+
+.krim-empty{
+    padding:26px 12px;
+
+    border:1px dashed var(--line);
+    border-radius:7px;
+
+    color:#8b95a5;
+
+    font-size:9px;
+
+    line-height:1.5;
+
+    text-align:center;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.krim-status{
+    display:inline-flex;
+    align-items:center;
+
+    min-height:20px;
+
+    padding:0 7px;
+
+    border-radius:999px;
+
+    font-size:7px;
+    font-weight:900;
+}
+
+.krim-status-neutral{
+    background:#eef1f5;
+    color:#697586;
+}
+
+.krim-status-success{
+    background:var(--green-bg);
+    color:var(--green);
+}
+
+.krim-status-warning{
+    background:var(--orange-bg);
+    color:var(--orange);
+}
+
+.krim-status-danger{
+    background:var(--red-bg);
+    color:var(--red);
+}
+
+/* =========================================================
+   ATTENTION
+   ========================================================= */
+
+.krim-attention{
+    display:flex;
+    gap:9px;
+
+    padding:11px 0;
+
+    border-bottom:1px solid #edf0f4;
+}
+
+.krim-attention:last-child{
+    border-bottom:0;
+}
+
+.krim-attention-icon{
+    width:30px;
+    height:30px;
+
+    flex:0 0 30px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:7px;
+
+    background:var(--orange-bg);
+    color:var(--orange);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.krim-attention strong{
+    display:block;
+
+    font-size:9px;
+}
+
+.krim-attention span{
+    display:block;
+
+    margin-top:3px;
+
+    color:#8b95a5;
+
+    font-size:8px;
+    line-height:1.45;
+}
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.krim-quick-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+
+    gap:7px;
+}
+
+.krim-quick{
+    min-height:70px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    padding:10px;
+
+    border:1px solid var(--line);
+    border-radius:7px;
+
+    background:#fff;
+}
+
+.krim-quick:hover{
+    border-color:var(--blue);
+    background:#f8faff;
+}
+
+.krim-quick-icon{
+    color:var(--blue);
+
+    font-size:14px;
+    font-weight:900;
+}
+
+.krim-quick strong{
+    font-size:8px;
+}
+
+/* =========================================================
+   ENVIRONMENT
+   ========================================================= */
+
+.krim-environment{
+    display:flex;
+    gap:9px;
+
+    padding:10px 0;
+
+    border-bottom:1px solid #edf0f4;
+}
+
+.krim-environment:last-child{
+    border-bottom:0;
+}
+
+.krim-environment-icon{
+    width:30px;
+    height:30px;
+
+    flex:0 0 30px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:7px;
+
+    background:var(--green-bg);
+    color:var(--green);
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.krim-environment strong{
+    display:block;
+
+    font-size:9px;
+}
+
+.krim-environment span{
+    display:block;
+
+    margin-top:3px;
+
+    color:#8b95a5;
+
+    font-size:8px;
+    line-height:1.45;
+}
+
+/* =========================================================
+   DOMAINS
+   ========================================================= */
+
+.krim-domains{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+
+    gap:7px;
+}
+
+.krim-domain{
+    min-height:80px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    padding:10px;
+
+    border:1px solid var(--line);
+    border-radius:7px;
+
+    background:#fff;
+}
+
+.krim-domain:hover{
+    border-color:var(--blue);
+    background:#f8faff;
+}
+
+.krim-domain small{
+    color:#8b95a5;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+.krim-domain strong{
+    font-size:8px;
+}
+
+.krim-domain span{
+    color:#8b95a5;
+
+    font-size:7px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.krim-footer{
+    margin-top:25px;
+
+    padding:20px 0 8px;
+
+    border-top:1px solid var(--line);
+}
+
+.krim-footer-grid{
+    display:grid;
+    grid-template-columns:2fr repeat(4,1fr);
+
+    gap:22px;
+}
+
+.krim-footer strong{
+    font-size:10px;
+}
+
+.krim-footer p{
+    max-width:320px;
+
+    margin:9px 0 0;
+
+    color:#8b95a5;
+
+    font-size:8px;
+    line-height:1.55;
+}
+
+.krim-footer h4{
+    margin:0 0 8px;
+
+    font-size:8px;
+}
+
+.krim-footer a{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#7b8798;
+
+    font-size:7px;
+}
+
+.krim-footer a:hover{
+    color:var(--blue);
+}
+
+.krim-footer-bottom{
+    display:flex;
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-top:18px;
+    padding-top:10px;
+
+    border-top:1px solid #edf0f4;
+
+    color:#8b95a5;
+
+    font-size:7px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1200px){
+
+    .krim-kpis{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .krim-domains{
+        grid-template-columns:repeat(4,1fr);
+    }
+}
+
+@media(max-width:900px){
+
+    .krim-grid{
+        grid-template-columns:1fr;
+    }
+
+    .krim-context{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-context-item:first-child{
+        grid-column:1/-1;
+    }
+
+    .krim-domains{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:700px){
+
+    .krim-header{
+        padding:0 10px;
+    }
+
+    .krim-menu{
+        display:grid;
+        place-items:center;
+    }
+
+    .krim-brand{
+        width:auto;
+    }
+
+    .krim-brand-text small{
+        display:none;
+    }
+
+    .krim-search{
+        flex:1;
+        width:auto;
+    }
+
+    .krim-sidebar{
+        transform:translateX(-100%);
+
+        transition:transform .2s ease;
+
+        box-shadow:8px 0 25px rgba(0,0,0,.12);
+    }
+
+    .krim-sidebar.open{
+        transform:translateX(0);
+    }
+
+    .krim-overlay.open{
+        display:block;
+
+        position:fixed;
+        z-index:850;
+
+        inset:0;
+
+        background:rgba(0,0,0,.35);
+    }
+
+    .krim-main{
+        margin-left:0;
+    }
+
+    .krim-content{
+        padding:18px 13px;
+    }
+
+    .krim-hero{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .krim-actions{
+        width:100%;
+    }
+
+    .krim-actions .krim-button{
+        flex:1;
+    }
+
+    .krim-domains{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:480px){
+
+    .krim-header-actions .krim-icon-button{
+        display:none;
+    }
+
+    .krim-user-name{
+        display:none;
+    }
+
+    .krim-kpis{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .krim-context{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-context-item:first-child{
+        grid-column:1/-1;
+    }
+
+    .krim-quick-actions{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-domains{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-footer-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .krim-footer-bottom{
+        flex-direction:column;
+    }
+}
+
+@media(max-width:350px){
+
+    .krim-search{
+        display:none;
+    }
+
+    .krim-kpis{
+        grid-template-columns:1fr;
+    }
+
+    .krim-context{
+        grid-template-columns:1fr;
+    }
+
+    .krim-context-item:first-child{
+        grid-column:auto;
+    }
+
+    .krim-domains,
+    .krim-footer-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     HEADER
+     ======================================================= -->
+
+<header class="krim-header">
+
+    <button
+        id="krimMenu"
+        class="krim-menu"
+        type="button"
+        aria-label="Open navigation"
+        aria-expanded="false"
+    >☰</button>
+
+    <a
+        href="../home.html"
+        class="krim-brand"
+    >
+
+        <span class="krim-logo">K</span>
+
+        <span class="krim-brand-text">
+
+            <strong>KRIM</strong>
+
+            <small>
+                GLOBAL LOGISTICS OPERATING SYSTEM
+            </small>
+
+        </span>
+
+    </a>
+
+    <div class="krim-search">
+
+        <input
+            id="globalSearch"
+            type="search"
+            placeholder="Search shipments, tracking, quotes..."
+            aria-label="Search KRIM"
+        >
+
+    </div>
+
+    <div class="krim-header-space"></div>
+
+    <div class="krim-header-actions">
+
+        <button
+            class="krim-icon-button"
+            type="button"
+            aria-label="Notifications"
+        >🔔</button>
+
+        <button
+            class="krim-icon-button"
+            type="button"
+            aria-label="Help"
+        >?</button>
+
+        <button
+            id="userButton"
+            class="krim-user"
+            type="button"
+            aria-label="Sign out"
+        >
+
+            <span
+                id="avatar"
+                class="krim-avatar"
+            >K</span>
+
+            <span
+                id="userName"
+                class="krim-user-name"
+            >Customer</span>
+
+        </button>
+
+    </div>
+
+</header>
+
+
+<div
+    id="overlay"
+    class="krim-overlay"
+></div>
+
+
+<!-- =======================================================
+     SIDEBAR
+     ======================================================= -->
+
+<aside
+    id="sidebar"
+    class="krim-sidebar"
+>
+
+    <div class="krim-nav-section">
+
+        <div class="krim-nav-title">
+            Dashboard
+        </div>
+
+        <a
+            class="krim-nav-link active"
+            href="customer-workspace.html"
+        >
+            <span class="krim-nav-icon">⌂</span>
+            Dashboard
+        </a>
+
+        <a
+            class="krim-nav-link"
+            href="../domains/shipments.html"
+        >
+            <span class="krim-nav-icon">▣</span>
+            Shipments
+        </a>
+
+        <a
+            class="krim-nav-link"
+            href="../domains/tracking.html"
+        >
+            <span class="krim-nav-icon">◎</span>
+            Tracking
+        </a>
+
+    </div>
+
+
+    <div class="krim-nav-section">
+
+        <div class="krim-nav-title">
+            Commercial
+        </div>
+
+        <a
+            class="krim-nav-link"
+            href="../domains/quotes.html"
+        >
+            <span class="krim-nav-icon">◇</span>
+            Quotes
+        </a>
+
+        <a
+            class="krim-nav-link"
+            href="../financial-management.html"
+        >
+            <span class="krim-nav-icon">$</span>
+            Finance
+        </a>
+
+    </div>
+
+
+    <div class="krim-nav-section">
+
+        <div class="krim-nav-title">
+            Network
+        </div>
+
+        <a
+            class="krim-nav-link"
+            href="../domains/network.html"
+        >
+          
