@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM MFA Enrollment</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7fb;
+      color: #0f172a;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 620px;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+
+    .head,
+    .body,
+    .foot {
+      padding: 24px;
+    }
+
+    .head {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: #0b5cff;
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 19px;
+    }
+
+    .brand-name {
+      font-weight: 800;
+    }
+
+    .brand-sub {
+      margin-top: 3px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 25px;
+    }
+
+    h2 {
+      font-size: 21px;
+    }
+
+    p {
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .loading {
+      padding: 30px 0;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto 15px;
+      border: 3px solid #dbe5f5;
+      border-top-color: #0b5cff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .qr {
+      width: 280px;
+      min-height: 280px;
+      margin: 20px auto;
+      padding: 12px;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      background: #ffffff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .qr img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .secret {
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .secret-label {
+      display: block;
+      margin-bottom: 6px;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .secret-value {
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    .code {
+      width: 100%;
+      padding: 14px;
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: 0.25em;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    .code:focus {
+      border-color: #0b5cff;
+      box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.12);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .primary {
+      background: #0b5cff;
+      color: #ffffff;
+    }
+
+    .primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: #eef2f7;
+      color: #334155;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #1e40af;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .status.success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .error-box {
+      padding: 14px;
+      margin-top: 18px;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      word-break: break-word;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .foot {
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 520px) {
+      .head,
+      .body,
+      .foot {
+        padding: 20px 16px;
+      }
+
+      .qr {
+        width: 240px;
+        min-height: 240px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <section class="card">
+
+    <header class="head">
+
+      <div class="brand">
+
+        <div class="mark">K</div>
+
+        <div>
+          <div class="brand-name">KRIM Logistics</div>
+
+          <div class="brand-sub">
+            Global Logistics Operating System
+          </div>
+        </div>
+
+      </div>
+
+      <h1>Secure your account</h1>
+
+      <p>
+        Set up multi-factor authentication for your KRIM account.
+      </p>
+
+    </header>
+
+
+    <main class="body">
+
+      <!-- LOADING -->
+
+      <section id="loadingStep" class="step active">
+
+        <div class="loading">
+
+          <div class="spinner"></div>
+
+          <strong id="loadingText">
+            Loading KRIM authentication services...
+          </strong>
+
+        </div>
+
+      </section>
+
+
+      <!-- ENROLLMENT -->
+
+      <section id="enrollStep" class="step">
+
+        <h2>Set up your authenticator</h2>
+
+        <p>
+          Scan the QR code with your authenticator application,
+          then enter the current 6-digit verification code.
+        </p>
+
+
+        <div id="qrBox" class="qr">
+          Creating QR code...
+        </div>
+
+
+        <div class="secret">
+
+          <span class="secret-label">
+            Manual setup key
+          </span>
+
+          <span id="secretValue" class="secret-value">
+            —
+          </span>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="code">
+            Authentication code
+          </label>
+
+          <input
+            id="code"
+            class="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            placeholder="000000"
+          >
+
+        </div>
+
+
+        <button
+          id="verifyButton"
+          class="btn primary"
+          type="button"
+        >
+          Verify and activate
+        </button>
+
+
+        <button
+          id="cancelButton"
+          class="btn secondary"
+          type="button"
+        >
+          Cancel and sign out
+        </button>
+
+
+        <div id="status" class="status">
+          Scan the QR code and enter your current 6-digit code.
+        </div>
+
+      </section>
+
+
+      <!-- EXISTING UNVERIFIED FACTOR -->
+
+      <section id="existingStep" class="step center">
+
+        <h2>Authenticator setup already exists</h2>
+
+        <p>
+          An unverified authenticator already exists for this account.
+          KRIM will not create a duplicate authenticator.
+        </p>
+
+        <button
+          id="existingCancel"
+          class="btn secondary"
+          type="button"
+        >
+          Sign out
+        </button>
+
+      </section>
+
+
+      <!-- COMPLETE -->
+
+      <section id="completeStep" class="step center">
+
+        <h2>MFA is already enabled</h2>
+
+        <p>
+          A verified authenticator already exists for this account.
+        </p>
+
+        <button
+          id="completeButton"
+          class="btn primary"
+          type="button"
+        >
+          Continue to MFA
+        </button>
+
+      </section>
+
+
+      <!-- ERROR -->
+
+      <section id="errorStep" class="step center">
+
+        <h2>MFA enrollment could not start</h2>
+
+        <p>
+          KRIM could not initialize the secure MFA enrollment process.
+        </p>
+
+        <div
+          id="errorText"
+          class="error-box"
+        >
+          Unknown authentication error.
+        </div>
+
+        <button
+          id="errorCancel"
+          class="btn secondary"
+          type="button"
+        >
+          Sign out
+        </button>
+
+      </section>
+
+    </main>
+
+
+    <footer class="foot">
+      KRIM authentication security · © 2026 KRIM Logistics
+    </footer>
+
+  </section>
+
+
+  <!-- OFFICIAL SUPABASE JAVASCRIPT -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+  <!-- KRIM PLATFORM SERVICES -->
+
+  <script src="../platform/krim-config.js"></script>
+
+  <script src="../platform/krim-supabase.js"></script>
+
+  <script src="../platform/krim-auth.js"></script>
+
+
+  <script>
+  (function () {
+
+    "use strict";
+
+
+    let factorId = null;
+
+    let challengeId = null;
+
+
+    function $(id) {
+
+      return document.getElementById(id);
+
+    }
+
+
+    function showStep(id) {
+
+      const steps = [
+        "loadingStep",
+        "enrollStep",
+        "existingStep",
+        "completeStep",
+        "errorStep"
+      ];
+
+
+      steps.forEach(function (stepId) {
+
+        $(stepId).classList.remove("active");
+
+      });
+
+
+      $(id).classList.add("active");
+
+    }
+
+
+    function getErrorMessage(error) {
+
+      if (!error) {
+
+        return "Unknown authentication error.";
+
+      }
+
+
+      if (typeof error === "string") {
+
+        return error;
+
+      }
+
+
+      return (
+        error.message ||
+        error.error_description ||
+        error.error ||
+        "Authentication service error."
+      );
+
+    }
+
+
+    async function signOut() {
+
+      try {
+
+        await window.KRIM_AUTH.signOut();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+
+      window.location.replace("login.html");
+
+    }
+
+
+    function renderQRCode(qrCode) {
+
+      const box = $("qrBox");
+
+
+      box.innerHTML = "";
+
+
+      if (!qrCode) {
+
+        box.textContent =
+          "Supabase did not return a QR code.";
+
+        return;
+
+      }
+
+
+      /*
+       * Supabase TOTP enrollment normally
+       * returns SVG QR markup.
+       */
+
+      if (
+        typeof qrCode === "string" &&
+        qrCode.trim().startsWith("<svg")
+      ) {
+
+        const image =
+          document.createElement("img");
+
+
+        image.alt =
+          "KRIM authenticator QR code";
+
+
+        image.src =
+          "data:image/svg+xml;charset=utf-8," +
+          encodeURIComponent(qrCode);
+
+
+        box.appendChild(image);
+
+        return;
+
+      }
+
+
+      /*
+       * Also support an already-created
+       * data URL.
+       */
+
+      if (
+        typeof qrCode === "string" &&
+        qrCode.startsWith("data:")
+      ) {
+
+        const image =
+          document.createElement("img");
+
+
+        image.alt =
+          "KRIM authenticator QR code";
+
+
+        image.src = qrCode;
+
+
+        box.appendChild(image);
+
+        return;
+
+      }
+
+
+      box.textContent =
+        "QR code was returned in an unsupported format.";
+
+    }
+
+
+    async function initialize() {
+
+      try {
+
+        /*
+         * Verify that the KRIM platform
+         * services actually loaded.
+         */
+
+        if (
+          !window.KRIM_SUPABASE ||
+          !window.KRIM_AUTH
+        ) {
+
+          throw new Error(
+            "KRIM authentication services failed to load. Check the platform files and Supabase JavaScript library."
+          );
+
+        }
+
+
+        $("loadingText").textContent =
+          "Checking your secure session...";
+
+
+        /*
+         * IMPORTANT:
+         *
+         * KRIM_AUTH.getSession()
+         * returns the SESSION directly.
+         *
+         * It does NOT return:
+         *
+         * { session: ... }
+         */
+
+        const session =
+          await window.KRIM_AUTH.getSession();
+
+
+        if (!session) {
+
+          window.location.replace("login.html");
+
+          return;
+
+        }
+
+
+        /*
+         * Check current assurance level.
+         */
+
+        const assurance =
+          await window.KRIM_AUTH.getAssuranceLevel();
+
+
+        if (
+          assurance &&
+          assurance.currentLevel === "aal2"
+        ) {
+
+          showStep("completeStep");
+
+          return;
+
+        }
+
+
+        /*
+         * Check existing MFA factors.
+         */
+
+        $("loadingText").textContent =
+          "Checking existing authenticator...";
+
+
+        const factors =
+          await window.KRIM_AUTH.getMFAFactors();
+
+
+        const totp =
+          factors &&
+          Array.isArray(factors.totp)
+            ? factors.totp
+            : [];
+
+
+        /*
+         * Do NOT create another factor
+         * if one is already verified.
+         */
+
+        const verified =
+          totp.find(function (factor) {
+
+            return factor.status === "verified";
+
+          });
+
+
+        if (verified) {
+
+          showStep("completeStep");
+
+          return;
+
+        }
+
+
+        /*
+         * Do NOT create duplicate unverified
+         * factors.
+         */
+
+        const unverified =
+          totp.find(function (factor) {
+
+            return factor.status === "unverified";
+
+          });
+
+
+        if (unverified) {
+
+          showStep("existingStep");
+
+          return;
+
+        }
+
+
+        /*
+         * Create TOTP authenticator.
+         *
+         * Raw Supabase response:
+         *
+         * {
+         *   data,
+         *   error
+         * }
+         */
+
+        $("loadingText").textContent =
+          "Creating secure authenticator...";
+
+
+        const enrollment =
+          await window.KRIM_SUPABASE.auth.mfa.enroll({
+
+            factorType: "totp",
+
+            friendlyName:
+              "KRIM Authenticator"
+
+          });
+
+
+        if (enrollment.error) {
+
+          throw enrollment.error;
+
+        }
+
+
+        if (
+          !enrollment.data ||
+          !enrollment.data.id
+        ) {
+
+          throw new Error(
+            "MFA enrollment returned no factor."
+          );
+
+        }
+
+
+        factorId =
+          enrollment.data.id;
+
+
+        const totpData =
+          enrollment.data.totp || {};
+
+
+        renderQRCode(
+          totpData.qr_code
+        );
+
+
+        $("secretValue").textContent =
+          totpData.secret ||
+          "Use the QR code.";
+
+
+        /*
+         * Create the challenge.
+         */
+
+        const challenge =
+          await window.KRIM_SUPABASE.auth.mfa.challenge({
+
+            factorId: factorId
+
+          });
+
+
+        if (challenge.error) {
+
+          throw challenge.error;
+
+        }
+
+
+        if (
+          !challenge.data ||
+          !challenge.data.id
+        ) {
+
+          throw new Error(
+            "MFA challenge returned no challenge ID."
+          );
+
+        }
+
+
+        challengeId =
+          challenge.data.id;
+
+
+        showStep("enrollStep");
+
+
+        $("status").className =
+          "status";
+
+
+        $("status").textContent =
+          "Scan the QR code, then enter the current 6-digit code from your authenticator app.";
+
+
+        $("code").focus();
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "KRIM MFA enrollment error:",
+          error
+        );
+
+
+        $("errorText").textContent =
+          getErrorMessage(error);
+
+
+        showStep("errorStep");
+
+      }
+
+    }
+
+
+    async function verifyMFA() {
+
+      const code =
+        $("code").value
+          .replace(/\D/g, "")
+          .slice(0, 6);
+
+
+      $("code").value = code;
+
+
+      if (!/^\d{6}$/.test(code)) {
+
+        $("status").className =
+          "status error";
+
+
+        $("status").textContent =
+          "Enter the current 6-digit authenticator code.";
+
+
+        $("code").focus();
+
+        return;
+
+      }
+
+
+      if (
+        !factorId ||
+        !challengeId
+      ) {
+
+        $("status").className =
+          "status error";
+
+
+        $("status").textContent =
+          "The MFA enrollment session is incomplete. Please reload the page.";
+
+        return;
+
+      }
+
+
+      const button =
+        $("verifyButton");
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Verifying...";
+
+
+      $("status").className =
+        "status";
+
+
+      $("status").textContent =
+        "Verifying your authenticator securely...";
+
+
+      try {
+
+        /*
+         * Verify using the official
+         * Supabase MFA API.
+         */
+
+        const verification =
+          await window.KRIM_SUPABASE.auth.mfa.verify({
+
+            factorId: factorId,
+
+            challengeId: challengeId,
+
+            code: code
+
+          });
+
+
+        if (verification.error) {
+
+          throw verification.error;
+
+        }
+
+
+        /*
+         * Confirm that the session has
+         * actually reached AAL2.
+         */
+
+        const assurance =
+          await window.KRIM_AUTH.getAssuranceLevel();
+
+
+        if (
+          !assurance ||
+          assurance.currentLevel !== "aal2"
+        ) {
+
+          throw new Error(
+            "Authenticator was verified, but the secure AAL2 session could not be confirmed."
+          );
+
+        }
+
+
+        $("status").className =
+          "status success";
+
+
+        $("status").textContent =
+          "MFA successfully activated. Opening your protected KRIM workspace...";
+
+
+        setTimeout(function () {
+
+          window.location.replace(
+            "../workspaces/customer-workspace.html"
+          );
+
+        }, 700);
+
+      }
+
+
+      catch (error) {
+
+        console.error(
+          "KRIM MFA verification error:",
+          error
+        );
+
+
+        $("status").className =
+          "status error";
+
+
+        $("status").textContent =
+          getErrorMessage(error);
+
+
+        button.disabled = false;
+
+        button.textContent =
+          "Verify and activate";
+
+      }
+
+    }
+
+
+    $("verifyButton")
+      .addEventListener(
+        "click",
+        verifyMFA
+      );
+
+
+    $("code")
+      .addEventListener(
+        "input",
+        function () {
+
+          this.value =
+            this.value
+              .replace(/\D/g, "")
+              .slice(0, 6);
+
+        }
+      );
+
+
+    $("code")
+      .addEventListener(
+        "keydown",
+        function (event) {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            verifyMFA();
+
+          }
+
+        }
+      );
+
+
+    $("cancelButton")
+      .addEventListener(
+        "click",
+        signOut
+      );
+
+
+    $("existingCancel")
+      .addEventListener(
+        "click",
+        signOut
+      );
+
+
+    $("errorCancel")
+      .addEventListener(
+        "click",
+        signOut
+      );
+
+
+    $("completeButton")
+      .addEventListener(
+        "click",
+        function () {
+
+          window.location.replace(
+            "mfa.html"
+          );
+
+        }
+      );
+
+
+    initialize();
+
+  })();
+  </script>
+
+</body>
+  </html>
