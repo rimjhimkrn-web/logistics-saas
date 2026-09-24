@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Capacity | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body{background:#f6f8fb}
+.cap-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px}
+.sidebar h3{margin:0 0 20px;padding:0 10px}
+.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#374151;text-decoration:none}
+.nav a:hover,.nav a.active{background:#eef4ff;color:#0b5cff}
+.main{min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;padding:0 22px}
+.brand{font-weight:800;color:#0b5cff;font-size:20px}
+.top-search{flex:1;max-width:520px}
+.top-search input{width:100%;padding:10px 14px;border:1px solid #dfe3e8;border-radius:9px}
+.account{margin-left:auto}
+.content{padding:24px;max-width:1500px;margin:auto}
+.mobile-menu{display:none;background:none;border:0;font-size:22px}
+.context{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.chip{padding:6px 10px;border:1px solid #dfe3e8;border-radius:999px;background:#fff;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.kpi strong{display:block;font-size:23px;margin-top:6px}
+.kpi span{font-size:12px;color:#6b7280}
+.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 15px}
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.searchbar input,.searchbar select{padding:10px;border:1px solid #dfe3e8;border-radius:8px;background:#fff}
+.searchbar input{flex:1;min-width:200px}
+.btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
+.btn.primary{background:#0b5cff;color:#fff}
+.btn.secondary{background:#eef2f7;color:#263241}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px}
+.green{background:#eaf8ef;color:#16803a}
+.blue{background:#eaf1ff;color:#1558c0}
+.orange{background:#fff4df;color:#a15c00}
+.red{background:#feecec;color:#b42318}
+.gray{background:#f0f2f5;color:#596273}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13px}
+.info-row:last-child{border-bottom:0}
+.bar{height:9px;background:#edf0f3;border-radius:10px;overflow:hidden;margin-top:8px}
+.fill{height:100%;background:#0b5cff;border-radius:10px}
+.capacity-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.capacity-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+.capacity-card strong{display:block;font-size:20px;margin-top:5px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:950px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
+th{font-size:11px;text-transform:uppercase;color:#6b7280}
+footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
+
+@media(max-width:1100px){
+.kpis{grid-template-columns:repeat(3,1fr)}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+.cap-layout{grid-template-columns:1fr}
+.sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
+.sidebar.open{display:block}
+.mobile-menu{display:block}
+.topbar{padding:0 14px}
+.top-search{display:none}
+.content{padding:16px}
+.kpis{grid-template-columns:repeat(2,1fr)}
+.capacity-cards{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+.kpi{padding:12px}
+.kpi strong{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="cap-layout">
+
+<aside class="sidebar" id="sidebar">
+<h3>KRIM</h3>
+<nav class="nav">
+<a href="../home.html">Overview</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="quotes.html">Quotes</a>
+<a href="network.html">Network</a>
+<a href="partners.html">Partners</a>
+<a class="active" href="capacity.html">Capacity</a>
+<a href="finance.html">Finance</a>
+<a href="documents.html">Documents</a>
+<a href="compliance.html">Compliance</a>
+<a href="exceptions.html">Exceptions</a>
+<a href="claims.html">Claims</a>
+<a href="analytics.html">Analytics</a>
+<a href="integrations.html">Integrations</a>
+<a href="ai.html">AI</a>
+</nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+<div class="brand">KRIM Logistics</div>
+
+<div class="top-search">
+<input id="globalSearch" placeholder="Search capacity, route, partner...">
+</div>
+
+<div class="account">
+<button class="btn secondary" id="signoutBtn">Sign out</button>
+</div>
+</header>
+
+<section class="content">
+
+<small>Network / Capacity</small>
+<h1>Global Capacity</h1>
+<p>Manage transport resources, availability, utilization and allocation across the KRIM network.</p>
+
+<div class="context">
+<span class="chip">🌍 Global Multi-market</span>
+<span class="chip">🇮🇳 India</span>
+<span class="chip">₹ INR</span>
+<span class="chip">Asia/Kolkata</span>
+<span class="chip">Authorized Capacity</span>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Total Resources</span><strong>0</strong></div>
+<div class="kpi"><span>Available</span><strong>0</strong></div>
+<div class="kpi"><span>Allocated</span><strong>0</strong></div>
+<div class="kpi"><span>Utilization</span><strong>0%</strong></div>
+<div class="kpi"><span>Capacity Alerts</span><strong>0</strong></div>
+<div class="kpi"><span>Markets</span><strong>1</strong></div>
+</div>
+
+<div class="grid">
+
+<div>
+
+<div class="panel">
+<h2>Capacity Search & Matching</h2>
+
+<div class="searchbar">
+<input id="origin" placeholder="Origin">
+<input id="destination" placeholder="Destination">
+
+<select id="mode">
+<option value="all">All modes</option>
+<option>Road</option>
+<option>Rail</option>
+<option>Ocean</option>
+<option>Air</option>
+<option>Multimodal</option>
+</select>
+
+<input id="weight" type="number" min="0" placeholder="Weight kg">
+
+<button class="btn primary" id="matchBtn">Find Capacity</button>
+</div>
+
+<div id="matchMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Capacity Portfolio</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Partner</th>
+<th>Mode</th>
+<th>Route</th>
+<th>Weight Capacity</th>
+<th>Availability</th>
+<th>Utilization</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Network resource pool</td>
+<td>KRIM Partner Network</td>
+<td>Road</td>
+<td>India</td>
+<td>Backend managed</td>
+<td>Dynamic</td>
+<td>—</td>
+<td><span class="status blue">Ready</span></td>
+</tr>
+
+<tr>
+<td>Future fleet resource</td>
+<td>Authorized partner</td>
+<td>Road</td>
+<td>Multi-market</td>
+<td>Dynamic</td>
+<td>Dynamic</td>
+<td>—</td>
+<td><span class="status gray">Pending</span></td>
+</tr>
+
+<tr>
+<td>Multimodal resource</td>
+<td>Network provider</td>
+<td>Multimodal</td>
+<td>Global</td>
+<td>Dynamic</td>
+<td>Dynamic</td>
+<td>—</td>
+<td><span class="status gray">Planned</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Capacity by Transport Mode</h2>
+
+<div class="capacity-cards">
+
+<div class="capacity-card">
+<span>🚚 Road</span>
+<strong>Ready</strong>
+<small>Fleet / carrier capacity</small>
+<div class="bar"><div class="fill" style="width:20%"></div></div>
+</div>
+
+<div class="capacity-card">
+<span>🚆 Rail</span>
+<strong>Supported</strong>
+<small>Rail network resources</small>
+<div class="bar"><div class="fill" style="width:15%"></div></div>
+</div>
+
+<div class="capacity-card">
+<span>🚢 Ocean</span>
+<strong>Supported</strong>
+<small>Container / vessel capacity</small>
+<div class="bar"><div class="fill" style="width:10%"></div></div>
+</div>
+
+<div class="capacity-card">
+<span>✈️ Air</span>
+<strong>Supported</strong>
+<small>Air cargo capacity</small>
+<div class="bar"><div class="fill" style="width:10%"></div></div>
+</div>
+
+<div class="capacity-card">
+<span>🔄 Multimodal</span>
+<strong>Supported</strong>
+<small>Combined transport</small>
+<div class="bar"><div class="fill" style="width:12%"></div></div>
+</div>
+
+<div class="capacity-card">
+<span>🏭 Warehouse</span>
+<strong>Supported</strong>
+<small>Storage / fulfillment</small>
+<div class="bar"><div class="fill" style="width:8%"></div></div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div>
+
+<div class="panel">
+<h2>Capacity Controls</h2>
+
+<div class="actions">
+<button class="btn primary" id="addBtn">Add Resource</button>
+<button class="btn secondary">Allocate</button>
+<button class="btn secondary">Release</button>
+<button class="btn secondary">Schedule</button>
+<button class="btn secondary">View Alerts</button>
+</div>
+
+<div id="controlMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Capacity Health</h2>
+
+<div class="info-row">
+<span>Resource model</span>
+<strong>Ready</strong>
+</div>
+
+<div class="info-row">
+<span>Partner capacity</span>
+<strong>Ready</strong>
+</div>
+
+<div class="info-row">
+<span>Route matching</span>
+<strong>Ready</strong>
+</div>
+
+<div class="info-row">
+<span>Availability windows</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Allocation controls</span>
+<strong>Supported</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Utilization</h2>
+
+<div class="info-row">
+<span>Network utilization</span>
+<strong>0%</strong>
+</div>
+
+<div class="bar">
+<div class="fill" style="width:0%"></div>
+</div>
+
+<p style="font-size:12px;color:#6b7280;margin-top:12px">
+Utilization will be calculated from authorized capacity resources and
+active allocations.
+</p>
+
+</div>
+
+<div class="panel">
+<h2>Capacity Risk</h2>
+
+<div class="info-row">
+<span>Shortage detection</span>
+<span class="status green">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Over-allocation detection</span>
+<span class="status green">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Route imbalance</span>
+<span class="status blue">Monitored</span>
+</div>
+
+<div class="info-row">
+<span>Capacity alerts</span>
+<span class="status blue">Supported</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Capacity Flow</h2>
+
+<div class="capacity-cards">
+
+<div class="capacity-card">
+<span>1. Network</span>
+<strong>Resource</strong>
+<small>Partner/fleet/warehouse enters network.</small>
+</div>
+
+<div class="capacity-card">
+<span>2. Availability</span>
+<strong>Schedule</strong>
+<small>Resource availability is recorded.</small>
+</div>
+
+<div class="capacity-card">
+<span>3. Matching</span>
+<strong>Route</strong>
+<small>Capacity is matched to demand.</small>
+</div>
+
+<div class="capacity-card">
+<span>4. Allocation</span>
+<strong>Booking</strong>
+<small>Authorized capacity is allocated.</small>
+</div>
+
+<div class="capacity-card">
+<span>5. Dispatch</span>
+<strong>Execution</strong>
+<small>Allocated resource enters operations.</small>
+</div>
+
+<div class="capacity-card">
+<span>6. Release</span>
+<strong>Completion</strong>
+<small>Capacity becomes available again.</small>
+</div>
+
+</div>
+</div>
+
+<div class="panel">
+<h2>Global Capacity Architecture</h2>
+
+<p>
+KRIM capacity is designed as a shared global operating layer. Capacity
+resources can represent vehicles, fleets, carriers, containers, rail
+resources, warehouse space, air cargo capacity or other authorized
+logistics resources.
+</p>
+
+<p>
+Availability can be linked to market, location, route, transport mode,
+time window, weight, volume, equipment and partner capability. The
+capacity engine can then support quote pricing, shipment assignment,
+dispatch and network planning.
+</p>
+
+<p>
+The frontend does not invent available capacity. Actual capacity,
+allocation and utilization should come from authorized backend records
+and network rules.
+</p>
+
+</div>
+
+<footer>
+KRIM Logistics • Global Capacity Infrastructure • Network • Matching • Allocation • Operations
+</footer>
+
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebar=document.getElementById("sidebar");
+
+document.getElementById("menuBtn")?.addEventListener("click",()=>{
+sidebar.classList.toggle("open");
+});
+
+document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+}catch(e){}
+location.href="../auth/login.html";
+});
+
+document.getElementById("matchBtn")?.addEventListener("click",()=>{
+const origin=document.getElementById("origin").value.trim();
+const destination=document.getElementById("destination").value.trim();
+const weight=document.getElementById("weight").value.trim();
+const box=document.getElementById("matchMessage");
+
+if(!origin||!destination||!weight){
+box.innerHTML='<div class="panel" style="margin-top:10px;background:#fff7ed">Enter origin, destination and required weight.</div>';
+return;
+}
+
+box.innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Capacity matching prepared for <strong>'+
+KRIM_UI.escapeHTML(origin)+
+' → '+
+KRIM_UI.escapeHTML(destination)+
+'</strong>. Authorized network capacity will determine eligible resources.</div>';
+});
+
+document.getElementById("addBtn")?.addEventListener("click",()=>{
+document.getElementById("controlMessage").innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Capacity-resource workflow is ready for authorized backend integration.</div>';
+});
+
+document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const q=e.target.value.trim();
+if(q) document.getElementById("origin").value=q;
+}
+});
+
+});
+</script>
+
+</body>
+  </html>
