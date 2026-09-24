@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claims | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body{background:#f6f8fb}
+.claim-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px}
+.sidebar h3{margin:0 0 20px;padding:0 10px}
+.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#374151;text-decoration:none}
+.nav a:hover,.nav a.active{background:#eef4ff;color:#0b5cff}
+.main{min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;padding:0 22px}
+.brand{font-weight:800;color:#0b5cff;font-size:20px}
+.top-search{flex:1;max-width:520px}
+.top-search input{width:100%;padding:10px 14px;border:1px solid #dfe3e8;border-radius:9px}
+.account{margin-left:auto}
+.content{padding:24px;max-width:1500px;margin:auto}
+.mobile-menu{display:none;background:none;border:0;font-size:22px}
+.context{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.chip{padding:6px 10px;border:1px solid #dfe3e8;border-radius:999px;background:#fff;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.kpi strong{display:block;font-size:23px;margin-top:6px}
+.kpi span{font-size:12px;color:#6b7280}
+.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 15px}
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.searchbar input,.searchbar select{padding:10px;border:1px solid #dfe3e8;border-radius:8px;background:#fff}
+.searchbar input{flex:1;min-width:180px}
+.btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
+.btn.primary{background:#0b5cff;color:#fff}
+.btn.secondary{background:#eef2f7;color:#263241}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px}
+.green{background:#eaf8ef;color:#16803a}
+.blue{background:#eaf1ff;color:#1558c0}
+.orange{background:#fff4df;color:#a15c00}
+.red{background:#feecec;color:#b42318}
+.gray{background:#f0f2f5;color:#596273}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13px}
+.info-row:last-child{border-bottom:0}
+.claim-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.claim-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+.claim-card strong{display:block;font-size:19px;margin-top:5px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
+th{font-size:11px;text-transform:uppercase;color:#6b7280}
+.bar{height:9px;background:#edf0f3;border-radius:10px;overflow:hidden;margin-top:8px}
+.fill{height:100%;background:#0b5cff;border-radius:10px}
+footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
+
+@media(max-width:1100px){
+.kpis{grid-template-columns:repeat(3,1fr)}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+.claim-layout{grid-template-columns:1fr}
+.sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
+.sidebar.open{display:block}
+.mobile-menu{display:block}
+.topbar{padding:0 14px}
+.top-search{display:none}
+.content{padding:16px}
+.kpis{grid-template-columns:repeat(2,1fr)}
+.claim-cards{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+.kpi{padding:12px}
+.kpi strong{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="claim-layout">
+
+<aside class="sidebar" id="sidebar">
+<h3>KRIM</h3>
+<nav class="nav">
+<a href="../home.html">Overview</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="quotes.html">Quotes</a>
+<a href="network.html">Network</a>
+<a href="partners.html">Partners</a>
+<a href="capacity.html">Capacity</a>
+<a href="finance.html">Finance</a>
+<a href="documents.html">Documents</a>
+<a href="compliance.html">Compliance</a>
+<a href="exceptions.html">Exceptions</a>
+<a class="active" href="claims.html">Claims</a>
+<a href="analytics.html">Analytics</a>
+<a href="integrations.html">Integrations</a>
+<a href="ai.html">AI</a>
+</nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+<div class="brand">KRIM Logistics</div>
+
+<div class="top-search">
+<input id="globalSearch" placeholder="Search claim, shipment, organization...">
+</div>
+
+<div class="account">
+<button class="btn secondary" id="signoutBtn">Sign out</button>
+</div>
+</header>
+
+<section class="content">
+
+<small>Operations / Claims</small>
+<h1>Global Claims</h1>
+<p>Manage cargo loss, damage, shortage, delivery disputes and claim resolution across the KRIM network.</p>
+
+<div class="context">
+<span class="chip">🌍 Global Claims</span>
+<span class="chip">🇮🇳 India</span>
+<span class="chip">₹ INR</span>
+<span class="chip">Asia/Kolkata</span>
+<span class="chip">Evidence Controlled</span>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Open Claims</span><strong>0</strong></div>
+<div class="kpi"><span>Under Review</span><strong>0</strong></div>
+<div class="kpi"><span>Approved</span><strong>0</strong></div>
+<div class="kpi"><span>Rejected</span><strong>0</strong></div>
+<div class="kpi"><span>Settled</span><strong>0</strong></div>
+<div class="kpi"><span>Claim Value</span><strong>₹0</strong></div>
+</div>
+
+<div class="grid">
+
+<div>
+
+<div class="panel">
+<h2>Claim Search</h2>
+
+<div class="searchbar">
+<input id="claimSearch" placeholder="Claim / shipment / organization">
+
+<select id="claimType">
+<option value="all">All types</option>
+<option>Damage</option>
+<option>Loss</option>
+<option>Shortage</option>
+<option>Delay</option>
+<option>Delivery Dispute</option>
+<option>Other</option>
+</select>
+
+<select id="claimStatus">
+<option value="all">All status</option>
+<option>Open</option>
+<option>Review</option>
+<option>Approved</option>
+<option>Rejected</option>
+<option>Settled</option>
+</select>
+
+<button class="btn primary" id="searchBtn">Search</button>
+</div>
+
+<div id="searchMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Claims Command Queue</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>Type</th>
+<th>Shipment</th>
+<th>Organization</th>
+<th>Value</th>
+<th>Status</th>
+<th>Owner</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>KRIM Claims Engine</td>
+<td>System</td>
+<td>Global</td>
+<td>Network</td>
+<td>Backend managed</td>
+<td><span class="status blue">Ready</span></td>
+<td>Claims</td>
+</tr>
+
+<tr>
+<td>Future damage claim</td>
+<td>Damage</td>
+<td>Dynamic</td>
+<td>Authorized customer</td>
+<td>Dynamic</td>
+<td><span class="status gray">Pending</span></td>
+<td>Claims</td>
+</tr>
+
+<tr>
+<td>Future shortage claim</td>
+<td>Shortage</td>
+<td>Dynamic</td>
+<td>Authorized customer</td>
+<td>Dynamic</td>
+<td><span class="status gray">Planned</span></td>
+<td>Claims</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Claim Categories</h2>
+
+<div class="claim-cards">
+
+<div class="claim-card">
+<span>📦 Damage</span>
+<strong>Cargo Damage</strong>
+<small>Physical damage to cargo during operations.</small>
+</div>
+
+<div class="claim-card">
+<span>🔎 Loss</span>
+<strong>Cargo Loss</strong>
+<small>Lost shipment, package or cargo unit.</small>
+</div>
+
+<div class="claim-card">
+<span>📊 Shortage</span>
+<strong>Quantity Issue</strong>
+<small>Short delivery or missing cargo quantity.</small>
+</div>
+
+<div class="claim-card">
+<span>⏱️ Delay</span>
+<strong>Service Claim</strong>
+<small>Claims related to qualifying service failures.</small>
+</div>
+
+<div class="claim-card">
+<span>🚚 Delivery</span>
+<strong>Dispute</strong>
+<small>Delivery or proof-of-delivery disputes.</small>
+</div>
+
+<div class="claim-card">
+<span>💰 Settlement</span>
+<strong>Resolution</strong>
+<small>Approved claim compensation and settlement.</small>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div>
+
+<div class="panel">
+<h2>Claim Controls</h2>
+
+<div class="actions">
+<button class="btn primary" id="createBtn">Create Claim</button>
+<button class="btn secondary">Review</button>
+<button class="btn secondary">Request Evidence</button>
+<button class="btn secondary">Approve</button>
+<button class="btn secondary">Settle</button>
+</div>
+
+<div id="controlMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Claims Infrastructure</h2>
+
+<div class="info-row">
+<span>Claim records</span>
+<strong>Ready</strong>
+</div>
+
+<div class="info-row">
+<span>Claim evidence</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Dispute linkage</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Review workflow</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Settlement workflow</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Audit trail</span>
+<strong>Supported</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Claims Health</h2>
+
+<div class="info-row">
+<span>Open claims</span>
+<strong>0</strong>
+</div>
+
+<div class="bar"><div class="fill" style="width:0%"></div></div>
+
+<div class="info-row" style="margin-top:12px">
+<span>Pending review</span>
+<strong>0</strong>
+</div>
+
+<div class="bar"><div class="fill" style="width:0%"></div></div>
+
+<p style="font-size:12px;color:#6b7280">
+Claim values, severity and settlement amounts are determined from
+authorized backend records and evidence.
+</p>
+</div>
+
+<div class="panel">
+<h2>Claim Governance</h2>
+
+<div class="info-row">
+<span>Evidence required</span>
+<span class="status green">Controlled</span>
+</div>
+
+<div class="info-row">
+<span>Review authorization</span>
+<span class="status blue">Required</span>
+</div>
+
+<div class="info-row">
+<span>Dispute handling</span>
+<span class="status blue">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Settlement authorization</span>
+<span class="status blue">Required</span>
+</div>
+
+<div class="info-row">
+<span>Audit history</span>
+<span class="status green">Tracked</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Claim Lifecycle</h2>
+
+<div class="claim-cards">
+
+<div class="claim-card">
+<span>1. Report</span>
+<strong>Claim</strong>
+<small>Authorized party reports a loss, damage or dispute.</small>
+</div>
+
+<div class="claim-card">
+<span>2. Evidence</span>
+<strong>Collect</strong>
+<small>Documents, POD, images and relevant records are attached.</small>
+</div>
+
+<div class="claim-card">
+<span>3. Review</span>
+<strong>Investigate</strong>
+<small>Authorized team reviews facts and responsibility.</small>
+</div>
+
+<div class="claim-card">
+<span>4. Decide</span>
+<strong>Outcome</strong>
+<small>Claim is approved, rejected or escalated.</small>
+</div>
+
+<div class="claim-card">
+<span>5. Settle</span>
+<strong>Compensation</strong>
+<small>Approved financial settlement is processed.</small>
+</div>
+
+<div class="claim-card">
+<span>6. Close</span>
+<strong>Audit</strong>
+<small>Resolution and evidence remain permanently auditable.</small>
+</div>
+
+</div>
+</div>
+
+<div class="panel">
+<h2>Global Claims Architecture</h2>
+
+<p>
+KRIM Claims is a controlled resolution layer connecting shipments,
+tracking, documents, proof of delivery, exceptions, disputes and
+finance.
+</p>
+
+<p>
+A claim can contain its shipment context, claimant, claim type,
+evidence, investigation, decision, approved amount and settlement
+state. Claims can therefore move from operational incident to governed
+financial resolution without creating a disconnected process.
+</p>
+
+<p>
+Claim approval and settlement are privileged operations. The frontend
+does not determine liability or authorize financial settlement; those
+decisions remain controlled by backend workflows, permissions, RLS and
+audit records.
+</p>
+
+</div>
+
+<footer>
+KRIM Logistics • Global Claims • Evidence • Review • Disputes • Settlement • Audit
+</footer>
+
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebar=document.getElementById("sidebar");
+
+document.getElementById("menuBtn")?.addEventListener("click",()=>{
+sidebar.classList.toggle("open");
+});
+
+document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+}catch(e){}
+location.href="../auth/login.html";
+});
+
+document.getElementById("searchBtn")?.addEventListener("click",()=>{
+const value=document.getElementById("claimSearch").value.trim();
+const type=document.getElementById("claimType").value;
+const status=document.getElementById("claimStatus").value;
+const box=document.getElementById("searchMessage");
+
+if(!value){
+box.innerHTML='<div class="panel" style="margin-top:10px;background:#fff7ed">Enter a claim reference to search.</div>';
+return;
+}
+
+box.innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Claim search prepared for <strong>'+
+KRIM_UI.escapeHTML(value)+
+'</strong> ('+
+KRIM_UI.escapeHTML(type)+
+', '+
+KRIM_UI.escapeHTML(status)+
+'). Authorized claim records will determine the results.</div>';
+});
+
+document.getElementById("createBtn")?.addEventListener("click",()=>{
+document.getElementById("controlMessage").innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Claim workflow is ready for authorized backend integration.</div>';
+});
+
+document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const q=e.target.value.trim();
+if(q)document.getElementById("claimSearch").value=q;
+}
+});
+
+});
+</script>
+
+</body>
+  </html>
