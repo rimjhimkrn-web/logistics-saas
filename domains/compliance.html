@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Compliance | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body {
+    background: #f6f8fb;
+}
+
+.compliance-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    padding: 20px 14px;
+}
+
+.sidebar h3 {
+    margin: 0 0 20px;
+    padding: 0 10px;
+}
+
+.nav a {
+    display: block;
+    padding: 10px 12px;
+    margin: 3px 0;
+    border-radius: 8px;
+    color: #374151;
+    text-decoration: none;
+}
+
+.nav a:hover,
+.nav a.active {
+    background: #eef4ff;
+    color: #0b5cff;
+}
+
+.main {
+    min-width: 0;
+}
+
+.topbar {
+    height: 64px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 22px;
+}
+
+.brand {
+    font-weight: 800;
+    color: #0b5cff;
+    font-size: 20px;
+}
+
+.top-search {
+    flex: 1;
+    max-width: 520px;
+}
+
+.top-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #dfe3e8;
+    border-radius: 9px;
+}
+
+.account {
+    margin-left: auto;
+}
+
+.content {
+    padding: 24px;
+    max-width: 1500px;
+    margin: auto;
+}
+
+.mobile-menu {
+    display: none;
+    background: none;
+    border: 0;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.context {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0 22px;
+}
+
+.chip {
+    padding: 6px 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 999px;
+    background: #ffffff;
+    font-size: 12px;
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.kpi {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.kpi strong {
+    display: block;
+    font-size: 23px;
+    margin-top: 6px;
+}
+
+.kpi span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.35fr 0.65fr;
+    gap: 18px;
+}
+
+.panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.panel h2 {
+    font-size: 17px;
+    margin: 0 0 15px;
+}
+
+.searchbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.searchbar input,
+.searchbar select {
+    padding: 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.searchbar input {
+    flex: 1;
+    min-width: 180px;
+}
+
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn.primary {
+    background: #0b5cff;
+    color: #ffffff;
+}
+
+.btn.secondary {
+    background: #eef2f7;
+    color: #263241;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+}
+
+.green {
+    background: #eaf8ef;
+    color: #16803a;
+}
+
+.blue {
+    background: #eaf1ff;
+    color: #1558c0;
+}
+
+.orange {
+    background: #fff4df;
+    color: #a15c00;
+}
+
+.red {
+    background: #feecec;
+    color: #b42318;
+}
+
+.gray {
+    background: #f0f2f5;
+    color: #596273;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eef0f2;
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    border-bottom: 0;
+}
+
+.compliance-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.compliance-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.compliance-card strong {
+    display: block;
+    font-size: 19px;
+    margin-top: 5px;
+}
+
+.table-wrap {
+    overflow: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 11px;
+    border-bottom: 1px solid #edf0f3;
+    font-size: 13px;
+}
+
+th {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.bar {
+    height: 9px;
+    background: #edf0f3;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.fill {
+    height: 100%;
+    background: #0b5cff;
+    border-radius: 10px;
+}
+
+footer {
+    padding: 25px;
+    color: #6b7280;
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 1100px) {
+    .kpis {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .compliance-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+        position: fixed;
+        z-index: 20;
+        top: 64px;
+        bottom: 0;
+        width: 240px;
+    }
+
+    .sidebar.open {
+        display: block;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+
+    .topbar {
+        padding: 0 14px;
+    }
+
+    .top-search {
+        display: none;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    .kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .compliance-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi {
+        padding: 12px;
+    }
+
+    .kpi strong {
+        font-size: 19px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="compliance-layout">
+
+    <aside class="sidebar" id="sidebar">
+
+        <h3>KRIM</h3>
+
+        <nav class="nav">
+            <a href="../home.html">Overview</a>
+            <a href="shipments.html">Shipments</a>
+            <a href="tracking.html">Tracking</a>
+            <a href="quotes.html">Quotes</a>
+            <a href="network.html">Network</a>
+            <a href="partners.html">Partners</a>
+            <a href="capacity.html">Capacity</a>
+            <a href="finance.html">Finance</a>
+            <a href="documents.html">Documents</a>
+            <a class="active" href="compliance.html">Compliance</a>
+            <a href="exceptions.html">Exceptions</a>
+            <a href="claims.html">Claims</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="integrations.html">Integrations</a>
+            <a href="ai.html">AI</a>
+        </nav>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <button
+                class="mobile-menu"
+                id="menuBtn"
+                aria-label="Open navigation">
+                ☰
+            </button>
+
+            <div class="brand">
+                KRIM Logistics
+            </div>
+
+            <div class="top-search">
+                <input
+                    id="globalSearch"
+                    type="search"
+                    placeholder="Search compliance, shipment, organization...">
+            </div>
+
+            <div class="account">
+                <button
+                    class="btn secondary"
+                    id="signoutBtn">
+                    Sign out
+                </button>
+            </div>
+
+        </header>
+
+        <section class="content">
+
+            <small>Governance / Compliance</small>
+
+            <h1>Global Compliance</h1>
+
+            <p>
+                Manage regulatory, trade, documentation, sanctions,
+                shipment and network compliance across KRIM markets.
+            </p>
+
+            <div class="context">
+
+                <span class="chip">
+                    🌍 Global Compliance
+                </span>
+
+                <span class="chip">
+                    🇮🇳 India
+                </span>
+
+                <span class="chip">
+                    ₹ INR
+                </span>
+
+                <span class="chip">
+                    Asia/Kolkata
+                </span>
+
+                <span class="chip">
+                    Controlled Access
+                </span>
+
+            </div>
+
+            <div class="kpis">
+
+                <div class="kpi">
+                    <span>Total Checks</span>
+                    <strong>0</strong>
+                </div>
+
+                <div class="kpi">
+                    <span>Passed</span>
+                    <strong>0</strong>
+                </div>
+
+                <div class="kpi">
+                    <span>Pending</span>
+                    <strong>0</strong>
+                </div>
+
+                <div class="kpi">
+                    <span>Failed</span>
+                    <strong>0</strong>
+                </div>
+
+                <div class="kpi">
+                    <span>Documents</span>
+                    <strong>0</strong>
+                </div>
+
+                <div class="kpi">
+                    <span>Markets</span>
+                    <strong>1</strong>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div>
+
+                    <div class="panel">
+
+                        <h2>Compliance Search</h2>
+
+                        <div class="searchbar">
+
+                            <input
+                                id="complianceSearch"
+                                placeholder="Shipment / organization / check ID">
+
+                            <select id="complianceType">
+
+                                <option value="all">
+                                    All checks
+                                </option>
+
+                                <option>
+                                    Trade
+                                </option>
+
+                                <option>
+                                    Sanctions
+                                </option>
+
+                                <option>
+                                    Customs
+                                </option>
+
+                                <option>
+                                    Documentation
+                                </option>
+
+                                <option>
+                                    Partner
+                                </option>
+
+                                <option>
+                                    Shipment
+                                </option>
+
+                            </select>
+
+                            <select id="complianceStatus">
+
+                                <option value="all">
+                                    All status
+                                </option>
+
+                                <option>
+                                    Passed
+                                </option>
+
+                                <option>
+                                    Pending
+                                </option>
+
+                                <option>
+                                    Failed
+                                </option>
+
+                            </select>
+
+                            <button
+                                class="btn primary"
+                                id="searchBtn">
+                                Search
+                            </button>
+
+                        </div>
+
+                        <div id="searchMessage"></div>
+
+                    </div>
+
+                    <div class="panel">
+
+                        <h2>Compliance Portfolio</h2>
+
+                        <div class="table-wrap">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Check Type</th>
+                                        <th>Organization</th>
+                                        <th>Market</th>
+                                        <th>Shipment</th>
+                                        <th>Status</th>
+                                        <th>Risk</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>
+                                            KRIM Compliance Engine
+                                        </td>
+
+                                        <td>
+                                            Platform
+                                        </td>
+
+                                        <td>
+                                            KRIM Network
+                                        </td>
+
+                                        <td>
+                                            Global
+                                        </td>
+
+                                        <td>
+                                            — 
+                                        </td>
+
+                                        <td>
+                                            <span class="status blue">
+                                                Ready
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            Controlled
+                                        </td>
+
+                                    </tr>
+
+                                    <tr>
+
+                                        <td>
+                                            Future trade check
+                                        </td>
+
+                                        <td>
+                                            Trade
+                                        </td>
+
+                                        <td>
+                                            Authorized organization
+                                        </td>
+
+                                        <td>
+                                            Regional
+                                        </td>
+
+                                        <td>
+                                            Dynamic
+                                        </td>
+
+                                        <td>
+                                            <span class="status gray">
+                                                Pending
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            Monitored
+                                        </td>
+
+                                    </tr>
+
+                                    <tr>
+
+                                        <td>
+                                            Future sanctions check
+                                        </td>
+
+                                        <td>
+                                            Sanctions
+                                        </td>
+
+                                        <td>
+                                            Authorized organization
+                                        </td>
+
+                                        <td>
+                                            Regional
+                                        </td>
+
+                                        <td>
+                                            Dynamic
+                                        </td>
+
+                                        <td>
+                                            <span class="status gray">
+                                                Planned
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            Controlled
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                    <div class="panel">
+
+                        <h2>Compliance Areas</h2>
+
+                        <div class="compliance-cards">
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    🛃 Trade
+                                </span>
+
+                                <strong>
+                                    Trade Controls
+                                </strong>
+
+                                <small>
+                                    Import, export and trade requirements.
+                                </small>
+
+                            </div>
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    🛡️ Sanctions
+                                </span>
+
+                                <strong>
+                                    Sanctions Screening
+                                </strong>
+
+                                <small>
+                                    Screening readiness for applicable
+                                    sanctions regimes.
+                                </small>
+
+                            </div>
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    📄 Documentation
+                                </span>
+
+                                <strong>
+                                    Document Controls
+                                </strong>
+
+                                <small>
+                                    Required documentation and verification.
+                                </small>
+
+                            </div>
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    🚢 Customs
+                                </span>
+
+                                <strong>
+                                    Customs Controls
+                                </strong>
+
+                                <small>
+                                    Customs and cross-border processes.
+                                </small>
+
+                            </div>
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    🤝 Partner
+                                </span>
+
+                                <strong>
+                                    Partner Compliance
+                                </strong>
+
+                                <small>
+                                    Partner verification and requirements.
+                                </small>
+
+                            </div>
+
+                            <div class="compliance-card">
+
+                                <span>
+                                    📦 Shipment
+                                </span>
+
+                                <strong>
+                                    Shipment Controls
+                                </strong>
+
+                                <small>
+                                    Shipment-level regulatory controls.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <div class="panel">
+
+                        <h2>Compliance Controls</h2>
+
+                        <div class="actions">
+
+                            <button
+                                class="btn primary"
+                                id="runCheckBtn">
+                                Run Check
+                            </button>
+
+                            <button class="btn secondary">
+                                Review
+                            </button>
+
+                            <button class="btn secondary">
+                                Approve
+                            </button>
+
+                            <button class="btn secondary">
+                                Escalate
