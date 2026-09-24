@@ -568,6 +568,16 @@ createShipmentBtn.onclick = async () => {
     shipmentCreateMessage.textContent =
       "Shipment created successfully: " +
       (data?.shipment_number || "Created");
+    if (data?.id) {
+  shipmentCreateMessage.textContent +=
+    " — Opening quote request...";
+
+  setTimeout(() => {
+    location.href =
+      "quotes.html?shipment_id=" +
+      encodeURIComponent(data.id);
+  }, 800);
+    }
 
     console.log("KRIM shipment:", data);
 
