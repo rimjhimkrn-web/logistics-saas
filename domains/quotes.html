@@ -504,10 +504,55 @@ message.innerHTML=
 (error?.message||"Unknown error")+
 '</div>';
 
-}
-
 });
+      document.getElementById("acceptQuoteBtn")?.addEventListener("click", async ()=>{
 
+        const message = document.getElementById("formMessage");
+
+        if (!shipmentId) {
+          message.innerHTML =
+            '<div class="panel" style="margin-top:12px;background:#fff7ed">No shipment is attached to this quote.</div>';
+          return;
+        }
+
+        const quoteId = window.prompt("Enter the Quote ID to accept:");
+
+        if (!quoteId) {
+          return;
+        }
+
+        message.innerHTML =
+          '<div class="panel" style="margin-top:12px;background:#eff6ff">Accepting quote...</div>';
+
+        try {
+
+          const { data, error } =
+            await window.KRIM_SUPABASE.rpc(
+              "krim_accept_global_quote",
+              {
+                p_quote_id: Number(quoteId)
+              }
+            );
+
+          if (error) throw error;
+
+          message.innerHTML =
+            '<div class="panel" style="margin-top:12px;background:#ecfdf5">Quote accepted successfully. Shipment is now confirmed.</div>';
+
+          console.log("KRIM accepted quote:", data);
+
+        } catch (error) {
+
+          console.error("KRIM quote acceptance error:", error);
+
+          message.innerHTML =
+            '<div class="panel" style="margin-top:12px;background:#fef2f2">Quote acceptance failed: ' +
+            (error?.message || "Unknown error") +
+            '</div>';
+
+        }
+
+      });
 document.querySelectorAll(".convertBtn").forEach(btn=>{
 btn.addEventListener("click",()=>{
 alert("Quote-to-shipment conversion will use the authorized KRIM shipment workflow.");
