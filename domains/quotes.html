@@ -551,6 +551,98 @@ async function loadGlobalQuote() {
 }
 
 loadGlobalQuote();
+// TEMPORARY GLOBAL PAYMENT TEST
+const paymentTestBtn = document.createElement("button");
+
+paymentTestBtn.type = "button";
+paymentTestBtn.textContent = "Test Global Razorpay Order";
+paymentTestBtn.style.cssText =
+  "margin-top:12px;padding:10px 16px;border:0;border-radius:8px;background:#172033;color:#fff;cursor:pointer;font-weight:600;";
+
+paymentTestBtn.addEventListener("click", async () => {
+  paymentTestBtn.disabled = true;
+  paymentTestBtn.textContent = "Creating Razorpay Order...";
+
+  try {
+    const { data: sessionData } =
+      await window.KRIM_SUPABASE.auth.getSession();
+
+    const accessToken =
+      sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      throw new Error("Please log in again before testing payment.");
+    }
+
+    const { data, error } =
+      await window.KRIM_SUPABASE.functions.invoke(
+        "create-global-razorpay-order",
+        {
+          body: {
+            krim_shipment_id: shipmentId
+          }
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    console.log(
+      "KRIM Global Razorpay Order:",
+      data
+    );
+
+    const message =
+      document.getElementById("formMessage");
+
+    if (message) {
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#eaf8ef">' +
+        "Global Razorpay order created successfully.<br>" +
+        "Payment Order ID: " +
+        data.payment_order_id +
+        "<br>" +
+        "Razorpay Order ID: " +
+        data.razorpay_order_id +
+        "<br>" +
+        "Amount: INR " +
+        (Number(data.amount_paise) / 100).toFixed(2) +
+        "</div>";
+    }
+
+    paymentTestBtn.textContent =
+      "Global Razorpay Order Created";
+  } catch (error) {
+    console.error(
+      "Global Razorpay test error:",
+      error
+    );
+
+    paymentTestBtn.disabled = false;
+    paymentTestBtn.textContent =
+      "Test Global Razorpay Order";
+
+    const message =
+      document.getElementById("formMessage");
+
+    if (message) {
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#fff0f0;color:#b42318">' +
+        (error?.message ||
+          "Unable to create global Razorpay order.") +
+        "</div>";
+    }
+  }
+});
+
+// Show temporary payment test button
+const testButtonContainer =
+  document.getElementById("formMessage");
+
+if (testButtonContainer) {
+  testButtonContainer.appendChild(paymentTestBtn);
+}
 
 const sidebar=document.getElementById("sidebar");
 
