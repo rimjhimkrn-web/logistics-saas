@@ -40,6 +40,7 @@ body{background:#f6f8fb}
 .btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
 .btn.primary{background:#0b5cff;color:#fff}
 .btn.secondary{background:#eef2f7;color:#263241}
+.btn:disabled{opacity:.6;cursor:not-allowed}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
 .status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px}
 .status.blue{background:#eaf1ff;color:#1558c0}
@@ -57,12 +58,14 @@ table{width:100%;border-collapse:collapse;min-width:850px}
 th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
 th{font-size:11px;text-transform:uppercase;color:#6b7280}
 .empty{padding:25px;text-align:center;color:#6b7280;background:#fafbfc;border-radius:9px}
+.message-panel{margin-top:12px}
 footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 
 @media(max-width:1100px){
 .kpis{grid-template-columns:repeat(3,1fr)}
 .grid{grid-template-columns:1fr}
 }
+
 @media(max-width:760px){
 .quote-layout{grid-template-columns:1fr}
 .sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
@@ -75,6 +78,7 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 .form-grid{grid-template-columns:1fr}
 .full{grid-column:auto}
 }
+
 @media(max-width:480px){
 .kpi{padding:12px}
 .kpi strong{font-size:19px}
@@ -88,6 +92,7 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 
 <aside class="sidebar" id="sidebar">
 <h3>KRIM</h3>
+
 <nav class="nav">
 <a href="../home.html">Overview</a>
 <a href="shipments.html">Shipments</a>
@@ -110,136 +115,258 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <main class="main">
 
 <header class="topbar">
-<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+
+<button
+  class="mobile-menu"
+  id="menuBtn"
+  aria-label="Menu"
+>
+☰
+</button>
+
 <div class="brand">KRIM Logistics</div>
 
 <div class="top-search">
-<input id="globalSearch" placeholder="Search quote, shipment, reference...">
+<input
+  id="globalSearch"
+  placeholder="Search quote, shipment, reference..."
+>
 </div>
 
 <div class="account">
-<button class="btn secondary" id="signoutBtn">Sign out</button>
+<button
+  class="btn secondary"
+  id="signoutBtn"
+>
+Sign out
+</button>
 </div>
+
 </header>
 
 <section class="content">
 
 <small>Commercial / Quotes</small>
+
 <h1>Global Quotes</h1>
-<p>Create, compare, manage and convert logistics quotes across markets.</p>
+
+<p>
+Create, compare, manage and convert logistics quotes across markets.
+</p>
 
 <div class="context">
+
 <span class="chip">🌍 Global Multi-market</span>
 <span class="chip">🇮🇳 India</span>
 <span class="chip">₹ INR</span>
 <span class="chip">Asia/Kolkata</span>
 <span class="chip">Authorized Quotes</span>
+
 </div>
 
 <div class="kpis">
-<div class="kpi"><span>Total Quotes</span><strong>18</strong></div>
-<div class="kpi"><span>Draft</span><strong>4</strong></div>
-<div class="kpi"><span>Sent</span><strong>6</strong></div>
-<div class="kpi"><span>Accepted</span><strong>5</strong></div>
-<div class="kpi"><span>Expired</span><strong>2</strong></div>
-<div class="kpi"><span>Converted</span><strong>1</strong></div>
+
+<div class="kpi">
+<span>Total Quotes</span>
+<strong>18</strong>
+</div>
+
+<div class="kpi">
+<span>Draft</span>
+<strong>4</strong>
+</div>
+
+<div class="kpi">
+<span>Sent</span>
+<strong>6</strong>
+</div>
+
+<div class="kpi">
+<span>Accepted</span>
+<strong>5</strong>
+</div>
+
+<div class="kpi">
+<span>Expired</span>
+<strong>2</strong>
+</div>
+
+<div class="kpi">
+<span>Converted</span>
+<strong>1</strong>
+</div>
+
 </div>
 
 <div class="grid">
 
 <div class="panel">
+
 <h2>Create Quote Request</h2>
 
 <div class="form-grid">
 
 <div class="field">
 <label>Origin</label>
-<input id="origin" placeholder="City / location">
+<input
+  id="origin"
+  placeholder="City / location"
+>
 </div>
 
 <div class="field">
 <label>Destination</label>
-<input id="destination" placeholder="City / location">
+<input
+  id="destination"
+  placeholder="City / location"
+>
 </div>
 
 <div class="field">
 <label>Transport Mode</label>
 <select id="mode">
+
 <option value="road">Road</option>
 <option value="rail">Rail</option>
 <option value="ocean">Ocean</option>
 <option value="air">Air</option>
 <option value="multimodal">Multimodal</option>
+
 </select>
 </div>
 
 <div class="field">
 <label>Service Level</label>
+
 <select id="service">
+
 <option>Standard</option>
 <option>Priority</option>
 <option>Express</option>
 <option>Economy</option>
+
 </select>
 </div>
 
 <div class="field">
 <label>Cargo</label>
-<input id="cargo" placeholder="Cargo description">
+
+<input
+  id="cargo"
+  placeholder="Cargo description"
+>
+
 </div>
 
 <div class="field">
+
 <label>Weight (kg)</label>
-<input id="weight" type="number" min="0" placeholder="0">
+
+<input
+  id="weight"
+  type="number"
+  min="0"
+  placeholder="0"
+>
+
 </div>
 
 <div class="field">
+
 <label>Market</label>
+
 <select id="market">
+
 <option>India</option>
 <option>United Arab Emirates</option>
 <option>Singapore</option>
 <option>United Kingdom</option>
 <option>United States</option>
 <option>Other market</option>
+
 </select>
+
 </div>
 
 <div class="field">
+
 <label>Currency</label>
+
 <select id="currency">
-<option>INR</option>
-<option>USD</option>
-<option>EUR</option>
-<option>GBP</option>
-<option>AED</option>
-<option>SGD</option>
+
+<option value="INR">INR</option>
+<option value="USD">USD</option>
+<option value="EUR">EUR</option>
+<option value="GBP">GBP</option>
+<option value="AED">AED</option>
+<option value="SGD">SGD</option>
+
 </select>
+
 </div>
 
 <div class="field">
+
 <label>Quote Amount</label>
-<input id="quoteAmount" type="number" min="0" step="0.01" placeholder="Enter commercial amount">
+
+<input
+  id="quoteAmount"
+  type="number"
+  min="0"
+  step="0.01"
+  placeholder="Enter commercial amount"
+>
+
 </div>
-  
+
 <div class="field full">
+
 <label>Customer Reference</label>
-<input id="reference" placeholder="Optional customer reference">
+
+<input
+  id="reference"
+  placeholder="Optional customer reference"
+>
+
 </div>
 
 </div>
 
 <div class="actions">
-<button class="btn primary" id="createBtn">Create Quote Request</button>
-<button class="btn secondary" id="clearBtn">Clear</button>
+
+<button
+  class="btn primary"
+  id="createBtn"
+>
+Create Quote Request
+</button>
+
+<button
+  class="btn secondary"
+  id="acceptQuoteBtn"
+  disabled
+>
+Accept Quote
+</button>
+
+<button
+  class="btn secondary"
+  id="clearBtn"
+>
+Clear
+</button>
+
 </div>
 
 <div id="formMessage"></div>
+
 </div>
+
 
 <div>
 
 <div class="panel">
+
 <h2>Pricing Structure</h2>
 
 <div class="info-row">
@@ -274,56 +401,122 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 
 </div>
 
+
 <div class="panel">
+
 <h2>Quote Lifecycle</h2>
 
-<div class="info-row"><span>1. Request</span><span class="status gray">Created</span></div>
-<div class="info-row"><span>2. Pricing</span><span class="status blue">Calculated</span></div>
-<div class="info-row"><span>3. Review</span><span class="status orange">Pending</span></div>
-<div class="info-row"><span>4. Sent</span><span class="status gray">Customer</span></div>
-<div class="info-row"><span>5. Accepted</span><span class="status green">Conversion Ready</span></div>
-<div class="info-row"><span>6. Shipment</span><span class="status green">Create Shipment</span></div>
+<div class="info-row">
+<span>1. Request</span>
+<span class="status gray">Created</span>
+</div>
+
+<div class="info-row">
+<span>2. Pricing</span>
+<span class="status blue">Calculated</span>
+</div>
+
+<div class="info-row">
+<span>3. Review</span>
+<span class="status orange">Pending</span>
+</div>
+
+<div class="info-row">
+<span>4. Sent</span>
+<span class="status gray">Customer</span>
+</div>
+
+<div class="info-row">
+<span>5. Accepted</span>
+<span class="status green">Conversion Ready</span>
+</div>
+
+<div class="info-row">
+<span>6. Shipment</span>
+<span class="status green">Create Shipment</span>
+</div>
 
 </div>
 
 </div>
+
 </div>
+
 
 <div class="panel">
+
 <h2>Quote Comparison</h2>
 
 <div class="quote-card">
+
 <div class="quote-head">
+
 <div>
+
 <strong>Network Option A</strong>
-<div style="font-size:12px;color:#6b7280;margin-top:4px">Road • Standard • India</div>
+
+<div style="font-size:12px;color:#6b7280;margin-top:4px">
+Road • Standard • India
 </div>
+
+</div>
+
 <span class="status green">Available</span>
+
 </div>
-<div class="price">Pricing Engine</div>
-<div style="font-size:12px;color:#6b7280">Final amount will be calculated from authorized network/pricing data.</div>
+
+<div class="price">
+Pricing Engine
 </div>
+
+<div style="font-size:12px;color:#6b7280">
+Final amount will be calculated from authorized network/pricing data.
+</div>
+
+</div>
+
 
 <div class="quote-card">
+
 <div class="quote-head">
+
 <div>
+
 <strong>Network Option B</strong>
-<div style="font-size:12px;color:#6b7280;margin-top:4px">Multimodal • Priority • India</div>
-</div>
-<span class="status blue">Alternative</span>
-</div>
-<div class="price">Pricing Engine</div>
-<div style="font-size:12px;color:#6b7280">Transit time and commercial components will be evaluated.</div>
+
+<div style="font-size:12px;color:#6b7280;margin-top:4px">
+Multimodal • Priority • India
 </div>
 
 </div>
+
+<span class="status blue">Alternative</span>
+
+</div>
+
+<div class="price">
+Pricing Engine
+</div>
+
+<div style="font-size:12px;color:#6b7280">
+Transit time and commercial components will be evaluated.
+</div>
+
+</div>
+
+</div>
+
 
 <div class="panel">
+
 <h2>Recent Quotes</h2>
 
 <div class="table-wrap">
+
 <table>
+
 <thead>
+
 <tr>
 <th>Quote</th>
 <th>Route</th>
@@ -334,51 +527,95 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <th>Status</th>
 <th>Action</th>
 </tr>
+
 </thead>
 
 <tbody>
 
 <tr>
+
 <td>KRIM-Q-2026-0018</td>
 <td>Ranchi → Jamshedpur</td>
 <td>Road</td>
 <td>India</td>
 <td>INR</td>
 <td>7 days</td>
-<td><span class="status green">Accepted</span></td>
-<td><button class="btn secondary convertBtn">Convert</button></td>
+
+<td>
+<span class="status green">
+Accepted
+</span>
+</td>
+
+<td>
+<button class="btn secondary convertBtn">
+Convert
+</button>
+</td>
+
 </tr>
 
+
 <tr>
+
 <td>KRIM-Q-2026-0017</td>
 <td>Delhi → Mumbai</td>
 <td>Road</td>
 <td>India</td>
 <td>INR</td>
 <td>5 days</td>
-<td><span class="status blue">Sent</span></td>
-<td><button class="btn secondary">View</button></td>
+
+<td>
+<span class="status blue">
+Sent
+</span>
+</td>
+
+<td>
+<button class="btn secondary">
+View
+</button>
+</td>
+
 </tr>
 
+
 <tr>
+
 <td>KRIM-Q-2026-0016</td>
 <td>Kolkata → Chennai</td>
 <td>Multimodal</td>
 <td>India</td>
 <td>INR</td>
 <td>Expired</td>
-<td><span class="status orange">Expired</span></td>
-<td><button class="btn secondary">Review</button></td>
+
+<td>
+<span class="status orange">
+Expired
+</span>
+</td>
+
+<td>
+<button class="btn secondary">
+Review
+</button>
+</td>
+
 </tr>
 
 </tbody>
+
 </table>
+
 </div>
 
 </div>
+
 
 <div class="panel">
+
 <h2>Global Commercial Architecture</h2>
+
 <p>
 KRIM quotes are designed around a global pricing model. Quote calculation
 can combine network capacity, carrier/partner cost, route, mode, cargo,
@@ -388,21 +625,29 @@ commercial policies.
 
 <p>
 A quote can progress from request → pricing → review → customer delivery
-→ acceptance → shipment creation. Actual commercial values should come
+→ acceptance → shipment confirmation. Actual commercial values should come
 from authorized backend pricing and network data rather than hard-coded
 frontend prices.
 </p>
+
 </div>
 
+
 <footer>
+
 KRIM Logistics • Global Commercial Infrastructure • Operations • Network • Finance • Governance
+
 </footer>
 
 </section>
+
 </main>
+
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="../platform/krim-config.js"></script>
 <script src="../platform/krim-supabase.js"></script>
 <script src="../platform/krim-auth.js"></script>
@@ -410,164 +655,445 @@ KRIM Logistics • Global Commercial Infrastructure • Operations • Network �
 <script src="../platform/krim-ui.js"></script>
 <script src="../platform/krim-security.js"></script>
 
+
 <script>
+
 document.addEventListener("DOMContentLoaded",()=>{
 
-const shipmentId = new URLSearchParams(window.location.search).get("shipment_id");
+/* =========================================================
+   KRIM GLOBAL QUOTES
+   ========================================================= */
 
-if (shipmentId) {
-  console.log("KRIM shipment attached to quote:", shipmentId);
-}
+const shipmentId =
+  new URLSearchParams(window.location.search).get("shipment_id");
 
-const sidebar=document.getElementById("sidebar");
+let currentQuoteId = null;
 
-document.getElementById("menuBtn")?.addEventListener("click",()=>{
-sidebar.classList.toggle("open");
-});
+const sidebar =
+  document.getElementById("sidebar");
 
-document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
-try{
-if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
-}catch(e){}
-location.href="../auth/login.html";
-});
+const message =
+  document.getElementById("formMessage");
 
-document.getElementById("clearBtn")?.addEventListener("click",()=>{
-["origin","destination","cargo","weight","reference"].forEach(id=>{
-const el=document.getElementById(id);
-if(el) el.value="";
-});
-document.getElementById("formMessage").innerHTML="";
-});
+const createBtn =
+  document.getElementById("createBtn");
 
-document.getElementById("createBtn")?.addEventListener("click", async ()=>{
+const acceptQuoteBtn =
+  document.getElementById("acceptQuoteBtn");
 
-const origin=document.getElementById("origin").value.trim();
-const destination=document.getElementById("destination").value.trim();
-const cargo=document.getElementById("cargo").value.trim();
-const weight=document.getElementById("weight").value.trim();
-const currency=document.getElementById("currency").value;
-const amount=Number(document.getElementById("quoteAmount").value);
 
-const message=document.getElementById("formMessage");
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
 
-if(!shipmentId){
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#fff7ed">No shipment is attached to this quote.</div>';
-return;
-}
-
-if(!origin||!destination||!cargo||!weight){
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#fff7ed">Please complete origin, destination, cargo and weight.</div>';
-return;
-}
-
-if(!Number.isFinite(amount)||amount<0){
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#fff7ed">Please enter a valid quote amount.</div>';
-return;
-}
-
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#eff6ff">Creating authorized quote...</div>';
-
-try{
-
-const validUntil=new Date(
-Date.now()+7*24*60*60*1000
-).toISOString();
-
-const {data,error}=await window.KRIM_SUPABASE.rpc(
-"krim_create_global_quote",
-{
-p_shipment_id:Number(shipmentId),
-p_amount:amount,
-p_currency_code:currency,
-p_valid_until:validUntil
-}
+document.getElementById("menuBtn")?.addEventListener(
+  "click",
+  ()=>{
+    sidebar?.classList.toggle("open");
+  }
 );
 
-if(error) throw error;
 
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#ecfdf5">Quote created successfully.</div>';
+/* =========================================================
+   SIGN OUT
+   ========================================================= */
 
-console.log("KRIM global quote:",data);
+document.getElementById("signoutBtn")?.addEventListener(
+  "click",
+  async ()=>{
 
-}catch(error){
+    try{
 
-console.error("KRIM quote creation error:",error);
+      if(window.KRIM_AUTH?.signOut){
 
-message.innerHTML=
-'<div class="panel" style="margin-top:12px;background:#fef2f2">Quote creation failed: '+
-(error?.message||"Unknown error")+
-'</div>';
+        await window.KRIM_AUTH.signOut();
 
-});
-      document.getElementById("acceptQuoteBtn")?.addEventListener("click", async ()=>{
+      }
 
-        const message = document.getElementById("formMessage");
+    }catch(error){
 
-        if (!shipmentId) {
-          message.innerHTML =
-            '<div class="panel" style="margin-top:12px;background:#fff7ed">No shipment is attached to this quote.</div>';
-          return;
-        }
+      console.error(
+        "KRIM sign out error:",
+        error
+      );
 
-        const quoteId = window.prompt("Enter the Quote ID to accept:");
+    }
 
-        if (!quoteId) {
-          return;
-        }
+    location.href="../auth/login.html";
 
-        message.innerHTML =
-          '<div class="panel" style="margin-top:12px;background:#eff6ff">Accepting quote...</div>';
+  }
+);
 
-        try {
 
-          const { data, error } =
-            await window.KRIM_SUPABASE.rpc(
-              "krim_accept_global_quote",
-              {
-                p_quote_id: Number(quoteId)
-              }
-            );
+/* =========================================================
+   MESSAGE HELPER
+   ========================================================= */
 
-          if (error) throw error;
+function showMessage(
+  html
+){
 
-          message.innerHTML =
-            '<div class="panel" style="margin-top:12px;background:#ecfdf5">Quote accepted successfully. Shipment is now confirmed.</div>';
+  if(message){
 
-          console.log("KRIM accepted quote:", data);
+    message.innerHTML = html;
 
-        } catch (error) {
+  }
 
-          console.error("KRIM quote acceptance error:", error);
-
-          message.innerHTML =
-            '<div class="panel" style="margin-top:12px;background:#fef2f2">Quote acceptance failed: ' +
-            (error?.message || "Unknown error") +
-            '</div>';
-
-        }
-
-      });
-document.querySelectorAll(".convertBtn").forEach(btn=>{
-btn.addEventListener("click",()=>{
-alert("Quote-to-shipment conversion will use the authorized KRIM shipment workflow.");
-});
-});
-
-document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-const q=e.target.value.trim();
-if(q) document.getElementById("reference").value=q;
 }
-});
 
-});
-</script>
 
-</body>
-                                              </html>
+/* =========================================================
+   LOAD EXISTING QUOTE FOR SHIPMENT
+   ========================================================= */
+
+async function loadExistingQuote(){
+
+  if(!shipmentId){
+
+    return;
+
+  }
+
+  try{
+
+    const {data,error} =
+      await window.KRIM_SUPABASE
+        .from("krim_quotes")
+        .select(
+          "id,status,amount,currency_code,valid_until,created_at"
+        )
+        .eq(
+          "shipment_id",
+          Number(shipmentId)
+        )
+        .order(
+          "id",
+          {ascending:false}
+        )
+        .limit(1)
+        .maybeSingle();
+
+    if(error){
+
+      console.error(
+        "KRIM quote lookup error:",
+        error
+      );
+
+      return;
+
+    }
+
+    if(data){
+
+      currentQuoteId = data.id;
+
+      if(
+        data.status === "sent"
+      ){
+
+        if(acceptQuoteBtn){
+
+          acceptQuoteBtn.disabled = false;
+
+        }
+
+      }
+
+      console.log(
+        "KRIM existing quote:",
+        data
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "KRIM existing quote exception:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CLEAR FORM
+   ========================================================= */
+
+document.getElementById("clearBtn")?.addEventListener(
+  "click",
+  ()=>{
+
+    [
+      "origin",
+      "destination",
+      "cargo",
+      "weight",
+      "quoteAmount",
+      "reference"
+    ].forEach(
+      id=>{
+
+        const element =
+          document.getElementById(id);
+
+        if(element){
+
+          element.value="";
+
+        }
+
+      }
+    );
+
+    if(message){
+
+      message.innerHTML="";
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CREATE GLOBAL QUOTE
+   ========================================================= */
+
+createBtn?.addEventListener(
+  "click",
+  async ()=>{
+
+    const origin =
+      document.getElementById("origin")
+        ?.value
+        .trim();
+
+    const destination =
+      document.getElementById("destination")
+        ?.value
+        .trim();
+
+    const cargo =
+      document.getElementById("cargo")
+        ?.value
+        .trim();
+
+    const weight =
+      document.getElementById("weight")
+        ?.value
+        .trim();
+
+    const currency =
+      document.getElementById("currency")
+        ?.value;
+
+    const amount =
+      Number(
+        document.getElementById("quoteAmount")
+          ?.value
+      );
+
+
+    /* -----------------------------------------------------
+       VALIDATION
+       ----------------------------------------------------- */
+
+    if(!shipmentId){
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fff7ed">' +
+        'No shipment is attached to this quote.' +
+        '</div>'
+      );
+
+      return;
+
+    }
+
+
+    if(
+      !origin ||
+      !destination ||
+      !cargo ||
+      !weight
+    ){
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fff7ed">' +
+        'Please complete origin, destination, cargo and weight.' +
+        '</div>'
+      );
+
+      return;
+
+    }
+
+
+    if(
+      !Number.isFinite(amount) ||
+      amount < 0
+    ){
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fff7ed">' +
+        'Please enter a valid quote amount.' +
+        '</div>'
+      );
+
+      return;
+
+    }
+
+
+    if(!window.KRIM_SUPABASE){
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fef2f2">' +
+        'KRIM database connection is not available.' +
+        '</div>'
+      );
+
+      return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       UI STATE
+       ----------------------------------------------------- */
+
+    createBtn.disabled = true;
+
+    if(acceptQuoteBtn){
+
+      acceptQuoteBtn.disabled = true;
+
+    }
+
+    showMessage(
+      '<div class="panel message-panel" style="background:#eff6ff">' +
+      'Creating authorized quote...' +
+      '</div>'
+    );
+
+
+    try{
+
+      const validUntil =
+        new Date(
+          Date.now() +
+          7 * 24 * 60 * 60 * 1000
+        ).toISOString();
+
+
+      const {
+        data,
+        error
+      } =
+        await window.KRIM_SUPABASE.rpc(
+          "krim_create_global_quote",
+          {
+            p_shipment_id:
+              Number(shipmentId),
+
+            p_amount:
+              amount,
+
+            p_currency_code:
+              currency,
+
+            p_valid_until:
+              validUntil
+          }
+        );
+
+
+      if(error){
+
+        throw error;
+
+      }
+
+
+      /* ---------------------------------------------------
+         STORE CREATED QUOTE
+         --------------------------------------------------- */
+
+      if(
+        data &&
+        data.id
+      ){
+
+        currentQuoteId =
+          data.id;
+
+      }
+
+
+      if(acceptQuoteBtn){
+
+        acceptQuoteBtn.disabled =
+          !currentQuoteId;
+
+      }
+
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#ecfdf5">' +
+        'Quote created successfully. Quote ID: ' +
+        '<strong>' +
+        (currentQuoteId ?? "Created") +
+        '</strong>' +
+        '</div>'
+      );
+
+
+      console.log(
+        "KRIM global quote:",
+        data
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "KRIM quote creation error:",
+        error
+      );
+
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fef2f2">' +
+        'Quote creation failed: ' +
+        (error?.message || "Unknown error") +
+        '</div>'
+      );
+
+
+    }finally{
+
+      createBtn.disabled = false;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   ACCEPT GLOBAL QUOTE
+   ========================================================= */
+
+acceptQuoteBtn?.addEventListener(
+  "click",
+  async ()=>{
+
+    if(!shipmentId){
+
+      showMessage(
+        '<div class="panel message-panel" style="background:#fff7ed">' +
+        'No shipment is attached to 
