@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Analytics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.chart-card{min-height:230px}
+.metric{font-size:28px;font-weight:800;margin:8px 0}
+.chart{height:120px;display:flex;align-items:end;gap:8px;margin-top:20px}
+.bar{flex:1;border-radius:6px 6px 0 0;background:#0b5cff;min-height:15px}
+.analytics-list{display:grid;gap:10px}
+.analytics-row{display:flex;justify-content:space-between;gap:16px;padding:13px;border:1px solid var(--krim-border);border-radius:10px}
+.section-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:900px){.analytics-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+.analytics-grid,.section-grid{grid-template-columns:1fr}
+.metric{font-size:24px}
+.analytics-row{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<header class="krim-topbar">
+<div class="krim-container">
+<div class="krim-topbar-inner">
+
+<a href="../home.html" class="krim-brand">KRIM</a>
+
+<button class="krim-icon-button" id="menuBtn" aria-label="Open menu">☰</button>
+
+<nav id="mainNav" class="krim-nav">
+<a href="../workspaces/operations-workspace.html">Operations</a>
+<a href="./shipments.html">Shipments</a>
+<a href="./tracking.html">Tracking</a>
+<a href="./finance.html">Finance</a>
+<a href="./network.html">Network</a>
+<a href="./analytics.html" class="active">Analytics</a>
+</nav>
+
+<div class="krim-topbar-actions">
+<button class="krim-button krim-button-secondary" id="signOutBtn">Sign out</button>
+</div>
+
+</div>
+</div>
+</header>
+
+<main class="krim-container krim-page">
+
+<div class="krim-breadcrumb">
+<a href="../workspaces/operations-workspace.html">Operations</a>
+<span>/</span>
+<span>Analytics</span>
+</div>
+
+<section class="krim-page-header">
+<div>
+<div class="krim-eyebrow">GLOBAL INTELLIGENCE</div>
+<h1>Analytics</h1>
+<p>Global operational, commercial, network and performance intelligence.</p>
+</div>
+</section>
+
+<section class="krim-context-bar">
+<span>Global KRIM Core</span>
+<span>India Market</span>
+<span>INR</span>
+<span>Asia/Kolkata</span>
+<span>Production</span>
+</section>
+
+<section class="analytics-grid">
+
+<div class="krim-card">
+<div class="krim-muted">Shipments</div>
+<div class="metric">—</div>
+<div class="krim-muted">Global shipment volume</div>
+</div>
+
+<div class="krim-card">
+<div class="krim-muted">On-time performance</div>
+<div class="metric">—</div>
+<div class="krim-muted">Delivery performance</div>
+</div>
+
+<div class="krim-card">
+<div class="krim-muted">Network utilization</div>
+<div class="metric">—</div>
+<div class="krim-muted">Available capacity usage</div>
+</div>
+
+<div class="krim-card">
+<div class="krim-muted">Revenue</div>
+<div class="metric">₹ —</div>
+<div class="krim-muted">Commercial performance</div>
+</div>
+
+</section>
+
+<section class="krim-section">
+<div class="krim-section-header">
+<div>
+<h2>Analytics Command</h2>
+<p>Query and analyze KRIM operational intelligence.</p>
+</div>
+</div>
+
+<div class="krim-card">
+<div class="krim-form-grid">
+
+<div class="krim-field">
+<label>Search</label>
+<input type="search" placeholder="Shipment, market, partner, customer...">
+</div>
+
+<div class="krim-field">
+<label>Market</label>
+<select>
+<option>All markets</option>
+<option>India</option>
+<option>Global</option>
+</select>
+</div>
+
+<div class="krim-field">
+<label>Period</label>
+<select>
+<option>Current period</option>
+<option>Last 7 days</option>
+<option>Last 30 days</option>
+<option>Last 90 days</option>
+<option>Year to date</option>
+</select>
+</div>
+
+<div class="krim-field">
+<label>Analytics domain</label>
+<select>
+<option>All domains</option>
+<option>Operations</option>
+<option>Network</option>
+<option>Finance</option>
+<option>Partners</option>
+<option>Customers</option>
+<option>Exceptions</option>
+<option>Claims</option>
+</select>
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="section-grid">
+
+<div class="krim-card chart-card">
+<h3>Shipment Performance</h3>
+<p class="krim-muted">Shipment volume and lifecycle performance.</p>
+
+<div class="chart">
+<div class="bar" style="height:45%"></div>
+<div class="bar" style="height:65%"></div>
+<div class="bar" style="height:55%"></div>
+<div class="bar" style="height:80%"></div>
+<div class="bar" style="height:70%"></div>
+<div class="bar" style="height:90%"></div>
+</div>
+</div>
+
+<div class="krim-card chart-card">
+<h3>Network Performance</h3>
+<p class="krim-muted">Capacity and network utilization intelligence.</p>
+
+<div class="chart">
+<div class="bar" style="height:55%"></div>
+<div class="bar" style="height:75%"></div>
+<div class="bar" style="height:60%"></div>
+<div class="bar" style="height:85%"></div>
+<div class="bar" style="height:72%"></div>
+<div class="bar" style="height:88%"></div>
+</div>
+</div>
+
+</section>
+
+<section class="section-grid">
+
+<div class="krim-card">
+<h3>Commercial Intelligence</h3>
+
+<div class="analytics-list">
+<div class="analytics-row">
+<span>Quotes</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Quote conversion</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Invoices</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Settlements</span>
+<strong>—</strong>
+</div>
+</div>
+</div>
+
+<div class="krim-card">
+<h3>Partner Performance</h3>
+
+<div class="analytics-list">
+<div class="analytics-row">
+<span>Active partners</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Capacity contribution</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Delivery performance</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Partner quality</span>
+<strong>—</strong>
+</div>
+</div>
+</div>
+
+</section>
+
+<section class="section-grid">
+
+<div class="krim-card">
+<h3>Customer Intelligence</h3>
+
+<div class="analytics-list">
+<div class="analytics-row">
+<span>Active customers</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Shipment demand</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Service performance</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Customer retention</span>
+<strong>—</strong>
+</div>
+</div>
+</div>
+
+<div class="krim-card">
+<h3>Risk, Exceptions & Claims</h3>
+
+<div class="analytics-list">
+<div class="analytics-row">
+<span>Open exceptions</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Delay risk</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Open claims</span>
+<strong>—</strong>
+</div>
+
+<div class="analytics-row">
+<span>Disputes</span>
+<strong>—</strong>
+</div>
+</div>
+</div>
+
+</section>
+
+<section class="krim-section">
+<div class="krim-section-header">
+<div>
+<h2>Market Intelligence</h2>
+<p>Global market, country and regional performance readiness.</p>
+</div>
+</div>
+
+<div class="krim-card">
+<div class="analytics-list">
+
+<div class="analytics-row">
+<span>India</span>
+<span class="krim-badge krim-badge-info">Active Market</span>
+</div>
+
+<div class="analytics-row">
+<span>Global markets</span>
+<span class="krim-badge">Architecture Ready</span>
+</div>
+
+<div class="analytics-row">
+<span>Currency intelligence</span>
+<span class="krim-badge">Ready</span>
+</div>
+
+<div class="analytics-row">
+<span>Regional analytics</span>
+<span class="krim-badge">Ready</span>
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="krim-section">
+<div class="krim-section-header">
+<div>
+<h2>Data Governance & Quality</h2>
+<p>Analytics must remain traceable, consistent and governed.</p>
+</div>
+</div>
+
+<div class="analytics-grid">
+
+<div class="krim-card">
+<h3>Data Quality</h3>
+<p class="krim-muted">Validation and completeness monitoring.</p>
+</div>
+
+<div class="krim-card">
+<h3>Auditability</h3>
+<p class="krim-muted">Analytics events remain traceable.</p>
+</div>
+
+<div class="krim-card">
+<h3>Data Freshness</h3>
+<p class="krim-muted">Monitoring of analytical data freshness.</p>
+</div>
+
+<div class="krim-card">
+<h3>Access Governance</h3>
+<p class="krim-muted">Role-based analytics visibility.</p>
+</div>
+
+</div>
+</section>
+
+<section class="krim-section">
+<div class="krim-card">
+
+<h2>KRIM Analytics Architecture</h2>
+
+<p class="krim-muted">
+KRIM Analytics is designed as the intelligence layer across shipments,
+tracking, network, capacity, finance, partners, customers,
+exceptions, claims and global markets.
+</p>
+
+<div class="krim-divider"></div>
+
+<div class="analytics-list">
+
+<div class="analytics-row">
+<span>Operational analytics</span>
+<strong>Ready</strong>
+</div>
+
+<div class="analytics-row">
+<span>Commercial analytics</span>
+<strong>Ready</strong>
+</div>
+
+<div class="analytics-row">
+<span>Network intelligence</span>
+<strong>Ready</strong>
+</div>
+
+<div class="analytics-row">
+<span>Global market intelligence</span>
+<strong>Ready</strong>
+</div>
+
+<div class="analytics-row">
+<span>AI intelligence layer</span>
+<strong>Integration Ready</strong>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<footer class="krim-footer">
+<div>
+<strong>KRIM Logistics</strong>
+<div class="krim-muted">Global Logistics Operating System</div>
+</div>
+
+<div class="krim-muted">
+© 2026 KRIM Logistics
+</div>
+</footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+  const menu=document.getElementById("menuBtn");
+  const nav=document.getElementById("mainNav");
+  const signOut=document.getElementById("signOutBtn");
+
+  menu?.addEventListener("click",()=>{
+    nav?.classList.toggle("is-open");
+  });
+
+  signOut?.addEventListener("click",async()=>{
+    try{
+      await window.KRIM_AUTH?.signOut();
+    }catch(e){}
+    window.location.href="../auth/login.html";
+  });
+
+  try{
+    await window.KRIM_SECURITY?.requireAuthentication?.();
+  }catch(e){
+    window.location.href="../auth/login.html";
+  }
+});
+</script>
+
+</body>
+  </html>
