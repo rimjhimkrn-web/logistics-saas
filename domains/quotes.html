@@ -578,6 +578,60 @@ document.getElementById("createBtn")?.addEventListener("click", async () => {
       '</div>';
 
     console.log("KRIM global quote created:", data);
+    const acceptBtn = document.createElement("button");
+acceptBtn.type = "button";
+acceptBtn.textContent = "Accept Quote";
+acceptBtn.style.cssText =
+  "margin-top:12px;padding:10px 16px;border:0;border-radius:8px;background:#172033;color:#fff;cursor:pointer;font-weight:600;";
+
+acceptBtn.addEventListener("click", async () => {
+
+  acceptBtn.disabled = true;
+  acceptBtn.textContent = "Accepting Quote...";
+
+  try {
+
+    const { data: acceptedQuote, error: acceptError } =
+      await window.KRIM_SUPABASE.rpc(
+        "krim_accept_global_quote",
+        {
+          p_quote_id: data.id
+        }
+      );
+
+    if (acceptError) throw acceptError;
+
+    message.innerHTML =
+      '<div class="panel" style="margin-top:12px;background:#eaf8ef">' +
+      "Quote accepted successfully. " +
+      "Quote ID: " + acceptedQuote.id +
+      " • Shipment is now confirmed." +
+      "</div>";
+
+    console.log(
+      "KRIM global quote accepted:",
+      acceptedQuote
+    );
+
+  } catch (error) {
+
+    console.error(
+      "KRIM global quote acceptance:",
+      error
+    );
+
+    acceptBtn.disabled = false;
+    acceptBtn.textContent = "Accept Quote";
+
+    message.innerHTML =
+      '<div class="panel" style="margin-top:12px;background:#fff0f0;color:#b42318">' +
+      (error?.message || "Unable to accept global quote.") +
+      "</div>";
+  }
+
+});
+
+message.appendChild(acceptBtn);
 
   } catch (error) {
 
