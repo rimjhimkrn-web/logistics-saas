@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Network | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body{background:#f6f8fb}
+.network-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px}
+.sidebar h3{margin:0 0 20px;padding:0 10px}
+.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#374151;text-decoration:none}
+.nav a:hover,.nav a.active{background:#eef4ff;color:#0b5cff}
+.main{min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;padding:0 22px}
+.brand{font-weight:800;color:#0b5cff;font-size:20px}
+.top-search{flex:1;max-width:520px}
+.top-search input{width:100%;padding:10px 14px;border:1px solid #dfe3e8;border-radius:9px}
+.account{margin-left:auto}
+.content{padding:24px;max-width:1500px;margin:auto}
+.mobile-menu{display:none;background:none;border:0;font-size:22px}
+.context{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.chip{padding:6px 10px;border:1px solid #dfe3e8;border-radius:999px;background:#fff;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.kpi strong{display:block;font-size:23px;margin-top:6px}
+.kpi span{font-size:12px;color:#6b7280}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 15px}
+.map{height:350px;border-radius:10px;background:
+linear-gradient(90deg,transparent 49%,#dbe4ee 50%,transparent 51%),
+linear-gradient(0deg,transparent 49%,#dbe4ee 50%,transparent 51%),#edf2f7;
+background-size:90px 90px;position:relative;overflow:hidden}
+.route{position:absolute;left:12%;right:12%;top:53%;height:4px;background:#0b5cff;transform:rotate(-7deg);border-radius:10px}
+.pin{position:absolute;width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 7px #555}
+.pin.one{left:13%;top:58%;background:#16a34a}
+.pin.two{left:48%;top:52%;background:#0b5cff}
+.pin.three{right:12%;top:42%;background:#f59e0b}
+.map-label{position:absolute;bottom:12px;left:12px;background:#fff;padding:8px 10px;border-radius:8px;font-size:12px}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13px}
+.info-row:last-child{border-bottom:0}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px}
+.green{background:#eaf8ef;color:#16803a}
+.blue{background:#eaf1ff;color:#1558c0}
+.orange{background:#fff4df;color:#a15c00}
+.gray{background:#f0f2f5;color:#596273}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:8px;padding:10px 13px;cursor:pointer;font-weight:600}
+.primary{background:#0b5cff;color:#fff}.secondary{background:#eef2f7;color:#263241}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
+th{font-size:11px;text-transform:uppercase;color:#6b7280}
+.network-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:10px}
+.network-card:last-child{margin-bottom:0}
+.card-head{display:flex;justify-content:space-between;gap:10px}
+footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
+
+@media(max-width:1100px){
+.kpis{grid-template-columns:repeat(3,1fr)}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+.network-layout{grid-template-columns:1fr}
+.sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
+.sidebar.open{display:block}
+.mobile-menu{display:block}
+.topbar{padding:0 14px}
+.top-search{display:none}
+.content{padding:16px}
+.kpis{grid-template-columns:repeat(2,1fr)}
+.map{height:290px}
+}
+@media(max-width:480px){
+.kpi{padding:12px}
+.kpi strong{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="network-layout">
+
+<aside class="sidebar" id="sidebar">
+<h3>KRIM</h3>
+<nav class="nav">
+<a href="../home.html">Overview</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="quotes.html">Quotes</a>
+<a class="active" href="network.html">Network</a>
+<a href="partners.html">Partners</a>
+<a href="capacity.html">Capacity</a>
+<a href="finance.html">Finance</a>
+<a href="documents.html">Documents</a>
+<a href="compliance.html">Compliance</a>
+<a href="exceptions.html">Exceptions</a>
+<a href="claims.html">Claims</a>
+<a href="analytics.html">Analytics</a>
+<a href="integrations.html">Integrations</a>
+<a href="ai.html">AI</a>
+</nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+<div class="brand">KRIM Logistics</div>
+
+<div class="top-search">
+<input id="globalSearch" placeholder="Search network, partner, location...">
+</div>
+
+<div class="account">
+<button class="btn secondary" id="signoutBtn">Sign out</button>
+</div>
+</header>
+
+<section class="content">
+
+<small>Network / Global Operations</small>
+<h1>Global Network</h1>
+<p>Manage KRIM's markets, organizations, locations, partners, capacity and network relationships.</p>
+
+<div class="context">
+<span class="chip">🌍 Global Multi-market</span>
+<span class="chip">🇮🇳 India — Market 1</span>
+<span class="chip">₹ INR</span>
+<span class="chip">Asia/Kolkata</span>
+<span class="chip">Production</span>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Active Markets</span><strong>1</strong></div>
+<div class="kpi"><span>Organizations</span><strong>1</strong></div>
+<div class="kpi"><span>Network Partners</span><strong>1</strong></div>
+<div class="kpi"><span>Locations</span><strong>2</strong></div>
+<div class="kpi"><span>Capacity Resources</span><strong>12</strong></div>
+<div class="kpi"><span>Network Utilization</span><strong>42%</strong></div>
+</div>
+
+<div class="grid">
+
+<div>
+
+<div class="panel">
+<h2>Global Network Map</h2>
+
+<div class="map">
+<div class="route"></div>
+<div class="pin one"></div>
+<div class="pin two"></div>
+<div class="pin three"></div>
+<div class="map-label">Network visualization • live integrations ready</div>
+</div>
+
+<div class="info-row">
+<span>Active market</span>
+<strong>India</strong>
+</div>
+
+<div class="info-row">
+<span>Network model</span>
+<strong>Global Core</strong>
+</div>
+
+<div class="info-row">
+<span>Transport coverage</span>
+<strong>Road / Rail / Ocean / Air</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Network Coverage</h2>
+
+<div class="network-card">
+<div class="card-head">
+<strong>India</strong>
+<span class="status green">Active</span>
+</div>
+<div style="font-size:12px;color:#6b7280;margin-top:6px">
+Current activated market and initial operating network.
+</div>
+</div>
+
+<div class="network-card">
+<div class="card-head">
+<strong>International Markets</strong>
+<span class="status blue">Architecture Ready</span>
+</div>
+<div style="font-size:12px;color:#6b7280;margin-top:6px">
+Additional countries can be activated without changing the global core.
+</div>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Network Organizations</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Organization</th>
+<th>Type</th>
+<th>Market</th>
+<th>Relationship</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>KRIM Global Core</td>
+<td>Platform</td>
+<td>Global</td>
+<td>Owner / Operator</td>
+<td><span class="status green">Active</span></td>
+</tr>
+
+<tr>
+<td>Network Partner</td>
+<td>Carrier / Partner</td>
+<td>India</td>
+<td>Operational</td>
+<td><span class="status green">Active</span></td>
+</tr>
+
+<tr>
+<td>Future Market Organizations</td>
+<td>Customer / Partner</td>
+<td>Global</td>
+<td>Network Relationship</td>
+<td><span class="status blue">Ready</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+<div>
+
+<div class="panel">
+<h2>Network Controls</h2>
+
+<div class="controls">
+<button class="btn primary">Add Organization</button>
+<button class="btn secondary">Add Location</button>
+<button class="btn secondary">Network Partner</button>
+<button class="btn secondary">Capacity</button>
+<button class="btn secondary">Markets</button>
+</div>
+</div>
+
+<div class="panel">
+<h2>Network Health</h2>
+
+<div class="info-row">
+<span>Network availability</span>
+<span class="status green">Operational</span>
+</div>
+
+<div class="info-row">
+<span>Capacity matching</span>
+<span class="status green">Available</span>
+</div>
+
+<div class="info-row">
+<span>Partner relationships</span>
+<span class="status green">Active</span>
+</div>
+
+<div class="info-row">
+<span>Market configuration</span>
+<span class="status green">Configured</span>
+</div>
+
+<div class="info-row">
+<span>Integration layer</span>
+<span class="status blue">Ready</span>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Transport Network</h2>
+
+<div class="info-row">
+<span>🚚 Road</span>
+<strong>Available</strong>
+</div>
+
+<div class="info-row">
+<span>🚆 Rail</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>🚢 Ocean</span>
+<strong>Architecture Ready</strong>
+</div>
+
+<div class="info-row">
+<span>✈️ Air</span>
+<strong>Architecture Ready</strong>
+</div>
+
+<div class="info-row">
+<span>🔗 Multimodal</span>
+<strong>Supported</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Network Intelligence</h2>
+
+<div class="info-row">
+<span>Capacity matching</span>
+<strong>Enabled</strong>
+</div>
+
+<div class="info-row">
+<span>Route selection</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Market pricing</span>
+<strong>Connected</strong>
+</div>
+
+<div class="info-row">
+<span>Partner capability matching</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>AI optimization</span>
+<strong>Ready</strong>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="panel">
+<h2>Network Operating Model</h2>
+
+<p>
+KRIM is designed as a global logistics network rather than a single-country
+transport marketplace. The global KRIM Core provides the common operating
+architecture while individual markets activate their own organizations,
+locations, currencies, regulatory rules, partners, capacity and operating
+requirements.
+</p>
+
+<p>
+This allows India to operate as the first active market without making
+India the architectural boundary of the platform.
+</p>
+</div>
+
+<div class="panel">
+<h2>Network Lifecycle</h2>
+
+<div class="info-row">
+<span>Market activation</span>
+<strong>Country → Market → Rules</strong>
+</div>
+
+<div class="info-row">
+<span>Organization onboarding</span>
+<strong>Organization → Relationship → Members</strong>
+</div>
+
+<div class="info-row">
+<span>Partner onboarding</span>
+<strong>Capability → Documents → Capacity</strong>
+</div>
+
+<div class="info-row">
+<span>Shipment matching</span>
+<strong>Route → Capacity → Partner</strong>
+</div>
+
+<div class="info-row">
+<span>Operations</span>
+<strong>Dispatch → Tracking → Delivery</strong>
+</div>
+
+</div>
+
+<footer>
+KRIM Logistics • Global Network Infrastructure • Markets • Organizations • Capacity • Partners
+</footer>
+
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebar=document.getElementById("sidebar");
+
+document.getElementById("menuBtn")?.addEventListener("click",()=>{
+sidebar.classList.toggle("open");
+});
+
+document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+}catch(e){}
+location.href="../auth/login.html";
+});
+
+document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const q=e.target.value.trim();
+if(q){
+const target="partners.html?search="+encodeURIComponent(q);
+location.href=target;
+}
+}
+});
+
+});
+</script>
+
+</body>
+  </html>
