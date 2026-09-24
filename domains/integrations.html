@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07152f">
+<title>KRIM | Integrations</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+:root{
+ --i-bg:#f5f7fb;--i-panel:#fff;--i-dark:#07152f;--i-blue:#0b5cff;
+ --i-text:#172033;--i-muted:#667085;--i-border:#e3e8f0;
+ --i-green:#138a5b;--i-orange:#b7791f;--i-red:#c0392b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--i-bg);color:var(--i-text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+
+.i-header{position:sticky;top:0;z-index:100;background:var(--i-dark);color:#fff}
+.i-head{max-width:1440px;margin:auto;min-height:68px;padding:0 24px;display:flex;align-items:center;gap:22px}
+.i-logo{font-size:23px;font-weight:850;white-space:nowrap}
+.i-logo small{display:block;font-size:9px;letter-spacing:1.3px;opacity:.65}
+.i-nav{display:flex;gap:4px;flex:1}
+.i-nav a,.i-mobile a{padding:9px 11px;border-radius:8px;color:#cbd5e7;font-size:13px;font-weight:600}
+.i-nav a:hover,.i-nav a.active,.i-mobile a:hover,.i-mobile a.active{background:rgba(255,255,255,.1);color:#fff}
+.i-menu{display:none;background:transparent;color:#fff;border:1px solid #41506b;border-radius:8px;width:42px;height:40px;font-size:21px}
+.i-out{background:transparent;color:#fff;border:1px solid #41506b;border-radius:8px;padding:9px 13px;cursor:pointer}
+.i-mobile{display:none}
+.i-mobile.open{display:grid;gap:4px;padding:10px 16px 14px;border-top:1px solid #1d2b45}
+
+.i-main{max-width:1440px;margin:auto;padding:28px 24px 45px}
+.i-crumb{font-size:12px;color:var(--i-muted);display:flex;gap:8px;margin-bottom:18px}
+.i-crumb a{color:var(--i-blue);font-weight:700}
+.i-title{margin-bottom:22px}
+.i-eye{font-size:11px;color:var(--i-blue);font-weight:800;letter-spacing:1.5px}
+.i-title h1{margin:3px 0;font-size:32px}
+.i-title p{margin:0;color:var(--i-muted);font-size:14px}
+.i-context{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.i-chip{padding:6px 10px;border-radius:20px;background:#eaf1ff;border:1px solid #d5e2ff;color:#1749a5;font-size:11px;font-weight:700}
+
+.i-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.i-card{background:var(--i-panel);border:1px solid var(--i-border);border-radius:14px;padding:20px;box-shadow:0 6px 22px rgba(7,21,47,.06)}
+.i-card h2{font-size:18px;margin:0 0 5px}
+.i-card h3{font-size:15px;margin:0 0 5px}
+.i-muted{font-size:12px;color:var(--i-muted)}
+.i-number{font-size:28px;font-weight:850;margin:8px 0 2px}
+
+.i-two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.i-list{display:grid;gap:9px;margin-top:14px}
+.i-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--i-border);border-radius:9px;background:#fafbfc;font-size:13px}
+.i-status{font-size:10px;font-weight:800;border-radius:20px;padding:4px 8px;white-space:nowrap}
+.ready{background:#e8f7f0;color:var(--i-green)}
+.active{background:#eaf1ff;color:#1749a5}
+.pending{background:#fff5df;color:var(--i-orange)}
+
+.i-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+.i-table th,.i-table td{text-align:left;padding:11px;border-bottom:1px solid var(--i-border)}
+.i-table th{color:var(--i-muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+
+.i-note{margin-top:14px;padding:17px;border:1px dashed #cbd4e2;border-radius:10px;background:#fafbfc;font-size:12px;color:var(--i-muted)}
+.i-footer{max-width:1440px;margin:auto;padding:24px;border-top:1px solid var(--i-border);display:flex;justify-content:space-between;color:var(--i-muted);font-size:11px}
+
+@media(max-width:950px){
+.i-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+.i-head{padding:0 16px}
+.i-nav{display:none}
+.i-menu{display:block;margin-left:auto}
+.i-out{display:none}
+.i-main{padding:22px 16px 38px}
+.i-title h1{font-size:27px}
+.i-mobile{position:absolute;top:68px;left:0;right:0;background:var(--i-dark);box-shadow:0 12px 25px rgba(0,0,0,.2)}
+.i-two{grid-template-columns:1fr}
+.i-footer{padding:20px 16px;flex-direction:column;gap:8px}
+}
+@media(max-width:520px){
+.i-kpis{grid-template-columns:1fr}
+.i-card{padding:16px}
+.i-row{align-items:flex-start;flex-direction:column}
+.i-table{display:block;overflow-x:auto;white-space:nowrap}
+}
+</style>
+</head>
+
+<body>
+
+<header class="i-header">
+<div class="i-head">
+
+<a class="i-logo" href="../home.html">
+KRIM
+<small>LOGISTICS</small>
+</a>
+
+<nav class="i-nav">
+<a href="../workspaces/operations-workspace.html">Operations</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="network.html">Network</a>
+<a href="integrations.html" class="active">Integrations</a>
+<a href="analytics.html">Analytics</a>
+</nav>
+
+<button id="menuBtn" class="i-menu" type="button"
+aria-label="Open navigation" aria-expanded="false">☰</button>
+
+<button id="signOut" class="i-out" type="button">Sign out</button>
+
+</div>
+
+<nav id="mobileNav" class="i-mobile" aria-hidden="true">
+<a href="../workspaces/operations-workspace.html">Operations</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="network.html">Network</a>
+<a href="integrations.html" class="active">Integrations</a>
+<a href="analytics.html">Analytics</a>
+</nav>
+</header>
+
+<main class="i-main">
+
+<div class="i-crumb">
+<a href="../workspaces/operations-workspace.html">Operations</a>
+<span>/</span>
+<span>Integrations</span>
+</div>
+
+<section class="i-title">
+<div class="i-eye">GLOBAL CONNECTIVITY</div>
+<h1>Integrations</h1>
+<p>Secure connectivity between KRIM and the global logistics ecosystem.</p>
+</section>
+
+<div class="i-context">
+<span class="i-chip">Global KRIM Core</span>
+<span class="i-chip">India Market</span>
+<span class="i-chip">Production</span>
+<span class="i-chip">API + Events</span>
+</div>
+
+<section class="i-kpis">
+
+<div class="i-card">
+<div class="i-muted">Integrations</div>
+<div class="i-number">—</div>
+<div class="i-muted">Connected systems</div>
+</div>
+
+<div class="i-card">
+<div class="i-muted">API health</div>
+<div class="i-number">—</div>
+<div class="i-muted">Governed telemetry</div>
+</div>
+
+<div class="i-card">
+<div class="i-muted">Webhooks</div>
+<div class="i-number">—</div>
+<div class="i-muted">Delivery status</div>
+</div>
+
+<div class="i-card">
+<div class="i-muted">Events</div>
+<div class="i-number">—</div>
+<div class="i-muted">Platform event flow</div>
+</div>
+
+</section>
+
+<section class="i-two">
+
+<article class="i-card">
+<h2>Integration Portfolio</h2>
+
+<div class="i-list">
+<div class="i-row"><span>Carrier / 3PL APIs</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>GPS / Telematics</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>ERP / TMS / WMS</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Payment providers</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Port / Terminal systems</span><span class="i-status pending">CONNECT</span></div>
+</div>
+</article>
+
+<article class="i-card">
+<h2>Connectivity Modes</h2>
+
+<div class="i-list">
+<div class="i-row"><span>REST APIs</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Webhooks</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Event-driven systems</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Scheduled synchronization</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Real-time telemetry</span><span class="i-status active">ARCHITECTED</span></div>
+</div>
+</article>
+
+</section>
+
+<section class="i-card" style="margin-bottom:18px">
+<h2>Integration Registry</h2>
+<div class="i-muted">Governed external-system connection inventory.</div>
+
+<table class="i-table">
+<thead>
+<tr>
+<th>System</th>
+<th>Category</th>
+<th>Connection</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Carrier / 3PL</td>
+<td>Transport</td>
+<td>API / Webhook</td>
+<td><span class="i-status ready">READY</span></td>
+</tr>
+<tr>
+<td>GPS / Telematics</td>
+<td>Tracking</td>
+<td>API / Telemetry</td>
+<td><span class="i-status active">ARCHITECTED</span></td>
+</tr>
+<tr>
+<td>Payment provider</td>
+<td>Finance</td>
+<td>Webhook</td>
+<td><span class="i-status ready">READY</span></td>
+</tr>
+<tr>
+<td>ERP / TMS / WMS</td>
+<td>Enterprise</td>
+<td>API</td>
+<td><span class="i-status ready">READY</span></td>
+</tr>
+<tr>
+<td>Port / Terminal</td>
+<td>Infrastructure</td>
+<td>API</td>
+<td><span class="i-status pending">CONNECT</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section class="i-two">
+
+<article class="i-card">
+<h2>API Operations</h2>
+
+<div class="i-list">
+<div class="i-row"><span>API authentication</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Idempotency</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Request validation</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Rate controls</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Audit trail</span><span class="i-status ready">READY</span></div>
+</div>
+</article>
+
+<article class="i-card">
+<h2>Webhook Operations</h2>
+
+<div class="i-list">
+<div class="i-row"><span>Endpoint registry</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Delivery tracking</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Deduplication</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Retry handling</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Dead-letter handling</span><span class="i-status ready">READY</span></div>
+</div>
+</article>
+
+</section>
+
+<section class="i-two">
+
+<article class="i-card">
+<h2>Security & Governance</h2>
+
+<div class="i-list">
+<div class="i-row"><span>Credential protection</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Authorization</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>RLS / RBAC</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Integration audit</span><span class="i-status ready">READY</span></div>
+</div>
+</article>
+
+<article class="i-card">
+<h2>Integration Health</h2>
+
+<div class="i-list">
+<div class="i-row"><span>Latency monitoring</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Failure monitoring</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Retry monitoring</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Incident visibility</span><span class="i-status ready">READY</span></div>
+</div>
+</article>
+
+</section>
+
+<section class="i-card">
+<h2>Global Integration Architecture</h2>
+
+<p class="i-muted">
+KRIM is designed as the orchestration and intelligence layer between
+customers, carriers, partners, enterprises, infrastructure providers,
+financial systems and external logistics platforms.
+</p>
+
+<div class="i-note">
+<strong>Production integration principle</strong><br>
+External systems will be connected through governed APIs, webhooks,
+events and secure integration services. No credentials or secrets are
+exposed in the frontend.
+</div>
+
+<div class="i-list">
+<div class="i-row"><span>API infrastructure</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Webhook infrastructure</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Event infrastructure</span><span class="i-status ready">READY</span></div>
+<div class="i-row"><span>Global integration model</span><span class="i-status ready">READY</span></div>
+</div>
+</section>
+
+</main>
+
+<footer class="i-footer">
+<div>
+<strong>KRIM Logistics</strong><br>
+Global Logistics Operating System
+</div>
+<div>© 2026 KRIM Logistics</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+(() => {
+const menu=document.getElementById("menuBtn");
+const nav=document.getElementById("mobileNav");
+const logout=document.getElementById("signOut");
+
+function closeMenu(){
+nav.classList.remove("open");
+nav.setAttribute("aria-hidden","true");
+menu.setAttribute("aria-expanded","false");
+}
+
+menu.addEventListener("click",e=>{
+e.stopPropagation();
+const open=!nav.classList.contains("open");
+nav.classList.toggle("open",open);
+nav.setAttribute("aria-hidden",String(!open));
+menu.setAttribute("aria-expanded",String(open));
+});
+
+nav.addEventListener("click",e=>{
+if(e.target.closest("a")) closeMenu();
+});
+
+document.addEventListener("click",e=>{
+if(!nav.contains(e.target)&&e.target!==menu) closeMenu();
+});
+
+document.addEventListener("keydown",e=>{
+if(e.key==="Escape") closeMenu();
+});
+
+window.addEventListener("resize",()=>{
+if(innerWidth>760) closeMenu();
+});
+
+logout.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+}finally{
+location.href="../auth/login.html";
+}
+});
+
+(async()=>{
+try{
+if(window.KRIM_SECURITY?.requireAuthentication)
+await window.KRIM_SECURITY.requireAuthentication();
+}catch(e){
+location.href="../auth/login.html";
+}
+})();
+})();
+</script>
+
+</body>
+  </html>
