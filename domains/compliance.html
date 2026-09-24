@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compliance | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body{background:#f6f8fb}
+.comp-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px}
+.sidebar h3{margin:0 0 20px;padding:0 10px}
+.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#374151;text-decoration:none}
+.nav a:hover,.nav a.active{background:#eef4ff;color:#0b5cff}
+.main{min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;padding:0 22px}
+.brand{font-weight:800;color:#0b5cff;font-size:20px}
+.top-search{flex:1;max-width:520px}
+.top-search input{width:100%;padding:10px 14px;border:1px solid #dfe3e8;border-radius:9px}
+.account{margin-left:auto}
+.content{padding:24px;max-width:1500px;margin:auto}
+.mobile-menu{display:none;background:none;border:0;font-size:22px}
+.context{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.chip{padding:6px 10px;border:1px solid #dfe3e8;border-radius:999px;background:#fff;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.kpi strong{display:block;font-size:23px;margin-top:6px}
+.kpi span{font-size:12px;color:#6b7280}
+.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 15px}
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.searchbar input,.searchbar select{padding:10px;border:1px solid #dfe3e8;border-radius:8px;background:#fff}
+.searchbar input{flex:1;min-width:180px}
+.btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
+.btn.primary{background:#0b5cff;color:#fff}
+.btn.secondary{background:#eef2f7;color:#263241}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:11px}
+.green{background:#eaf8ef;color:#16803a}
+.blue{background:#eaf1ff;color:#1558c0}
+.orange{background:#fff4df;color:#a15c00}
+.red{background:#feecec;color:#b42318}
+.gray{background:#f0f2f5;color:#596273}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13px}
+.info-row:last-child{border-bottom:0}
+.comp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.comp-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+.comp-card strong{display:block;font-size:19px;margin-top:5px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
+th{font-size:11px;text-transform:uppercase;color:#6b7280}
+.bar{height:9px;background:#edf0f3;border-radius:10px;overflow:hidden;margin-top:8px}
+.fill{height:100%;background:#0b5cff;border-radius:10px}
+footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
+
+@media(max-width:1100px){
+.kpis{grid-template-columns:repeat(3,1fr)}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+.comp-layout{grid-template-columns:1fr}
+.sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
+.sidebar.open{display:block}
+.mobile-menu{display:block}
+.topbar{padding:0 14px}
+.top-search{display:none}
+.content{padding:16px}
+.kpis{grid-template-columns:repeat(2,1fr)}
+.comp-cards{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+.kpi{padding:12px}
+.kpi strong{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="comp-layout">
+
+<aside class="sidebar" id="sidebar">
+<h3>KRIM</h3>
+<nav class="nav">
+<a href="../home.html">Overview</a>
+<a href="shipments.html">Shipments</a>
+<a href="tracking.html">Tracking</a>
+<a href="quotes.html">Quotes</a>
+<a href="network.html">Network</a>
+<a href="partners.html">Partners</a>
+<a href="capacity.html">Capacity</a>
+<a href="finance.html">Finance</a>
+<a href="documents.html">Documents</a>
+<a class="active" href="compliance.html">Compliance</a>
+<a href="exceptions.html">Exceptions</a>
+<a href="claims.html">Claims</a>
+<a href="analytics.html">Analytics</a>
+<a href="integrations.html">Integrations</a>
+<a href="ai.html">AI</a>
+</nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+<div class="brand">KRIM Logistics</div>
+
+<div class="top-search">
+<input id="globalSearch" placeholder="Search compliance, shipment, organization...">
+</div>
+
+<div class="account">
+<button class="btn secondary" id="signoutBtn">Sign out</button>
+</div>
+</header>
+
+<section class="content">
+
+<small>Governance / Compliance</small>
+<h1>Global Compliance</h1>
+<p>Manage regulatory controls, trade requirements, document verification and compliance checks across KRIM markets.</p>
+
+<div class="context">
+<span class="chip">🌍 Global Compliance</span>
+<span class="chip">🇮🇳 India</span>
+<span class="chip">₹ INR</span>
+<span class="chip">Asia/Kolkata</span>
+<span class="chip">Regulatory Controls</span>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Compliance Checks</span><strong>0</strong></div>
+<div class="kpi"><span>Passed</span><strong>0</strong></div>
+<div class="kpi"><span>Pending</span><strong>0</strong></div>
+<div class="kpi"><span>Failed</span><strong>0</strong></div>
+<div class="kpi"><span>Markets</span><strong>1</strong></div>
+<div class="kpi"><span>Alerts</span><strong>0</strong></div>
+</div>
+
+<div class="grid">
+
+<div>
+
+<div class="panel">
+<h2>Compliance Search</h2>
+
+<div class="searchbar">
+<input id="compSearch" placeholder="Shipment / organization / check ID">
+
+<select id="compType">
+<option value="all">All controls</option>
+<option>Trade</option>
+<option>Customs</option>
+<option>Partner</option>
+<option>Document</option>
+<option>Sanctions</option>
+<option>Market</option>
+</select>
+
+<select id="compStatus">
+<option value="all">All status</option>
+<option>Passed</option>
+<option>Pending</option>
+<option>Failed</option>
+</select>
+
+<button class="btn primary" id="searchBtn">Search</button>
+</div>
+
+<div id="searchMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Compliance Portfolio</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>Control</th>
+<th>Entity</th>
+<th>Market</th>
+<th>Requirement</th>
+<th>Status</th>
+<th>Risk</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>KRIM Compliance Engine</td>
+<td>Global Controls</td>
+<td>Network</td>
+<td>Global</td>
+<td>Policy framework</td>
+<td><span class="status blue">Ready</span></td>
+<td>Controlled</td>
+</tr>
+
+<tr>
+<td>Future trade check</td>
+<td>Trade Compliance</td>
+<td>Authorized shipment</td>
+<td>Regional</td>
+<td>Dynamic</td>
+<td><span class="status gray">Pending</span></td>
+<td>Monitored</td>
+</tr>
+
+<tr>
+<td>Future partner check</td>
+<td>Partner Compliance</td>
+<td>Authorized partner</td>
+<td>Regional</td>
+<td>Verification</td>
+<td><span class="status gray">Planned</span></td>
+<td>Controlled</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Compliance Domains</h2>
+
+<div class="comp-cards">
+
+<div class="comp-card">
+<span>🛃 Trade</span>
+<strong>Trade Controls</strong>
+<small>Import, export and cross-border requirements.</small>
+</div>
+
+<div class="comp-card">
+<span>📋 Customs</span>
+<strong>Customs Controls</strong>
+<small>Customs declarations and documentation.</small>
+</div>
+
+<div class="comp-card">
+<span>🛡️ Sanctions</span>
+<strong>Screening</strong>
+<small>Sanctions and restricted-party controls.</small>
+</div>
+
+<div class="comp-card">
+<span>🤝 Partners</span>
+<strong>Verification</strong>
+<small>Partner credentials and compliance status.</small>
+</div>
+
+<div class="comp-card">
+<span>📄 Documents</span>
+<strong>Document Controls</strong>
+<small>Required-document verification.</small>
+</div>
+
+<div class="comp-card">
+<span>🌍 Markets</span>
+<strong>Regional Rules</strong>
+<small>Market-specific regulatory requirements.</small>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div>
+
+<div class="panel">
+<h2>Compliance Controls</h2>
+
+<div class="actions">
+<button class="btn primary" id="checkBtn">Run Check</button>
+<button class="btn secondary">Review</button>
+<button class="btn secondary">Approve</button>
+<button class="btn secondary">Escalate</button>
+<button class="btn secondary">Audit</button>
+</div>
+
+<div id="controlMessage"></div>
+</div>
+
+<div class="panel">
+<h2>Compliance Infrastructure</h2>
+
+<div class="info-row">
+<span>Compliance records</span>
+<strong>Ready</strong>
+</div>
+
+<div class="info-row">
+<span>Market rules</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Document verification</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Trade controls</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Partner verification</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Audit trail</span>
+<strong>Supported</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Compliance Health</h2>
+
+<div class="info-row">
+<span>Control coverage</span>
+<strong>Global</strong>
+</div>
+
+<div class="bar"><div class="fill" style="width:30%"></div></div>
+
+<div class="info-row" style="margin-top:12px">
+<span>Active market rules</span>
+<strong>1</strong>
+</div>
+
+<div class="bar"><div class="fill" style="width:10%"></div></div>
+
+<p style="font-size:12px;color:#6b7280">
+Actual compliance status is determined by authorized backend checks,
+market rules and applicable regulatory data.
+</p>
+</div>
+
+<div class="panel">
+<h2>Risk Controls</h2>
+
+<div class="info-row">
+<span>Sanctions screening</span>
+<span class="status green">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Restricted goods</span>
+<span class="status blue">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Customs requirements</span>
+<span class="status blue">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Market restrictions</span>
+<span class="status blue">Supported</span>
+</div>
+
+<div class="info-row">
+<span>Compliance escalation</span>
+<span class="status green">Supported</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Compliance Lifecycle</h2>
+
+<div class="comp-cards">
+
+<div class="comp-card">
+<span>1. Identify</span>
+<strong>Requirement</strong>
+<small>Determine applicable market and shipment rules.</small>
+</div>
+
+<div class="comp-card">
+<span>2. Screen</span>
+<strong>Check</strong>
+<small>Run relevant regulatory and policy checks.</small>
+</div>
+
+<div class="comp-card">
+<span>3. Verify</span>
+<strong>Evidence</strong>
+<small>Validate documents and required information.</small>
+</div>
+
+<div class="comp-card">
+<span>4. Decide</span>
+<strong>Outcome</strong>
+<small>Pass, hold, reject or escalate.</small>
+</div>
+
+<div class="comp-card">
+<span>5. Execute</span>
+<strong>Control</strong>
+<small>Allow authorized operations to proceed.</small>
+</div>
+
+<div class="comp-card">
+<span>6. Audit</span>
+<strong>Record</strong>
+<small>Maintain an auditable compliance history.</small>
+</div>
+
+</div>
+</div>
+
+<div class="panel">
+<h2>Global Compliance Architecture</h2>
+
+<p>
+KRIM Compliance is a global governance layer designed to evaluate
+shipments, organizations, partners, documents, markets and transactions
+against applicable rules.
+</p>
+
+<p>
+The architecture is market-aware and can support country-specific
+requirements, customs controls, sanctions screening, restricted goods,
+dual-use controls and other regulatory policies as the KRIM network
+expands.
+</p>
+
+<p>
+Compliance decisions must be enforced by authorized backend services,
+database policies and controlled workflows. The frontend only presents
+authorized compliance information and actions.
+</p>
+
+</div>
+
+<footer>
+KRIM Logistics • Global Compliance • Trade • Customs • Sanctions • Governance
+</footer>
+
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+const sidebar=document.getElementById("sidebar");
+
+document.getElementById("menuBtn")?.addEventListener("click",()=>{
+sidebar.classList.toggle("open");
+});
+
+document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+}catch(e){}
+location.href="../auth/login.html";
+});
+
+document.getElementById("searchBtn")?.addEventListener("click",()=>{
+const value=document.getElementById("compSearch").value.trim();
+const type=document.getElementById("compType").value;
+const status=document.getElementById("compStatus").value;
+const box=document.getElementById("searchMessage");
+
+if(!value){
+box.innerHTML='<div class="panel" style="margin-top:10px;background:#fff7ed">Enter a compliance reference to search.</div>';
+return;
+}
+
+box.innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Compliance search prepared for <strong>'+
+KRIM_UI.escapeHTML(value)+
+'</strong> ('+
+KRIM_UI.escapeHTML(type)+
+', '+
+KRIM_UI.escapeHTML(status)+
+'). Authorized compliance records will determine the results.</div>';
+});
+
+document.getElementById("checkBtn")?.addEventListener("click",()=>{
+document.getElementById("controlMessage").innerHTML=
+'<div class="panel" style="margin-top:10px;background:#eff6ff">Compliance-check workflow is ready for authorized backend integration.</div>';
+});
+
+document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const q=e.target.value.trim();
+if(q)document.getElementById("compSearch").value=q;
+}
+});
+
+});
+</script>
+
+</body>
+  </html>
