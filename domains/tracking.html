@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tracking | KRIM Logistics</title>
+
+<link rel="stylesheet" href="../core/krim-core.css">
+<link rel="stylesheet" href="../core/krim-components.css">
+<link rel="stylesheet" href="../core/krim-responsive.css">
+
+<style>
+body{background:#f6f8fb}
+.track-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px}
+.sidebar h3{margin:0 0 20px;padding:0 10px}
+.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#374151;text-decoration:none}
+.nav a:hover,.nav a.active{background:#eef4ff;color:#0b5cff}
+.main{min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;padding:0 22px}
+.brand{font-weight:800;color:#0b5cff;font-size:20px}
+.top-search{flex:1;max-width:520px}
+.top-search input{width:100%;padding:10px 14px;border:1px solid #dfe3e8;border-radius:9px}
+.account{margin-left:auto}
+.content{padding:24px;max-width:1500px;margin:auto}
+.mobile-menu{display:none}
+.context{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.chip{padding:6px 10px;border:1px solid #dfe3e8;border-radius:999px;background:#fff;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.kpi strong{display:block;font-size:23px;margin-top:6px}
+.kpi span{font-size:12px;color:#6b7280}
+.tracking-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:18px}
+.panel h2{font-size:17px;margin:0 0 14px}
+.map{height:390px;border-radius:10px;background:
+linear-gradient(90deg,transparent 49%,#dbe4ee 50%,transparent 51%),
+linear-gradient(0deg,transparent 49%,#dbe4ee 50%,transparent 51%),
+#edf2f7;
+background-size:100px 100px;position:relative;overflow:hidden}
+.route{position:absolute;left:12%;right:12%;top:53%;height:4px;background:#0b5cff;transform:rotate(-9deg);border-radius:10px}
+.pin{position:absolute;width:15px;height:15px;background:#0b5cff;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px #777}
+.pin.start{left:12%;top:59%}.pin.live{left:51%;top:48%;background:#16a34a}.pin.end{right:11%;top:38%;background:#f59e0b}
+.map-label{position:absolute;bottom:12px;left:12px;background:#fff;padding:8px 10px;border-radius:8px;font-size:12px;box-shadow:0 2px 8px #0001}
+.search-track{display:flex;gap:8px;margin-bottom:14px}
+.search-track input{flex:1;padding:11px;border:1px solid #dfe3e8;border-radius:8px}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef0f2;font-size:13px}
+.info-row:last-child{border-bottom:0}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;background:#eaf8ef;color:#16803a;font-size:11px}
+.timeline{border-left:2px solid #dbe3ee;margin-left:8px;padding-left:18px}
+.event{position:relative;margin:0 0 18px}
+.event:before{content:"";position:absolute;left:-25px;top:3px;width:10px;height:10px;background:#0b5cff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0b5cff}
+.event strong{font-size:13px}.event small{display:block;color:#6b7280;margin-top:3px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:8px;padding:10px 13px;cursor:pointer;font-weight:600}
+.btn.primary{background:#0b5cff;color:#fff}.btn.secondary{background:#eef2f7;color:#263241}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #edf0f3;font-size:13px}
+th{font-size:11px;text-transform:uppercase;color:#6b7280}
+footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
+
+@media(max-width:1100px){
+.kpis{grid-template-columns:repeat(3,1fr)}
+.tracking-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+.track-layout{grid-template-columns:1fr}
+.sidebar{display:none;position:fixed;z-index:20;top:64px;bottom:0;width:240px}
+.sidebar.open{display:block}
+.mobile-menu{display:block;background:none;border:0;font-size:22px}
+.topbar{padding:0 14px}
+.top-search{display:none}
+.content{padding:16px}
+.kpis{grid-template-columns:repeat(2,1fr)}
+.map{height:300px}
+}
+@media(max-width:480px){
+.kpis{grid-template-columns:1fr 1fr}
+.kpi{padding:12px}
+.kpi strong{font-size:19px}
+.context{margin-bottom:15px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="track-layout">
+
+<aside class="sidebar" id="sidebar">
+<h3>KRIM</h3>
+<nav class="nav">
+<a href="../home.html">Overview</a>
+<a href="shipments.html">Shipments</a>
+<a class="active" href="tracking.html">Tracking</a>
+<a href="quotes.html">Quotes</a>
+<a href="network.html">Network</a>
+<a href="partners.html">Partners</a>
+<a href="capacity.html">Capacity</a>
+<a href="finance.html">Finance</a>
+<a href="documents.html">Documents</a>
+<a href="compliance.html">Compliance</a>
+<a href="exceptions.html">Exceptions</a>
+<a href="claims.html">Claims</a>
+<a href="analytics.html">Analytics</a>
+<a href="integrations.html">Integrations</a>
+<a href="ai.html">AI</a>
+</nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+<button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+<div class="brand">KRIM Logistics</div>
+
+<div class="top-search">
+<input id="globalSearch" placeholder="Search shipment, tracking ID, reference...">
+</div>
+
+<div class="account">
+<button class="btn secondary" id="signoutBtn">Sign out</button>
+</div>
+</header>
+
+<section class="content">
+
+<div>
+<small>Operations / Tracking</small>
+<h1>Global Tracking</h1>
+<p>Track shipments, vehicles, containers, milestones and live movement across markets.</p>
+</div>
+
+<div class="context">
+<span class="chip">🌍 Global Multi-market</span>
+<span class="chip">🇮🇳 India</span>
+<span class="chip">₹ INR</span>
+<span class="chip">Asia/Kolkata</span>
+<span class="chip">Authorized Tracking</span>
+</div>
+
+<div class="kpis">
+<div class="kpi"><span>Active Shipments</span><strong>24</strong></div>
+<div class="kpi"><span>Live GPS</span><strong>18</strong></div>
+<div class="kpi"><span>On Route</span><strong>21</strong></div>
+<div class="kpi"><span>Delayed</span><strong>2</strong></div>
+<div class="kpi"><span>Route Alerts</span><strong>1</strong></div>
+<div class="kpi"><span>Delivered Today</span><strong>7</strong></div>
+</div>
+
+<div class="panel">
+<h2>Track a Shipment</h2>
+<div class="search-track">
+<input id="trackingInput" placeholder="Enter KRIM tracking ID or shipment reference">
+<button class="btn primary" id="trackBtn">Track</button>
+</div>
+<div id="trackMessage"></div>
+</div>
+
+<div class="tracking-grid">
+
+<div>
+
+<div class="panel">
+<h2>Live Movement</h2>
+
+<div class="map">
+<div class="route"></div>
+<div class="pin start" title="Origin"></div>
+<div class="pin live" title="Live location"></div>
+<div class="pin end" title="Destination"></div>
+<div class="map-label">Live tracking map • GPS/telematics ready</div>
+</div>
+
+<div class="info-row">
+<span>Tracking ID</span>
+<strong>KRIM-2026-000001</strong>
+</div>
+<div class="info-row">
+<span>Current location</span>
+<strong>Live location pending integration</strong>
+</div>
+<div class="info-row">
+<span>GPS status</span>
+<span class="status">Tracking infrastructure ready</span>
+</div>
+<div class="info-row">
+<span>ETA</span>
+<strong>Integration calculated</strong>
+</div>
+<div class="info-row">
+<span>Distance remaining</span>
+<strong>Calculated from live route</strong>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Tracking Events</h2>
+
+<div class="timeline">
+
+<div class="event">
+<strong>Shipment picked up</strong>
+<small>Origin milestone • Recorded by KRIM</small>
+</div>
+
+<div class="event">
+<strong>In transit</strong>
+<small>Movement tracking active</small>
+</div>
+
+<div class="event">
+<strong>Current movement</strong>
+<small>Awaiting live GPS/telematics signal</small>
+</div>
+
+<div class="event">
+<strong>Destination arrival</strong>
+<small>Future milestone</small>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div>
+
+<div class="panel">
+<h2>Tracking Controls</h2>
+<div class="controls">
+<button class="btn primary">Live Tracking</button>
+<button class="btn secondary">Shipment Details</button>
+<button class="btn secondary">Events</button>
+<button class="btn secondary">Alerts</button>
+<button class="btn secondary">Documents</button>
+</div>
+</div>
+
+<div class="panel">
+<h2>Tracking Sources</h2>
+
+<div class="info-row">
+<span>Driver mobile GPS</span>
+<span class="status">Ready</span>
+</div>
+
+<div class="info-row">
+<span>Vehicle telematics</span>
+<span class="status">Ready</span>
+</div>
+
+<div class="info-row">
+<span>Carrier GPS API</span>
+<span class="status">Ready</span>
+</div>
+
+<div class="info-row">
+<span>Container tracking</span>
+<span class="status">Ready</span>
+</div>
+
+<div class="info-row">
+<span>Manual events</span>
+<span class="status">Available</span>
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Tracking Intelligence</h2>
+
+<div class="info-row">
+<span>Route deviation</span>
+<strong>Monitored</strong>
+</div>
+
+<div class="info-row">
+<span>Delay risk</span>
+<strong>Monitored</strong>
+</div>
+
+<div class="info-row">
+<span>Geofence events</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Idle time</span>
+<strong>Supported</strong>
+</div>
+
+<div class="info-row">
+<span>Temperature / sensors</span>
+<strong>Integration ready</strong>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="panel">
+<h2>Tracked Shipment Portfolio</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Shipment</th>
+<th>Route</th>
+<th>Mode</th>
+<th>Tracking</th>
+<th>ETA</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KRIM-2026-000001</td>
+<td>Ranchi → Jamshedpur</td>
+<td>Road</td>
+<td>GPS Ready</td>
+<td>Integration</td>
+<td><span class="status">In Transit</span></td>
+</tr>
+<tr>
+<td>KRIM-2026-000002</td>
+<td>Delhi → Mumbai</td>
+<td>Road</td>
+<td>Carrier API</td>
+<td>Calculated</td>
+<td><span class="status">On Route</span></td>
+</tr>
+<tr>
+<td>KRIM-2026-000003</td>
+<td>Kolkata → Chennai</td>
+<td>Multimodal</td>
+<td>Container</td>
+<td>Calculated</td>
+<td><span class="status">On Route</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Global Tracking Architecture</h2>
+<p>
+KRIM tracking is designed as a multi-source infrastructure layer.
+Vehicle GPS, driver mobile location, carrier APIs, telematics,
+container tracking and manual events can feed the same global shipment
+and shipment-leg tracking model.
+</p>
+<p>
+GPS availability does not determine whether a shipment can be tracked.
+KRIM can continue using milestones, events, carrier updates and other
+authorized tracking sources when live GPS is unavailable.
+</p>
+</div>
+
+<footer>
+KRIM Logistics • Global Tracking Infrastructure • Operations • Network • Governance • Platform
+</footer>
+
+</section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../platform/krim-config.js"></script>
+<script src="../platform/krim-supabase.js"></script>
+<script src="../platform/krim-auth.js"></script>
+<script src="../platform/krim-api.js"></script>
+<script src="../platform/krim-ui.js"></script>
+<script src="../platform/krim-security.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",async()=>{
+
+const menu=document.getElementById("menuBtn");
+const sidebar=document.getElementById("sidebar");
+
+menu?.addEventListener("click",()=>sidebar.classList.toggle("open"));
+
+document.getElementById("signoutBtn")?.addEventListener("click",async()=>{
+try{
+if(window.KRIM_AUTH?.signOut) await window.KRIM_AUTH.signOut();
+location.href="../auth/login.html";
+}catch(e){
+location.href="../auth/login.html";
+}
+});
+
+document.getElementById("trackBtn")?.addEventListener("click",()=>{
+const value=document.getElementById("trackingInput").value.trim();
+const message=document.getElementById("trackMessage");
+
+if(!value){
+message.innerHTML='<div class="panel" style="margin:8px 0 0;background:#fff7ed">Enter a tracking ID or shipment reference.</div>';
+return;
+}
+
+message.innerHTML='<div class="panel" style="margin:8px 0 0;background:#eff6ff">Tracking request received for <strong>'+KRIM_UI.escapeHTML(value)+'</strong>. Live backend tracking integration will resolve the authorized shipment.</div>';
+});
+
+document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const q=e.target.value.trim();
+if(q) document.getElementById("trackingInput").value=q;
+}
+});
+
+});
+</script>
+
+</body>
+  </html>
