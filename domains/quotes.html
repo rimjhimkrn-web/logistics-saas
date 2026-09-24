@@ -422,10 +422,74 @@ KRIM Logistics • Global Commercial Infrastructure • Operations • Network �
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
+
 const params = new URLSearchParams(window.location.search);
 const shipmentId = Number(params.get("shipment_id"));
 
 console.log("KRIM Quote Shipment ID:", shipmentId);
+
+async function loadGlobalQuote() {
+
+  if (!shipmentId || !window.KRIM_SUPABASE) return;
+
+  try {
+
+    const { data, error } = await window.KRIM_SUPABASE
+      .from("krim_quotes")
+      .select(`
+        id,
+        shipment_id,
+        amount,
+        currency_code,
+        valid_until,
+        status,
+        created_at
+      `)
+      .eq("shipment_id", shipmentId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      console.log("No global quote found for shipment:", shipmentId);
+      return;
+    }
+
+    console.log("KRIM real global quote:", data);
+
+    const amountField = document.getElementById("quoteAmount");
+
+    if (amountField) {
+      amountField.value = data.amount;
+    }
+
+    const currencyField = document.getElementById("currency");
+
+    if (currencyField) {
+      currencyField.value = data.currency_code;
+    }
+
+    const message = document.getElementById("formMessage");
+
+    if (message) {
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#eaf8ef">' +
+        'Existing global quote loaded. Quote ID: ' + data.id +
+        ' • Status: ' + data.status +
+        ' • Amount: ' + data.currency_code + ' ' + data.amount +
+        '</div>';
+    }
+
+  } catch (error) {
+
+    console.error("KRIM quote loading error:", error);
+
+  }
+}
+
+loadGlobalQuote();
 
 const sidebar=document.getElementById("sidebar");
 
