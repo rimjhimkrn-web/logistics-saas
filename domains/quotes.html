@@ -217,6 +217,11 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 </select>
 </div>
 
+<div class="field">
+<label>Quote Amount</label>
+<input id="quoteAmount" type="number" min="0" step="0.01" placeholder="Enter commercial amount">
+</div>
+  
 <div class="field full">
 <label>Customer Reference</label>
 <input id="reference" placeholder="Optional customer reference">
@@ -435,20 +440,72 @@ if(el) el.value="";
 document.getElementById("formMessage").innerHTML="";
 });
 
-document.getElementById("createBtn")?.addEventListener("click",()=>{
+document.getElementById("createBtn")?.addEventListener("click", async ()=>{
+
 const origin=document.getElementById("origin").value.trim();
 const destination=document.getElementById("destination").value.trim();
 const cargo=document.getElementById("cargo").value.trim();
 const weight=document.getElementById("weight").value.trim();
+const currency=document.getElementById("currency").value;
+const amount=Number(document.getElementById("quoteAmount").value);
+
+const message=document.getElementById("formMessage");
+
+if(!shipmentId){
+message.innerHTML=
+'<div class="panel" style="margin-top:12px;background:#fff7ed">No shipment is attached to this quote.</div>';
+return;
+}
 
 if(!origin||!destination||!cargo||!weight){
-document.getElementById("formMessage").innerHTML=
+message.innerHTML=
 '<div class="panel" style="margin-top:12px;background:#fff7ed">Please complete origin, destination, cargo and weight.</div>';
 return;
 }
 
-document.getElementById("formMessage").innerHTML=
-'<div class="panel" style="margin-top:12px;background:#eff6ff">Quote request prepared successfully. Authorized backend pricing will calculate the commercial offer.</div>';
+if(!Number.isFinite(amount)||amount<0){
+message.innerHTML=
+'<div class="panel" style="margin-top:12px;background:#fff7ed">Please enter a valid quote amount.</div>';
+return;
+}
+
+message.innerHTML=
+'<div class="panel" style="margin-top:12px;background:#eff6ff">Creating authorized quote...</div>';
+
+try{
+
+const validUntil=new Date(
+Date.now()+7*24*60*60*1000
+).toISOString();
+
+const {data,error}=await window.KRIM_SUPABASE.rpc(
+"krim_create_global_quote",
+{
+p_shipment_id:Number(shipmentId),
+p_amount:amount,
+p_currency_code:currency,
+p_valid_until:validUntil
+}
+);
+
+if(error) throw error;
+
+message.innerHTML=
+'<div class="panel" style="margin-top:12px;background:#ecfdf5">Quote created successfully.</div>';
+
+console.log("KRIM global quote:",data);
+
+}catch(error){
+
+console.error("KRIM quote creation error:",error);
+
+message.innerHTML=
+'<div class="panel" style="margin-top:12px;background:#fef2f2">Quote creation failed: '+
+(error?.message||"Unknown error")+
+'</div>';
+
+}
+
 });
 
 document.querySelectorAll(".convertBtn").forEach(btn=>{
