@@ -517,6 +517,69 @@ console.error("KRIM shipment authentication:",e);
 }
 }
 
+const createShipmentBtn = $("createShipmentBtn");
+const shipmentCreateMessage = $("shipmentCreateMessage");
+
+createShipmentBtn.onclick = async () => {
+
+  const originId = Number($("shipmentOrigin").value);
+  const destinationId = Number($("shipmentDestination").value);
+  const cargo = $("shipmentCargo").value.trim();
+  const weight = Number($("shipmentWeight").value);
+
+  shipmentCreateMessage.style.display = "block";
+  shipmentCreateMessage.textContent = "Creating shipment...";
+
+  if (!originId || !destinationId) {
+    shipmentCreateMessage.textContent =
+      "Please enter valid origin and destination location IDs.";
+    return;
+  }
+
+  if (!cargo) {
+    shipmentCreateMessage.textContent =
+      "Please enter the cargo / commodity.";
+    return;
+  }
+
+  if (!Number.isFinite(weight) || weight < 0) {
+    shipmentCreateMessage.textContent =
+      "Please enter a valid weight.";
+    return;
+  }
+
+  try {
+
+    const { data, error } =
+      await window.supabaseClient.rpc(
+        "krim_create_global_shipment",
+        {
+          p_customer_organization_id: 1,
+          p_origin_location_id: originId,
+          p_destination_location_id: destinationId,
+          p_goods_description: cargo,
+          p_total_weight_kg: weight
+        }
+      );
+
+    if (error) throw error;
+
+    shipmentCreateMessage.textContent =
+      "Shipment created successfully: " +
+      (data?.shipment_number || "Created");
+
+    console.log("KRIM shipment:", data);
+
+  } catch (error) {
+
+    console.error("Shipment creation error:", error);
+
+    shipmentCreateMessage.textContent =
+      error?.message || "Unable to create shipment.";
+
+  }
+};
+
 init();
 })();
 </script>
