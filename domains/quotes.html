@@ -654,36 +654,224 @@ paymentTestBtn.addEventListener("click", async () => {
       order_id:
         data.razorpay_order_id,
 
-      handler: function (paymentResponse) {
+      handler: async function (paymentResponse) {
 
-        console.log(
-          "Razorpay payment response:",
-          paymentResponse
-        );
+  console.log(
+    "Razorpay payment response:",
+    paymentResponse
+  );
 
-        const message =
-          document.getElementById(
-            "formMessage"
-          );
+  const message =
+    document.getElementById("formMessage");
 
-        if (message) {
+  try {
 
-          message.innerHTML =
-            '<div class="panel" style="margin-top:12px;background:#eaf8ef">' +
-            "Razorpay Checkout completed.<br>" +
-            "Payment ID: " +
-            paymentResponse.razorpay_payment_id +
-            "<br>" +
-            "Order ID: " +
-            paymentResponse.razorpay_order_id +
-            "</div>";
+    if (
+      !paymentResponse?.razorpay_payment_id ||
+      !paymentResponse?.razorpay_order_id ||
+      !paymentResponse?.razorpay_signature
+    ) {
+      throw new Error(
+        "Razorpay returned an incomplete payment response."
+      );
+    }
 
-        }
+    paymentTestBtn.disabled = true;
+    paymentTestBtn.textContent =
+      "Verifying Payment...";
 
-        paymentTestBtn.disabled = false;
-        paymentTestBtn.textContent =
-          "Pay Now";
-      },
+    if (message) {
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#eef4ff">' +
+        "Payment received. Verifying securely with KRIM..." +
+        "</div>";
+    }
+
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await window.KRIM_SUPABASE.auth.getSession();
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    const accessToken =
+      sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      throw new Error(
+        "No active login session found. Please log in again."
+      );
+    }
+
+    const verifyResponse = await fetch(
+      "https://ebltviniygljwwseplph.supabase.co" +
+        "/functions/v1/verify-razorpay-payment",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          "apikey":
+            "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
+
+          "Authorization":
+            "Bearer " + accessToken
+        },
+
+        body: JSON.stringify({
+          razorpay_payment_id:
+            paymentResponse.razorpay_payment_id,
+
+          razorpay_order_id:
+            paymentResponse.razorpay_order_id,
+
+          razorpay_signature:
+            paymentResponse.razorpay_signature
+        })
+      }
+    );
+
+    const verifyText =
+      await verifyResponse.text();
+
+    let verifyData;
+
+    try {
+      verifyData =
+        JSON.parse(verifyText);
+    } catch {
+      throw new Error(
+        "Payment verification returned an invalid server response: " +
+        verifyText
+      );
+    }
+
+    if (
+      !verifyResponse.ok ||
+      verifyData?.success === false
+    ) {
+      throw new Error(
+        verifyData?.error ||
+        "Payment verification failed."
+      );
+    }
+
+    console.log(
+      "KRIM Razorpay payment verified:",
+      verifyData
+    );
+
+    if (message) {
+
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#eaf8ef">' +
+
+        "<strong>Payment verified successfully.</strong><br><br>" +
+
+        "Shipment: " +
+        (
+          verifyData.shipment_number ||
+          shipmentId
+        ) +
+
+        "<br>" +
+
+        "Payment ID: " +
+        (
+          verifyData.razorpay_payment_id ||
+          paymentResponse.razorpay_payment_id
+        ) +
+
+        "<br>" +
+
+        "Order ID: " +
+        (
+          verifyData.razorpay_order_id ||
+          paymentResponse.razorpay_order_id
+        ) +
+
+        "<br>" +
+
+        "Amount: " +
+        (
+          verifyData.currency ||
+          "INR"
+        ) +
+        " " +
+        (
+          verifyData.amount ??
+          ""
+        ) +
+
+        "<br>" +
+
+        "Status: PAID" +
+
+        (
+          verifyData.financial_transaction_id
+            ? "<br>Financial Transaction ID: " +
+              verifyData.financial_transaction_id
+            : ""
+        ) +
+
+        "</div>";
+
+    }
+
+    paymentTestBtn.disabled = false;
+    paymentTestBtn.textContent =
+      "Payment Verified";
+
+    paymentTestBtn.style.background =
+      "#16803a";
+
+  } catch (error) {
+
+    console.error(
+      "KRIM Razorpay verification error:",
+      error
+    );
+
+    if (message) {
+
+      message.innerHTML =
+        '<div class="panel" style="margin-top:12px;background:#fff0f0;color:#b42318">' +
+
+        "<strong>Payment received, but verification failed.</strong><br><br>" +
+
+        (
+          error?.message ||
+          "The payment could not be verified."
+        ) +
+
+        "<br><br>" +
+
+        "Do not make another payment yet. " +
+        "Please contact KRIM support with the Payment ID." +
+
+        "<br>" +
+
+        "Payment ID: " +
+        (
+          paymentResponse?.razorpay_payment_id ||
+          "Unavailable"
+        ) +
+
+        "</div>";
+
+    }
+
+    paymentTestBtn.disabled = false;
+    paymentTestBtn.textContent =
+      "Pay Now";
+
+  }
+
+},
 
       prefill: {
         name: "KRIM Customer"
