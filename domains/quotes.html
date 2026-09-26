@@ -421,7 +421,7 @@ KRIM Logistics • Global Commercial Infrastructure • Operations • Network �
 <script src="../platform/krim-security.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", async ()=>{
 
 const params = new URLSearchParams(window.location.search);
 const shipmentId = Number(params.get("shipment_id"));
@@ -554,7 +554,7 @@ async function loadGlobalQuote() {
   }
 }
 
-loadGlobalQuote();
+await loadGlobalQuote();
 // GLOBAL RAZORPAY CHECKOUT
 
 // Check whether this shipment has already been paid
@@ -580,9 +580,35 @@ if (paymentCheckError) {
     "KRIM payment status check:",
     paymentCheckError
   );
-}
 
-if (existingPayment?.status === "paid") {
+  const paymentErrorMessage =
+    document.createElement("div");
+
+  paymentErrorMessage.style.cssText =
+    "margin-top:12px;padding:12px 16px;border-radius:8px;background:#fff7ed;color:#9a3412;font-weight:600;";
+
+  paymentErrorMessage.textContent =
+    "Unable to confirm payment status. Pay Now has been disabled for your protection.";
+
+  document.getElementById("formMessage")?.appendChild(
+    paymentErrorMessage
+  );
+
+} else if (existingPayment?.status === "paid") {
+
+  const paidMessage = document.createElement("div");
+
+  paidMessage.style.cssText =
+    "margin-top:12px;padding:12px 16px;border-radius:8px;background:#eaf8ef;color:#18794e;font-weight:600;";
+
+  paidMessage.textContent =
+    "✓ Payment Successful — this shipment has already been paid.";
+
+  document.getElementById("formMessage")?.appendChild(
+    paidMessage
+  );
+
+} else {
 
   const paidMessage = document.createElement("div");
 
