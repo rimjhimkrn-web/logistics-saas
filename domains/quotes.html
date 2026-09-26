@@ -557,7 +557,46 @@ async function loadGlobalQuote() {
 loadGlobalQuote();
 // GLOBAL RAZORPAY CHECKOUT
 
-const paymentTestBtn = document.createElement("button");
+// Check whether this shipment has already been paid
+const { data: existingPayment, error: paymentCheckError } =
+  await window.KRIM_SUPABASE
+    .from("payment_orders")
+    .select(`
+      id,
+      status,
+      amount_paise,
+      currency,
+      razorpay_order_id,
+      razorpay_payment_id,
+      paid_at
+    `)
+    .eq("krim_shipment_id", shipmentId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+if (paymentCheckError) {
+  console.error(
+    "KRIM payment status check:",
+    paymentCheckError
+  );
+}
+
+if (existingPayment?.status === "paid") {
+
+  const paidMessage = document.createElement("div");
+
+  paidMessage.style.cssText =
+    "margin-top:12px;padding:12px 16px;border-radius:8px;background:#eaf8ef;color:#18794e;font-weight:600;";
+
+  paidMessage.textContent =
+    "✓ Payment Successful — this shipment has already been paid.";
+
+  document.getElementById("formMessage")?.appendChild(paidMessage);
+
+} else {
+
+  const paymentTestBtn = document.createElement("button");
 
 paymentTestBtn.type = "button";
 paymentTestBtn.textContent = "Pay Now";
