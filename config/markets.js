@@ -12,7 +12,7 @@
     { code: "it", label: "Italian", dir: "ltr" },
     { code: "nl", label: "Dutch", dir: "ltr" },
     { code: "tr", label: "Turkish", dir: "ltr" },
-    { code: "zh-CN", label: "Chinese (Simplified)", dir: "ltr" },
+    { code: "zh", label: "Chinese (Simplified)", dir: "ltr" },
     { code: "ja", label: "Japanese", dir: "ltr" },
     { code: "ko", label: "Korean", dir: "ltr" },
     { code: "ru", label: "Russian", dir: "ltr" },

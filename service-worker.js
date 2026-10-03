@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "krim-shell-v1";
+const CACHE_NAME = "krim-shell-v2";
 const LOCAL_SHELL = [
   "/",
   "/index.html",
@@ -12,6 +12,9 @@ const LOCAL_SHELL = [
   "/public/manifest.webmanifest",
   "/public/icons/krim-mark.svg",
   "/core/styles/main.css",
+  "/core/krim-core.css",
+  "/core/krim-components.css",
+  "/core/krim-responsive.css",
   "/core/components/ui.js",
   "/core/localization/catalog.js",
   "/core/js/platform.js",
@@ -20,7 +23,12 @@ const LOCAL_SHELL = [
   "/core/js/portal.js",
   "/config.js",
   "/config/markets.js",
-  "/core/js/auth-flows.js"
+  "/core/js/auth-flows.js",
+  "/platform/krim-config.js",
+  "/platform/krim-supabase.js",
+  "/platform/krim-auth.js",
+  "/platform/krim-api.js",
+  "/platform/krim-security.js"
 ];
 const REMOTE_SDK = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
 const ROUTE_PATHS = new Set(["/app/customer/", "/app/partner/", "/app/enterprise/", "/app/field/", "/docs/legal/"]);

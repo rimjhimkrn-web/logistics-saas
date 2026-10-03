@@ -29,14 +29,11 @@
         return;
     }
 
-
-    /*
-     * -------------------------------------------------------
-     * PREVENT DUPLICATE INITIALIZATION
-     * -------------------------------------------------------
-     */
-
-    if (window.KRIM_SUPABASE) {
+    if (window.KRIM_SUPABASE || window.supabaseClient) {
+        window.KRIM_SUPABASE =
+            window.KRIM_SUPABASE || window.supabaseClient;
+        window.supabaseClient = window.KRIM_SUPABASE;
+        window.KRIM_SUPABASE_READY = true;
         return;
     }
 

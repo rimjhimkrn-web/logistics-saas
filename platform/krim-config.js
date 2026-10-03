@@ -44,7 +44,47 @@
         return "/";
     }
 
+    function detectEnvironment() {
+        const configured =
+            window.KRIM_ENVIRONMENT ||
+            document.querySelector(
+                'meta[name="krim-environment"]'
+            )?.content;
+        const supported = [
+            "development",
+            "preview",
+            "production"
+        ];
+
+        if (supported.includes(configured)) {
+            return configured;
+        }
+
+        const hostname =
+            window.location.hostname.toLowerCase();
+
+        if (
+            hostname === "localhost" ||
+            hostname === "127.0.0.1" ||
+            hostname === "::1"
+        ) {
+            return "development";
+        }
+
+        if (
+            hostname.includes(".preview.") ||
+            /^pr-\d+--.+\.netlify\.app$/.test(hostname) ||
+            /-git-[^.]+\.vercel\.app$/.test(hostname)
+        ) {
+            return "preview";
+        }
+
+        return "production";
+    }
+
     const BASE_PATH = detectBasePath();
+    const ENVIRONMENT = detectEnvironment();
+    window.KRIM_ENVIRONMENT = ENVIRONMENT;
 
     function route(path) {
         const cleanPath = String(path || "")
@@ -59,7 +99,7 @@
             name: "KRIM Logistics",
             shortName: "KRIM",
             architecture: "global",
-            environment: "production",
+            environment: ENVIRONMENT,
             version: "1.0.0",
             basePath: BASE_PATH
         }),

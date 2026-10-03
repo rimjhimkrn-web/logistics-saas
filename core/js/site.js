@@ -83,17 +83,23 @@
       "Live tracking is not connected yet. Contact your KRIM representative for a verified status.";
   });
 
-  let installPrompt;
   const installButton = document.querySelector("[data-install]");
   window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    installPrompt = event;
-    installButton.hidden = false;
+    installButton.hidden = !window.KRIM.pwa.canPromptInstall();
   });
   installButton.addEventListener("click", async () => {
-    if (!installPrompt) return;
-    await installPrompt.prompt();
-    installPrompt = null;
+    if (!window.KRIM.pwa.canPromptInstall()) return;
+    installButton.disabled = true;
+    try {
+      await window.KRIM.pwa.promptInstall();
+    } catch (error) {
+      console.warn("Install prompt could not be opened.");
+    } finally {
+      installButton.hidden = true;
+      installButton.disabled = false;
+    }
+  });
+  window.addEventListener("appinstalled", () => {
     installButton.hidden = true;
   });
 

@@ -3,9 +3,35 @@
 
   const catalog = global.KRIM_CATALOG || {};
   const marketConfig = global.KRIM_MARKETS || {};
+  const supportedEnvironments = ["development", "preview", "production"];
+  const environment = supportedEnvironments.includes(global.KRIM_ENVIRONMENT)
+    ? global.KRIM_ENVIRONMENT
+    : "production";
+  const defaultMarket = (marketConfig.countries || []).find(
+    (country) => country.market === marketConfig.defaultMarket
+  );
+  const defaultTimezone = defaultMarket ? defaultMarket.timeZone : "UTC";
+  const defaultCurrency = defaultMarket ? defaultMarket.currency : "USD";
+  let deferredInstallPrompt = null;
+
+  global.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+  });
+  global.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+  });
 
   function currentLanguage() {
-    try { return localStorage.getItem("krim-language") || "en"; } catch (error) { return "en"; }
+    try {
+      const saved = localStorage.getItem("krim-language");
+      const language = saved === "zh-CN" ? "zh" : saved;
+      return (marketConfig.languages || []).some((item) => item.code === language)
+        ? language
+        : "en";
+    } catch (error) {
+      return "en";
+    }
   }
 
   function translate(key) {
@@ -14,7 +40,8 @@
   }
 
   function setLanguage(language) {
-    const supported = (marketConfig.languages || []).find((item) => item.code === language);
+    const code = language === "zh-CN" ? "zh" : language;
+    const supported = (marketConfig.languages || []).find((item) => item.code === code);
     if (!supported) return;
     try {
       localStorage.setItem("krim-language", supported.code);
@@ -56,7 +83,7 @@
     }));
   }
 
-  let client = global.supabaseClient || null;
+  let client = global.KRIM_SUPABASE || global.supabaseClient || null;
   try {
     if (!client && typeof supabaseClient !== "undefined") client = supabaseClient;
   } catch (error) {
@@ -64,27 +91,59 @@
   }
 
   global.KRIM = Object.freeze({
-    config: Object.freeze({ markets: marketConfig }),
+    config: Object.freeze({ markets: marketConfig, environment }),
     i18n: Object.freeze({ translate, setLanguage }),
     market: Object.freeze({
       active: "IN",
+      timezone: defaultTimezone,
       serviceAvailability: "confirm-per-request",
       formatCurrency(amount, currency) {
         try {
           return new Intl.NumberFormat(document.documentElement.lang || "en", {
             style: "currency",
-            currency: currency || "INR",
+            currency: currency || defaultCurrency,
             maximumFractionDigits: 2
           }).format(amount);
         } catch (error) {
-          return String(amount) + " " + (currency || "INR");
+          return String(amount) + " " + (currency || defaultCurrency);
+        }
+      },
+      formatNumber(value, options) {
+        try {
+          return new Intl.NumberFormat(
+            document.documentElement.lang || "en",
+            options
+          ).format(value);
+        } catch (error) {
+          return String(value);
         }
       },
       formatDate(value, timeZone) {
         try {
           return new Intl.DateTimeFormat(document.documentElement.lang || "en", {
             dateStyle: "medium",
-            timeZone: timeZone || "Asia/Kolkata"
+            timeZone: timeZone || defaultTimezone
+          }).format(new Date(value));
+        } catch (error) {
+          return "";
+        }
+      },
+      formatTime(value, timeZone) {
+        try {
+          return new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+            timeStyle: "short",
+            timeZone: timeZone || defaultTimezone
+          }).format(new Date(value));
+        } catch (error) {
+          return "";
+        }
+      },
+      formatDateTime(value, timeZone) {
+        try {
+          return new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: timeZone || defaultTimezone
           }).format(new Date(value));
         } catch (error) {
           return "";
@@ -98,6 +157,37 @@
     }),
     features: Object.freeze({
       enabled: () => false
+    }),
+    analytics: Object.freeze({
+      track(eventName) {
+        if (typeof eventName !== "string" || !eventName.trim()) return;
+        global.dispatchEvent(new CustomEvent("krim:event", {
+          detail: {
+            name: eventName.trim().slice(0, 64),
+            timestamp: new Date().toISOString()
+          }
+        }));
+      }
+    }),
+    errors: Object.freeze({ report: reportError }),
+    pwa: Object.freeze({
+      isInstalled() {
+        return Boolean(
+          (global.matchMedia &&
+            global.matchMedia("(display-mode: standalone)").matches) ||
+            global.navigator.standalone === true
+        );
+      },
+      canPromptInstall() {
+        return deferredInstallPrompt !== null;
+      },
+      async promptInstall() {
+        if (!deferredInstallPrompt) return null;
+        const installPrompt = deferredInstallPrompt;
+        deferredInstallPrompt = null;
+        await installPrompt.prompt();
+        return installPrompt.userChoice;
+      }
     }),
     notifications: Object.freeze({ notify }),
     auth: Object.freeze({
