@@ -377,17 +377,17 @@ Clear
 
 <div class="ai-row">
 <span>Shipment data</span>
-<span class="ai-status ready">AVAILABLE</span>
+<span class="ai-status">NOT CONNECTED</span>
 </div>
 
 <div class="ai-row">
 <span>Tracking events</span>
-<span class="ai-status ready">AVAILABLE</span>
+<span class="ai-status">NOT CONNECTED</span>
 </div>
 
 <div class="ai-row">
 <span>Network data</span>
-<span class="ai-status ready">AVAILABLE</span>
+<span class="ai-status">NOT CONNECTED</span>
 </div>
 
 <div class="ai-row">
@@ -481,7 +481,7 @@ workflow controls, human approval where required, and audit logging.
 
 <div class="ai-row">
 <span>KRIM AI Edge Function</span>
-<span class="ai-status ready">AVAILABLE</span>
+<span class="ai-status">NOT CONNECTED</span>
 </div>
 
 <div class="ai-row">
@@ -568,7 +568,7 @@ output.style.display="none";
 output.textContent="";
 });
 
-ask.addEventListener("click",async()=>{
+ask.addEventListener("click",()=>{
 
 const text=prompt.value.trim();
 
@@ -578,21 +578,8 @@ output.style.display="block";
 return;
 }
 
-output.textContent="KRIM AI request prepared. Governed AI execution will use the secure KRIM AI service.";
+output.textContent="AI execution is not connected to a verified backend contract. No request was sent.";
 output.style.display="block";
-
-try{
-
-if(window.KRIM_API &&
-typeof window.KRIM_API.invoke==="function"){
-
-await window.KRIM_API.invoke("krim-ai",{prompt:text});
-
-}
-
-}catch(e){
-/* Backend execution remains optional during frontend build. */
-}
 
 });
 

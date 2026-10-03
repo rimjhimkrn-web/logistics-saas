@@ -129,7 +129,7 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <div>
 <small>Operations / Tracking</small>
 <h1>Global Tracking</h1>
-<p>Track shipments, vehicles, containers, milestones and live movement across markets.</p>
+<p>Tracking interface preview. No live shipment or vehicle data is connected.</p>
 </div>
 
 <div class="context">
@@ -141,12 +141,12 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 </div>
 
 <div class="kpis">
-<div class="kpi"><span>Active Shipments</span><strong>24</strong></div>
-<div class="kpi"><span>Live GPS</span><strong>18</strong></div>
-<div class="kpi"><span>On Route</span><strong>21</strong></div>
-<div class="kpi"><span>Delayed</span><strong>2</strong></div>
-<div class="kpi"><span>Route Alerts</span><strong>1</strong></div>
-<div class="kpi"><span>Delivered Today</span><strong>7</strong></div>
+<div class="kpi"><span>Active Shipments</span><strong>—</strong></div>
+<div class="kpi"><span>Live GPS</span><strong>—</strong></div>
+<div class="kpi"><span>On Route</span><strong>—</strong></div>
+<div class="kpi"><span>Delayed</span><strong>—</strong></div>
+<div class="kpi"><span>Route Alerts</span><strong>—</strong></div>
+<div class="kpi"><span>Delivered Today</span><strong>—</strong></div>
 </div>
 
 <div class="panel">
@@ -163,35 +163,35 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <div>
 
 <div class="panel">
-<h2>Live Movement</h2>
+<h2>Illustrative view · not live tracking</h2>
 
 <div class="map">
 <div class="route"></div>
 <div class="pin start" title="Origin"></div>
 <div class="pin live" title="Live location"></div>
 <div class="pin end" title="Destination"></div>
-<div class="map-label">Live tracking map • GPS/telematics ready</div>
+<div class="map-label">Illustrative only · no tracking data connected</div>
 </div>
 
 <div class="info-row">
 <span>Tracking ID</span>
-<strong>KRIM-2026-000001</strong>
+<strong>—</strong>
 </div>
 <div class="info-row">
 <span>Current location</span>
-<strong>Live location pending integration</strong>
+<strong>Not connected</strong>
 </div>
 <div class="info-row">
 <span>GPS status</span>
-<span class="status">Tracking infrastructure ready</span>
+<span class="status">Not connected</span>
 </div>
 <div class="info-row">
 <span>ETA</span>
-<strong>Integration calculated</strong>
+<strong>Not available</strong>
 </div>
 <div class="info-row">
 <span>Distance remaining</span>
-<strong>Calculated from live route</strong>
+<strong>Not available</strong>
 </div>
 
 </div>
@@ -202,23 +202,23 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <div class="timeline">
 
 <div class="event">
-<strong>Shipment picked up</strong>
-<small>Origin milestone • Recorded by KRIM</small>
+<strong>Pickup event source not connected</strong>
+<small>No operational event is displayed.</small>
 </div>
 
 <div class="event">
-<strong>In transit</strong>
-<small>Movement tracking active</small>
+<strong>Transit event source not connected</strong>
+<small>No operational event is displayed.</small>
 </div>
 
 <div class="event">
-<strong>Current movement</strong>
-<small>Awaiting live GPS/telematics signal</small>
+<strong>Live movement source not connected</strong>
+<small>No operational event is displayed.</small>
 </div>
 
 <div class="event">
-<strong>Destination arrival</strong>
-<small>Future milestone</small>
+<strong>Delivery event source not connected</strong>
+<small>No operational event is displayed.</small>
 </div>
 
 </div>
@@ -231,11 +231,11 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 <div class="panel">
 <h2>Tracking Controls</h2>
 <div class="controls">
-<button class="btn primary">Live Tracking</button>
-<button class="btn secondary">Shipment Details</button>
-<button class="btn secondary">Events</button>
-<button class="btn secondary">Alerts</button>
-<button class="btn secondary">Documents</button>
+<button class="btn primary" type="button" disabled>Live Tracking unavailable</button>
+<button class="btn secondary" type="button" disabled>Shipment Details unavailable</button>
+<button class="btn secondary" type="button" disabled>Events unavailable</button>
+<button class="btn secondary" type="button" disabled>Alerts unavailable</button>
+<button class="btn secondary" type="button" disabled>Documents unavailable</button>
 </div>
 </div>
 
@@ -244,27 +244,27 @@ footer{padding:25px;color:#6b7280;font-size:12px;text-align:center}
 
 <div class="info-row">
 <span>Driver mobile GPS</span>
-<span class="status">Ready</span>
+<span class="status">Not connected</span>
 </div>
 
 <div class="info-row">
 <span>Vehicle telematics</span>
-<span class="status">Ready</span>
+<span class="status">Not connected</span>
 </div>
 
 <div class="info-row">
 <span>Carrier GPS API</span>
-<span class="status">Ready</span>
+<span class="status">Not connected</span>
 </div>
 
 <div class="info-row">
 <span>Container tracking</span>
-<span class="status">Ready</span>
+<span class="status">Not connected</span>
 </div>
 
 <div class="info-row">
 <span>Manual events</span>
-<span class="status">Available</span>
+<span class="status">Not connected</span>
 </div>
 
 </div>
@@ -404,7 +404,7 @@ message.innerHTML='<div class="panel" style="margin:8px 0 0;background:#fff7ed">
 return;
 }
 
-message.innerHTML='<div class="panel" style="margin:8px 0 0;background:#eff6ff">Tracking request received for <strong>'+KRIM_UI.escapeHTML(value)+'</strong>. Live backend tracking integration will resolve the authorized shipment.</div>';
+message.textContent="Live tracking is not connected to a verified backend contract. No lookup was sent.";
 });
 
 document.getElementById("globalSearch")?.addEventListener("keydown",e=>{
