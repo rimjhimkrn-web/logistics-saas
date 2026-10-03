@@ -80,7 +80,7 @@
         routes: Object.freeze({
 
             public: Object.freeze({
-                home: route("home.html"),
+                home: route("index.html"),
                 index: route("index.html"),
                 terms: route("terms.html"),
                 privacy: route("privacy.html"),
