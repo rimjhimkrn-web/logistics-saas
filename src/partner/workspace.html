@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partner Operating Workspace — KRIM LOGISTICS OS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-surface-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-purple: #c084fc;
+      --krim-rose: #f43f5e;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    aside {
+      width: 260px;
+      background: var(--krim-surface);
+      border-right: 1px solid var(--krim-border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      margin-bottom: 28px;
+      padding: 0 12px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      color: var(--krim-text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .partner-org-badge {
+      background: rgba(0, 210, 255, 0.08);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+    }
+    .partner-org-badge .org-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .partner-org-badge .org-role {
+      font-size: 0.68rem;
+      font-family: var(--font-code);
+      color: var(--krim-cyan);
+      margin-top: 2px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      color: var(--krim-text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-item a:hover, .nav-item a.active {
+      background: rgba(0, 210, 255, 0.1);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-item a.active {
+      border: 1px solid rgba(0, 210, 255, 0.25);
+    }
+
+    /* MAIN VIEWPORT */
+    main {
+      flex-grow: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    /* METRICS STRIP */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .metric-label {
+      color: var(--krim-text-muted);
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      text-transform: uppercase;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 6px 0 2px;
+    }
+    .metric-sub {
+      font-size: 0.72rem;
+      color: var(--krim-text-muted);
+    }
+
+    /* VIEW TABS */
+    .view-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--krim-border);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--krim-text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(0, 210, 255, 0.12);
+      color: var(--krim-cyan);
+    }
+
+    /* SECTION CARDS */
+    .panel-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* DATA TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 14px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .data-table th {
+      color: var(--krim-text-muted);
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-family: var(--font-code);
+      font-weight: 600;
+    }
+    .status-badge.active { background: rgba(16, 185, 129, 0.15); color: var(--krim-emerald); }
+    .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--krim-amber); }
+    .status-badge.review { background: rgba(192, 132, 252, 0.15); color: var(--krim-purple); }
+
+    /* ACTION BUTTONS */
+    .btn-primary {
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    /* FORM STYLES */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--krim-text-muted);
+    }
+    .form-group input, .form-group select {
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--krim-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside>
+    <div>
+      <a href="/index.html" class="brand-group">
+        <div class="logo-icon"></div>
+        <div class="brand-text">
+          KRIM
+          <span>LOGISTICS OS</span>
+        </div>
+      </a>
+
+      <!-- PARTNER CONTEXT -->
+      <div class="partner-org-badge">
+        <div class="org-title">ABC Transport Pvt Ltd</div>
+        <div class="org-role">ROLE: Fleet Operator / Carrier</div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#" class="active" onclick="switchTab('overview')">📊 Operations Summary</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('opportunities')">🎯 Available Opportunities</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('fleet')">🚚 Fleet & Capacity</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('settlements')">💳 Finance & Earnings</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('compliance')">🛡️ Verification & Audit</a></li>
+      </ul>
+    </div>
+
+    <div style="padding: 12px; border-top: 1px solid var(--krim-border);">
+      <a href="/dashboard.html" style="color: var(--krim-text-muted); text-decoration: none; font-size: 0.8rem; font-family: var(--font-code);">← Workspace Switcher</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main>
+    <div class="header-bar">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800;">Partner Operating Hub</h1>
+        <p style="color: var(--krim-text-muted); font-size: 0.82rem; margin-top: 4px;">Verified Carrier Network Node — ID: <span style="font-family: var(--font-code); color: var(--krim-cyan);">PTR-88301-IN</span></p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" onclick="openDispatchModal()">+ Assign Vehicle</button>
+        <button class="btn-primary" onclick="switchTab('opportunities')">Find Loads</button>
+      </div>
+    </div>
+
+    <!-- METRICS STRIP -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">ACTIVE TRIPS</div>
+        <div class="metric-value" style="color: var(--krim-cyan);">3 Active</div>
+        <div class="metric-sub">1 Awaiting Pickup • 2 In Transit</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">FLEET UTILIZATION</div>
+        <div class="metric-value" style="color: var(--krim-emerald);">75%</div>
+        <div class="metric-sub">6 / 8 Heavy Vehicles Assigned</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">PENDING SETTLEMENTS</div>
+        <div class="metric-value" style="font-family: var(--font-code);">₹ 4,85,000</div>
+        <div class="metric-sub">2 Invoices Processing</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">REPUTATION SCORE</div>
+        <div class="metric-value" style="color: var(--krim-purple);">98.4 / 100</div>
+        <div class="metric-sub">Verified Verified Fleet Operational Status</div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')">Active Shipments</button>
+      <button class="tab-btn" id="tab-opportunities" onclick="switchTab('opportunities')">Matching Opportunities (2)</button>
+      <button class="tab-btn" id="tab-fleet" onclick="switchTab('fleet')">Vehicle Roster</button>
+      <button class="tab-btn" id="tab-compliance" onclick="switchTab('compliance')">Compliance Status</button>
+    </div>
+
+    <!-- PANEL 1: ACTIVE SHIPMENTS WORKSPACE -->
+    <div id="panel-overview" class="panel-card">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Active Operational Executions</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SHIPMENT ID</th>
+            <th>ORIGIN → DESTINATION</th>
+            <th>CARGO / SPEC</th>
+            <th>ASSIGNED DRIVER & VEHICLE</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-cyan);">KRIM-2026-00124</td>
+            <td>Ranchi, JH → Kolkata, WB</td>
+            <td>18,000 kg (Steel Bars)</td>
+            <td style="font-family: var(--font-code);">JH-01-EV-8841 (R. Kumar)</td>
+            <td><span class="status-badge active">IN TRANSIT</span></td>
+            <td><button class="btn-secondary" onclick="viewTripDetails('KRIM-2026-00124')">Track Trip</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-cyan);">KRIM-2026-00128</td>
+            <td>Jamshedpur, JH → Patna, BR</td>
+            <td>24,000 kg (Industrial Parts)</td>
+            <td style="font-family: var(--font-code);">JH-02-AB-1102 (A. Singh)</td>
+            <td><span class="status-badge pending">AWAITING PICKUP</span></td>
+            <td><button class="btn-secondary" onclick="viewTripDetails('KRIM-2026-00128')">Manage Dispatch</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 2: MATCHING OPPORTUNITIES & BIDDING -->
+    <div id="panel-opportunities" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px;">Eligible Load Matching Queue</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 16px;">AI-matched freight based on your active vehicle capacity and operating corridors.</p>
+      
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ROUTE</th>
+            <th>REQUIREMENT</th>
+            <th>PICKUP WINDOW</th>
+            <th>ESTIMATED VALUE</th>
+            <th>RESPONSE DEADLINE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 700;">Ranchi → Dhanbad</td>
+            <td>32T Open Trailer (22,000 kg)</td>
+            <td>Tomorrow, 10:00 AM</td>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">₹ 42,000</td>
+            <td style="font-family: var(--font-code); color: var(--krim-amber);">3 hrs remaining</td>
+            <td><button class="btn-primary" onclick="submitQuote('Ranchi-Dhanbad')">Submit Quote / Accept</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700;">Bokaro → Haldia Port</td>
+            <td>40T Container Carrier (Bulk Cargo)</td>
+            <td>08 Oct 2026</td>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">₹ 1,18,000</td>
+            <td style="font-family: var(--font-code);">12 hrs remaining</td>
+            <td><button class="btn-primary" onclick="submitQuote('Bokaro-Haldia')">Submit Quote / Accept</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 3: FLEET & CAPACITY MANAGEMENT -->
+    <div id="panel-fleet" class="panel-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 1.1rem; font-weight: 800;">Registered Fleet & Capacity Roster</h2>
+        <button class="btn-primary" onclick="registerVehicle()">+ Register New Vehicle</button>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>REGISTRATION NO.</th>
+            <th>VEHICLE TYPE</th>
+            <th>MAX PAYLOAD</th>
+            <th>OPERATIONAL STATUS</th>
+            <th>ASSIGNED DRIVER</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">JH-01-EV-8841</td>
+            <td>32-ft Heavy Multi-Axle</td>
+            <td>28,000 kg</td>
+            <td><span class="status-badge active">ON JOB</span></td>
+            <td>R. Kumar (+91 98351-XXXXX)</td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">JH-02-AB-1102</td>
+            <td>24-ft Container Trailer</td>
+            <td>18,000 kg</td>
+            <td><span class="status-badge active">ASSIGNED</span></td>
+            <td>A. Singh (+91 94311-XXXXX)</td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">JH-01-CC-9904</td>
+            <td>16-ft Open Flatbed</td>
+            <td>9,000 kg</td>
+            <td><span class="status-badge pending">AVAILABLE</span></td>
+            <td>Unassigned</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 4: COMPLIANCE & VERIFICATION STATUS -->
+    <div id="panel-compliance" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Partner Verification & Compliance Audit</h2>
+      
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>DOCUMENT / CHECK</th>
+            <th>REQUIREMENT TYPE</th>
+            <th>ISSUING AUTHORITY</th>
+            <th>STATUS</th>
+            <th>EXPIRY / VALIDITY</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 700;">GSTIN & Business License</td>
+            <td>Corporate Tax KYC</td>
+            <td>Govt. of India</td>
+            <td><span class="status-badge active">VERIFIED</span></td>
+            <td style="font-family: var(--font-code);">Valid (Permanent)</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700;">National Goods Permit</td>
+            <td>Transport Compliance</td>
+            <td>Ministry of Road Transport</td>
+            <td><span class="status-badge active">VERIFIED</span></td>
+            <td style="font-family: var(--font-code);">31 Dec 2027</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700;">Fleet Liability Insurance</td>
+            <td>Commercial Coverage</td>
+            <td>National Insurance Co.</td>
+            <td><span class="status-badge pending">EXPIRING SOON</span></td>
+            <td style="font-family: var(--font-code); color: var(--krim-amber);">15 Days Remaining</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      const tabs = ['overview', 'opportunities', 'fleet', 'compliance'];
+      
+      tabs.forEach(t => {
+        const panel = document.getElementById(`panel-${t}`);
+        const tabBtn = document.getElementById(`tab-${t}`);
+        
+        if (panel) panel.style.display = (t === tabId) ? 'block' : 'none';
+        if (tabBtn) {
+          if (t === tabId) tabBtn.classList.add('active');
+          else tabBtn.classList.remove('active');
+        }
+      });
+    }
+
+    function viewTripDetails(id) {
+      window.location.href = `/src/shipments/details.html?id=${id}`;
+    }
+
+    function submitQuote(route) {
+      alert(`Initiating commercial quote submission for route: ${route}. Event logged in KRIM Partner Ledger.`);
+    }
+
+    function openDispatchModal() {
+      alert("Opening Fleet Dispatcher & Vehicle Assignment modal...");
+    }
+
+    function registerVehicle() {
+      alert("Opening Vehicle & Driver KYC Registration wizard...");
+    }
+  </script>
+</body>
+          </html>
+  
