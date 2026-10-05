@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Network & Coverage — KRIM LOGISTICS OS</title>
+  
+  <!-- CSS RESET & DESIGN SYSTEM VARIABLES -->
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-surface-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-purple: #c084fc;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace, monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TYPOGRAPHY & BUTTONS */
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0, 210, 255, 0.1);
+      color: var(--krim-cyan);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .btn-track {
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-track:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 210, 255, 0.3);
+    }
+
+    /* HEADER & NAV */
+    header {
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--krim-border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      padding: 20px 48px;
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-logo-icon { width: 32px; height: 32px; background: var(--krim-cyan); border-radius: 8px; }
+    .brand-name { color: #fff; font-weight: 900; font-size: 1.2rem; letter-spacing: -0.02em; }
+    .brand-tag { color: var(--krim-cyan); font-family: var(--font-code); font-size: 0.7rem; display: block; }
+    .nav-links { display: flex; gap: 28px; list-style: none; font-size: 0.9rem; }
+    .nav-links a { color: var(--krim-text-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+
+    /* SPEC GRID CARD CONTAINER */
+    .spec-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 20px;
+      padding: 36px;
+      margin-bottom: 48px;
+      scroll-margin-top: 100px;
+    }
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 0.9rem;
+    }
+    .spec-table th, .spec-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .spec-table th { color: var(--krim-text-muted); font-family: var(--font-code); font-size: 0.8rem; }
+
+    /* INTERACTIVE MAP STYLES */
+    .map-container {
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      border-radius: 20px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .network-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .hub-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--krim-border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s ease;
+    }
+    .hub-card:hover {
+      border-color: var(--krim-cyan);
+    }
+    .hub-status {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--krim-emerald);
+      box-shadow: 0 0 8px var(--krim-emerald);
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-container">
+      <a href="/index.html" class="brand-group">
+        <div class="brand-logo-icon"></div>
+        <div>
+          <span class="brand-name">KRIM</span>
+          <span class="brand-tag">LOGISTICS OS</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/solutions.html">Solutions Specifications</a></li>
+        <li><a href="/network.html" style="color: var(--krim-cyan); font-weight: 700;">Global Network</a></li>
+        <li><a href="/about.html">About & Vision</a></li>
+      </ul>
+      <a href="/index.html" class="btn-track" style="text-decoration: none; font-size: 0.85rem;">← Back to Portal</a>
+    </div>
+  </header>
+
+  <!-- MAIN HERO NETWORK HEADER -->
+  <section style="max-width: 1400px; margin: 80px auto 40px; padding: 0 48px;">
+    <div class="hero-badge">Global Trade Infrastructure & Hubs</div>
+    <h1 style="font-size: 3rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 16px;">
+      Cross-Border Network Topology
+    </h1>
+    <p style="color: var(--krim-text-muted); max-width: 720px; font-size: 1.1rem; line-height: 1.6;">
+      Connecting primary trade lanes across Asia, Europe, Middle East, and the Americas with automated customs electronic gateways and multi-currency settlement.
+    </p>
+  </section>
+
+  <!-- NETWORK & HUBS CONTENT -->
+  <section style="max-width: 1400px; margin: 0 auto 100px; padding: 0 48px;">
+
+    <!-- MAP VISUALIZATION CARD -->
+    <div class="map-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <span style="color: var(--krim-cyan); font-family: var(--font-code); font-size: 0.8rem; font-weight: 700;">LIVE TELEMETRY MAP</span>
+          <h2 style="font-size: 1.5rem; font-weight: 800; margin-top: 4px;">Active Strategic Trade Corridors</h2>
+        </div>
+        <span style="background: rgba(16, 185, 129, 0.1); color: var(--krim-emerald); border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 12px; border-radius: 8px; font-family: var(--font-code); font-size: 0.8rem;">
+          <span class="hub-status"></span>All Gateways Operational
+        </span>
+      </div>
+
+      <svg viewBox="0 0 1000 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; opacity: 0.85;">
+        <!-- Route Arcs -->
+        <path d="M180 180 Q350 80 520 160" stroke="var(--krim-cyan)" stroke-width="2" stroke-dasharray="6 6"/>
+        <path d="M520 160 Q700 100 850 200" stroke="var(--krim-purple)" stroke-width="2" stroke-dasharray="6 6"/>
+        <path d="M520 160 Q600 280 720 280" stroke="var(--krim-emerald)" stroke-width="2"/>
+
+        <!-- Hub Nodes -->
+        <g id="hub-ranchi">
+          <circle cx="520" cy="160" r="8" fill="var(--krim-cyan)"/>
+          <circle cx="520" cy="160" r="16" stroke="var(--krim-cyan)" stroke-opacity="0.4"/>
+          <text x="535" y="165" fill="#fff" font-family="JetBrains Mono" font-size="12" font-weight="700">Ranchi Central Hub (IXR)</text>
+        </g>
+
+        <g id="hub-rotterdam">
+          <circle cx="180" cy="180" r="6" fill="#fff"/>
+          <text x="120" y="205" fill="var(--krim-text-muted)" font-family="JetBrains Mono" font-size="11">Port of Rotterdam</text>
+        </g>
+
+        <g id="hub-singapore">
+          <circle cx="720" cy="280" r="6" fill="#fff"/>
+          <text x="735" y="285" fill="var(--krim-text-muted)" font-family="JetBrains Mono" font-size="11">Singapore Logistics Gate</text>
+        </g>
+
+        <g id="hub-dubai">
+          <circle cx="850" cy="200" r="6" fill="#fff"/>
+          <text x="780" y="225" fill="var(--krim-text-muted)" font-family="JetBrains Mono" font-size="11">Dubai JAFZA Hub</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- REGIONAL OPERATIONAL HUBS -->
+    <div class="spec-card">
+      <div style="margin-bottom: 24px;">
+        <span style="color: var(--krim-purple); font-family: var(--font-code); font-size: 0.8rem; font-weight: 700;">HUB DIRECTORY</span>
+        <h2 style="font-size: 1.8rem; font-weight: 800; margin-top: 4px;">Primary Operations Terminals</h2>
+      </div>
+
+      <div class="network-grid">
+        <div class="hub-card">
+          <span style="color: var(--krim-cyan); font-family: var(--font-code); font-size: 0.75rem;">SOUTH ASIA HEADQUARTERS</span>
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin: 8px 0;">Ranchi Central Logistics Hub</h3>
+          <p style="color: var(--krim-text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 12px;">
+            Primary multimodal staging zone, automated high-bay fulfillment, and regional fleet telematics center.
+          </p>
+          <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--krim-emerald);">
+            <span class="hub-status"></span>Clearance SLA: &lt; 30 mins
+          </div>
+        </div>
+
+        <div class="hub-card">
+          <span style="color: var(--krim-purple); font-family: var(--font-code); font-size: 0.75rem;">EUROPE GATEWAY</span>
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin: 8px 0;">Rotterdam Freight Gateway</h3>
+          <p style="color: var(--krim-text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 12px;">
+            Deepwater ocean terminal interface and automated rail haulage connection across Western Europe.
+          </p>
+          <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--krim-emerald);">
+            <span class="hub-status"></span>EDI pre-clearance active
+          </div>
+        </div>
+
+        <div class="hub-card">
+          <span style="color: var(--krim-amber); font-family: var(--font-code); font-size: 0.75rem;">MIDDLE EAST HUB</span>
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin: 8px 0;">Dubai Freezone Logistics Gate</h3>
+          <p style="color: var(--krim-text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 12px;">
+            Duty-deferred cross-docking terminal servicing East-West linehaul transit and air charters.
+          </p>
+          <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--krim-emerald);">
+            <span class="hub-status"></span>24/7 Air Charter Ramp
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMS & COMPLIANCE TABLE -->
+    <div class="spec-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="color: var(--krim-emerald); font-family: var(--font-code); font-size: 0.8rem; font-weight: 700;">REGULATORY COMPLIANCE</span>
+          <h2 style="font-size: 1.8rem; font-weight: 800; margin-top: 4px;">Automated Customs & Cross-Border Protocols</h2>
+        </div>
+      </div>
+
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>TRADE CORRIDOR</th>
+            <th>DECLARATION INTERFACE</th>
+            <th>CURRENCY SUPPORT</th>
+            <th>INSPECTION SLA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>India &bull; EU Linehaul</strong></td>
+            <td>ICS2 / NCTS Direct API Integration</td>
+            <td>EUR, INR, USD</td>
+            <td>Electronic Pre-Clearance</td>
+          </tr>
+          <tr>
+            <td><strong>GCC Intra-Transit</strong></td>
+            <td>Bayan Customs Direct Protocol</td>
+            <td>AED, SAR, USD</td>
+            <td>&lt; 60 Minutes Gateway</td>
+          </tr>
+          <tr>
+            <td><strong>APAC Cross-Border</strong></td>
+            <td>ASEAN Single Window Gateway</td>
+            <td>SGD, INR, CNH</td>
+            <td>Automated Duty Calculation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: #01040a; padding: 40px 48px; border-top: 1px solid var(--krim-border); text-align: center; color: var(--krim-text-muted); font-size: 0.85rem;">
+    &copy; 2026 KRIM Logistics (krimlogistics). Ranchi, India &bull; Global Multimodal Network
+  </footer>
+
+</body>
+  </html>
+  
