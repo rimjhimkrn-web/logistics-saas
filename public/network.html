@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Network & Coverage | KRIM Logistics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       1. GLOBAL TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --bg-dark: #070d19;
+      --bg-surface: #0d172a;
+      --bg-card: #132238;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #00d2ff;
+      --accent-blue: #0072ff;
+      --accent-gradient: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+      --max-width: 1280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       2. NAVIGATION
+       ========================================================================== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(7, 13, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--accent-gradient);
+      border-radius: 8px;
+      position: relative;
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.62rem;
+      color: var(--accent-cyan);
+      letter-spacing: 0.25em;
+      margin-top: -3px;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-menu a:hover, .nav-menu a.active {
+      color: var(--accent-cyan);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .lang-select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       3. HERO SECTION
+       ========================================================================== */
+    .net-hero {
+      padding: 160px 24px 80px;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      text-align: center;
+    }
+    .net-badge {
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-family: var(--font-code);
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    .net-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+    .net-title span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .net-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 640px;
+      margin: 0 auto 40px;
+    }
+
+    /* ==========================================================================
+       4. INTERACTIVE MAP & ROUTE STAGE
+       ========================================================================== */
+    .map-stage {
+      max-width: var(--max-width);
+      margin: 0 auto 100px;
+      padding: 0 24px;
+    }
+    .map-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 36px;
+      position: relative;
+    }
+    .map-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .region-pills {
+      display: flex;
+      gap: 10px;
+    }
+    .pill-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn.active, .pill-btn:hover {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .map-canvas {
+      width: 100%;
+      height: 440px;
+      background: radial-gradient(circle at center, rgba(0, 210, 255, 0.05) 0%, transparent 80%),
+                  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.08)"/></svg>');
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .map-svg-layer {
+      width: 90%;
+      height: 90%;
+    }
+
+    /* Node & Route Animations */
+    .node-pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { r: 4px; opacity: 1; }
+      50% { r: 10px; opacity: 0.4; }
+      100% { r: 4px; opacity: 1; }
+    }
+
+    /* ==========================================================================
+       5. REGIONAL HUBS GRID
+       ========================================================================== */
+    .hubs-section {
+      max-width: var(--max-width);
+      margin: 0 auto 120px;
+      padding: 0 24px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .hub-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .hub-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-cyan);
+    }
+    .hub-flag {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+    .hub-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .hub-type {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      margin-bottom: 14px;
+      display: block;
+    }
+    .hub-stats {
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+    }
+    .hub-stats span {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       6. FOOTER
+       ========================================================================== */
+    footer {
+      background: #030712;
+      border-top: 1px solid var(--border-color);
+      padding: 60px 24px 30px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .net-title { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-container">
+      <a href="/index.html" class="brand-logo">
+        <div class="logo-icon"></div>
+        <div class="brand-text">
+          KRIM
+          <span>LOGISTICS</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/solutions.html">Solutions</a></li>
+        <li><a href="/network.html" class="active">Global Network</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <select class="lang-select" onchange="applyLang(this.value)">
+          <option value="en">EN</option>
+          <option value="hi">HI</option>
+        </select>
+        <a href="/index.html#auth-modal" class="btn-primary">Get a Quote</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="net-hero">
+    <span class="net-badge">CONNECTED TRADE LANES</span>
+    <h1 class="net-title">Global Reach, <span>Local Precision</span></h1>
+    <p class="net-desc">
+      Orchestrating cross-border freight across 120+ trade lanes with integrated customs compliance, regional hub management, and multi-currency settlement engines.
+    </p>
+  </section>
+
+  <!-- INTERACTIVE MAP CONTAINER -->
+  <section class="map-stage">
+    <div class="map-card">
+      <div class="map-controls">
+        <div class="region-pills">
+          <button class="pill-btn active" onclick="filterRegion('all')">All Trade Lanes</button>
+          <button class="pill-btn" onclick="filterRegion('asia')">Asia-Pacific</button>
+          <button class="pill-btn" onclick="filterRegion('europe')">Europe</button>
+          <button class="pill-btn" onclick="filterRegion('americas')">Americas</button>
+          <button class="pill-btn" onclick="filterRegion('mea')">Middle East & Africa</button>
+        </div>
+        <div style="font-family: var(--font-code); font-size: 0.8rem; color: var(--accent-cyan);">
+          ACTIVE NODES: <span id="node-count">142</span> HUBS
+        </div>
+      </div>
+
+      <div class="map-canvas">
+        <svg class="map-svg-layer" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Connective Trade Routes -->
+          <path class="route-line" d="M180 160 Q 300 80 500 140 T 820 200" stroke="url(#cyan-grad)" stroke-width="2" stroke-dasharray="4 4"/>
+          <path class="route-line" d="M220 280 Q 400 320 520 180 T 780 280" stroke="url(#cyan-grad)" stroke-width="1.5" stroke-dasharray="6 6"/>
+
+          <!-- Primary Hub Nodes -->
+          <g id="hub-nodes">
+            <!-- Rotterdam / Europe -->
+            <circle cx="500" cy="140" r="6" fill="#00d2ff"/>
+            <circle cx="500" cy="140" r="12" fill="none" stroke="#00d2ff" class="node-pulse"/>
+            <text x="512" y="145" fill="#fff" font-size="11" font-weight="700">Rotterdam Hub</text>
+
+            <!-- Singapore / APAC -->
+            <circle cx="780" cy="280" r="6" fill="#00d2ff"/>
+            <circle cx="780" cy="280" r="12" fill="none" stroke="#00d2ff" class="node-pulse"/>
+            <text x="792" y="285" fill="#fff" font-size="11" font-weight="700">Singapore Gateway</text>
+
+            <!-- Los Angeles / Americas -->
+            <circle cx="180" cy="160" r="6" fill="#00d2ff"/>
+            <circle cx="180" cy="160" r="12" fill="none" stroke="#00d2ff" class="node-pulse"/>
+            <text x="110" y="145" fill="#fff" font-size="11" font-weight="700">LA Gateway</text>
+
+            <!-- Dubai / MEA -->
+            <circle cx="600" cy="210" r="6" fill="#00d2ff"/>
+            <circle cx="600" cy="210" r="12" fill="none" stroke="#00d2ff" class="node-pulse"/>
+            <text x="612" y="215" fill="#fff" font-size="11" font-weight="700">Dubai Hub</text>
+          </g>
+
+          <defs>
+            <linearGradient id="cyan-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#0072ff" stop-opacity="0.2"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY REGIONAL HUBS -->
+  <section class="hubs-section">
+    <div style="margin-bottom: 32px;">
+      <h2 style="font-size: 1.8rem; font-weight: 800;">Primary Command Hubs</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Verified compliance and cross-dock facilities operating 24/7.</p>
+    </div>
+
+    <div class="grid-3" id="hub-cards-container">
+      <div class="hub-card" data-region="europe">
+        <div class="hub-flag">🇳🇱</div>
+        <h3 class="hub-name">Rotterdam Gateway</h3>
+        <span class="hub-type">EU CUSTOMS & OCEAN FREIGHT HUB</span>
+        <ul class="hub-stats">
+          <li>Customs Clearance: <span>Automated EU-EDI</span></li>
+          <li>Storage Capacity: <span>180,000 m²</span></li>
+          <li>Direct Routes: <span>48 Ports</span></li>
+        </ul>
+      </div>
+
+      <div class="hub-card" data-region="asia">
+        <div class="hub-flag">🇸🇬</div>
+        <h3 class="hub-name">Singapore Central</h3>
+        <span class="hub-type">APAC MULTIMODAL CONSOLIDATION</span>
+        <ul class="hub-stats">
+          <li>Customs Clearance: <span>TradeNet Direct</span></li>
+          <li>Storage Capacity: <span>220,000 m²</span></li>
+          <li>Direct Routes: <span>64 Ports</span></li>
+        </ul>
+      </div>
+
+      <div class="hub-card" data-region="americas">
+        <div class="hub-flag">🇺🇸</div>
+        <h3 class="hub-name">Los Angeles Port Hub</h3>
+        <span class="hub-type">NORTH AMERICA CROSS-DOCK</span>
+        <ul class="hub-stats">
+          <li>Customs Clearance: <span>US CBP ACE Fast-Track</span></li>
+          <li>Storage Capacity: <span>150,000 m²</span></li>
+          <li>Direct Routes: <span>32 Rail Terminals</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div>&copy; 2026 KRIM Logistics. All rights reserved.</div>
+      <div style="display: flex; gap: 20px;">
+        <a href="/index.html" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <a href="/solutions.html" style="color: var(--text-muted); text-decoration: none;">Solutions</a>
+        <a href="/about.html" style="color: var(--text-muted); text-decoration: none;">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function filterRegion(region) {
+      // Update UI Buttons
+      document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Filter Hub Cards
+      const cards = document.querySelectorAll('.hub-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        if (region === 'all' || card.getAttribute('data-region') === region) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('node-count').innerText = region === 'all' ? '142' : (visibleCount * 28).toString();
+    }
+  </script>
+</body>
+      </html>
+      
