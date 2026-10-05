@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Command Deck — KRIM LOGISTICS GOS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #070d19;
+      --krim-card: #0d172a;
+      --krim-card-hover: #13223f;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-border-bright: rgba(0, 210, 255, 0.25);
+      --krim-cyan: #00d2ff;
+      --krim-blue: #0072ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-rose: #f43f5e;
+      --krim-purple: #c084fc;
+      --text-main: #ffffff;
+      --text-muted: #8e9bb0;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* GLOBAL SYSTEM TICKER BAR */
+    .gos-ticker-bar {
+      height: 32px;
+      background: #02040a;
+      border-bottom: 1px solid var(--krim-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      z-index: 100;
+    }
+    .ticker-group { display: flex; gap: 20px; align-items: center; }
+    .ticker-item { display: flex; gap: 8px; align-items: center; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--krim-emerald); }
+    .status-dot.warning { background: var(--krim-amber); }
+    .status-dot.danger { background: var(--krim-rose); }
+
+    /* LAYOUT WRAPPER */
+    .app-shell { display: flex; flex: 1; overflow: hidden; }
+
+    /* HEAVY SIDEBAR NAVIGATION */
+    aside {
+      width: 280px;
+      background: var(--krim-surface);
+      border-right: 1px solid var(--krim-border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      margin-bottom: 24px;
+      padding: 0 8px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--krim-cyan) 0%, var(--krim-blue) 100%);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text { font-weight: 800; font-size: 1.1rem; line-height: 1; }
+    .brand-text span {
+      display: block;
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .nav-section-title {
+      font-family: var(--font-code);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 16px 8px 8px;
+    }
+    .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-item a:hover, .nav-item a.active {
+      background: rgba(0, 210, 255, 0.08);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid var(--krim-border-bright);
+    }
+    .nav-badge {
+      background: rgba(255, 255, 255, 0.08);
+      font-family: var(--font-code);
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* MAIN DECK CONTAINER */
+    main {
+      flex-grow: 1;
+      padding: 24px 32px;
+      overflow-y: auto;
+      background: radial-gradient(circle at 80% 10%, rgba(0, 210, 255, 0.04) 0%, transparent 50%);
+    }
+
+    /* TOP COMMAND BAR */
+    .command-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      background: var(--krim-card);
+      border: 1px solid var(--krim-border);
+      padding: 16px 24px;
+      border-radius: 14px;
+    }
+    .header-titles h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; }
+    .header-titles p { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
+
+    .system-controls { display: flex; gap: 12px; align-items: center; }
+    .btn-command {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-command:hover { border-color: var(--krim-cyan); color: var(--krim-cyan); }
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--krim-cyan) 0%, var(--krim-blue) 100%);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 210, 255, 0.2);
+    }
+
+    /* HEAVY METRICS GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--krim-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--krim-cyan);
+    }
+    .metric-card.warning::before { background: var(--krim-amber); }
+    .metric-card.danger::before { background: var(--krim-rose); }
+    .metric-card.success::before { background: var(--krim-emerald); }
+
+    .metric-header { display: flex; justify-content: space-between; align-items: center; }
+    .metric-title { font-family: var(--font-code); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
+    .metric-value { font-size: 1.6rem; font-weight: 800; margin: 8px 0 2px; letter-spacing: -0.02em; }
+    .metric-footer { font-size: 0.72rem; display: flex; gap: 6px; align-items: center; }
+
+    /* HEAVY MATRIX TABLE CONTAINER */
+    .matrix-container {
+      background: var(--krim-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .matrix-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .heavy-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .heavy-table th {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      font-size: 0.7rem;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .heavy-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .heavy-table tbody tr:hover { background: var(--krim-card-hover); }
+
+    .tag {
+      font-family: var(--font-code);
+      font-size: 0.68rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .tag-active { background: rgba(16, 185, 129, 0.12); color: var(--krim-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-hold { background: rgba(244, 63, 94, 0.12); color: var(--krim-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .tag-transit { background: rgba(0, 210, 255, 0.12); color: var(--krim-cyan); border: 1px solid rgba(0, 210, 255, 0.3); }
+
+    .risk-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GLOBAL SYSTEM TICKER -->
+  <div class="gos-ticker-bar">
+    <div class="ticker-group">
+      <div class="ticker-item"><span class="status-dot"></span> <span>GOS CORE: ONLINE</span></div>
+      <div class="ticker-item"><span class="status-dot"></span> <span>AMER GATEWAY: 100% OPERATIONAL</span></div>
+      <div class="ticker-item"><span class="status-dot warning"></span> <span>EMEA CORRIDOR: HEAVY CONGESTION (ROTTERDAM)</span></div>
+      <div class="ticker-item"><span class="status-dot"></span> <span>APAC NETWORK: NORMAL</span></div>
+    </div>
+    <div class="ticker-group">
+      <span style="color: var(--text-muted);">SYS LATENCY: <strong style="color: var(--krim-cyan);">14ms</strong></span>
+      <span style="color: var(--text-muted);">UTC: <strong id="utc-clock">--:--:--</strong></span>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <!-- HEAVY SIDEBAR NAVIGATION -->
+    <aside>
+      <div>
+        <a href="/index.html" class="brand-group">
+          <div class="logo-icon"></div>
+          <div class="brand-text">
+            KRIM LOGISTICS
+            <span>GLOBAL OS V3.0</span>
+          </div>
+        </a>
+
+        <div class="nav-section-title">Operational Engines</div>
+        <ul class="nav-menu">
+          <li class="nav-item"><a href="/dashboard.html" class="active"><span>📊 Control Deck</span> <span class="nav-badge">LIVE</span></a></li>
+          <li class="nav-item"><a href="/src/shipments/list.html"><span>📦 Cargo Registry</span> <span class="nav-badge">1,428</span></a></li>
+          <li class="nav-item"><a href="/src/telemetry_center.html"><span>📡 Telemetry Hub</span> <span class="nav-badge" style="color: var(--krim-emerald);">AIS-ON</span></a></li>
+        </ul>
+
+        <div class="nav-section-title">Finance & Clearance</div>
+        <ul class="nav-menu">
+          <li class="nav-item"><a href="/src/financial_hub.html"><span>💳 Escrow Ledger</span></a></li>
+          <li class="nav-item"><a href="/src/document_vault.html"><span>📁 Document Vault</span> <span class="nav-badge">KYC</span></a></li>
+        </ul>
+      </div>
+
+      <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid var(--krim-border);">
+        <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-code);">OPERATOR SESSION</div>
+        <div style="font-size: 0.82rem; font-weight: 700; color: #fff; margin-top: 2px;" id="operator-id">admin@krim-gos.global</div>
+        <button onclick="logout()" style="background: none; border: none; color: var(--krim-rose); font-family: var(--font-code); font-size: 0.7rem; margin-top: 8px; cursor: pointer;">[← Terminate Session]</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTROL DECK -->
+    <main>
+      <!-- COMMAND HEADER -->
+      <div class="command-header">
+        <div class="header-titles">
+          <h1>Global Command Deck</h1>
+          <p>Real-time multimodal monitoring, high-density telemetry, and risk management engine.</p>
+        </div>
+
+        <div class="system-controls">
+          <button class="btn-command" onclick="alert('Exporting system telemetry logs CSV...')">📥 Export Ledger</button>
+          <button class="btn-command" onclick="location.reload()">🔄 Refresh Matrix</button>
+          <button class="btn-primary-action" onclick="window.location.href='/src/shipments/details.html?mode=new'">+ Dispatch New Cargo</button>
+        </div>
+      </div>
+
+      <!-- HEAVY METRICS GRID -->
+      <div class="metrics-grid">
+        <div class="metric-card success">
+          <div class="metric-header">
+            <span class="metric-title">TOTAL ACTIVE CARGO</span>
+            <span style="color: var(--krim-emerald); font-family: var(--font-code); font-size: 0.7rem;">99.1% SLA</span>
+          </div>
+          <div class="metric-value">1,428</div>
+          <div class="metric-footer"><span style="color: var(--krim-emerald);">▲ +12%</span> vs last 24 hours</div>
+        </div>
+
+        <div class="metric-card danger">
+          <div class="metric-header">
+            <span class="metric-title">CUSTOMS EXCEPTIONS</span>
+            <span style="color: var(--krim-rose); font-family: var(--font-code); font-size: 0.7rem;">ACTION REQUIRED</span>
+          </div>
+          <div class="metric-value" style="color: var(--krim-rose);">3</div>
+          <div class="metric-footer"><span style="color: var(--krim-rose);">⚠️ Holds:</span> Rotterdam, Jebel Ali</div>
+        </div>
+
+        <div class="metric-card warning">
+          <div class="metric-header">
+            <span class="metric-title">ACTIVE FLEET / TEU</span>
+            <span style="color: var(--krim-amber); font-family: var(--font-code); font-size: 0.7rem;">88% CAP</span>
+          </div>
+          <div class="metric-value">42,890</div>
+          <div class="metric-footer"><span style="color: var(--krim-amber);">● 621 Vessels/Trucks</span> in motion</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">ESCROW VOLUME</span>
+            <span style="color: var(--krim-cyan); font-family: var(--font-code); font-size: 0.7rem;">SETTLED 24H</span>
+          </div>
+          <div class="metric-value" style="color: var(--krim-cyan);">$4.82M</div>
+          <div class="metric-footer"><span style="color: var(--krim-cyan);">USD/EUR/INR</span> automated clearing</div>
+        </div>
+      </div>
+
+      <!-- HEAVY COMMAND MATRIX TABLE -->
+      <div class="matrix-container">
+        <div class="matrix-header">
+          <div class="matrix-title">
+            <span>🌐 Priority Fleet & Manifest Operations Matrix</span>
+          </div>
+          <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--text-muted);">
+            Showing Live Feed [Updated Every 5s]
+          </div>
+        </div>
+
+        <table class="heavy-table">
+          <thead>
+            <tr>
+              <th>MANIFEST REF</th>
+              <th>MODE & CARRIER</th>
+              <th>CORRIDOR (ORIGIN → DESTINATION)</th>
+              <th>RISK INDEX</th>
+              <th>ESCROW STATUS</th>
+              <th>OPERATIONAL STATE</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-cyan);">KRM-8820-EU</td>
+              <td><strong>🚢 OCEAN</strong> <span style="color: var(--text-muted); font-size: 0.75rem;">(Maersk Line)</span></td>
+              <td>Hamburg (DE) → Singapore (SG)</td>
+              <td><span class="risk-indicator" style="color: var(--krim-emerald);">🟢 LOW (0.02)</span></td>
+              <td><span style="color: var(--krim-emerald); font-family: var(--font-code); font-size: 0.75rem;">VERIFIED ($120k)</span></td>
+              <td><span class="tag tag-transit">IN TRANSIT</span></td>
+              <td><a href="/src/shipments/details.html?id=KRM-8820-EU" style="color: var(--krim-cyan); text-decoration: none; font-family: var(--font-code); font-weight: 700;">INSPECT →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-rose);">EX-9041-NL</td>
+              <td><strong>🚢 OCEAN</strong> <span style="color: var(--text-muted); font-size: 0.75rem;">(MSC Cargo)</span></td>
+              <td>Shanghai (CN) → Rotterdam (NL)</td>
+              <td><span class="risk-indicator" style="color: var(--krim-rose);">🔴 HIGH (0.89)</span></td>
+              <td><span style="color: var(--krim-amber); font-family: var(--font-code); font-size: 0.75rem;">HELD ($450k)</span></td>
+              <td><span class="tag tag-hold">CUSTOMS HOLD</span></td>
+              <td><a href="/src/shipments/details.html?id=EX-9041-NL" style="color: var(--krim-rose); text-decoration: none; font-family: var(--font-code); font-weight: 700;">RESOLVE →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-cyan);">KRM-9041-IN</td>
+              <td><strong>✈️️ AIR</strong> <span style="color: var(--text-muted); font-size: 0.75rem;">(Emirates SkyCargo)</span></td>
+              <td>Mumbai (BOM) → Dubai (DXB)</td>
+              <td><span class="risk-indicator" style="color: var(--krim-emerald);">🟢 LOW (0.05)</span></td>
+              <td><span style="color: var(--krim-emerald); font-family: var(--font-code); font-size: 0.75rem;">VERIFIED ($85k)</span></td>
+              <td><span class="tag tag-active">CUSTOMS CLEARANCE</span></td>
+              <td><a href="/src/shipments/details.html?id=KRM-9041-IN" style="color: var(--krim-cyan); text-decoration: none; font-family: var(--font-code); font-weight: 700;">INSPECT →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-cyan);">KRM-1092-US</td>
+              <td><strong>🚛 ROAD</strong> <span style="color: var(--text-muted); font-size: 0.75rem;">(Knight-Swift)</span></td>
+              <td>Chicago (IL) → Dallas (TX)</td>
+              <td><span class="risk-indicator" style="color: var(--krim-amber);">🟡 MED (0.34)</span></td>
+              <td><span style="color: var(--krim-emerald); font-family: var(--font-code); font-size: 0.75rem;">VERIFIED ($18k)</span></td>
+              <td><span class="tag tag-transit">IN TRANSIT</span></td>
+              <td><a href="/src/shipments/details.html?id=KRM-1092-US" style="color: var(--krim-cyan); text-decoration: none; font-family: var(--font-code); font-weight: 700;">INSPECT →</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Live UTC Clock Functionality
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('utc-clock').textContent = now.toISOString().substr(11, 8);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // User Context Binding
+    document.addEventListener('DOMContentLoaded', () => {
+      const email = localStorage.getItem('krim_gos_id');
+      if(email) { document.getElementById('operator-id').textContent = email; }
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/src/auth/unified_gateway.html';
+    }
+  </script>
+</body>
+      </html>
+  
