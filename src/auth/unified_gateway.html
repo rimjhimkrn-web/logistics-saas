@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified Auth Gateway — KRIM LOGISTICS GOS</title>
+  
+  <!-- FONT INTEGRATION (Using KRIM Inter standard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. CORE DESIGN SYSTEM TOKENS (Shared across GOS & Apps)
+       ========================================================================== */
+    :root {
+      --bg-dark: #070d19;
+      --bg-card: #0d172a;
+      --bg-card-hover: #13223f;
+      --bg-auth: #0a0f21;
+      --accent-cyan: #00d2ff;
+      --accent-blue: #0072ff;
+      --accent-gradient: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      --text-main: #ffffff;
+      --text-muted: #8e9bb0;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --font-sans: 'Inter', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-auth);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* TYPOGRAPHY COMPONENTS */
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-gradient);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* AUTH CONTAINER LAYOUT */
+    .auth-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      position: relative;
+    }
+    .auth-bg-visual {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 75% 30%, rgba(0, 210, 255, 0.15) 0%, transparent 60%);
+      opacity: 0.6;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(13, 23, 42, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 48px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 210, 255, 0.1);
+      z-index: 10;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .auth-header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-top: 16px;
+    }
+    .auth-header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    /* FORM & INPUT COMPONENTS */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font-code);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* BUTTONS & LINKS */
+    .btn-auth {
+      width: 100%;
+      background: var(--accent-gradient);
+      color: #fff;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 210, 255, 0.25);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 8px;
+    }
+    .btn-auth:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 210, 255, 0.45);
+    }
+    .auth-meta {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .auth-meta a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .auth-meta a:hover {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body class="krim-gos krim-identity">
+
+  <section class="auth-stage">
+    <div class="auth-bg-visual"></div>
+    
+    <div class="auth-card">
+      <div class="auth-header">
+        <a href="/index.html" class="brand-group" style="justify-content: center;">
+          <div class="logo-icon"></div>
+          <div class="brand-text">
+            KRIM
+            <span>LOGISTICS GOS</span>
+          </div>
+        </a>
+        <h1 data-i18n="auth_login_title">Log In to KRIM GOS</h1>
+        <p data-i18n="auth_login_desc">Enter your credentials to access the operating system.</p>
+      </div>
+
+      <form onsubmit="handleAuthSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_email">Company Email</label>
+          <input type="email" class="form-control" placeholder="logistics@acme.com" required data-gos-field="email" />
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_password">Password</label>
+          <input type="password" class="form-control" placeholder="••••••••" required data-gos-field="password" />
+        </div>
+
+        <button type="submit" class="btn-auth" data-i18n="btn_login_submit">Authenticate Gateway</button>
+      </form>
+
+      <div class="auth-meta">
+        <a href="/auth/reset_request.html" data-i18n="link_forgot_pass">Forgot your password?</a><br>
+        <div style="margin-top: 10px;" data-i18n="meta_signup">Don't have an account? <a href="/auth/signup.html">Create a Free Account</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH ROUTING & MFA MIDDLEWARE SIMULATION -->
+  <script>
+    function handleAuthSubmit(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const email = form.querySelector('[data-gos-field="email"]').value;
+      
+      // Simulate successful API call and RBAC role assignment
+      localStorage.setItem('krim_gos_token', 'JWT_TOKEN_SIM');
+      localStorage.setItem('krim_gos_id', email);
+
+      // Simulation of GOS role detection logic (Customer vs Partner vs Admin)
+      let detectedRole = 'universa';
+      if (email.includes('@admin')) { detectedRole = 'admin'; } 
+      else if (email.includes('@carrier')) { detectedRole = 'partner'; } 
+      else { detectedRole = 'shipper'; }
+      localStorage.setItem('krim_gos_role', detectedRole);
+
+      // If successful, simulate redirecting through security MFA validation
+      window.location.href = `/auth/mfa_challenge.html?challenge_id=AUTHSIM_123456&next_url=/dashboard.html`;
+    }
+  </script>
+
+</body>
+</html>
