@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Portal — KRIM LOGISTICS OS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-surface-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-purple: #c084fc;
+      --krim-rose: #f43f5e;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    aside {
+      width: 270px;
+      background: var(--krim-surface);
+      border-right: 1px solid var(--krim-border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      margin-bottom: 28px;
+      padding: 0 12px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      color: var(--krim-text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .ent-org-badge {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid rgba(192, 132, 252, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+    }
+    .ent-org-badge .org-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .ent-org-badge .org-role {
+      font-size: 0.68rem;
+      font-family: var(--font-code);
+      color: var(--krim-purple);
+      margin-top: 2px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      color: var(--krim-text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-item a:hover, .nav-item a.active {
+      background: rgba(192, 132, 252, 0.1);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-item a.active {
+      border: 1px solid rgba(192, 132, 252, 0.25);
+    }
+
+    /* MAIN VIEWPORT */
+    main {
+      flex-grow: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    /* METRICS STRIP */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .metric-label {
+      color: var(--krim-text-muted);
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      text-transform: uppercase;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 6px 0 2px;
+    }
+    .metric-sub {
+      font-size: 0.72rem;
+      color: var(--krim-text-muted);
+    }
+
+    /* VIEW TABS */
+    .view-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--krim-border);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--krim-text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(192, 132, 252, 0.12);
+      color: var(--krim-purple);
+    }
+
+    /* SECTION CARDS */
+    .panel-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* DATA TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 14px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .data-table th {
+      color: var(--krim-text-muted);
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-family: var(--font-code);
+      font-weight: 600;
+    }
+    .status-badge.active { background: rgba(16, 185, 129, 0.15); color: var(--krim-emerald); }
+    .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--krim-amber); }
+    .status-badge.purple { background: rgba(192, 132, 252, 0.15); color: var(--krim-purple); }
+
+    /* ACTION BUTTONS */
+    .btn-primary {
+      background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    /* INTEGRATION CARDS */
+    .integration-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .integration-card {
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside>
+    <div>
+      <a href="/index.html" class="brand-group">
+        <div class="logo-icon"></div>
+        <div class="brand-text">
+          KRIM
+          <span>LOGISTICS OS</span>
+        </div>
+      </a>
+
+      <!-- ENTERPRISE CONTEXT -->
+      <div class="ent-org-badge">
+        <div class="org-title">TATA Steel & Infrastructure</div>
+        <div class="org-role">ENT ORG ID: ENT-GLOBAL-881</div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#" class="active" id="nav-entities" onclick="switchTab('entities')">🏢 Multi-Entity Structure</a></li>
+        <li class="nav-item"><a href="#" id="nav-approvals" onclick="switchTab('approvals')">🛡️ Approval Rules & Limits</a></li>
+        <li class="nav-item"><a href="#" id="nav-sla" onclick="switchTab('sla')">📈 SLA Analytics & KPIs</a></li>
+        <li class="nav-item"><a href="#" id="nav-integrations" onclick="switchTab('integrations')">🔌 ERP / TMS Connectors</a></li>
+      </ul>
+    </div>
+
+    <div style="padding: 12px; border-top: 1px solid var(--krim-border);">
+      <a href="/dashboard.html" style="color: var(--krim-text-muted); text-decoration: none; font-size: 0.8rem; font-family: var(--font-code);">← Workspace Switcher</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main>
+    <div class="header-bar">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800;">Enterprise Command & Control</h1>
+        <p style="color: var(--krim-text-muted); font-size: 0.82rem; margin-top: 4px;">Multi-Subsidiary Logistics Operating Layer — <span style="font-family: var(--font-code); color: var(--krim-purple);">Enterprise Edition</span></p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" onclick="switchTab('integrations')">API Gateway Status</button>
+        <button class="btn-primary" onclick="addSubsidiary()">+ Register Subsidiary Entity</button>
+      </div>
+    </div>
+
+    <!-- METRICS STRIP -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">REGISTERED ENTITIES</div>
+        <div class="metric-value" style="color: var(--krim-purple);">6 Subsidiaries</div>
+        <div class="metric-sub">Eastern & Central Industrial Regions</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">MONTHLY FREIGHT SPEND</div>
+        <div class="metric-value" style="font-family: var(--font-code);">₹ 4.28 Cr</div>
+        <div class="metric-sub">Centralized Master Account</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">APPROVAL QUEUE</div>
+        <div class="metric-value" style="color: var(--krim-amber);">3 Pending</div>
+        <div class="metric-sub">> ₹ 5,000,000 Threshold Triggers</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">ERP SYNC HEALTH</div>
+        <div class="metric-value" style="color: var(--krim-emerald);">99.98%</div>
+        <div class="metric-sub">SAP S/4HANA & Oracle ERP Active</div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tab-entities" onclick="switchTab('entities')">Subsidiaries & Units</button>
+      <button class="tab-btn" id="tab-approvals" onclick="switchTab('approvals')">Approval Policies (3)</button>
+      <button class="tab-btn" id="tab-sla" onclick="switchTab('sla')">SLA & Carrier Performance</button>
+      <button class="tab-btn" id="tab-integrations" onclick="switchTab('integrations')">ERP / TMS Webhooks</button>
+    </div>
+
+    <!-- PANEL 1: MULTI-ENTITY STRUCTURE -->
+    <div id="panel-entities" class="panel-card">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Operating Division Hierarchy</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ENTITY CODE</th>
+            <th>SUBSIDIARY NAME</th>
+            <th>OPERATING REGION</th>
+            <th>MONTHLY RUN RATE</th>
+            <th>COMPLIANCE STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-purple);">SUB-JSR-01</td>
+            <td>Jamshedpur Heavy Steel Division</td>
+            <td>Jharkhand Region</td>
+            <td style="font-family: var(--font-code);">₹ 2,40,00,000</td>
+            <td><span class="status-badge active">AUDITED</span></td>
+            <td><button class="btn-secondary" onclick="manageEntity('SUB-JSR-01')">Manage RLS Rules</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-purple);">SUB-BOK-04</td>
+            <td>Bokaro Raw Material Logistics</td>
+            <td>Jharkhand Region</td>
+            <td style="font-family: var(--font-code);">₹ 1,25,00,000</td>
+            <td><span class="status-badge active">AUDITED</span></td>
+            <td><button class="btn-secondary" onclick="manageEntity('SUB-BOK-04')">Manage RLS Rules</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-purple);">SUB-KOL-02</td>
+            <td>Kolkata Port Export Hub</td>
+            <td>West Bengal Region</td>
+            <td style="font-family: var(--font-code);">₹ 63,00,000</td>
+            <td><span class="status-badge pending">ANNUAL AUDIT DUE</span></td>
+            <td><button class="btn-secondary" onclick="manageEntity('SUB-KOL-02')">Manage RLS Rules</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 2: APPROVAL POLICIES & THRESHOLDS -->
+    <div id="panel-approvals" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Financial Governance & Threshold Controls</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 16px;">Automated approval rules triggering VP/Director multi-sig approvals for high-value freight dispatches.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>RULE CODE</th>
+            <th>TRIGGER CONDITION</th>
+            <th>REQUIRED APPROVER ROLE</th>
+            <th>ESCALATION SLA</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">RULE-FIN-01</td>
+            <td>Shipment Booking Value > ₹ 5,00,000</td>
+            <td>Logistics VP / Director</td>
+            <td style="font-family: var(--font-code);">2 Hours</td>
+            <td><span class="status-badge active">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">RULE-FIN-02</td>
+            <td>Spot Freight Rate > 15% Baseline Market Rate</td>
+            <td>Procurement Lead</td>
+            <td style="font-family: var(--font-code);">1 Hour</td>
+            <td><span class="status-badge active">ENFORCED</span></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700;">RULE-HAZ-08</td>
+            <td>Hazardous Class 3 Liquid Material Booking</td>
+            <td>EHS Director & Compliance Officer</td>
+            <td style="font-family: var(--font-code);">30 Mins</td>
+            <td><span class="status-badge active">ENFORCED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 3: CUSTOM SLA ANALYTICS -->
+    <div id="panel-sla" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Contractual SLA Performance & Penalty Audit</h2>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SUBSIDIARY / CARRIER</th>
+            <th>TOTAL DISPATCHES</th>
+            <th>ON-TIME DELIVERY (OTD)</th>
+            <th>POD SUBMISSION AVG</th>
+            <th>PENALTY CLAUSE STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 700;">Jamshedpur Heavy Steel / ABC Transport</td>
+            <td style="font-family: var(--font-code);">142 Trips</td>
+            <td style="font-family: var(--font-code); color: var(--krim-emerald); font-weight: 700;">99.1%</td>
+            <td style="font-family: var(--font-code);">4.2 Hours</td>
+            <td><span class="status-badge active">ZERO PENALTIES</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700;">Bokaro Raw Materials / Regional Fleet B</td>
+            <td style="font-family: var(--font-code);">88 Trips</td>
+            <td style="font-family: var(--font-code); color: var(--krim-amber); font-weight: 700;">94.2%</td>
+            <td style="font-family: var(--font-code);">18.5 Hours</td>
+            <td><span class="status-badge pending">1 SLA WARNING</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 4: ERP / TMS INTEGRATION HUB -->
+    <div id="panel-integrations" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px;">Enterprise System Integration Connectors</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 16px;">Bi-directional event streams linking KRIM OS database events with enterprise ERP software.</p>
+
+      <div class="integration-grid">
+        <div class="integration-card">
+          <div>
+            <span class="status-badge active" style="margin-bottom: 8px;">CONNECTED</span>
+            <h3 style="font-size: 1rem; font-weight: 800;">SAP S/4HANA ERP</h3>
+            <p style="color: var(--krim-text-muted); font-size: 0.78rem; margin-top: 4px;">Automated PO-to-Shipment generation and ledger settlement sync.</p>
+          </div>
+          <div style="margin-top: 16px; font-family: var(--font-code); font-size: 0.72rem; color: var(--krim-emerald);">
+            Latency: 42ms • Sync OK
+          </div>
+        </div>
+
+        <div class="integration-card">
+          <div>
+            <span class="status-badge active" style="margin-bottom: 8px;">CONNECTED</span>
+            <h3 style="font-size: 1rem; font-weight: 800;">Oracle Cloud TMS</h3>
+            <p style="color: var(--krim-text-muted); font-size: 0.78rem; margin-top: 4px;">Real-time shipment status milestone webhook feed.</p>
+          </div>
+          <div style="margin-top: 16px; font-family: var(--font-code); font-size: 0.72rem; color: var(--krim-emerald);">
+            Latency: 28ms • Sync OK
+          </div>
+        </div>
+
+        <div class="integration-card">
+          <div>
+            <span class="status-badge purple" style="margin-bottom: 8px;">READY FOR SYNC</span>
+            <h3 style="font-size: 1rem; font-weight: 800;">Custom REST Webhook Gateway</h3>
+            <p style="color: var(--krim-text-muted); font-size: 0.78rem; margin-top: 4px;">Internal custom logistics middleware endpoints.</p>
+          </div>
+          <div style="margin-top: 16px; font-family: var(--font-code); font-size: 0.72rem; color: var(--krim-purple);">
+            Endpoints Configured: 12
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      const tabs = ['entities', 'approvals', 'sla', 'integrations'];
+      
+      tabs.forEach(t => {
+        const panel = document.getElementById(`panel-${t}`);
+        const tabBtn = document.getElementById(`tab-${t}`);
+        const navLink = document.getElementById(`nav-${t}`);
+        
+        if (panel) panel.style.display = (t === tabId) ? 'block' : 'none';
+        if (tabBtn) {
+          if (t === tabId) tabBtn.classList.add('active');
+          else tabBtn.classList.remove('active');
+        }
+        if (navLink) {
+          if (t === tabId) navLink.classList.add('active');
+          else navLink.classList.remove('active');
+        }
+      });
+    }
+
+    function addSubsidiary() {
+      alert("Opening New Subsidiary & Entity Registration Wizard...");
+    }
+
+    function manageEntity(entityId) {
+      alert(`Configuring Row-Level Security (RLS) & Budget Caps for ${entityId}...`);
+    }
+  </script>
+</body>
+                  </html>
+  
