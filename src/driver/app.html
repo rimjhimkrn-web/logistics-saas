@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Driver Mobile Hub — KRIM LOGISTICS OS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.1);
+      --krim-emerald: #10b981;
+      --krim-cyan: #00d2ff;
+      --krim-amber: #f59e0b;
+      --krim-rose: #f43f5e;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .mobile-container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--krim-surface);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-left: 1px solid var(--krim-border);
+      border-right: 1px solid var(--krim-border);
+    }
+
+    /* TOP BAR */
+    .app-header {
+      padding: 16px 20px;
+      background: var(--krim-card);
+      border-bottom: 1px solid var(--krim-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .driver-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00d2ff, #0072ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .status-pill {
+      font-size: 0.68rem;
+      font-family: var(--font-code);
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--krim-emerald);
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--krim-emerald);
+      box-shadow: 0 0 8px var(--krim-emerald);
+    }
+
+    /* MAIN CONTENT AREA */
+    .app-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      padding-bottom: 90px;
+    }
+
+    .card {
+      background: var(--krim-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .trip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .route-display {
+      position: relative;
+      padding-left: 20px;
+      margin: 16px 0;
+    }
+    .route-display::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--krim-cyan);
+    }
+    .route-point {
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .route-point:last-child { margin-bottom: 0; }
+    .route-point::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--krim-cyan);
+    }
+    .route-point.destination::before {
+      background: var(--krim-emerald);
+    }
+
+    /* ACTION BUTTONS */
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s;
+      margin-top: 10px;
+    }
+    .btn-action:active { opacity: 0.8; }
+    .btn-emerald { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+    .btn-cyan { background: linear-gradient(135deg, #00d2ff, #0072ff); color: #fff; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid var(--krim-border); }
+
+    /* POD CAPTURE MOCK UI */
+    .pod-upload-box {
+      border: 2px dashed var(--krim-border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      margin: 14px 0;
+      cursor: pointer;
+    }
+
+    /* BOTTOM NAV BAR */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: var(--krim-card);
+      border-top: 1px solid var(--krim-border);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 10px 0;
+      z-index: 100;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--krim-text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-btn.active { color: var(--krim-cyan); }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-container">
+    
+    <!-- HEADER BAR -->
+    <div class="app-header">
+      <div class="driver-badge">
+        <div class="avatar">RK</div>
+        <div>
+          <div style="font-weight: 800; font-size: 0.9rem;">R. Kumar</div>
+          <div style="font-size: 0.7rem; color: var(--krim-text-muted); font-family: var(--font-code);">JH-01-AB-8821</div>
+        </div>
+      </div>
+
+      <div class="status-pill">
+        <div class="pulse-dot"></div>
+        GPS ONLINE
+      </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="app-body">
+
+      <!-- NAVIGATION TAB 1: ACTIVE TRIP -->
+      <div id="tab-active" class="tab-view">
+        <div class="card">
+          <div class="trip-header">
+            <div>
+              <span style="font-family: var(--font-code); font-size: 0.72rem; color: var(--krim-emerald); font-weight: 700;">ASSIGNED SHIPMENT</span>
+              <h2 style="font-size: 1.2rem; font-weight: 800; margin-top: 2px;">KRIM-2026-00124</h2>
+            </div>
+            <span style="background: rgba(0, 210, 255, 0.15); color: var(--krim-cyan); font-size: 0.68rem; font-family: var(--font-code); padding: 4px 8px; border-radius: 6px; font-weight: 700;">IN TRANSIT</span>
+          </div>
+
+          <div class="route-display">
+            <div class="route-point">
+              <div style="font-size: 0.72rem; color: var(--krim-text-muted); font-family: var(--font-code);">ORIGIN PICKUP</div>
+              <div style="font-size: 0.95rem; font-weight: 700;">Ranchi Industrial Yard A</div>
+            </div>
+            <div class="route-point destination">
+              <div style="font-size: 0.72rem; color: var(--krim-text-muted); font-family: var(--font-code);">DESTINATION DROP</div>
+              <div style="font-size: 0.95rem; font-weight: 700;">Kolkata Terminal Gate 4</div>
+            </div>
+          </div>
+
+          <div style="background: var(--krim-surface); padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 0.8rem; display: flex; justify-content: space-between;">
+            <div>
+              <span style="color: var(--krim-text-muted);">Payload:</span> 18,000 kg Steel
+            </div>
+            <div>
+              <span style="color: var(--krim-text-muted);">ETA:</span> Tomorrow, 4:00 PM
+            </div>
+          </div>
+
+          <button class="btn-action btn-cyan" onclick="updateStatus('In-Transit Highway')">📍 Ping Current Location</button>
+          <button class="btn-action btn-emerald" onclick="switchView('pod')">📸 Arrived & Upload POD</button>
+        </div>
+      </div>
+
+      <!-- NAVIGATION TAB 2: DIGITAL POD PROOF CAPTURE -->
+      <div id="tab-pod" class="tab-view" style="display: none;">
+        <div class="card">
+          <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px;">Capture Proof of Delivery</h2>
+          <p style="color: var(--krim-text-muted); font-size: 0.8rem;">Upload receiver signed invoice or photo of unloaded goods at destination.</p>
+
+          <div class="pod-upload-box" onclick="triggerCamera()">
+            <div style="font-size: 2rem; margin-bottom: 6px;">📷</div>
+            <div style="font-size: 0.88rem; font-weight: 700;">Take Photo / Select File</div>
+            <div style="font-size: 0.72rem; color: var(--krim-text-muted); margin-top: 4px;">GPS location and timestamp will auto-embed</div>
+          </div>
+
+          <button class="btn-action btn-emerald" onclick="submitPOD()">Submit Verified POD</button>
+          <button class="btn-action btn-secondary" onclick="switchView('active')">Cancel</button>
+        </div>
+      </div>
+
+      <!-- NAVIGATION TAB 3: SETTLEMENTS & PAYMENTS -->
+      <div id="tab-earnings" class="tab-view" style="display: none;">
+        <div class="card">
+          <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Trip Fuel Advances & Pay</h2>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--krim-emerald); font-family: var(--font-code);">₹ 14,500</div>
+          <p style="color: var(--krim-text-muted); font-size: 0.78rem; margin-top: 2px;">Cleared Advance Received via UPI / Fastag</p>
+
+          <div style="margin-top: 16px; border-top: 1px solid var(--krim-border); padding-top: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
+              <span style="color: var(--krim-text-muted);">Fuel Allowance Fastag</span>
+              <span style="font-family: var(--font-code);">₹ 8,000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
+              <span style="color: var(--krim-text-muted);">Driver Cash Advance</span>
+              <span style="font-family: var(--font-code);">₹ 6,500</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM FIXED NAV BAR -->
+    <div class="bottom-nav">
+      <button class="nav-btn active" id="nav-active" onclick="switchView('active')">
+        <span style="font-size: 1.2rem;">🚚</span>
+        Active Trip
+      </button>
+      <button class="nav-btn" id="nav-pod" onclick="switchView('pod')">
+        <span style="font-size: 1.2rem;">📄</span>
+        Upload POD
+      </button>
+      <button class="nav-btn" id="nav-earnings" onclick="switchView('earnings')">
+        <span style="font-size: 1.2rem;">💳</span>
+        Advances
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    function switchView(tab) {
+      document.querySelectorAll('.tab-view').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      document.getElementById(`nav-${tab}`).classList.add('active');
+    }
+
+    function updateStatus(statusMsg) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          alert(`GPS Ping Sent: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)} — Status: ${statusMsg}`);
+        }, () => {
+          alert(`Telemetry Ping Sent — Status: ${statusMsg}`);
+        });
+      } else {
+        alert(`Telemetry Ping Sent — Status: ${statusMsg}`);
+      }
+    }
+
+    function triggerCamera() {
+      alert("Opening camera capture interface...");
+    }
+
+    function submitPOD() {
+      alert("POD digitally captured and timestamped! Shipment marked complete.");
+      switchView('active');
+    }
+  </script>
+</body>
+</html>
