@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Workspace — KRIM LOGISTICS OS</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-surface-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-purple: #c084fc;
+      --krim-rose: #f43f5e;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    aside {
+      width: 260px;
+      background: var(--krim-surface);
+      border-right: 1px solid var(--krim-border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      margin-bottom: 28px;
+      padding: 0 12px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      color: var(--krim-text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .customer-org-badge {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+    }
+    .customer-org-badge .org-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .customer-org-badge .org-role {
+      font-size: 0.68rem;
+      font-family: var(--font-code);
+      color: var(--krim-emerald);
+      margin-top: 2px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      color: var(--krim-text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-item a:hover, .nav-item a.active {
+      background: rgba(16, 185, 129, 0.1);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-item a.active {
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    /* MAIN VIEWPORT */
+    main {
+      flex-grow: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    /* METRICS STRIP */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .metric-label {
+      color: var(--krim-text-muted);
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      text-transform: uppercase;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 6px 0 2px;
+    }
+    .metric-sub {
+      font-size: 0.72rem;
+      color: var(--krim-text-muted);
+    }
+
+    /* VIEW TABS */
+    .view-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--krim-border);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--krim-text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--krim-emerald);
+    }
+
+    /* SECTION CARDS */
+    .panel-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* DATA TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 14px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--krim-border);
+    }
+    .data-table th {
+      color: var(--krim-text-muted);
+      font-family: var(--font-code);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-family: var(--font-code);
+      font-weight: 600;
+    }
+    .status-badge.active { background: rgba(16, 185, 129, 0.15); color: var(--krim-emerald); }
+    .status-badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--krim-amber); }
+    .status-badge.complete { background: rgba(0, 210, 255, 0.15); color: var(--krim-cyan); }
+
+    /* ACTION BUTTONS */
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    /* TIMELINE TRACKER */
+    .timeline-container {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 24px 0 12px;
+      padding: 0 10px;
+    }
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background: var(--krim-border);
+      z-index: 1;
+    }
+    .timeline-step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: var(--krim-surface-card);
+      padding: 0 8px;
+    }
+    .step-node {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--krim-surface);
+      border: 2px solid var(--krim-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .timeline-step.completed .step-node {
+      background: var(--krim-emerald);
+      border-color: var(--krim-emerald);
+      color: #000;
+    }
+    .timeline-step.current .step-node {
+      background: var(--krim-cyan);
+      border-color: var(--krim-cyan);
+      color: #000;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+    }
+    .step-label {
+      font-size: 0.72rem;
+      color: var(--krim-text-muted);
+      font-weight: 500;
+    }
+    .timeline-step.current .step-label {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* FORM STYLES */
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--krim-text-muted);
+    }
+    .form-group input, .form-group select {
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--krim-emerald);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside>
+    <div>
+      <a href="/index.html" class="brand-group">
+        <div class="logo-icon"></div>
+        <div class="brand-text">
+          KRIM
+          <span>LOGISTICS OS</span>
+        </div>
+      </a>
+
+      <!-- CUSTOMER CONTEXT -->
+      <div class="customer-org-badge">
+        <div class="org-title">Apex Industrial Corp</div>
+        <div class="org-role">ROLE: Shippers / Enterprise Client</div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#" class="active" onclick="switchTab('shipments')">📦 Active Shipments</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('book')">⚡ Quick Booking & Rate Quote</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('documents')">📄 Proof of Delivery (POD)</a></li>
+        <li class="nav-item"><a href="#" onclick="switchTab('invoices')">🧾 Invoices & Statements</a></li>
+      </ul>
+    </div>
+
+    <div style="padding: 12px; border-top: 1px solid var(--krim-border);">
+      <a href="/dashboard.html" style="color: var(--krim-text-muted); text-decoration: none; font-size: 0.8rem; font-family: var(--font-code);">← Workspace Switcher</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main>
+    <div class="header-bar">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800;">Customer Booking & Tracking Workspace</h1>
+        <p style="color: var(--krim-text-muted); font-size: 0.82rem; margin-top: 4px;">Shipper Portal Node — Account ID: <span style="font-family: var(--font-code); color: var(--krim-emerald);">CUST-99210-IN</span></p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" onclick="switchTab('documents')">View POD Vault</button>
+        <button class="btn-primary" onclick="switchTab('book')">+ Create Freight Request</button>
+      </div>
+    </div>
+
+    <!-- METRICS STRIP -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">IN-TRANSIT CARGO</div>
+        <div class="metric-value" style="color: var(--krim-emerald);">2 Shipments</div>
+        <div class="metric-sub">1 Regional • 1 Multi-Modal</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">ON-TIME PERFORMANCE</div>
+        <div class="metric-value" style="color: var(--krim-cyan);">99.2%</div>
+        <div class="metric-sub">SLA Verified Across 45 Deliveries</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">OUTSTANDING BALANCES</div>
+        <div class="metric-value" style="font-family: var(--font-code);">₹ 1,82,500</div>
+        <div class="metric-sub">Net-30 Payment Terms Active</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">DIGITAL PODs AUDITED</div>
+        <div class="metric-value" style="color: var(--krim-purple);">100%</div>
+        <div class="metric-sub">45 / 45 Signatures Verified</div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tab-shipments" onclick="switchTab('shipments')">Track Live Freight</button>
+      <button class="tab-btn" id="tab-book" onclick="switchTab('book')">Instant Rate Calculator & Request</button>
+      <button class="tab-btn" id="tab-documents" onclick="switchTab('documents')">Digital POD & Documents</button>
+      <button class="tab-btn" id="tab-invoices" onclick="switchTab('invoices')">Invoices & Billing</button>
+    </div>
+
+    <!-- PANEL 1: LIVE SHIPMENT TRACKING & TIMELINE -->
+    <div id="panel-shipments" class="panel-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
+        <div>
+          <span style="font-family: var(--font-code); font-size: 0.8rem; color: var(--krim-emerald); font-weight: 700;">FEATURED ACTIVE TRACKER</span>
+          <h2 style="font-size: 1.2rem; font-weight: 800; margin-top: 2px;">Shipment ID: KRIM-2026-00124</h2>
+          <p style="color: var(--krim-text-muted); font-size: 0.8rem;">Ranchi, JH → Kolkata, WB (18,000 kg Steel Bars)</p>
+        </div>
+        <button class="btn-secondary" onclick="viewFullMap('KRIM-2026-00124')">View Telemetry Map</button>
+      </div>
+
+      <!-- VISUAL MILESTONE TIMELINE -->
+      <div class="timeline-container">
+        <div class="timeline-step completed">
+          <div class="step-node">✓</div>
+          <div class="step-label">Booking Confirmed</div>
+        </div>
+        <div class="timeline-step completed">
+          <div class="step-node">✓</div>
+          <div class="step-label">Vehicle Loaded</div>
+        </div>
+        <div class="timeline-step current">
+          <div class="step-node">🚚</div>
+          <div class="step-label">In Transit (Highway)</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-node">4</div>
+          <div class="step-label">Arrived Unloading</div>
+        </div>
+        <div class="timeline-step">
+          <div class="step-node">5</div>
+          <div class="step-label">POD Verified</div>
+        </div>
+      </div>
+
+      <table class="data-table" style="margin-top: 24px;">
+        <thead>
+          <tr>
+            <th>BOOKING ID</th>
+            <th>ROUTE & FREIGHT SPECS</th>
+            <th>CARRIER / DRIVER</th>
+            <th>ESTIMATED ARRIVAL</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">KRIM-2026-00124</td>
+            <td>Ranchi → Kolkata (18T Steel)</td>
+            <td style="font-family: var(--font-code);">ABC Transport / R. Kumar</td>
+            <td style="font-family: var(--font-code);">Tomorrow, 04:00 PM</td>
+            <td><span class="status-badge active">ON TIME</span></td>
+            <td><button class="btn-secondary" onclick="trackDetail('KRIM-2026-00124')">Details</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">KRIM-2026-00128</td>
+            <td>Jamshedpur → Patna (24T Industrial)</td>
+            <td style="font-family: var(--font-code);">ABC Transport / A. Singh</td>
+            <td style="font-family: var(--font-code);">07 Oct 2026, 11:00 AM</td>
+            <td><span class="status-badge pending">AWAITING PICKUP</span></td>
+            <td><button class="btn-secondary" onclick="trackDetail('KRIM-2026-00128')">Details</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 2: INSTANT RATE CALCULATOR & FREIGHT REQUEST -->
+    <div id="panel-book" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;">Request Freight Quote & Instant Booking</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 20px;">Get real-time rates based on route distance, truck payload capacity, and market corridor availability.</p>
+
+      <form id="bookingForm" onsubmit="handleQuoteCalculation(event)">
+        <div class="booking-grid">
+          <div class="form-group">
+            <label>ORIGIN LOCATION</label>
+            <input type="text" id="origin" placeholder="e.g. Ranchi, Jharkhand" required>
+          </div>
+          <div class="form-group">
+            <label>DESTINATION LOCATION</label>
+            <input type="text" id="destination" placeholder="e.g. Kolkata, West Bengal" required>
+          </div>
+          <div class="form-group">
+            <label>FREIGHT WEIGHT (KG)</label>
+            <input type="number" id="weight" placeholder="e.g. 15000" required>
+          </div>
+          <div class="form-group">
+            <label>CARGO TYPE</label>
+            <select id="cargoType">
+              <option value="industrial">Industrial Equipment & Metals</option>
+              <option value="raw">Raw Materials & Minerals</option>
+              <option value="consumer">Packaged Consumer Goods</option>
+              <option value="hazmat">Hazardous / Special Cargo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>VEHICLE REQUIREMENT</label>
+            <select id="vehicleType">
+              <option value="32ft-multi">32ft Multi-Axle Open Trailer</option>
+              <option value="24ft-container">24ft Closed Container</option>
+              <option value="16ft-flatbed">16ft Flatbed Light Heavy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>TARGET PICKUP DATE</label>
+            <input type="date" id="pickupDate" required>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 16px; background: var(--krim-surface); border-radius: 10px; border: 1px dashed var(--krim-border); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.75rem; font-family: var(--font-code); color: var(--krim-text-muted);">ESTIMATED CONTRACT RATE</div>
+            <div id="rateDisplay" style="font-size: 1.4rem; font-weight: 800; color: var(--krim-emerald); margin-top: 2px;">Enter details to calculate...</div>
+          </div>
+          <button type="submit" class="btn-primary" style="padding: 10px 20px;">Calculate & Request Dispatch</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- PANEL 3: DIGITAL PROOF OF DELIVERY (POD) VAULT -->
+    <div id="panel-documents" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px;">Proof of Delivery (POD) & E-Way Bills</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 16px;">Audit-ready legal documentation, driver signatures, and timestamped photo verification.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SHIPMENT ID</th>
+            <th>COMPLETED DATE</th>
+            <th>CONSIGNEE RECEIVER</th>
+            <th>POD VERIFICATION</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">KRIM-2026-00092</td>
+            <td style="font-family: var(--font-code);">28 Sep 2026</td>
+            <td>Kolkata Port Terminal Ops</td>
+            <td><span class="status-badge complete">DIGITALLY SIGNED</span></td>
+            <td><button class="btn-secondary" onclick="downloadPOD('KRIM-2026-00092')">Download POD PDF</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">KRIM-2026-00088</td>
+            <td style="font-family: var(--font-code);">24 Sep 2026</td>
+            <td>Patna Industrial Warehouse B</td>
+            <td><span class="status-badge complete">DIGITALLY SIGNED</span></td>
+            <td><button class="btn-secondary" onclick="downloadPOD('KRIM-2026-00088')">Download POD PDF</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PANEL 4: INVOICES & STATEMENTS -->
+    <div id="panel-invoices" class="panel-card" style="display: none;">
+      <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px;">Invoices & Payment Statements</h2>
+      <p style="color: var(--krim-text-muted); font-size: 0.8rem; margin-bottom: 16px;">Track billing cycles, Net-30 credit limits, and download GST-compliant tax invoices.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>INVOICE #</th>
+            <th>DATE</th>
+            <th>ASSOCIATED SHIPMENT</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">INV-2026-0881</td>
+            <td style="font-family: var(--font-code);">29 Sep 2026</td>
+            <td style="font-family: var(--font-code);">KRIM-2026-00092</td>
+            <td style="font-family: var(--font-code); font-weight: 700;">₹ 1,12,000</td>
+            <td><span class="status-badge pending">UNPAID (NET-30)</span></td>
+            <td><button class="btn-secondary" onclick="viewInvoice('INV-2026-0881')">Download PDF</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">INV-2026-0842</td>
+            <td style="font-family: var(--font-code);">25 Sep 2026</td>
+            <td style="font-family: var(--font-code);">KRIM-2026-00088</td>
+            <td style="font-family: var(--font-code); font-weight: 700;">₹ 70,500</td>
+            <td><span class="status-badge pending">UNPAID (NET-30)</span></td>
+            <td><button class="btn-secondary" onclick="viewInvoice('INV-2026-0842')">Download PDF</button></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-code); font-weight: 700; color: var(--krim-emerald);">INV-2026-0790</td>
+            <td style="font-family: var(--font-code);">12 Sep 2026</td>
+            <td style="font-family: var(--font-code);">KRIM-2026-00045</td>
+            <td style="font-family: var(--font-code); font-weight: 700;">₹ 95,000</td>
+            <td><span class="status-badge complete">PAID</span></td>
+            <td><button class="btn-secondary" onclick="viewInvoice('INV-2026-0790')">Download PDF</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    function switchTab(tabName) {
+      // Hide all panels
+      const panels = ['shipments', 'book', 'documents', 'invoices'];
+      panels.forEach(id => {
+        const panel = document.getElementById(`panel-${id}`);
+        if (panel) panel.style.display = 'none';
+      });
+
+      // Reset active tab button states
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      // Reset sidebar link active states
+      const navLinks = document.querySelectorAll('.nav-item a');
+      navLinks.forEach(link => link.classList.remove('active'));
+
+      // Display active panel & set active states
+      const targetPanel = document.getElementById(`panel-${tabName}`);
+      if (targetPanel) targetPanel.style.display = 'block';
+
+      const targetTabBtn = document.getElementById(`tab-${tabName}`);
+      if (targetTabBtn) targetTabBtn.classList.add('active');
+
+      // Sync active menu link
+      const targetNavLink = Array.from(navLinks).find(link => link.getAttribute('onclick')?.includes(tabName));
+      if (targetNavLink) targetNavLink.classList.add('active');
+    }
+
+    function handleQuoteCalculation(e) {
+      e.preventDefault();
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      
+      if (weight > 0) {
+        // Base rate calculation mock logic
+        const estimatedRate = Math.round(weight * 3.85 + 4500);
+        const formattedRate = new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          maximumFractionDigits: 0
+        }).format(estimatedRate);
+
+        document.getElementById('rateDisplay').innerText = `${formattedRate} (Est. Base Freight)`;
+      } else {
+        document.getElementById('rateDisplay').innerText = 'Please enter weight to calculate';
+      }
+    }
+
+    function viewFullMap(shipmentId) {
+      alert(`Opening GPS Telemetry Map Stream for Shipment ${shipmentId}...`);
+    }
+
+    function trackDetail(shipmentId) {
+      alert(`Fetching telemetry & milestone events for ${shipmentId}...`);
+    }
+
+    function downloadPOD(shipmentId) {
+      alert(`Downloading digital POD document for ${shipmentId}...`);
+    }
+
+    function viewInvoice(invoiceId) {
+      alert(`Generating tax invoice document PDF for ${invoiceId}...`);
+    }
+  </script>
+</body>
+</html>
