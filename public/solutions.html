@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Solutions & Operational Specifications</title>
+  
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ==========================================================================
+       KRIM SYSTEM CSS DESIGN ENGINE (SOLUTIONS SPECIFICATIONS)
+       ========================================================================== */
+    :root {
+      --krim-bg-dark: #030712;
+      --krim-bg-surface: #0b132b;
+      --krim-bg-card: rgba(15, 23, 42, 0.75);
+      --krim-card-border: rgba(30, 58, 138, 0.35);
+      --krim-blue-Primary: #1d6bf3;
+      --krim-blue-hover: #1554c0;
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-text-primary: #f8fafc;
+      --krim-text-secondary: #94a3b8;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--krim-bg-dark);
+      color: var(--krim-text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* NAVIGATION BAR */
+    .krim-nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(3, 7, 18, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--krim-card-border);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-symbol {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--krim-blue-Primary), var(--krim-cyan));
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--krim-text-primary);
+    }
+
+    .brand-subtitle {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--krim-cyan);
+      letter-spacing: 0.15em;
+      display: block;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: var(--krim-text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--krim-cyan);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .lang-selector-dropdown {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--krim-card-border);
+      color: var(--krim-text-primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-auth-portal {
+      background: rgba(29, 107, 243, 0.1);
+      border: 1px solid rgba(29, 107, 243, 0.4);
+      color: var(--krim-cyan);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-auth-portal:hover {
+      background: var(--krim-blue-Primary);
+      color: #ffffff;
+    }
+
+    /* PAGE HEADER */
+    .page-header-section {
+      padding: 80px 40px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 210, 255, 0.1);
+      border: 1px solid rgba(0, 210, 255, 0.25);
+      color: var(--krim-cyan);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .page-description {
+      font-size: 1.1rem;
+      color: var(--krim-text-secondary);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* SPECIFICATIONS CONTENT LAYOUT */
+    .solutions-spec-wrapper {
+      max-width: 1400px;
+      margin: 0 auto 100px;
+      padding: 0 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+    }
+
+    .spec-block {
+      background: var(--krim-bg-card);
+      border: 1px solid var(--krim-card-border);
+      border-radius: 24px;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .spec-block.reverse {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .spec-media-box {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--krim-card-border);
+      position: relative;
+      height: 380px;
+    }
+
+    .spec-media-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .spec-content h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--krim-text-primary);
+    }
+
+    .spec-content p {
+      color: var(--krim-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 0.88rem;
+    }
+
+    .spec-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: rgba(3, 7, 18, 0.6);
+      color: var(--krim-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--krim-card-border);
+    }
+
+    .spec-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(30, 58, 138, 0.2);
+      color: var(--krim-text-primary);
+    }
+
+    .btn-action-trigger {
+      background: var(--krim-blue-Primary);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-action-trigger:hover {
+      background: var(--krim-blue-hover);
+    }
+
+    @media (max-width: 1024px) {
+      .spec-block, .spec-block.reverse { grid-template-columns: 1fr; }
+      .spec-media-box { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="krim-nav-header">
+    <a href="/index.html" class="brand-container">
+      <div class="brand-symbol"></div>
+      <div>
+        <span class="brand-title">KRIM</span>
+        <span class="brand-subtitle">LOGISTICS OS</span>
+      </div>
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/index.html" class="nav-link" data-i18n="nav_home">Home</a></li>
+      <li><a href="/solutions.html" class="nav-link active" data-i18n="nav_solutions">Solutions Specifications</a></li>
+      <li><a href="/index.html#technology" class="nav-link" data-i18n="nav_tech">Technology</a></li>
+      <li><a href="/index.html#network" class="nav-link" data-i18n="nav_network">Global Network</a></li>
+      <li><a href="/index.html#partners" class="nav-link" data-i18n="nav_partners">Partners</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <select id="i18n-selector" class="lang-selector-dropdown">
+        <option value="en">EN (US)</option>
+        <option value="hi">HI (हिंदी)</option>
+        <option value="ar">AR (العربية)</option>
+        <option value="es">ES (Español)</option>
+      </select>
+      <button onclick="openModal('auth-modal')" class="btn-auth-portal" data-i18n="btn_portal">Portal Login</button>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header-section">
+    <div class="section-badge">Multimodal Specifications & Capacity</div>
+    <h1 class="page-title">Enterprise Cargo Execution Protocols</h1>
+    <p class="page-description">
+      Review deep-tier technical specifications, transit times, unit load device (ULD) configurations, and compliance parameters for KRIM managed freight networks.
+    </p>
+  </section>
+
+  <!-- SOLUTIONS SPECIFICATIONS CONTENT -->
+  <main class="solutions-spec-wrapper">
+
+    <!-- 1. AIR FREIGHT DETAILED SPECIFICATION -->
+    <div class="spec-block" id="air-spec">
+      <div>
+        <div class="section-badge" style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.3);">Mode 01 // Air Charter & Linehaul</div>
+        <h2>Priority Air Freight Specifications</h2>
+        <p>
+          KRIM's air freight protocol operates on scheduled freighter allocations and direct charter contracts, engineered for temperature-sensitive pharmaceutical shipments, high-value electronics, and emergency heavy machinery replacement parts.
+        </p>
+
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>PARAMETER</th>
+              <th>STANDARD LINEHAUL</th>
+              <th>EXPRESS CHARTER</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Transit Window</td>
+              <td>24 – 48 Hours</td>
+              <td>12 – 24 Hours Direct</td>
+            </tr>
+            <tr>
+              <td>Temp Control</td>
+              <td>+15°C to +25°C / Active Cold</td>
+              <td>-20°C Cryo / Custom Range</td>
+            </tr>
+            <tr>
+              <td>Max Payload Unit</td>
+              <td>PMC / PAG Pallets (Up to 6.8t)</td>
+              <td>Full Nose-Door Freighter (110t)</td>
+            </tr>
+            <tr>
+              <td>Customs Protocol</td>
+              <td>Pre-Arrival Automated EDI</td>
+              <td>Priority On-Board Courier Clearance</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button onclick="openModal('quote-modal')" class="btn-action-trigger">Request Air Freight Capacity →</button>
+      </div>
+
+      <div class="spec-media-box">
+        <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80" alt="KRIM Air Freight Operations" />
+      </div>
+    </div>
+        <!-- 2. OCEAN FREIGHT DETAILED SPECIFICATION -->
+    <div class="spec-block reverse" id="ocean-spec">
+      <div class="spec-media-box">
+        <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=1200&q=80" alt="KRIM Maritime Container Vessel" />
+      </div>
+
+      <div>
+        <div class="section-badge" style="color: var(--krim-cyan); border-color: rgba(0, 210, 255, 0.3);">Mode 02 // Maritime Alliance</div>
+        <h2>Ocean Freight & Container Logistics</h2>
+        <p>
+          Integrated Full Container Load (FCL) and Less than Container Load (LCL) services routing across premier deep-sea shipping lanes. Automated container tracking synchronizes port terminal manifests with downstream drayage dispatch.
+        </p>
+
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>SERVICE CATEGORY</th>
+              <th>FCL (FULL CONTAINER)</th>
+              <th>LCL (CONSOLIDATION)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Container Standard</td>
+              <td>20' / 40' / 40' High Cube / Reefer</td>
+              <td>Palletized / Shared Box Loads</td>
+            </tr>
+            <tr>
+              <td>Port Gate Protocol</td>
+              <td>Automated Fast-Track Gate-In</td>
+              <td>CFS De-consolidation Hub</td>
+            </tr>
+            <tr>
+              <td>Tracking Telematics</td>
+              <td>Real-time IoT Satellite GPS</td>
+              <td>Milestone Barcode Scan LED</td>
+            </tr>
+            <tr>
+              <td>Demurrage Shield</td>
+              <td>AI Yard Stay Optimization</td>
+              <td>Pre-cleared CFS Transit</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button onclick="openModal('quote-modal')" class="btn-action-trigger">Request Ocean Tariff Rate →</button>
+      </div>
+    </div>
+
+    <!-- 3. ROAD FREIGHT & FLEET SPECIFICATION -->
+    <div class="spec-block" id="road-spec">
+      <div>
+        <div class="section-badge" style="color: var(--krim-emerald); border-color: rgba(16, 185, 129, 0.3);">Mode 03 // Overland Telematics</div>
+        <h2>Heavy Road Freight & Haulage Fleet</h2>
+        <p>
+          Interstate heavy transport and last-mile distribution networks. Powered by automated driver dispatch, electronically verified proof-of-delivery (e-POD), and real-time engine sensor diagnostic feeds.
+        </p>
+
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>FLEET TYPE</th>
+              <th>CAPACITY RANGE</th>
+              <th>PRIMARY USE CASE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Heavy Multi-Axle Trailer</td>
+              <td>25 to 45 Metric Tons</td>
+              <td>Bulk Industrial Materials & Machinery</td>
+            </tr>
+            <tr>
+              <td>Refrigerated Reefer Fleet</td>
+              <td>10 to 20 Metric Tons</td>
+              <td>Cold-Chain Food & Perishables</td>
+            </tr>
+            <tr>
+              <td>Mid-Mile Box Trucks</td>
+              <td>3.5 to 9 Metric Tons</td>
+              <td>Regional Distribution Center Feeder</td>
+            </tr>
+            <tr>
+              <td>Last-Mile EV Cargo Vans</td>
+              <td>Up to 1.5 Metric Tons</td>
+              <td>Urban Micro-Fulfillment Delivery</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button onclick="openModal('quote-modal')" class="btn-action-trigger">Book Road Fleet Haulage →</button>
+      </div>
+
+      <div class="spec-media-box">
+        <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80" alt="KRIM Highway Fleet Transport" />
+      </div>
+    </div>
+
+    <!-- 4. BONDED WAREHOUSING & CUSTOMS SPECIFICATION -->
+    <div class="spec-block reverse" id="warehouse-spec">
+      <div class="spec-media-box">
+        <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80" alt="KRIM Bonded Logistics Warehouse" />
+      </div>
+
+      <div>
+        <div class="section-badge" style="color: var(--krim-amber); border-color: rgba(245, 158, 11, 0.3);">Mode 04 // Bonded Storage</div>
+        <h2>Customs Clearance & Bonded Warehousing</h2>
+        <p>
+          High-security logistics parks and customs-bonded facilities. Featuring automated barcode inventory management, cross-docking infrastructure, and direct digital interface with national customs portals.
+        </p>
+
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>FACILITY FEATURE</th>
+              <th>SPECIFICATION STANDARD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Storage Architecture</td>
+              <td>High-Bay Pallet Racking & Temperature Zones</td>
+            </tr>
+            <tr>
+              <td>Security Protocol</td>
+              <td>24/7 CCTV / RFID Perimeter & Biometric Access</td>
+            </tr>
+            <tr>
+              <td>Customs Filing</td>
+              <td>Automated HS Code Classification & Bill of Entry</td>
+            </tr>
+            <tr>
+              <td>Value-Added Services</td>
+              <td>Kitting, Re-labeling, Palletization, Duty Deferment</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button onclick="openModal('quote-modal')" class="btn-action-trigger">Reserve Warehouse Capacity →</button>
+      </div>
+    </div>
+
+  </main>
+    <!-- PARTNER CTA SECTION -->
+  <section style="max-width: 1400px; margin: 0 auto 100px; padding: 0 40px;">
+    <div style="background: linear-gradient(135deg, rgba(29, 107, 243, 0.15), rgba(0, 210, 255, 0.05)); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 20px; padding: 40px; text-align: center;">
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 12px;">Require Custom Freight Orchestration?</h3>
+      <p style="color: var(--krim-text-secondary); max-width: 600px; margin: 0 auto 24px;">
+        Our logistics engineers design dedicated route management programs and private charter capacity for enterprise clients.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 16px;">
+        <button onclick="openModal('quote-modal')" class="btn-action-trigger">Request Enterprise Quote →</button>
+        <button onclick="openModal('auth-modal')" class="btn-auth-portal">Access Portal</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: #01040a; border-top: 1px solid var(--krim-card-border); padding: 80px 40px 40px; margin-top: 100px;">
+    <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 48px;">
+      <div>
+        <div class="brand-container" style="margin-bottom: 16px;">
+          <div class="brand-symbol"></div>
+          <div>
+            <span class="brand-title">KRIM</span>
+            <span class="brand-subtitle">LOGISTICS OS</span>
+          </div>
+        </div>
+        <p style="color: var(--krim-text-secondary); font-size: 0.88rem; max-width: 300px; line-height: 1.6;">
+          Institutional global logistics operating system connecting cross-border trade networks through intelligent automation.
+        </p>
+      </div>
+
+      <div>
+        <h4 style="color: var(--krim-text-primary); font-size: 0.95rem; font-weight: 700; margin-bottom: 20px;">Solutions</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+          <li><a href="/solutions.html#air-spec" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Air Freight Specs</a></li>
+          <li><a href="/solutions.html#ocean-spec" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Ocean Freight Tariffs</a></li>
+          <li><a href="/solutions.html#road-spec" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Road Fleet Capacity</a></li>
+          <li><a href="/solutions.html#warehouse-spec" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Bonded Warehousing</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="color: var(--krim-text-primary); font-size: 0.95rem; font-weight: 700; margin-bottom: 20px;">Platform & Apps</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+          <li><a href="javascript:void(0)" onclick="openModal('auth-modal')" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Customer Portal Login</a></li>
+          <li><a href="javascript:void(0)" onclick="openModal('auth-modal')" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Partner Network Registration</a></li>
+          <li><a href="javascript:void(0)" onclick="openModal('install-app-modal')" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Driver Telematics App</a></li>
+          <li><a href="javascript:void(0)" onclick="openModal('install-app-modal')" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Partner PWA Download</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="color: var(--krim-text-primary); font-size: 0.95rem; font-weight: 700; margin-bottom: 20px;">Operations</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+          <li><a href="javascript:void(0)" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">System Status: Operational</a></li>
+          <li><a href="javascript:void(0)" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">API Telematics Ledger</a></li>
+          <li><a href="javascript:void(0)" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Privacy & Compliance</a></li>
+          <li><a href="javascript:void(0)" style="color: var(--krim-text-secondary); text-decoration: none; font-size: 0.88rem;">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="max-width: 1400px; margin: 60px auto 0; padding-top: 24px; border-top: 1px solid var(--krim-card-border); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--krim-text-secondary);">
+      <span>&copy; 2026 KRIM Logistics. All rights reserved.</span>
+      <span>Ranchi, Jharkhand, India &bull; Global Operations</span>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+     MODAL POPUPS
+     ========================================================================== -->
+
+  <!-- 1. Auth Modal -->
+  <div class="krim-modal-overlay" id="auth-modal" style="position: fixed; inset: 0; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+    <div style="background: var(--krim-bg-surface); border: 1px solid var(--krim-card-border); border-radius: 20px; padding: 36px; width: 100%; max-width: 520px; position: relative;">
+      <button onclick="closeModal('auth-modal')" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--krim-text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      
+      <div style="display: flex; background: rgba(3, 7, 18, 0.6); padding: 4px; border-radius: 10px; margin-bottom: 24px; border: 1px solid var(--krim-card-border);">
+        <button id="tab-login" style="flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; color: #fff; border: none; background: var(--krim-blue-Primary); cursor: pointer; border-radius: 8px;" onclick="switchAuthTab('login')">Portal Login</button>
+        <button id="tab-signup" style="flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--krim-text-secondary); border: none; background: none; cursor: pointer; border-radius: 8px;" onclick="switchAuthTab('signup')">Register Account</button>
+      </div>
+
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <div id="role-field" style="display: none; margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Account Role Protocol</label>
+          <select id="auth-role" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;">
+            <option value="customer">Customer / Enterprise Shipper</option>
+            <option value="partner">Logistics Partner / Carrier Network</option>
+            <option value="driver">Field Driver / Fleet Operator</option>
+          </select>
+        </div>
+
+        <div id="name-field" style="display: none; margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Full Legal / Organization Name</label>
+          <input type="text" id="auth-name" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;" placeholder="e.g. Acme Industrial Corp" />
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Corporate Email Address</label>
+          <input type="email" id="auth-email" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;" required placeholder="name@company.com" />
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Access Security Key (Password)</label>
+          <input type="password" id="auth-pass" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;" required placeholder="••••••••••••" />
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="btn-action-trigger" style="width: 100%; padding: 12px; margin-top: 8px;">
+          Authenticate to System →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Spot Quote Calculator Modal -->
+  <div class="krim-modal-overlay" id="quote-modal" style="position: fixed; inset: 0; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+    <div style="background: var(--krim-bg-surface); border: 1px solid var(--krim-card-border); border-radius: 20px; padding: 36px; width: 100%; max-width: 520px; position: relative;">
+      <button onclick="closeModal('quote-modal')" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--krim-text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      
+      <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 6px;">Request Commercial Freight Quote</h3>
+      <p style="color: var(--krim-text-secondary); font-size: 0.85rem; margin-bottom: 20px;">
+        Receive automated spot rates and lane availability options.
+      </p>
+
+      <form onsubmit="handleQuoteSubmit(event)">
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Cargo Origin Point</label>
+          <input type="text" id="quote-origin" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;" required placeholder="City, Port, or Warehouse Code" />
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Destination Point</label>
+          <input type="text" id="quote-destination" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;" required placeholder="City, Port, or Distribution Center" />
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label style="display: block; font-size: 0.82rem; color: var(--krim-text-secondary); margin-bottom: 6px;">Transport Mode Protocol</label>
+          <select id="quote-mode" style="width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid var(--krim-card-border); border-radius: 10px; padding: 12px; color: var(--krim-text-primary); outline: none;">
+            <option value="Air Freight">Priority Express Air Cargo</option>
+            <option value="Ocean Freight">Global Ocean Freight (FCL/LCL)</option>
+            <option value="Road Freight">Overland Heavy Fleet Transport</option>
+            <option value="Warehousing">Bonded Warehousing & Storage</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-action-trigger" style="width: 100%; padding: 12px; margin-top: 8px;">
+          Calculate Freight Estimate →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. App Installation Hub Modal -->
+  <div class="krim-modal-overlay" id="install-app-modal" style="position: fixed; inset: 0; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+    <div style="background: var(--krim-bg-surface); border: 1px solid var(--krim-card-border); border-radius: 20px; padding: 36px; width: 100%; max-width: 520px; position: relative;">
+      <button onclick="closeModal('install-app-modal')" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--krim-text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+
+      <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 6px;">KRIM Mobile & PWA Hub</h3>
+      <p style="color: var(--krim-text-secondary); font-size: 0.85rem; margin-bottom: 24px;">
+        Deploy dedicated mobile client apps for field drivers, fleet dispatchers, and shippers.
+      </p>
+
+      <div style="background: rgba(3, 7, 18, 0.5); border: 1px solid var(--krim-card-border); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div>
+          <h4 style="font-size: 0.95rem; font-weight: 600;">KRIM Shipper Mobile</h4>
+          <p style="font-size: 0.78rem; color: var(--krim-text-secondary);">Real-time tracking & instant quotes for enterprise clients.</p>
+        </div>
+        <button onclick="triggerPWAInstall()" class="btn-action-trigger" style="padding: 6px 14px; font-size: 0.8rem;">Install PWA</button>
+      </div>
+
+      <div style="background: rgba(3, 7, 18, 0.5); border: 1px solid var(--krim-card-border); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <h4 style="font-size: 0.95rem; font-weight: 600;">Driver Telematics & Partner Portal</h4>
+          <p style="font-size: 0.78rem; color: var(--krim-text-secondary);">Active route dispatching, e-POD, and proof-of-delivery logging.</p>
+        </div>
+        <button onclick="triggerPWAInstall()" class="btn-auth-portal" style="padding: 6px 14px; font-size: 0.8rem;">Get App</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const translationDictionary = {
+      en: {
+        nav_home: "Home",
+        nav_solutions: "Solutions Specifications",
+        nav_tech: "Technology",
+        nav_network: "Global Network",
+        nav_partners: "Partners",
+        btn_portal: "Portal Login",
+        btn_quote: "Get a Quote →"
+      },
+      hi: {
+        nav_home: "मुख्य पृष्ठ",
+        nav_solutions: "समाधान विनिर्देश",
+        nav_tech: "प्रौद्योगिकी",
+        nav_network: "ग्लोबल नेटवर्क",
+        nav_partners: "भागीदार",
+        btn_portal: "पोर्टल लॉगिन",
+        btn_quote: "कोटेशन प्राप्त करें →"
+      },
+      ar: {
+        nav_home: "الرئيسية",
+        nav_solutions: "مواصفات الحلول",
+        nav_tech: "التكنولوجيا",
+        nav_network: "الشبكة العالمية",
+        nav_partners: "الشركاء",
+        btn_portal: "تسجيل الدخول",
+        btn_quote: "احصل على عرض سعر ←"
+      },
+      es: {
+        nav_home: "Inicio",
+        nav_solutions: "Especificaciones",
+        nav_tech: "Tecnología",
+        nav_network: "Red Global",
+        nav_partners: "Socios",
+        btn_portal: "Acceso Portal",
+        btn_quote: "Cotizar Ahora →"
+      }
+    };
+
+    const langSelect = document.getElementById('i18n-selector');
+    if (langSelect) {
+      langSelect.addEventListener('change', function(e) {
+        applyLanguage(e.target.value);
+      });
+    }
+
+    function applyLanguage(lang) {
+      const dict = translationDictionary[lang] || translationDictionary['en'];
+      if (lang === 'ar') {
+        document.documentElement.setAttribute('dir', 'rtl');
+      } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      localStorage.setItem('krim_selected_lang', lang);
+    }
+
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    let authMode = 'login';
+    function switchAuthTab(mode) {
+      authMode = mode;
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const roleField = document.getElementById('role-field');
+      const nameField = document.getElementById('name-field');
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      if (mode === 'signup') {
+        tabSignup.style.background = 'var(--krim-blue-Primary)';
+        tabSignup.style.color = '#fff';
+        tabLogin.style.background = 'none';
+        tabLogin.style.color = 'var(--krim-text-secondary)';
+        roleField.style.display = 'block';
+        nameField.style.display = 'block';
+        submitBtn.textContent = 'Register System Account →';
+      } else {
+        tabLogin.style.background = 'var(--krim-blue-Primary)';
+        tabLogin.style.color = '#fff';
+        tabSignup.style.background = 'none';
+        tabSignup.style.color = 'var(--krim-text-secondary)';
+        roleField.style.display = 'none';
+        nameField.style.display = 'none';
+        submitBtn.textContent = 'Authenticate to System →';
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      alert(authMode === 'signup' ? 'Account registered successfully.' : 'Authenticated to System Portal.');
+      closeModal('auth-modal');
+    }
+
+    function handleQuoteSubmit(e) {
+      e.preventDefault();
+      const origin = document.getElementById('quote-origin').value;
+      const destination = document.getElementById('quote-destination').value;
+      const mode = document.getElementById('quote-mode').value;
+
+      alert(`Quote request dispatched for ${mode} from ${origin} to ${destination}.`);
+      closeModal('quote-modal');
+    }
+
+    function triggerPWAInstall() {
+      alert('App installation active. Use your browser menu to add KRIM OS to your home screen.');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('krim_selected_lang') || 'en';
+      if (langSelect) langSelect.value = savedLang;
+      applyLanguage(savedLang);
+    });
+  </script>
+</body>
+            </html>
+  
