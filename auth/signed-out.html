@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Terminated — KRIM LOGISTICS OS</title>
+  <link rel="stylesheet" href="/core/krim-core.css" />
+  <link rel="stylesheet" href="/core/krim-components.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { width: 100%; max-width: 420px; background: var(--krim-card); border: 1px solid var(--krim-border); border-radius: var(--radius-lg); padding: 36px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div style="font-size: 2.2rem; margin-bottom: 12px;">🔒</div>
+      <h2 style="font-weight: 800; font-size: 1.3rem;">Signed Out Safely</h2>
+      <p class="text-muted" style="font-size: 0.85rem; margin-top: 8px; margin-bottom: 24px;">
+        Your platform session token and encryption context have been purged from this browser device.
+      </p>
+
+      <a href="/auth/login.html" class="btn-krim btn-primary" style="width: 100%; text-decoration:none;">Sign In Again</a>
+    </div>
+  </div>
+
+  <script src="/js/session.js"></script>
+  <script>
+    // Ensure all local session memory is purged on load
+    document.addEventListener("DOMContentLoaded", () => {
+      KrimSession.clear();
+    });
+  </script>
+</body>
+</html>
