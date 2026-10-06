@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM OS — Driver SMS Auth</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans">
+  <header class="w-full max-w-7xl flex justify-between items-center py-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
+      <span class="font-extrabold text-lg tracking-wider text-white">KRIM <span class="text-xs font-mono text-cyan-400 block -mt-1">LOGISTICS OS</span></span>
+    </div>
+  </header>
+
+  <main class="w-full max-w-md p-8 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 mx-auto mb-3 bg-cyan-500/10 border border-cyan-500/30 rounded-full flex items-center justify-center text-xl text-cyan-400">📱</div>
+      <h1 class="text-xl font-extrabold text-white">Driver SMS Gateway</h1>
+      <p class="text-xs text-slate-400 mt-1">Authenticate using mobile mobile phone number (E.164)</p>
+    </div>
+
+    <div id="alert-box" class="hidden p-3 mb-4 rounded-lg text-xs"></div>
+
+    <form id="phone-form" class="space-y-4">
+      <div id="phone-step">
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Mobile Number</label>
+        <input type="tel" id="phone" required placeholder="+1234567890" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
+      </div>
+
+      <div id="code-step" class="hidden">
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">SMS Code</label>
+        <input type="text" id="sms-code" maxlength="6" placeholder="000000" class="w-full py-2.5 text-center text-xl font-mono tracking-[0.3em] bg-[#0b1329] border border-white/10 rounded-lg text-cyan-400 focus:outline-none focus:border-cyan-400">
+      </div>
+
+      <button type="submit" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider hover:opacity-90 transition-all">
+        Send SMS Verification →
+      </button>
+    </form>
+  </main>
+
+  <footer class="text-[11px] font-mono text-slate-500 py-4">© 2026 KRIM Logistics Engine</footer>
+
+  <script type="module">
+    import { supabase, AUTH_ROUTES, renderTestSwitcher } from './js/auth-core.js';
+    renderTestSwitcher();
+
+    let step = 'send';
+    const form = document.getElementById('phone-form');
+    const alertBox = document.getElementById('alert-box');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('phone').value;
+      const btn = document.getElementById('submit-btn');
+
+      if (step === 'send') {
+        const { error } = await supabase.auth.signInWithOtp({ phone });
+        if (error) {
+          alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
+          alertBox.innerText = error.message;
+          alertBox.classList.remove('hidden');
+        } else {
+          document.getElementById('phone-step').classList.add('hidden');
+          document.getElementById('code-step').classList.remove('hidden');
+          btn.innerText = 'Verify & Launch Terminal →';
+          step = 'verify';
+        }
+      } else {
+        const code = document.getElementById('sms-code').value;
+        const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
+        if (error) {
+          alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
+          alertBox.innerText = error.message;
+          alertBox.classList.remove('hidden');
+        } else {
+          window.location.href = 'driver-terminal.html';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
