@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Phone — KRIM FIELD OPS</title>
+  <link rel="stylesheet" href="/core/krim-core.css" />
+  <link rel="stylesheet" href="/core/krim-components.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { width: 100%; max-width: 420px; background: var(--krim-card); border: 1px solid var(--krim-border); border-radius: var(--radius-lg); padding: 32px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div style="font-size: 2.5rem; margin-bottom: 12px;">📱</div>
+      <h2 style="font-weight: 800; font-size: 1.2rem;">Mobile Verification</h2>
+      <p class="text-muted" style="font-size: 0.82rem; margin-top: 6px;">Enter the SMS verification code sent to your mobile device.</p>
+
+      <div style="margin: 20px 0;">
+        <input type="text" id="phoneOtp" class="krim-input font-mono" placeholder="0 0 0 0 0 0" style="text-align: center; font-size: 1.3rem; letter-spacing: 0.2em;" maxlength="6" />
+      </div>
+
+      <button onclick="verifyPhone()" class="btn-krim btn-emerald" style="width: 100%;">Confirm Mobile Credentials</button>
+    </div>
+  </div>
+
+  <script src="/core/krim-config.js"></script>
+  <script src="/js/session.js"></script>
+  <script>
+    function verifyPhone() {
+      KrimSession.set({
+        role: "driver",
+        token: "driver_verified_" + Math.random().toString(36).substring(2),
+        accountId: "DRV-PHONE-8831"
+      });
+      window.location.href = KRIM_CONFIG.ROUTES.driver;
+    }
+  </script>
+</body>
+</html>
