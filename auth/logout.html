@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM OS — Terminating Session...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans text-center">
+  <div class="w-16 h-16 mb-4 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin flex items-center justify-center"></div>
+  <h1 class="text-lg font-bold text-white">Terminating Secure Session...</h1>
+  <p class="text-xs text-slate-400 mt-1 font-mono">Revoking refresh tokens & clearing browser storage.</p>
+
+  <script type="module">
+    import { supabase, AUTH_ROUTES } from './js/auth-core.js';
+
+    async function executeGlobalSignOut() {
+      try {
+        // Revoke current session globally on Supabase server
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.error("Signout error:", err);
+      } finally {
+        // Clear all client storage
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirect back to login gateway
+        window.location.href = AUTH_ROUTES.SIGN_IN;
+      }
+    }
+
+    executeGlobalSignOut();
+  </script>
+</body>
+</html>
