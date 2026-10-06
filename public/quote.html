@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Instant Multi-Modal Spot & Contract Rate Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              accent: '#06b6d4',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="/index.html" class="flex items-center space-x-3">
+          <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-amber-500/20">K</div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
+            <span class="text-[10px] font-mono text-amber-400 mt-1 uppercase tracking-widest leading-none">Rate Engine</span>
+          </div>
+        </a>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-8 text-xs font-mono">
+          <a href="/tracking.html" class="text-slate-400 hover:text-white transition-colors">Tracking</a>
+          <a href="/quote.html" class="text-amber-400 font-bold border-b-2 border-amber-400 pb-1">Rate Engine</a>
+          <a href="/solutions.html" class="text-slate-400 hover:text-white transition-colors">Routes & Schedules</a>
+          <a href="/enterprise.html" class="text-slate-400 hover:text-white transition-colors">Enterprise OS</a>
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center space-x-4">
+          <a href="/auth/login.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-white rounded-xl transition-all">
+            Portal Login
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- HERO / CALCULATOR PARAMETERS -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-3xl mb-6">
+        <span class="text-[11px] font-mono text-amber-400 uppercase tracking-widest block mb-1">Instant Multi-Modal Tariffs</span>
+        <h1 class="text-xl sm:text-3xl font-extrabold text-white tracking-tight">Spot & Contract Rate Calculator</h1>
+        <p class="text-xs text-slate-400 mt-1 font-mono">Calculate real-time spot market pricing, landed costs, fuel surcharges (BAF), and port fees.</p>
+      </div>
+
+      <form id="rate-engine-form" class="space-y-6">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Origin -->
+          <div>
+            <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2">Origin Port / ZIP</label>
+            <input 
+              type="text" 
+              id="quote-origin" 
+              placeholder="e.g., Shanghai (CNSHA)" 
+              class="w-full bg-[#040814] border border-slate-800 focus:border-amber-500 text-white placeholder-slate-600 text-xs font-mono rounded-xl px-4 py-3 focus:outline-none transition-all uppercase"
+              required
+            />
+          </div>
+
+          <!-- Destination -->
+          <div>
+            <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2">Destination Port / ZIP</label>
+            <input 
+              type="text" 
+              id="quote-destination" 
+              placeholder="e.g., Rotterdam (NLRTM)" 
+              class="w-full bg-[#040814] border border-slate-800 focus:border-amber-500 text-white placeholder-slate-600 text-xs font-mono rounded-xl px-4 py-3 focus:outline-none transition-all uppercase"
+              required
+            />
+          </div>
+
+          <!-- Freight Mode -->
+          <div>
+            <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2">Freight Transport Mode</label>
+            <select id="quote-mode" class="w-full bg-[#040814] border border-slate-800 focus:border-amber-500 text-white text-xs font-mono rounded-xl px-4 py-3 focus:outline-none transition-all">
+              <option value="ocean_fcl">Ocean FCL (Full Container)</option>
+              <option value="ocean_lcl">Ocean LCL (Shared Cargo)</option>
+              <option value="air">Air Cargo Express</option>
+              <option value="ftl">Road Full Truckload (FTL)</option>
+              <option value="rail">Intermodal Rail</option>
+            </select>
+          </div>
+
+          <!-- Cargo Weight / Volume -->
+          <div>
+            <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-2">Weight / Volume (KG or CBM)</label>
+            <input 
+              type="text" 
+              id="quote-payload" 
+              placeholder="e.g., 18,500 KG / 40 FT" 
+              class="w-full bg-[#040814] border border-slate-800 focus:border-amber-500 text-white placeholder-slate-600 text-xs font-mono rounded-xl px-4 py-3 focus:outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800/60">
+          <div class="flex items-center space-x-6">
+            <label class="inline-flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" id="chk-hazmat" class="rounded bg-slate-900 border-slate-800 text-amber-500 focus:ring-0">
+              <span class="text-xs font-mono text-slate-400">Hazardous / DG Cargo</span>
+            </label>
+            <label class="inline-flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" id="chk-reefer" class="rounded bg-slate-900 border-slate-800 text-amber-500 focus:ring-0">
+              <span class="text-xs font-mono text-slate-400">Temperature Controlled (Reefer)</span>
+            </label>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full sm:w-auto px-8 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs font-mono rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20">
+            Execute Rate Engine →
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- CALCULATION RESULTS DISPLAY -->
+    <div id="rate-results-container" class="space-y-6">
+      
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold font-mono text-white flex items-center gap-2">
+          <span>📊</span> Live Carrier Spot Rates & Contract Options
+        </h2>
+        <span class="text-[10px] font-mono text-slate-500">Quotes valid for 7 days</span>
+      </div>
+
+      <!-- RATES GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Option 1: Standard Ocean / Carrier A -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-amber-500/50 transition-all relative">
+          <div class="space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-mono rounded font-bold">ECONOMY</span>
+                <h3 class="text-base font-bold text-white mt-2">Maersk Ocean Line</h3>
+              </div>
+              <span class="text-xs font-mono text-slate-400">22-25 Days</span>
+            </div>
+
+            <div class="border-t border-b border-slate-800 py-3 space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>Base Ocean Freight:</span>
+                <span class="text-slate-200">$2,450.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Fuel Surcharge (BAF):</span>
+                <span class="text-slate-200">$320.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Terminal Handling (THC):</span>
+                <span class="text-slate-200">$180.00</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-baseline font-mono">
+              <span class="text-xs text-slate-400">Landed Total:</span>
+              <span class="text-2xl font-black text-amber-400">$2,950.00 <span class="text-[10px] text-slate-500 font-normal">USD</span></span>
+            </div>
+          </div>
+
+          <button class="w-full mt-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl font-mono transition-all">
+            Select & Lock Spot Rate
+          </button>
+        </div>
+
+        <!-- Option 2: Priority Direct (Featured) -->
+        <div class="bg-[#081020] border-2 border-amber-500/60 rounded-2xl p-6 flex flex-col justify-between relative shadow-xl shadow-amber-500/5">
+          <div class="absolute -top-3 right-6 bg-amber-500 text-slate-950 font-bold font-mono text-[9px] px-3 py-0.5 rounded-full uppercase">
+            Fastest Transit
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-mono rounded font-bold">EXPRESS DIRECT</span>
+                <h3 class="text-base font-bold text-white mt-2">MSC Direct Express</h3>
+              </div>
+              <span class="text-xs font-mono text-slate-400">16-18 Days</span>
+            </div>
+
+            <div class="border-t border-b border-slate-800 py-3 space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>Base Freight Tariff:</span>
+                <span class="text-slate-200">$3,100.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Low-Sulphur Surcharge:</span>
+                <span class="text-slate-200">$210.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Peak Season Adj (PSS):</span>
+                <span class="text-slate-200">$150.00</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-baseline font-mono">
+              <span class="text-xs text-slate-400">Landed Total:</span>
+              <span class="text-2xl font-black text-amber-400">$3,460.00 <span class="text-[10px] text-slate-500 font-normal">USD</span></span>
+            </div>
+          </div>
+
+          <button class="w-full mt-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl font-mono transition-all">
+            Instant Booking & Allocation
+          </button>
+        </div>
+
+        <!-- Option 3: Premium Air Freight -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-amber-500/50 transition-all">
+          <div class="space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono rounded font-bold">AIR FREIGHT</span>
+                <h3 class="text-base font-bold text-white mt-2">Lufthansa Cargo</h3>
+              </div>
+              <span class="text-xs font-mono text-slate-400">3-4 Days</span>
+            </div>
+
+            <div class="border-t border-b border-slate-800 py-3 space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>Airway Bill Rate (per KG):</span>
+                <span class="text-slate-200">$4.85 / kg</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Fuel & Security Surcharge:</span>
+                <span class="text-slate-200">$420.00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Handling & Customs:</span>
+                <span class="text-slate-200">$250.00</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-baseline font-mono">
+              <span class="text-xs text-slate-400">Estimated Total:</span>
+              <span class="text-2xl font-black text-amber-400">$8,240.00 <span class="text-[10px] text-slate-500 font-normal">USD</span></span>
+            </div>
+          </div>
+
+          <button class="w-full mt-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl font-mono transition-all">
+            Request Air Charter Quote
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-xs">K</div>
+        <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
+      </div>
+      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Real-time Tariff & Spot Rate Engine.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== SCRIPT & RUNTIME ==================== -->
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/js/public/public-runtime.js"></script>
+
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const originParam = urlParams.get('origin');
+      const destParam = urlParams.get('dest');
+      const modeParam = urlParams.get('mode');
+
+      if (originParam) document.getElementById('quote-origin').value = originParam;
+      if (destParam) document.getElementById('quote-destination').value = destParam;
+      if (modeParam) document.getElementById('quote-mode').value = modeParam;
+
+      document.getElementById('rate-engine-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Dynamic re-calculation trigger point for backend integration
+      });
+    });
+  </script>
+</body>
+  </html>
+                                                                           
