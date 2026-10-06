@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM OS — Create Enterprise Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans">
+  
+  <header class="w-full max-w-7xl flex justify-between items-center py-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
+      <span class="font-extrabold text-lg tracking-wider text-white">KRIM <span class="text-xs font-mono text-cyan-400 block -mt-1">LOGISTICS OS</span></span>
+    </div>
+  </header>
+
+  <main class="w-full max-w-md p-8 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl">
+    <div class="text-center mb-6">
+      <h1 class="text-xl font-extrabold text-white">Register Account</h1>
+      <p class="text-xs text-slate-400 mt-1">Join the multi-tenant logistics network</p>
+    </div>
+
+    <div id="alert-box" class="hidden p-3 mb-4 rounded-lg text-xs"></div>
+
+    <form id="signup-form" class="space-y-4">
+      <div>
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Full Name</label>
+        <input type="text" id="fullname" required placeholder="Alex Mercer" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Work Email</label>
+        <input type="email" id="email" required placeholder="operator@company.com" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Password</label>
+        <input type="password" id="password" required placeholder="••••••••••••" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Account Role</label>
+        <select id="role" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
+          <option value="customer">Shipper / Customer</option>
+          <option value="carrier">Carrier / Freight Partner</option>
+          <option value="driver">Fleet Driver</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider hover:opacity-90 transition-all">
+        Create Account →
+      </button>
+
+      <div class="text-center pt-4 border-t border-white/10">
+        <a href="login.html" class="text-xs font-mono text-slate-400 hover:text-white">Already registered? Sign In</a>
+      </div>
+    </form>
+  </main>
+
+  <footer class="text-[11px] font-mono text-slate-500 py-4">© 2026 KRIM Logistics Engine</footer>
+
+  <script type="module">
+    import { supabase, AUTH_ROUTES, renderTestSwitcher } from './js/auth-core.js';
+    renderTestSwitcher();
+
+    const form = document.getElementById('signup-form');
+    const alertBox = document.getElementById('alert-box');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const fullName = document.getElementById('fullname').value;
+      const role = document.getElementById('role').value;
+      const btn = document.getElementById('submit-btn');
+
+      btn.disabled = true;
+      btn.innerText = 'Registering User...';
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, user_role: role }
+        }
+      });
+
+      if (error) {
+        alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
+        alertBox.innerText = error.message;
+        alertBox.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerText = 'Create Account →';
+      } else {
+        window.location.href = `verify-email.html?email=${encodeURIComponent(email)}`;
+      }
+    });
+  </script>
+</body>
+</html>
