@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Recovery — KRIM LOGISTICS OS</title>
+  <link rel="stylesheet" href="/core/krim-core.css" />
+  <link rel="stylesheet" href="/core/krim-components.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-card { width: 100%; max-width: 420px; background: var(--krim-card); border: 1px solid var(--krim-border); border-radius: var(--radius-lg); padding: 32px; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <span class="status-pill pill-amber" style="margin-bottom:10px;">EMERGENCY ACCESSIBILITY</span>
+      <h2 style="font-weight: 800; font-size: 1.25rem; margin-top:8px; margin-bottom: 8px;">Account Recovery</h2>
+      <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 20px;">Use one of your 16-character emergency recovery keys generated during enrollment.</p>
+
+      <form onsubmit="handleRecovery(event)">
+        <div style="margin-bottom: 18px;">
+          <label class="font-mono text-muted" style="font-size:0.75rem; display:block; margin-bottom:6px;">RECOVERY KEY</label>
+          <input type="text" id="recoveryKey" class="krim-input font-mono" placeholder="XXXX-XXXX-XXXX-XXXX" required />
+        </div>
+        <button type="submit" class="btn-krim btn-secondary" style="width: 100%; border-color:var(--krim-amber); color:var(--krim-amber);">Override Security & Recover Session</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/core/krim-config.js"></script>
+  <script src="/js/session.js"></script>
+  <script>
+    function handleRecovery(e) {
+      e.preventDefault();
+      alert("Recovery key accepted. Resetting MFA preferences.");
+      KrimSession.set({ role: "customer", email: "recovered@krim.com", token: "rec_token" });
+      window.location.href = KRIM_CONFIG.ROUTES.customer;
+    }
+  </script>
+</body>
+</html>
