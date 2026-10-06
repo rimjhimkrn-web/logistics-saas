@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identity Gateway — KRIM LOGISTICS OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/core/krim-config.js"></script>
+  <script src="/core/krim-supabase.js"></script>
+  <script src="/js/session.js"></script>
+
+  <style>
+    :root {
+      --krim-bg: #030712;
+      --krim-surface: #0b1329;
+      --krim-surface-card: #0f172a;
+      --krim-border: rgba(255, 255, 255, 0.08);
+      --krim-cyan: #00d2ff;
+      --krim-emerald: #10b981;
+      --krim-amber: #f59e0b;
+      --krim-purple: #c084fc;
+      --krim-rose: #f43f5e;
+      --krim-text-muted: #94a3b8;
+      --font-code: "JetBrains Mono", monospace;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--krim-bg);
+      color: #fff;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--krim-surface-card);
+      border: 1px solid var(--krim-border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      clip-path: polygon(0% 0%, 45% 0%, 100% 50%, 45% 100%, 0% 100%, 45% 50%);
+    }
+    .brand-text {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .brand-text span {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.22em;
+      color: var(--krim-text-muted);
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--krim-text-muted);
+      text-transform: uppercase;
+    }
+    .form-group input {
+      background: var(--krim-surface);
+      border: 1px solid var(--krim-border);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: var(--krim-cyan);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .error-alert {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--krim-rose);
+      font-size: 0.8rem;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <a href="/" class="brand-group">
+      <div class="logo-icon"></div>
+      <div class="brand-text">
+        KRIM
+        <span>LOGISTICS OS</span>
+      </div>
+    </a>
+
+    <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">Sign In to Enterprise Node</h2>
+    <p style="color: var(--krim-text-muted); font-size: 0.82rem; margin-bottom: 24px;">Enter your operational credentials to authenticate session.</p>
+
+    <div id="error-alert" class="error-alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Identity / Email</label>
+        <input type="email" id="email" required placeholder="operator@krim-logistics.com">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required placeholder="••••••••••••">
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn-primary">Authenticate Session →</button>
+    </form>
+
+    <div style="margin-top: 24px; text-align: center; border-top: 1px solid var(--krim-border); padding-top: 20px;">
+      <a href="/auth/mfa.html" style="color: var(--krim-text-muted); font-size: 0.78rem; text-decoration: none; font-family: var(--font-code);">MFA / TOTP Challenge Direct Portal</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorAlert = document.getElementById('error-alert');
+      const submitBtn = document.getElementById('submit-btn');
+
+      errorAlert.style.display = 'none';
+      submitBtn.innerText = 'Authenticating...';
+      submitBtn.disabled = true;
+
+      try {
+        const { data, error } = await window.KrimBackend.signIn(email, password);
+        
+        if (error) throw error;
+
+        // Check if MFA TOTP is required
+        const { data: factors } = await window.KrimBackend.client.auth.mfa.listFactors();
+        if (factors && factors.totp && factors.totp.length > 0) {
+          sessionStorage.setItem('KRIM_MFA_FACTOR_ID', factors.totp[0].id);
+          window.location.href = '/auth/mfa.html';
+          return;
+        }
+
+        // Fetch User Metadata and Role
+        const role = data.user.user_metadata?.role || KRIM_CONFIG.ROLES.PARTNER;
+        const tenantId = data.user.user_metadata?.tenant_id || "PTR-88301-IN";
+
+        KrimSession.set({
+          token: data.session.access_token,
+          user: data.user,
+          role: role,
+          tenantId: tenantId
+        });
+
+        // Route to respective workspace
+        const destination = KRIM_CONFIG.ROUTES[role] || KRIM_CONFIG.ROUTES.partner;
+        window.location.href = destination;
+
+      } catch (err) {
+        errorAlert.innerText = err.message || "Authentication failed. Check network or credentials.";
+        errorAlert.style.display = 'block';
+        submitBtn.innerText = 'Authenticate Session →';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
