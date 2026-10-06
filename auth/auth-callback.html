@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM OS — Authenticating Session...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans text-center">
+  <div class="w-12 h-12 mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-xl text-cyan-400 animate-pulse">⚡</div>
+  <h1 class="text-lg font-bold text-white">Verifying Identity Token...</h1>
+  <p id="status-text" class="text-xs text-slate-400 mt-1 font-mono">Exchanging PKCE authorization code with Supabase backend.</p>
+
+  <script type="module">
+    import { supabase, AUTH_ROUTES } from './js/auth-core.js';
+
+    async function handleAuthCallback() {
+      const statusText = document.getElementById('status-text');
+
+      // Detect session automatically parsed by Supabase JS client from hash/query params
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (error || !session) {
+        statusText.innerText = "Authentication failed or token expired. Redirecting to login...";
+        setTimeout(() => window.location.href = AUTH_ROUTES.SIGN_IN, 2000);
+        return;
+      }
+
+      // Check MFA requirement (AAL level)
+      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
+        window.location.href = AUTH_ROUTES.MFA_CHALLENGE;
+        return;
+      }
+
+      statusText.innerText = "Identity verified! Launching workspace...";
+      setTimeout(() => window.location.href = AUTH_ROUTES.DASHBOARD, 1000);
+    }
+
+    handleAuthCallback();
+  </script>
+</body>
+</html>
