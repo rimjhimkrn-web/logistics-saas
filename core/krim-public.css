@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --krim-bg: #060b17;
+  --krim-card-bg: rgba(15, 23, 42, 0.75);
+  --krim-border: rgba(51, 65, 85, 0.6);
+  --krim-cyan: #06b6d4;
+  --krim-cyan-glow: rgba(6, 182, 212, 0.15);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--krim-bg);
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism Surface */
+.glass-panel {
+  background: var(--krim-card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--krim-border);
+}
+
+.glass-panel:hover {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 25px var(--krim-cyan-glow);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060b17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #06b6d4;
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
