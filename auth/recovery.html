@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KRIM OS — Emergency Account Recovery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans">
+  <header class="w-full max-w-7xl flex justify-between items-center py-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
+      <span class="font-extrabold text-lg tracking-wider text-white">KRIM <span class="text-xs font-mono text-cyan-400 block -mt-1">LOGISTICS OS</span></span>
+    </div>
+  </header>
+
+  <main class="w-full max-w-md p-8 bg-[#0f172a] border border-rose-500/30 rounded-2xl shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 mx-auto mb-3 bg-rose-500/10 border border-rose-500/30 rounded-full flex items-center justify-center text-xl text-rose-400">🚨</div>
+      <h1 class="text-xl font-extrabold text-white">Emergency Recovery</h1>
+      <p class="text-xs text-slate-400 mt-1">Enter your single-use emergency backup key code.</p>
+    </div>
+
+    <div id="alert-box" class="hidden p-3 mb-4 rounded-lg text-xs"></div>
+
+    <form id="recovery-form" class="space-y-4">
+      <div>
+        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Backup Code</label>
+        <input type="text" id="backup-code" required placeholder="XXXX-XXXX-XXXX" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-center font-mono text-amber-400 tracking-wider focus:outline-none focus:border-amber-400">
+      </div>
+
+      <button type="submit" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-rose-500 to-amber-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider hover:opacity-90 transition-all">
+        Bypass MFA & Reset Totp →
+      </button>
+    </form>
+  </main>
+
+  <footer class="text-[11px] font-mono text-slate-500 py-4">© 2026 KRIM Logistics Engine</footer>
+
+  <script type="module">
+    import { supabase, AUTH_ROUTES, renderTestSwitcher } from './js/auth-core.js';
+    renderTestSwitcher();
+
+    const form = document.getElementById('recovery-form');
+    const alertBox = document.getElementById('alert-box');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('backup-code').value.trim();
+
+      const { data, error } = await supabase.rpc('verify_emergency_recovery_code', { p_code: code });
+
+      if (error || !data?.success) {
+        alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
+        alertBox.innerText = error?.message || 'Invalid backup code.';
+        alertBox.classList.remove('hidden');
+      } else {
+        window.location.href = `${AUTH_ROUTES.MFA_ENROLL}?reason=recovery_reset`;
+      }
+    });
+  </script>
+</body>
+</html>
