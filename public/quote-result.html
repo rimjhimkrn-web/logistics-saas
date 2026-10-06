@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Quote & Spot Rate Breakdown</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              accent: '#06b6d4',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="/index.html" class="flex items-center space-x-3">
+          <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-amber-500/20">K</div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
+            <span class="text-[10px] font-mono text-amber-400 mt-1 uppercase tracking-widest leading-none">Rate Engine</span>
+          </div>
+        </a>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-8 text-xs font-mono">
+          <a href="/tracking.html" class="text-slate-400 hover:text-white transition-colors">Tracking</a>
+          <a href="/quote.html" class="text-amber-400 font-bold border-b-2 border-amber-400 pb-1">Rate Engine</a>
+          <a href="/solutions.html" class="text-slate-400 hover:text-white transition-colors">Routes & Schedules</a>
+          <a href="/enterprise.html" class="text-slate-400 hover:text-white transition-colors">Enterprise OS</a>
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center space-x-4">
+          <a href="/auth/login.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-white rounded-xl transition-all">
+            Portal Login
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- BREADCRUMB & SUMMARY BAR -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div>
+        <a href="/quote.html" class="text-xs font-mono text-cyan-400 hover:underline">← Modify Search Parameters</a>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-white mt-1">Official Tariff & Spot Quote Breakdown</h1>
+      </div>
+      <div class="flex items-center space-x-3 font-mono">
+        <span class="text-xs text-slate-400">Quote Reference:</span>
+        <span id="quote-ref-code" class="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-lg">KRM-QT-2026-9941</span>
+      </div>
+    </div>
+
+    <!-- MAIN GRID: DETAILED BREAKDOWN & BOOKING PANEL -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- LEFT COL: ITEMIZED COST DETAILS (2 COLUMNS) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- ROUTE & CARRIER HEADLINE -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="px-2.5 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono rounded-md font-bold uppercase">Ocean FCL — Guaranteed Space</span>
+              <h2 class="text-lg font-bold text-white mt-2">Maersk Line — Asia-Europe Express Loop</h2>
+            </div>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-lg">Space Lock Active</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-800 font-mono text-xs">
+            <div>
+              <span class="text-slate-500 text-[10px] block uppercase">Origin Port</span>
+              <span id="summary-origin" class="text-slate-200 font-bold">Shanghai (CNSHA)</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block uppercase">Destination Port</span>
+              <span id="summary-dest" class="text-slate-200 font-bold">Rotterdam (NLRTM)</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block uppercase">Estimated Transit</span>
+              <span class="text-slate-200 font-bold">18 Days</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block uppercase">Valid Until</span>
+              <span class="text-amber-400 font-bold">Oct 13, 2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEMIZED TARIFF BREAKDOWN TABLE -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-bold font-mono text-white flex items-center gap-2">
+            <span>📋</span> Itemized Cost & Surcharge Structure
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-mono text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+                  <th class="pb-3">Charge Component</th>
+                  <th class="pb-3">Code</th>
+                  <th class="pb-3">Basis</th>
+                  <th class="pb-3 text-right">Amount (USD)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                <tr>
+                  <td class="py-3 font-bold text-white">Base Ocean Freight (BAS)</td>
+                  <td class="py-3 text-slate-500">BAS</td>
+                  <td class="py-3 text-slate-400">1 x 40ft HC</td>
+                  <td class="py-3 text-right font-bold">$2,450.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Bunker Adjustment Factor (BAF)</td>
+                  <td class="py-3 text-slate-500">BAF</td>
+                  <td class="py-3 text-slate-400">Fixed Surcharge</td>
+                  <td class="py-3 text-right">$320.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Origin Terminal Handling (OTHC)</td>
+                  <td class="py-3 text-slate-500">THC</td>
+                  <td class="py-3 text-slate-400">CNSHA Yard</td>
+                  <td class="py-3 text-right">$180.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Destination Terminal Handling (DTHC)</td>
+                  <td class="py-3 text-slate-500">DTH</td>
+                  <td class="py-3 text-slate-400">NLRTM Yard</td>
+                  <td class="py-3 text-right">$210.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Low-Sulphur Surcharge (LSS)</td>
+                  <td class="py-3 text-slate-500">LSS</td>
+                  <td class="py-3 text-slate-400">IMO Compliance</td>
+                  <td class="py-3 text-right">$95.00</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Digital Bill of Lading (eBL) Fee</td>
+                  <td class="py-3 text-slate-500">EBL</td>
+                  <td class="py-3 text-slate-400">KRIM Smart Doc</td>
+                  <td class="py-3 text-right">$25.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COMPLIANCE & RESTRICTIONS -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-3 font-mono text-xs">
+          <h3 class="font-bold text-slate-300 uppercase tracking-wider text-[11px]">Included Services & Governance</h3>
+          <ul class="space-y-2 text-slate-400">
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Automated Export Customs Filing (AES/ACE) included.
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Real-Time AIS Satellite Telemetry & Container Shock/Temp monitoring unlocked.
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-emerald-400">✓</span> Free Storage Time: 7 Days Demurrage / Detentions at NLRTM destination.
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COL: TOTAL SUMMARY & BOOKING ACTION (1 COLUMN) -->
+      <div class="space-y-6">
+        
+        <div class="bg-[#081020] border border-amber-500/40 rounded-2xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <h3 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-widest">Grand Total & Lock</h3>
+
+          <div class="space-y-2 border-b border-slate-800 pb-4 font-mono">
+            <div class="flex justify-between text-xs text-slate-400">
+              <span>Subtotal Tariffs:</span>
+              <span>$3,280.00</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-400">
+              <span>Platform Surcharge:</span>
+              <span>$0.00 (Tier 1 Free)</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-2">
+              <span class="text-xs font-bold text-slate-200">Total Landed Price:</span>
+              <span class="text-3xl font-black text-amber-400">$3,280.00 <span class="text-[10px] text-slate-500 font-normal">USD</span></span>
+            </div>
+          </div>
+
+          <!-- BOOKING TRIGGER FORM -->
+          <form id="booking-execution-form" class="space-y-4">
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">Company / Shipper Name</label>
+              <input 
+                type="text" 
+                placeholder="e.g., Global Freight Partners Ltd" 
+                class="w-full bg-[#040814] border border-slate-800 text-white placeholder-slate-600 text-xs font-mono rounded-xl px-3.5 py-2.5 focus:border-amber-500 focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">Work Email</label>
+              <input 
+                type="email" 
+                placeholder="logistics@company.com" 
+                class="w-full bg-[#040814] border border-slate-800 text-white placeholder-slate-600 text-xs font-mono rounded-xl px-3.5 py-2.5 focus:border-amber-500 focus:outline-none"
+                required
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs font-mono rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20">
+              Confirm & Book Allocation →
+            </button>
+          </form>
+
+          <p class="text-[10px] font-mono text-slate-500 text-center">
+            🔒 Rate locked upon confirmation. Subject to carrier booking acceptance and standard terms.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-xs">K</div>
+        <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
+      </div>
+      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Spot Tariff & Booking Allocation System.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== SCRIPT & RUNTIME ==================== -->
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/js/public/public-runtime.js"></script>
+
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const origin = urlParams.get('origin');
+      const dest = urlParams.get('dest');
+
+      if (origin) document.getElementById('summary-origin').textContent = origin.toUpperCase();
+      if (dest) document.getElementById('summary-dest').textContent = dest.toUpperCase();
+
+      document.getElementById('booking-execution-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        window.location.href = '/auth/login.html?portal=shipper&action=booking_confirmation';
+      });
+    });
+  </script>
+</body>
+                    </html>
+                    
