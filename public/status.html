@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — System Operational Status & API Telemetry</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              accent: '#06b6d4',
+              green: '#10b981'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="/index.html" class="flex items-center space-x-3">
+          <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-emerald-500/20">K</div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
+            <span class="text-[10px] font-mono text-emerald-400 mt-1 uppercase tracking-widest leading-none">System Status</span>
+          </div>
+        </a>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-8 text-xs font-mono">
+          <a href="/tracking.html" class="text-slate-400 hover:text-white transition-colors">Tracking</a>
+          <a href="/quote.html" class="text-slate-400 hover:text-white transition-colors">Rate Engine</a>
+          <a href="/solutions.html" class="text-slate-400 hover:text-white transition-colors">Routes & Schedules</a>
+          <a href="/global-coverage.html" class="text-slate-400 hover:text-white transition-colors">Global Network</a>
+          <a href="/status.html" class="text-emerald-400 font-bold border-b-2 border-emerald-400 pb-1">System Status</a>
+          <a href="/enterprise.html" class="text-slate-400 hover:text-white transition-colors">Enterprise OS</a>
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center space-x-4">
+          <a href="/auth/login.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-white rounded-xl transition-all">
+            Portal Login
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- HERO / OVERALL HEALTH BANNER -->
+    <section class="bg-[#081020] border border-emerald-500/30 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div class="absolute -right-16 -top-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="space-y-2">
+        <div class="flex items-center space-x-3">
+          <span class="relative flex h-3.5 w-3.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+          </span>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-white font-mono">All Systems Operational</h1>
+        </div>
+        <p class="text-xs text-slate-400 font-mono">KRIM OS Global Infrastructure, Carrier Telemetry Pipelines & API Services running smoothly.</p>
+      </div>
+
+      <div class="bg-[#040814] border border-slate-800 rounded-xl px-4 py-2.5 text-right font-mono text-xs">
+        <span class="text-slate-500 block text-[10px] uppercase">30-Day Uptime</span>
+        <span class="text-emerald-400 font-extrabold text-base">99.98%</span>
+      </div>
+    </section>
+
+    <!-- CORE PLATFORM SERVICES HEALTH -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 font-mono">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>⚡</span> Platform Services & Core APIs
+        </h2>
+        <span class="text-[10px] text-slate-500">Real-time Telemetry Feed</span>
+      </div>
+
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl divide-y divide-slate-800/80 font-mono text-xs">
+        
+        <!-- SERVICE 1 -->
+        <div class="p-4 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="font-bold text-white block">Global Spot Rate Calculation Engine</span>
+            <span class="text-[10px] text-slate-500">Rate queries, ocean index feeds, surcharge engines</span>
+          </div>
+          <div class="flex items-center space-x-6">
+            <span class="text-[11px] text-slate-400 hidden sm:inline">28ms latency</span>
+            <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase">Operational</span>
+          </div>
+        </div>
+
+        <!-- SERVICE 2 -->
+        <div class="p-4 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="font-bold text-white block">Shipment & AIS Vessel Telemetry Tracking</span>
+            <span class="text-[10px] text-slate-500">AIS satellite feeds, carrier container milestones, push webhooks</span>
+          </div>
+          <div class="flex items-center space-x-6">
+            <span class="text-[11px] text-slate-400 hidden sm:inline">42ms latency</span>
+            <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase">Operational</span>
+          </div>
+        </div>
+
+        <!-- SERVICE 3 -->
+        <div class="p-4 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="font-bold text-white block">Customs Gateway & Automated Clearance Pipeline</span>
+            <span class="text-[10px] text-slate-500">US CBP ACE, EU ICS2, China Single Window endpoints</span>
+          </div>
+          <div class="flex items-center space-x-6">
+            <span class="text-[11px] text-slate-400 hidden sm:inline">65ms latency</span>
+            <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase">Operational</span>
+          </div>
+        </div>
+
+        <!-- SERVICE 4 -->
+        <div class="p-4 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="font-bold text-white block">Carrier EDI & API Direct Connectors</span>
+            <span class="text-[10px] text-slate-500">EDIFACT 304, X12 214, Ocean/Air Carrier direct bridges</span>
+          </div>
+          <div class="flex items-center space-x-6">
+            <span class="text-[11px] text-slate-400 hidden sm:inline">31ms latency</span>
+            <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase">Operational</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RECENT INCIDENTS / MAINTENANCE LOG -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4 font-mono text-xs">
+      <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+        <h2 class="text-base font-bold text-white">System Maintenance & Maintenance Log</h2>
+        <span class="text-[10px] text-slate-500">Past 30 Days</span>
+      </div>
+
+      <div class="space-y-4">
+        <div class="p-4 bg-[#040814]/60 rounded-xl border border-slate-800/80 space-y-1">
+          <div class="flex items-center justify-between text-[10px] text-slate-500">
+            <span class="text-emerald-400 font-bold">Completed Scheduled Maintenance</span>
+            <span>Oct 02, 2026 — 02:00 UTC</span>
+          </div>
+          <h4 class="font-bold text-white text-xs">ACE Customs Gateway Schema Upgrade v4.2</h4>
+          <p class="text-slate-400 text-[11px] leading-relaxed">Routine maintenance performed on North American customs integration endpoints. Zero downtime observed.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-xs">K</div>
+        <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
+      </div>
+      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Infrastructure Status.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== SCRIPT & RUNTIME ==================== -->
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/js/public/public-runtime.js"></script>
+</body>
+      </html>
+      
