@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Connection Disconnected (Offline Telemetry Mode)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- HEADER -->
+  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/index.html" class="flex items-center space-x-3">
+          <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-amber-500/20">K</div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
+            <span class="text-[10px] font-mono text-amber-400 mt-1 uppercase tracking-widest leading-none">Offline Telemetry Mode</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN OFFLINE SURFACE -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center text-center space-y-6">
+    <div class="w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center text-3xl text-amber-400 shadow-xl shadow-amber-500/10">
+      ⚡
+    </div>
+
+    <div class="space-y-3">
+      <span class="text-xs font-mono text-amber-400 font-bold uppercase tracking-widest block">Local Cache Active • Satellite Telemetry Interrupted</span>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">Offline Operating State</h1>
+      <p class="text-xs sm:text-sm font-mono text-slate-400 leading-relaxed max-w-xl">Your system is currently disconnected from the KRIM OS global gateway mesh. Queued telemetry actions and cached manifests will sync automatically upon reconnection.</p>
+    </div>
+
+    <div class="pt-4 flex flex-col sm:flex-row gap-4 font-mono text-xs w-full max-w-md">
+      <button onclick="window.location.reload()" class="w-full px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
+        Re-establish Connection →
+      </button>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Offline Runtime Buffer.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/js/public/public-runtime.js"></script>
+</body>
+</html>
