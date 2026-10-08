@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Active Shipper Cargo & Telemetry Feed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Shipper Cargo Tracking & Active Telemetry</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/shipper/booking-request.html" class="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-cyan-500/20">
+        + New Booking
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CARGO LISTING ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Active Satellite & AIS Stream</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Live Shipper Cargo Management</h1>
+        <p class="text-slate-400 leading-relaxed max-w-2xl">Real-time status monitoring, customs hold alerts, e-POD access, and vessel ETA tracking across all active shipments.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="/shipper/shipper-invoices.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold rounded-xl transition-all">
+          💳 Billing & Invoices
+        </a>
+      </div>
+    </section>
+
+    <!-- CARGO CARDS LIST -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🚢</span> Active Cargo Shipments (1,248)
+        </h2>
+        <span class="text-[10px] text-slate-500">Auto-Refreshed via WebSocket</span>
+      </div>
+
+      <div class="space-y-4">
+
+        <!-- SHIPMENT 1 (WITH CUSTOMS HOLD WARNING) -->
+        <div class="bg-[#081020] border-l-4 border-l-amber-500 border-y border-r border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-base">MSCU892101</span>
+                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded uppercase">CUSTOMS_INSPECTION_HOLD</span>
+              </div>
+              <p class="text-slate-400 text-[11px]">Route: Singapore Port (SGSIN) → Rotterdam Port (NLRTM) | Vessel: MSC OSCAR</p>
+            </div>
+
+            <div class="text-left sm:text-right space-y-1">
+              <span class="text-white font-bold block">ETA: Oct 14, 2026</span>
+              <span class="text-[10px] text-slate-500">Carrier: MSC Marine</span>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <span class="text-amber-400 font-bold">⚠️ Action Required: Rotterdam Terminal Gate 4 Customs Inspection</span>
+            <a href="/shipper/shipment-details.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-cyan-400 font-bold rounded-xl transition-all">
+              Inspect Shipment Details →
+            </a>
+          </div>
+        </div>
+
+        <!-- SHIPMENT 2 (NOMINAL IN TRANSIT) -->
+        <div class="bg-[#081020] border-l-4 border-l-emerald-400 border-y border-r border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-base">AWB-7720-90</span>
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded uppercase">IN_TRANSIT_AIR</span>
+              </div>
+              <p class="text-slate-400 text-[11px]">Route: Frankfurt (FRA) → New York (JFK) | Flight: LH8220</p>
+            </div>
+
+            <div class="text-left sm:text-right space-y-1">
+              <span class="text-white font-bold block">ETA: Oct 09, 2026</span>
+              <span class="text-[10px] text-slate-500">Carrier: Lufthansa Cargo</span>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <span class="text-emerald-400 font-bold">✓ On-Time Progress • Telemetry Active</span>
+            <a href="/shipper/shipment-details.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-cyan-400 font-bold rounded-xl transition-all">
+              Inspect Shipment Details →
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Active Cargo Feed.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
