@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Modular Dashboard Framework & Operational Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Modular Operational Dashboard</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-[11px] text-slate-300">Live Stream: <strong class="text-white">14ms</strong></span>
+      </div>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN DASHBOARD CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO DASHBOARD BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold rounded uppercase">Global Tenant Stream</span>
+          <span class="text-slate-500 text-[10px]">Context: Global Supply Chain Corp</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Universal Operations & Analytics Tower</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Real-time telematics aggregation, active lane bottlenecks, predictive ETA adjustments, and cross-modal dispatch telemetry.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <button onclick="alert('Dashboard Layout Reset to Enterprise Default')" class="px-3.5 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs rounded-xl transition-all">
+          ⚙️ Customize Layout
+        </button>
+        <button onclick="alert('Exporting Operational Analytics Report (PDF / CSV)...')" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20">
+          📥 Export Telemetry
+        </button>
+      </div>
+    </section>
+
+    <!-- KPI METRICS GRID -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+      
+      <!-- KPI 1 -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden">
+        <div class="flex justify-between items-center text-slate-400">
+          <span class="text-[10px] uppercase font-bold tracking-wider">Active Shipments</span>
+          <span class="text-emerald-400 text-[10px] font-bold">+12.4% vs last week</span>
+        </div>
+        <div class="text-2xl font-extrabold text-white">1,248 <span class="text-xs font-normal text-slate-500">Units</span></div>
+        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-cyan-500 h-full w-[78%]"></div>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden">
+        <div class="flex justify-between items-center text-slate-400">
+          <span class="text-[10px] uppercase font-bold tracking-wider">On-Time Reliability</span>
+          <span class="text-emerald-400 text-[10px] font-bold">98.6% Target</span>
+        </div>
+        <div class="text-2xl font-extrabold text-white">99.1%</div>
+        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-emerald-400 h-full w-[99%]"></div>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden">
+        <div class="flex justify-between items-center text-slate-400">
+          <span class="text-[10px] uppercase font-bold tracking-wider">Customs Exceptions</span>
+          <span class="text-rose-400 text-[10px] font-bold">3 Action Required</span>
+        </div>
+        <div class="text-2xl font-extrabold text-white">03 <span class="text-xs font-normal text-slate-500">Holds</span></div>
+        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-rose-500 h-full w-[15%]"></div>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-3 relative overflow-hidden">
+        <div class="flex justify-between items-center text-slate-400">
+          <span class="text-[10px] uppercase font-bold tracking-wider">Settled Freight Spend</span>
+          <span class="text-cyan-400 text-[10px] font-bold">USD Curr.</span>
+        </div>
+        <div class="text-2xl font-extrabold text-white">$4.82M</div>
+        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-purple-500 h-full w-[62%]"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- MAIN WIDGETS & MODULAR PANELS -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+
+      <!-- LEFT 2 COLUMNS: LIVE DISPATCH STREAM -->
+      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>🚢</span> Active Cross-Border Freight Telemetry
+          </h2>
+          <span class="text-[10px] text-cyan-400">Live Socket Updates</span>
+        </div>
+
+        <div class="space-y-3">
+
+          <!-- ITEM 1 -->
+          <div class="p-4 bg-[#040814] border border-slate-800/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-all">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-sm">MSCU892101</span>
+                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">CUSTOMS_HOLD</span>
+              </div>
+              <p class="text-slate-400 text-[11px]">SIN → ROT • Ocean FCL • Carrier: MSC Marine</p>
+            </div>
+
+            <div class="text-left sm:text-right space-y-1">
+              <span class="text-white font-bold block">ETA: Oct 14, 2026</span>
+              <span class="text-[10px] text-slate-500 block">Rotterdam Terminal Gate 4</span>
+            </div>
+          </div>
+
+          <!-- ITEM 2 -->
+          <div class="p-4 bg-[#040814] border border-slate-800/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-all">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-sm">AWB-7720-90</span>
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">IN_TRANSIT</span>
+              </div>
+              <p class="text-slate-400 text-[11px]">FRA → JFK • Express Air Cargo • Carrier: Lufthansa Cargo</p>
+            </div>
+
+            <div class="text-left sm:text-right space-y-1">
+              <span class="text-white font-bold block">ETA: Oct 09, 2026</span>
+              <span class="text-[10px] text-slate-500 block">Flight LH8220 Altitude 34k ft</span>
+            </div>
+          </div>
+
+          <!-- ITEM 3 -->
+          <div class="p-4 bg-[#040814] border border-slate-800/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition-all">
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-sm">TRK-IND-9910</span>
+                <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold rounded">DRAYAGE_DISPATCH</span>
+              </div>
+              <p class="text-slate-400 text-[11px]">BOM → DEL • Inland Trucking FTL • Driver ID: DRV-882</p>
+            </div>
+
+            <div class="text-left sm:text-right space-y-1">
+              <span class="text-white font-bold block">ETA: Oct 08, 2026</span>
+              <span class="text-[10px] text-slate-500 block">NH-48 Corridor Speed: 62 km/h</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: QUICK ACTION PANELS & SYSTEM FEED -->
+      <div class="space-y-6">
+
+        <!-- QUICK EXECUTION ACTIONS -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+            <span>⚡</span> Quick Execution Engine
+          </h3>
+
+          <div class="space-y-2">
+            <a href="/app/messaging-center.html" class="w-full flex items-center justify-between p-3 bg-[#040814] border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-200 transition-all">
+              <span>💬 Dispatch Broadcast Message</span>
+              <span>→</span>
+            </a>
+
+            <a href="/app/document-vault.html" class="w-full flex items-center justify-between p-3 bg-[#040814] border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-200 transition-all">
+              <span>📁 Upload Manifest / e-BL</span>
+              <span>→</span>
+            </a>
+
+            <a href="/app/global-search.html" class="w-full flex items-center justify-between p-3 bg-[#040814] border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-200 transition-all">
+              <span>🔍 Global Search Engine</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- REAL-TIME AUDIT STREAM -->
+        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+            <span>📜</span> System Execution Log
+          </h3>
+
+          <div class="space-y-2 text-[10px] font-mono text-slate-400">
+            <p><span class="text-cyan-400">[09:58:12]</span> Container MSCU892101 GPS Pings Synced</p>
+            <p><span class="text-emerald-400">[09:54:00]</span> e-POD Signature Validated for AWB-7720-90</p>
+            <p><span class="text-purple-400">[09:40:15]</span> Currency FX Rates Re-hedged to USD/SGD</p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Universal Analytics Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+          </html>
+  
