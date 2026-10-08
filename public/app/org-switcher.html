@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Multi-Tenant Organization & Workspace Switcher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Organization & Workspace Governance</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO / STATUS BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-widest block">Multi-Tenant Context Governance</span>
+        <h1 class="text-2xl font-extrabold text-white">Active Workspace & Organization Manager</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Switch active tenant contexts across global subsidiaries, regional dispatch hubs, and isolated developer sandbox environments.</p>
+      </div>
+
+      <button class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20 shrink-0">
+        + Provision New Tenant
+      </button>
+    </section>
+
+    <!-- ORGANIZATIONS GRID -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🏢</span> Authorized Organizations & Subsidiaries
+        </h2>
+        <span class="text-[10px] text-slate-500">3 Tenants Connected</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+
+        <!-- ORG CARD 1 (Active) -->
+        <div class="bg-[#081020] border-2 border-cyan-500 rounded-2xl p-6 space-y-5 relative shadow-xl shadow-cyan-500/5">
+          <div class="flex items-start justify-between">
+            <div class="space-y-1">
+              <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold text-[9px] rounded uppercase">Active Context</span>
+              <h3 class="font-extrabold text-white text-base pt-1">Global Supply Chain Corp</h3>
+              <span class="text-[10px] text-slate-500 block">ID: org_global_01</span>
+            </div>
+            <div class="w-10 h-10 bg-cyan-500/10 border border-cyan-500/30 rounded-xl flex items-center justify-center font-bold text-cyan-400 text-sm">GS</div>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-slate-800/80 text-[11px]">
+            <div class="flex justify-between text-slate-400">
+              <span>User Role:</span>
+              <span class="text-white font-bold">ENTERPRISE_ADMIN</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Subscription Tier:</span>
+              <span class="text-cyan-400 font-bold">Enterprise Tier 1</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Active Shipments:</span>
+              <span class="text-white font-bold">1,248 Live</span>
+            </div>
+          </div>
+
+          <button class="w-full py-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 rounded-xl font-bold cursor-default">
+            ✓ Currently Selected
+          </button>
+        </div>
+
+        <!-- ORG CARD 2 -->
+        <div class="bg-[#081020] border border-slate-800 hover:border-slate-700 rounded-2xl p-6 space-y-5 transition-all flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="space-y-1">
+                <span class="px-2 py-0.5 bg-slate-800 text-slate-400 font-bold text-[9px] rounded uppercase">Regional Sub-Hub</span>
+                <h3 class="font-extrabold text-white text-base pt-1">KRIM APAC Freight Hub</h3>
+                <span class="text-[10px] text-slate-500 block">ID: org_apac_02</span>
+              </div>
+              <div class="w-10 h-10 bg-purple-500/10 border border-purple-500/30 rounded-xl flex items-center justify-center font-bold text-purple-400 text-sm">AP</div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-[11px]">
+              <div class="flex justify-between text-slate-400">
+                <span>User Role:</span>
+                <span class="text-white font-bold">REGIONAL_DISPATCHER</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Subscription Tier:</span>
+                <span class="text-purple-400 font-bold">Regional Fleet</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Active Shipments:</span>
+                <span class="text-white font-bold">412 Live</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="alert('Switched active tenant context to KRIM APAC Freight Hub.')" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 hover:text-cyan-400 text-slate-200 rounded-xl font-bold transition-all mt-4">
+            Switch Context →
+          </button>
+        </div>
+
+        <!-- ORG CARD 3 -->
+        <div class="bg-[#081020] border border-slate-800 hover:border-slate-700 rounded-2xl p-6 space-y-5 transition-all flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="space-y-1">
+                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold text-[9px] rounded uppercase">Partner / Carrier</span>
+                <h3 class="font-extrabold text-white text-base pt-1">EuroTrans Logistics GmbH</h3>
+                <span class="text-[10px] text-slate-500 block">ID: org_emea_03</span>
+              </div>
+              <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-center font-bold text-amber-400 text-sm">ET</div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-[11px]">
+              <div class="flex justify-between text-slate-400">
+                <span>User Role:</span>
+                <span class="text-white font-bold">AUDITOR</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Subscription Tier:</span>
+                <span class="text-amber-400 font-bold">Carrier Network</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Active Shipments:</span>
+                <span class="text-white font-bold">89 Live</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="alert('Switched active tenant context to EuroTrans Logistics GmbH.')" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 hover:text-cyan-400 text-slate-200 rounded-xl font-bold transition-all mt-4">
+            Switch Context →
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Context Switching Engine.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
