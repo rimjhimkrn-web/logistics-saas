@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Instant Spot Quote Approvals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">One-Tap Spot Rate Approval</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/shipper/booking-request.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← New Booking
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Dynamic Spot Rate Fitted</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white mt-1">Available Spot Quote Fits</h1>
+        <p class="text-slate-400 leading-relaxed text-[11px] mt-1">Select and lock guaranteed carrier capacity for Booking Request #SGP-ROT-2026-88.</p>
+      </div>
+
+      <div class="p-3 bg-[#040814] border border-amber-500/50 rounded-xl text-right shrink-0">
+        <span class="text-amber-400 text-[10px] font-bold block">RATE LOCK GUARANTEE</span>
+        <span class="text-white font-extrabold text-sm">14m 32s Remaining</span>
+      </div>
+    </section>
+
+    <!-- SPOT QUOTES GRID -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- QUOTE 1 (RECOMMENDED) -->
+      <div class="bg-[#081020] border-2 border-cyan-500 rounded-2xl p-6 space-y-5 shadow-2xl shadow-cyan-500/5 relative flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded uppercase">OPTIMAL TRANSIT TIME</span>
+              <h3 class="font-extrabold text-white text-base pt-1">Pacific Maritime Lines (Feeder Direct)</h3>
+              <span class="text-[10px] text-slate-500 block">Singapore (SGSIN) → Rotterdam (NLRTM)</span>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-black text-emerald-400">$2,450</span>
+              <span class="text-[10px] text-slate-500 block">USD Total All-In</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-slate-800 text-[11px]">
+            <div class="flex justify-between text-slate-400">
+              <span>Transit Time:</span>
+              <span class="text-white font-bold">22 Days Direct Vessel</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Free Time at Destination:</span>
+              <span class="text-cyan-400 font-bold">14 Days Demurrage Free</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Co2 Footprint Estimate:</span>
+              <span class="text-white font-bold">1.24 MT CO2e</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="alert('Spot Rate Locked! Booking Confirmed for SHP-2026-881.'); window.location.href='/shipper/active-shipments.html';" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-cyan-500/20 mt-4">
+          Lock Rate & Confirm Booking →
+        </button>
+      </div>
+
+      <!-- QUOTE 2 (ECONOMY) -->
+      <div class="bg-[#081020] border border-slate-800 hover:border-slate-700 rounded-2xl p-6 space-y-5 transition-all flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="px-2 py-0.5 bg-slate-800 text-slate-300 font-bold text-[9px] rounded uppercase">ECONOMY ROUTE</span>
+              <h3 class="font-extrabold text-white text-base pt-1">Global Trans Feeder Lines</h3>
+              <span class="text-[10px] text-slate-500 block">Singapore → Colombo (Transshipment) → Rotterdam</span>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-black text-white">$2,180</span>
+              <span class="text-[10px] text-slate-500 block">USD Total All-In</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-slate-800 text-[11px]">
+            <div class="flex justify-between text-slate-400">
+              <span>Transit Time:</span>
+              <span class="text-white font-bold">28 Days (1 Transshipment)</span>
+            </div>
+            <div class="flex justify-between text-slate-400">
+              <span>Free Time at Destination:</span>
+              <span class="text-white font-bold">7 Days Demurrage Free</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="alert('Spot Rate Locked! Booking Confirmed.'); window.location.href='/shipper/active-shipments.html';" class="w-full py-3 bg-slate-900 border border-slate-800 hover:border-cyan-500/50 text-slate-200 font-bold rounded-xl transition-all mt-4">
+          Lock Rate & Confirm Booking →
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Spot Engine.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
