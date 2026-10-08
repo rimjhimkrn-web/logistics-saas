@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Enterprise Document & e-Sign Vault</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Cryptographic Document Vault</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN VAULT CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-widest block">Immutable Trade Documentation Vault</span>
+        <h1 class="text-2xl font-extrabold text-white">Document Repository & Digital e-Sign Execution</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Encrypted storage for electronic Bills of Lading (e-BL), Sea Waybills, e-AWBs, Commercial Invoices, Packing Lists, and Customs Declarations.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <button onclick="alert('Drag & Drop or select file for OCR Manifest Processing')" class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-cyan-500/20">
+          + Upload & OCR Scan Document
+        </button>
+      </div>
+    </section>
+
+    <!-- DOCUMENTS TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>📁</span> Active Trade Documents (Tenant Vault)
+        </h2>
+        <span class="text-[10px] text-slate-500">AES-256 Encrypted Storage</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Document Name / Reference</th>
+              <th class="py-3 px-2">Type</th>
+              <th class="py-3 px-2">Associated Shipment</th>
+              <th class="py-3 px-2">e-Sign Status</th>
+              <th class="py-3 px-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- DOC 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">eBL-MSCU-892101-FINAL.pdf</td>
+              <td class="py-3 px-2"><span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] rounded">e-Bill of Lading</span></td>
+              <td class="py-3 px-2 font-bold text-slate-400">MSCU892101</td>
+              <td class="py-3 px-2"><span class="text-emerald-400 font-bold">✓ Signed (ESIGN Verified)</span></td>
+              <td class="py-3 px-2 text-right">
+                <button onclick="alert('Downloading encrypted PDF...')" class="text-cyan-400 hover:underline">Download</button>
+              </td>
+            </tr>
+
+            <!-- DOC 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">CBP-CUSTOMS-DEC-9912.pdf</td>
+              <td class="py-3 px-2"><span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[9px] rounded">Customs Filing</span></td>
+              <td class="py-3 px-2 font-bold text-slate-400">AWB-7720-90</td>
+              <td class="py-3 px-2"><span class="text-amber-400 font-bold">⏱ Pending Broker Approval</span></td>
+              <td class="py-3 px-2 text-right">
+                <button onclick="alert('Opening Document Preview...')" class="text-cyan-400 hover:underline">Preview</button>
+              </td>
+            </tr>
+
+            <!-- DOC 3 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">COMMERCIAL-INVOICE-GSCC-2026.pdf</td>
+              <td class="py-3 px-2"><span class="px-2 py-0.5 bg-slate-800 text-slate-300 text-[9px] rounded">Invoice / Packing</span></td>
+              <td class="py-3 px-2 font-bold text-slate-400">TRK-IND-9910</td>
+              <td class="py-3 px-2"><span class="text-emerald-400 font-bold">✓ Validated</span></td>
+              <td class="py-3 px-2 text-right">
+                <button onclick="alert('Downloading encrypted PDF...')" class="text-cyan-400 hover:underline">Download</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Cryptographic Vault Engine.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
