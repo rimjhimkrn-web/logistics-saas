@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Global Command Palette & Navigation Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Global Command Interface</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN PALETTE INTERFACE ==================== -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-12 space-y-6 font-mono text-xs">
+
+    <!-- COMMAND PALETTE CONTAINER -->
+    <div class="bg-[#081020] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+      
+      <!-- SEARCH / INPUT BAR -->
+      <div class="p-4 border-b border-slate-800/80 flex items-center gap-3 bg-[#040814]">
+        <span class="text-cyan-400 text-base">🔍</span>
+        <input type="text" id="palette-search-input" placeholder="Type a command or quick jump (e.g., 'Track Container', 'Create Booking', 'Docs')..." class="w-full bg-transparent text-white outline-none placeholder-slate-600 text-xs font-mono" autofocus />
+        <kbd class="px-2 py-1 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400 font-bold">ESC</kbd>
+      </div>
+
+      <!-- COMMAND CATEGORIES & QUICK ACTIONS -->
+      <div class="p-3 space-y-4 max-h-[480px] overflow-y-auto">
+
+        <!-- CATEGORY: CORE NAVIGATION -->
+        <div class="space-y-1">
+          <span class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Core Navigation</span>
+          
+          <a href="/app/dashboard-framework.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 text-slate-200 transition-all group">
+            <div class="flex items-center space-x-3">
+              <span>📊</span>
+              <span class="font-bold">Launch Modular Dashboard</span>
+            </div>
+            <span class="text-[10px] text-slate-500 group-hover:text-cyan-400">Jump →</span>
+          </a>
+
+          <a href="/app/global-search.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 text-slate-200 transition-all group">
+            <div class="flex items-center space-x-3">
+              <span>🌐</span>
+              <span class="font-bold">Global Entity Search</span>
+            </div>
+            <span class="text-[10px] text-slate-500 group-hover:text-cyan-400">Jump →</span>
+          </a>
+
+          <a href="/app/document-vault.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 text-slate-200 transition-all group">
+            <div class="flex items-center space-x-3">
+              <span>📁</span>
+              <span class="font-bold">Document & e-Sign Vault</span>
+            </div>
+            <span class="text-[10px] text-slate-500 group-hover:text-cyan-400">Jump →</span>
+          </a>
+        </div>
+
+        <!-- CATEGORY: OPERATIONAL ACTIONS -->
+        <div class="space-y-1">
+          <span class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Quick Operational Actions</span>
+
+          <a href="/app/messaging-center.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-emerald-500/10 hover:text-emerald-400 text-slate-200 transition-all group">
+            <div class="flex items-center space-x-3">
+              <span>💬</span>
+              <span class="font-bold">Send Dispatch Broadcast</span>
+            </div>
+            <span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] rounded font-bold">ACTION</span>
+          </a>
+
+          <a href="/app/org-switcher.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-purple-500/10 hover:text-purple-400 text-slate-200 transition-all group">
+            <div class="flex items-center space-x-3">
+              <span>🏢</span>
+              <span class="font-bold">Switch Organization Tenant</span>
+            </div>
+            <span class="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-[9px] rounded font-bold">CONTEXT</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- FOOTER KEYBOARD LEGEND -->
+      <div class="p-3 bg-[#040814] border-t border-slate-800 text-[10px] text-slate-500 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <span><kbd class="px-1 py-0.5 bg-slate-900 border border-slate-800 rounded text-slate-400">↑↓</kbd> Navigate</span>
+          <span><kbd class="px-1 py-0.5 bg-slate-900 border border-slate-800 rounded text-slate-400">↵</kbd> Select</span>
+        </div>
+        <span class="text-cyan-400 font-bold">Command Mesh Active</span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-3xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Command Engine.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
