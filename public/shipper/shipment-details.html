@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Shipment Audit & Milestone Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- HEADER -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Shipment Audit View: MSCU892101</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/shipper/active-shipments.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← Active Cargo Feed
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN AUDIT CONTENT -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- SHIPMENT HERO SUMMARY -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded uppercase">CUSTOMS_INSPECTION_HOLD</span>
+          <span class="text-slate-500 text-[10px]">Booking Ref: BK-SGP-9901</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Container MSCU892101</h1>
+        <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Singapore PSA Terminal (SGSIN) → Rotterdam ECT Delta Terminal (NLRTM)</p>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="/shipper/proof-of-delivery.html" class="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-cyan-500/20">
+          📄 View e-POD / Delivery Certificate
+        </a>
+      </div>
+    </section>
+
+    <!-- MILESTONES & TIMELINE -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- TIMELINE COLUMN -->
+      <div class="md:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+          <span>📍</span> Operational Milestone Progression
+        </h3>
+
+        <div class="space-y-4 border-l-2 border-slate-800 pl-4 ml-2">
+          <!-- MILESTONE 1 -->
+          <div class="relative space-y-1">
+            <span class="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#081020]"></span>
+            <span class="text-emerald-400 font-bold block">01. Container Gated In at Origin</span>
+            <p class="text-slate-400 text-[10px]">Singapore Port Terminal Gate 2 • Oct 01, 2026 14:20 SGT</p>
+          </div>
+
+          <!-- MILESTONE 2 -->
+          <div class="relative space-y-1">
+            <span class="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#081020]"></span>
+            <span class="text-emerald-400 font-bold block">02. Vessel Departure & AIS Tracking Active</span>
+            <p class="text-slate-400 text-[10px]">Vessel MSC OSCAR V-881E • Oct 03, 2026 04:10 SGT</p>
+          </div>
+
+          <!-- MILESTONE 3 (CURRENT HOLD) -->
+          <div class="relative space-y-1">
+            <span class="absolute -left-[23px] top-1 w-3 h-3 rounded-full bg-amber-500 ring-4 ring-[#081020] animate-ping"></span>
+            <span class="text-amber-400 font-bold block">03. Customs Hold Initiated at Destination</span>
+            <p class="text-slate-300 text-[10px]">Rotterdam Terminal Gate 4 • Oct 08, 2026 09:12 CET</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARGO & CARRIER SPECS -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+          <span>📋</span> Cargo Specifications
+        </h3>
+
+        <div class="space-y-2 text-[11px] text-slate-400">
+          <div class="flex justify-between"><span class="text-slate-500">Equipment Type:</span><span class="text-white font-bold">40ft High Cube</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Gross Weight:</span><span class="text-white font-bold">18,450.00 KG</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Incoterms®:</span><span class="text-white font-bold">FOB Singapore</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Carrier:</span><span class="text-white font-bold">MSC Mediterranean</span></div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Audit View.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
