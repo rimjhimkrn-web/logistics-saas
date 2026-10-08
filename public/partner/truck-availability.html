@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Live Equipment & Capacity Availability Matrix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-amber-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Real-Time Equipment Capacity Matrix</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/partner/partner-directory.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← Partner Directory
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN MATRIX CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Live GPS Telemetry Stream</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Truck & Container Capacity Feed</h1>
+        <p class="text-slate-400 leading-relaxed max-w-2xl">Real-time equipment availability matrix filtering active drayage trucks, empty containers, and feeder vessels ready for dispatch matching.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="/partner/fleet-assignment.html" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
+          ⚡ Auto-Match Dispatch →
+        </a>
+      </div>
+    </section>
+
+    <!-- CAPACITY MATRIX TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🚛</span> Available Transporter Units
+        </h2>
+        <span class="text-[10px] text-slate-500">Updated <strong class="text-emerald-400">12s ago</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Equipment ID / Type</th>
+              <th class="py-3 px-2">Transporter Partner</th>
+              <th class="py-3 px-2">Current Location / Hub</th>
+              <th class="py-3 px-2">Driver Status</th>
+              <th class="py-3 px-2 text-right">Dispatch Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- UNIT 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">TRK-GER-8812</span>
+                <span class="text-[10px] text-amber-400 font-bold">40ft Temperature-Controlled Reefer</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-300">EuroTrans Logistics GmbH</td>
+              <td class="py-3.5 px-2">Hamburg Logistics Hub (DE)</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">READY_FOR_PICKUP</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <a href="/partner/fleet-assignment.html" class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-lg font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">Assign →</a>
+              </td>
+            </tr>
+
+            <!-- UNIT 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">FDR-SIN-009</span>
+                <span class="text-[10px] text-cyan-400 font-bold">Ocean Feeder Vessel (1,200 TEU)</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-300">Pacific Maritime Lines</td>
+              <td class="py-3.5 px-2">Singapore PSA Port Terminal 2</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">BERTHED</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <a href="/partner/fleet-assignment.html" class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-lg font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">Assign →</a>
+              </td>
+            </tr>
+
+            <!-- UNIT 3 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">TRK-IND-9910</span>
+                <span class="text-[10px] text-purple-400 font-bold">Standard 32ft Multi-Axle FTL</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-300">KRIM India Drayage Fleet</td>
+              <td class="py-3.5 px-2">Nhava Sheva Port (JNPT), Mumbai</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">STANDBY</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <a href="/partner/fleet-assignment.html" class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-lg font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">Assign →</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Capacity Feed.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
