@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Shipper Cargo Booking Request</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 5 • Customer / Shipper Platform</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/shipper/active-shipments.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        Active Cargo (1,248)
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Core Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKFLOW CONTENT ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-3 relative overflow-hidden">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold rounded uppercase">Instant Cargo Dispatch</span>
+        <span class="text-slate-500 text-[10px]">Context: Global Supply Chain Corp</span>
+      </div>
+      <h1 class="text-2xl font-extrabold text-white">New Freight Booking Request</h1>
+      <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Submit new international ocean, express air, or inland road freight bookings for real-time spot fitting and automated carrier matching.</p>
+    </section>
+
+    <!-- BOOKING FORM -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
+
+      <form onsubmit="event.preventDefault(); window.location.href='/shipper/spot-approvals.html';" class="space-y-6">
+
+        <!-- SECTION 1: ROUTE & MODAL -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
+            <span>🌐</span> Origin, Destination & Transport Modal
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Origin Port / Location *</label>
+              <input type="text" placeholder="e.g., Singapore Port (SGSIN) or Nhava Sheva" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Destination Port / Location *</label>
+              <input type="text" placeholder="e.g., Rotterdam Port (NLRTM) or Delhi ICD" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Transport Modal *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500">
+                <option value="OCEAN_FCL">Ocean Freight (FCL 20ft/40ft/HC)</option>
+                <option value="OCEAN_LCL">Ocean Freight (LCL Consolidation)</option>
+                <option value="AIR_EXPRESS">Air Freight (Express Charter)</option>
+                <option value="ROAD_FTL">Inland Road Trucking (FTL)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: CARGO SPECS & INCOTERMS -->
+        <div class="space-y-4 pt-2">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
+            <span>📦</span> Cargo Specifications & Trade Terms
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Cargo Weight (KG) *</label>
+              <input type="number" placeholder="18,500" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Volume (CBM) *</label>
+              <input type="number" placeholder="68" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Incoterms® 2020 *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500">
+                <option value="FOB">FOB — Free On Board</option>
+                <option value="CIF">CIF — Cost, Insurance & Freight</option>
+                <option value="EXW">EXW — Ex Works</option>
+                <option value="DDP">DDP — Delivered Duty Paid</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Cargo Category *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-cyan-500">
+                <option value="GENERAL">General Dry Goods</option>
+                <option value="REEFER">Refrigerated / Temperature-Controlled</option>
+                <option value="HAZMAT">Dangerous Goods (IMDG / IATA)</option>
+                <option value="ELECTRONICS">High-Value Electronics</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBMIT ACTION -->
+        <div class="pt-4 flex items-center justify-between border-t border-slate-800">
+          <a href="/shipper/active-shipments.html" class="text-slate-400 hover:text-white">Cancel Request</a>
+          <button type="submit" class="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-cyan-500/20">
+            Request Instant Spot Quotes →
+          </button>
+        </div>
+
+      </form>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Shipper Booking Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
