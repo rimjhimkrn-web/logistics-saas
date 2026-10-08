@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Transporter Onboarding & KYC Compliance Audit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-amber-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Carrier Verification & KYC Desk</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/partner/partner-directory.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← Partner Directory
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN ONBOARDING WORKFLOW ==================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO / STATUS BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-3 relative overflow-hidden">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded uppercase">Phase 4 Onboarding Pipeline</span>
+        <span class="text-slate-500 text-[10px]">Compliance SLA: 24h Verification</span>
+      </div>
+      <h1 class="text-2xl font-extrabold text-white">Carrier KYC & Operating Authority Onboarding</h1>
+      <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Onboard new fleet operators, road transporters, NVOCCs, and air freight charter providers with automated insurance verification, tax compliance (GSTIN/VAT/EIN), and carrier agreements.</p>
+    </section>
+
+    <!-- FORM STEPS CONTAINER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
+
+      <!-- STEP INDICATORS -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-slate-800 pb-6">
+        <div class="p-3 bg-[#040814] border border-amber-500/50 rounded-xl space-y-1">
+          <span class="text-amber-400 font-bold block text-[10px]">STEP 01</span>
+          <span class="text-white font-extrabold">Entity & Authority ID</span>
+        </div>
+        <div class="p-3 bg-[#040814] border border-slate-800 rounded-xl space-y-1 opacity-60">
+          <span class="text-slate-500 font-bold block text-[10px]">STEP 02</span>
+          <span class="text-slate-300 font-extrabold">Insurance & Certificates</span>
+        </div>
+        <div class="p-3 bg-[#040814] border border-slate-800 rounded-xl space-y-1 opacity-60">
+          <span class="text-slate-500 font-bold block text-[10px]">STEP 03</span>
+          <span class="text-slate-300 font-extrabold">Master Carrier Agreement</span>
+        </div>
+      </div>
+
+      <!-- FORM FIELDS -->
+      <form onsubmit="event.preventDefault(); alert('Carrier KYC Documents Submitted for Verification!');" class="space-y-6">
+        
+        <!-- SECTION 1: LEGAL ENTITY DETAILS -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
+            <span>🏢</span> Transporter Legal Business Identity
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered Transporter Name *</label>
+              <input type="text" placeholder="e.g., EuroTrans Logistics GmbH" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Country of Incorporation *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
+                <option value="DE">Germany (DE)</option>
+                <option value="IN">India (IN)</option>
+                <option value="SG">Singapore (SG)</option>
+                <option value="US">United States (US)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Operating Authority ID (DOT / MC / GSTIN) *</label>
+              <input type="text" placeholder="e.g., DE892104991 or 27AAAAA0000A1Z5" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Primary Fleet Operational Category *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
+                <option value="ROAD_FTL">Road Freight (FTL / LTL)</option>
+                <option value="OCEAN_NVOCC">Ocean Carrier / NVOCC</option>
+                <option value="AIR_CHARTER">Air Cargo Charter</option>
+                <option value="INTERMODAL_RAIL">Intermodal Rail Drayage</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: CERTIFICATE UPLOADS -->
+        <div class="space-y-4 pt-2">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
+            <span>📜</span> Regulatory Document Attachments
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
+              <span class="text-white font-bold block">Certificate of Cargo Insurance ($1M+ Policy)</span>
+              <p class="text-slate-500 text-[10px]">PDF format required. Must state marine & cargo liability limits.</p>
+              <button type="button" onclick="alert('File Dialog Opened')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-300 rounded-lg text-[10px] font-bold">
+                📎 Attach Insurance Certificate
+              </button>
+            </div>
+
+            <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
+              <span class="text-white font-bold block">Tax Registration & Tax Clearance Certificate</span>
+              <p class="text-slate-500 text-[10px]">Official government tax filing certificate (W-9 / GSTIN / VAT ID).</p>
+              <button type="button" onclick="alert('File Dialog Opened')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-300 rounded-lg text-[10px] font-bold">
+                📎 Attach Tax Certificate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBMIT ACTION -->
+        <div class="pt-4 flex items-center justify-between border-t border-slate-800">
+          <a href="/partner/partner-directory.html" class="text-slate-400 hover:text-white">Cancel</a>
+          <button type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
+            Submit KYC Verification Packet →
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Carrier Onboarding Desk.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+          </html>
+          
