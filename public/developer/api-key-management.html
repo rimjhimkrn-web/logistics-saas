@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Production & Sandbox API Key Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e',
+              orange: '#f97316'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-orange-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">API Keys & Authentication Tokens</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/developer/api-docs.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← API Reference
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN API KEY WORKSPACE ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="text-[11px] font-bold text-orange-400 uppercase tracking-widest block">Bearer Token Credentials</span>
+        <h1 class="text-xl font-extrabold text-white mt-1">API Key Management & Access Control</h1>
+        <p class="text-slate-400 text-[11px] mt-1">Generate production and sandbox API keys, restrict IP CIDR ranges, and revoke compromised tokens.</p>
+      </div>
+
+      <button onclick="alert('Generating new Production API Secret Key...')" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-orange-500/20 shrink-0">
+        🔑 Generate New API Key
+      </button>
+    </section>
+
+    <!-- KEYS TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🗝️</span> Active API Key Credentials
+        </h2>
+        <span class="text-[10px] text-slate-500">Security Standard: <strong class="text-emerald-400">AES-256 Encrypted</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Key Label / Environment</th>
+              <th class="py-3 px-2">API Key Prefix</th>
+              <th class="py-3 px-2">Created Date</th>
+              <th class="py-3 px-2">Last Used</th>
+              <th class="py-3 px-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- KEY 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">Production Backend Master Key</span>
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">PRODUCTION</span>
+              </td>
+              <td class="py-3.5 px-2 font-mono text-orange-400 font-bold">krm_live_9982401...x90</td>
+              <td class="py-3.5 px-2 text-slate-400">Sep 15, 2026</td>
+              <td class="py-3.5 px-2 text-emerald-400 font-bold">Just now (12ms ago)</td>
+              <td class="py-3.5 px-2 text-right">
+                <button onclick="alert('API Key Revoked!')" class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg hover:bg-rose-500 hover:text-slate-950 font-bold transition-all">Revoke Key</button>
+              </td>
+            </tr>
+
+            <!-- KEY 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">Sandbox Testing Key</span>
+                <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold rounded">SANDBOX</span>
+              </td>
+              <td class="py-3.5 px-2 font-mono text-slate-400">krm_test_1102840...a12</td>
+              <td class="py-3.5 px-2 text-slate-400">Oct 01, 2026</td>
+              <td class="py-3.5 px-2 text-slate-400">2 days ago</td>
+              <td class="py-3.5 px-2 text-right">
+                <button onclick="alert('API Key Revoked!')" class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg hover:bg-rose-500 hover:text-slate-950 font-bold transition-all">Revoke Key</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. API Key Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
