@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Multi-Tenant Partitioning & VPC Isolation Controls</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e',
+              red: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-red-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Multi-Tenant VPC Data Partitioning & Isolation</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/admin/rbac-matrix.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← RBAC Governance
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="text-[11px] font-bold text-red-400 uppercase tracking-widest block">Strict RLS & Virtual Private Cloud Isolation</span>
+        <h1 class="text-xl font-extrabold text-white mt-1">Tenant Partitioning & Resource Quota Desk</h1>
+        <p class="text-slate-400 text-[11px] mt-1">Manage database schema isolation, Row-Level Security (RLS) enforcement, dedicated VPC cluster routes, and tenant storage limits.</p>
+      </div>
+
+      <div class="p-3 bg-[#040814] border border-red-500/40 rounded-xl text-right shrink-0">
+        <span class="text-red-400 text-[10px] font-bold block">PARTITION HEALTH</span>
+        <span class="text-emerald-400 font-extrabold text-sm">100% Zero Data Leakage</span>
+      </div>
+    </section>
+
+    <!-- TENANT PARTITION LIST -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🏢</span> Active Tenant Isolation Schemes (2 Enterprise Tenants)
+        </h2>
+        <span class="text-[10px] text-slate-500">Security Standard: <strong class="text-emerald-400">PostgreSQL RLS Active</strong></span>
+      </div>
+
+      <div class="space-y-4">
+
+        <!-- TENANT 1 -->
+        <div class="p-5 bg-[#040814] rounded-xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-sm">Global Supply Chain Corp</span>
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded uppercase">ISOLATED_VPC_SCHEMA</span>
+              </div>
+              <span class="text-[10px] text-slate-500 block mt-0.5">Tenant ID: tnt_gsc_prod_8812 • Schema: schema_gsc_vault</span>
+            </div>
+            <span class="text-emerald-400 font-extrabold text-xs">Storage: 42.8 GB / 100 GB</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[10px]">
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">KMS Key Reference:</span><strong class="text-white">kms-gsc-key-us-east-1</strong></div>
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">Row-Level Security (RLS):</span><strong class="text-emerald-400">ENFORCED (Strict)</strong></div>
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">API Rate Limit Quota:</span><strong class="text-white">1,000,000 Req/Day</strong></div>
+          </div>
+        </div>
+
+        <!-- TENANT 2 -->
+        <div class="p-5 bg-[#040814] rounded-xl border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white text-sm">AeroTech International Ltd</span>
+                <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-[9px] font-bold rounded uppercase">SHARED_PARTITION_RLS</span>
+              </div>
+              <span class="text-[10px] text-slate-500 block mt-0.5">Tenant ID: tnt_aerotech_4401 • Schema: schema_public (RLS)</span>
+            </div>
+            <span class="text-cyan-400 font-extrabold text-xs">Storage: 18.2 GB / 50 GB</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[10px]">
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">KMS Key Reference:</span><strong class="text-white">kms-aerotech-key-eu-west-1</strong></div>
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">Row-Level Security (RLS):</span><strong class="text-emerald-400">ENFORCED (Strict)</strong></div>
+            <div class="p-2 bg-[#081020] rounded-lg border border-slate-800"><span class="text-slate-500 block">API Rate Limit Quota:</span><strong class="text-white">500,000 Req/Day</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Partitioning Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
