@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Developer API Reference & Interactive Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e',
+              blue: '#3b82f6',
+              teal: '#14b8a6',
+              orange: '#f97316'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-orange-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 11 • Developer Portal & API Marketplace</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/developer/api-key-management.html" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-orange-500/20">
+        🔑 API Keys & Credentials
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN API DOCS WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/30 text-[9px] font-bold rounded uppercase">OpenAPI v3.1 & GraphQL Specification</span>
+          <span class="text-slate-500 text-[10px]">API Endpoint v2.4 (Live Production)</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Developer API Reference & Explorer</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Integrate global logistics bookings, real-time AIS vessel telemetry, automated customs declarations, and cryptographic ledger settlements via REST and GraphQL API endpoints.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 text-xs">
+        <a href="/developer/webhooks-management.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-orange-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          ⚡ Webhook Engine
+        </a>
+        <a href="/developer/sdk-downloads.html" class="px-4 py-2.5 bg-orange-500 hover:bg-orange-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-orange-500/20">
+          📦 Download Client SDKs
+        </a>
+      </div>
+    </section>
+
+    <!-- API EXPLORER GRID -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+
+      <!-- ENDPOINTS NAVIGATION LIST -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+          <span>📚</span> API Resource Directory
+        </h2>
+
+        <div class="space-y-2">
+          <button class="w-full text-left p-3 bg-[#040814] border border-orange-500/40 rounded-xl space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 font-bold text-[9px] rounded">GET</span>
+              <span class="text-slate-400 text-[10px]">v2/shipments/telemetry</span>
+            </div>
+            <span class="text-white font-bold block text-[11px]">Live Cargo & Vessel AIS Telemetry</span>
+          </button>
+
+          <button class="w-full text-left p-3 bg-[#040814] border border-slate-800 hover:border-orange-500/40 rounded-xl space-y-1 transition-all">
+            <div class="flex justify-between items-center">
+              <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 font-bold text-[9px] rounded">POST</span>
+              <span class="text-slate-400 text-[10px]">v2/bookings/create</span>
+            </div>
+            <span class="text-white font-bold block text-[11px]">Create Multi-Modal Freight Booking</span>
+          </button>
+
+          <button class="w-full text-left p-3 bg-[#040814] border border-slate-800 hover:border-orange-500/40 rounded-xl space-y-1 transition-all">
+            <div class="flex justify-between items-center">
+              <span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 font-bold text-[9px] rounded">POST</span>
+              <span class="text-slate-400 text-[10px]">v2/customs/single-window</span>
+            </div>
+            <span class="text-white font-bold block text-[11px]">Submit Single-Window Customs Filing</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CODE PLAYGROUND & RESPONSE PANEL -->
+      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 font-bold text-[10px] rounded">GET</span>
+              <span class="text-white font-bold text-sm">https://api.krim.os/v2/shipments/MSCU892101</span>
+            </div>
+            <button onclick="alert('Executing live Sandbox API request...')" class="px-3 py-1.5 bg-orange-500 text-slate-950 font-extrabold rounded-lg hover:bg-orange-400 transition-all">
+              ▶ Test Request
+            </button>
+          </div>
+
+          <!-- REQUEST HEADERS & PARAMS -->
+          <div class="space-y-2">
+            <span class="text-slate-400 text-[10px] uppercase font-bold block">Authorization Header</span>
+            <input type="text" value="Bearer krm_live_9982401_secret_key_x90" readonly class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-orange-400 font-mono text-[10px]" />
+          </div>
+
+          <!-- RESPONSE JSON VIEW -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">JSON Response Body</span>
+              <span class="text-emerald-400 text-[10px] font-bold">200 OK (14ms)</span>
+            </div>
+            <pre class="bg-[#040814] border border-slate-800 rounded-xl p-4 text-slate-300 font-mono text-[10px] leading-relaxed overflow-x-auto">{
+  "status": "success",
+  "data": {
+    "shipment_id": "MSCU892101",
+    "carrier": "MSC Mediterranean Shipping",
+    "vessel_name": "MSC OSCAR",
+    "telemetry": {
+      "latitude": 1.2902,
+      "longitude": 103.8519,
+      "speed_knots": 18.4,
+      "status": "UNDERWAY_USING_ENGINE"
+    },
+    "customs_clearance": "EU_ICS2_HOLD_PENDING",
+    "co2e_emissions_mt": 2.396
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. API Marketplace Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
