@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Enterprise RBAC Matrix & Access Governance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e',
+              blue: '#3b82f6',
+              teal: '#14b8a6',
+              red: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-red-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 12 • Platform Governance, SIEM & Security</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/admin/siem-audit-logs.html" class="px-3 py-1.5 bg-red-500 hover:bg-red-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-red-500/20">
+        🛡️ SIEM Audit Stream
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO / COMMAND BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/30 text-[9px] font-bold rounded uppercase">Zero-Trust Access Model • ISO 27001 & SOC 2 Type II</span>
+          <span class="text-slate-500 text-[10px]">Strict Least-Privilege Policy Enforcement</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Global RBAC Access Governance Matrix</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Manage enterprise system roles, configure resource-level permissions, enforce multi-factor authentication (MFA) policies, and audit token scope delegations.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 text-xs">
+        <a href="/admin/tenant-partitioning.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-red-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          🏢 Tenant VPC Controls
+        </a>
+        <a href="/admin/kms-key-rotation.html" class="px-4 py-2.5 bg-red-500 hover:bg-red-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-red-500/20">
+          🔐 KMS Key Rotation
+        </a>
+      </div>
+    </section>
+
+    <!-- RBAC MATRIX TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>👥</span> Role-Based Permission Assignments
+        </h2>
+        <span class="text-[10px] text-slate-500">Active Roles: <strong class="text-emerald-400">4 Defined System Policies</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Module / Resource Area</th>
+              <th class="py-3 px-2 text-center">Super Admin</th>
+              <th class="py-3 px-2 text-center">Operations Officer</th>
+              <th class="py-3 px-2 text-center">Customs Broker</th>
+              <th class="py-3 px-2 text-center">Finance Manager</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- ROW 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">Operations & Control Tower</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-amber-400 font-bold">READ ONLY</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+            </tr>
+
+            <!-- ROW 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">Customs Single-Window & e-BL</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-amber-400 font-bold">READ ONLY</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+            </tr>
+
+            <!-- ROW 3 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">Billing, Escrow & Ledger</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+            </tr>
+
+            <!-- ROW 4 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3 px-2 font-bold text-white">KMS Keys & SIEM Logs</td>
+              <td class="py-3 px-2 text-center text-emerald-400 font-extrabold">FULL (RWX)</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+              <td class="py-3 px-2 text-center text-slate-600">— NO ACCESS —</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 flex items-center justify-between border-t border-slate-800">
+        <span class="text-slate-400 text-[10px]">MFA Policy: <strong class="text-emerald-400">HARDWARE WEBAUTHN MANDATORY FOR ALL ADMINS</strong></span>
+        <button onclick="alert('Updating Enterprise RBAC Policy Mapping...')" class="px-5 py-2 bg-red-500 hover:bg-red-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-red-500/20">
+          Save Permission Schema Changes →
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Governance Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
