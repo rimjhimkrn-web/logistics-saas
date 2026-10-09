@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Escrow Settlement & Payout Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-emerald-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Cryptographic Escrow & Settlement Engine</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/billing/financial-ledger-audit.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        📖 Double-Entry Ledger
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN ESCROW WORKSPACE ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block">Condition-Based Multi-Bank Escrow</span>
+        <h1 class="text-xl font-extrabold text-white mt-1">Automated Freight Escrow & Smart Payouts</h1>
+        <p class="text-slate-400 text-[11px] mt-1">Funds locked in tier-1 escrow banks and released automatically upon verified e-POD signature and customs clearance.</p>
+      </div>
+
+      <div class="p-3 bg-[#040814] border border-emerald-500/40 rounded-xl text-right shrink-0">
+        <span class="text-emerald-400 text-[10px] font-bold block">TOTAL ESCROW HELD</span>
+        <span class="text-white font-extrabold text-sm">$84,920.00 USD</span>
+      </div>
+    </section>
+
+    <!-- ESCROW ACCOUNTS TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🛡️</span> Active Escrow Vault Contracts
+        </h2>
+        <span class="text-[10px] text-slate-500">Bank Gateways: <strong class="text-emerald-400">JPMorgan / Citi Escrow Active</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Escrow Contract ID</th>
+              <th class="py-3 px-2">Beneficiary / Carrier</th>
+              <th class="py-3 px-2">Locked Value</th>
+              <th class="py-3 px-2">Release Condition Gate</th>
+              <th class="py-3 px-2 text-right">Settlement Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- CONTRACT 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">ESC-2026-8812</span>
+                <span class="text-[10px] text-slate-500">Shipment: MSCU892101</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-200">EuroTrans Logistics GmbH</td>
+              <td class="py-3.5 px-2 font-extrabold text-white">€1,250.00 EUR</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">✓ e-POD SIGNED & CUSTOMS CLEARED</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <button onclick="alert('Escrow Vault Released! Funds Transferred to Carrier SEPA IBAN.')" class="px-3 py-1 bg-emerald-500 text-slate-950 font-extrabold rounded-lg hover:bg-emerald-400 transition-all">Release Escrow →</button>
+              </td>
+            </tr>
+
+            <!-- CONTRACT 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">ESC-2026-9910</span>
+                <span class="text-[10px] text-slate-500">Shipment: TRK-IND-9910</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-200">KRIM India Drayage Fleet</td>
+              <td class="py-3.5 px-2 font-extrabold text-white">$840.00 USD</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">PENDING_DELIVERY_SIGNATURE</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <span class="text-slate-500 text-[10px] font-bold">Locked in Escrow</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Escrow Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
