@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Global AIS Vessel Transponder WebSocket Stream</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-purple-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Global AIS Vessel Transponder Stream</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/connectors/iot-container-sensors.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← IoT Sensors
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="text-[11px] font-bold text-purple-400 uppercase tracking-widest block">Satellite & Terrestrial AIS Receiver Network</span>
+        <h1 class="text-xl font-extrabold text-white mt-1">AIS Vessel Transponder Live Stream</h1>
+        <p class="text-slate-400 text-[11px] mt-1">Sub-second maritime position reports, course over ground (COG), speed over ground (SOG), and port arrival predictions.</p>
+      </div>
+
+      <div class="p-3 bg-[#040814] border border-purple-500/40 rounded-xl text-right shrink-0">
+        <span class="text-purple-400 text-[10px] font-bold block">ACTIVE STREAM SOCKET</span>
+        <span class="text-emerald-400 font-extrabold text-sm">wss://ais.krim.os/v2/stream</span>
+      </div>
+    </section>
+
+    <!-- VESSEL STREAM TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🛰️</span> Live Fleet AIS Telemetry Feed
+        </h2>
+        <span class="text-[10px] text-slate-500">Update Frequency: <strong class="text-emerald-400">Real-Time WebSocket</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Vessel Name / IMO</th>
+              <th class="py-3 px-2">Position (Lat / Lon)</th>
+              <th class="py-3 px-2">Speed (SOG)</th>
+              <th class="py-3 px-2">Destination Port</th>
+              <th class="py-3 px-2 text-right">Navigation Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">MSC OSCAR</span>
+                <span class="text-[10px] text-slate-500">IMO: 9703291 • Flag: PA</span>
+              </td>
+              <td class="py-3.5 px-2 text-slate-300">1.2902° N, 103.8519° E</td>
+              <td class="py-3.5 px-2 font-bold text-purple-400">18.4 Knots</td>
+              <td class="py-3.5 px-2 text-slate-300">NLRTM (Rotterdam)</td>
+              <td class="py-3.5 px-2 text-right"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">UNDERWAY_POWER</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. AIS Stream Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
