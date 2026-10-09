@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Automated Freight Rating Engine & Tariff Auditor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-emerald-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 8 • Automated Freight Rating & Settlement</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/billing/escrow-settlement.html" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-emerald-500/20">
+        🛡️ Escrow Ledger
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO / COMMAND BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded uppercase">Real-Time Tariff Calculation</span>
+          <span class="text-slate-500 text-[10px]">Currency Matrix: USD / EUR / SGD / INR</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Automated Freight Rating Engine</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Execute algorithmic line-item rating across ocean, air, and road tariffs with dynamic fuel surcharge indexing (BAF/FSC) and margin protections.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 text-xs">
+        <a href="/billing/freight-audit-disputes.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          ⚖️ Invoice Audit & Disputes
+        </a>
+        <a href="/billing/customer-invoices.html" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+          📄 Generate Customer Billing
+        </a>
+      </div>
+    </section>
+
+    <!-- RATING WORKSPACE GRID -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+
+      <!-- LEFT 2 COLUMNS: RATING CALCULATOR FORM -->
+      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>⚙️</span> Shipment Rating Parameters
+          </h2>
+          <span class="text-[10px] text-cyan-400 font-bold">Contract ID: TRF-EMEA-2026-01</span>
+        </div>
+
+        <form onsubmit="event.preventDefault(); alert('Rating logic executed successfully!');" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Base Freight Charge ($)</label>
+              <input type="number" value="1850.00" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Fuel Surcharge (FSC %)</label>
+              <input type="number" value="12.4" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Target Currency</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="SGD">SGD ($)</option>
+                <option value="INR">INR (₹)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Accessorial / Terminal Handling (THC)</label>
+              <input type="number" value="220.00" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Customs Clearance & Documentation</label>
+              <input type="number" value="150.00" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500 font-bold" />
+            </div>
+          </div>
+
+          <div class="pt-4 flex items-center justify-end border-t border-slate-800">
+            <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+              Recalculate Rated Total →
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: BREAKDOWN OUTPUT -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+            <span>💵</span> Rated Line-Item Breakdown
+          </h3>
+
+          <div class="space-y-2 text-[11px] text-slate-300">
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Base Freight Charge:</span>
+              <span class="font-bold text-white">$1,850.00 USD</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Fuel Surcharge (12.4%):</span>
+              <span class="font-bold text-amber-400">$229.40 USD</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Terminal Handling (THC):</span>
+              <span class="font-bold text-white">$220.00 USD</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Customs Clearance Fee:</span>
+              <span class="font-bold text-white">$150.00 USD</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 space-y-2">
+          <div class="flex justify-between items-center text-sm font-extrabold">
+            <span class="text-white">Total Rated Charge:</span>
+            <span class="text-emerald-400 text-lg">$2,449.40 USD</span>
+          </div>
+          <a href="/billing/customer-invoices.html" class="w-full block py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-center rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+            Issue Invoice From Rating →
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Rating Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
