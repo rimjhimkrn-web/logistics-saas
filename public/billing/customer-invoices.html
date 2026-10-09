@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Customer Invoicing & Accounts Receivable</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-emerald-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Customer Invoicing & Accounts Receivable (AR)</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/billing/freight-rating-engine.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← Rating Engine
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded uppercase">AR Billing Ledger</span>
+          <span class="text-slate-500 text-[10px]">Real-Time Stripe / Wire Gateway Status: Active</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">Customer Billing & Accounts Receivable</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Issue multi-currency freight invoices, track customer payment statuses, process credit card / SWIFT wire settlements, and monitor aging receivables.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="/billing/carrier-payables.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          💳 Carrier Payables (AP)
+        </a>
+        <button onclick="alert('Creating Manual Customer Invoice Draft...')" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20">
+          + Issue New Invoice
+        </button>
+      </div>
+    </section>
+
+    <!-- AR SUMMARY STATS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Total AR Outstanding</span>
+        <span class="text-2xl font-black text-white">$142,850.00 <span class="text-xs text-slate-500 font-normal">USD</span></span>
+        <span class="text-amber-400 text-[10px] block font-bold">12 Active Statements</span>
+      </div>
+
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Paid (Last 30 Days)</span>
+        <span class="text-2xl font-black text-emerald-400">$389,420.00 <span class="text-xs text-slate-500 font-normal">USD</span></span>
+        <span class="text-emerald-400 text-[10px] block font-bold">100% On-Time Collection</span>
+      </div>
+
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Overdue (>30 Days)</span>
+        <span class="text-2xl font-black text-rose-400">$12,400.00 <span class="text-xs text-slate-500 font-normal">USD</span></span>
+        <span class="text-rose-400 text-[10px] block font-bold">1 Account Pending Escalation</span>
+      </div>
+
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">DSO (Days Sales Outstanding)</span>
+        <span class="text-2xl font-black text-cyan-400">18.4 Days</span>
+        <span class="text-cyan-400 text-[10px] block font-bold">Benchmark: Target &lt; 30 Days</span>
+      </div>
+    </section>
+
+    <!-- INVOICE TABLE -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <span>🧾</span> Customer Accounts Receivable Ledger
+        </h2>
+        <span class="text-[10px] text-slate-500">Filter: <strong class="text-white">All Active Invoices</strong></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
+              <th class="py-3 px-2">Invoice Ref / Date</th>
+              <th class="py-3 px-2">Customer Account</th>
+              <th class="py-3 px-2">Associated Shipment</th>
+              <th class="py-3 px-2">Total Amount</th>
+              <th class="py-3 px-2">Status</th>
+              <th class="py-3 px-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- INVOICE 1 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">INV-2026-8812</span>
+                <span class="text-[10px] text-slate-500">Issued Oct 01, 2026</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-200">Global Supply Chain Corp</td>
+              <td class="py-3.5 px-2 text-slate-400">MSCU892101 (Singapore → Rotterdam)</td>
+              <td class="py-3.5 px-2 font-extrabold text-amber-400">$2,449.40 USD</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">PENDING_PAYMENT</span></td>
+              <td class="py-3.5 px-2 text-right space-x-2">
+                <button onclick="alert('Payment Reminder Email Transmitted!')" class="text-cyan-400 hover:underline font-bold">Send Reminder</button>
+                <button onclick="alert('Opening SWIFT / Stripe Gateway...')" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-lg font-bold hover:bg-emerald-500 hover:text-slate-950 transition-all">Settle →</button>
+              </td>
+            </tr>
+
+            <!-- INVOICE 2 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">INV-2026-7710</span>
+                <span class="text-[10px] text-slate-500">Issued Sep 28, 2026</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-200">AeroTech International Ltd</td>
+              <td class="py-3.5 px-2 text-slate-400">AWB-7720-90 (Frankfurt → JFK)</td>
+              <td class="py-3.5 px-2 font-extrabold text-emerald-400">$1,840.00 USD</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">SETTLED</span></td>
+              <td class="py-3.5 px-2 text-right">
+                <button onclick="alert('Downloading Settled Statement PDF...')" class="text-slate-400 hover:text-white font-bold">Download PDF</button>
+              </td>
+            </tr>
+
+            <!-- INVOICE 3 -->
+            <tr class="hover:bg-slate-900/50 transition-all">
+              <td class="py-3.5 px-2">
+                <span class="font-bold text-white block">INV-2026-6641</span>
+                <span class="text-[10px] text-slate-500">Issued Aug 15, 2026</span>
+              </td>
+              <td class="py-3.5 px-2 font-bold text-slate-200">IndoPacific Traders Pvt</td>
+              <td class="py-3.5 px-2 text-slate-400">TRK-IND-9910 (Nhava Sheva → Delhi)</td>
+              <td class="py-3.5 px-2 font-extrabold text-rose-400">$12,400.00 USD</td>
+              <td class="py-3.5 px-2"><span class="px-2 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[9px] font-bold rounded">OVERDUE_30D</span></td>
+              <td class="py-3.5 px-2 text-right space-x-2">
+                <a href="/billing/freight-audit-disputes.html" class="text-rose-400 hover:underline font-bold">Open Dispute Desk</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. AR Ledger Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
