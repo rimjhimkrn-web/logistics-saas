@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — AI Dynamic Freight Rate Sizing & Yield Optimizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+              rose: '#f43f5e',
+              blue: '#3b82f6',
+              indigo: '#6366f1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-indigo-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 16 • AI & Autonomous Operations</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/ai-ops/route-optimizer.html" class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-indigo-500/20">
+        🧭 Route Optimizer AI
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
+
+    <!-- HERO BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-[9px] font-bold rounded uppercase">Machine Learning Spot Market Pricing Engine</span>
+          <span class="text-slate-500 text-[10px]">Model Version: KRIM-AI-Rate-v4.2</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">AI Dynamic Freight Rate Sizing & Yield Optimizer</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Real-time predictive pricing algorithm incorporating bunker fuel futures, port congestion indexes, equipment availability, and spot market elasticity.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="/ai-ops/predictive-maintenance.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          🔧 Predictive Maintenance AI
+        </a>
+      </div>
+    </section>
+
+    <!-- PRICING SIMULATOR GRID -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- SIMULATION CONTROLS -->
+      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+          <span>🧠</span> AI Rate Sizing Engine Parameter Desk
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-slate-400 text-[10px] uppercase font-bold block">Origin Port / Hub *</label>
+            <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none">
+              <option value="SGSIN">Singapore (SGSIN)</option>
+              <option value="NLRTM">Rotterdam (NLRTM)</option>
+              <option value="USNYC">New York (USNYC)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-slate-400 text-[10px] uppercase font-bold block">Destination Port / Hub *</label>
+            <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none">
+              <option value="NLRTM">Rotterdam (NLRTM)</option>
+              <option value="SGSIN">Singapore (SGSIN)</option>
+              <option value="CNSHA">Shanghai (CNSHA)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-slate-400 text-[10px] uppercase font-bold block">Equipment Type</label>
+            <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none">
+              <option value="40FT_HC">40ft High Cube Dry Container</option>
+              <option value="40FT_REF">40ft Refrigerated (Reefer)</option>
+              <option value="20FT_STANDARD">20ft Standard Dry</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-slate-400 text-[10px] uppercase font-bold block">Target Departure Date</label>
+            <input type="date" value="2026-10-15" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none" />
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button onclick="alert('Calculating AI-Optimized Spot Rate Quote...')" class="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+            Calculate AI Spot Quote →
+          </button>
+        </div>
+      </div>
+
+      <!-- AI QUOTE OUTPUT -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+            <span>💡</span> AI Rate Recommendation
+          </h3>
+
+          <div class="p-4 bg-[#040814] rounded-xl border border-indigo-500/40 space-y-1 text-center">
+            <span class="text-slate-500 text-[10px] uppercase font-bold block">Optimized Spot Rate</span>
+            <span class="text-3xl font-black text-indigo-400 block font-mono">$3,420.00</span>
+            <span class="text-slate-400 text-[10px]">USD All-Inclusive (FCL)</span>
+          </div>
+
+          <div class="space-y-2 text-[11px] text-slate-300">
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Demand Elasticity Factor:</span>
+              <span class="font-bold text-emerald-400">Moderate (1.12x)</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">AI Confidence Score:</span>
+              <span class="font-bold text-indigo-400">99.4%</span>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="alert('AI Rate Quote locked and saved to active booking session!')" class="w-full py-2.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+          Lock & Apply Rate Quote →
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. AI Pricing Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
