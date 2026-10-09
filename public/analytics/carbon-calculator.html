@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — GLEC Framework CO2e Carbon Emissions Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7',
+              rose: '#f43f5e',
+              blue: '#3b82f6',
+              teal: '#14b8a6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-teal-500/20">K</div>
+        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+      </a>
+      <div class="h-5 w-px bg-slate-800"></div>
+      <span class="text-xs font-bold text-slate-400">Phase 10 • Global Analytics, Carbon Engine & ESG</span>
+    </div>
+
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <a href="/analytics/carbon-offset-market.html" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold rounded-lg transition-all shadow-lg shadow-teal-500/20">
+        🌱 Carbon Offset Marketplace
+      </a>
+      <a href="/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+        ← App Shell
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
+
+    <!-- HERO / COMMAND BANNER -->
+    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-teal-500/10 text-teal-400 border border-teal-500/30 text-[9px] font-bold rounded uppercase">GLEC Framework v3.0 & ISO 14083 Compliant</span>
+          <span class="text-slate-500 text-[10px]">Scope 3 Freight Intensity Audit</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white">GLEC CO2e Carbon Emissions Calculator</h1>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Calculate well-to-wheel (WTW) greenhouse gas emissions, CO2e intensity per tonne-kilometer, and environmental impact footprints across multi-modal shipment legs.</p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 text-xs">
+        <a href="/analytics/esg-compliance-report.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-teal-500/50 text-slate-200 font-bold rounded-xl transition-all">
+          📄 CSRD / ESG Disclosures
+        </a>
+        <a href="/analytics/executive-bi-dashboard.html" class="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-teal-500/20">
+          📊 Executive BI Dashboard
+        </a>
+      </div>
+    </section>
+
+    <!-- CALCULATOR & METRICS GRID -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+
+      <!-- LEFT 2 COLUMNS: ROUTE EMISSIONS MODELING -->
+      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span>🌿</span> Multi-Modal Leg Footprint Modeler
+          </h2>
+          <span class="text-[10px] text-teal-400 font-bold">Standard: ISO 14083 / GLEC v3.0</span>
+        </div>
+
+        <form onsubmit="event.preventDefault(); alert('Emissions model updated via GLEC Engine!');" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Transport Mode *</label>
+              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none focus:border-teal-500">
+                <option value="OCEAN_CONTAINER">Ocean Vessel (Post-Panamax Container)</option>
+                <option value="AIR_FREIGHT">Air Freight (Wide-body Cargo Jet)</option>
+                <option value="ROAD_DIESEL">Road Drayage (Euro VI Heavy Truck)</option>
+                <option value="RAIL_ELECTRIC">Rail Freight (Electric Locomotive)</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Cargo Weight (Metric Tonnes)</label>
+              <input type="number" value="18.45" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-teal-500 font-bold" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Distance Travelled (KM)</label>
+              <input type="number" value="15420" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white outline-none focus:border-teal-500 font-bold" />
+            </div>
+          </div>
+
+          <div class="p-3 bg-[#040814] rounded-xl border border-slate-800 space-y-2">
+            <span class="text-slate-400 text-[10px] uppercase font-bold block">Fuel & Fuel Cycle Parameter (Well-To-Wheel)</span>
+            <div class="grid grid-cols-2 gap-4 text-[10px] text-slate-300">
+              <div><span>Fuel Type:</span> <strong class="text-white">Very Low Sulphur Fuel Oil (VLSFO)</strong></div>
+              <div><span>GLEC Intensity Factor:</span> <strong class="text-teal-400">8.42 g CO2e / tonne-km</strong></div>
+            </div>
+          </div>
+
+          <div class="pt-4 flex items-center justify-end border-t border-slate-800">
+            <button type="submit" class="px-5 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-teal-500/20">
+              Recalculate GLEC Emissions Footprint →
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: FOOTPRINT OUTPUT -->
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
+            <span>📉</span> Footprint Calculation Result
+          </h3>
+
+          <div class="p-4 bg-[#040814] rounded-xl border border-teal-500/40 space-y-1 text-center">
+            <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Well-To-Wheel Emissions</span>
+            <span class="text-3xl font-black text-teal-400 block font-mono">2.396 MT</span>
+            <span class="text-slate-400 text-[10px]">Metric Tonnes CO2 Equivalent (CO2e)</span>
+          </div>
+
+          <div class="space-y-2 text-[11px] text-slate-300">
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Tank-to-Wheel (TTW Direct):</span>
+              <span class="font-bold text-white">1.942 MT CO2e</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Well-to-Tank (WTT Indirect):</span>
+              <span class="font-bold text-white">0.454 MT CO2e</span>
+            </div>
+            <div class="flex justify-between p-2 bg-[#040814] rounded-lg border border-slate-800">
+              <span class="text-slate-400">Intensity Efficiency Rating:</span>
+              <span class="font-bold text-emerald-400">A+ (Low Emission Corridor)</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="/analytics/carbon-offset-market.html" class="w-full block py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-center rounded-xl transition-all shadow-lg shadow-teal-500/20">
+          Offset This Shipment (2.4 Credits) →
+        </a>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Carbon Engine Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/app-runtime.js"></script>
+</body>
+</html>
