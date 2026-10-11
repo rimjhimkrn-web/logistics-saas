@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KRIM OS — Shared Application Dashboard Shell</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#02050e',
+              panel: '#081020',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+              rose: '#f43f5e',
+              blue: '#3b82f6',
+              gold: '#eab308'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
+  <header class="h-16 bg-[#040814]/95 border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
+    <div class="flex items-center space-x-4 font-mono">
+      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 bg-blue-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-blue-500/20">K</div>
+        <div>
+          <span class="font-extrabold text-white text-sm tracking-wide block">KRIM OS</span>
+          <span class="text-[9px] text-slate-500 font-bold block uppercase">Global Logistics Operating System</span>
+        </div>
+      </a>
+      <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+      <!-- Organization Switcher Dropdown Trigger -->
+      <button onclick="window.location.href='/app/shared/organization-switcher.html'" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-[#081020] border border-slate-800 hover:border-slate-700 rounded-lg text-xs font-mono text-slate-300 transition-all">
+        <span>🏢 Global Supply Chain Corp</span>
+        <span class="text-slate-500 text-[10px]">▼</span>
+      </button>
+    </div>
+
+    <!-- Right Control Actions -->
+    <div class="flex items-center space-x-3 font-mono text-xs">
+      <!-- Global Search -->
+      <div class="relative hidden md:block">
+        <input type="text" placeholder="Search shipments, BOL, containers..." class="w-64 bg-[#081020] border border-slate-800 rounded-xl px-3 py-1.5 pl-8 text-white placeholder-slate-500 text-xs focus:border-blue-500 outline-none transition-all" />
+        <span class="absolute left-2.5 top-2 text-slate-500">🔍</span>
+      </div>
+
+      <!-- Notifications Bell -->
+      <button onclick="alert('No unread enterprise notifications.')" class="p-2 bg-[#081020] border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl transition-all relative">
+        🔔
+        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+      </button>
+
+      <!-- User Profile & Security Settings -->
+      <a href="/app/shared/security-manager.html" class="flex items-center space-x-2 px-3 py-1.5 bg-[#081020] border border-slate-800 hover:border-blue-500/50 rounded-xl text-xs text-slate-200 transition-all">
+        <div class="w-6 h-6 bg-blue-500/20 text-blue-400 font-bold rounded-full flex items-center justify-center text-[10px]">OS</div>
+        <span class="font-bold hidden sm:inline">Operator</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN LAYOUT CONTAINER ==================== -->
+  <div class="flex-1 flex flex-col md:flex-row">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-64 bg-[#040814] border-r border-slate-800/80 p-4 space-y-6 shrink-0 font-mono text-xs">
+      <div class="space-y-1">
+        <span class="text-[10px] font-bold text-slate-500 uppercase px-3 tracking-wider block">Operational Navigation</span>
+        <nav class="space-y-1 pt-1">
+          <a href="/app/app-shell.html" class="flex items-center space-x-3 px-3 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-xl font-extrabold transition-all">
+            <span>📊</span> <span>Command Dashboard</span>
+          </a>
+          <a href="/customer/shipments.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>📦</span> <span>Active Shipments</span>
+          </a>
+          <a href="/customer/tracking.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>🛰️</span> <span>Live Telemetry & Map</span>
+          </a>
+          <a href="/customer/finance.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>💳</span> <span>Invoices & Ledger</span>
+          </a>
+          <a href="/customer/compliance.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>🛡️</span> <span>Compliance & Customs</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-bold text-slate-500 uppercase px-3 tracking-wider block">Shared Settings & Security</span>
+        <nav class="space-y-1 pt-1">
+          <a href="/app/shared/organization-switcher.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>🏢</span> <span>Organizations</span>
+          </a>
+          <a href="/app/shared/security-manager.html" class="flex items-center space-x-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-all">
+            <span>🔐</span> <span>Security & Passkeys</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-1 p-6 sm:p-8 space-y-8 font-mono text-xs">
+      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[9px] font-bold rounded uppercase">Shared Dashboard Shell Active</span>
+          <span class="text-slate-500 text-[10px]">Session Status: Authenticated & Encrypted</span>
+        </div>
+        <h1 class="text-xl font-extrabold text-white">Universal Application Layout Container</h1>
+        <p class="text-slate-400 text-xs leading-relaxed max-w-2xl">This shared dashboard shell provides consistent navigation, multi-tenant organization context, and secure audit session management across all KRIM OS workspaces.</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
+      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Shared Shell Core.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/platform/krim-config.js"></script>
+  <script type="module" src="/app/shared/shared-runtime.js"></script>
+</body>
+</html>
