@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/logistics-saas/config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -120,10 +121,7 @@
 
     <!-- Institutional Sign In & MFA Challenge Logic -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
         let activeFactorId = null;
 
@@ -140,16 +138,16 @@
                 const email = document.getElementById('login-email').value;
                 const password = document.getElementById('login-password').value;
 
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
-                const { data: aalData, error: aalErr } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
                 if (aalErr) throw aalErr;
 
                 if (aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
                     // MFA Required: List factors to obtain challenge ID
-                    const { data: factors, error: factorsErr } = await supabaseClient.auth.mfa.listFactors();
+                    const { data: factors, error: factorsErr } = await window.KRIM_SUPABASE.auth.mfa.listFactors();
                     if (factorsErr) throw factorsErr;
 
                     const totpFactor = factors.totp.find(f => f.status === 'verified');
@@ -192,19 +190,19 @@
 
             try {
                 if (!activeFactorId) {
-                    const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+                    const { data: factors } = await window.KRIM_SUPABASE.auth.mfa.listFactors();
                     const active = factors?.totp?.find(f => f.status === 'verified');
                     if (!active) throw new Error("No active TOTP factor found.");
                     activeFactorId = active.id;
                 }
 
-                const { data: challengeData, error: challengeErr } = await supabaseClient.auth.mfa.challenge({
+                const { data: challengeData, error: challengeErr } = await window.KRIM_SUPABASE.auth.mfa.challenge({
                     factorId: activeFactorId
                 });
 
                 if (challengeErr) throw challengeErr;
 
-                const { data: verifyData, error: verifyErr } = await supabaseClient.auth.mfa.verify({
+                const { data: verifyData, error: verifyErr } = await window.KRIM_SUPABASE.auth.mfa.verify({
                     factorId: activeFactorId,
                     challengeId: challengeData.id,
                     code: code
