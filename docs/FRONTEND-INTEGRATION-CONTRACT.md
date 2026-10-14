@@ -5,6 +5,7 @@ This is the required standard for every new KRIM web page. A page is not conside
 ## Hosting and routes
 - Current GitHub Pages project base: `/logistics-saas/`.
 - Internal links, redirects, manifests, and local assets must work beneath that base path.
+- New pages must build internal URLs with `window.krimPath('auth/login.html')` (or the relevant repo-relative path), rather than hard-coding `/logistics-saas/` or assuming domain root.
 - Do not hard-code paths that assume the domain root. Verify links from both the public landing page and the nested page where they are used.
 - The repository root `index.html` is the entry point and forwards to `public/index.html`.
 
