@@ -190,7 +190,7 @@
             try {
                 const shipmentId = document.getElementById('calc-shipment-id').value.trim();
                 const tier = document.getElementById('calc-service-tier').value;
-                if (!/^\\d+$/.test(shipmentId)) throw new Error("Enter a valid shipment ID.");
+                if (!/^\d+$/.test(shipmentId)) throw new Error("Enter a valid shipment ID.");
                 if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
                     await fetchShipmentWeight(shipmentId);
                 }
