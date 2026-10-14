@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Customer Command Workspace</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { bg: '#090d16', card: '#111827', border: '#1f2937', accent: '#06b6d4' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-purple-500 selection:text-white">
+
+    <div class="w-full bg-[#05080f] border-b border-gray-900 text-[11px] text-gray-400 py-1.5 px-6 flex justify-between items-center font-mono">
+        <div class="flex items-center space-x-4">
+            <span class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-emerald-400 font-semibold">KRIM CORE: ONLINE</span></span>
+            <span>|</span>
+            <span>Customer Workspace Node Active</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="session-identity-badge" class="text-purple-400">Authenticating...</span>
+            <span>|</span>
+            <span>EN (US)</span>
+        </div>
+    </div>
+
+    <header class="border-b border-gray-800 bg-[#090d16]/95 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow">K</div>
+                <div><span class="text-sm font-extrabold tracking-wider text-white">KRIM OS</span><span class="block text-[9px] tracking-widest text-purple-400 uppercase font-mono">CUSTOMER PORTAL</span></div>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-1 text-xs font-medium text-gray-400 font-mono">
+                <button onclick="switchTab('overview')" id="nav-overview" class="px-3 py-1.5 rounded-lg text-white bg-purple-600/30 border border-purple-500/30 transition">Overview</button>
+                <button onclick="switchTab('shipments')" id="nav-shipments" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Shipments</button>
+                <button onclick="switchTab('create')" id="nav-create" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">+ New Shipment</button>
+                <button onclick="switchTab('quotes')" id="nav-quotes" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Quotes</button>
+            </nav>
+
+            <div>
+                <a href="/auth/logout.html" class="text-xs font-mono text-red-400 bg-red-950/40 border border-red-900/50 px-3 py-1.5 rounded-lg hover:bg-red-950 transition">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-10 flex-grow w-full">
+        <!-- TAB 1: OVERVIEW -->
+        <section id="tab-overview" class="space-y-8 workspace-tab">
+            <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-purple-400">ENTERPRISE SUPPLY CHAIN CONTROL TOWER</span>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white mt-1 mb-2">Customer Command Workspace</h1>
+                <p class="text-sm text-gray-400 max-w-2xl">Monitor active freight lanes, review server-validated quotations, and execute secure settlements.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-xl">
+                    <span class="text-xs font-mono text-gray-400 uppercase tracking-wider">Active Shipments</span>
+                    <p id="metric-shipments" class="text-3xl font-bold text-white mt-2 font-mono">--</p>
+                </div>
+                <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-xl">
+                    <span class="text-xs font-mono text-gray-400 uppercase tracking-wider">Active Quotations</span>
+                    <p id="metric-quotes" class="text-3xl font-bold text-purple-400 mt-2 font-mono">--</p>
+                </div>
+                <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-xl">
+                    <span class="text-xs font-mono text-gray-400 uppercase tracking-wider">Node Security</span>
+                    <p class="text-3xl font-bold text-emerald-400 mt-2 font-mono">Verified</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SHIPMENTS -->
+        <section id="tab-shipments" class="space-y-6 workspace-tab hidden">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white">Authorized Shipments</h2>
+                <button onclick="loadCustomerData()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-xl text-xs font-mono uppercase border border-gray-700">Refresh ⟳</button>
+            </div>
+            <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-2xl overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-[11px] font-mono text-gray-400 uppercase tracking-widest">
+                            <th class="py-3 px-4">ID</th><th class="py-3 px-4">Route</th><th class="py-3 px-4">Goods</th><th class="py-3 px-4">Weight</th><th class="py-3 px-4">Status</th><th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-shipments-tbody" class="divide-y divide-gray-800 text-sm text-gray-300">
+                        <tr><td colspan="6" class="py-8 text-center text-gray-500 font-mono text-xs">Loading telemetry...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 3: CREATE SHIPMENT (EXACT RPC CONTRACT) -->
+        <section id="tab-create" class="space-y-6 workspace-tab hidden">
+            <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 shadow-2xl max-w-3xl mx-auto">
+                <div class="mb-6 pb-4 border-b border-gray-800">
+                    <h2 class="text-xl font-bold text-white">Create Verified Global Shipment</h2>
+                    <p class="text-xs text-gray-400">Invokes krim_create_global_shipment with resolved organization mapping.</p>
+                </div>
+                <form id="workspace-shipment-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Origin Location ID / Name</label>
+                        <input type="text" id="ws-origin" required placeholder="e.g., Ranchi Hub" class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 font-mono text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Destination Location ID / Name</label>
+                        <input type="text" id="ws-destination" required placeholder="e.g., New Delhi Terminal" class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 font-mono text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Goods Description</label>
+                        <input type="text" id="ws-goods" required placeholder="e.g., Industrial Equipment" class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 font-mono text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Total Weight (kg)</label>
+                        <input type="number" id="ws-weight" required placeholder="1250" class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 font-mono text-sm">
+                    </div>
+                    <div class="md:col-span-2 pt-2">
+                        <button type="submit" id="ws-submit-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 px-6 rounded-xl uppercase text-xs font-mono tracking-wider transition cursor-pointer">
+                            Execute Global Core Contract →
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 4: QUOTES -->
+        <section id="tab-quotes" class="space-y-6 workspace-tab hidden">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-white">Authoritative Quotations</h2>
+                <a href="/public/shipper/rate-calculator.html" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-mono uppercase">New Quote Engine →</a>
+            </div>
+            <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-2xl overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-[11px] font-mono text-gray-400 uppercase tracking-widest">
+                            <th class="py-3 px-4">Quote ID</th><th class="py-3 px-4">Shipment ID</th><th class="py-3 px-4">Amount</th><th class="py-3 px-4">Status</th><th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-quotes-tbody" class="divide-y divide-gray-800 text-sm text-gray-300">
+                        <tr><td colspan="5" class="py-8 text-center text-gray-500 font-mono text-xs">Loading quotations...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-gray-800 py-8 text-center text-xs text-gray-500 font-mono">
+        KRIM Logistics OS Enterprise Network © 2026. All rights reserved.
+    </footer>
+
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.workspace-tab').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            ['overview', 'shipments', 'create', 'quotes'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) {
+                    btn.className = (t === tabName) ? "px-3 py-1.5 rounded-lg text-white bg-purple-600/30 border border-purple-500/30 transition" : "px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition";
+                }
+            });
+        }
+
+        async function initWorkspace() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = "/auth/login.html"; return; }
+            document.getElementById('session-identity-badge').innerText = `Node: ${session.user.email}`;
+            await loadCustomerData();
+        }
+
+        async function loadCustomerData() {
+            try {
+                const { data: shipments } = await supabaseClient.from('krim_shipments').select('*').order('created_at', { ascending: false });
+                const { data: quotes } = await supabaseClient.from('krim_quotes').select('*').order('created_at', { ascending: false });
+
+                if (shipments) {
+                    document.getElementById('metric-shipments').innerText = shipments.length;
+                    const tbody = document.getElementById('customer-shipments-tbody');
+                    tbody.innerHTML = shipments.length === 0 ? `<tr><td colspan="6" class="py-8 text-center text-gray-500 font-mono text-xs">No shipments found.</td></tr>` : '';
+                    shipments.forEach(s => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-gray-900/40 transition">
+                                <td class="py-4 px-4 font-mono font-medium text-white">#${s.id}</td>
+                                <td class="py-4 px-4 text-gray-300">${s.origin_location_id || s.origin || 'N/A'} → ${s.destination_location_id || s.destination || 'N/A'}</td>
+                                <td class="py-4 px-4 text-gray-400">${s.goods_description || 'Cargo'}</td>
+                                <td class="py-4 px-4 font-mono">${s.total_weight_kg || 1000} kg</td>
+                                <td class="py-4 px-4"><span class="px-2 py-1 rounded text-xs font-mono bg-amber-950/40 text-amber-400 border border-amber-900">${s.status || 'pending'}</span></td>
+                                <td class="py-4 px-4 text-right"><a href="/public/shipper/rate-calculator.html?shipment_id=${s.id}" class="text-purple-400 font-mono text-xs hover:underline">Quote →</a></td>
+                            </tr>`;
+                    });
+                }
+
+                if (quotes) {
+                    document.getElementById('metric-quotes').innerText = quotes.length;
+                    const qTbody = document.getElementById('customer-quotes-tbody');
+                    qTbody.innerHTML = quotes.length === 0 ? `<tr><td colspan="5" class="py-8 text-center text-gray-500 font-mono text-xs">No quotations found.</td></tr>` : '';
+                    quotes.forEach(q => {
+                        qTbody.innerHTML += `
+                            <tr class="hover:bg-gray-900/40 transition">
+                                <td class="py-4 px-4 font-mono font-medium text-white">#${q.id}</td>
+                                <td class="py-4 px-4 font-mono">#${q.shipment_id}</td>
+                                <td class="py-4 px-4 font-mono text-purple-400 font-semibold">${q.currency_code || 'INR'} ${Number(q.amount || 0).toLocaleString('en-IN')}</td>
+                                <td class="py-4 px-4"><span class="px-2 py-1 rounded text-xs font-mono bg-purple-950/40 text-purple-400 border border-purple-900">${q.status || 'pending'}</span></td>
+                                <td class="py-4 px-4 text-right"><a href="/public/quote-result.html?shipment_id=${q.shipment_id}" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded text-xs font-mono uppercase">Checkout →</a></td>
+                            </tr>`;
+                    });
+                }
+            } catch (err) { console.error("Data load error:", err); }
+        }
+
+        document.getElementById('workspace-shipment-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('ws-submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Resolving Organization & Executing RPC...";
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) throw new Error("No active session.");
+
+                const { data: member, error: memberErr } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('organization_id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (memberErr || !member) throw new Error("Organization membership lookup failed.");
+
+                const { data, error } = await supabaseClient.rpc('krim_create_global_shipment', {
+                    p_customer_organization_id: member.organization_id,
+                    p_origin_location_id: document.getElementById('ws-origin').value,
+                    p_destination_location_id: document.getElementById('ws-destination').value,
+                    p_goods_description: document.getElementById('ws-goods').value,
+                    p_total_weight_kg: Number(document.getElementById('ws-weight').value)
+                });
+
+                if (error) throw error;
+
+                alert("Global shipment successfully created via backend contract!");
+                document.getElementById('workspace-shipment-form').reset();
+                await loadCustomerData();
+                switchTab('shipments');
+            } catch (err) {
+                alert("RPC Execution Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Execute Global Core Contract →";
+            }
+        });
+
+        initWorkspace();
+    </script>
+</body>
+  </html>
+  
