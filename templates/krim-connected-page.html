@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KRIM Logistics OS — New Connected Page</title>
+  <meta name="krim-environment" content="production">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/logistics-saas/config.js"></script>
+</head>
+<body>
+  <main>
+    <h1 id="page-title">KRIM Workspace</h1>
+    <p id="page-status" role="status">Checking your secure session…</p>
+    <section id="page-content" hidden></section>
+  </main>
+
+  <script>
+    // Copy this template for new protected KRIM pages.
+    // Use RLS-protected queries and server-side RPCs/Edge Functions for writes.
+    (async function initKrimPage() {
+      const status = document.getElementById("page-status");
+      const content = document.getElementById("page-content");
+      const client = window.KRIM_SUPABASE;
+
+      function setStatus(message, isError = false) {
+        status.textContent = message;
+        status.style.color = isError ? "#b91c1c" : "";
+      }
+
+      try {
+        if (!client) throw new Error("Shared KRIM Supabase client did not initialize.");
+
+        const { data: { session }, error: sessionError } = await client.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!session) {
+          window.location.replace(window.krimPath("auth/login.html"));
+          return;
+        }
+
+        const { data: memberships, error: membershipError } = await client
+          .from("krim_organization_members")
+          .select("organization_id, role, status")
+          .eq("user_id", session.user.id)
+          .eq("status", "active")
+          .limit(2);
+
+        if (membershipError) throw membershipError;
+        if (!memberships || memberships.length === 0) {
+          setStatus("Your account does not have an active KRIM organization membership. Complete onboarding or contact KRIM support.", true);
+          return;
+        }
+
+        // Do not guess which organization to use when a user belongs to multiple organizations.
+        if (memberships.length > 1) {
+          setStatus("This account belongs to multiple organizations. Add an explicit organization selector before loading organization data.", true);
+          return;
+        }
+
+        window.KRIM_PAGE_CONTEXT = {
+          userId: session.user.id,
+          email: session.user.email || "",
+          organizationId: memberships[0].organization_id,
+          organizationRole: memberships[0].role
+        };
+
+        content.hidden = false;
+        setStatus("Secure session and active organization verified.");
+        // Add page-specific, organization-scoped data loading below this line.
+      } catch (error) {
+        setStatus("Page initialization failed: " + (error && error.message ? error.message : "Unknown error"), true);
+      }
+    })();
+  </script>
+</body>
+</html>
