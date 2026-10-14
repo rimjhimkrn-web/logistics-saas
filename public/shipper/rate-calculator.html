@@ -158,14 +158,17 @@
 
         function calculateRate() {
             const tier = document.getElementById('calc-service-tier').value;
-            const weight = loadedShipmentData ? (loadedShipmentData.total_weight_kg || 1000) : 1000;
-            
+            if (!loadedShipmentData || !Number(loadedShipmentData.total_weight_kg)) {
+                document.getElementById('preview-amount').innerText = "Load a valid shipment first";
+                return null;
+            }
+            const weight = Number(loadedShipmentData.total_weight_kg);
             let ratePerKg = 15;
             if (tier === 'air_priority') ratePerKg = 45;
             if (tier === 'heavy_haul') ratePerKg = 10;
-
             const total = weight * ratePerKg;
-            document.getElementById('preview-amount').innerText = `₹${total.toLocaleString('en-IN')}.00`;
+            document.getElementById('preview-amount').innerText =
+                `Indicative estimate: ₹${total.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})} — server will calculate the final quote`;
             return total;
         }
 
@@ -180,36 +183,37 @@
             const btn = document.getElementById('btn-commit-quote');
             const feedback = document.getElementById('calculator-feedback');
             btn.disabled = true;
-            btn.innerText = "Committing Quote to Ledger...";
-            feedback.innerHTML = "";
+            btn.innerText = "Requesting Server-Calculated Quote...";
+            feedback.textContent = "";
 
             try {
                 const shipmentId = document.getElementById('calc-shipment-id').value.trim();
-                const amount = calculateRate();
-                const customerOrgId = loadedShipmentData ? loadedShipmentData.customer_organization_id : "00000000-0000-0000-0000-000000000001";
+                const tier = document.getElementById('calc-service-tier').value;
+                if (!/^\\d+$/.test(shipmentId)) throw new Error("Enter a valid shipment ID.");
+                if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
+                    await fetchShipmentWeight(shipmentId);
+                }
+                if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
+                    throw new Error("Shipment could not be loaded. Check the ID and your organization access.");
+                }
 
-                // Insert quote into krim_quotes schema table
-                const { data, error } = await supabaseClient.from('krim_quotes').insert([{
-                    shipment_id: shipmentId,
-                    customer_organization_id: customerOrgId,
-                    amount: amount,
-                    currency_code: 'INR',
-                    status: 'pending',
-                    valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                }]).select();
-
+                const { data, error } = await supabaseClient.rpc('krim_create_tariff_quote', {
+                    p_shipment_id: Number(shipmentId),
+                    p_service_tier: tier,
+                    p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                });
                 if (error) throw error;
+                if (!data || !data.id) throw new Error("The server did not return a quotation reference.");
 
-                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Quote committed successfully! Redirecting to secure checkout...</p>`;
-
+                feedback.innerHTML = "<p class='text-emerald-600 font-semibold'>Server-calculated quote created. Open Spot Approvals to review and accept it.</p>";
                 setTimeout(() => {
-                    window.location.href = `/logistics-saas/public/quote-result.html?shipment_id=${shipmentId}`;
-                }, 1200);
-
+                    window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
+                }, 1000);
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Ledger Error: ${err.message}</p>`;
+                feedback.textContent = "Quote creation failed: " + (err.message || "Unknown error");
+                feedback.className = "text-sm font-semibold text-red-700";
                 btn.disabled = false;
-                btn.innerText = "Commit Quote & Proceed to Checkout →";
+                btn.innerText = "Request Quote & Review →";
             }
         });
 
