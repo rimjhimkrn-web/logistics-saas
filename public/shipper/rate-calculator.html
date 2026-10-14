@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Authoritative Rate Calculator</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { dark: { bg: '#090d16', card: '#111827', border: '#1f2937', accent: '#06b6d4' } } } } }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-purple-500 selection:text-white">
+
+    <div class="w-full bg-[#05080f] border-b border-gray-900 text-[11px] text-gray-400 py-1.5 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-emerald-400 font-semibold">KRIM CORE: ONLINE</span></span>
+        <span id="session-identity-badge" class="text-purple-400">Authenticating...</span>
+    </div>
+
+    <header class="border-b border-gray-800 bg-[#090d16]/95 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow">K</div>
+                <span class="text-sm font-extrabold tracking-wider text-white">KRIM OS — TARIFF ENGINE</span>
+            </div>
+            <a href="/app/customer/index.html" class="text-xs font-mono text-gray-300 bg-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-700 transition">← Workspace</a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12 flex-grow w-full space-y-8">
+        <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 md:p-8 shadow-2xl">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-purple-400">SCHEMA-ALIGNED QUOTATION ENGINE</span>
+            <h1 class="text-2xl font-extrabold text-white mt-1 mb-2">Freight Rate Calculator</h1>
+            <p class="text-sm text-gray-400">Computes tariffs and inserts into krim_quotes with exact schema columns.</p>
+        </div>
+
+        <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 shadow-2xl">
+            <form id="rate-calculator-form" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Select Shipment</label>
+                    <select id="calculator-shipment-select" required class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-purple-500">
+                        <option value="">Loading shipments...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Service Tier</label>
+                    <select id="calculator-service-tier" class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-purple-500">
+                        <option value="surface_express">Surface Express</option>
+                        <option value="air_priority">Air Priority</option>
+                        <option value="heavy_haul">Heavy Haul / ODC</option>
+                    </select>
+                </div>
+                <button type="submit" id="calculate-rate-btn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-6 rounded-xl uppercase text-xs font-mono tracking-wider transition cursor-pointer">
+                    Compute & Save Quote (Schema Aligned) →
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="border-t border-gray-800 py-8 text-center text-xs text-gray-500 font-mono">KRIM Logistics OS © 2026.</footer>
+
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        async function init() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = "/auth/login.html"; return; }
+            document.getElementById('session-identity-badge').innerText = `Node: ${session.user.email}`;
+
+            const { data } = await supabaseClient.from('krim_shipments').select('*').order('created_at', { ascending: false });
+            const select = document.getElementById('calculator-shipment-select');
+            select.innerHTML = '<option value="">-- Choose Shipment --</option>';
+            if (data) {
+                data.forEach(s => {
+                    select.innerHTML += `<option value="${s.id}" data-weight="${s.total_weight_kg || 1000}" data-org="${s.customer_organization_id || ''}">Shipment #${s.id} (${s.total_weight_kg || 1000} kg)</option>`;
+                });
+            }
+        }
+
+        document.getElementById('rate-calculator-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('calculate-rate-btn');
+            const select = document.getElementById('calculator-shipment-select');
+            const shipmentId = Number(select.value);
+            const selectedOpt = select.options[select.selectedIndex];
+            const weight = Number(selectedOpt.getAttribute('data-weight')) || 1000;
+            const orgId = selectedOpt.getAttribute('data-org');
+
+            if (!shipmentId) { alert("Select a shipment."); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Saving Quote to Database Schema...";
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const { data: member } = await supabaseClient.from('krim_organization_members').select('organization_id').eq('user_id', session.user.id).single();
+                const customerOrgId = orgId && orgId !== 'null' ? orgId : member?.organization_id;
+
+                const amount = weight * 15; // Calculated tariff amount
+
+                // Exact schema columns: amount, currency_code, valid_until, status, customer_organization_id, shipment_id
+                const { data, error } = await supabaseClient
+                    .from('krim_quotes')
+                    .insert([{
+                        shipment_id: shipmentId,
+                        customer_organization_id: customerOrgId,
+                        amount: amount,
+                        currency_code: 'INR',
+                        valid_until: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
+                        status: 'pending'
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                alert(`Quote #${data.id} created successfully! Amount: ₹${amount}`);
+                window.location.href = `/public/quote-result.html?shipment_id=${shipmentId}`;
+            } catch (err) {
+                alert("Error: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Compute & Save Quote (Schema Aligned) →";
+            }
+        });
+        init();
+    </script>
+</body>
+</html>
