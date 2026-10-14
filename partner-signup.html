@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Carrier & Partner Automated Onboarding</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Global Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-emerald-600 font-semibold uppercase">Global Partner Network</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-sm">
+                <span class="text-slate-500 hidden sm:inline">Already onboarded?</span>
+                <a href="/auth/login.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Sign In →</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Partner Onboarding Main Section -->
+    <main class="max-w-2xl mx-auto px-6 py-16 flex-grow w-full">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
+            
+            <!-- STAGE 1: PARTNER REGISTRATION FORM -->
+            <div id="stage-partner-signup" class="space-y-6">
+                <div class="space-y-2">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Automated Carrier Acquisition</span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Join KRIM Partner Network</h1>
+                    <p class="text-slate-600 text-sm">Autonomous onboarding engine for carriers, fleet operators, and logistics service providers to plug into enterprise freight demand.</p>
+                </div>
+
+                <form id="form-partner-signup" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Carrier / Enterprise Name</label>
+                            <input type="text" id="partner-org-name" required placeholder="Global Transit Corp" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Primary Mode</label>
+                            <select id="partner-mode" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-500 transition">
+                                <option value="surface_fleet">Surface Fleet / Trucking</option>
+                                <option value="air_freight">Air Freight Carrier</option>
+                                <option value="ocean_liner">Ocean / Maritime Port</option>
+                                <option value="intermodal_3pl">Intermodal 3PL Operator</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Corporate Admin Email</label>
+                        <input type="email" id="partner-email" required placeholder="dispatch@globaltransit.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Secure Passphrase</label>
+                        <input type="password" id="partner-password" required placeholder="••••••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+
+                    <button type="submit" id="btn-partner-signup" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        Initialize Automated Onboarding & Node Provisioning →
+                    </button>
+                </form>
+                <div id="partner-signup-feedback" class="text-xs"></div>
+            </div>
+
+            <!-- STAGE 2: MFA ENROLLMENT (HIDDEN INITIALLY) -->
+            <div id="stage-partner-mfa" class="space-y-6 hidden">
+                <div class="space-y-2">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Enterprise Security Enrollment</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Mandatory AAL2 MFA Setup</h2>
+                    <p class="text-slate-600 text-sm">Scan the secure authenticator key below into your TOTP application to secure your partner telemetry node.</p>
+                </div>
+
+                <div class="space-y-4 text-center">
+                    <div id="partner-qrcode-container" class="p-6 bg-slate-50 rounded-2xl border border-slate-200 inline-block">
+                        <!-- QR Code / Secret Key Rendered Here -->
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Enter 6-Digit TOTP Code to Verify</label>
+                        <input type="text" id="partner-mfa-code" maxlength="6" placeholder="123456" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-center font-mono text-lg tracking-[0.5em] focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <button onclick="verifyPartnerMFA()" id="btn-partner-verify-mfa" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/20 cursor-pointer">
+                    Verify TOTP & Enter Partner Workspace →
+                </button>
+                <div id="partner-mfa-feedback" class="text-xs"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Partner Network © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="/auth/login.html" class="hover:text-slate-800 transition">Sign In</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Partner Onboarding Logic Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        let enrolledFactorId = null;
+
+        document.getElementById('form-partner-signup').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-partner-signup');
+            const feedback = document.getElementById('partner-signup-feedback');
+            btn.disabled = true;
+            btn.innerText = "Provisioning Partner Node...";
+            feedback.innerHTML = "";
+
+            try {
+                const orgName = document.getElementById('partner-org-name').value.trim();
+                const mode = document.getElementById('partner-mode').value;
+                const email = document.getElementById('partner-email').value.trim();
+                const password = document.getElementById('partner-password').value;
+
+                // 1. Sign up user
+                const { data: authData, error: authErr } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { organization_name: orgName, role: 'partner_carrier', transport_mode: mode }
+                    }
+                });
+
+                if (authErr) throw authErr;
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Node provisioned successfully! Initializing mandatory MFA enrollment...</p>`;
+
+                // 2. Enroll TOTP Factor for AAL2 Enforcement
+                const { data: enrollData, error: enrollErr } = await supabaseClient.auth.mfa.enroll({
+                    factorType: 'totp',
+                    issuer: 'KRIM OS Carrier Network',
+                    friendlyName: orgName
+                });
+
+                if (enrollErr) throw enrollErr;
+
+                enrolledFactorId = enrollData.id;
+
+                // Render QR Code
+                const qrContainer = document.getElementById('partner-qrcode-container');
+                qrContainer.innerHTML = `
+                    <div class="space-y-3">
+                        <img src="${enrollData.totp.qr_code}" alt="MFA QR Code" class="mx-auto w-40 h-40 border border-slate-200 rounded-xl p-1 bg-white">
+                        <span class="text-[11px] text-slate-500 font-mono block">Secret: ${enrollData.totp.secret}</span>
+                    </div>`;
+
+                setTimeout(() => {
+                    document.getElementById('stage-partner-signup').classList.add('hidden');
+                    document.getElementById('stage-partner-mfa').classList.remove('hidden');
+                }, 1000);
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Onboarding Failed: ${err.message}</p>`;
+                btn.disabled = false;
+                btn.innerText = "Initialize Automated Onboarding & Node Provisioning →";
+            }
+        });
+
+        async function verifyPartnerMFA() {
+            const feedback = document.getElementById('partner-mfa-feedback');
+            const code = document.getElementById('partner-mfa-code').value.trim();
+
+            if (!code || code.length !== 6) {
+                feedback.innerHTML = `<p class='text-amber-600 font-semibold'>Please enter a valid 6-digit TOTP verification code.</p>`;
+                return;
+            }
+
+            feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Verifying cryptographic challenge...</p>`;
+
+            try {
+                const { data: challengeData, error: challengeErr } = await supabaseClient.auth.mfa.challenge({
+                    factorId: enrolledFactorId
+                });
+
+                if (challengeErr) throw challengeErr;
+
+                const { data: verifyData, error: verifyErr } = await supabaseClient.auth.mfa.verify({
+                    factorId: enrolledFactorId,
+                    challengeId: challengeData.id,
+                    code: code
+                });
+
+                if (verifyErr) throw verifyErr;
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Enrolled & Verified! Entering Partner Workspace...</p>`;
+                setTimeout(() => {
+                    window.location.href = "/app/partner/index.html";
+                }, 1200);
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Verification Error: ${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+                                                                                            </html>
+                                                                                            
