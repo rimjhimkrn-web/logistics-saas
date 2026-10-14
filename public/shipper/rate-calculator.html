@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/logistics-saas/config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -125,7 +126,7 @@
         const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let loadedShipmentData = null;
 
         async function initCalculator() {
