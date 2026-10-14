@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Dynamic Tariff Calculator & Quote Registry</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Telemetry Status Bar -->
+    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-emerald-400 font-bold">TARIFF ENGINE: ACTIVE</span>
+        </span>
+        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Rate Calculator</span>
+                </div>
+            </div>
+            
+            <a href="/public/shipper/active-shipments.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+                ← Active Fleet
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Calculator Content -->
+    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
+            
+            <div class="space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Authoritative Pricing Core</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Calculate Service Tariff</h1>
+                <p class="text-slate-600 text-sm">Select service tier, compute freight coefficients, and commit authoritative quotations to the financial ledger (`krim_quotes`).</p>
+            </div>
+
+            <form id="form-calculator" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Shipment Reference ID</label>
+                        <input type="text" id="calc-shipment-id" required placeholder="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Service Tier</label>
+                        <select id="calc-service-tier" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                            <option value="surface_express">Surface Express (₹15 / kg)</option>
+                            <option value="air_priority">Air Priority (₹45 / kg)</option>
+                            <option value="heavy_haul">Heavy Haul (₹10 / kg)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Calculated Tariff Amount:</span>
+                        <span id="preview-amount" class="text-slate-900 font-bold text-sm">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Currency Code:</span>
+                        <span class="text-sky-600 font-bold">INR</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-commit-quote" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
+                    Commit Quote & Proceed to Checkout →
+                </button>
+            </form>
+
+            <div id="calculator-feedback" class="text-xs"></div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Tariff Engine © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/public/shipper/spot-approvals.html" class="hover:text-slate-800 transition">Spot Approvals</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Calculator Logic Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        let loadedShipmentData = null;
+
+        async function initCalculator() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shipmentId = urlParams.get('shipment_id');
+            if (shipmentId) {
+                document.getElementById('calc-shipment-id').value = shipmentId;
+                fetchShipmentWeight(shipmentId);
+            }
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = "/auth/login.html";
+                return;
+            }
+            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+        }
+
+        async function fetchShipmentWeight(id) {
+            try {
+                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
+                if (data) {
+                    loadedShipmentData = data;
+                    calculateRate();
+                }
+            } catch (err) {
+                console.error("Error fetching shipment weight:", err);
+            }
+        }
+
+        function calculateRate() {
+            const tier = document.getElementById('calc-service-tier').value;
+            const weight = loadedShipmentData ? (loadedShipmentData.total_weight_kg || 1000) : 1000;
+            
+            let ratePerKg = 15;
+            if (tier === 'air_priority') ratePerKg = 45;
+            if (tier === 'heavy_haul') ratePerKg = 10;
+
+            const total = weight * ratePerKg;
+            document.getElementById('preview-amount').innerText = `₹${total.toLocaleString('en-IN')}.00`;
+            return total;
+        }
+
+        document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
+        document.getElementById('calc-shipment-id').addEventListener('blur', function() {
+            const id = this.value.trim();
+            if (id) fetchShipmentWeight(id);
+        });
+
+        document.getElementById('form-calculator').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-commit-quote');
+            const feedback = document.getElementById('calculator-feedback');
+            btn.disabled = true;
+            btn.innerText = "Committing Quote to Ledger...";
+            feedback.innerHTML = "";
+
+            try {
+                const shipmentId = document.getElementById('calc-shipment-id').value.trim();
+                const amount = calculateRate();
+                const customerOrgId = loadedShipmentData ? loadedShipmentData.customer_organization_id : "00000000-0000-0000-0000-000000000001";
+
+                // Insert quote into krim_quotes schema table
+                const { data, error } = await supabaseClient.from('krim_quotes').insert([{
+                    shipment_id: shipmentId,
+                    customer_organization_id: customerOrgId,
+                    amount: amount,
+                    currency_code: 'INR',
+                    status: 'pending',
+                    valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                }]).select();
+
+                if (error) throw error;
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Quote committed successfully! Redirecting to secure checkout...</p>`;
+
+                setTimeout(() => {
+                    window.location.href = `/public/quote-result.html?shipment_id=${shipmentId}`;
+                }, 1200);
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Ledger Error: ${err.message}</p>`;
+                btn.disabled = false;
+                btn.innerText = "Commit Quote & Proceed to Checkout →";
+            }
+        });
+
+        initCalculator();
+    </script>
+</body>
+</html>
