@@ -119,7 +119,7 @@
     <!-- Booking RPC Execution Script -->
     <script>
         const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let currentUserOrgId = null;
@@ -140,14 +140,15 @@
                     .eq('user_id', session.user.id)
                     .single();
 
-                if (membership) {
-                    currentUserOrgId = membership.organization_id;
-                } else {
-                    // Fallback to default demo org ID if membership row hasn't been explicitly seeded yet
-                    currentUserOrgId = "00000000-0000-0000-0000-000000000001";
+                if (error) throw error;
+                if (!membership?.organization_id) {
+                    throw new Error("Your account is not linked to a KRIM organization. Please contact KRIM support before creating a shipment.");
                 }
+                currentUserOrgId = membership.organization_id;
             } catch (err) {
-                currentUserOrgId = "00000000-0000-0000-0000-000000000001";
+                document.getElementById('booking-feedback').innerHTML =
+                    `<p class="text-red-600 font-semibold">Organization access error: ${err.message}</p>`;
+                document.getElementById('btn-submit-booking').disabled = true;
             }
         }
 
@@ -186,15 +187,9 @@
                     shipmentId = data.id || data.shipment_id;
                 }
 
-                // Fallback query if RPC returns void or custom scalar
+                // Never redirect to an unrelated shipment if the RPC did not return its ID.
                 if (!shipmentId) {
-                    const { data: latestShipment } = await supabaseClient
-                        .from('krim_shipments')
-                        .select('id')
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
-                    shipmentId = latestShipment ? latestShipment.id : 1;
+                    throw new Error("Shipment was created but the RPC did not return a shipment ID. Please contact support before retrying.");
                 }
 
                 setTimeout(() => {
