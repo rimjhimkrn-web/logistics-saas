@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Spot Approvals & Carrier Governance</title>
-    <link rel="manifest" href="/logistics-saas/logistics-saas/manifest.json">
+    <link rel="manifest" href="/logistics-saas/manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,7 +56,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -99,8 +99,8 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Spot Governance © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
@@ -115,7 +115,7 @@
         async function initSpotApprovals() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/logistics-saas/logistics-saas/logistics-saas/auth/login.html";
+                window.location.href = "/logistics-saas/auth/login.html";
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
@@ -143,7 +143,7 @@
                             <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ${statusColor}">${q.status || 'pending'}</span></td>
                             <td class="py-4 px-4 font-mono text-xs text-slate-500">${new Date(q.valid_until || Date.now()).toLocaleDateString()}</td>
                             <td class="py-4 px-4 text-right">
-                                <a href="/logistics-saas/logistics-saas/public/quote-result.html?shipment_id=${q.shipment_id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
+                                <a href="/logistics-saas/public/quote-result.html?shipment_id=${q.shipment_id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
                                     ${q.status === 'paid' ? 'View Receipt →' : 'Authorize & Pay →'}
                                 </a>
                             </td>
