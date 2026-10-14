@@ -98,53 +98,73 @@
         
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
-        async function performPublicTracking() {
-            const id = document.getElementById('public-track-input').value.trim();
-            const resultBox = document.getElementById('public-track-result');
+        function escapeTrackingText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
+                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+            });
+        }
 
-            if (!id) {
-                resultBox.innerHTML = `<div class='p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 font-medium text-xs'>Please enter a valid shipment reference ID.</div>`;
+        async function performPublicTracking() {
+            const id = document.getElementById("public-track-input").value.trim();
+            const resultBox = document.getElementById("public-track-result");
+            if (!/^\\d+$/.test(id)) {
+                resultBox.textContent = "Enter a valid shipment reference ID.";
                 return;
             }
 
-            resultBox.innerHTML = `<div class='p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs'>Querying global telemetry database...</div>`;
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session) {
+                resultBox.innerHTML = '<div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">Sign in to view shipment tracking. Public token-based tracking is not enabled yet.</div><a class="inline-block mt-3 text-sky-700 underline" href="/logistics-saas/auth/login.html">Sign in securely →</a>';
+                return;
+            }
 
+            resultBox.textContent = "Loading tracking details authorized for your account...";
             try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
-                
-                if (error || !data) {
-                    resultBox.innerHTML = `<div class='p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium text-xs'>Consignment #${id} was not found in the global network registry.</div>`;
+                const { data, error } = await supabaseClient
+                    .from("krim_shipments")
+                    .select("id, shipment_number, status, origin_location_id, destination_location_id, created_at, estimated_delivery_at, actual_delivery_at")
+                    .eq("id", Number(id))
+                    .maybeSingle();
+                if (error) throw error;
+                if (!data) {
+                    resultBox.textContent = "Shipment was not found or your account does not have access to it.";
                     return;
                 }
 
-                resultBox.innerHTML = `
-                    <div class='p-6 bg-sky-50/60 border border-sky-200 rounded-2xl space-y-4 font-mono text-xs'>
-                        <div class='flex justify-between items-center border-b border-sky-200 pb-3'>
-                            <span class='text-sky-900 font-bold text-sm'>Consignment Telemetry #${data.id}</span>
-                            <span class='px-2.5 py-1 rounded-full text-[11px] border font-semibold text-emerald-700 bg-emerald-50 border-emerald-200 uppercase'>${data.status || 'in_transit'}</span>
-                        </div>
-                        <div class='grid grid-cols-1 sm:grid-cols-2 gap-4 text-slate-700 font-sans'>
-                            <div>
-                                <span class='text-slate-500 text-[11px] uppercase font-mono block'>Origin Hub</span>
-                                <p class='font-bold text-slate-900'>${data.origin_location_id || data.origin || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <span class='text-slate-500 text-[11px] uppercase font-mono block'>Destination Terminal</span>
-                                <p class='font-bold text-slate-900'>${data.destination_location_id || data.destination || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <span class='text-slate-500 text-[11px] uppercase font-mono block'>Goods Description</span>
-                                <p class='font-bold text-slate-900'>${data.goods_description || 'General Cargo'}</p>
-                            </div>
-                            <div>
-                                <span class='text-slate-500 text-[11px] uppercase font-mono block'>Total Weight</span>
-                                <p class='font-bold text-slate-900 font-mono'>${data.total_weight_kg || 1000} kg</p>
-                            </div>
-                        </div>
-                    </div>`;
+                const { data: events, error: eventsError } = await supabaseClient
+                    .from("krim_tracking_events")
+                    .select("event_type, event_time, location_id")
+                    .eq("shipment_id", Number(id))
+                    .order("event_time", { ascending: false })
+                    .limit(20);
+                if (eventsError) throw eventsError;
 
+                const status = String(data.status || "unknown");
+                const statusColor = ["delivered", "closed"].includes(status.toLowerCase())
+                    ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                    : "text-sky-700 bg-sky-50 border-sky-200";
+                const eventRows = (events || []).map(function(event) {
+                    return '<li class="py-3 border-b border-sky-100"><span class="font-semibold text-slate-900">' +
+                        escapeTrackingText(event.event_type || "Status update") + '</span><span class="block mt-1 text-slate-500">' +
+                        escapeTrackingText(event.event_time ? new Date(event.event_time).toLocaleString() : "Time not recorded") +
+                        (event.location_id ? " · Location reference #" + Number(event.location_id) : "") + '</span></li>';
+                }).join("");
+                const eta = data.estimated_delivery_at ? new Date(data.estimated_delivery_at).toLocaleString() : "Not available";
+                const delivered = data.actual_delivery_at ? new Date(data.actual_delivery_at).toLocaleString() : "Not delivered";
+                resultBox.innerHTML =
+                    '<div class="p-6 bg-sky-50/60 border border-sky-200 rounded-2xl space-y-4">' +
+                    '<div class="flex flex-wrap justify-between items-center gap-3 border-b border-sky-200 pb-3"><span class="text-sky-900 font-bold text-sm">Shipment ' +
+                    escapeTrackingText(data.shipment_number || ("#" + data.id)) + '</span><span class="px-2.5 py-1 rounded-full text-xs border font-semibold uppercase ' + statusColor + '">' +
+                    escapeTrackingText(status) + '</span></div>' +
+                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm"><div><span class="text-slate-500 block text-xs uppercase">Origin reference</span><p class="font-bold">#' +
+                    (Number(data.origin_location_id) || "—") + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Destination reference</span><p class="font-bold">#' +
+                    (Number(data.destination_location_id) || "—") + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Estimated delivery</span><p class="font-bold">' +
+                    escapeTrackingText(eta) + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Actual delivery</span><p class="font-bold">' +
+                    escapeTrackingText(delivered) + '</p></div></div><h2 class="font-bold text-slate-900 pt-2">Recent tracking events</h2>' +
+                    (eventRows ? '<ul class="divide-y divide-sky-100">' + eventRows + '</ul>' : '<p class="text-sm text-slate-600">No tracking events have been recorded yet.</p>') +
+                    '</div>';
             } catch (err) {
-                resultBox.innerHTML = `<div class='p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 font-medium text-xs'>Telemetry query error: ${err.message}</div>`;
+                resultBox.textContent = "Tracking could not be loaded: " + (err.message || "Unknown error");
             }
         }
     </script>
