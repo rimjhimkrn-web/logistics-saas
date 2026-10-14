@@ -76,11 +76,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Origin Location / Hub</label>
-                        <input type="text" id="booking-origin" required placeholder="e.g., DEL_AIRPORT_HUB" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                        <select id="booking-origin" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition"><option value="">Loading locations...</option></select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Destination Terminal</label>
-                        <input type="text" id="booking-destination" required placeholder="e.g., BOM_SEAFRONT_PORT" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                        <select id="booking-destination" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition"><option value="">Loading locations...</option></select>
                     </div>
                 </div>
 
@@ -124,31 +124,53 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let currentUserOrgId = null;
 
+        async function loadBookingLocations() {
+            const originSelect = document.getElementById("booking-origin");
+            const destinationSelect = document.getElementById("booking-destination");
+            const { data, error } = await supabaseClient
+                .from("krim_locations")
+                .select("id, location_code, city, state_region")
+                .eq("is_active", true)
+                .order("city", { ascending: true });
+            if (error) throw error;
+            if (!data || data.length < 2) throw new Error("At least two active locations are required before booking.");
+            const options = '<option value="">Select a location</option>' + data.map(function(location) {
+                const label = [location.location_code, location.city, location.state_region].filter(Boolean).join(" — ");
+                return '<option value="' + Number(location.id) + '">' +
+                    String(label).replace(/[&<>"']/g, function(ch) {
+                        return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+                    }) + '</option>';
+            }).join("");
+            originSelect.innerHTML = options;
+            destinationSelect.innerHTML = options;
+        }
+
         async function initBooking() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 window.location.href = "/logistics-saas/auth/login.html";
                 return;
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+            document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
 
-            // Resolve organization ID from membership
             try {
                 const { data: membership, error } = await supabaseClient
-                    .from('krim_organization_members')
-                    .select('organization_id')
-                    .eq('user_id', session.user.id)
-                    .single();
-
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .limit(1)
+                    .maybeSingle();
                 if (error) throw error;
                 if (!membership?.organization_id) {
-                    throw new Error("Your account is not linked to a KRIM organization. Please contact KRIM support before creating a shipment.");
+                    throw new Error("Your account is not linked to an active KRIM organization. Please contact support.");
                 }
                 currentUserOrgId = membership.organization_id;
+                await loadBookingLocations();
             } catch (err) {
-                document.getElementById('booking-feedback').innerHTML =
-                    `<p class="text-red-600 font-semibold">Organization access error: ${err.message}</p>`;
-                document.getElementById('btn-submit-booking').disabled = true;
+                document.getElementById("booking-feedback").textContent = "Booking setup error: " + (err.message || "Unknown error");
+                document.getElementById("booking-feedback").className = "text-sm font-semibold text-red-700";
+                document.getElementById("btn-submit-booking").disabled = true;
             }
         }
 
@@ -161,10 +183,12 @@
             feedback.innerHTML = "";
 
             try {
-                const origin = document.getElementById('booking-origin').value.trim();
-                const destination = document.getElementById('booking-destination').value.trim();
+                const origin = Number(document.getElementById('booking-origin').value);
+                const destination = Number(document.getElementById('booking-destination').value);
                 const goods = document.getElementById('booking-goods').value.trim();
                 const weight = parseFloat(document.getElementById('booking-weight').value);
+                if (!Number.isInteger(origin) || origin <= 0 || !Number.isInteger(destination) || destination <= 0 || origin === destination) throw new Error('Select two different valid locations.');
+                if (!Number.isFinite(weight) || weight <= 0) throw new Error('Enter a valid shipment weight greater than zero.');
 
                 // Call verified server-side RPC contract
                 const { data, error } = await supabaseClient.rpc('krim_create_global_shipment', {
