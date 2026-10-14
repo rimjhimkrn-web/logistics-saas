@@ -26,10 +26,10 @@ function detectKrimEnvironment() {
 
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
 
-const supabaseClient =
+const krimSupabaseClient =
   window.KRIM_SUPABASE ||
   window.supabaseClient ||
   window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-window.KRIM_SUPABASE = supabaseClient;
-window.supabaseClient = supabaseClient;
+window.KRIM_SUPABASE = krimSupabaseClient;
+window.supabaseClient = krimSupabaseClient;
