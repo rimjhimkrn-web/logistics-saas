@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Carrier Load Marketplace & Bidding</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Telemetry Status Bar -->
+    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-emerald-400 font-bold">LOAD MARKETPLACE: LIVE DEMAND</span>
+        </span>
+        <span id="session-identity-node" class="text-emerald-400">Authenticating partner session...</span>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-emerald-600 font-semibold uppercase">Load Marketplace</span>
+                </div>
+            </div>
+            
+            <a href="/app/partner/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+                ← Partner Workspace
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Enterprise Freight Board</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Available Consignment Loads</h1>
+                <p class="text-slate-600 text-sm">Review active shipper shipments across global trade lanes and submit competitive carrier spot bids.</p>
+            </div>
+            <button onclick="loadMarketplaceLoads()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition border border-slate-300">
+                Refresh Board ⟳
+            </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
+                        <th class="py-3 px-4">Load Ref</th>
+                        <th class="py-3 px-4">Route</th>
+                        <th class="py-3 px-4">Cargo Details</th>
+                        <th class="py-3 px-4">Weight</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Action / Submit Bid</th>
+                    </tr>
+                </thead>
+                <tbody id="marketplace-tbody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                    <tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Querying global freight demand ledger...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Load Marketplace © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/app/partner/index.html" class="hover:text-slate-800 transition">Partner Workspace</a>
+                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Marketplace Logic Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        let currentPartnerOrgId = null;
+
+        async function initMarketplace() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = "/auth/login.html";
+                return;
+            }
+            document.getElementById('session-identity-node').innerText = `Partner Node: ${session.user.email}`;
+
+            // Resolve organization ID
+            try {
+                const { data: membership } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('organization_id')
+                    .eq('user_id', session.user.id)
+                    .single();
+                currentPartnerOrgId = membership ? membership.organization_id : "00000000-0000-0000-0000-000000000002";
+            } catch (err) {
+                currentPartnerOrgId = "00000000-0000-0000-0000-000000000002";
+            }
+
+            loadMarketplaceLoads();
+        }
+
+        async function loadMarketplaceLoads() {
+            try {
+                const { data, error } = await supabaseClient.from('krim_shipments').select('*').order('created_at', { ascending: false });
+                const tbody = document.getElementById('marketplace-tbody');
+                tbody.innerHTML = '';
+
+                if (error || !data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No open loads available on the market board.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(load => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-4 px-4 font-mono font-bold text-slate-900">#${load.id}</td>
+                            <td class="py-4 px-4 font-medium text-slate-800">${load.origin_location_id || load.origin || 'Origin'} → ${load.destination_location_id || load.destination || 'Destination'}</td>
+                            <td class="py-4 px-4 text-slate-600">${load.goods_description || 'General Cargo'}</td>
+                            <td class="py-4 px-4 font-mono text-slate-600">${load.total_weight_kg || 1000} kg</td>
+                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-emerald-700 bg-emerald-50 border-emerald-200 uppercase">${load.status || 'open'}</span></td>
+                            <td class="py-4 px-4 text-right">
+                                <button onclick="submitCarrierBid(${load.id}, ${load.total_weight_kg || 1000})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs cursor-pointer">
+                                    Submit Spot Bid →
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (err) {
+                console.error("Error loading marketplace loads:", err);
+            }
+        }
+
+        async function submitCarrierBid(shipmentId, weight) {
+            const bidAmount = prompt(`Enter your spot bid amount (INR) for Shipment #${shipmentId} (${weight} kg):`, `${weight * 18}`);
+            if (!bidAmount || isNaN(bidAmount)) return;
+
+            try {
+                const { error } = await supabaseClient.from('krim_quotes').insert([{
+                    shipment_id: shipmentId,
+                    customer_organization_id: currentPartnerOrgId,
+                    amount: parseFloat(bidAmount),
+                    currency_code: 'INR',
+                    status: 'pending_carrier_bid',
+                    valid_until: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+                }]);
+
+                if (error) throw error;
+                alert(`Carrier spot bid of ₹${Number(bidAmount).toLocaleString('en-IN')} submitted successfully to ledger!`);
+                loadMarketplaceLoads();
+            } catch (err) {
+                alert("Error submitting bid: " + err.message);
+            }
+        }
+
+        initMarketplace();
+    </script>
+</body>
+</html>
