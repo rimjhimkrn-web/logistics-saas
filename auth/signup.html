@@ -73,6 +73,10 @@
                         <input type="email" id="signup-email" required placeholder="executive@enterprise.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
                     <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Company / Organization Name</label>
+                        <input type="text" id="signup-company" required minlength="2" maxlength="200" autocomplete="organization" placeholder="Your registered company or business name" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Secure Passphrase</label>
                         <input type="password" id="signup-password" required placeholder="••••••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
@@ -141,17 +145,28 @@
             feedback.innerHTML = "";
 
             try {
-                const email = document.getElementById('signup-email').value;
+                const email = document.getElementById('signup-email').value.trim();
                 const password = document.getElementById('signup-password').value;
+                const companyName = document.getElementById('signup-company').value.trim();
+                if (companyName.length < 2 || companyName.length > 200) {
+                    throw new Error("Enter a company or organization name between 2 and 200 characters.");
+                }
 
                 // 1. Sign up user via Supabase Auth
                 const { data: authData, error: authErr } = await window.KRIM_SUPABASE.auth.signUp({
                     email,
-                    password
+                    password,
+                    options: { data: { company_name: companyName } }
                 });
 
                 if (authErr) throw authErr;
                 if (!authData.user) throw new Error("Registration response did not return a valid user node.");
+
+                if (!authData.session) {
+                    feedback.textContent = "Account created. Check your email to confirm your address, then sign in. Your KRIM organization will be provisioned securely after sign-in.";
+                    btn.innerText = "Check your email to continue";
+                    return;
+                }
 
                 feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Account created! Initializing secure hardware MFA channel...</p>`;
 
@@ -215,7 +230,14 @@
 
                 if (verifyErr) throw verifyErr;
 
-                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Activated Successfully! Redirecting to Workspace...</p>`;
+                const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
+                    "krim_provision_customer_organization",
+                    { p_legal_name: document.getElementById("signup-company").value.trim() }
+                );
+                if (organizationError) throw organizationError;
+                if (!organizationId) throw new Error("Your account is secure, but organization setup did not complete. Please sign in and retry.");
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA activated and KRIM organization provisioned. Redirecting to Workspace...</p>`;
                 
                 setTimeout(() => {
                     window.location.href = "/logistics-saas/app/customer/index.html";
