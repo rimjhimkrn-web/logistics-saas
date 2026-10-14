@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d16">
+  <meta name="description" content="KRIM Logistics customer shipment and quote workspace.">
+  <title>Customer Workspace | KRIM Logistics</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090d16;
+      --panel: #111827;
+      --border: #263244;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #06b6d4;
+      --accent2: #7c3aed;
+      --danger: #f87171;
+      --success: #34d399;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    a { color: inherit; }
+
+    .topbar {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #05080f;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(9, 13, 22, .97);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      min-height: 68px;
+      margin: auto;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #0891b2, #7c3aed);
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    nav button, .secondary, .primary, .danger {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 13px;
+      cursor: pointer;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    nav button.active, .primary {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      color: white;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .danger {
+      color: #fecaca;
+      border-color: #7f1d1d;
+    }
+
+    main {
+      max-width: 1200px;
+      width: 100%;
+      margin: auto;
+      padding: 26px 18px 50px;
+    }
+
+    .page-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: clamp(25px, 4vw, 35px); }
+    h2 { font-size: 19px; margin: 0 0 16px; }
+    p { line-height: 1.55; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 19px;
+      min-width: 0;
+    }
+
+    .metric {
+      font-size: 31px;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .workspace-tab { display: none; }
+    .workspace-tab.active { display: block; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      color: #d1d5db;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #090d16;
+      color: white;
+    }
+
+    textarea { resize: vertical; }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid rgba(6, 182, 212, .35);
+      border-color: var(--accent);
+    }
+
+    .field { min-width: 0; }
+    .full { grid-column: 1 / -1; }
+
+    .notice {
+      padding: 13px 15px;
+      border-radius: 10px;
+      margin-bottom: 17px;
+      border: 1px solid var(--border);
+      background: #0d1420;
+      overflow-wrap: anywhere;
+    }
+
+    .notice.error {
+      color: #fecaca;
+      border-color: #7f1d1d;
+      background: #2a1015;
+    }
+
+    .notice.success {
+      color: #a7f3d0;
+      border-color: #065f46;
+      background: #06251e;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: #0c1220;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .badge {
+      display: inline-block;
+      border: 1px solid #374151;
+      background: #1f2937;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      padding: 24px 16px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .hidden { display: none !important; }
+
+    #page-message { white-space: pre-wrap; }
+
+    @media (max-width: 760px) {
+      .header-inner { align-items: flex-start; flex-wrap: wrap; }
+      nav { width: 100%; }
+      nav button { flex: 1 1 30%; }
+      .grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      main { padding: 20px 12px 35px; }
+      .card { padding: 15px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <span>KRIM GLOBAL LOGISTICS OS</span>
+    <span id="session-label">Checking session…</span>
+  </div>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark">K</div>
+        <div>
+          <div>KRIM LOGISTICS</div>
+          <div class="muted small">CUSTOMER WORKSPACE</div>
+        </div>
+      </div>
+
+      <nav aria-label="Customer navigation">
+        <button type="button" class="active" data-tab="overview">Overview</button>
+        <button type="button" data-tab="shipments">Shipments</button>
+        <button type="button" data-tab="create">Create shipment</button>
+        <button type="button" data-tab="quotes">Quotes</button>
+        <button type="button" id="refresh-button">Refresh</button>
+        <button type="button" id="signout-button">Sign out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-heading">
+      <div>
+        <h1>Customer workspace</h1>
+        <p class="muted">Manage your freight requests, shipment records and quotations.</p>
+      </div>
+
+      <div class="field" style="min-width:230px;max-width:100%">
+        <label for="organization-select">Active organization</label>
+        <select id="organization-select" disabled>
+          <option value="">Loading membership…</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="page-message" class="notice" role="status" aria-live="polite">
+      Connecting to KRIM services…
+    </div>
+
+    <section id="tab-overview" class="workspace-tab active">
+      <div class="grid">
+        <div class="card">
+          <div class="muted small">YOUR SHIPMENTS</div>
+          <div id="metric-shipments" class="metric">—</div>
+          <div class="muted small">Records visible to your organization</div>
+        </div>
+
+        <div class="card">
+          <div class="muted small">YOUR QUOTES</div>
+          <div id="metric-quotes" class="metric">—</div>
+          <div class="muted small">Quotation records visible to your organization</div>
+        </div>
+
+        <div class="card">
+          <div class="muted small">ACTIVE ORGANIZATION</div>
+          <div id="metric-organization" class="metric" style="font-size:19px">—</div>
+          <div class="muted small">Organization membership is checked through Supabase</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Getting started</h2>
+        <p class="muted">
+          Create a shipment request with valid origin and destination locations.
+          Your backend validates authorization and shipment rules.
+        </p>
+        <button type="button" class="primary" data-go-tab="create">Create a shipment</button>
+      </div>
+    </section>
+
+    <section id="tab-shipments" class="workspace-tab">
+      <div class="card">
+        <h2>Your shipments</h2>
+        <p class="muted small">Only records permitted by your Supabase access policies can be displayed.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Shipment</th>
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Goods</th>
+                <th>Weight</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="shipments-body">
+              <tr><td colspan="7">Loading shipments…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-create" class="workspace-tab">
+      <div class="card">
+        <h2>Create shipment request</h2>
+        <p class="muted">
+          Choose locations from the active KRIM location catalogue.
+          Submitting calls the existing global shipment RPC.
+        </p>
+
+        <form id="shipment-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="origin-location">Origin *</label>
+              <select id="origin-location" required disabled>
+                <option value="">Loading locations…</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="destination-location">Destination *</label>
+              <select id="destination-location" required disabled>
+                <option value="">Loading locations…</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="goods-description">Goods description *</label>
+              <textarea id="goods-description" required minlength="2" maxlength="1000"
+                rows="3" placeholder="Describe the goods being transported"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="total-weight">Total weight (kg) *</label>
+              <input id="total-weight" type="number" required min="0.01"
+                max="100000000" step="0.01" inputmode="decimal" placeholder="e.g. 1200">
+            </div>
+
+            <div class="field" style="align-self:end">
+              <button id="submit-shipment" type="submit" class="primary" style="width:100%">
+                Submit shipment request
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="tab-quotes" class="workspace-tab">
+      <div class="card">
+        <h2>Your quotations</h2>
+        <p class="muted small">
+          Amounts and currency are read from the existing KRIM quote records.
+          Payment is not marked complete by this page.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Quote</th>
+                <th>Shipment</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Status</th>
+                <th>Valid until</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="quotes-body">
+              <tr><td colspan="7">Loading quotes…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    KRIM Logistics OS · Customer Workspace · Secure access depends on backend authorization and RLS.
+  </footer>
+
+  <script>
+    "use strict";
+
+    // This is a public publishable key, intended for browser use.
+    // NEVER place a Supabase service_role or secret key in this file.
+    const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    );
+
+    const $ = (id) => document.getElementById(id);
+
+    let currentUser = null;
+    let activeOrganizationId = null;
+    let organizations = [];
+    let locations = [];
+
+    function repoPath(path) {
+      // Works on a GitHub Pages project site and on a custom-domain root.
+      const pathname = window.location.pathname;
+      const marker = "/app/customer/";
+      const markerIndex = pathname.indexOf(marker);
+
+      if (markerIndex >= 0) {
+        const base = pathname.slice(0, markerIndex);
+        return `${base}/${path.replace(/^\/+/, "")}`;
+      }
+
+      return `/${path.replace(/^\/+/, "")}`;
+    }
+
+    function showMessage(message, type = "") {
+      const box = $("page-message");
+      box.textContent = message;
+      box.className = "notice" + (type ? ` ${type}` : "");
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll(".workspace-tab").forEach((section) => {
+        section.classList.toggle("active", section.id === `tab-${tabName}`);
+      });
+
+      document.querySelectorAll("[data-tab]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.tab === tabName);
+      });
+    }
+
+    function makeCell(row, value, className = "") {
+      const cell = document.createElement("td");
+      cell.textContent = value == null || value === "" ? "—" : String(value);
+      if (className) cell.className = className;
+      row.appendChild(cell);
+      return cell;
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+    }
+
+    function formatAmount(amount, currency) {
+      if (amount == null || amount === "") return "—";
+      const number = Number(amount);
+      if (!Number.isFinite(number)) return "—";
+
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: currency || "INR"
+        }).format(number);
+      } catch {
+        return `${currency || ""} ${number.toLocaleString()}`.trim();
+      }
+    }
+
+    function makeStatusBadge(row, status) {
+      const cell = document.createElement("td");
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = status || "unknown";
+      cell.appendChild(badge);
+      row.appendChild(cell);
+    }
+
+    async function requireSession() {
+      const { data, error } = await db.auth.getSession();
+      if (error) throw error;
+
+      const session = data.session;
+      if (!session) {
+        window.location.replace(repoPath("auth/login.html"));
+        return false;
+      }
+
+      currentUser = session.user;
+      $("session-label").textContent = currentUser.email || "Authenticated user";
+      return true;
+    }
+
+    async function loadOrganizations() {
+      const { data, error } = await db
+        .from("krim_organization_members")
+        .select("organization_id, role, status")
+        .eq("user_id", currentUser.id);
+
+      if (error) throw error;
+
+      organizations = (data || []).filter((membership) => {
+        return membership.organization_id != null &&
+          String(membership.status || "").toLowerCase() === "active";
+      });
+
+      const unique = new Map();
+      organizations.forEach((membership) => {
+        unique.set(String(membership.organization_id), membership);
+      });
+      organizations = Array.from(unique.values());
+
+      const selector = $("organization-select");
+      selector.replaceChildren();
+
+      if (organizations.length === 0) {
+        selector.disabled = true;
+        selector.add(new Option("No active organization membership", ""));
+        throw new Error(
+          "Your account has no active KRIM organization membership. Ask an authorized KRIM administrator to verify your organization access."
+        );
+      }
+
+      organizations.forEach((membership) => {
+        selector.add(new Option(
+          `Organization #${membership.organization_id} · ${membership.role || "member"}`,
+          String(membership.organization_id)
+        ));
+      });
+
+      selector.disabled = false;
+
+      const savedId = sessionStorage.getItem("krim_customer_org");
+      activeOrganizationId = organizations.some(
+        (membership) => String(membership.organization_id) === savedId
+      ) ? savedId : String(organizations[0].organization_id);
+
+      selector.value = activeOrganizationId;
+      $("metric-organization").textContent = `#${activeOrganizationId}`;
+    }
+
+    async function loadLocations() {
+      const { data, error } = await db
+        .from("krim_locations")
+        .select("id, city, state_region, region, country_id, location_code, location_type")
+        .eq("is_active", true)
+        .order("city", { ascending: true })
+        .limit(2000);
+
+      if (error) throw error;
+
+      locations = data || [];
+
+      for (const id of ["origin-location", "destination-location"]) {
+        const selector = $(id);
+        selector.replaceChildren();
+
+        selector.add(new Option(
+          locations.length ? "Select a location" : "No active locations available",
+          ""
+        ));
+
+        locations.forEach((location) => {
+          const parts = [
+            location.city,
+            location.state_region || location.region,
+            location.location_code
+          ].filter(Boolean);
+
+          const label = parts.length ? parts.join(", ") : `Location #${location.id}`;
+          selector.add(new Option(label, String(location.id)));
+        });
+
+        selector.disabled = locations.length === 0;
+      }
+
+      if (!locations.length) {
+        showMessage(
+          "No active locations were returned. Check krim_locations permissions, RLS and active location data.",
+          "error"
+        );
+      }
+    }
+
+    async function loadShipments() {
+      const body = $("shipments-body");
+      body.replaceChildren();
+
+      const { data, error } = await db
+        .from("krim_shipments")
+        .select(
+          "id, shipment_number, customer_organization_id, origin_location_id, destination_location_id, goods_description, total_weight_kg, status, created_at"
+        )
+        .eq("customer_organization_id", Number(activeOrganizationId))
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+
+      $("metric-shipments").textContent = String((data || []).length);
+
+      if (!data || data.length === 0) {
+        const row = body.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 7;
+        cell.textContent = "No shipments found for this organization.";
+        return;
+      }
+
+      const locationById = new Map(
+        locations.map((location) => [String(location.id), location])
+      );
+
+      data.forEach((shipment) => {
+        const row = body.insertRow();
+        const origin = locationById.get(String(shipment.origin_location_id));
+        const destination = locationById.get(String(shipment.destination_location_id));
+
+        makeCell(row, shipment.shipment_number || `#${shipment.id}`);
+        makeCell(row, origin?.city || `Location #${ship
