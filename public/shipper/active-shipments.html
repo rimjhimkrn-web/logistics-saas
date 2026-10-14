@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Active Fleet Telemetry & Consignments</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/logistics-saas/manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,7 +56,7 @@
                 </div>
             </div>
             
-            <a href="/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -99,8 +99,8 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Active Fleet © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/public/shipper/booking-request.html" class="hover:text-slate-800 transition">Book Shipment</a>
-                <a href="/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/logistics-saas/public/shipper/booking-request.html" class="hover:text-slate-800 transition">Book Shipment</a>
+                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
@@ -108,14 +108,14 @@
     <!-- Active Fleet Script -->
     <script>
         const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
         async function initActiveFleet() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/auth/login.html";
+                window.location.href = "/logistics-saas/logistics-saas/auth/login.html";
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
@@ -142,10 +142,10 @@
                             <td class="py-4 px-4 font-mono text-slate-600">${s.total_weight_kg || 1000} kg</td>
                             <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-amber-600 bg-amber-50 border-amber-200">${s.status || 'pending'}</span></td>
                             <td class="py-4 px-4 text-right space-x-2">
-                                <a href="/public/shipper/shipment-details.html?shipment_id=${s.id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">
+                                <a href="/logistics-saas/public/shipper/shipment-details.html?shipment_id=${s.id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">
                                     Details →
                                 </a>
-                                <a href="/public/shipper/rate-calculator.html?shipment_id=${s.id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
+                                <a href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${s.id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
                                     Calculate Rate →
                                 </a>
                             </td>
