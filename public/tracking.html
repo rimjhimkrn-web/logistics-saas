@@ -168,6 +168,10 @@
                 resultBox.textContent = "Tracking could not be loaded: " + (err.message || "Unknown error");
             }
         }
+        const trackingPrefillId = new URLSearchParams(window.location.search).get("shipment_id");
+        if (trackingPrefillId && /^\d+$/.test(trackingPrefillId)) {
+            document.getElementById("public-track-input").value = trackingPrefillId;
+        }
     </script>
 </body>
 </html>
