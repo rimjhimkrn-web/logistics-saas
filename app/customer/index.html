@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Customer Command Workspace</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Telemetry Status Bar -->
+    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-emerald-400 font-bold">WORKSPACE NODE: SECURE</span>
+        </span>
+        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
+    </div>
+
+    <!-- Workspace Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Command Workspace</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4 text-sm font-medium">
+                <a href="/public/shipper/booking-request.html" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl transition shadow-sm">+ New Shipment</a>
+                <button onclick="handleSignOut()" class="text-slate-600 hover:text-slate-900 border border-slate-300 px-4 py-2.5 rounded-xl transition">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Workspace Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        
+        <!-- Welcome Banner -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Enterprise Logistics Portal</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Consignment Command Center</h1>
+                <p class="text-slate-600 text-sm">Monitor shipments, review quotations, and manage carrier approvals in real time.</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="/public/shipper/active-shipments.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition border border-slate-300">Active Fleet →</a>
+                <a href="/public/shipper/spot-approvals.html" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm">Spot Approvals →</a>
+            </div>
+        </div>
+
+        <!-- Quick Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Consignments</span>
+                <p id="metric-active-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
+                <p class="text-xs text-sky-600 font-medium">Synced with network database</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pending Quotations</span>
+                <p id="metric-quote-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
+                <p class="text-xs text-emerald-600 font-medium">Authoritative tariff calculations</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Security Assurance</span>
+                <p class="text-3xl font-extrabold text-slate-900 font-mono">AAL2</p>
+                <p class="text-xs text-sky-600 font-medium">Hardware MFA & Tenant RLS Active</p>
+            </div>
+        </div>
+
+        <!-- Quick Navigation Directory -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
+            <h2 class="text-lg font-bold text-slate-900">Operational Gateway Modules</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+                <a href="/public/shipper/booking-request.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
+                    <span class="text-sky-600 font-bold block">01 / BOOKING</span>
+                    <p class="text-slate-700 font-sans">Create new global shipment with verified RPC contracts.</p>
+                </a>
+                <a href="/public/shipper/rate-calculator.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
+                    <span class="text-sky-600 font-bold block">02 / TARIFFS</span>
+                    <p class="text-slate-700 font-sans">Calculate service rates and commit quotes to ledger.</p>
+                </a>
+                <a href="/public/shipper/active-shipments.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
+                    <span class="text-sky-600 font-bold block">03 / TELEMETRY</span>
+                    <p class="text-slate-700 font-sans">Monitor live transit milestones and route statuses.</p>
+                </a>
+                <a href="/public/shipper/spot-approvals.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
+                    <span class="text-sky-600 font-bold block">04 / GOVERNANCE</span>
+                    <p class="text-slate-700 font-sans">Review carrier quotes and authorize checkouts.</p>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Command Workspace © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Workspace Initialization Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        async function initWorkspace() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = "/auth/login.html";
+                return;
+            }
+
+            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+
+            // Load metrics
+            try {
+                const { count: shipCount } = await supabaseClient.from('krim_shipments').select('*', { count: 'exact', head: true });
+                const { count: quoteCount } = await supabaseClient.from('krim_quotes').select('*', { count: 'exact', head: true });
+
+                document.getElementById('metric-active-count').innerText = shipCount || 0;
+                document.getElementById('metric-quote-count').innerText = quoteCount || 0;
+            } catch (err) {
+                console.error("Error loading workspace metrics:", err);
+            }
+        }
+
+        async function handleSignOut() {
+            await supabaseClient.auth.signOut();
+            window.location.href = "/auth/login.html";
+        }
+
+        initWorkspace();
+    </script>
+</body>
+</html>
