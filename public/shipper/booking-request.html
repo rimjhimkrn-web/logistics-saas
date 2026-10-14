@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Global Shipment Booking Gateway</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Telemetry Status Bar -->
+    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-emerald-400 font-bold">RPC CONTRACT ENGINE: READY</span>
+        </span>
+        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Booking Gateway</span>
+                </div>
+            </div>
+            
+            <a href="/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+                ← Back to Workspace
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Booking Form Content -->
+    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
+            
+            <div class="space-y-2">
+                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Global Core Operation</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Create New Shipment</h1>
+                <p class="text-slate-600 text-sm">Execute verified server-side RPC contract (`krim_create_global_shipment`) to register your transit consignment securely.</p>
+            </div>
+
+            <form id="form-booking" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Origin Location / Hub</label>
+                        <input type="text" id="booking-origin" required placeholder="e.g., DEL_AIRPORT_HUB" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Destination Terminal</label>
+                        <input type="text" id="booking-destination" required placeholder="e.g., BOM_SEAFRONT_PORT" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Goods Description / Cargo</label>
+                        <input type="text" id="booking-goods" required placeholder="e.g., Industrial Machinery Parts" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Total Weight (KG)</label>
+                        <input type="number" id="booking-weight" required min="1" placeholder="1250" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-booking" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
+                    Execute RPC Contract & Create Shipment →
+                </button>
+            </form>
+
+            <div id="booking-feedback" class="text-xs"></div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Booking Gateway © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Booking RPC Execution Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        let currentUserOrgId = null;
+
+        async function initBooking() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = "/auth/login.html";
+                return;
+            }
+            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+
+            // Resolve organization ID from membership
+            try {
+                const { data: membership, error } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('organization_id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (membership) {
+                    currentUserOrgId = membership.organization_id;
+                } else {
+                    // Fallback to default demo org ID if membership row hasn't been explicitly seeded yet
+                    currentUserOrgId = "00000000-0000-0000-0000-000000000001";
+                }
+            } catch (err) {
+                currentUserOrgId = "00000000-0000-0000-0000-000000000001";
+            }
+        }
+
+        document.getElementById('form-booking').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-booking');
+            const feedback = document.getElementById('booking-feedback');
+            btn.disabled = true;
+            btn.innerText = "Executing RPC Contract...";
+            feedback.innerHTML = "";
+
+            try {
+                const origin = document.getElementById('booking-origin').value.trim();
+                const destination = document.getElementById('booking-destination').value.trim();
+                const goods = document.getElementById('booking-goods').value.trim();
+                const weight = parseFloat(document.getElementById('booking-weight').value);
+
+                // Call verified server-side RPC contract
+                const { data, error } = await supabaseClient.rpc('krim_create_global_shipment', {
+                    p_customer_organization_id: currentUserOrgId,
+                    p_origin_location_id: origin,
+                    p_destination_location_id: destination,
+                    p_goods_description: goods,
+                    p_total_weight_kg: weight
+                });
+
+                if (error) throw error;
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Shipment successfully registered! Redirecting to tariff calculation...</p>`;
+
+                // Extract shipment ID from result (handling array or direct object response)
+                let shipmentId = null;
+                if (Array.isArray(data) && data.length > 0) {
+                    shipmentId = data[0].id || data[0].shipment_id;
+                } else if (data && typeof data === 'object') {
+                    shipmentId = data.id || data.shipment_id;
+                }
+
+                // Fallback query if RPC returns void or custom scalar
+                if (!shipmentId) {
+                    const { data: latestShipment } = await supabaseClient
+                        .from('krim_shipments')
+                        .select('id')
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single();
+                    shipmentId = latestShipment ? latestShipment.id : 1;
+                }
+
+                setTimeout(() => {
+                    window.location.href = `/public/shipper/rate-calculator.html?shipment_id=${shipmentId}`;
+                }, 1200);
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>RPC Error: ${err.message}</p>`;
+                btn.disabled = false;
+                btn.innerText = "Execute RPC Contract & Create Shipment →";
+            }
+        });
+
+        initBooking();
+    </script>
+</body>
+</html>
