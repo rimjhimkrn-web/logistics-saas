@@ -26,6 +26,19 @@ function detectKrimEnvironment() {
 
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
 
+const krimBasePath =
+  window.location.hostname.endsWith("github.io") &&
+  window.location.pathname.startsWith("/logistics-saas")
+    ? "/logistics-saas"
+    : "";
+
+window.KRIM_BASE_PATH = krimBasePath;
+window.krimPath = function (path = "") {
+  const cleanPath = String(path).replace(/^\\/+/, "");
+  return cleanPath ? `${krimBasePath}/${cleanPath}` : `${krimBasePath}/`;
+};
+
+
 const krimSupabaseClient =
   window.KRIM_SUPABASE ||
   window.supabaseClient ||
