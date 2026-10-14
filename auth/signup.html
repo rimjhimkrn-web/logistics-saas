@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/logistics-saas/config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -127,10 +128,7 @@
 
     <!-- Institutional Registration & TOTP Enrollment Logic -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
         let activeFactorId = null;
 
@@ -147,7 +145,7 @@
                 const password = document.getElementById('signup-password').value;
 
                 // 1. Sign up user via Supabase Auth
-                const { data: authData, error: authErr } = await supabaseClient.auth.signUp({
+                const { data: authData, error: authErr } = await window.KRIM_SUPABASE.auth.signUp({
                     email,
                     password
                 });
@@ -158,7 +156,7 @@
                 feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Account created! Initializing secure hardware MFA channel...</p>`;
 
                 // 2. Automatically initiate TOTP Factor Enrollment
-                const { data: enrollData, error: enrollErr } = await supabaseClient.auth.mfa.enroll({
+                const { data: enrollData, error: enrollErr } = await window.KRIM_SUPABASE.auth.mfa.enroll({
                     factorType: 'totp',
                     friendlyName: 'KRIM Enterprise Authenticator'
                 });
@@ -202,14 +200,14 @@
 
             try {
                 // Prepare challenge
-                const { data: challengeData, error: challengeErr } = await supabaseClient.auth.mfa.challenge({
+                const { data: challengeData, error: challengeErr } = await window.KRIM_SUPABASE.auth.mfa.challenge({
                     factorId: activeFactorId
                 });
 
                 if (challengeErr) throw challengeErr;
 
                 // Verify challenge code
-                const { data: verifyData, error: verifyErr } = await supabaseClient.auth.mfa.verify({
+                const { data: verifyData, error: verifyErr } = await window.KRIM_SUPABASE.auth.mfa.verify({
                     factorId: activeFactorId,
                     challengeId: challengeData.id,
                     code: code
