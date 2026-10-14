@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Enterprise Sign In & MFA Challenge</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Global Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Global Logistics Network</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-sm">
+                <span class="text-slate-500 hidden sm:inline">New to KRIM OS?</span>
+                <a href="/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sign In & MFA Challenge Main Section -->
+    <main class="max-w-xl mx-auto px-6 py-16 flex-grow w-full">
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
+            
+            <!-- STAGE 1: SIGN IN FORM -->
+            <div id="stage-login" class="space-y-6">
+                <div class="space-y-2">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Enterprise Authentication</span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Sign In to Your Node</h1>
+                    <p class="text-slate-600 text-sm">Authenticate session token and evaluate multi-factor security clearance.</p>
+                </div>
+
+                <form id="form-login" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Corporate Email</label>
+                        <input type="email" id="login-email" required placeholder="executive@enterprise.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Secure Passphrase</label>
+                        <input type="password" id="login-password" required placeholder="••••••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                    </div>
+                    <button type="submit" id="btn-login" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
+                        Authenticate & Verify Session →
+                    </button>
+                </form>
+                <div id="login-feedback" class="text-xs"></div>
+            </div>
+
+            <!-- STAGE 2: MFA CHALLENGE FORM (HIDDEN INITIALLY) -->
+            <div id="stage-mfa-challenge" class="space-y-6 hidden">
+                <div class="space-y-2">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Security Challenge</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Multi-Factor Authentication</h2>
+                    <p class="text-slate-600 text-sm">Enter the 6-digit verification code from your authenticator application.</p>
+                </div>
+
+                <form id="form-mfa" class="space-y-5">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Authenticator Code (TOTP)</label>
+                        <input type="text" id="mfa-code" required maxlength="6" placeholder="123456" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-center font-mono text-lg tracking-[0.5em] focus:outline-none focus:border-sky-500 transition">
+                    </div>
+
+                    <button type="submit" id="btn-mfa" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/20 cursor-pointer">
+                        Verify TOTP & Enter Workspace →
+                    </button>
+                </form>
+                <div id="mfa-feedback" class="text-xs"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="/auth/signup.html" class="hover:text-slate-800 transition">Register</a>
+                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Institutional Sign In & MFA Challenge Logic -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        let activeFactorId = null;
+
+        // 1. Sign In & MFA Assurance Level Evaluation
+        document.getElementById('form-login').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            const feedback = document.getElementById('login-feedback');
+            btn.disabled = true;
+            btn.innerText = "Evaluating Credentials...";
+            feedback.innerHTML = "";
+
+            try {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                // Evaluate Multi-Factor Assurance Level (AAL)
+                const { data: aalData, error: aalErr } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (aalErr) throw aalErr;
+
+                if (aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+                    // MFA Required: List factors to obtain challenge ID
+                    const { data: factors, error: factorsErr } = await supabaseClient.auth.mfa.listFactors();
+                    if (factorsErr) throw factorsErr;
+
+                    const totpFactor = factors.totp.find(f => f.status === 'verified');
+                    if (totpFactor) {
+                        activeFactorId = totpFactor.id;
+                        feedback.innerHTML = `<p class='text-sky-600 font-semibold'>MFA Challenge Required. Switching to verification mode...</p>`;
+                        setTimeout(() => {
+                            document.getElementById('stage-login').classList.add('hidden');
+                            document.getElementById('stage-mfa-challenge').classList.remove('hidden');
+                        }, 1000);
+                        return;
+                    }
+                }
+
+                // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
+                window.location.href = "/app/customer/index.html";
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Authentication Failed: ${err.message}</p>`;
+                btn.disabled = false;
+                btn.innerText = "Authenticate & Verify Session →";
+            }
+        });
+
+        // 2. MFA Challenge Verification Execution
+        document.getElementById('form-mfa').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-mfa');
+            const feedback = document.getElementById('mfa-feedback');
+            const code = document.getElementById('mfa-code').value.trim();
+
+            if (!code || code.length !== 6) {
+                feedback.innerHTML = `<p class='text-amber-600 font-semibold'>Please enter a valid 6-digit TOTP code.</p>`;
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verifying Code...";
+            feedback.innerHTML = "";
+
+            try {
+                if (!activeFactorId) {
+                    const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+                    const active = factors?.totp?.find(f => f.status === 'verified');
+                    if (!active) throw new Error("No active TOTP factor found.");
+                    activeFactorId = active.id;
+                }
+
+                const { data: challengeData, error: challengeErr } = await supabaseClient.auth.mfa.challenge({
+                    factorId: activeFactorId
+                });
+
+                if (challengeErr) throw challengeErr;
+
+                const { data: verifyData, error: verifyErr } = await supabaseClient.auth.mfa.verify({
+                    factorId: activeFactorId,
+                    challengeId: challengeData.id,
+                    code: code
+                });
+
+                if (verifyErr) throw verifyErr;
+
+                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Verified Successfully! Entering Workspace...</p>`;
+                setTimeout(() => {
+                    window.location.href = "/app/customer/index.html";
+                }, 1000);
+
+            } catch (err) {
+                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Verification Failed: ${err.message}</p>`;
+                btn.disabled = false;
+                btn.innerText = "Verify TOTP & Enter Workspace →";
+            }
+        });
+    </script>
+</body>
+</html>
