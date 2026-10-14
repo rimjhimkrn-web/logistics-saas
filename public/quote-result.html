@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KRIM Logistics OS - Quote & Checkout</title>
+    <!-- Include Supabase and Razorpay SDKs if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div id="checkout-container">
+        <h1>Your Quote Result</h1>
+        <!-- Your page content here -->
+        <button onclick="handleSecureCheckout(1, 'customer@example.com')">Pay Securely</button>
+    </div>
+
+    <!-- WRAP THE JAVASCRIPT IN SCRIPT TAGS -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        
+        async function handleSecureCheckout(shipmentId, customerEmail) {
+            try {
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError || !sessionData?.session) {
+                    throw new Error("Authentication required. Please sign in again.");
+                }
+                const accessToken = sessionData.session.access_token;
+
+                const orderResponse = `${SUPABASE_PROJECT_URL}/functions/v1/create-razorpay-order`;
+                const orderFetch = await fetch(orderResponse, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        shipment_id: shipmentId,
+                        customer_email: customerEmail
+                    })
+                });
+
+                if (!orderFetch.ok) {
+                    const errText = await orderFetch.text();
+                    throw new Error(`Server order initialization failed: ${errText}`);
+                }
+
+                const orderData = await orderFetch.json();
+                if (!orderData.success || !orderData.order_id) {
+                    throw new Error(orderData.error || "Failed to initialize secure order token.");
+                }
+
+                const options = {
+                    key: orderData.key_id,
+                    amount: orderData.amount,
+                    currency: orderData.currency || "INR",
+                    name: "KRIM Logistics OS",
+                    description: `Freight Settlement for Shipment #${shipmentId}`,
+                    order_id: orderData.order_id,
+                    handler: async function (res) {
+                        try {
+                            const verifyResponse = await fetch(
+                                `${SUPABASE_PROJECT_URL}/functions/v1/process-payment-`,
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${accessToken}`
+                                    },
+                                    body: JSON.stringify({
+                                        shipment_id: shipmentId,
+                                        payment_id: res.razorpay_payment_id,
+                                        order_id: res.razorpay_order_id,
+                                        signature: res.razorpay_signature,
+                                        customer_email: customerEmail
+                                    })
+                                }
+                            );
+
+                            if (!verifyResponse.ok) {
+                                throw new Error("Payment verification failed on the server.");
+                            }
+
+                            const verifyData = await verifyResponse.json();
+                            if (!verifyData.success) {
+                                throw new Error(verifyData.error || "Cryptographic signature validation failed.");
+                            }
+
+                            alert("Payment successful and verified!");
+
+                        } catch (verifyErr) {
+                            alert(`Payment verification error: ${verifyErr.message}`);
+                        }
+                    },
+                    prefill: { email: customerEmail },
+                    theme: { color: "#0F172A" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (err) {
+                alert(`Checkout Error: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
