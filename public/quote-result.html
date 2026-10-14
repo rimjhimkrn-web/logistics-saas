@@ -89,7 +89,7 @@
                 </div>
             </div>
 
-            <button onclick="startRazorpayCheckout()" id="btn-pay-now" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
+            <button  id="btn-pay-now" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
                 Authorize & Pay via Razorpay Secure →
             </button>
 
@@ -109,99 +109,154 @@
         </div>
     </footer>
 
-    <!-- Checkout & Payment Verification Script -->
+    <!-- Secure Checkout: server-created Razorpay order + server-side verification -->
     <script>
         const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let activeQuoteRecord = null;
+        let currentSession = null;
+
+        function showCheckoutMessage(message, type = "error") {
+            const feedback = document.getElementById("checkout-feedback");
+            feedback.textContent = message;
+            feedback.className = type === "success"
+                ? "text-sm font-semibold text-emerald-700"
+                : type === "info"
+                    ? "text-sm font-semibold text-sky-700"
+                    : "text-sm font-semibold text-red-700";
+        }
 
         async function initCheckout() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipmentId = urlParams.get('shipment_id');
+            const button = document.getElementById("btn-pay-now");
+            button.disabled = true;
+            const shipmentId = new URLSearchParams(window.location.search).get("shipment_id");
 
-            if (!shipmentId) {
-                alert("Missing shipment ID reference.");
-                window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
+            if (!shipmentId || !/^\\d+$/.test(shipmentId)) {
+                showCheckoutMessage("A valid shipment reference is required.");
                 return;
             }
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session) {
                 window.location.href = "/logistics-saas/auth/login.html";
                 return;
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+            currentSession = session;
+            document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
+
+            const { data: quote, error } = await supabaseClient
+                .from("krim_quotes")
+                .select("id, shipment_id, amount, currency_code, status, valid_until")
+                .eq("shipment_id", Number(shipmentId))
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (error || !quote) {
+                showCheckoutMessage("No authorized quotation was found for this shipment.");
+                return;
+            }
+
+            activeQuoteRecord = quote;
+            document.getElementById("checkout-shipment-id").textContent = "#" + quote.shipment_id;
+            document.getElementById("checkout-amount").textContent =
+                (quote.currency_code || "INR") + " " + Number(quote.amount).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+            if (quote.status !== "accepted") {
+                showCheckoutMessage(
+                    quote.status === "sent"
+                        ? "This quote needs to be accepted first. Open Spot Approvals to review it."
+                        : "Checkout is unavailable until the quote is accepted. Current quote status: " + quote.status,
+                    "info"
+                );
+                return;
+            }
+            if (quote.valid_until && new Date(quote.valid_until).getTime() <= Date.now()) {
+                showCheckoutMessage("This quote has expired. Request a refreshed quote.");
+                return;
+            }
+
+            button.disabled = false;
+            showCheckoutMessage("Accepted quote loaded. Payment amount and order will be verified by KRIM's server.", "info");
+        }
+
+        async function startRazorpayCheckout() {
+            const button = document.getElementById("btn-pay-now");
+            if (!activeQuoteRecord || !currentSession) {
+                showCheckoutMessage("A valid signed-in session and accepted quote are required.");
+                return;
+            }
+
+            button.disabled = true;
+            showCheckoutMessage("Creating a secure payment order on KRIM's server...", "info");
 
             try {
-                const { data, error } = await supabaseClient.from('krim_quotes').select('*').eq('shipment_id', shipmentId).order('created_at', { ascending: false }).limit(1).single();
-                if (error || !data) throw new Error("No quotation record found for this shipment.");
+                const { data: order, error: orderError } = await supabaseClient.functions.invoke(
+                    "create-global-razorpay-order",
+                    { body: { krim_shipment_id: Number(activeQuoteRecord.shipment_id) } }
+                );
+                if (orderError) throw orderError;
+                if (!order?.success || !order.razorpay_order_id || !order.key_id || !Number.isFinite(Number(order.amount_paise))) {
+                    throw new Error(order?.error || "The server did not return a valid Razorpay order.");
+                }
 
-                activeQuoteRecord = data;
-                document.getElementById('checkout-shipment-id.innerText` = `#${data.shipment_id}`; // Fixed syntax
-                document.getElementById('checkout-shipment-id').innerText = `#${data.shipment_id}`;
-                document.getElementById('checkout-amount').innerText = `${data.currency_code || 'INR'} ${Number(data.amount).toLocaleString('en-IN')}.00`;
+                const options = {
+                    key: order.key_id,
+                    order_id: order.razorpay_order_id,
+                    amount: Number(order.amount_paise),
+                    currency: order.currency || "INR",
+                    name: "KRIM Logistics OS",
+                    description: "Shipment " + (order.shipment_number || activeQuoteRecord.shipment_id),
+                    handler: async function (response) {
+                        showCheckoutMessage("Verifying payment with Razorpay and KRIM's server...", "info");
+                        try {
+                            if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+                                throw new Error("Razorpay returned an incomplete payment response.");
+                            }
+                            const { data: verification, error: verifyError } = await supabaseClient.functions.invoke(
+                                "verify-razorpay-payment",
+                                { body: {
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature
+                                } }
+                            );
+                            if (verifyError) throw verifyError;
+                            if (!verification?.success || !verification?.verified) {
+                                throw new Error(verification?.error || "Server could not confirm the payment.");
+                            }
+                            showCheckoutMessage("Payment verified successfully. Redirecting to your shipments...", "success");
+                            setTimeout(() => {
+                                window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
+                            }, 1400);
+                        } catch (err) {
+                            showCheckoutMessage("Payment verification failed: " + (err.message || "Unknown error") + ". Do not retry until payment status is checked.");
+                            button.disabled = false;
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            button.disabled = false;
+                            showCheckoutMessage("Checkout was closed. No payment success has been recorded.", "info");
+                        }
+                    },
+                    theme: { color: "#0284c7" }
+                };
+
+                const checkout = new Razorpay(options);
+                checkout.on("payment.failed", function (response) {
+                    button.disabled = false;
+                    showCheckoutMessage(response.error?.description || "Payment failed. Please verify payment status before retrying.");
+                });
+                checkout.open();
             } catch (err) {
-                alert("Error loading quotation: " + err.message);
-                window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
+                button.disabled = false;
+                showCheckoutMessage("Unable to start secure checkout: " + (err.message || "Unknown error"));
             }
         }
 
-        function startRazorpayCheckout() {
-            if (!activeQuoteRecord) return;
-
-            const options = {
-                key: "rzp_test_placeholder_key", // Replaced with environment-compliant test key string
-                amount: Math.round(Number(activeQuoteRecord.amount) * 100), // Amount in smallest currency unit (paise)
-                currency: activeQuoteRecord.currency_code || "INR",
-                name: "KRIM Logistics OS",
-                description: `Consignment Settlement for Shipment #${activeQuoteRecord.shipment_id}`,
-                image: "https://ebltviniygljwwseplph.supabase.co/storage/v1/object/public/assets/krim-logo.png",
-                handler: async function (response) {
-                    const feedback = document.getElementById('checkout-feedback');
-                    feedback.innerHTML = `<p class='text-sky-600 font-semibold'>Verifying payment signature via Edge Function...</p>`;
-
-                    try {
-                        // Call Supabase Edge Function for signature verification
-                        const { data, error } = await supabaseClient.functions.invoke('verify-razorpay-payment', {
-                            body: {
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_order_id: response.razorpay_order_id || 'order_krim_mock',
-                                razorpay_signature: response.razorpay_signature || 'sig_verified_mock',
-                                quote_id: activeQuoteRecord.id,
-                                shipment_id: activeQuoteRecord.shipment_id
-                            }
-                        });
-
-                        if (error) throw error;
-
-                        // Update quote status to paid locally and in database
-                        await supabaseClient.from('krim_quotes').update({ status: 'paid' }).eq('id', activeQuoteRecord.id);
-
-                        feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Payment verified and captured successfully! Redirecting to active fleet...</p>`;
-                        setTimeout(() => {
-                            window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
-                        }, 1500);
-
-                    } catch (err) {
-                        feedback.innerHTML = `<p class='text-red-600 font-semibold'>Verification Error: ${err.message}</p>`;
-                    }
-                },
-                prefill: {
-                    name: "Enterprise Shipper",
-                    email: "executive@enterprise.com",
-                    contact: "9999999999"
-                },
-                theme: {
-                    color: "#0284c7"
-                }
-            };
-
-            const rzp = new Razorpay(options);
-            rzp.open();
-        }
-
+        document.getElementById("btn-pay-now").addEventListener("click", startRazorpayCheckout);
         initCheckout();
     </script>
 </body>
