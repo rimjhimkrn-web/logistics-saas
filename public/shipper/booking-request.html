@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Official Booking Request</title>
+    <!-- PWA & Mobile Installable Configuration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#090d16',
+                            card: '#111827',
+                            border: '#1f2937',
+                            accent: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Top Telemetry & System Status Bar -->
+    <div class="w-full bg-[#05080f] border-b border-gray-900 text-[11px] text-gray-400 py-1.5 px-6 flex flex-wrap justify-between items-center tracking-wider font-mono">
+        <div class="flex items-center space-x-4">
+            <span class="flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-emerald-400 font-semibold">KRIM CORE: ONLINE</span>
+            </span>
+            <span class="hidden sm:inline text-gray-600">|</span>
+            <span class="hidden sm:inline text-gray-400">Booking Gateway Node Active</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="session-identity-badge" class="text-purple-400">Authenticating...</span>
+            <span class="text-gray-600">|</span>
+            <span>EN (US)</span>
+        </div>
+    </div>
+
+    <!-- Global Navigation Header -->
+    <header class="border-b border-gray-800 bg-[#090d16]/95 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow">
+                    K
+                </div>
+                <div>
+                    <span class="text-sm font-extrabold tracking-wider text-white">KRIM OS</span>
+                    <span class="block text-[9px] tracking-widest text-purple-400 uppercase font-mono">BOOKING GATEWAY</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <a href="/app/customer/index.html" class="text-xs font-mono text-gray-300 bg-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-700 transition">
+                    ← Back to Workspace
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Content Area -->
+    <main class="max-w-4xl mx-auto px-4 py-12 flex-grow w-full">
+        <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 shadow-2xl">
+            <div class="mb-6 pb-4 border-b border-gray-800">
+                <h1 class="text-2xl font-bold text-white">Official Booking Request Form</h1>
+                <p class="text-xs text-gray-400 mt-1">Submit institutional cargo parameters via the Global Core backend contract.</p>
+            </div>
+
+            <form id="shipper-booking-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Origin Facility / Hub</label>
+                    <input type="text" id="booking-origin" required placeholder="e.g., Jharkhand Hub (Ranchi)" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Destination Terminal</label>
+                    <input type="text" id="booking-destination" required placeholder="e.g., New Delhi Distribution Terminal" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Goods Description</label>
+                    <input type="text" id="booking-goods" required placeholder="e.g., Industrial Machinery Spares" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Total Weight (kg)</label>
+                    <input type="number" id="booking-weight" required placeholder="1250" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                </div>
+
+                <div class="md:col-span-2 pt-4">
+                    <button type="submit" id="booking-submit-btn" 
+                            class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg shadow-purple-600/25 cursor-pointer uppercase text-xs font-mono tracking-wider">
+                        Invoke Global Core Contract & Book →
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 py-8 text-center text-xs text-gray-500 font-mono">
+        KRIM Logistics OS Enterprise Network © 2026. All rights reserved.
+    </footer>
+
+    <!-- Booking Integration Script -->
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        async function initAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                document.getElementById('session-identity-badge').innerText = "Guest Mode (Auth Required for Production)";
+            } else {
+                document.getElementById('session-identity-badge').innerText = `Node: ${session.user.email}`;
+            }
+        }
+
+        // Updated Booking Submission: Invokes krim_create_global_shipment RPC
+        document.getElementById('shipper-booking-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('booking-submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Invoking Global Core Backend...";
+
+            try {
+                const origin = document.getElementById('booking-origin').value;
+                const destination = document.getElementById('booking-destination').value;
+                const goods_description = document.getElementById('booking-goods').value;
+                const total_weight_kg = Number(document.getElementById('booking-weight').value);
+
+                const { data, error } = await supabaseClient.rpc('krim_create_global_shipment', {
+                    p_origin: origin,
+                    p_destination: destination,
+                    p_goods_description: goods_description,
+                    p_total_weight_kg: total_weight_kg
+                });
+
+                if (error) throw error;
+
+                // Handle RPC return value (if ID or object returned)
+                const newShipmentId = data && (data.id || data) ? (data.id || data) : 1;
+                alert(`🎉 Booking Request Successfully Registered via Global Core! Shipment ID: #${newShipmentId}`);
+                
+                window.location.href = `/domains/quotes.html?shipment_id=${newShipmentId}`;
+            } catch (err) {
+                alert("Global Core Transmission Error: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Invoke Global Core Contract & Book →";
+            }
+        });
+
+        initAuth();
+    </script>
+</body>
+</html>
