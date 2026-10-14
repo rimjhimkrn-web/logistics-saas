@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM Logistics OS — Enterprise Organization Registration</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#06b6d4">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { dark: { bg: '#090d16', card: '#111827', border: '#1f2937', accent: '#06b6d4' } } } } }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- Telemetry Header Bar -->
+    <div class="w-full bg-[#05080f] border-b border-gray-900 text-[11px] text-gray-400 py-2 px-6 flex justify-between items-center font-mono">
+        <span class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-emerald-400 font-semibold">KRIM GLOBAL CORE: SECURE GATEWAY</span></span>
+        <span class="text-purple-400 uppercase tracking-widest">Protocol 2.6-TLS</span>
+    </div>
+
+    <!-- Main Registration Shell -->
+    <main class="max-w-md mx-auto px-4 py-16 flex-grow w-full flex items-center">
+        <div class="w-full bg-[#111827] border border-gray-800/80 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg mb-4">K</div>
+                <h1 class="text-2xl font-extrabold text-white tracking-tight">Register Enterprise Node</h1>
+                <p class="text-xs text-gray-400">Initialize your institutional shipper organization and gain access to global core contracts.</p>
+            </div>
+
+            <form id="signup-form" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block uppercase tracking-wider text-gray-400 mb-1.5">Organization Legal Name</label>
+                    <input type="text" id="signup-org-name" required placeholder="e.g., Apex Global Industries Ltd" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition text-sm font-sans">
+                </div>
+                <div>
+                    <label class="block uppercase tracking-wider text-gray-400 mb-1.5">Institutional Email</label>
+                    <input type="email" id="signup-email" required placeholder="admin@apexglobal.com" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition text-sm font-sans">
+                </div>
+                <div>
+                    <label class="block uppercase tracking-wider text-gray-400 mb-1.5">Cryptographic Password</label>
+                    <input type="password" id="signup-password" required placeholder="••••••••••••" 
+                           class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition text-sm font-sans">
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="signup-btn" 
+                            class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/25">
+                        Provision Organization Node →
+                    </button>
+                </div>
+            </form>
+
+            <div class="pt-4 border-t border-gray-800 text-center font-mono text-xs">
+                <p class="text-gray-400">Already have an active node? <a href="/auth/login.html" class="text-purple-400 hover:underline font-bold">Authenticate here</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-gray-800 py-6 text-center text-xs text-gray-500 font-mono">
+        KRIM Logistics OS Enterprise Network © 2026. All rights reserved.
+    </footer>
+
+    <script>
+        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('signup-btn');
+            btn.disabled = true;
+            btn.innerText = "Provisioning Node...";
+
+            try {
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const orgName = document.getElementById('signup-org-name').value;
+
+                // 1. Supabase Auth Signup
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: { organization_name: orgName }
+                    }
+                });
+
+                if (error) throw error;
+
+                alert("Institutional node registered successfully! Please check your email to verify your account.");
+                window.location.href = "/auth/verify-email.html";
+            } catch (err) {
+                alert("Registration Failed: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Provision Organization Node →";
+            }
+        });
+    </script>
+</body>
+</html>
