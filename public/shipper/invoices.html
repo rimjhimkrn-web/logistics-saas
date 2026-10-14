@@ -122,38 +122,50 @@
             loadInvoices();
         }
 
-        async function loadInvoices() {
-            try {
-                const { data, error } = await supabaseClient.from('krim_quotes').select('*').order('created_at', { ascending: false });
-                const tbody = document.getElementById('invoices-tbody');
-                tbody.innerHTML = '';
+        function escapeInvoiceText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
+                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+            });
+        }
 
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No invoice records found in ledger.</td></tr>`;
+        async function loadInvoices() {
+            const tbody = document.getElementById("invoices-tbody");
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Loading authorized invoices...</td></tr>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from("krim_invoices")
+                    .select("id, invoice_number, shipment_id, total_amount, paid_amount, outstanding_amount, currency_code, status, issue_date, due_date")
+                    .order("issue_date", { ascending: false });
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No invoice records are available to this account.</td></tr>';
                     return;
                 }
 
-                data.forEach((inv, index) => {
-                    const isPaid = inv.status === 'paid';
-                    const statusColor = isPaid ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200';
-                    const invoiceNumber = `INV-2026-${(1000 + index)}`;
-                    
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">${invoiceNumber}</td>
-                            <td class="py-4 px-4 font-mono text-slate-600">#${inv.shipment_id}</td>
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">${inv.currency_code || 'INR'} ${Number(inv.amount).toLocaleString('en-IN')}.00</td>
-                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ${statusColor}">${isPaid ? 'Settled' : 'Pending'}</span></td>
-                            <td class="py-4 px-4 font-mono text-xs text-slate-500">${new Date(inv.created_at || Date.now()).toLocaleDateString()}</td>
-                            <td class="py-4 px-4 text-right">
-                                <a href="/logistics-saas/public/quote-result.html?shipment_id=${inv.shipment_id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">
-                                    ${isPaid ? 'Download PDF →' : 'Pay Invoice →'}
-                                </a>
-                            </td>
-                        </tr>`;
-                });
+                tbody.innerHTML = data.map(function(inv) {
+                    const total = Number(inv.total_amount);
+                    const outstanding = Number(inv.outstanding_amount);
+                    const status = String(inv.status || "unknown");
+                    const paid = Number.isFinite(outstanding) && outstanding <= 0;
+                    const statusColor = paid
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                        : "text-amber-700 bg-amber-50 border-amber-200";
+                    const issueDate = inv.issue_date ? new Date(inv.issue_date + "T00:00:00").toLocaleDateString() : "—";
+                    const invoiceNo = inv.invoice_number || ("Invoice #" + inv.id);
+                    const amountText = Number.isFinite(total)
+                        ? total.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2})
+                        : "—";
+                    return '<tr class="hover:bg-slate-50/80 transition">' +
+                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(invoiceNo) + '</td>' +
+                        '<td class="py-4 px-4 font-mono text-slate-600">' + (Number.isFinite(Number(inv.shipment_id)) ? "#" + Number(inv.shipment_id) : "—") + '</td>' +
+                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(inv.currency_code || "INR") + ' ' + amountText + '</td>' +
+                        '<td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ' + statusColor + '">' + escapeInvoiceText(status) + '</span></td>' +
+                        '<td class="py-4 px-4 font-mono text-xs text-slate-500">' + escapeInvoiceText(issueDate) + '</td>' +
+                        '<td class="py-4 px-4 text-right text-xs text-slate-500">' + (paid ? "Settled" : "Payment workflow not yet enabled for invoices") + '</td>' +
+                        '</tr>';
+                }).join("");
             } catch (err) {
-                console.error("Error loading invoices:", err);
+                tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-600 font-mono text-xs">Unable to load invoices: ' + escapeInvoiceText(err.message || "Unknown error") + '</td></tr>';
             }
         }
 
