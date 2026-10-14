@@ -122,35 +122,73 @@
             loadSpotApprovals();
         }
 
-        async function loadSpotApprovals() {
-            try {
-                const { data, error } = await supabaseClient.from('krim_quotes').select('*').order('created_at', { ascending: false });
-                const tbody = document.getElementById('spot-approvals-tbody');
-                tbody.innerHTML = '';
+        function escapeQuoteText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
+                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
+            });
+        }
 
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No quotation records found in ledger.</td></tr>`;
+        async function acceptGlobalQuote(quoteId) {
+            if (!Number.isInteger(Number(quoteId)) || Number(quoteId) <= 0) return;
+            const confirmed = window.confirm("Accept this quotation? This confirms the quote and shipment status.");
+            if (!confirmed) return;
+            try {
+                const { data, error } = await supabaseClient.rpc("krim_accept_global_quote", {
+                    p_quote_id: Number(quoteId)
+                });
+                if (error) throw error;
+                if (!data) throw new Error("The server did not confirm quote acceptance.");
+                window.alert("Quote accepted. You can now proceed to secure checkout.");
+                await loadSpotApprovals();
+            } catch (err) {
+                window.alert("Quote could not be accepted: " + (err.message || "Unknown error"));
+            }
+        }
+
+        async function loadSpotApprovals() {
+            const tbody = document.getElementById("spot-approvals-tbody");
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Loading authorized quotations...</td></tr>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from("krim_quotes")
+                    .select("id, shipment_id, amount, currency_code, status, valid_until, created_at")
+                    .order("created_at", { ascending: false });
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No quotation records are available to this account.</td></tr>';
                     return;
                 }
 
-                data.forEach(q => {
-                    const statusColor = q.status === 'paid' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200';
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">#${q.id}</td>
-                            <td class="py-4 px-4 font-mono text-slate-600">#${q.shipment_id}</td>
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">${q.currency_code || 'INR'} ${Number(q.amount).toLocaleString('en-IN')}.00</td>
-                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ${statusColor}">${q.status || 'pending'}</span></td>
-                            <td class="py-4 px-4 font-mono text-xs text-slate-500">${new Date(q.valid_until || Date.now()).toLocaleDateString()}</td>
-                            <td class="py-4 px-4 text-right">
-                                <a href="/logistics-saas/public/quote-result.html?shipment_id=${q.shipment_id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
-                                    ${q.status === 'paid' ? 'View Receipt →' : 'Authorize & Pay →'}
-                                </a>
-                            </td>
-                        </tr>`;
-                });
+                tbody.innerHTML = data.map(function(q) {
+                    const id = Number(q.id);
+                    const shipmentId = Number(q.shipment_id);
+                    const status = String(q.status || "unknown");
+                    const statusColor = status === "accepted"
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                        : status === "sent"
+                            ? "text-sky-700 bg-sky-50 border-sky-200"
+                            : "text-amber-700 bg-amber-50 border-amber-200";
+                    let action = '<span class="text-xs text-slate-500">Not actionable</span>';
+                    if (status === "sent" && Number.isInteger(id) && id > 0) {
+                        action = '<button type="button" onclick="acceptGlobalQuote(' + id + ')" class="bg-slate-900 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Accept Quote</button>';
+                    } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0) {
+                        action = '<a href="/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
+                    } else if (status === "pending" || status === "draft" || status === "quoted") {
+                        action = '<span class="text-xs text-amber-700">Needs quote review / reissue</span>';
+                    }
+                    const validUntil = q.valid_until ? new Date(q.valid_until).toLocaleString() : "—";
+                    const amount = Number(q.amount);
+                    const displayAmount = Number.isFinite(amount) ? amount.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2}) : "—";
+                    return '<tr class="hover:bg-slate-50/80 transition">' +
+                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">#' + id + '</td>' +
+                        '<td class="py-4 px-4 font-mono text-slate-600">#' + shipmentId + '</td>' +
+                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeQuoteText(q.currency_code || "INR") + ' ' + displayAmount + '</td>' +
+                        '<td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ' + statusColor + '">' + escapeQuoteText(status) + '</span></td>' +
+                        '<td class="py-4 px-4 font-mono text-xs text-slate-500">' + escapeQuoteText(validUntil) + '</td>' +
+                        '<td class="py-4 px-4 text-right">' + action + '</td></tr>';
+                }).join("");
             } catch (err) {
-                console.error("Error loading spot approvals:", err);
+                tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-600 font-mono text-xs">Unable to load quotations: ' + escapeQuoteText(err.message || "Unknown error") + '</td></tr>';
             }
         }
 
