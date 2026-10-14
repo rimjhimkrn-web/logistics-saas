@@ -169,36 +169,15 @@
 
     <!-- Quick Tracking Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function quickTrack() {
-            const id = document.getElementById('home-track-input').value.trim();
-            const resultBox = document.getElementById('home-track-result');
-            if (!id) {
-                resultBox.innerHTML = "<p class='text-red-500 font-semibold'>Please enter a valid shipment ID.</p>";
+        function quickTrack() {
+            const id = document.getElementById("home-track-input").value.trim();
+            const resultBox = document.getElementById("home-track-result");
+            if (!/^\d+$/.test(id)) {
+                resultBox.textContent = "Enter a valid numeric shipment reference.";
                 return;
             }
-            resultBox.innerHTML = "<p class='text-slate-500'>Querying live network...</p>";
-
-            try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
-                if (error || !data) {
-                    resultBox.innerHTML = `<div class='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 font-medium'>Shipment #${id} not found in network.</div>`;
-                } else {
-                    resultBox.innerHTML = `
-                        <div class='p-4 bg-sky-50 border border-sky-200 rounded-xl space-y-2 text-slate-700'>
-                            <p class='font-bold text-sky-900'>Consignment #${data.id}</p>
-                            <p><strong>Route:</strong> ${data.origin_location_id || data.origin || 'Origin'} → ${data.destination_location_id || data.destination || 'Destination'}</p>
-                            <p><strong>Status:</strong> <span class='text-emerald-600 uppercase font-bold'>${data.status || 'pending'}</span></p>
-                            <a href="/logistics-saas/public/tracking.html" class='block text-sky-600 font-semibold pt-1 hover:underline'>View Full Telemetry →</a>
-                        </div>`;
-                }
-            } catch (err) {
-                resultBox.innerHTML = "<p class='text-red-500'>Consignment lookup failed.</p>";
-            }
+            resultBox.textContent = "Opening secure shipment tracking…";
+            window.location.href = "/logistics-saas/public/tracking.html?shipment_id=" + encodeURIComponent(id);
         }
     </script>
 </body>
