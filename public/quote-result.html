@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Secure Checkout & Razorpay Settlement</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/logistics-saas/manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,7 +58,7 @@
                 </div>
             </div>
             
-            <a href="/public/shipper/spot-approvals.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="/logistics-saas/public/shipper/spot-approvals.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Spot Approvals
             </a>
         </div>
@@ -103,8 +103,8 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Settlement Gateway © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
@@ -112,7 +112,7 @@
     <!-- Checkout & Payment Verification Script -->
     <script>
         const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
+        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let activeQuoteRecord = null;
@@ -123,13 +123,13 @@
 
             if (!shipmentId) {
                 alert("Missing shipment ID reference.");
-                window.location.href = "/public/shipper/active-shipments.html";
+                window.location.href = "/logistics-saas/logistics-saas/public/shipper/active-shipments.html";
                 return;
             }
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/auth/login.html";
+                window.location.href = "/logistics-saas/logistics-saas/auth/login.html";
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
@@ -144,7 +144,7 @@
                 document.getElementById('checkout-amount').innerText = `${data.currency_code || 'INR'} ${Number(data.amount).toLocaleString('en-IN')}.00`;
             } catch (err) {
                 alert("Error loading quotation: " + err.message);
-                window.location.href = "/public/shipper/active-shipments.html";
+                window.location.href = "/logistics-saas/logistics-saas/public/shipper/active-shipments.html";
             }
         }
 
@@ -181,7 +181,7 @@
 
                         feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Payment verified and captured successfully! Redirecting to active fleet...</p>`;
                         setTimeout(() => {
-                            window.location.href = "/public/shipper/active-shipments.html";
+                            window.location.href = "/logistics-saas/logistics-saas/public/shipper/active-shipments.html";
                         }, 1500);
 
                     } catch (err) {
