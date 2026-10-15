@@ -34,7 +34,7 @@ const krimBasePath =
 
 window.KRIM_BASE_PATH = krimBasePath;
 window.krimPath = function (path = "") {
-  const cleanPath = String(path).replace(/^\\/+/, "");
+  const cleanPath = String(path).replace(/^\/+/, "");
   return cleanPath ? `${krimBasePath}/${cleanPath}` : `${krimBasePath}/`;
 };
 
