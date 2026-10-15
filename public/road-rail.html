@@ -1,193 +1,141 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Road & Intermodal Rail Freight Network</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              amber: '#f59e0b'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Multi-Modal Road & Rail Freight Solutions</title>
+    <meta name="description" content="Secure, high-capacity road and rail freight logistics corridors powered by KRIM OS enterprise multi-tenant architecture and real-time GPS telemetry.">
+    <!-- Tailwind CSS Modern Styling Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#026f9e',
+                            900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
+    </script>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
-  <!-- ==================== HEADER / NAVIGATION ==================== -->
-  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
+    <!-- Institutional Navigation Header -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                    K
+                </div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Road & Rail Solutions</span>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+                <a href="/public/solutions.html" class="hover:text-slate-900 transition">Solutions</a>
+                <a href="/public/network.html" class="hover:text-slate-900 transition">Global Network</a>
+                <a href="/public/tracking.html" class="hover:text-slate-900 transition">Track Shipment</a>
+            </nav>
+
+            <div class="flex items-center space-x-4 text-sm font-medium">
+                <a href="/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
+                <a href="/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
         
-        <!-- Logo -->
-        <a href="/index.html" class="flex items-center space-x-3">
-          <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-amber-500/20">K</div>
-          <div class="flex flex-col">
-            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
-            <span class="text-[10px] font-mono text-amber-400 mt-1 uppercase tracking-widest leading-none">Road & Rail</span>
-          </div>
-        </a>
-
-        <!-- Navigation Links -->
-        <nav class="hidden md:flex items-center space-x-8 text-xs font-mono">
-          <a href="/tracking.html" class="text-slate-400 hover:text-white transition-colors">Tracking</a>
-          <a href="/quote.html" class="text-slate-400 hover:text-white transition-colors">Rate Engine</a>
-          <a href="/ocean.html" class="text-slate-400 hover:text-white transition-colors">Ocean Freight</a>
-          <a href="/air.html" class="text-slate-400 hover:text-white transition-colors">Air Freight</a>
-          <a href="/road-rail.html" class="text-amber-400 font-bold border-b-2 border-amber-400 pb-1">Road & Rail</a>
-          <a href="/enterprise.html" class="text-slate-400 hover:text-white transition-colors">Enterprise OS</a>
-        </nav>
-
-        <!-- Right Quick Actions -->
-        <div class="flex items-center space-x-4">
-          <a href="/quote.html?mode=road" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs font-mono rounded-xl transition-all shadow-lg shadow-amber-500/20">
-            Book Freight →
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN CONTENT ==================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-
-    <!-- HERO SECTION -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-      <div class="absolute -right-16 -top-16 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="max-w-3xl space-y-4">
-        <span class="text-[11px] font-mono text-amber-400 uppercase tracking-widest block font-bold">Ground Logistics & Rail Intermodal OS</span>
-        <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">Cross-Border Trucking & Intermodal Rail Network</h1>
-        <p class="text-xs sm:text-sm text-slate-400 font-mono leading-relaxed">Direct carrier TMS dispatch, dynamic FTL/LTL freight matching, port drayage automation, and high-capacity rail corridors with real-time GPS telemetry.</p>
-      </div>
-
-      <div class="flex flex-wrap gap-4 mt-8 pt-6 border-t border-slate-800 font-mono text-xs">
-        <a href="/quote.html?mode=ftl" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
-          Get Instant FTL Rate
-        </a>
-        <a href="/quote.html?mode=rail" class="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-white font-bold rounded-xl transition-all">
-          Explore Intermodal Rail Routes
-        </a>
-      </div>
-    </section>
-
-    <!-- GROUND MODALITIES GRID -->
-    <section class="space-y-6">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h2 class="text-sm font-bold font-mono text-white flex items-center gap-2">
-          <span>🚛</span> Ground & Rail Capabilities
-        </h2>
-        <span class="text-[10px] font-mono text-slate-500">Automated Dispatch Network</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-
-        <!-- FTL TRUCKING -->
-        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 hover:border-amber-500/50 transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-lg">
-              🚚
+        <!-- Hero Section -->
+        <section class="max-w-7xl mx-auto px-6 py-20 lg:py-28 space-y-12 text-center">
+            <div class="space-y-6 max-w-3xl mx-auto">
+                <span class="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-600 border border-sky-200 uppercase tracking-widest">
+                    Terrestrial Logistics Corridors
+                </span>
+                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+                    Road & Rail Freight Operations
+                </h1>
+                <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
+                    Optimize domestic and cross-border overland transport with integrated spot bidding, automated rail container scheduling, and secure escrow disbursement.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 pt-2">
+                    <a href="/public/solutions.html" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20">
+                        Back to Solutions →
+                    </a>
+                    <a href="/public/tracking.html" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition">
+                        Track Consignment
+                    </a>
+                </div>
             </div>
-            <h3 class="text-base font-bold text-white">Full Truckload (FTL) & Drayage</h3>
-            <p class="text-slate-400 leading-relaxed text-[11px]">Dedicated dry vans, flatbeds, and port drayage container shuttles with driver app tracking and automated electronic Proof of Delivery (e-POD).</p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 text-[10px] text-amber-400">
-            <span>Direct Point-to-Point Haulage</span>
-          </div>
-        </div>
 
-        <!-- LTL CONSOLIDATION -->
-        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 hover:border-orange-500/50 transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-lg">
-              📦
+            <!-- Features Grid -->
+            <div class="max-w-6xl mx-auto pt-16 space-y-12 text-left">
+                <div class="text-center space-y-2 max-w-xl mx-auto">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-sky-600 font-mono">Terrestrial Infrastructure</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900">Engineered for Overland Reliability</h2>
+                    <p class="text-slate-600 text-sm">Seamlessly connect trucking fleets and freight rail networks through a single operating system.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
+                            01
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900">Dedicated Truckload (FTL/LTL)</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Manage dry van, refrigerated, and flatbed transport with automated carrier dispatch and real-time geofence tracking telemetry.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
+                            02
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900">Intermodal Rail Integration</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Combine long-haul rail efficiency with final-mile trucking delivery under unified multi-modal consignment manifests.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
+                            03
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900">Automated Escrow Payouts</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Razorpay escrow accounts automatically release carrier funds upon successful cryptographic electronic proof of delivery (ePOD) sign-off.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <h3 class="text-base font-bold text-white">Less-Than-Truckload (LTL)</h3>
-            <p class="text-slate-400 leading-relaxed text-[11px]">Dynamic pallet consolidation hubs for regional distribution, featuring density-based class rating and automated door-to-door transit times.</p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 text-[10px] text-orange-400">
-            <span>Regional Hub Consolidation</span>
-          </div>
-        </div>
+        </section>
+    </main>
 
-        <!-- INTERMODAL RAIL -->
-        <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 hover:border-yellow-500/50 transition-all flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="w-10 h-10 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-400 font-bold text-lg">
-              🚂
+    <!-- Clean Footer -->
+    <footer class="bg-white border-t border-slate-100 py-10 text-xs text-slate-500 font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="/public/network.html" class="hover:text-slate-800 transition">Network</a>
+                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+                <a href="/portal.html" class="hover:text-slate-800 transition">Sign In</a>
             </div>
-            <h3 class="text-base font-bold text-white">Intermodal Rail Freight</h3>
-            <p class="text-slate-400 leading-relaxed text-[11px]">Eco-friendly long-distance rail corridors connecting major industrial zones, inland container depots (ICDs), and maritime container terminals.</p>
-          </div>
-          <div class="pt-4 border-t border-slate-800/80 text-[10px] text-yellow-400">
-            <span>High Capacity / Lower Emissions</span>
-          </div>
         </div>
+    </footer>
 
-      </div>
-    </section>
-
-    <!-- KEY CORRIDORS PREVIEW -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4 font-mono text-xs">
-      <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
-        <h2 class="text-base font-bold text-white">Popular Land Trade Corridors</h2>
-        <a href="/solutions.html" class="text-amber-400 hover:underline text-[11px]">All Trade Corridors →</a>
-      </div>
-
-      <div class="space-y-3">
-        <div class="p-4 bg-[#040814]/60 rounded-xl border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <div class="flex items-center space-x-2 text-white font-bold text-sm">
-              <span>US-Mexico (Monterrey → Chicago)</span>
-            </div>
-            <p class="text-[10px] text-slate-500">Cross-border drayage + Rail express | Transit: 4 Days | Automated C-TPAT Clearance</p>
-          </div>
-          <a href="/quote.html?mode=road_intermodal" class="px-3 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-400 text-amber-400 text-[11px] rounded-lg text-center transition-all">
-            Get Land Rate
-          </a>
-        </div>
-
-        <div class="p-4 bg-[#040814]/60 rounded-xl border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <div class="flex items-center space-x-2 text-white font-bold text-sm">
-              <span>EU Intra-European Express (Rotterdam → Warsaw)</span>
-            </div>
-            <p class="text-[10px] text-slate-500">FTL Double-Driver Relay | Transit: 28 Hours | GPS Live Tracking</p>
-          </div>
-          <a href="/quote.html?mode=ftl_eu" class="px-3 py-1.5 bg-slate-900 border border-slate-700 hover:border-amber-400 text-amber-400 text-[11px] rounded-lg text-center transition-all">
-            Get Land Rate
-          </a>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center space-x-3">
-        <div class="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-xs">K</div>
-        <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
-      </div>
-      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Road & Rail Dispatch Engine.</p>
-    </div>
-  </footer>
-
-  <!-- ==================== SCRIPT & RUNTIME ==================== -->
-  <script type="module" src="/platform/krim-config.js"></script>
-  <script type="module" src="/js/public/public-runtime.js"></script>
 </body>
-              </html>
-              
+</html>
