@@ -173,7 +173,8 @@
                 window.location.href = "/logistics-saas/app/customer/index.html";
 
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Authentication Failed: ${err.message}</p>`;
+                feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
+                feedback.className = "text-red-600 font-semibold";
                 btn.disabled = false;
                 btn.innerText = "Authenticate & Verify Session →";
             }
@@ -223,7 +224,8 @@
                 }, 1000);
 
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Verification Failed: ${err.message}</p>`;
+                feedback.textContent = "Verification failed: " + (err.message || "Unknown error");
+                feedback.className = "text-red-600 font-semibold";
                 btn.disabled = false;
                 btn.innerText = "Verify TOTP & Enter Workspace →";
             }
