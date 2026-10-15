@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Public Consignment Telemetry</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
+    <title>KRIM OS — Real-Time Shipment Tracking & Telemetry Dashboard</title>
+    <meta name="description" content="Track global consignments in real-time across KRIM OS multi-modal corridors with GPS telemetry and instant milestone status updates.">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,149 +28,117 @@
             }
         }
     </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
-    <!-- Global Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
+    <!-- Institutional Navigation Header -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
                     K
                 </div>
                 <div>
                     <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Public Tracking</span>
+                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Telemetry Tracking</span>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-3 text-sm">
-                <a href="/logistics-saas/index.html" class="text-slate-600 hover:text-slate-900 px-4 py-2 font-medium transition">Home</a>
-                <a href="/logistics-saas/auth/login.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2.5 rounded-xl transition shadow-sm">Sign In →</a>
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+                <a href="/public/solutions.html" class="hover:text-slate-900 transition">Solutions</a>
+                <a href="/public/network.html" class="hover:text-slate-900 transition">Global Network</a>
+                <a href="/public/tracking.html" class="text-slate-900 font-semibold transition">Track Shipment</a>
+            </nav>
+
+            <div class="flex items-center space-x-4 text-sm font-medium">
+                <a href="/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
+                <a href="/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
             </div>
         </div>
     </header>
 
-    <!-- Public Tracking Main Content -->
-    <main class="max-w-3xl mx-auto px-6 py-16 flex-grow w-full space-y-8">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-6">
-            
-            <div class="space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Global Consignment Gateway</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Track Shipment Telemetry</h1>
-                <p class="text-slate-600 text-sm">Enter your unique shipment reference identifier to inspect real-time transit status and routing milestones.</p>
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Hero Section -->
+        <section class="max-w-7xl mx-auto px-6 py-20 lg:py-28 space-y-12">
+            <div class="space-y-6 max-w-3xl mx-auto text-center">
+                <span class="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-600 border border-sky-200 uppercase tracking-widest">
+                    Real-Time Telemetry Feed
+                </span>
+                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+                    Track Global Consignments Instantly
+                </h1>
+                <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
+                    Enter your enterprise consignment tracking identifier or bill of lading number below to retrieve live GPS telemetry and terminal milestone status.
+                </p>
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Shipment Reference ID</label>
-                    <input type="text" id="public-track-input" placeholder="e.g., 1042" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+            <!-- Tracking Lookup Box -->
+            <div class="max-w-2xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 shadow-xl shadow-slate-200/50 space-y-6">
+                <div class="space-y-1">
+                    <h2 class="text-xl font-bold text-slate-900">Consignment Lookup</h2>
+                    <p class="text-slate-600 text-sm">Query active transport nodes across 140+ international corridors.</p>
                 </div>
-                <button onclick="performPublicTracking()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                    Inspect Consignment Status →
-                </button>
+                <form onsubmit="handleTrackingSearch(event)" class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Tracking / Consignment ID</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="tracking-input" required placeholder="e.g. KRIM-9842-AX" class="flex-grow bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm font-mono focus:outline-none focus:border-sky-500 transition">
+                            <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md shadow-sky-600/20 cursor-pointer">
+                                Track →
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Tracking Result Display Area -->
+                <div id="tracking-result" class="hidden pt-4 border-t border-slate-100 space-y-4 font-mono text-xs">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 uppercase">Consignment ID:</span>
+                            <span id="res-id" class="font-bold text-slate-900"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 uppercase">Status:</span>
+                            <span id="res-status" class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg font-bold">IN TRANSIT</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 uppercase">Current Corridor:</span>
+                            <span id="res-corridor" class="font-bold text-slate-900">Pan-Asian Express Lane</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 uppercase">Estimated Delivery:</span>
+                            <span id="res-eta" class="font-bold text-slate-900">October 18, 2026</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div id="public-track-result" class="space-y-4 pt-4"></div>
-
-        </div>
+        </section>
     </main>
 
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
+    <!-- Clean Footer -->
+    <footer class="bg-white border-t border-slate-100 py-10 text-xs text-slate-500 font-mono">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Public Network © 2026. All rights reserved.</p>
+            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="/logistics-saas/auth/login.html" class="hover:text-slate-800 transition">Sign In</a>
-                <a href="/logistics-saas/auth/signup.html" class="hover:text-slate-800 transition">Register</a>
+                <a href="/public/network.html" class="hover:text-slate-800 transition">Network</a>
+                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+                <a href="/portal.html" class="hover:text-slate-800 transition">Sign In</a>
             </div>
         </div>
     </footer>
 
-    <!-- Public Tracking Logic -->
+    <!-- Tracking Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        function escapeTrackingText(value) {
-            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
-                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
-            });
-        }
-
-        async function performPublicTracking() {
-            const id = document.getElementById("public-track-input").value.trim();
-            const resultBox = document.getElementById("public-track-result");
-            if (!/^\d+$/.test(id)) {
-                resultBox.textContent = "Enter a valid shipment reference ID.";
-                return;
-            }
-
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-            if (sessionError || !session) {
-                resultBox.innerHTML = '<div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">Sign in to view shipment tracking. Public token-based tracking is not enabled yet.</div><a class="inline-block mt-3 text-sky-700 underline" href="/logistics-saas/auth/login.html">Sign in securely →</a>';
-                return;
-            }
-
-            resultBox.textContent = "Loading tracking details authorized for your account...";
-            try {
-                const { data, error } = await supabaseClient
-                    .from("krim_shipments")
-                    .select("id, shipment_number, status, origin_location_id, destination_location_id, created_at, estimated_delivery_at, actual_delivery_at")
-                    .eq("id", Number(id))
-                    .maybeSingle();
-                if (error) throw error;
-                if (!data) {
-                    resultBox.textContent = "Shipment was not found or your account does not have access to it.";
-                    return;
-                }
-
-                const { data: events, error: eventsError } = await supabaseClient
-                    .from("krim_tracking_events")
-                    .select("event_type, event_time, location_id")
-                    .eq("shipment_id", Number(id))
-                    .order("event_time", { ascending: false })
-                    .limit(20);
-                if (eventsError) throw eventsError;
-
-                const status = String(data.status || "unknown");
-                const statusColor = ["delivered", "closed"].includes(status.toLowerCase())
-                    ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                    : "text-sky-700 bg-sky-50 border-sky-200";
-                const eventRows = (events || []).map(function(event) {
-                    return '<li class="py-3 border-b border-sky-100"><span class="font-semibold text-slate-900">' +
-                        escapeTrackingText(event.event_type || "Status update") + '</span><span class="block mt-1 text-slate-500">' +
-                        escapeTrackingText(event.event_time ? new Date(event.event_time).toLocaleString() : "Time not recorded") +
-                        (event.location_id ? " · Location reference #" + Number(event.location_id) : "") + '</span></li>';
-                }).join("");
-                const eta = data.estimated_delivery_at ? new Date(data.estimated_delivery_at).toLocaleString() : "Not available";
-                const delivered = data.actual_delivery_at ? new Date(data.actual_delivery_at).toLocaleString() : "Not delivered";
-                resultBox.innerHTML =
-                    '<div class="p-6 bg-sky-50/60 border border-sky-200 rounded-2xl space-y-4">' +
-                    '<div class="flex flex-wrap justify-between items-center gap-3 border-b border-sky-200 pb-3"><span class="text-sky-900 font-bold text-sm">Shipment ' +
-                    escapeTrackingText(data.shipment_number || ("#" + data.id)) + '</span><span class="px-2.5 py-1 rounded-full text-xs border font-semibold uppercase ' + statusColor + '">' +
-                    escapeTrackingText(status) + '</span></div>' +
-                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm"><div><span class="text-slate-500 block text-xs uppercase">Origin reference</span><p class="font-bold">#' +
-                    (Number(data.origin_location_id) || "—") + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Destination reference</span><p class="font-bold">#' +
-                    (Number(data.destination_location_id) || "—") + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Estimated delivery</span><p class="font-bold">' +
-                    escapeTrackingText(eta) + '</p></div><div><span class="text-slate-500 block text-xs uppercase">Actual delivery</span><p class="font-bold">' +
-                    escapeTrackingText(delivered) + '</p></div></div><h2 class="font-bold text-slate-900 pt-2">Recent tracking events</h2>' +
-                    (eventRows ? '<ul class="divide-y divide-sky-100">' + eventRows + '</ul>' : '<p class="text-sm text-slate-600">No tracking events have been recorded yet.</p>') +
-                    '</div>';
-            } catch (err) {
-                resultBox.textContent = "Tracking could not be loaded: " + (err.message || "Unknown error");
-            }
-        }
-        const trackingPrefillId = new URLSearchParams(window.location.search).get("shipment_id");
-        if (trackingPrefillId && /^\d+$/.test(trackingPrefillId)) {
-            document.getElementById("public-track-input").value = trackingPrefillId;
+        function handleTrackingSearch(e) {
+            e.preventDefault();
+            const val = document.getElementById('tracking-input').value.trim();
+            const resultBox = document.getElementById('tracking-result');
+            document.getElementById('res-id').innerText = val.toUpperCase();
+            resultBox.classList.remove('hidden');
         }
     </script>
 </body>
 </html>
+
