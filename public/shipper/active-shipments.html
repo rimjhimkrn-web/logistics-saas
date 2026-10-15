@@ -123,40 +123,62 @@
             loadActiveShipments();
         }
 
-        async function loadActiveShipments() {
-            try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').order('created_at', { ascending: false });
-                const tbody = document.getElementById('active-shipments-tbody');
-                tbody.innerHTML = '';
+        function escapeFleetText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function (char) {
+                return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char];
+            });
+        }
 
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No active shipments found in fleet.</td></tr>`;
+        async function loadActiveShipments() {
+            const tbody = document.getElementById("active-shipments-tbody");
+            tbody.textContent = "";
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from("krim_shipments")
+                    .select("id, shipment_number, origin_location_id, destination_location_id, goods_description, total_weight_kg, status, created_at")
+                    .order("created_at", { ascending: false });
+
+                if (error) throw error;
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No shipments are currently available to this account.</td></tr>';
                     return;
                 }
 
-                data.forEach(s => {
-                    tbody.innerHTML += `
+                tbody.innerHTML = data.map(function (shipment) {
+                    const id = Number(shipment.id);
+                    if (!Number.isSafeInteger(id) || id <= 0) return "";
+                    const origin = escapeFleetText(shipment.origin_location_id ?? "—");
+                    const destination = escapeFleetText(shipment.destination_location_id ?? "—");
+                    const goods = escapeFleetText(shipment.goods_description || "Goods not specified");
+                    const status = escapeFleetText(shipment.status || "unknown");
+                    const weight = Number(shipment.total_weight_kg);
+                    const weightText = Number.isFinite(weight) && weight > 0
+                        ? escapeFleetText(weight.toLocaleString("en-IN") + " kg")
+                        : "—";
+                    return `
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">#${s.id}</td>
-                            <td class="py-4 px-4 font-medium text-slate-800">${s.origin_location_id || s.origin || 'Origin'} → ${s.destination_location_id || s.destination || 'Destination'}</td>
-                            <td class="py-4 px-4 text-slate-600">${s.goods_description || 'General Cargo'}</td>
-                            <td class="py-4 px-4 font-mono text-slate-600">${s.total_weight_kg || 1000} kg</td>
-                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-amber-600 bg-amber-50 border-amber-200">${s.status || 'pending'}</span></td>
+                            <td class="py-4 px-4 font-mono font-bold text-slate-900">#${id}</td>
+                            <td class="py-4 px-4 font-medium text-slate-800">${origin} → ${destination}</td>
+                            <td class="py-4 px-4 text-slate-600">${goods}</td>
+                            <td class="py-4 px-4 font-mono text-slate-600">${weightText}</td>
+                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-amber-600 bg-amber-50 border-amber-200">${status}</span></td>
                             <td class="py-4 px-4 text-right space-x-2">
-                                <a href="/logistics-saas/public/shipper/shipment-details.html?shipment_id=${s.id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">
-                                    Details →
-                                </a>
-                                <a href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${s.id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
-                                    Calculate Rate →
-                                </a>
+                                <a href="/logistics-saas/public/shipper/shipment-details.html?shipment_id=${id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">Details →</a>
+                                <a href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">Calculate Rate →</a>
                             </td>
                         </tr>`;
-                });
+                }).join("");
+
+                if (!tbody.innerHTML.trim()) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No valid shipment records were returned.</td></tr>';
+                }
             } catch (err) {
                 console.error("Error loading active shipments:", err);
+                tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-700 font-mono text-xs">Unable to load shipments. Check your organization access or try again later.</td></tr>';
             }
         }
-
         initActiveFleet();
     </script>
 </body>
