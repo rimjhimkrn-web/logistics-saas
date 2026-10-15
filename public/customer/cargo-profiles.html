@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Customer Cargo Profiles</title>
+    <meta name="description" content="Manage hazardous material classifications, pallet dimensions, and weight thresholds in KRIM OS.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#026f9e', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-800 flex items-center justify-center text-white font-bold text-lg">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Cargo Profiles</span>
+                </div>
+            </div>
+            <a href="/public/customer/locations.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Back to Locations</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest">Freight Classification</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Cargo Profiles & Specs</h1>
+            <p class="text-slate-400 text-xs font-mono">Define standard commodity types, weight tolerances, and hazmat compliance flags.</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-slate-700">
+                    <div class="space-y-1">
+                        <span class="font-bold text-white text-sm">Industrial Machinery & Heavy Pallets</span>
+                        <span class="block text-slate-400 text-[11px]">Max Payload: 24,000 kg • Class: Non-Haz Industrial</span>
+                    </div>
+                    <span class="px-3 py-1 bg-sky-500/15 text-sky-400 font-bold rounded-lg border border-sky-500/30">Standard Profile</span>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-slate-700">
+                    <div class="space-y-1">
+                        <span class="font-bold text-white text-sm">Temperature-Controlled Pharmaceuticals (Cold Chain)</span>
+                        <span class="block text-slate-400 text-[11px]">Strict Range: +2°C to +8°C • Real-time IoT Telemetry Required</span>
+                    </div>
+                    <span class="px-3 py-1 bg-emerald-500/15 text-emerald-400 font-bold rounded-lg border border-emerald-500/30">Cold Chain</span>
+                </div>
+            </div>
+
+            <button onclick="handleCargoProceed()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 cursor-pointer">
+                Proceed to Quote Request →
+            </button>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleCargoProceed() {
+            alert('Cargo profiles validated. Routing to Quote Request module.');
+            window.location.href = '/public/customer/quote-request.html';
+        }
+    </script>
+</body>
+</html>
