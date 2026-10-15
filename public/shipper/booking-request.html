@@ -221,7 +221,8 @@
                 }, 1200);
 
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>RPC Error: ${err.message}</p>`;
+                feedback.textContent = "Shipment booking failed: " + (err.message || "Unknown error");
+                feedback.className = "text-sm font-semibold text-red-700";
                 btn.disabled = false;
                 btn.innerText = "Execute RPC Contract & Create Shipment →";
             }
