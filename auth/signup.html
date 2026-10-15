@@ -192,7 +192,8 @@
                 }, 1000);
 
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Registration Error: ${err.message}</p>`;
+                feedback.textContent = "Registration failed: " + (err.message || "Unknown error");
+                feedback.className = "text-red-600 font-semibold";
                 btn.disabled = false;
                 btn.innerText = "Create Account & Proceed to MFA →";
             }
@@ -244,7 +245,8 @@
                 }, 1200);
 
             } catch (err) {
-                feedback.innerHTML = `<p class='text-red-600 font-semibold'>Verification Failed: ${err.message}</p>`;
+                feedback.textContent = "Verification failed: " + (err.message || "Unknown error");
+                feedback.className = "text-red-600 font-semibold";
                 btn.disabled = false;
                 btn.innerText = "Verify & Enter Command Workspace →";
             }
