@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Carrier Load Marketplace & Bidding</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
@@ -56,7 +57,7 @@
                 </div>
             </div>
             
-            <a href="/app/partner/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="../../app/partner/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Partner Workspace
             </a>
         </div>
@@ -100,92 +101,178 @@
             <p>KRIM Logistics OS Load Marketplace © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
                 <a href="/app/partner/index.html" class="hover:text-slate-800 transition">Partner Workspace</a>
-                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
+                <a href="../tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
             </div>
         </div>
     </footer>
 
     <!-- Marketplace Logic Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-        let currentPartnerOrgId = null;
+        const supabaseClient = window.KRIM_SUPABASE;
+        const tbody = document.getElementById("marketplace-tbody");
+        const feedback = document.createElement("p");
+        feedback.id = "marketplace-feedback";
+        feedback.setAttribute("role", "status");
+        feedback.setAttribute("aria-live", "polite");
+        feedback.className = "mb-4 text-xs font-mono text-slate-500";
+        tbody.closest("table").before(feedback);
+
+        function showMarketplaceMessage(message, kind = "info") {
+            feedback.textContent = message;
+            feedback.className = "mb-4 text-xs font-mono " + (kind === "error" ? "text-rose-600" : kind === "success" ? "text-emerald-700" : "text-slate-500");
+        }
+        function addCell(row, value, className) {
+            const cell = document.createElement("td");
+            cell.className = className;
+            cell.textContent = value == null || value === "" ? "—" : String(value);
+            row.appendChild(cell);
+            return cell;
+        }
 
         async function initMarketplace() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = `Partner Node: ${session.user.email}`;
-
-            // Resolve organization ID
             try {
-                const { data: membership } = await supabaseClient
-                    .from('krim_organization_members')
-                    .select('organization_id')
-                    .eq('user_id', session.user.id)
-                    .single();
-                currentPartnerOrgId = membership ? membership.organization_id : "00000000-0000-0000-0000-000000000002";
-            } catch (err) {
-                currentPartnerOrgId = "00000000-0000-0000-0000-000000000002";
-            }
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../../auth/login.html";
+                    return;
+                }
+                document.getElementById("session-identity-node").textContent = `Partner Node: ${session.user.email || "Signed-in user"}`;
 
-            loadMarketplaceLoads();
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .order("created_at", { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) {
+                    window.location.href = "../../auth/partner-signup.html";
+                    return;
+                }
+
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+                    .eq("id", membership.organization_id)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                const verified = organization
+                    && ["partner", "carrier", "forwarder"].includes(organization.organization_type)
+                    && ["verified", "approved"].includes(String(organization.partner_verification_status || "").toLowerCase())
+                    && ["active", "verified"].includes(String(organization.partner_lifecycle_status || "").toLowerCase())
+                    && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(String(organization.partner_compliance_status || "").toLowerCase());
+                if (!verified) {
+                    window.location.href = "./partner-onboarding.html";
+                    return;
+                }
+                await loadMarketplaceLoads();
+            } catch (error) {
+                console.error("Marketplace initialization failed:", error);
+                showMarketplaceMessage("Could not verify partner access. No loads or bids are available until your organization status is confirmed.", "error");
+            }
         }
 
         async function loadMarketplaceLoads() {
             try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').order('created_at', { ascending: false });
-                const tbody = document.getElementById('marketplace-tbody');
-                tbody.innerHTML = '';
+                showMarketplaceMessage("Loading currently open partner opportunities…");
+                const { data: opportunities, error } = await supabaseClient
+                    .from("krim_partner_opportunities")
+                    .select("id, shipment_id, opportunity_number, status, response_deadline, service_lane")
+                    .eq("status", "open")
+                    .order("created_at", { ascending: false });
+                if (error) throw error;
 
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No open loads available on the market board.</td></tr>`;
+                const now = Date.now();
+                const openOpportunities = (opportunities || []).filter((item) => !item.response_deadline || new Date(item.response_deadline).getTime() > now);
+                const shipmentIds = [...new Set(openOpportunities.map((item) => item.shipment_id).filter(Boolean))];
+                let shipments = [];
+                if (shipmentIds.length) {
+                    const { data, error: shipmentError } = await supabaseClient
+                        .from("krim_shipments")
+                        .select("id, shipment_number, goods_description, total_weight_kg, status")
+                        .in("id", shipmentIds);
+                    if (shipmentError) throw shipmentError;
+                    shipments = data || [];
+                }
+                const shipmentById = new Map(shipments.map((shipment) => [String(shipment.id), shipment]));
+                tbody.replaceChildren();
+
+                const eligible = openOpportunities.filter((opportunity) => shipmentById.has(String(opportunity.shipment_id)));
+                if (!eligible.length) {
+                    const row = document.createElement("tr");
+                    const cell = addCell(row, "No open verified partner opportunities are available right now.", "py-8 text-center text-slate-500 font-mono text-xs");
+                    cell.colSpan = 6;
+                    tbody.appendChild(row);
+                    showMarketplaceMessage("No eligible open loads are available at this time.");
                     return;
                 }
 
-                data.forEach(load => {
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">#${load.id}</td>
-                            <td class="py-4 px-4 font-medium text-slate-800">${load.origin_location_id || load.origin || 'Origin'} → ${load.destination_location_id || load.destination || 'Destination'}</td>
-                            <td class="py-4 px-4 text-slate-600">${load.goods_description || 'General Cargo'}</td>
-                            <td class="py-4 px-4 font-mono text-slate-600">${load.total_weight_kg || 1000} kg</td>
-                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-emerald-700 bg-emerald-50 border-emerald-200 uppercase">${load.status || 'open'}</span></td>
-                            <td class="py-4 px-4 text-right">
-                                <button onclick="submitCarrierBid(${load.id}, ${load.total_weight_kg || 1000})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs cursor-pointer">
-                                    Submit Spot Bid →
-                                </button>
-                            </td>
-                        </tr>`;
-                });
-            } catch (err) {
-                console.error("Error loading marketplace loads:", err);
+                for (const opportunity of eligible) {
+                    const shipment = shipmentById.get(String(opportunity.shipment_id));
+                    const row = document.createElement("tr");
+                    row.className = "hover:bg-slate-50/80 transition";
+                    addCell(row, "#" + (shipment.shipment_number || shipment.id), "py-4 px-4 font-mono font-bold text-slate-900");
+                    addCell(row, opportunity.service_lane || ("Shipment " + shipment.id), "py-4 px-4 font-medium text-slate-800");
+                    addCell(row, shipment.goods_description || "General Cargo", "py-4 px-4 text-slate-600");
+                    addCell(row, Number(shipment.total_weight_kg || 0).toLocaleString("en-IN") + " kg", "py-4 px-4 font-mono text-slate-600");
+                    addCell(row, opportunity.status, "py-4 px-4 text-emerald-700 uppercase");
+                    const actionCell = document.createElement("td");
+                    actionCell.className = "py-4 px-4 text-right";
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs cursor-pointer";
+                    button.textContent = "Submit Spot Bid →";
+                    button.addEventListener("click", () => submitCarrierBid(opportunity.id, shipment, opportunity.response_deadline));
+                    actionCell.appendChild(button);
+                    row.appendChild(actionCell);
+                    tbody.appendChild(row);
+                }
+                showMarketplaceMessage(`Showing ${eligible.length} open partner opportunities.`);
+            } catch (error) {
+                console.error("Error loading partner opportunities:", error);
+                tbody.replaceChildren();
+                const row = document.createElement("tr");
+                const cell = addCell(row, "Unable to load partner opportunities. Check organization verification and access.", "py-8 text-center text-rose-600 font-mono text-xs");
+                cell.colSpan = 6;
+                tbody.appendChild(row);
+                showMarketplaceMessage("Load board unavailable. No bid was submitted.", "error");
             }
         }
 
-        async function submitCarrierBid(shipmentId, weight) {
-            const bidAmount = prompt(`Enter your spot bid amount (INR) for Shipment #${shipmentId} (${weight} kg):`, `${weight * 18}`);
-            if (!bidAmount || isNaN(bidAmount)) return;
+        async function submitCarrierBid(opportunityId, shipment, responseDeadline) {
+            const defaultAmount = Math.max(1, Number(shipment.total_weight_kg || 1) * 18).toFixed(2);
+            const enteredAmount = prompt(`Enter your proposed freight price (INR) for ${shipment.shipment_number || ("Shipment #" + shipment.id)} (${shipment.total_weight_kg || 0} kg):`, defaultAmount);
+            if (enteredAmount === null || enteredAmount.trim() === "") return;
+            const amount = Number(enteredAmount);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showMarketplaceMessage("Enter a positive numeric bid amount.", "error");
+                return;
+            }
+
+            const deadline = responseDeadline ? new Date(responseDeadline).getTime() : Date.now() + 5 * 24 * 60 * 60 * 1000;
+            const validUntil = new Date(Math.min(Date.now() + 5 * 24 * 60 * 60 * 1000, deadline)).toISOString();
+            if (new Date(validUntil).getTime() <= Date.now()) {
+                showMarketplaceMessage("This opportunity's response deadline has passed.", "error");
+                return;
+            }
 
             try {
-                const { error } = await supabaseClient.from('krim_quotes').insert([{
-                    shipment_id: shipmentId,
-                    customer_organization_id: currentPartnerOrgId,
-                    amount: parseFloat(bidAmount),
-                    currency_code: 'INR',
-                    status: 'pending_carrier_bid',
-                    valid_until: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
-                }]);
-
+                const { data, error } = await supabaseClient.rpc("krim_submit_partner_quote", {
+                    p_opportunity_id: opportunityId,
+                    p_amount: amount,
+                    p_currency_code: "INR",
+                    p_valid_until: validUntil,
+                    p_notes: null
+                });
                 if (error) throw error;
-                alert(`Carrier spot bid of ₹${Number(bidAmount).toLocaleString('en-IN')} submitted successfully to ledger!`);
-                loadMarketplaceLoads();
-            } catch (err) {
-                alert("Error submitting bid: " + err.message);
+                if (!data || !(data.id || data.quote_number)) throw new Error("Server did not confirm a partner quote reference.");
+                showMarketplaceMessage("Bid submitted to the KRIM partner-quote workflow. The server confirmed the quote record.", "success");
+                await loadMarketplaceLoads();
+            } catch (error) {
+                console.error("Partner bid submission failed:", error);
+                showMarketplaceMessage(error?.message || "Bid submission failed. No success has been recorded.", "error");
             }
         }
 
