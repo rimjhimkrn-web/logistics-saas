@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Live Tracking Map & Fleet Overview</title>
+    <meta name="description" content="Real-time geospatial fleet tracking, vessel telemetry, and global shipment map inside KRIM OS Visibility Suite.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-blue-400 font-semibold uppercase">Live Tracking Map</span>
+                </div>
+            </div>
+            <a href="/public/visibility/tracking-history.html" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition font-mono font-semibold">Next: Tracking History →</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2 text-center">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Visibility Suite • Module 1 of 16</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Global Geospatial Live Tracking Map</h1>
+            <p class="text-slate-400 text-xs font-mono">Real-time AIS vessel telemetry, IoT container sensor feeds, and active transport routes.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 font-mono text-xs">
+            <!-- Sidebar Fleet Summary -->
+            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-6 lg:col-span-1">
+                <div class="space-y-1 pb-4 border-b border-slate-700">
+                    <span class="text-slate-400 uppercase text-[10px]">Active Fleet Monitored</span>
+                    <div class="text-2xl font-bold text-white">1,428 Assets</div>
+                    <span class="text-[10px] text-emerald-400">99.4% Telemetry Uptime</span>
+                </div>
+
+                <div class="space-y-3">
+                    <span class="text-slate-400 uppercase text-[10px]">Active Filters</span>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700 cursor-pointer">
+                            <input type="checkbox" checked class="accent-blue-600">
+                            <span class="text-white">Ocean Vessels (AIS)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700 cursor-pointer">
+                            <input type="checkbox" checked class="accent-blue-600">
+                            <span class="text-white">Air Cargo Flights</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700 cursor-pointer">
+                            <input type="checkbox" checked class="accent-blue-600">
+                            <span class="text-white">Rail & Road Freight</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700 space-y-2">
+                    <span class="text-slate-400 uppercase text-[10px]">Selected Asset</span>
+                    <div class="text-white font-semibold">MAERSK MC-KINNEY MØLLER</div>
+                    <div class="text-[10px] text-blue-400">Route: USNYC → NLRTM</div>
+                    <div class="text-[10px] text-emerald-400">Speed: 19.4 knots | Heading: 074°</div>
+                </div>
+            </div>
+
+            <!-- Main Interactive Map Canvas Simulator -->
+            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl lg:col-span-3 flex flex-col justify-between min-h-[500px] relative overflow-hidden">
+                <!-- Map Background Grid Pattern Simulation -->
+                <div class="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+
+                <div class="relative z-10 flex items-center justify-between pb-4 border-b border-slate-700">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-white font-semibold">Live Telemetry Stream Connected</span>
+                    </div>
+                    <span class="text-slate-400">Coordinates: 42.1824° N, 35.0921° W</span>
+                </div>
+
+                <!-- Simulated Map UI Elements -->
+                <div class="relative z-10 my-auto py-16 text-center space-y-4">
+                    <div class="inline-block p-6 rounded-3xl bg-blue-600/10 border border-blue-500/30 text-blue-400 text-xl font-bold">
+                        🚢 Atlantic Corridor • Vessel QTE-2026-OCT-0101 in Transit
+                    </div>
+                    <p class="text-slate-400 max-w-md mx-auto">
+                        Vector visualization active. Showing live GPS coordinates, weather overlays, and predicted arrival timestamps.
+                    </p>
+                </div>
+
+                <div class="relative z-10 pt-4">
+                    <a href="/public/visibility/tracking-history.html" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25">
+                        Proceed to Tracking History →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Visibility OS © 2026. All rights reserved.</p>
+    </footer>
+</body>
+</html>
