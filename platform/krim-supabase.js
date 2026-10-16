@@ -3,6 +3,7 @@
  * Requires platform/krim-config.js to be loaded first.
  * Only the public publishable key is used in browser code.
  */
+import "./krim-config.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const config = window.KRIM_CONFIG;
