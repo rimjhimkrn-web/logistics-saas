@@ -1,19 +1,18 @@
 /**
- * KRIM OS — Supabase Client Initializer
- * Provides the unified database and auth client for all frontends.
+ * KRIM OS — Shared Supabase Client Initializer
+ * Requires platform/krim-config.js to be loaded first.
+ * Only the public publishable key is used in browser code.
  */
-
+import "./krim-config.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { KRIM_CONFIG } from "./krim-config.js";
 
-export const supabase = createClient(
-  KRIM_CONFIG.SUPABASE_URL,
-  KRIM_CONFIG.SUPABASE_ANON_KEY,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
+const config = window.KRIM_CONFIG;
+if (!config?.supabase?.url || !config?.supabase?.publishableKey) {
+  throw new Error("KRIM configuration is missing. Load platform/krim-config.js first.");
+}
+export const supabase = window.KRIM_SUPABASE || createClient(
+  config.supabase.url,
+  config.supabase.publishableKey,
+  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
 );
+window.KRIM_SUPABASE = supabase;

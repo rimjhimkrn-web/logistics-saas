@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM OS — Enterprise Tracking & Telemetry Map</title>
-    <meta name="description" content="Real-time GPS telemetry, geofence boundary monitoring, and truck movement map for shipment #SHP-2026-8841 in KRIM OS.">
+    <meta name="description" content="View the latest authorized tracking events for a shipment. GPS coordinates are shown only when supplied by a connected tracking source.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -37,71 +40,88 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="space-y-2">
                 <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Live GPS Telemetry</span>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">Active Fleet Tracking Map (#SHP-2026-8841)</h1>
-                <p class="text-slate-400 text-xs font-mono">Real-time coordinates, speed metrics, and geofence boundary status via Supabase Edge sync.</p>
+                <h1 id="tracking-map-heading" class="text-3xl font-extrabold text-white tracking-tight">Shipment Tracking</h1>
+                <p class="text-slate-400 text-xs font-mono">The map provider is not configured yet. KRIM displays recorded tracking events below rather than inventing live GPS telemetry.</p>
             </div>
-            <a href="/public/customer/pod-capture.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25">
-                Proceed to ePOD Capture →
+            <a id="tracking-details-link" href="/public/customer/shipment-details.html" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25">
+                View Shipment Details →
             </a>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono text-xs">
-            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl relative h-[420px] flex flex-col justify-between overflow-hidden">
-                <div class="absolute inset-0 bg-slate-950/40 z-0"></div>
-                <!-- Simulated Map Grid Background -->
-                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:24px_24px] z-0"></div>
-                
-                <div class="relative z-10 flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700">
-                    <div>
-                        <span class="text-slate-400 text-[10px] uppercase tracking-wider block">Current Coordinates</span>
-                        <span class="text-white font-bold">18.9220° N, 73.1802° E (Mumbai-Pune Expressway)</span>
-                    </div>
-                    <span class="px-3 py-1 bg-emerald-500/15 text-emerald-400 font-bold rounded-lg border border-emerald-500/30 text-[10px]">Signal Strong</span>
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl min-h-[360px] flex flex-col gap-5">
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700">
+                    <span class="text-slate-400 text-[10px] uppercase tracking-wider block">Latest Verified Location</span>
+                    <span id="tracking-current-location" class="text-white font-bold block mt-2">Loading tracking records…</span>
+                    <span id="tracking-current-coordinates" class="text-slate-400 text-[11px] block mt-2">Coordinates not yet supplied</span>
                 </div>
-
-                <div class="relative z-10 flex justify-center items-center py-12">
-                    <div class="relative flex items-center justify-center">
-                        <div class="absolute w-24 h-24 rounded-full bg-sky-500/10 animate-ping"></div>
-                        <div class="w-14 h-14 rounded-2xl bg-sky-600 border-2 border-sky-400 text-white flex items-center justify-center font-bold text-lg shadow-xl shadow-sky-600/40 z-10">🚛</div>
-                    </div>
+                <div class="flex-grow rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-6 flex items-center justify-center text-center">
+                    <p id="tracking-map-provider-notice" class="text-slate-400 max-w-md">Map tiles and live GPS telemetry require a configured map/tracking provider. This panel will not display fabricated coordinates.</p>
                 </div>
-
-                <div class="relative z-10 grid grid-cols-3 gap-3 bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700 text-center">
-                    <div>
-                        <span class="text-slate-400 text-[10px] uppercase tracking-wider block">Speed</span>
-                        <span class="text-white font-bold text-sm">68 km/h</span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 text-[10px] uppercase tracking-wider block">Heading</span>
-                        <span class="text-white font-bold text-sm">South-East</span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 text-[10px] uppercase tracking-wider block">ETA</span>
-                        <span class="text-emerald-400 font-bold text-sm">04:00 PM</span>
-                    </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700"><span class="text-slate-400 text-[10px] block uppercase">Shipment Status</span><span id="tracking-shipment-status" class="text-white font-bold block mt-2">Loading…</span></div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700"><span class="text-slate-400 text-[10px] block uppercase">Latest Event Time</span><span id="tracking-event-time" class="text-white font-bold block mt-2">Loading…</span></div>
                 </div>
             </div>
-
             <div class="space-y-6">
                 <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-4">
-                    <span class="text-slate-400 uppercase tracking-wider block">Driver & Unit Telemetry</span>
-                    <div class="p-4 bg-slate-900 rounded-2xl border border-slate-700 space-y-2">
-                        <span class="text-white font-bold block text-sm">Rajesh Kumar</span>
-                        <span class="block text-slate-400 text-[11px]">Primary Operator • Ph: +91 98211 XXXXX</span>
-                        <span class="block text-emerald-400 text-[11px]">Compliance: Verified & Active</span>
-                    </div>
-                    <div class="p-4 bg-slate-900 rounded-2xl border border-slate-700 space-y-2">
-                        <span class="text-white font-bold block text-sm">Vehicle # MH-12-AZ-9941</span>
-                        <span class="block text-slate-400 text-[11px]">32 Ft Multi-Axle • Bolt Seal #ZS-9921</span>
-                        <span class="block text-sky-400 text-[11px]">Temperature: Ambient (Normal)</span>
-                    </div>
+                    <span class="text-slate-400 uppercase tracking-wider block">Tracking Event Feed</span>
+                    <div id="tracking-event-feed" class="space-y-3 text-slate-300"><p>Loading events…</p></div>
                 </div>
             </div>
         </div>
+        <div id="tracking-map-feedback" role="status" aria-live="polite" class="text-sm text-slate-300 break-words"></div>
     </main>
 
     <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
         <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
     </footer>
+    <script>
+      const trackingMapClient = window.KRIM_SUPABASE || window.supabase.createClient(
+        window.KRIM_CONFIG.supabase.url, window.KRIM_CONFIG.supabase.publishableKey,
+        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+      );
+      window.KRIM_SUPABASE = trackingMapClient;
+      const trackingMapFeedback=document.getElementById("tracking-map-feedback");
+      const trackingFeed=document.getElementById("tracking-event-feed");
+      const trackEscape=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);
+      const trackDate=value=>{const d=value?new Date(value):null;return d&&!Number.isNaN(d.getTime())?d.toLocaleString():"Time not recorded";};
+      async function loadTrackingMap(){
+        try{
+          const params=new URLSearchParams(window.location.search), shipmentId=params.get("shipment_id");
+          if(!shipmentId||!/^\d+$/.test(shipmentId))throw new Error("A valid shipment_id query parameter is required.");
+          const {data:sessionData,error:sessionError}=await trackingMapClient.auth.getSession();
+          if(sessionError)throw sessionError;
+          if(!sessionData?.session){window.location.assign(window.KRIM_ROUTE("auth/login.html"));return;}
+          const {data:shipment,error:shipmentError}=await trackingMapClient.from("krim_shipments").select("id,shipment_number,status").eq("id",Number(shipmentId)).single();
+          if(shipmentError)throw shipmentError;
+          if(!shipment)throw new Error("Shipment not found or access denied.");
+          document.getElementById("tracking-map-heading").textContent="Tracking — "+(shipment.shipment_number||("#"+shipment.id));
+          document.getElementById("tracking-details-link").href=window.KRIM_ROUTE("public/customer/shipment-details.html?shipment_id="+encodeURIComponent(shipment.id));
+          document.getElementById("tracking-shipment-status").textContent=shipment.status||"Unknown";
+          const {data:events,error:eventError}=await trackingMapClient.from("krim_tracking_events").select("event_type,event_time,location_id,source_type,metadata,latitude,longitude,created_at").eq("shipment_id",shipment.id).order("event_time",{ascending:false}).limit(30);
+          if(eventError)throw eventError;
+          if(!events?.length){
+            document.getElementById("tracking-current-location").textContent="No location event recorded";
+            document.getElementById("tracking-current-coordinates").textContent="Coordinates not supplied";
+            document.getElementById("tracking-event-time").textContent="No event recorded";
+            trackingFeed.innerHTML='<p class="text-slate-400">No tracking events are available for this shipment yet.</p>';
+            return;
+          }
+          const ids=[...new Set(events.map(e=>e.location_id).filter(Boolean))];
+          let locations=[];
+          if(ids.length){const result=await trackingMapClient.from("krim_locations").select("id,location_code,city,state_region").in("id",ids);if(!result.error)locations=result.data||[];}
+          const locationMap=new Map(locations.map(x=>[String(x.id),[x.location_code,x.city,x.state_region].filter(Boolean).join(" — ")]));
+          const latest=events[0], latestLocation=locationMap.get(String(latest.location_id))||(latest.location_id?"Location #"+latest.location_id:"Location not supplied");
+          document.getElementById("tracking-current-location").textContent=latestLocation;
+          document.getElementById("tracking-event-time").textContent=trackDate(latest.event_time||latest.created_at);
+          const meta=latest.metadata&&typeof latest.metadata==="object"?latest.metadata:{};
+          const lat=Number(latest.latitude??meta.latitude??meta.lat), lon=Number(latest.longitude??meta.longitude??meta.lng??meta.lon);
+          document.getElementById("tracking-current-coordinates").textContent=Number.isFinite(lat)&&Number.isFinite(lon)?"Recorded coordinates: "+lat.toFixed(5)+", "+lon.toFixed(5):"Coordinates not supplied by the latest tracking event";
+          trackingFeed.innerHTML=events.map(event=>'<div class="bg-slate-900 border border-slate-700 rounded-xl p-3"><strong class="text-white block">'+trackEscape(event.event_type||"Tracking update")+'</strong><span class="text-slate-400 block mt-1">'+trackEscape(trackDate(event.event_time||event.created_at))+'</span><span class="text-slate-500 block mt-1">'+trackEscape(locationMap.get(String(event.location_id))||(event.location_id?"Location #"+event.location_id:"Location not supplied"))+' · '+trackEscape(event.source_type||"source unspecified")+'</span></div>').join("");
+        }catch(error){trackingMapFeedback.textContent="Unable to load tracking data: "+(error?.message||"Unknown error");trackingMapFeedback.className="text-sm text-rose-300 break-words";trackingFeed.textContent="Tracking data is unavailable.";}
+      }
+      loadTrackingMap();
+    </script>
 </body>
 </html>

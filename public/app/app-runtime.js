@@ -6,7 +6,8 @@
  * organization context switching UI, and global keyboard shortcuts.
  */
 
-import { store } from "/app/app-store.js";
+import { store } from "./app-store.js";
+import { supabase } from "../../platform/krim-supabase.js";
 
 class AppRuntime {
   constructor() {
@@ -21,33 +22,51 @@ class AppRuntime {
 
     console.log("🚀 [KRIM App Runtime] Initializing Authenticated Application Core...");
 
-    // 1. Session & Auth Verification Guard
-    this.verifySessionGuard();
+    // A real Supabase session is required. Never create a demo/stub session.
+    const session = await this.verifySessionGuard();
+    if (!session) return;
 
-    // 2. Bind UI Components with State Store
-    this.bindStoreWithUI();
+    try {
+      await store.loadAuthenticatedContext(session);
+      if (!store.state.currentOrg) {
+        this.showRuntimeNotice("Your account has no active KRIM organization yet. Complete onboarding or contact your organization administrator.");
+        return;
+      }
 
-    // 3. Register Global Keyboard Commands (Cmd + K)
-    this.registerGlobalShortcuts();
-
-    // 4. Enforce Client-Side RBAC Protection
-    this.enforceRBACGuards();
-
-    this.isInitialized = true;
-    console.log("✅ [KRIM App Runtime] Core Runtime Operating Nominal.");
+      this.bindStoreWithUI();
+      this.registerGlobalShortcuts();
+      this.enforceRBACGuards();
+      this.isInitialized = true;
+      console.log("KRIM authenticated application runtime initialized.");
+    } catch (error) {
+      console.error("KRIM workspace initialization failed.", error);
+      this.showRuntimeNotice("KRIM could not load your authorized workspace. Refresh the page or contact support.");
+    }
   }
 
   /**
    * Verification Guard to enforce active session
    */
-  verifySessionGuard() {
-    const authSession = localStorage.getItem("krim_auth_session") || sessionStorage.getItem("krim_auth_session");
-    
-    // Fallback stub session for demonstration / local dev
-    if (!authSession) {
-      console.info("[KRIM App Runtime] No active auth token found. Initializing enterprise demo session context.");
-      localStorage.setItem("krim_auth_session", JSON.stringify({ token: "demo_jwt_99824", active: true }));
+  async verifySessionGuard() {
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data?.session) {
+      const loginRoute = window.KRIM_ROUTE ? window.KRIM_ROUTE("auth/login.html") : "../../auth/login.html";
+      window.location.replace(loginRoute);
+      return null;
     }
+    return data.session;
+  }
+
+  showRuntimeNotice(message) {
+    let notice = document.getElementById("krim-runtime-notice");
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = "krim-runtime-notice";
+      notice.setAttribute("role", "status");
+      notice.style.cssText = "margin:16px;padding:14px;border:1px solid #92400e;border-radius:12px;background:#1c1917;color:#fde68a;font:13px/1.5 system-ui,sans-serif;";
+      document.body.prepend(notice);
+    }
+    notice.textContent = message;
   }
 
   /**
@@ -58,7 +77,7 @@ class AppRuntime {
     const currencySelectEl = document.getElementById("app-currency-select");
 
     // Sync initial state
-    if (orgNameEl) orgNameEl.innerText = store.state.currentOrg.name;
+    if (orgNameEl) orgNameEl.innerText = (store.state.currentOrg?.name || "KRIM Workspace");
     if (currencySelectEl) currencySelectEl.value = store.state.preferences.currency;
 
     // Currency Switcher Event
@@ -69,7 +88,7 @@ class AppRuntime {
     // Subscribe to State Changes
     store.subscribe((state, key) => {
       if (key === "ORGANIZATION_CHANGED" && orgNameEl) {
-        orgNameEl.innerText = state.currentOrg.name;
+        orgNameEl.innerText = (state.currentOrg?.name || "KRIM Workspace");
       }
       if (key === "CURRENCY_CHANGED" && currencySelectEl) {
         currencySelectEl.value = state.preferences.currency;

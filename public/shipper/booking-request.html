@@ -148,7 +148,7 @@
         async function initBooking() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = window.KRIM_ROUTE("auth/login.html");
                 return;
             }
             document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
@@ -217,7 +217,7 @@
                 }
 
                 setTimeout(() => {
-                    window.location.href = `/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${shipmentId}`;
+                    window.location.href = window.KRIM_ROUTE("public/shipper/rate-calculator.html?shipment_id=" + encodeURIComponent(shipmentId));
                 }, 1200);
 
             } catch (err) {
@@ -230,5 +230,6 @@
 
         initBooking();
     </script>
+  <script src="../platform/krim-navigation.js"></script>
 </body>
 </html>

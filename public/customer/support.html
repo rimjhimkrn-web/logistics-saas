@@ -6,6 +6,9 @@
     <title>KRIM OS — Enterprise Helpdesk & Support Center</title>
     <meta name="description" content="Access 24/7 institutional logistics support, emergency dispatch intervention, and escalation ticketing inside KRIM OS.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -41,31 +44,40 @@
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <form onsubmit="handleSupportSubmit(event)" class="space-y-5">
+            <form id="support-ticket-form" class="space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Issue Category</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                            <option>Live Shipment Interruption / Delay</option>
-                            <option>Escrow / Billing Discrepancy</option>
-                            <option>Carrier Communication Failure</option>
-                            <option>Technical API / Platform Issue</option>
+                        <select id="support-category" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
+                            <option value="shipment_interruption">Live Shipment Interruption / Delay</option>
+                            <option value="billing_discrepancy">Billing Discrepancy</option>
+                            <option value="carrier_communication">Carrier Communication Failure</option>
+                            <option value="technical_platform">Technical API / Platform Issue</option>
                         </select>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Priority Level</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                            <option>P1 - Critical Emergency (Immediate Dispatch Intervention)</option>
-                            <option>P2 - High Urgency (Within 2 Hours)</option>
-                            <option>P3 - Standard Inquiry (Within 24 Hours)</option>
+                        <select id="support-priority" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
+                            <option value="critical">P1 — Critical Emergency</option>
+                            <option value="high">P2 — High Urgency</option>
+                            <option value="normal" selected>P3 — Standard Inquiry</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block text-slate-400 uppercase tracking-wider">Detailed Description</label>
-                    <textarea rows="4" required placeholder="Provide shipment numbers, driver contacts, or invoice references..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white focus:outline-none focus:border-sky-500 transition resize-none"></textarea>
+                    <label for="support-subject" class="block text-slate-400 uppercase tracking-wider">Subject</label>
+                    <input id="support-subject" type="text" maxlength="200" required placeholder="Briefly describe the issue" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
                 </div>
+                <div class="space-y-2">
+                    <label for="support-shipment-id" class="block text-slate-400 uppercase tracking-wider">Shipment ID (optional)</label>
+                    <input id="support-shipment-id" type="number" min="1" placeholder="KRIM shipment ID" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
+                </div>
+                <div class="space-y-2">
+                    <label for="support-message" class="block text-slate-400 uppercase tracking-wider">Detailed Description</label>
+                    <textarea id="support-message" rows="4" required maxlength="10000" placeholder="Describe what happened and what help you need…" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white focus:outline-none focus:border-sky-500 transition resize-none"></textarea>
+                </div>
+                <div id="support-ticket-feedback" role="status" aria-live="polite" class="text-sm text-slate-300 break-words"></div>
 
                 <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 cursor-pointer">
                     Submit Priority Ticket to Control Tower →
@@ -79,11 +91,76 @@
     </footer>
 
     <script>
-        function handleSupportSubmit(e) {
-            e.preventDefault();
-            alert('Support ticket escalated to logistics control tower. Routing to Reorder module.');
-            window.location.href = '/public/customer/reorder.html';
+      const supportClient = window.KRIM_SUPABASE || window.supabase.createClient(
+        window.KRIM_CONFIG.supabase.url,
+        window.KRIM_CONFIG.supabase.publishableKey,
+        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+      );
+      window.KRIM_SUPABASE = supportClient;
+      const supportForm = document.getElementById("support-ticket-form");
+      const supportButton = supportForm.querySelector('button[type="submit"]');
+      const supportFeedback = document.getElementById("support-ticket-feedback");
+      supportForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+        supportButton.disabled = true;
+        supportButton.textContent = "Submitting secure support ticket…";
+        try {
+          const { data: sessionData, error: sessionError } = await supportClient.auth.getSession();
+          if (sessionError) throw sessionError;
+          const session = sessionData?.session;
+          if (!session) {
+            window.location.assign(window.KRIM_ROUTE("auth/login.html"));
+            return;
+          }
+          const { data: membership, error: membershipError } = await supportClient
+            .from("krim_organization_members").select("organization_id")
+            .eq("user_id", session.user.id).eq("status", "active").limit(1).maybeSingle();
+          if (membershipError) throw membershipError;
+          if (!membership?.organization_id) throw new Error("An active organization membership is required to open an organization support ticket.");
+
+          const shipmentValue = document.getElementById("support-shipment-id").value.trim();
+          let krimShipmentId = null;
+          if (shipmentValue) {
+            if (!/^\d+$/.test(shipmentValue)) throw new Error("Shipment ID must be a number.");
+            const { data: shipment, error: shipmentError } = await supportClient
+              .from("krim_shipments").select("id")
+              .eq("id", Number(shipmentValue))
+              .eq("customer_organization_id", membership.organization_id)
+              .maybeSingle();
+            if (shipmentError) throw shipmentError;
+            if (!shipment) throw new Error("That shipment does not belong to your active organization or is not accessible.");
+            krimShipmentId = shipment.id;
+          }
+
+          const payload = {
+            user_id: session.user.id,
+            krim_organization_id: membership.organization_id,
+            krim_shipment_id: krimShipmentId,
+            category: document.getElementById("support-category").value,
+            priority: document.getElementById("support-priority").value,
+            subject: document.getElementById("support-subject").value.trim(),
+            message: document.getElementById("support-message").value.trim(),
+            status: "open"
+          };
+          if (!payload.subject || payload.subject.length > 200) throw new Error("Subject must be between 1 and 200 characters.");
+          if (!payload.message || payload.message.length > 10000) throw new Error("Message must be between 1 and 10,000 characters.");
+          const { data: ticket, error: insertError } = await supportClient
+            .from("support_tickets")
+            .insert(payload)
+            .select("id, ticket_number, status, created_at")
+            .single();
+          if (insertError) throw insertError;
+          supportFeedback.textContent = "Support ticket created: " + (ticket.ticket_number || ("#" + ticket.id)) + " · Status: " + ticket.status + ". Keep this reference for follow-up.";
+          supportFeedback.className = "text-sm text-emerald-300 break-words";
+          supportButton.textContent = "Ticket Submitted ✓";
+          supportForm.reset();
+        } catch (error) {
+          supportFeedback.textContent = "Ticket submission failed: " + (error?.message || "Unknown error");
+          supportFeedback.className = "text-sm text-rose-300 break-words";
+          supportButton.disabled = false;
+          supportButton.textContent = "Submit Priority Ticket to Control Tower →";
         }
+      });
     </script>
 </body>
   </html>

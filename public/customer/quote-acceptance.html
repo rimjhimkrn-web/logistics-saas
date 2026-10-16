@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM OS — Enterprise Quote Acceptance</title>
-    <meta name="description" content="Digitally sign freight contracts and lock in escrow funds for carrier dispatch in KRIM OS.">
+    <meta name="description" content="Review a server-generated quote and accept it through KRIM’s authorized quote workflow.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -35,34 +38,35 @@
 
     <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
         <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Cryptographic Binding</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Accept Quote & Lock Escrow</h1>
-            <p class="text-slate-400 text-xs font-mono">Digitally sign the transport service agreement and authorize escrow hold via Supabase secure vault.</p>
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Quote Review</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Review and Accept Quote</h1>
+            <p class="text-slate-400 text-xs font-mono">Quote acceptance is recorded by the backend. Payment is a separate verified step and is not implied by accepting a quote.</p>
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
             <div class="p-4 bg-slate-900 rounded-2xl border border-slate-700 space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Selected Carrier</span>
-                    <span class="text-white font-bold">TransGlobal Fleet Solutions</span>
+                    <span class="text-slate-400">Quote Record</span>
+                    <span id="acceptance-quote-reference" class="text-white font-bold">Loaded from KRIM</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Escrow Amount</span>
-                    <span class="text-emerald-400 font-bold">₹42,500</span>
+                    <span class="text-slate-400">Server-Generated Quote Total</span>
+                    <span id="acceptance-quote-total" class="text-emerald-400 font-bold">Not loaded</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400">Smart Contract Hash</span>
-                    <span class="text-slate-300 font-mono text-[10px]">0x7f8c9b2...4a1e</span>
+                    <span class="text-slate-400">Quote Status</span>
+                    <span id="acceptance-quote-status" class="text-slate-300 font-mono text-[10px]">Not loaded</span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-3 p-4 bg-slate-900 rounded-2xl border border-slate-700">
                 <input type="checkbox" id="terms" required class="w-5 h-5 accent-sky-500 cursor-pointer">
-                <label for="terms" class="text-slate-300 text-[11px] cursor-pointer">I legally bind my organization to the KRIM OS Master Transport SLA and authorize secure escrow disbursement upon ePOD verification.</label>
+                <label for="terms" class="text-slate-300 text-[11px] cursor-pointer">I have reviewed the quote details and authorize KRIM to record quote acceptance. Payment, carrier assignment, and delivery are separate workflows.</label>
             </div>
 
-            <button onclick="handleAcceptQuote()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 cursor-pointer">
-                Sign & Confirm Booking →
+            <div id="quote-acceptance-feedback" role="status" aria-live="polite" class="text-sm text-slate-300 break-words"></div>
+            <button id="quote-acceptance-button" onclick="handleAcceptQuote()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 cursor-pointer" disabled>
+                Loading quote…
             </button>
         </div>
     </main>
@@ -72,15 +76,73 @@
     </footer>
 
     <script>
-        function handleAcceptQuote() {
-            const checkbox = document.getElementById('terms');
-            if (!checkbox.checked) {
-                alert('Please accept the transport SLA terms to proceed.');
-                return;
-            }
-            alert('Contract signed and escrow locked successfully in Supabase vault. Routing to Booking Confirmation.');
-            window.location.href = '/public/customer/booking-confirmation.html';
+      const acceptanceClient = window.KRIM_SUPABASE || (window.supabase && window.KRIM_CONFIG
+        ? window.supabase.createClient(window.KRIM_CONFIG.supabase.url, window.KRIM_CONFIG.supabase.publishableKey)
+        : null);
+      let acceptanceQuote = null;
+      function acceptanceMessage(text, success=false) {
+        const el=document.getElementById("quote-acceptance-feedback");
+        el.textContent=text;
+        el.className="text-sm break-words "+(success?"text-emerald-300":"text-rose-300");
+      }
+      async function loadAcceptanceQuote() {
+        try {
+          if(!acceptanceClient) throw new Error("KRIM client configuration is unavailable.");
+          const {data:sessionData,error:sessionError}=await acceptanceClient.auth.getSession();
+          if(sessionError) throw sessionError;
+          if(!sessionData?.session){window.location.assign(window.KRIM_ROUTE("auth/login.html"));return;}
+          const params=new URLSearchParams(window.location.search);
+          const quoteId=params.get("quote_id"), shipmentId=params.get("shipment_id");
+          let query=acceptanceClient.from("krim_quotes").select("id,shipment_id,amount,currency_code,status,valid_until");
+          if(quoteId&&/^\d+$/.test(quoteId)) query=query.eq("id",Number(quoteId));
+          else if(shipmentId&&/^\d+$/.test(shipmentId)) query=query.eq("shipment_id",Number(shipmentId)).order("created_at",{ascending:false}).limit(1);
+          else throw new Error("A valid quote_id or shipment_id is required.");
+          const {data,error}=await query.maybeSingle();
+          if(error) throw error;
+          if(!data) throw new Error("Quote not found or access denied.");
+          acceptanceQuote=data;
+          document.getElementById("acceptance-quote-reference").textContent="Quote #"+data.id+" · Shipment #"+data.shipment_id;
+          const amount=Number(data.amount);
+          document.getElementById("acceptance-quote-total").textContent=(data.currency_code||"INR")+" "+(Number.isFinite(amount)?amount.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—");
+          document.getElementById("acceptance-quote-status").textContent=(data.status||"unknown")+" · Valid until "+(data.valid_until?new Date(data.valid_until).toLocaleString():"not specified");
+          const button=document.getElementById("quote-acceptance-button");
+          button.disabled=false;
+          button.textContent=data.status==="accepted"?"Proceed to Secure Checkout →":data.status==="sent"?"Accept Quote →":"Return to Quote Approvals";
+          acceptanceMessage("Quote data loaded from KRIM. No escrow or payment state is assumed.",true);
+        } catch(error) {
+          acceptanceMessage("Unable to load quote: "+(error?.message||"Unknown error"));
+          document.getElementById("quote-acceptance-button").disabled=true;
+          document.getElementById("quote-acceptance-button").textContent="Quote Unavailable";
         }
+      }
+      async function handleAcceptQuote() {
+        if(!acceptanceQuote)return;
+        if(!document.getElementById("terms").checked){acceptanceMessage("Please confirm that you reviewed the quote acceptance terms.");return;}
+        const button=document.getElementById("quote-acceptance-button");
+        if(acceptanceQuote.status==="accepted"){
+          window.location.assign(window.KRIM_ROUTE("public/quote-result.html?shipment_id="+encodeURIComponent(acceptanceQuote.shipment_id)));
+          return;
+        }
+        if(acceptanceQuote.status!=="sent"){
+          window.location.assign(window.KRIM_ROUTE("public/shipper/spot-approvals.html?shipment_id="+encodeURIComponent(acceptanceQuote.shipment_id)));
+          return;
+        }
+        button.disabled=true;
+        try{
+          const {data,error}=await acceptanceClient.rpc("krim_accept_global_quote",{p_quote_id:Number(acceptanceQuote.id)});
+          if(error)throw error;
+          if(!data)throw new Error("Backend did not confirm quote acceptance.");
+          acceptanceQuote.status="accepted";
+          document.getElementById("acceptance-quote-status").textContent="accepted";
+          button.textContent="Proceed to Secure Checkout →";
+          button.disabled=false;
+          acceptanceMessage("Quote acceptance recorded. Payment has not yet been verified.",true);
+        }catch(error){
+          acceptanceMessage("Quote acceptance failed: "+(error?.message||"Unknown error"));
+          button.disabled=false;
+        }
+      }
+      loadAcceptanceQuote();
     </script>
 </body>
 </html>

@@ -31,7 +31,8 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
+    <script src="../../config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -57,7 +58,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -100,23 +101,21 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Invoicing Ledger © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
 
     <!-- Invoicing Ledger Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
+        if (!supabaseClient) throw new Error("KRIM Supabase client did not initialize.");
 
         async function initInvoices() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = window.KRIM_ROUTE("auth/login.html");
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;

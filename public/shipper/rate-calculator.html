@@ -29,8 +29,10 @@
             }
         }
     </script>
-    <!-- Supabase Client SDK -->
+    <!-- Supabase Client SDK and shared KRIM configuration -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -122,38 +124,52 @@
 
     <!-- Calculator Logic Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(
+            window.KRIM_CONFIG.supabase.url,
+            window.KRIM_CONFIG.supabase.publishableKey,
+            { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+        );
+        window.KRIM_SUPABASE = supabaseClient;
         let loadedShipmentData = null;
 
         async function initCalculator() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipmentId = urlParams.get('shipment_id');
-            if (shipmentId) {
-                document.getElementById('calc-shipment-id').value = shipmentId;
-                fetchShipmentWeight(shipmentId);
-            }
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError) throw sessionError;
+            const session = sessionData?.session;
             if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.assign(window.KRIM_ROUTE("auth/login.html"));
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const shipmentId = urlParams.get('shipment_id');
+            const tier = urlParams.get('service_tier');
+            if (["surface_express", "air_priority", "heavy_haul"].includes(tier)) {
+                document.getElementById("calc-service-tier").value = tier;
+            }
+            if (shipmentId) {
+                document.getElementById('calc-shipment-id').value = shipmentId;
+                try {
+                    await fetchShipmentWeight(shipmentId);
+                } catch (error) {
+                    document.getElementById("calculator-feedback").textContent = "Shipment could not be loaded: " + (error?.message || "Unknown error");
+                    document.getElementById("calculator-feedback").className = "text-sm font-semibold text-red-700";
+                }
+            }
         }
 
         async function fetchShipmentWeight(id) {
-            try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
-                if (data) {
-                    loadedShipmentData = data;
-                    calculateRate();
-                }
-            } catch (err) {
-                console.error("Error fetching shipment weight:", err);
-            }
+            const { data, error } = await supabaseClient
+                .from('krim_shipments')
+                .select('id, shipment_number, customer_organization_id, goods_description, total_weight_kg, status')
+                .eq('id', Number(id))
+                .single();
+            if (error) throw error;
+            if (!data) throw new Error("Shipment not found or access denied.");
+            loadedShipmentData = data;
+            calculateRate();
+            return data;
         }
 
         function calculateRate() {
@@ -173,9 +189,15 @@
         }
 
         document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
-        document.getElementById('calc-shipment-id').addEventListener('blur', function() {
+        document.getElementById('calc-shipment-id').addEventListener('blur', async function() {
             const id = this.value.trim();
-            if (id) fetchShipmentWeight(id);
+            if (!id) return;
+            try {
+                await fetchShipmentWeight(id);
+            } catch (error) {
+                document.getElementById("calculator-feedback").textContent = "Shipment could not be loaded: " + (error?.message || "Unknown error");
+                document.getElementById("calculator-feedback").className = "text-sm font-semibold text-red-700";
+            }
         });
 
         document.getElementById('form-calculator').addEventListener('submit', async function(e) {
@@ -207,7 +229,7 @@
 
                 feedback.innerHTML = "<p class='text-emerald-600 font-semibold'>Server-calculated quote created. Open Spot Approvals to review and accept it.</p>";
                 setTimeout(() => {
-                    window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
+                    window.location.href = window.KRIM_ROUTE("public/shipper/spot-approvals.html?shipment_id=" + encodeURIComponent(shipmentId) + "&quote_id=" + encodeURIComponent(data.id));
                 }, 1000);
             } catch (err) {
                 feedback.textContent = "Quote creation failed: " + (err.message || "Unknown error");
@@ -217,7 +239,11 @@
             }
         });
 
-        initCalculator();
+        initCalculator().catch(error => {
+            document.getElementById("calculator-feedback").textContent = "Calculator initialization failed: " + (error?.message || "Unknown error");
+            document.getElementById("calculator-feedback").className = "text-sm font-semibold text-red-700";
+            document.getElementById("btn-commit-quote").disabled = true;
+        });
     </script>
 </body>
 </html>
