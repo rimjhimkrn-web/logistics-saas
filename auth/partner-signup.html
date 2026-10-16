@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM OS — Carrier Partner Fleet Registration & Escrow Setup</title>
     <meta name="description" content="Register your transport fleet on KRIM OS. Connect to 1,250+ enterprise shippers, receive guaranteed escrow payouts, and manage live spot bids.">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -45,13 +47,13 @@
             </div>
             
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="/public/partners.html" class="hover:text-white transition">Carrier Network</a>
-                <a href="/public/network.html" class="hover:text-white transition">Global Corridors</a>
-                <a href="/public/tracking.html" class="hover:text-white transition">Track Shipment</a>
+                <a href="../public/partners.html" class="hover:text-white transition">Carrier Network</a>
+                <a href="../public/network.html" class="hover:text-white transition">Global Corridors</a>
+                <a href="../public/tracking.html" class="hover:text-white transition">Track Shipment</a>
             </nav>
 
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-400 hover:text-white transition">Sign In</a>
+                <a href="./login.html" class="text-slate-400 hover:text-white transition">Sign In</a>
             </div>
         </div>
     </header>
@@ -95,10 +97,11 @@
                     Register Carrier Fleet →
                 </button>
             </form>
+            <div id="partner-signup-feedback" class="mt-4 text-sm" role="status" aria-live="polite"></div>
 
             <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
                 <p>Are you an enterprise shipper organization?</p>
-                <a href="/auth/signup.html" class="inline-block text-sky-400 hover:underline font-bold">Deploy Shipper Tenant instead →</a>
+                <a href="./signup.html" class="inline-block text-sky-400 hover:underline font-bold">Deploy Shipper Tenant instead →</a>
             </div>
         </div>
     </main>
@@ -117,11 +120,65 @@
 
     <!-- Partner Signup Script -->
     <script>
-        function handlePartnerSignup(e) {
+        async function handlePartnerSignup(e) {
             e.preventDefault();
-            const fleet = document.getElementById('partner-fleet').value;
-            alert('Registering carrier fleet for ' + fleet + ' with Supabase Auth & Escrow Integration...');
-            window.location.href = '/portal.html';
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            const feedback = document.getElementById('partner-signup-feedback');
+            const fleet = document.getElementById('partner-fleet').value.trim();
+            const fullName = document.getElementById('partner-name').value.trim();
+            const email = document.getElementById('partner-email').value.trim();
+            const password = document.getElementById('partner-password').value;
+            const client = window.KRIM_SUPABASE || window.supabaseClient;
+
+            feedback.textContent = '';
+            if (!client) {
+                feedback.textContent = 'Authentication service is unavailable. Refresh the page and try again.';
+                feedback.className = 'mt-4 text-sm text-red-400';
+                return;
+            }
+            if (fleet.length < 2 || fullName.length < 2 || password.length < 10) {
+                feedback.textContent = 'Enter a valid company and operator name. Password must be at least 10 characters.';
+                feedback.className = 'mt-4 text-sm text-amber-300';
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Creating secure partner account...';
+            try {
+                const { data, error } = await client.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            company_name: fleet,
+                            krim_account_type: 'partner'
+                        }
+                    }
+                });
+                if (error) throw error;
+
+                if (data.session) {
+                    const { error: provisionError } = await client.rpc('krim_provision_partner_organization', {
+                        p_legal_name: fleet
+                    });
+                    if (provisionError) throw provisionError;
+                    feedback.textContent = 'Partner account and organization created. Your carrier verification is still pending; opening the partner workspace.';
+                    feedback.className = 'mt-4 text-sm text-emerald-300';
+                    window.location.href = window.krimPath ? window.krimPath('app/partner/index.html') : '../app/partner/index.html';
+                    return;
+                }
+
+                feedback.textContent = 'Partner account created. Confirm your email, then sign in. KRIM will finish organization setup after sign-in; carrier verification is not yet approved.';
+                feedback.className = 'mt-4 text-sm text-emerald-300';
+                button.textContent = 'Account Created — Check Email';
+            } catch (err) {
+                feedback.textContent = err.message || 'Partner registration failed. Please try again.';
+                feedback.className = 'mt-4 text-sm text-red-400';
+                button.disabled = false;
+                button.textContent = 'Register Carrier Fleet →';
+            }
         }
     </script>
 </body>
