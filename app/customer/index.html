@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Customer Command Workspace</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -72,7 +72,7 @@
         <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="space-y-1">
                 <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Enterprise Logistics Portal</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Consignment Command Center</h1>
+                <h1 id="workspace-organization-name" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Consignment Command Center</h1>
                 <p class="text-slate-600 text-sm">Monitor shipments, review quotations, and manage carrier approvals in real time.</p>
             </div>
             <div class="flex space-x-3">
@@ -89,14 +89,14 @@
                 <p class="text-xs text-sky-600 font-medium">Synced with network database</p>
             </div>
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pending Quotations</span>
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Quotes</span>
                 <p id="metric-quote-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
                 <p class="text-xs text-emerald-600 font-medium">Authoritative tariff calculations</p>
             </div>
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Security Assurance</span>
-                <p class="text-3xl font-extrabold text-slate-900 font-mono">AAL2</p>
-                <p class="text-xs text-sky-600 font-medium">Hardware MFA & Tenant RLS Active</p>
+                <p id="metric-security-status" class="text-xl font-extrabold text-slate-900 font-mono">Checking…</p>
+                <p id="metric-security-detail" class="text-xs text-sky-600 font-medium">Authentication assurance is read from the current session.</p>
             </div>
         </div>
 
@@ -189,16 +189,19 @@
           const workspaceTitle=document.getElementById("workspace-organization-name");
           if(workspaceTitle)workspaceTitle.textContent=organization?.display_name||organization?.legal_name||"Customer Workspace";
 
-          const [shipments,quotes]=await Promise.all([
+          const [shipments,quotes,assurance]=await Promise.all([
             customerWorkspaceClient.from("krim_shipments").select("id",{count:"exact",head:true}).eq("customer_organization_id",organizationId),
-            customerWorkspaceClient.from("krim_quotes").select("id",{count:"exact",head:true}).eq("customer_organization_id",organizationId)
+            customerWorkspaceClient.from("krim_quotes").select("id",{count:"exact",head:true}).eq("customer_organization_id",organizationId),
+            customerWorkspaceClient.auth.mfa.getAuthenticatorAssuranceLevel()
           ]);
-          document.getElementById("metric-shipments-count").textContent=shipments.error?"—":String(shipments.count||0);
-          document.getElementById("metric-quotes-count").textContent=quotes.error?"—":String(quotes.count||0);
+          document.getElementById("metric-active-count").textContent=shipments.error?"—":String(shipments.count||0);
+          document.getElementById("metric-quote-count").textContent=quotes.error?"—":String(quotes.count||0);
+          document.getElementById("metric-security-status").textContent=assurance.error?"Unknown":(assurance.data?.currentLevel||"Password");
+          document.getElementById("metric-security-detail").textContent=assurance.error?"Unable to read session assurance.":"Current session assurance level; this is not a substitute for backend authorization.";
         } catch(error) {
           console.error("KRIM customer workspace failed to load.",error);
-          const shipmentMetric=document.getElementById("metric-shipments-count");
-          const quoteMetric=document.getElementById("metric-quotes-count");
+          const shipmentMetric=document.getElementById("metric-active-count");
+          const quoteMetric=document.getElementById("metric-quote-count");
           if(shipmentMetric)shipmentMetric.textContent="—";
           if(quoteMetric)quoteMetric.textContent="—";
           const status=document.getElementById("workspace-load-status");
