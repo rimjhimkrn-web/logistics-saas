@@ -6,7 +6,7 @@
  * organization context switching UI, and global keyboard shortcuts.
  */
 
-import { store } from "/app/app-store.js";
+import { store } from "./app-store.js";
 
 class AppRuntime {
   constructor() {
@@ -22,7 +22,8 @@ class AppRuntime {
     console.log("🚀 [KRIM App Runtime] Initializing Authenticated Application Core...");
 
     // 1. Session & Auth Verification Guard
-    this.verifySessionGuard();
+    const authenticated = await this.verifySessionGuard();
+    if (!authenticated) return;
 
     // 2. Bind UI Components with State Store
     this.bindStoreWithUI();
@@ -37,16 +38,137 @@ class AppRuntime {
     console.log("✅ [KRIM App Runtime] Core Runtime Operating Nominal.");
   }
 
+  async ensureSupabaseClient() {
+    if (window.KRIM_SUPABASE) return window.KRIM_SUPABASE;
+
+    const loadScript = (src) => new Promise((resolve, reject) => {
+      const existing = Array.from(document.scripts).find((script) => script.src === src);
+      if (existing) {
+        if (existing.dataset.loaded === "true") return resolve();
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = false;
+      script.addEventListener("load", () => { script.dataset.loaded = "true"; resolve(); }, { once: true });
+      script.addEventListener("error", reject, { once: true });
+      document.head.appendChild(script);
+    });
+
+    await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+    const configUrl = new URL("../../config.js", import.meta.url).href;
+    await loadScript(configUrl);
+    if (!window.KRIM_SUPABASE) throw new Error("KRIM Supabase client could not be initialized.");
+    return window.KRIM_SUPABASE;
+  }
+
   /**
-   * Verification Guard to enforce active session
+   * Real authentication guard and least-privilege workspace context.
+   * Local storage values are never accepted as proof of authentication.
    */
-  verifySessionGuard() {
-    const authSession = localStorage.getItem("krim_auth_session") || sessionStorage.getItem("krim_auth_session");
-    
-    // Fallback stub session for demonstration / local dev
-    if (!authSession) {
-      console.info("[KRIM App Runtime] No active auth token found. Initializing enterprise demo session context.");
-      localStorage.setItem("krim_auth_session", JSON.stringify({ token: "demo_jwt_99824", active: true }));
+  async verifySessionGuard() {
+    let client;
+    try {
+      client = await this.ensureSupabaseClient();
+      const { data: { session }, error } = await client.auth.getSession();
+      if (error) throw error;
+      if (!session?.user?.id) {
+        window.location.href = new URL("../../auth/login.html", import.meta.url).href;
+        return false;
+      }
+
+      const user = session.user;
+      const fullName = String(user.user_metadata?.full_name || "").trim();
+      store.state.user = {
+        id: user.id,
+        name: fullName || user.email || "Signed-in user",
+        email: user.email || "",
+        avatar: (fullName || user.email || "U").slice(0, 2).toUpperCase(),
+        role: "UNASSIGNED",
+        permissions: []
+      };
+
+      const { data: memberships, error: membershipError } = await client
+        .from("krim_organization_members")
+        .select("organization_id, role")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      if (membershipError) {
+        console.warn("[KRIM App Runtime] Organization membership could not be loaded; workspace access remains restricted.", membershipError.message);
+        store.state.availableOrgs = [];
+      } else {
+        const membershipRows = memberships || [];
+        const orgIds = [...new Set(membershipRows.map((row) => row.organization_id).filter(Boolean))];
+        let organizations = [];
+        if (orgIds.length) {
+          const { data: orgRows, error: orgError } = await client
+            .from("krim_organizations")
+            .select("id, display_name, legal_name, organization_type, default_currency_code, status")
+            .in("id", orgIds);
+          if (orgError) {
+            console.warn("[KRIM App Runtime] Organization context could not be loaded.", orgError.message);
+          } else {
+            organizations = orgRows || [];
+          }
+        }
+
+        store.state.availableOrgs = organizations.map((org) => {
+          const membership = membershipRows.find((row) => String(row.organization_id) === String(org.id));
+          return { id: org.id, name: org.display_name || org.legal_name || ("Organization " + org.id), role: membership?.role || "member" };
+        });
+
+        const savedOrg = localStorage.getItem("krim_active_org");
+        const selected = store.state.availableOrgs.find((org) => savedOrg && String(org.id) === String(JSON.parse(savedOrg).id))
+          || store.state.availableOrgs[0];
+        store.state.currentOrg = selected
+          ? { id: selected.id, name: selected.name, code: "", plan: "", sandboxMode: false }
+          : { id: null, name: "No organization selected", code: "", plan: "", sandboxMode: true };
+      }
+
+      // Permissions are loaded only from database role assignments; failures leave the UI denied by default.
+      const { data: assignments, error: assignmentError } = await client
+        .from("krim_user_role_assignments")
+        .select("organization_id, role_id")
+        .eq("user_id", user.id)
+        .eq("is_active", true);
+
+      if (!assignmentError && assignments?.length) {
+        const roleIds = [...new Set(assignments.map((row) => row.role_id).filter(Boolean))];
+        const { data: roles, error: rolesError } = await client
+          .from("krim_security_roles")
+          .select("id, role_code")
+          .in("id", roleIds);
+        if (!rolesError && roles?.length) {
+          store.state.user.role = roles.map((role) => role.role_code).join(",");
+          const { data: mappings, error: mappingError } = await client
+            .from("krim_role_permissions")
+            .select("permission_id, role_id, granted")
+            .in("role_id", roleIds)
+            .eq("granted", true);
+          if (!mappingError && mappings?.length) {
+            const permissionIds = [...new Set(mappings.map((row) => row.permission_id).filter(Boolean))];
+            const { data: permissionRows, error: permissionError } = await client
+              .from("krim_security_permissions")
+              .select("id, permission_code")
+              .in("id", permissionIds);
+            if (!permissionError) {
+              store.state.user.permissions = (permissionRows || []).map((row) => row.permission_code);
+            }
+          }
+        }
+      } else if (assignmentError) {
+        console.warn("[KRIM App Runtime] Permissions could not be loaded; restricted controls remain hidden.", assignmentError.message);
+      }
+
+      store.notify("AUTH_CONTEXT_LOADED");
+      return true;
+    } catch (error) {
+      console.error("[KRIM App Runtime] Authentication bootstrap failed.", error);
+      window.location.href = new URL("../../auth/login.html", import.meta.url).href;
+      return false;
     }
   }
 
