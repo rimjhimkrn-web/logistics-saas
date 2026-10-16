@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Secure Checkout & Razorpay Settlement</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
+    <script src="../config.js"></script>
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -59,7 +59,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/public/shipper/spot-approvals.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="./shipper/spot-approvals.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Spot Approvals
             </a>
         </div>
@@ -104,17 +104,15 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Settlement Gateway © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="./shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
 
     <!-- Secure Checkout: server-created Razorpay order + server-side verification -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
         let activeQuoteRecord = null;
         let currentSession = null;
 
@@ -140,7 +138,7 @@
 
             const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
             if (sessionError || !session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = "../auth/login.html";
                 return;
             }
             currentSession = session;
@@ -229,7 +227,7 @@
                             }
                             showCheckoutMessage("Payment verified successfully. Redirecting to your shipments...", "success");
                             setTimeout(() => {
-                                window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
+                                window.location.href = "./shipper/active-shipments.html";
                             }, 1400);
                         } catch (err) {
                             showCheckoutMessage("Payment verification failed: " + (err.message || "Unknown error") + ". Do not retry until payment status is checked.");
