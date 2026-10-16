@@ -148,7 +148,7 @@
 
             const { data: quote, error } = await supabaseClient
                 .from("krim_quotes")
-                .select("id, shipment_id, amount, currency_code, status, valid_until")
+                .select("id, shipment_id, amount, currency_code, status, valid_until, partner_quote_id")
                 .eq("shipment_id", Number(shipmentId))
                 .order("created_at", { ascending: false })
                 .limit(1)
@@ -163,6 +163,14 @@
             document.getElementById("checkout-shipment-id").textContent = "#" + quote.shipment_id;
             document.getElementById("checkout-amount").textContent =
                 (quote.currency_code || "INR") + " " + Number(quote.amount).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+            if (!quote.partner_quote_id) {
+                showCheckoutMessage(
+                    "Checkout is locked until a verified partner quotation has been awarded and linked to this shipment. Partner selection and assignment acceptance must finish first.",
+                    "info"
+                );
+                return;
+            }
 
             if (quote.status !== "accepted") {
                 showCheckoutMessage(
