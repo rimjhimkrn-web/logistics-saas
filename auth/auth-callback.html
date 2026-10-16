@@ -30,6 +30,18 @@
         if (provisionError) throw provisionError;
         if (!organizationId) throw new Error("Organization setup was not confirmed. Please sign in to retry.");
 
+        let workspacePath = "../app/customer/index.html";
+        if (accountType === "partner") {
+          const { data: partnerOrg, error: partnerStatusError } = await client
+            .from("krim_organizations")
+            .select("partner_verification_status, partner_onboarding_status")
+            .eq("id", organizationId)
+            .maybeSingle();
+          if (partnerStatusError) throw partnerStatusError;
+          const verified = ["verified", "approved"].includes(String(partnerOrg?.partner_verification_status || "").toLowerCase());
+          workspacePath = verified ? "../app/partner/index.html" : "../public/partner/partner-onboarding.html";
+        }
+
         const { data: mfaData, error: mfaError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
         if (mfaError) throw mfaError;
         if (mfaData?.nextLevel === "aal2" && mfaData?.currentLevel !== "aal2") {
@@ -37,7 +49,7 @@
           return;
         }
         statusText.textContent = "Identity verified. Opening your workspace…";
-        window.location.href = accountType === "partner" ? "../app/partner/index.html" : "../app/customer/index.html";
+        window.location.href = workspacePath;
       } catch (error) {
         statusText.textContent = (error?.message || "Authentication failed.") + " Redirecting to sign in…";
         setTimeout(() => { window.location.href = "./login.html"; }, 2500);
