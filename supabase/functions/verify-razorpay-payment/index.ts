@@ -259,7 +259,8 @@ amount_paise,
 currency,
 status,
 razorpay_order_id,
-razorpay_payment_id
+razorpay_payment_id,
+paid_at
 `)
 .eq(
 "razorpay_order_id",
