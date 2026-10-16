@@ -157,12 +157,14 @@
                 .from("krim_quotes")
                 .select("id, shipment_id, amount, currency_code, status, valid_until, partner_quote_id")
                 .eq("shipment_id", Number(shipmentId))
+                .eq("status", "accepted")
+                .not("partner_quote_id", "is", null)
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
 
             if (error || !quote) {
-                showCheckoutMessage("No authorized quotation was found for this shipment.");
+                showCheckoutMessage("No accepted partner quotation was found for this shipment. Accept a valid partner quote before payment.");
                 return;
             }
 
