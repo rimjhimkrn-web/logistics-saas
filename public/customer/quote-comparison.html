@@ -6,6 +6,9 @@
     <title>KRIM OS — Enterprise Quote Comparison</title>
     <meta name="description" content="Compare carrier bids, transit SLAs, and institutional pricing rates in KRIM OS.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -40,44 +43,8 @@
             <p class="text-slate-400 text-xs font-mono">Evaluate real-time spot quotes, driver safety scores, and guaranteed transit times.</p>
         </div>
 
-        <div class="space-y-4 font-mono text-xs">
-            <div class="bg-slate-800 border border-emerald-500/40 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div class="space-y-2">
-                    <div class="flex items-center space-x-3">
-                        <span class="font-bold text-white text-base">TransGlobal Fleet Solutions (Node: AP-SOUTH)</span>
-                        <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 font-bold rounded-md border border-emerald-500/30 text-[10px]">Lowest Bid</span>
-                    </div>
-                    <p class="text-slate-400 text-[11px]">32 Ft Multi-Axle • GPS Telemetry Active • Driver Rating: 4.9/5.0</p>
-                </div>
-                <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end">
-                    <div class="text-right">
-                        <span class="block text-lg font-bold text-white">₹42,500</span>
-                        <span class="text-[10px] text-slate-400">All-inclusive toll & tax</span>
-                    </div>
-                    <button onclick="handleSelectQuote('TransGlobal Fleet', '₹42,500')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-3 rounded-xl uppercase tracking-wider transition cursor-pointer">
-                        Select Bid →
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div class="space-y-2">
-                    <div class="flex items-center space-x-3">
-                        <span class="font-bold text-white text-base">Apex Express Logistics</span>
-                        <span class="px-2.5 py-0.5 bg-sky-500/15 text-sky-400 font-bold rounded-md border border-sky-500/30 text-[10px]">Fastest Transit</span>
-                    </div>
-                    <p class="text-slate-400 text-[11px]">32 Ft Multi-Axle • Guaranteed 14-hour express SLA • Driver Rating: 4.8/5.0</p>
-                </div>
-                <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end">
-                    <div class="text-right">
-                        <span class="block text-lg font-bold text-white">₹46,800</span>
-                        <span class="text-[10px] text-slate-400">All-inclusive toll & tax</span>
-                    </div>
-                    <button onclick="handleSelectQuote('Apex Express', '₹46,800')" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-5 py-3 rounded-xl uppercase tracking-wider transition cursor-pointer">
-                        Select Bid →
-                    </button>
-                </div>
-            </div>
+        <div id="quote-comparison-list" class="space-y-4 font-mono text-xs">
+            <p class="text-slate-400">Loading authorized quotes…</p>
         </div>
     </main>
 
@@ -86,10 +53,49 @@
     </footer>
 
     <script>
-        function handleSelectQuote(carrier, amount) {
-            alert('Carrier selected: ' + carrier + ' (' + amount + '). Routing to Quote Details.');
-            window.location.href = '/public/customer/quote-details.html';
+      const comparisonClient = window.KRIM_SUPABASE || window.supabase.createClient(
+        window.KRIM_CONFIG.supabase.url,
+        window.KRIM_CONFIG.supabase.publishableKey,
+        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+      );
+      window.KRIM_SUPABASE = comparisonClient;
+      const comparisonList = document.getElementById("quote-comparison-list");
+      const escapeQuote = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch]);
+      async function loadQuoteComparison() {
+        try {
+          const { data: sessionData, error: sessionError } = await comparisonClient.auth.getSession();
+          if (sessionError) throw sessionError;
+          if (!sessionData?.session) {
+            window.location.assign(window.KRIM_ROUTE("auth/login.html"));
+            return;
+          }
+          const params = new URLSearchParams(window.location.search);
+          const shipmentId = params.get("shipment_id");
+          let query = comparisonClient.from("krim_quotes")
+            .select("id, shipment_id, amount, currency_code, status, valid_until, created_at")
+            .order("created_at", { ascending: false })
+            .limit(100);
+          if (shipmentId && /^\d+$/.test(shipmentId)) query = query.eq("shipment_id", Number(shipmentId));
+          const { data: quotes, error } = await query;
+          if (error) throw error;
+          if (!quotes?.length) {
+            comparisonList.innerHTML = '<div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center"><p class="text-slate-300">No quote records are available for this account yet.</p><a href="' + window.KRIM_ROUTE("public/customer/quote-request.html") + '" class="inline-block mt-4 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-xl">Request a Quote →</a></div>';
+            return;
+          }
+          comparisonList.innerHTML = quotes.map(q => {
+            const status = String(q.status || "unknown");
+            const statusClass = status === "accepted" ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" : status === "sent" ? "text-sky-400 border-sky-500/30 bg-sky-500/10" : "text-amber-300 border-amber-500/30 bg-amber-500/10";
+            const amount = Number(q.amount);
+            const amountText = Number.isFinite(amount) ? amount.toLocaleString("en-IN", {minimumFractionDigits:2,maximumFractionDigits:2}) : "—";
+            const detailsUrl = window.KRIM_ROUTE("public/customer/quote-details.html?quote_id=" + encodeURIComponent(q.id) + "&shipment_id=" + encodeURIComponent(q.shipment_id));
+            return '<div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6"><div class="space-y-2"><div class="flex flex-wrap items-center gap-3"><span class="font-bold text-white text-base">Quote #' + escapeQuote(q.id) + '</span><span class="px-2.5 py-0.5 rounded-md border text-[10px] font-bold uppercase ' + statusClass + '">' + escapeQuote(status) + '</span></div><p class="text-slate-400 text-[11px]">Shipment #' + escapeQuote(q.shipment_id) + ' · Valid until ' + escapeQuote(q.valid_until ? new Date(q.valid_until).toLocaleString() : "not specified") + '</p><p class="text-slate-500 text-[11px]">Quote amount and status are loaded from KRIM. No carrier identity is assumed unless the backend supplies it.</p></div><div class="flex items-center gap-4 w-full md:w-auto justify-between"><div class="text-right"><span class="block text-lg font-bold text-white">' + escapeQuote(q.currency_code || "INR") + ' ' + amountText + '</span><span class="text-[10px] text-slate-400">Server-generated quote</span></div><a href="' + detailsUrl + '" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-5 py-3 rounded-xl uppercase tracking-wider transition">Review Quote →</a></div></div>';
+          }).join("");
+        } catch (error) {
+          comparisonList.textContent = "Unable to load quotes: " + (error?.message || "Unknown error");
+          comparisonList.className = "space-y-4 font-mono text-xs text-rose-300";
         }
+      }
+      loadQuoteComparison();
     </script>
 </body>
           </html>
