@@ -1,0 +1,59 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
+const SUPABASE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=s=>document.querySelector(s);
+const status=$("#status"), form=$("#action-form"), fields=$("#fields"), title=$("#title"), desc=$("#description"), submit=$("#submit");
+const page=document.body.dataset.page;
+const pages={
+"change-password":["Change password","Update your KRIM sign-in password after re-authentication.","Current password","New password","Confirm new password"],
+"change-email":["Change email address","A verification email may be required before the new address takes effect.","New email address","Current password"],
+"change-phone":["Change phone number","Requires a configured SMS provider and a supported phone-auth flow.","New phone number"],
+"passkey-management":["Passkey management","Supabase Auth does not expose a generic passkey-management API in this client. Use only a verified WebAuthn provider integration.",""],
+"backup-codes":["Backup codes","Backup codes must be generated and verified server-side before they can be safely enabled. This page will not create insecure client-only codes.",""],
+"active-sessions":["Active sessions","This client can sign out the current session. It cannot reliably enumerate and revoke every other session.",""],
+"device-management":["Device management","No trusted-device registry or enforcement API has been verified for this project. No devices will be fabricated.",""],
+"account-recovery-status":["Account recovery status","Shows the current authenticated account and email-confirmation state; it cannot inspect private recovery-provider queues.",""],
+"identity-verification":["Identity verification","No identity-verification provider or server-side case workflow has been verified. Do not upload identity documents here yet.",""],
+"account-deactivation":["Deactivate account","Account deactivation must be implemented as an authorized server-side workflow before this action can be offered.",""],
+"account-deletion":["Delete account","Permanent account deletion requires a server-side, re-authenticated workflow and data-retention checks. It is not performed by this page.",""],
+"consent-management":["Privacy and consent","Consent records require a defined policy catalogue and server-side audit trail. This page will not claim a consent was saved without a verified backend.",""],
+"organization-invitation-acceptance":["Accept organization invitation","Invitation acceptance requires a server-validated token. Open this page using an invitation link that includes its token.",""],
+"organization-switch":["Switch organization","Lists organizations where the signed-in user has a membership. Switching updates this browser's selected organization only; database authorization must still enforce membership.",""],
+"step-up-verification":["Step-up verification","Use a configured Supabase MFA factor to complete an additional verification challenge.",""]
+};
+function message(t,ok=false){status.textContent=t;status.className="status "+(ok?"ok":"err");}
+function input(label,type="text",name="value",required=true){const l=document.createElement("label");l.textContent=label;const i=document.createElement("input");i.type=type;i.name=name;i.required=required;i.autocomplete=type==="password"?"current-password":"off";l.append(i);fields.append(l);return i;}
+async function requireUser(){const {data,error}=await sb.auth.getUser();if(error||!data.user){throw new Error("Please sign in first, then reopen this page.");}return data.user;}
+async function boot(){
+ const p=pages[page];if(!p){message("Unknown account workflow.");return;}
+ title.textContent=p[0];desc.textContent=p[1];
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session && !["account-recovery-status","organization-invitation-acceptance"].includes(page)) {message("You are not signed in. Please sign in first.");return;}
+  if(page==="change-password"){input(p[2],"password","current");input(p[3],"password","next");input(p[4],"password","confirm");}
+  else if(page==="change-email"){input(p[2],"email","email");input(p[3],"password","password");}
+  else if(page==="change-phone"){input(p[2],"tel","phone");}
+  else if(page==="organization-invitation-acceptance"){input("Invitation token","text","token");}
+  else if(page==="step-up-verification"){const {data,error}=await sb.auth.mfa.listFactors();if(error)throw error;const factors=[...(data.totp||[]),...(data.phone||[])].filter(f=>f.status==="verified");if(!factors.length){message("No verified MFA factor is enrolled. Enroll MFA before step-up verification.");return;}const sel=document.createElement("select");sel.name="factor";for(const f of factors){const o=document.createElement("option");o.value=f.id;o.textContent=(f.friendly_name||f.factor_type)+" • "+f.id.slice(0,8);sel.append(o);}fields.append(sel);input("Verification code","text","code");}
+  else if(page==="organization-switch"){const {data,error}=await sb.from("krim_organization_members").select("*").limit(50);if(error)throw error;const sel=document.createElement("select");sel.name="org";for(const m of (data||[])){const o=document.createElement("option");o.value=m.organization_id??m.krim_organization_id??"";o.textContent="Organization "+(o.value||"(membership record)");if(!o.value)o.disabled=true;sel.append(o);}if(!sel.options.length){message("No memberships were returned by the database policies. No organization was selected.");return;}fields.append(sel);}
+  else if(page==="account-recovery-status"){const u=session?.user;if(u){message("Signed in as "+u.email+". Email confirmed: "+(u.email_confirmed_at?"Yes":"No")+".",true);}else message("No active session. If you requested a reset, check your email and use the recovery link.");return;}
+  else if(page==="active-sessions"){const u=await requireUser();message("Current account: "+u.email+". For security, only the current session can be signed out from this browser.");}
+  else if(["passkey-management","backup-codes","device-management","identity-verification","account-deactivation","account-deletion","consent-management"].includes(page)){submit.disabled=true;submit.textContent="Backend workflow not configured";message(p[1]);return;}
+  else {submit.disabled=true;message("This workflow requires a server-side token-verification endpoint that has not been verified.");return;}
+ }catch(e){message(e.message||"Unable to load account workflow.");}
+}
+form.addEventListener("submit",async e=>{
+ e.preventDefault();submit.disabled=true;
+ try{
+  const v=Object.fromEntries(new FormData(form).entries());
+  if(page==="change-password"){if(v.next!==v.confirm)throw new Error("New passwords do not match.");if(v.next.length<8)throw new Error("Use at least 8 characters.");const {data:{user},error:re}=await sb.auth.getUser();if(re||!user?.email)throw new Error("Please sign in again.");const {error:ve}=await sb.auth.signInWithPassword({email:user.email,password:v.current});if(ve)throw new Error("Current password could not be verified.");const {error}=await sb.auth.updateUser({password:v.next});if(error)throw error;message("Password updated by Supabase Auth.",true);}
+  else if(page==="change-email"){const {error:re}=await sb.auth.signInWithPassword({email:(await requireUser()).email,password:v.password});if(re)throw new Error("Current password could not be verified.");const {error}=await sb.auth.updateUser({email:v.email});if(error)throw error;message("Email change requested. Follow the verification email(s) sent by Supabase.",true);}
+  else if(page==="change-phone"){const {error}=await sb.auth.updateUser({phone:v.phone});if(error)throw error;message("Phone change requested. Complete the verification flow sent by your configured provider.",true);}
+  else if(page==="active-sessions"){const {error}=await sb.auth.signOut({scope:"local"});if(error)throw error;message("This browser session has been signed out.",true);setTimeout(()=>location.href="../auth/login.html",900);}
+  else if(page==="organization-switch"){if(!v.org)throw new Error("Select a valid organization membership.");sessionStorage.setItem("krim_selected_organization_id",v.org);message("Organization selection saved for this browser. This does not grant access; backend RLS/RBAC remains authoritative.",true);}
+  else if(page==="step-up-verification"){const {data,error}=await sb.auth.mfa.challengeAndVerify({factorId:v.factor,code:v.code});if(error)throw error;message("MFA challenge verified by Supabase.",true);}
+  else if(page==="organization-invitation-acceptance"){throw new Error("Invitation acceptance endpoint is not yet configured; token was not consumed.");}
+ }catch(e){message(e.message||"Request failed.");}finally{submit.disabled=false;}
+});
+boot();
