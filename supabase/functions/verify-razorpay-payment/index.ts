@@ -295,7 +295,6 @@ error:
 
 // --------------------------------------------------
 // Global payment only
-// --------------------------------------------------
 
 if (!paymentOrder.krim_shipment_id) {
 return jsonResponse(
@@ -303,6 +302,35 @@ return jsonResponse(
 error: "This payment order is not linked to a global KRIM shipment",
 },
 400
+);
+}
+
+// User ownership
+
+if (paymentOrder.customer_id && paymentOrder.customer_id !== user.id) {
+return jsonResponse(
+{
+error: "Payment order does not belong to authenticated user",
+},
+403
+);
+}
+
+// Idempotency and legacy compatibility
+
+const alreadyPaid =
+paymentOrder.status === "paid" &&
+paymentOrder.razorpay_payment_id === razorpayPaymentId;
+
+const legacyAlreadyPaid = alreadyPaid &&
+(!paymentOrder.krim_quote_id || !paymentOrder.partner_quote_id || !paymentOrder.customer_organization_id);
+
+if (paymentOrder.status === "paid" && !alreadyPaid) {
+return jsonResponse(
+{
+error: "This payment order is already paid by a different payment ID.",
+},
+409
 );
 }
 
@@ -315,43 +343,6 @@ error: "This payment order is not bound to a partner-awarded customer quote.",
 );
 }
 
-// --------------------------------------------------
-// User ownership
-// --------------------------------------------------
-
-if (
-paymentOrder.customer_id &&
-paymentOrder.customer_id !== user.id
-) {
-return jsonResponse(
-{
-error:
-"Payment order does not belong to authenticated user",
-},
-403
-);
-}
-
-// --------------------------------------------------
-// Idempotency
-// --------------------------------------------------
-
-const alreadyPaid =
-paymentOrder.status === "paid" &&
-paymentOrder.razorpay_payment_id === razorpayPaymentId;
-
-const legacyAlreadyPaid = alreadyPaid &&
-(!paymentOrder.krim_quote_id || !paymentOrder.partner_quote_id || !paymentOrder.customer_organization_id);
-
-if (paymentOrder.status === "paid" && !alreadyPaid) {
-return jsonResponse({
-error: "This payment order is already paid by a different payment ID.",
-},
-409
-);
-}
-
-// --------------------------------------------------
 // Verify organization access through shipment
 // --------------------------------------------------
 
