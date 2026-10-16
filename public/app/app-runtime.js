@@ -241,19 +241,19 @@ class AppRuntime {
             <kbd class="px-2 py-1 bg-slate-900 border border-slate-800 rounded text-[10px] text-slate-400">ESC</kbd>
           </div>
           <div class="p-2 space-y-1 max-h-80 overflow-y-auto text-slate-300">
-            <a href="/app/dashboard-framework.html" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
+            <a href="${new URL("./dashboard-framework.html", import.meta.url).href}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
               <span>📊 Dashboard Framework</span>
               <span class="text-[10px] text-slate-500">NAVIGATE</span>
             </a>
-            <a href="/app/global-search.html" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
+            <a href="${new URL("./global-search.html", import.meta.url).href}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
               <span>🌐 Global Search Engine</span>
               <span class="text-[10px] text-slate-500">NAVIGATE</span>
             </a>
-            <a href="/app/document-vault.html" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
+            <a href="${new URL("./document-vault.html", import.meta.url).href}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
               <span>📁 Document & e-Sign Vault</span>
               <span class="text-[10px] text-slate-500">NAVIGATE</span>
             </a>
-            <a href="/app/org-switcher.html" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
+            <a href="${new URL("./org-switcher.html", import.meta.url).href}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-400 transition-all">
               <span>🏢 Organization & Workspace Switcher</span>
               <span class="text-[10px] text-slate-500">NAVIGATE</span>
             </a>
