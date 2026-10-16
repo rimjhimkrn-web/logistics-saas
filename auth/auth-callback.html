@@ -12,7 +12,7 @@
   <p id="status-text" class="text-xs text-slate-400 mt-1 font-mono">Exchanging PKCE authorization code with Supabase backend.</p>
 
   <script type="module">
-    import { supabase, AUTH_ROUTES } from './js/auth-core.js';
+    import { supabase, AUTH_ROUTES } from '../auth-core.js';
 
     async function handleAuthCallback() {
       const statusText = document.getElementById('status-text');
@@ -26,6 +26,25 @@
         return;
       }
 
+      // Create the customer organization only for customer accounts. The RPC requires auth.uid()
+      // and performs organization/member/role writes on the backend.
+      const user = session.user;
+      const accountType = String(user.user_metadata?.account_type || "customer").toLowerCase();
+      if (accountType === "customer") {
+        const organizationName = String(user.user_metadata?.organization_name || user.user_metadata?.company_name || "").trim();
+        if (organizationName) {
+          const { error: organizationError } = await supabase.rpc(
+            "krim_provision_customer_organization",
+            { p_legal_name: organizationName }
+          );
+          if (organizationError) {
+            statusText.innerText = "Identity verified, but workspace setup needs attention. Please sign in to retry.";
+            setTimeout(() => window.location.href = AUTH_ROUTES.SIGN_IN, 2500);
+            return;
+          }
+        }
+      }
+
       // Check MFA requirement (AAL level)
       const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
@@ -33,8 +52,15 @@
         return;
       }
 
-      statusText.innerText = "Identity verified! Launching workspace...";
-      setTimeout(() => window.location.href = AUTH_ROUTES.DASHBOARD, 1000);
+      const destinations = {
+        customer: window.KRIM_ROUTE("app/customer/index.html"),
+        partner: window.KRIM_ROUTE("app/partner/index.html"),
+        enterprise: window.KRIM_ROUTE("app/enterprise/index.html"),
+        driver: window.KRIM_ROUTE("app/field/index.html"),
+        warehouse: window.KRIM_ROUTE("app/field/index.html")
+      };
+      statusText.innerText = "Identity verified! Launching your KRIM workspace...";
+      setTimeout(() => window.location.href = destinations[accountType] || AUTH_ROUTES.DASHBOARD, 1000);
     }
 
     handleAuthCallback();
