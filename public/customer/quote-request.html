@@ -62,7 +62,7 @@
                 </div>
                 <div id="quote-request-feedback" role="status" aria-live="polite" class="text-sm text-slate-300 break-words"></div>
                 <button id="quote-request-submit" type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 cursor-pointer">
-                    Request Server-Calculated Quote →
+                    Request Partner Bids →
                 </button>
             </form>
         </div>
@@ -117,7 +117,7 @@
             .from("krim_shipments")
             .select("id, shipment_number, goods_description, total_weight_kg, status")
             .eq("customer_organization_id", organizationId)
-            .eq("status", "draft")
+            .in("status", ["draft", "quoted"])
             .order("created_at", { ascending: false });
           if (shipmentError) throw shipmentError;
           quoteSelect.innerHTML = "";
@@ -137,7 +137,7 @@
             const label = [shipment.shipment_number || ("Shipment #" + shipment.id), shipment.goods_description, Number(shipment.total_weight_kg) + " kg"].filter(Boolean).join(" — ");
             quoteSelect.add(new Option(label, String(shipment.id)));
           });
-          quoteMessage("Choose a draft shipment. The server calculates the quote; no browser-entered amount is accepted.", "info");
+          quoteMessage("Choose a draft or quoted shipment. KRIM publishes a partner opportunity; verified carriers submit bids separately.", "info");
         } catch (error) {
           quoteSelect.innerHTML = '<option value="">Could not load shipments</option>';
           quoteButton.disabled = true;
@@ -154,19 +154,19 @@
           const shipmentId = Number(quoteSelect.value);
           const tier = document.getElementById("quote-service-tier").value;
           if (!Number.isInteger(shipmentId) || shipmentId <= 0) throw new Error("Select a valid draft shipment.");
-          const { data, error } = await quoteClient.rpc("krim_create_tariff_quote", {
+          const { data, error } = await quoteClient.rpc("krim_create_partner_opportunity", {
             p_shipment_id: shipmentId,
-            p_service_tier: tier,
-            p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            p_response_deadline: null,
+            p_service_tier: tier
           });
           if (error) throw error;
-          if (!data?.id) throw new Error("The server did not return a quote reference.");
-          quoteMessage("Quote created by the server. Opening quote approvals…", "success");
-          window.location.assign(window.KRIM_ROUTE("public/shipper/spot-approvals.html?shipment_id=" + shipmentId + "&quote_id=" + data.id));
+          if (!data?.id) throw new Error("The server did not return an opportunity reference.");
+          quoteMessage("Partner opportunity " + (data.opportunity_number || ("#" + data.id)) + " is open. Partner bids will appear as they are submitted.", "success");
+          window.location.assign(window.KRIM_ROUTE("public/customer/quote-comparison.html?shipment_id=" + shipmentId + "&opportunity_id=" + data.id));
         } catch (error) {
           quoteMessage("Quote request failed: " + (error?.message || "Unknown error"));
           quoteButton.disabled = false;
-          quoteButton.textContent = "Request Server-Calculated Quote →";
+          quoteButton.textContent = "Request Partner Bids →";
         }
       });
       initQuoteRequest();
