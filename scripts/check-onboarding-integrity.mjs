@@ -10,6 +10,11 @@ const requiredFiles = [
   "auth/auth-callback.html",
   "public/partner/partner-onboarding.html",
   "public/quote-result.html",
+  "public/shipper/booking-request.html",
+  "public/shipper/rate-calculator.html",
+  "public/partner/load-marketplace.html",
+  "app/customer/index.html",
+  "app/partner/index.html",
   "config.js",
   "core/krim-config.js",
   "public/app/app-store.js",
@@ -55,6 +60,12 @@ const mustContain = [
   ["public/partner/partner-onboarding.html", 'from("krim-partner-verification")'],
   ["public/quote-result.html", '"create-global-razorpay-order"'],
   ["public/quote-result.html", '"verify-razorpay-payment"'],
+  ["public/shipper/booking-request.html", "krim_create_global_shipment"],
+  ["public/shipper/rate-calculator.html", "krim_create_tariff_quote"],
+  ["public/partner/load-marketplace.html", 'rpc("krim_submit_partner_quote"'],
+  ["app/customer/index.html", ".eq('customer_organization_id', membership.organization_id)"],
+  ["app/partner/index.html", "krim_partner_opportunities"],
+  ["app/partner/index.html", "getAuthenticatorAssuranceLevel"],
   ["public/app/app-runtime.js", "client.auth.getSession()"],
   ["public/app/app-store.js", 'permissions: []'],
   ["core/krim-config.js", "https://ebltviniygljwwseplph.supabase.co"]
@@ -73,7 +84,10 @@ const mustNotContain = [
   ["public/app/app-runtime.js", "demo_jwt_99824"],
   ["public/app/app-store.js", "Global Supply Chain Corp"],
   ["core/krim-config.js", "your-supabase-instance.supabase.co"],
-  ["public/quote-result.html", "/logistics-saas/"]
+  ["public/quote-result.html", "/logistics-saas/"],
+  ["app/partner/index.html", "9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E"],
+  ["public/partner/load-marketplace.html", "00000000-0000-0000-0000-000000000002"],
+  ["public/partner/load-marketplace.html", "from('krim_quotes').insert"]
 ];
 for (const [file, text] of mustNotContain) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8").includes(text)) {
