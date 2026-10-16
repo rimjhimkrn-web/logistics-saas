@@ -124,6 +124,7 @@
         
 
         let activeFactorId = null;
+        let postLoginPath = "/logistics-saas/app/customer/index.html";
 
         // 1. Sign In & MFA Assurance Level Evaluation
         document.getElementById('form-login').addEventListener('submit', async function(e) {
@@ -140,13 +141,22 @@
 
                 const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                const organizationName = String(data.user.user_metadata?.company_name || (data.user.email ? data.user.email.split('@')[0] + ' Workspace' : '')).trim();
+                const metadata = data.user?.user_metadata || {};
+                const accountType = metadata.krim_account_type === "partner" ? "partner" : "customer";
+                const organizationName = String(metadata.company_name || (data.user.email ? data.user.email.split("@")[0] + " Workspace" : "")).trim();
+                if (organizationName.length < 2) throw new Error("Your KRIM organization name is missing. Contact support to complete account setup.");
+                const provisionRpc = accountType === "partner"
+                    ? "krim_provision_partner_organization"
+                    : "krim_provision_customer_organization";
                 const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
-                    'krim_provision_customer_organization',
+                    provisionRpc,
                     { p_legal_name: organizationName }
                 );
                 if (organizationError) throw organizationError;
-                if (!organizationId) throw new Error('KRIM organization setup did not return an organization reference.');
+                if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
+                postLoginPath = accountType === "partner"
+                    ? "/logistics-saas/app/partner/index.html"
+                    : "/logistics-saas/app/customer/index.html";
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -171,7 +181,7 @@
                 }
 
                 // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
-                window.location.href = "/logistics-saas/app/customer/index.html";
+                window.location.href = postLoginPath;
 
             } catch (err) {
                 feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
