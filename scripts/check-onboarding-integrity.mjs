@@ -16,6 +16,8 @@ const requiredFiles = [
   "app/customer/index.html",
   "app/partner/index.html",
   "domains/shipments.html",
+  "domains/quotes.html",
+  "public/quote.html",
   "config.js",
   "core/krim-config.js",
   "public/app/app-store.js",
@@ -78,6 +80,8 @@ const mustContain = [
   ["app/partner/index.html", "getAuthenticatorAssuranceLevel"],
   ["domains/shipments.html", 'rpc("krim_create_global_shipment"'],
   ["domains/shipments.html", 'from("krim_locations")'],
+  ["domains/quotes.html", "rate-calculator.html"],
+  ["public/quote.html", "SECURE SERVER-CALCULATED QUOTE REQUEST"],
   ["public/app/app-runtime.js", "client.auth.getSession()"],
   ["public/app/app-store.js", 'permissions: []'],
   ["core/krim-config.js", "https://ebltviniygljwwseplph.supabase.co"]
@@ -101,7 +105,8 @@ const mustNotContain = [
   ["public/partner/load-marketplace.html", "00000000-0000-0000-0000-000000000002"],
   ["public/partner/load-marketplace.html", "from('krim_quotes').insert"],
   ["domains/shipments.html", "9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E"],
-  ["domains/shipments.html", "from('krim_shipments').insert"]
+  ["domains/shipments.html", "from('krim_shipments').insert"],
+  ["public/quote.html", "INSTANT SPOT TARIFF ESTIMATOR"]
 ];
 for (const [file, text] of mustNotContain) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8").includes(text)) {
