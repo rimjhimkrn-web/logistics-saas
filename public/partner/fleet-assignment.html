@@ -1,120 +1,235 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Carrier & Fleet Assignment Engine</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Partner Assignments | KRIM Logistics</title>
+  <link rel="manifest" href="../../manifest.json">
+  <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              purple: '#a855f7'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../config.js"></script>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-amber-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Automated Fleet Assignment Engine</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="/partner/truck-availability.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← Capacity Feed
-      </a>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+      <div><p class="text-xs font-mono uppercase tracking-widest text-amber-700">KRIM Logistics OS</p><h1 class="text-xl font-bold">Partner Assignments</h1></div>
+      <nav class="flex flex-wrap gap-3 text-sm">
+        <a href="./load-marketplace.html" class="text-slate-600 hover:text-amber-700">Load Marketplace</a>
+        <a href="../../app/partner/index.html" class="text-slate-600 hover:text-amber-700">Partner Workspace</a>
+      </nav>
     </div>
   </header>
-
-  <!-- ==================== MAIN ASSIGNMENT ENGINE ==================== -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
-
-    <!-- HERO BANNER -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-2">
-      <span class="text-[11px] font-bold text-amber-400 uppercase tracking-widest block">Automated Dispatch Optimization</span>
-      <h1 class="text-2xl font-extrabold text-white">Carrier & Fleet Assignment Engine</h1>
-      <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Match unassigned cargo shipments with verified transporter capacity based on route proximity, rate card tariffs, and carrier safety scores.</p>
-    </section>
-
-    <!-- MATCHING WORKSPACE -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      <!-- UNASSIGNED SHIPMENT -->
-      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
-          <span>📦</span> Selected Unassigned Shipment
-        </h3>
-
-        <div class="p-4 bg-[#040814] rounded-xl border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-white text-sm">SHP-2026-9901</span>
-            <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">PENDING_ASSIGNMENT</span>
-          </div>
-
-          <div class="space-y-1 text-slate-400 text-[11px]">
-            <p><strong class="text-white">Route:</strong> Nhava Sheva (INBOM) → Delhi ICD (INDEL)</p>
-            <p><strong class="text-white">Cargo Type:</strong> 40ft High Cube (Electronics / Dry Cargo)</p>
-            <p><strong class="text-white">Target Pickup:</strong> Oct 10, 2026 08:00 IST</p>
-          </div>
-        </div>
+  <main class="mx-auto max-w-7xl space-y-6 px-4 py-8">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p class="text-xs font-mono uppercase tracking-widest text-amber-700">Partner response workflow</p>
+      <h2 class="mt-1 text-2xl font-bold">Review awarded loads</h2>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">A customer award is an assignment offer, not proof that your fleet has accepted it. Accept only when your capacity, route, equipment, timing and commercial terms are confirmed.</p>
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <button id="refresh-assignments" type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Refresh assignments</button>
+        <span id="partner-identity" class="text-xs font-mono text-slate-500">Verifying partner access…</span>
       </div>
-
-      <!-- RECOMMENDED CARRIER MATCH -->
-      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
-          <span>🎯</span> Top Algorithmic Carrier Match
-        </h3>
-
-        <div class="p-4 bg-[#040814] rounded-xl border border-amber-500/50 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-white text-sm">KRIM India Drayage Fleet</span>
-            <span class="text-emerald-400 font-bold text-[10px]">98.6% Match Score</span>
-          </div>
-
-          <div class="space-y-1 text-slate-400 text-[11px]">
-            <p><strong class="text-white">Assigned Vehicle:</strong> TRK-IND-9910 (At Nhava Sheva Hub)</p>
-            <p><strong class="text-white">Contracted Tariff:</strong> $840 USD (Fixed Rate Card)</p>
-            <p><strong class="text-white">Driver Assigned:</strong> Hans Mueller (DRV-882)</p>
-          </div>
-
-          <button onclick="alert('Shipment SHP-2026-9901 successfully assigned to KRIM India Drayage Fleet!')" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
-            Confirm Fleet Assignment & Issue Order →
-          </button>
-        </div>
-      </div>
-
+      <p id="assignment-feedback" role="status" aria-live="polite" class="mt-4 text-sm text-slate-600"></p>
     </section>
-
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-5 py-4"><h3 class="font-bold">Your assignments</h3></div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <tr><th class="px-4 py-3">Assignment / shipment</th><th class="px-4 py-3">Route</th><th class="px-4 py-3">Cargo</th><th class="px-4 py-3">Weight</th><th class="px-4 py-3">Deadline</th><th class="px-4 py-3">Status</th><th class="px-4 py-3 text-right">Response</th></tr>
+          </thead>
+          <tbody id="assignments-tbody" class="divide-y divide-slate-100">
+            <tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Loading assignments…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
+  <script>
+    const client = window.KRIM_SUPABASE;
+    let currentPartnerOrgId = null;
+    const tbody = document.getElementById("assignments-tbody");
+    const feedback = document.getElementById("assignment-feedback");
 
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Assignment Engine.</p>
-    </div>
-  </footer>
+    function showMessage(message, kind) {
+      feedback.textContent = message;
+      feedback.className = "mt-4 text-sm " + (kind === "success" ? "text-emerald-700" : kind === "error" ? "text-rose-700" : "text-slate-600");
+    }
+    function addCell(row, value, className) {
+      const cell = document.createElement("td");
+      cell.className = className || "px-4 py-4";
+      cell.textContent = value == null || value === "" ? "—" : String(value);
+      row.appendChild(cell);
+      return cell;
+    }
 
-  <script type="module" src="/platform/krim-config.js"></script>
-  <script type="module" src="/app/app-runtime.js"></script>
+    async function initialize() {
+      try {
+        const { data: { session }, error: sessionError } = await client.auth.getSession();
+        if (sessionError || !session) {
+          window.location.href = "../../auth/login.html";
+          return;
+        }
+        document.getElementById("partner-identity").textContent = session.user.email || "Signed-in partner";
+        const { data: membership, error: membershipError } = await client
+          .from("krim_organization_members")
+          .select("organization_id")
+          .eq("user_id", session.user.id)
+          .eq("status", "active")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (membershipError) throw membershipError;
+        if (!membership?.organization_id) {
+          window.location.href = "../../auth/partner-signup.html";
+          return;
+        }
+        currentPartnerOrgId = membership.organization_id;
+
+        const { data: organization, error: organizationError } = await client
+          .from("krim_organizations")
+          .select("organization_type, status, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+          .eq("id", currentPartnerOrgId)
+          .maybeSingle();
+        if (organizationError) throw organizationError;
+        const verified = organization && organization.status === "active"
+          && ["partner", "carrier", "forwarder"].includes(organization.organization_type)
+          && ["verified", "approved"].includes(String(organization.partner_verification_status || "").toLowerCase())
+          && ["active", "verified"].includes(String(organization.partner_lifecycle_status || "").toLowerCase())
+          && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(String(organization.partner_compliance_status || "").toLowerCase());
+        if (!verified) {
+          window.location.href = "./partner-onboarding.html";
+          return;
+        }
+        await loadAssignments();
+      } catch (error) {
+        console.error("Partner assignment initialization failed:", error);
+        showMessage(error?.message || "Could not verify partner assignment access.", "error");
+        tbody.replaceChildren();
+        const row = document.createElement("tr");
+        const cell = addCell(row, "Assignments are unavailable until partner access and organization status are verified.", "px-4 py-8 text-center text-rose-700");
+        cell.colSpan = 7;
+        tbody.appendChild(row);
+      }
+    }
+
+    async function loadAssignments() {
+      if (!currentPartnerOrgId) return;
+      showMessage("Loading assignments from the backend…");
+      const { data: assignments, error } = await client
+        .from("krim_shipment_partner_assignments")
+        .select("id, shipment_id, partner_organization_id, partner_quote_id, assignment_number, status, response_deadline, created_at")
+        .eq("partner_organization_id", currentPartnerOrgId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const shipmentIds = [...new Set((assignments || []).map((item) => item.shipment_id).filter(Boolean))];
+      let shipments = [];
+      if (shipmentIds.length) {
+        const { data, error: shipmentError } = await client
+          .from("krim_shipments")
+          .select("id, shipment_number, origin_location_id, destination_location_id, goods_description, total_weight_kg, status")
+          .in("id", shipmentIds);
+        if (shipmentError) throw shipmentError;
+        shipments = data || [];
+      }
+      const shipmentById = new Map(shipments.map((item) => [String(item.id), item]));
+      const locationIds = [...new Set(shipments.flatMap((item) => [item.origin_location_id, item.destination_location_id]).filter(Boolean))];
+      let locations = [];
+      if (locationIds.length) {
+        const { data, error: locationError } = await client
+          .from("krim_locations")
+          .select("id, city, state_region, location_code")
+          .in("id", locationIds);
+        if (locationError) throw locationError;
+        locations = data || [];
+      }
+      const locationById = new Map(locations.map((item) => [String(item.id), [item.city, item.state_region, item.location_code].filter(Boolean).join(" · ") || ("Location #" + item.id)]));
+      tbody.replaceChildren();
+
+      if (!assignments?.length) {
+        const row = document.createElement("tr");
+        const cell = addCell(row, "No assignments have been offered to this partner organization yet.", "px-4 py-8 text-center text-slate-500");
+        cell.colSpan = 7;
+        tbody.appendChild(row);
+        showMessage("No assignments are awaiting your response.");
+        return;
+      }
+
+      assignments.forEach((assignment) => {
+        const shipment = shipmentById.get(String(assignment.shipment_id));
+        const row = document.createElement("tr");
+        row.className = "hover:bg-slate-50";
+        addCell(row, (assignment.assignment_number || ("Assignment #" + assignment.id)) + " · " + (shipment?.shipment_number || ("Shipment #" + assignment.shipment_id)), "px-4 py-4 font-mono text-xs font-semibold");
+        const origin = locationById.get(String(shipment?.origin_location_id)) || ("Location #" + (shipment?.origin_location_id || "—"));
+        const destination = locationById.get(String(shipment?.destination_location_id)) || ("Location #" + (shipment?.destination_location_id || "—"));
+        addCell(row, origin + " → " + destination, "px-4 py-4");
+        addCell(row, shipment?.goods_description || "—", "px-4 py-4");
+        addCell(row, shipment?.total_weight_kg == null ? "—" : Number(shipment.total_weight_kg).toLocaleString("en-IN") + " kg", "px-4 py-4 font-mono");
+        addCell(row, assignment.response_deadline ? new Date(assignment.response_deadline).toLocaleString() : "No deadline provided", "px-4 py-4 text-xs text-slate-500");
+        addCell(row, assignment.status, "px-4 py-4 text-xs uppercase font-semibold");
+        const actionCell = document.createElement("td");
+        actionCell.className = "px-4 py-4 text-right";
+        if (assignment.status === "offered") {
+          const accept = document.createElement("button");
+          accept.type = "button";
+          accept.textContent = "Accept";
+          accept.className = "mr-2 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-600";
+          accept.addEventListener("click", () => respondToAssignment(assignment, true));
+          const reject = document.createElement("button");
+          reject.type = "button";
+          reject.textContent = "Decline";
+          reject.className = "rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50";
+          reject.addEventListener("click", () => respondToAssignment(assignment, false));
+          actionCell.append(accept, reject);
+        } else {
+          const label = document.createElement("span");
+          label.className = "text-xs text-slate-500";
+          label.textContent = assignment.status === "accepted" ? "Accepted" : assignment.status === "rejected" ? "Declined" : "No response action";
+          actionCell.appendChild(label);
+        }
+        row.appendChild(actionCell);
+        tbody.appendChild(row);
+      });
+      showMessage("Loaded " + assignments.length + " assignment record(s).");
+    }
+
+    async function respondToAssignment(assignment, accept) {
+      let reason = null;
+      if (!accept) {
+        reason = window.prompt("Please enter a reason for declining this assignment:");
+        if (reason === null) return;
+        reason = reason.trim();
+        if (!reason) {
+          showMessage("A decline reason is required.", "error");
+          return;
+        }
+      } else if (!window.confirm("Confirm that your partner organization can fulfill this assignment under the agreed route, capacity and quote?")) {
+        return;
+      }
+
+      for (const button of tbody.querySelectorAll("button")) button.disabled = true;
+      showMessage(accept ? "Recording assignment acceptance…" : "Recording assignment decline…");
+      try {
+        const { data, error } = await client.rpc("krim_respond_to_partner_assignment", {
+          p_assignment_id: Number(assignment.id),
+          p_accept: Boolean(accept),
+          p_reason: reason
+        });
+        if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result || result.status !== (accept ? "accepted" : "rejected")) {
+          throw new Error("The server did not confirm the requested assignment state.");
+        }
+        showMessage(accept ? "Assignment acceptance confirmed. The customer can now continue to checkout." : "Assignment declined. The linked customer quote has been cancelled and the opportunity can be re-awarded.", "success");
+        await loadAssignments();
+      } catch (error) {
+        showMessage(error?.message || "Assignment response failed.", "error");
+        for (const button of tbody.querySelectorAll("button")) button.disabled = false;
+      }
+    }
+
+    document.getElementById("refresh-assignments").addEventListener("click", () => loadAssignments().catch((error) => showMessage(error?.message || "Refresh failed.", "error")));
+    initialize();
+  </script>
 </body>
 </html>
