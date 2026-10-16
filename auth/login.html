@@ -153,20 +153,21 @@
                 if (aalErr) throw aalErr;
 
                 if (aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
-                    // MFA Required: List factors to obtain challenge ID
                     const { data: factors, error: factorsErr } = await window.KRIM_SUPABASE.auth.mfa.listFactors();
                     if (factorsErr) throw factorsErr;
 
-                    const totpFactor = factors.totp.find(f => f.status === 'verified');
-                    if (totpFactor) {
-                        activeFactorId = totpFactor.id;
-                        feedback.innerHTML = `<p class='text-sky-600 font-semibold'>MFA Challenge Required. Switching to verification mode...</p>`;
-                        setTimeout(() => {
-                            document.getElementById('stage-login').classList.add('hidden');
-                            document.getElementById('stage-mfa-challenge').classList.remove('hidden');
-                        }, 1000);
-                        return;
+                    const totpFactor = (factors?.totp || []).find(f => f.status === 'verified');
+                    if (!totpFactor) {
+                        throw new Error("Multi-factor authentication is required for this workspace. Enroll and verify an authenticator before continuing.");
                     }
+
+                    activeFactorId = totpFactor.id;
+                    feedback.textContent = "MFA challenge required. Enter your authenticator code.";
+                    setTimeout(() => {
+                        document.getElementById('stage-login').classList.add('hidden');
+                        document.getElementById('stage-mfa-challenge').classList.remove('hidden');
+                    }, 250);
+                    return;
                 }
 
                 // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
