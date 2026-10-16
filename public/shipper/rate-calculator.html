@@ -82,16 +82,16 @@
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Service Tier</label>
                         <select id="calc-service-tier" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
-                            <option value="surface_express">Surface Express (₹15 / kg)</option>
-                            <option value="air_priority">Air Priority (₹45 / kg)</option>
-                            <option value="heavy_haul">Heavy Haul (₹10 / kg)</option>
+                            <option value="surface_express">Surface Express</option>
+                            <option value="air_priority">Air Priority</option>
+                            <option value="heavy_haul">Heavy Haul</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
                     <div class="flex justify-between">
-                        <span class="text-slate-500">Calculated Tariff Amount:</span>
+                        <span class="text-slate-500">Pricing basis:</span>
                         <span id="preview-amount" class="text-slate-900 font-bold text-sm">₹0.00</span>
                     </div>
                     <div class="flex justify-between">
@@ -200,12 +200,10 @@
                 return null;
             }
             const weight = Number(loadedShipmentData.total_weight_kg);
-            const ratePerKg = tier === "air_priority" ? 45 : tier === "heavy_haul" ? 10 : 15;
-            const total = weight * ratePerKg;
             document.getElementById("preview-amount").textContent =
-                "Indicative estimate only: ₹" + total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-                " — final customer price comes from verified partner bids";
-            return total;
+                weight.toLocaleString("en-IN") + " kg · " + tier.replaceAll("_", " ") +
+                " · no binding price yet; verified partner bids determine the customer total";
+            return null;
         }
 
         document.getElementById("calc-service-tier").addEventListener("change", calculateRate);
