@@ -28,6 +28,8 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -45,13 +47,13 @@
             </div>
             
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="/public/solutions.html" class="hover:text-white transition">Solutions</a>
-                <a href="/public/network.html" class="hover:text-white transition">Global Network</a>
-                <a href="/public/tracking.html" class="hover:text-white transition">Track Shipment</a>
+                <a href="../public/solutions.html" class="hover:text-white transition">Solutions</a>
+                <a href="../public/network.html" class="hover:text-white transition">Global Network</a>
+                <a href="../public/tracking.html" class="hover:text-white transition">Track Shipment</a>
             </nav>
 
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-400 hover:text-white transition">Sign In</a>
+                <a href="../auth/login.html" class="text-slate-400 hover:text-white transition">Sign In</a>
             </div>
         </div>
     </header>
@@ -95,10 +97,11 @@
                     Initialize Shipper Tenant →
                 </button>
             </form>
+            <div id="signup-feedback" class="mt-4 text-sm" role="status" aria-live="polite"></div>
 
             <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
                 <p>Are you a transport carrier fleet operator?</p>
-                <a href="/auth/partner-signup.html" class="inline-block text-emerald-400 hover:underline font-bold">Register Carrier Fleet instead →</a>
+                <a href="./partner-signup.html" class="inline-block text-emerald-400 hover:underline font-bold">Register Carrier Fleet instead →</a>
             </div>
         </div>
     </main>
@@ -108,20 +111,66 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/public/network.html" class="hover:text-slate-300 transition">Network</a>
-                <a href="/public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
-                <a href="/portal.html" class="hover:text-slate-300 transition">Sign In</a>
+                <a href="../public/network.html" class="hover:text-slate-300 transition">Network</a>
+                <a href="../public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
+                <a href="../auth/login.html" class="hover:text-slate-300 transition">Sign In</a>
             </div>
         </div>
     </footer>
 
     <!-- Signup Script -->
     <script>
-        function handleSignup(e) {
+        async function handleSignup(e) {
             e.preventDefault();
-            const org = document.getElementById('signup-org').value;
-            alert('Provisioning enterprise tenant for ' + org + ' via Supabase RLS...');
-            window.location.href = '/portal.html';
+            const button = e.target.querySelector('button[type="submit"]');
+            const feedback = document.getElementById("signup-feedback");
+            const organizationName = document.getElementById("signup-org").value.trim();
+            const fullName = document.getElementById("signup-name").value.trim();
+            const email = document.getElementById("signup-email").value.trim();
+            const password = document.getElementById("signup-password").value;
+            const client = window.KRIM_SUPABASE || window.supabaseClient;
+            if (!client) {
+                feedback.textContent = "Authentication service did not initialize. Refresh the page and try again.";
+                feedback.className = "mt-4 text-sm text-red-400";
+                return;
+            }
+            if (organizationName.length < 2 || fullName.length < 2 || password.length < 10) {
+                feedback.textContent = "Enter an organization name and full name. Use a password of at least 10 characters.";
+                feedback.className = "mt-4 text-sm text-amber-300";
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Creating secure account...";
+            feedback.textContent = "";
+            try {
+                const { data, error } = await client.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: fullName, company_name: organizationName } }
+                });
+                if (error) throw error;
+                if (data.session) {
+                    const { error: provisionError } = await client.rpc("krim_provision_customer_organization", {
+                        p_legal_name: organizationName
+                    });
+                    if (provisionError) {
+                        throw new Error("Account created, but organization setup needs support: " + provisionError.message);
+                    }
+                    feedback.textContent = "Account and organization created. Opening your KRIM workspace...";
+                    feedback.className = "mt-4 text-sm text-emerald-300";
+                    window.location.href = window.krimPath ? window.krimPath("app/customer/index.html") : "../app/customer/index.html";
+                    return;
+                }
+                feedback.textContent = "Account created. Check your email to confirm the address, then sign in to finish organization setup.";
+                feedback.className = "mt-4 text-sm text-emerald-300";
+                button.disabled = false;
+                button.textContent = "Account Created — Check Email";
+            } catch (err) {
+                feedback.textContent = err.message || "Registration failed. Please try again.";
+                feedback.className = "mt-4 text-sm text-red-400";
+                button.disabled = false;
+                button.textContent = "Initialize Shipper Tenant →";
+            }
         }
     </script>
 </body>
