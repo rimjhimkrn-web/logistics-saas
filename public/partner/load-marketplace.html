@@ -154,11 +154,12 @@
 
                 const { data: organization, error: organizationError } = await supabaseClient
                     .from("krim_organizations")
-                    .select("organization_type, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+                    .select("organization_type, status, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
                     .eq("id", membership.organization_id)
                     .maybeSingle();
                 if (organizationError) throw organizationError;
                 const verified = organization
+                    && organization.status === "active"
                     && ["partner", "carrier", "forwarder"].includes(organization.organization_type)
                     && ["verified", "approved"].includes(String(organization.partner_verification_status || "").toLowerCase())
                     && ["active", "verified"].includes(String(organization.partner_lifecycle_status || "").toLowerCase())
