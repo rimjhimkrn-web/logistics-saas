@@ -65,34 +65,54 @@
         try {
           const { data: sessionData, error: sessionError } = await comparisonClient.auth.getSession();
           if (sessionError) throw sessionError;
-          if (!sessionData?.session) {
-            window.location.assign(window.KRIM_ROUTE("auth/login.html"));
+          const session=sessionData?.session;
+          if (!session) { window.location.assign(window.KRIM_ROUTE("auth/login.html")); return; }
+          const {data:memberships,error:membershipError}=await comparisonClient.from("krim_organization_members")
+            .select("organization_id").eq("user_id",session.user.id).eq("status","active");
+          if(membershipError)throw membershipError;
+          const ids=[...new Set((memberships||[]).map(m=>m.organization_id))];
+          if(!ids.length)throw new Error("No active organization membership is available.");
+          const savedOrg=localStorage.getItem("krim_active_org_id");
+          const orgId=ids.find(id=>String(id)===savedOrg)||ids[0];
+          const params=new URLSearchParams(window.location.search), shipmentId=params.get("shipment_id");
+          let opportunityQuery=comparisonClient.from("krim_partner_opportunities")
+            .select("id,shipment_id,opportunity_number,status,response_deadline,service_lane,requested_at")
+            .eq("customer_organization_id",orgId)
+            .in("status",["open","awarded","shortlisted"])
+            .order("requested_at",{ascending:false}).limit(100);
+          if(shipmentId&&/^\d+$/.test(shipmentId))opportunityQuery=opportunityQuery.eq("shipment_id",Number(shipmentId));
+          const {data:opportunities,error:opportunityError}=await opportunityQuery;
+          if(opportunityError)throw opportunityError;
+          if(!opportunities?.length){
+            comparisonList.innerHTML='<div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center"><p class="text-slate-300">No partner opportunities are available for this organization yet.</p><a href="'+window.KRIM_ROUTE("public/customer/quote-request.html")+'" class="inline-block mt-4 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-xl">Request Partner Bids →</a></div>';
             return;
           }
-          const params = new URLSearchParams(window.location.search);
-          const shipmentId = params.get("shipment_id");
-          let query = comparisonClient.from("krim_quotes")
-            .select("id, shipment_id, amount, currency_code, status, valid_until, created_at")
-            .order("created_at", { ascending: false })
-            .limit(100);
-          if (shipmentId && /^\d+$/.test(shipmentId)) query = query.eq("shipment_id", Number(shipmentId));
-          const { data: quotes, error } = await query;
-          if (error) throw error;
-          if (!quotes?.length) {
-            comparisonList.innerHTML = '<div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 text-center"><p class="text-slate-300">No quote records are available for this account yet.</p><a href="' + window.KRIM_ROUTE("public/customer/quote-request.html") + '" class="inline-block mt-4 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-xl">Request a Quote →</a></div>';
+          const opportunityIds=opportunities.map(o=>o.id);
+          const {data:bids,error:bidError}=await comparisonClient.from("krim_partner_quotes")
+            .select("id,opportunity_id,shipment_id,partner_organization_id,quote_number,amount,currency_code,status,valid_until,notes,submitted_at")
+            .in("opportunity_id",opportunityIds).order("submitted_at",{ascending:false}).limit(200);
+          if(bidError)throw bidError;
+          const partnerIds=[...new Set((bids||[]).map(b=>b.partner_organization_id).filter(Boolean))];
+          let partners=[];
+          if(partnerIds.length){const result=await comparisonClient.from("krim_organizations").select("id,display_name,legal_name").in("id",partnerIds);if(!result.error)partners=result.data||[];}
+          const partnerMap=new Map(partners.map(p=>[String(p.id),p.display_name||p.legal_name||("Partner #"+p.id)]));
+          const opportunityMap=new Map(opportunities.map(o=>[String(o.id),o]));
+          if(!bids?.length){
+            comparisonList.innerHTML=opportunities.map(o=>'<div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl"><div class="flex flex-wrap justify-between gap-3"><strong class="text-white text-base">Opportunity '+escapeQuote(o.opportunity_number||("#"+o.id))+'</strong><span class="text-emerald-400 uppercase font-bold">'+escapeQuote(o.status)+'</span></div><p class="text-slate-400 mt-2">Shipment #'+escapeQuote(o.shipment_id)+' · '+escapeQuote(o.service_lane||"Route not specified")+'</p><p class="text-slate-500 mt-2">Response deadline: '+escapeQuote(o.response_deadline?new Date(o.response_deadline).toLocaleString():"not specified")+'</p><p class="text-slate-300 mt-3">No partner bids have been submitted yet. Refresh this page later to check for new bids.</p></div>').join("");
             return;
           }
-          comparisonList.innerHTML = quotes.map(q => {
-            const status = String(q.status || "unknown");
-            const statusClass = status === "accepted" ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" : status === "sent" ? "text-sky-400 border-sky-500/30 bg-sky-500/10" : "text-amber-300 border-amber-500/30 bg-amber-500/10";
-            const amount = Number(q.amount);
-            const amountText = Number.isFinite(amount) ? amount.toLocaleString("en-IN", {minimumFractionDigits:2,maximumFractionDigits:2}) : "—";
-            const detailsUrl = window.KRIM_ROUTE("public/customer/quote-details.html?quote_id=" + encodeURIComponent(q.id) + "&shipment_id=" + encodeURIComponent(q.shipment_id));
-            return '<div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6"><div class="space-y-2"><div class="flex flex-wrap items-center gap-3"><span class="font-bold text-white text-base">Quote #' + escapeQuote(q.id) + '</span><span class="px-2.5 py-0.5 rounded-md border text-[10px] font-bold uppercase ' + statusClass + '">' + escapeQuote(status) + '</span></div><p class="text-slate-400 text-[11px]">Shipment #' + escapeQuote(q.shipment_id) + ' · Valid until ' + escapeQuote(q.valid_until ? new Date(q.valid_until).toLocaleString() : "not specified") + '</p><p class="text-slate-500 text-[11px]">Quote amount and status are loaded from KRIM. No carrier identity is assumed unless the backend supplies it.</p></div><div class="flex items-center gap-4 w-full md:w-auto justify-between"><div class="text-right"><span class="block text-lg font-bold text-white">' + escapeQuote(q.currency_code || "INR") + ' ' + amountText + '</span><span class="text-[10px] text-slate-400">Server-generated quote</span></div><a href="' + detailsUrl + '" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-5 py-3 rounded-xl uppercase tracking-wider transition">Review Quote →</a></div></div>';
+          comparisonList.innerHTML=bids.map(b=>{
+            const opp=opportunityMap.get(String(b.opportunity_id));
+            const status=String(b.status||"unknown");
+            const statusClass=status==="accepted"?"text-emerald-400 border-emerald-500/30 bg-emerald-500/10":status==="submitted"||status==="under_review"||status==="shortlisted"?"text-sky-400 border-sky-500/30 bg-sky-500/10":"text-amber-300 border-amber-500/30 bg-amber-500/10";
+            const amount=Number(b.amount);
+            const amountText=Number.isFinite(amount)?amount.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+            const detailUrl=window.KRIM_ROUTE("public/customer/quote-details.html?partner_quote_id="+encodeURIComponent(b.id)+"&shipment_id="+encodeURIComponent(b.shipment_id)+"&opportunity_id="+encodeURIComponent(b.opportunity_id));
+            return '<div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6"><div class="space-y-2"><div class="flex flex-wrap items-center gap-3"><span class="font-bold text-white text-base">'+escapeQuote(b.quote_number||("Partner Bid #"+b.id))+'</span><span class="px-2.5 py-0.5 rounded-md border text-[10px] font-bold uppercase '+statusClass+'">'+escapeQuote(status)+'</span></div><p class="text-slate-300">'+escapeQuote(partnerMap.get(String(b.partner_organization_id))||("Partner #"+b.partner_organization_id))+'</p><p class="text-slate-400 text-[11px]">Opportunity '+escapeQuote(opp?.opportunity_number||b.opportunity_id)+' · Shipment #'+escapeQuote(b.shipment_id)+' · Valid until '+escapeQuote(b.valid_until?new Date(b.valid_until).toLocaleString():"not specified")+'</p><p class="text-slate-500 text-[11px]">'+escapeQuote(b.notes||"No additional bid notes supplied.")+'</p></div><div class="flex items-center gap-4 w-full md:w-auto justify-between"><div class="text-right"><span class="block text-lg font-bold text-white">'+escapeQuote(b.currency_code||"INR")+' '+amountText+'</span><span class="text-[10px] text-slate-400">Partner-submitted bid</span></div><a href="'+detailUrl+'" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-5 py-3 rounded-xl uppercase tracking-wider transition">Review Bid →</a></div></div>';
           }).join("");
-        } catch (error) {
-          comparisonList.textContent = "Unable to load quotes: " + (error?.message || "Unknown error");
-          comparisonList.className = "space-y-4 font-mono text-xs text-rose-300";
+        } catch(error) {
+          comparisonList.textContent="Unable to load partner bids: "+(error?.message||"Unknown error");
+          comparisonList.className="space-y-4 font-mono text-xs text-rose-300";
         }
       }
       loadQuoteComparison();
