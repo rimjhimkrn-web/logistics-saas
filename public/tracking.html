@@ -45,14 +45,14 @@
             </div>
             
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-                <a href="/public/solutions.html" class="hover:text-slate-900 transition">Solutions</a>
-                <a href="/public/network.html" class="hover:text-slate-900 transition">Global Network</a>
-                <a href="/public/tracking.html" class="text-slate-900 font-semibold transition">Track Shipment</a>
+                <a href="/logistics-saas/public/solutions.html" class="hover:text-slate-900 transition">Solutions</a>
+                <a href="/logistics-saas/public/network.html" class="hover:text-slate-900 transition">Global Network</a>
+                <a href="/logistics-saas/public/tracking.html" class="text-slate-900 font-semibold transition">Track Shipment</a>
             </nav>
 
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
-                <a href="/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
+                <a href="/logistics-saas/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
+                <a href="/logistics-saas/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
             </div>
         </div>
     </header>
@@ -93,6 +93,7 @@
                 </form>
 
                 <!-- Tracking Result Display Area -->
+                <p id="tracking-feedback" class="hidden text-sm font-semibold" role="status" aria-live="polite"></p>
                 <div id="tracking-result" class="hidden pt-4 border-t border-slate-100 space-y-4 font-mono text-xs">
                     <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
                         <div class="flex justify-between items-center">
@@ -101,17 +102,18 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 uppercase">Status:</span>
-                            <span id="res-status" class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg font-bold">IN TRANSIT</span>
+                            <span id="res-status" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-bold">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 uppercase">Current Corridor:</span>
-                            <span id="res-corridor" class="font-bold text-slate-900">Pan-Asian Express Lane</span>
+                            <span id="res-corridor" class="font-bold text-slate-900">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500 uppercase">Estimated Delivery:</span>
-                            <span id="res-eta" class="font-bold text-slate-900">October 18, 2026</span>
+                            <span id="res-eta" class="font-bold text-slate-900">--</span>
                         </div>
                     </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200"><h3 class="text-slate-700 font-bold uppercase tracking-wider mb-3">Latest Shipment Events</h3><ol id="tracking-events" class="space-y-3 text-slate-600"><li>No event data loaded.</li></ol></div>
                 </div>
             </div>
         </section>
@@ -122,23 +124,81 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/public/network.html" class="hover:text-slate-800 transition">Network</a>
-                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
-                <a href="/portal.html" class="hover:text-slate-800 transition">Sign In</a>
+                <a href="/logistics-saas/public/network.html" class="hover:text-slate-800 transition">Network</a>
+                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+                <a href="/logistics-saas/portal.html" class="hover:text-slate-800 transition">Sign In</a>
             </div>
         </div>
     </footer>
 
-    <!-- Tracking Script -->
+    <!-- Public tracking uses an allowlisted server response; never query private shipment rows from this page. -->
     <script>
-        function handleTrackingSearch(e) {
+        const KRIM_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+
+        function safeText(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function (ch) {
+                return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch];
+            });
+        }
+
+        function displayDate(value) {
+            if (!value) return "Not available";
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleString();
+        }
+
+        async function handleTrackingSearch(e) {
             e.preventDefault();
-            const val = document.getElementById('tracking-input').value.trim();
-            const resultBox = document.getElementById('tracking-result');
-            document.getElementById('res-id').innerText = val.toUpperCase();
-            resultBox.classList.remove('hidden');
+            const input = document.getElementById("tracking-input");
+            const feedback = document.getElementById("tracking-feedback");
+            const resultBox = document.getElementById("tracking-result");
+            const button = e.submitter || e.target.querySelector('button[type="submit"]');
+            const trackingNumber = input.value.trim().toUpperCase();
+
+            feedback.classList.remove("hidden");
+            feedback.className = "text-sm font-semibold text-sky-700";
+            feedback.textContent = "Looking up shipment securely...";
+            resultBox.classList.add("hidden");
+            if (button) button.disabled = true;
+
+            try {
+                if (trackingNumber.length < 8 || trackingNumber.length > 100 || !/^[A-Z0-9-]+$/.test(trackingNumber)) {
+                    throw new Error("Enter the tracking number supplied by KRIM.");
+                }
+                const response = await fetch(KRIM_SUPABASE_URL + "/functions/v1/public-shipment-tracking", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "apikey": KRIM_PUBLISHABLE_KEY },
+                    body: JSON.stringify({ tracking_number: trackingNumber })
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || !payload.success) throw new Error(payload.error || "Tracking information could not be loaded.");
+
+                document.getElementById("res-id").textContent = payload.shipment_number || payload.tracking_number || trackingNumber;
+                document.getElementById("res-status").textContent = String(payload.status || "Unknown").replace(/[_-]+/g, " ");
+                document.getElementById("res-corridor").textContent = [payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable";
+                document.getElementById("res-eta").textContent = payload.delivered_at ? "Delivered " + displayDate(payload.delivered_at) : displayDate(payload.estimated_delivery_at);
+
+                const events = Array.isArray(payload.events) ? payload.events : [];
+                document.getElementById("tracking-events").innerHTML = events.length
+                    ? events.map(function (event) {
+                        return '<li class="border-l-2 border-sky-300 pl-3"><div class="font-bold text-slate-800">' +
+                            safeText(String(event.event_type || "Shipment update").replace(/[_-]+/g, " ")) +
+                            '</div><div>' + safeText(displayDate(event.event_time)) + '</div>' +
+                            (event.location ? '<div>' + safeText(event.location) + '</div>' : '') + '</li>';
+                    }).join("")
+                    : '<li>No milestone events have been recorded yet.</li>';
+
+                resultBox.classList.remove("hidden");
+                feedback.className = "text-sm font-semibold text-emerald-700";
+                feedback.textContent = "Tracking record loaded.";
+            } catch (err) {
+                feedback.className = "text-sm font-semibold text-red-700";
+                feedback.textContent = err.message || "Tracking failed. Please try again.";
+            } finally {
+                if (button) button.disabled = false;
+            }
         }
     </script>
 </body>
 </html>
-
