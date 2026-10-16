@@ -1,9 +1,13 @@
 // js/auth-core.js
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import './platform/krim-config.js';
 
-// Global KRIM OS Configuration
-export const SUPABASE_URL = "https://your-supabase-project.supabase.co";
-export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const KRIM_SUPABASE_CONFIG = window.KRIM_CONFIG?.supabase;
+if (!KRIM_SUPABASE_CONFIG?.url || !KRIM_SUPABASE_CONFIG?.publishableKey) {
+  throw new Error("KRIM Supabase configuration is unavailable.");
+}
+export const SUPABASE_URL = KRIM_SUPABASE_CONFIG.url;
+export const SUPABASE_ANON_KEY = KRIM_SUPABASE_CONFIG.publishableKey;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -16,18 +20,18 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 // Centralized Navigation Matrix
 export const AUTH_ROUTES = {
-  SIGN_IN: 'login.html',
-  SIGN_UP: 'signup.html',
-  VERIFY_EMAIL: 'verify-email.html',
-  VERIFY_PHONE: 'verify-phone.html',
-  FORGOT_PASSWORD: 'forgot-password.html',
-  RESET_PASSWORD: 'reset-password.html',
-  MFA_ENROLL: 'mfa-enroll.html',
-  MFA_CHALLENGE: 'mfa-challenge.html',
-  RECOVERY: 'recovery.html',
-  INVITATION: 'invitation.html',
-  DISABLED: 'disabled.html',
-  DASHBOARD: 'dashboard.html'
+  SIGN_IN: window.KRIM_ROUTE('auth/login.html'),
+  SIGN_UP: window.KRIM_ROUTE('auth/signup.html'),
+  VERIFY_EMAIL: window.KRIM_ROUTE('auth/verify-email.html'),
+  VERIFY_PHONE: window.KRIM_ROUTE('auth/verify-phone.html'),
+  FORGOT_PASSWORD: window.KRIM_ROUTE('auth/forgot-password.html'),
+  RESET_PASSWORD: window.KRIM_ROUTE('auth/reset-password.html'),
+  MFA_ENROLL: window.KRIM_ROUTE('auth/mfa-enroll.html'),
+  MFA_CHALLENGE: window.KRIM_ROUTE('auth/mfa-challenge.html'),
+  RECOVERY: window.KRIM_ROUTE('auth/recovery.html'),
+  INVITATION: window.KRIM_ROUTE('auth/invitation.html'),
+  DISABLED: window.KRIM_ROUTE('auth/disabled.html'),
+  DASHBOARD: window.KRIM_ROUTE('app/customer/index.html')
 };
 
 // Global Session Health & RBAC Guard
