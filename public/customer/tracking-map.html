@@ -99,7 +99,7 @@
           document.getElementById("tracking-map-heading").textContent="Tracking — "+(shipment.shipment_number||("#"+shipment.id));
           document.getElementById("tracking-details-link").href=window.KRIM_ROUTE("public/customer/shipment-details.html?shipment_id="+encodeURIComponent(shipment.id));
           document.getElementById("tracking-shipment-status").textContent=shipment.status||"Unknown";
-          const {data:events,error:eventError}=await trackingMapClient.from("krim_tracking_events").select("event_type,event_time,location_id,source_type,metadata,created_at").eq("shipment_id",shipment.id).order("event_time",{ascending:false}).limit(30);
+          const {data:events,error:eventError}=await trackingMapClient.from("krim_tracking_events").select("event_type,event_time,location_id,source_type,metadata,latitude,longitude,created_at").eq("shipment_id",shipment.id).order("event_time",{ascending:false}).limit(30);
           if(eventError)throw eventError;
           if(!events?.length){
             document.getElementById("tracking-current-location").textContent="No location event recorded";
@@ -116,7 +116,7 @@
           document.getElementById("tracking-current-location").textContent=latestLocation;
           document.getElementById("tracking-event-time").textContent=trackDate(latest.event_time||latest.created_at);
           const meta=latest.metadata&&typeof latest.metadata==="object"?latest.metadata:{};
-          const lat=Number(meta.latitude??meta.lat), lon=Number(meta.longitude??meta.lng??meta.lon);
+          const lat=Number(latest.latitude??meta.latitude??meta.lat), lon=Number(latest.longitude??meta.longitude??meta.lng??meta.lon);
           document.getElementById("tracking-current-coordinates").textContent=Number.isFinite(lat)&&Number.isFinite(lon)?"Recorded coordinates: "+lat.toFixed(5)+", "+lon.toFixed(5):"Coordinates not supplied by the latest tracking event";
           trackingFeed.innerHTML=events.map(event=>'<div class="bg-slate-900 border border-slate-700 rounded-xl p-3"><strong class="text-white block">'+trackEscape(event.event_type||"Tracking update")+'</strong><span class="text-slate-400 block mt-1">'+trackEscape(trackDate(event.event_time||event.created_at))+'</span><span class="text-slate-500 block mt-1">'+trackEscape(locationMap.get(String(event.location_id))||(event.location_id?"Location #"+event.location_id:"Location not supplied"))+' · '+trackEscape(event.source_type||"source unspecified")+'</span></div>').join("");
         }catch(error){trackingMapFeedback.textContent="Unable to load tracking data: "+(error?.message||"Unknown error");trackingMapFeedback.className="text-sm text-rose-300 break-words";trackingFeed.textContent="Tracking data is unavailable.";}
