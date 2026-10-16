@@ -24,40 +24,34 @@ Deno.serve(async (req: Request) => {
     if (!url || !serviceKey) return respond({ error: "Tracking service is temporarily unavailable." }, 503);
 
     const body = await req.json().catch(() => null);
-    const trackingNumber = typeof body?.tracking_number === "string" ? body.tracking_number.trim().toUpperCase() : "";
-    if (trackingNumber.length < 8 || trackingNumber.length > 100 || !/^[A-Z0-9-]+$/.test(trackingNumber)) {
-      return respond({ error: "Enter the tracking number provided by KRIM." }, 400);
+    let token = typeof body?.tracking_number === "string" ? body.tracking_number.trim().toUpperCase() : "";
+    if (token.startsWith("KRIM-")) token = token.slice(5);
+    if (!/^[A-F0-9]{32}$/.test(token)) {
+      return respond({ error: "Enter the secure KRIM tracking reference shown in your shipment details." }, 400);
     }
 
     const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data: legacy, error: lookupError } = await db
-      .from("shipment_requests")
-      .select("tracking_number,status,created_at,delivered_at,krim_shipment_id,pickup_location,delivery_location")
-      .eq("tracking_number", trackingNumber)
+    const { data: shipment, error: lookupError } = await db
+      .from("krim_shipments")
+      .select("id,shipment_number,status,estimated_delivery_at,actual_delivery_at,origin_location_id,destination_location_id,last_known_location_id,created_at,public_tracking_token")
+      .eq("public_tracking_token", token)
       .maybeSingle();
 
     if (lookupError) {
       console.error("Tracking lookup query failed", lookupError.message);
       return respond({ error: "Tracking is temporarily unavailable. Please try again later." }, 503);
     }
-    if (!legacy) return respond({ error: "No shipment was found for that tracking number." }, 404);
+    if (!shipment) return respond({ error: "No shipment was found for that secure tracking reference." }, 404);
 
-    let shipment: Record<string, unknown> | null = null;
-    let events: Array<Record<string, unknown>> = [];
-    if (legacy.krim_shipment_id) {
-      const { data } = await db.from("krim_shipments")
-        .select("shipment_number,status,estimated_delivery_at,actual_delivery_at")
-        .eq("id", legacy.krim_shipment_id).maybeSingle();
-      if (data) shipment = data as Record<string, unknown>;
+    const { data: eventRows } = await db.from("krim_tracking_events")
+      .select("event_type,event_time,location_id")
+      .eq("shipment_id", shipment.id).order("event_time", { ascending: false }).limit(10);
+    const events = eventRows || [];
+    const locationIds = [...new Set([
+      shipment.origin_location_id, shipment.destination_location_id,
+      shipment.last_known_location_id, ...events.map((e) => e.location_id),
+    ].filter((id) => id !== null && id !== undefined))];
 
-      const { data: eventRows } = await db.from("krim_tracking_events")
-        .select("event_type,event_time,location_id")
-        .eq("shipment_id", legacy.krim_shipment_id)
-        .order("event_time", { ascending: false }).limit(10);
-      if (eventRows) events = eventRows as Array<Record<string, unknown>>;
-    }
-
-    const locationIds = [...new Set(events.map((e) => e.location_id).filter((id) => id !== null))];
     let locations = new Map<number, string>();
     if (locationIds.length) {
       const { data: locationRows } = await db.from("krim_locations")
@@ -67,17 +61,17 @@ Deno.serve(async (req: Request) => {
       ]));
     }
 
-    // Deliberately omit names, phone numbers, full addresses, internal notes, and event metadata.
     return respond({
       success: true,
-      tracking_number: legacy.tracking_number,
-      shipment_number: shipment?.shipment_number ?? null,
-      status: shipment?.status ?? legacy.status ?? "unknown",
-      origin: legacy.pickup_location ?? null,
-      destination: legacy.delivery_location ?? null,
-      created_at: legacy.created_at ?? null,
-      estimated_delivery_at: shipment?.estimated_delivery_at ?? null,
-      delivered_at: shipment?.actual_delivery_at ?? legacy.delivered_at ?? null,
+      tracking_number: "KRIM-" + shipment.public_tracking_token,
+      shipment_number: shipment.shipment_number,
+      status: shipment.status || "unknown",
+      origin: locations.get(Number(shipment.origin_location_id)) ?? null,
+      destination: locations.get(Number(shipment.destination_location_id)) ?? null,
+      current_location: locations.get(Number(shipment.last_known_location_id)) ?? null,
+      created_at: shipment.created_at,
+      estimated_delivery_at: shipment.estimated_delivery_at,
+      delivered_at: shipment.actual_delivery_at,
       events: events.map((event) => ({
         event_type: event.event_type,
         event_time: event.event_time,
