@@ -1,135 +1,153 @@
-/**
- * KRIM OS — Authenticated Application Reactive State Store
- * Phase 3: Shared Authenticated Application Core
- * 
- * Manages reactive state for Organization Context, RBAC permissions,
- * active user session, currency/localization preferences, notifications,
- * and real-time operational socket feeds.
- */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const supabase = createClient(
+  "https://ebltviniygljwwseplph.supabase.co",
+  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
+  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+);
 
 class AppStore {
   constructor() {
     this.state = {
-      user: {
-        id: "usr_9982401",
-        name: "Operations Director",
-        email: "ops.director@krim.os",
-        avatar: "OP",
-        role: "ENTERPRISE_ADMIN",
-        permissions: [
-          "shipment:read",
-          "shipment:write",
-          "shipment:delete",
-          "org:manage",
-          "billing:access",
-          "telemetry:live",
-          "customs:submit"
-        ]
-      },
-      currentOrg: {
-        id: "org_global_01",
-        name: "Global Supply Chain Corp",
-        code: "GSCC-GLOBAL",
-        plan: "ENTERPRISE_TIER_1",
-        sandboxMode: false
-      },
-      availableOrgs: [
-        { id: "org_global_01", name: "Global Supply Chain Corp", role: "ENTERPRISE_ADMIN" },
-        { id: "org_apac_02", name: "KRIM APAC Freight Hub", role: "REGIONAL_DISPATCHER" },
-        { id: "org_emea_03", name: "EuroTrans Logistics GmbH", role: "AUDITOR" }
-      ],
-      preferences: {
-        currency: "USD",
-        locale: "en-US",
-        timezone: "UTC",
-        theme: "dark"
-      },
-      notifications: [
-        { id: "n_101", type: "WARN", title: "Customs Hold Alert", msg: "Container MSCU892101 held at Rotterdam Gate 4", time: "2m ago", unread: true },
-        { id: "n_102", type: "INFO", title: "e-POD Received", msg: "AOG Shipment AWB-7720-90 signed by Receiver", time: "12m ago", unread: true },
-        { id: "n_103", type: "SUCCESS", title: "EDI 315 Synced", msg: "Vessel MAERSK MC-KINNEY MOLLER departed SIN", time: "1h ago", unread: true }
-      ],
-      telemetrySocket: {
-        connected: true,
-        latencyMs: 14,
-        lastHeartbeat: new Date().toISOString()
-      }
+      user: null,
+      currentOrg: null,
+      availableOrgs: [],
+      preferences: { currency: "INR", locale: "en", timezone: "Asia/Kolkata", theme: "dark" },
+      notifications: [],
+      telemetrySocket: { connected: false, latencyMs: null, lastHeartbeat: null },
+      loading: true,
+      error: null
     };
-
     this.listeners = new Set();
-    this.initFromLocalStorage();
+    this.ready = this.initialize();
   }
 
-  /**
-   * Initialize state overrides from persistent local storage
-   */
-  initFromLocalStorage() {
+  async initialize() {
+    this.state.loading = true;
+    this.notify("INITIALIZING");
     try {
-      const savedPref = localStorage.getItem("krim_app_preferences");
-      if (savedPref) {
-        this.state.preferences = { ...this.state.preferences, ...JSON.parse(savedPref) };
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      const authUser = data?.user || null;
+      this.state.user = authUser ? {
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name || authUser.email || "KRIM User",
+        email: authUser.email || "",
+        avatar: (authUser.email || "K").slice(0, 1).toUpperCase(),
+        role: null,
+        permissions: []
+      } : null;
+
+      if (!authUser) {
+        this.state.currentOrg = null;
+        this.state.availableOrgs = [];
+        this.state.error = "Sign-in required";
+        return;
       }
-      const savedOrg = localStorage.getItem("krim_active_org");
-      if (savedOrg) {
-        this.state.currentOrg = JSON.parse(savedOrg);
+
+      const [prefResult, memberResult] = await Promise.all([
+        supabase.from("krim_user_app_preferences").select("preferences").eq("user_id", authUser.id).maybeSingle(),
+        supabase.from("krim_organization_members")
+          .select("organization_id,role,status,krim_organizations(id,display_name,legal_name,default_currency_code,timezone)")
+          .eq("user_id", authUser.id)
+          .eq("status", "active")
+      ]);
+
+      if (!prefResult.error && prefResult.data?.preferences) {
+        const p = prefResult.data.preferences;
+        this.state.preferences = {
+          ...this.state.preferences,
+          currency: p.currency || this.state.preferences.currency,
+          locale: p.language || p.locale || this.state.preferences.locale,
+          timezone: p.timezone || this.state.preferences.timezone,
+          theme: p.theme || this.state.preferences.theme,
+          ...p
+        };
       }
-    } catch (e) {
-      console.warn("[KRIM Store] Storage hydration fallback used.", e);
+      if (!memberResult.error && Array.isArray(memberResult.data)) {
+        this.state.availableOrgs = memberResult.data.map(m => {
+          const org = m.krim_organizations || {};
+          return {
+            id: m.organization_id,
+            name: org.display_name || org.legal_name || ("Organization " + m.organization_id),
+            role: m.role,
+            currency: org.default_currency_code || null,
+            timezone: org.timezone || null
+          };
+        });
+      }
+      const savedOrg = this.state.availableOrgs.find(o => String(o.id) === String(this.state.preferences.activeOrganizationId));
+      this.state.currentOrg = savedOrg || this.state.availableOrgs[0] || null;
+      this.state.error = prefResult.error?.message || memberResult.error?.message || null;
+      await this.recordActivity("app_opened", { source: "app-shell" });
+    } catch (error) {
+      this.state.error = error?.message || "Unable to initialize KRIM session";
+      this.state.user = null;
+      this.state.currentOrg = null;
+      this.state.availableOrgs = [];
+    } finally {
+      this.state.loading = false;
+      this.notify("INITIALIZED");
     }
   }
 
-  /**
-   * Subscribe to state mutation events
-   * @param {Function} listener Callback function receiving (newState, mutationKey)
-   */
   subscribe(listener) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
-  /**
-   * Notify all registered UI components of state change
-   */
   notify(key) {
-    this.listeners.forEach((listener) => listener(this.state, key));
+    this.listeners.forEach(listener => listener(this.state, key));
   }
 
-  /**
-   * Update Organization Context
-   */
-  setOrganization(orgId) {
-    const target = this.state.availableOrgs.find((o) => o.id === orgId);
-    if (target) {
-      this.state.currentOrg = { ...this.state.currentOrg, id: target.id, name: target.name };
-      localStorage.setItem("krim_active_org", JSON.stringify(this.state.currentOrg));
-      this.notify("ORGANIZATION_CHANGED");
-    }
+  async recordActivity(event_type, details = {}) {
+    if (!this.state.user?.id) return;
+    const { error } = await supabase.from("krim_user_activity_events").insert({
+      user_id: this.state.user.id,
+      event_type,
+      page_path: location.pathname,
+      details
+    });
+    if (error) console.warn("[KRIM Store] Activity logging unavailable:", error.message);
   }
 
-  /**
-   * Update Currency Preference
-   */
-  setCurrency(currCode) {
-    this.state.preferences.currency = currCode;
-    localStorage.setItem("krim_app_preferences", JSON.stringify(this.state.preferences));
+  async setOrganization(orgId) {
+    const target = this.state.availableOrgs.find(o => String(o.id) === String(orgId));
+    if (!target) throw new Error("Organization membership not found.");
+    this.state.currentOrg = target;
+    this.state.preferences = { ...this.state.preferences, activeOrganizationId: target.id };
+    await this.savePreferences();
+    this.notify("ORGANIZATION_CHANGED");
+    await this.recordActivity("preferences_saved", { activeOrganizationId: target.id });
+  }
+
+  async setCurrency(currCode) {
+    const allowed = ["INR", "USD", "EUR", "GBP", "AED"];
+    if (!allowed.includes(currCode)) throw new Error("Unsupported currency.");
+    this.state.preferences = { ...this.state.preferences, currency: currCode };
+    await this.savePreferences();
     this.notify("CURRENCY_CHANGED");
   }
 
-  /**
-   * Check RBAC Permission
-   */
-  hasPermission(permission) {
-    return this.state.user.permissions.includes(permission) || this.state.user.role === "ENTERPRISE_ADMIN";
+  async savePreferences() {
+    if (!this.state.user?.id) throw new Error("Sign in to save preferences.");
+    const { error } = await supabase.from("krim_user_app_preferences").upsert({
+      user_id: this.state.user.id,
+      preferences: this.state.preferences,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    if (error) throw error;
   }
 
-  /**
-   * Mark all notifications as read
-   */
-  markNotificationsRead() {
-    this.state.notifications.forEach((n) => (n.unread = false));
-    this.notify("NOTIFICATIONS_UPDATED");
+  hasPermission(permission) {
+    // Frontend permission checks only affect presentation. Backend authorization remains mandatory.
+    return Boolean(this.state.user && this.state.permissions?.includes(permission));
+  }
+
+  async markNotificationsRead() {
+    // No fake notification mutation: wire this only when the user's notification schema/action contract is confirmed.
+    this.notify("NOTIFICATIONS_NOT_CONFIGURED");
   }
 }
 
 export const store = new AppStore();
-  
