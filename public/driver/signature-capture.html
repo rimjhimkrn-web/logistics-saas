@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Driver Digital Signature Capture</title>
+    <meta name="description" content="Capture recipient digital signature for Proof of Delivery inside KRIM OS Driver Portal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-emerald-400 font-semibold uppercase">Signature Capture</span>
+                </div>
+            </div>
+            <a href="/public/driver/photo-proof.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Photo Proof →</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-md mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2 text-center">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Driver Module • Step 16 of 24</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Digital Signature Capture</h1>
+            <p class="text-slate-400 text-xs font-mono">Have the receiving supervisor sign on the screen below to validate receipt of goods.</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-xl space-y-6 font-mono text-xs">
+            <form onsubmit="handleSignatureSubmit(event)" class="space-y-5">
+                <div class="space-y-2">
+                    <label class="block text-slate-400 uppercase tracking-wider">Receiver Signature Pad</label>
+                    <div class="w-full h-48 bg-slate-900 border border-slate-700 rounded-2xl flex items-center justify-center text-slate-500 cursor-crosshair border-dashed">
+                        [ Touch & Sign Here ]
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button type="button" onclick="alert('Signature canvas cleared.')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2.5 rounded-xl transition">Clear Pad</button>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 cursor-pointer">
+                        Save Signature →
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Logistics OS Driver Network © 2026. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleSignatureSubmit(e) {
+            e.preventDefault();
+            alert('Digital signature captured successfully! Proceeding to Photo Proof of Delivery.');
+            window.location.href = '/public/driver/photo-proof.html';
+        }
+    </script>
+</body>
+                      </html>
+                      
