@@ -151,7 +151,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from("krim_quotes")
-                    .select("id, shipment_id, amount, currency_code, status, valid_until, created_at")
+                    .select("id, shipment_id, amount, currency_code, status, valid_until, created_at, partner_quote_id")
                     .order("created_at", { ascending: false });
                 if (error) throw error;
                 if (!data || data.length === 0) {
@@ -171,8 +171,10 @@
                     let action = '<span class="text-xs text-slate-500">Not actionable</span>';
                     if (status === "sent" && Number.isInteger(id) && id > 0) {
                         action = '<button type="button" onclick="acceptGlobalQuote(' + id + ')" class="bg-slate-900 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Accept Quote</button>';
-                    } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0) {
+                    } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0 && Number(q.partner_quote_id) > 0) {
                         action = '<a href="/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
+                    } else if (status === "accepted" && !Number(q.partner_quote_id)) {
+                        action = '<span class="text-xs text-amber-700">Waiting for verified partner award and assignment acceptance</span>';
                     } else if (status === "pending" || status === "draft" || status === "quoted") {
                         action = '<span class="text-xs text-amber-700">Needs quote review / reissue</span>';
                     }
