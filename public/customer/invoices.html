@@ -6,6 +6,9 @@
     <title>KRIM OS — Enterprise Corporate Invoices & Tax Ledger</title>
     <meta name="description" content="View, download, and reconcile GST-compliant corporate freight invoices inside KRIM OS.">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../platform/krim-config.js"></script>
+    <script src="../../platform/krim-navigation.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -41,30 +44,9 @@
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <div class="space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-slate-900 rounded-2xl border border-slate-700 gap-4">
-                    <div>
-                        <span class="text-white font-bold block text-sm">#INV-2026-4410 • TransGlobal Fleet Logistics</span>
-                        <span class="text-slate-400 text-[11px]">HSN 996511 • GSTIN: 27AABCT5501N1ZT • Oct 16, 2026</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="text-emerald-400 font-bold">₹42,500 (Incl. 5% GST)</span>
-                        <button onclick="alert('Downloading GST invoice #INV-2026-4410...')" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 rounded-xl uppercase tracking-wider transition">PDF ↓</button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-slate-900 rounded-2xl border border-slate-700 gap-4">
-                    <div>
-                        <span class="text-white font-bold block text-sm">#INV-2026-4392 • Apex Express Cargo</span>
-                        <span class="text-slate-400 text-[11px]">HSN 996511 • GSTIN: 07AAACA9921B1Z2 • Oct 14, 2026</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="text-emerald-400 font-bold">₹38,000 (Incl. 5% GST)</span>
-                        <button onclick="alert('Downloading GST invoice #INV-2026-4392...')" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 rounded-xl uppercase tracking-wider transition">PDF ↓</button>
-                    </div>
-                </div>
+            <div id="customer-invoice-list" class="space-y-4">
+                <p class="text-slate-400">Loading authorized invoice records…</p>
             </div>
-
             <a href="/public/customer/credit-notes.html" class="block w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 text-center">
                 Proceed to Credit Notes →
             </a>
@@ -74,5 +56,50 @@
     <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
         <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
     </footer>
+    <script>
+      const invoiceClient = window.KRIM_SUPABASE || window.supabase.createClient(
+        window.KRIM_CONFIG.supabase.url,
+        window.KRIM_CONFIG.supabase.publishableKey,
+        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+      );
+      window.KRIM_SUPABASE = invoiceClient;
+      const invoiceList = document.getElementById("customer-invoice-list");
+      const invoiceEscape = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch]);
+      async function loadCustomerInvoices() {
+        try {
+          const { data: sessionData, error: sessionError } = await invoiceClient.auth.getSession();
+          if (sessionError) throw sessionError;
+          if (!sessionData?.session) { window.location.assign(window.KRIM_ROUTE("auth/login.html")); return; }
+          const { data: memberships, error: membershipError } = await invoiceClient.from("krim_organization_members")
+            .select("organization_id").eq("user_id", sessionData.session.user.id).eq("status","active");
+          if (membershipError) throw membershipError;
+          const ids = [...new Set((memberships || []).map(item => item.organization_id))];
+          if (!ids.length) { invoiceList.textContent = "No active organization membership is available."; return; }
+          const savedOrg = localStorage.getItem("krim_active_org_id");
+          const organizationId = ids.find(id => String(id) === savedOrg) || ids[0];
+          const { data: invoices, error } = await invoiceClient.from("krim_invoices")
+            .select("id, organization_id, customer_organization_id, shipment_id, invoice_number, status, currency_code, issue_date, due_date, total_amount, paid_amount, outstanding_amount, created_at")
+            .eq("organization_id", organizationId)
+            .order("created_at", { ascending: false }).limit(100);
+          if (error) throw error;
+          if (!invoices?.length) {
+            invoiceList.innerHTML = '<div class="p-6 bg-slate-900 rounded-2xl border border-slate-700 text-slate-300">No invoice records are available for this organization yet. KRIM will not show invented invoice amounts or fake PDF downloads.</div>';
+            return;
+          }
+          invoiceList.innerHTML = invoices.map(invoice => {
+            const amount = Number(invoice.total_amount || 0);
+            const outstanding = Number(invoice.outstanding_amount || 0);
+            const status = String(invoice.status || "unknown");
+            const statusClass = ["paid","settled","closed"].includes(status.toLowerCase()) ? "text-emerald-400" : "text-amber-300";
+            const shipmentUrl = invoice.shipment_id ? window.KRIM_ROUTE("public/customer/shipment-details.html?shipment_id=" + encodeURIComponent(invoice.shipment_id)) : window.KRIM_ROUTE("public/customer/shipment-list.html");
+            return '<div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-slate-900 rounded-2xl border border-slate-700 gap-4"><div><span class="text-white font-bold block text-sm">#' + invoiceEscape(invoice.invoice_number) + '</span><span class="text-slate-400 text-[11px]">Shipment ' + invoiceEscape(invoice.shipment_id || "not linked") + ' · Issued ' + invoiceEscape(invoice.issue_date || "date not recorded") + ' · Due ' + invoiceEscape(invoice.due_date || "not specified") + '</span><span class="block mt-2 ' + statusClass + ' font-bold uppercase">' + invoiceEscape(status) + '</span></div><div class="flex items-center gap-4"><div class="text-right"><span class="text-white font-bold block">' + invoiceEscape(invoice.currency_code || "INR") + ' ' + amount.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span><span class="text-slate-400 text-[10px]">Outstanding: ' + outstanding.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span></div><a href="' + shipmentUrl + '" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 rounded-xl uppercase tracking-wider transition">View Shipment →</a></div></div>';
+          }).join("");
+        } catch (error) {
+          invoiceList.textContent = "Unable to load invoices: " + (error?.message || "Unknown error");
+          invoiceList.className = "space-y-4 text-rose-300";
+        }
+      }
+      loadCustomerInvoices();
+    </script>
 </body>
 </html>
