@@ -26,6 +26,25 @@
         return;
       }
 
+      // Complete idempotent organization provisioning after email-confirmation callbacks.
+      const metadata = session.user?.user_metadata || {};
+      const accountType = metadata.krim_account_type;
+      const organizationName = String(metadata.company_name || "").trim();
+      let dashboardPath = AUTH_ROUTES.DASHBOARD;
+      if ((accountType === "customer" || accountType === "partner") && organizationName.length >= 2) {
+        const provisionRpc = accountType === "partner"
+          ? "krim_provision_partner_organization"
+          : "krim_provision_customer_organization";
+        const { error: provisionError } = await supabase.rpc(provisionRpc, {
+          p_legal_name: organizationName
+        });
+        if (provisionError) {
+          statusText.innerText = "Identity verified, but organization setup could not be completed. Please sign in to retry or contact support.";
+          return;
+        }
+        if (accountType === "partner") dashboardPath = "../app/partner/index.html";
+      }
+
       // Check MFA requirement (AAL level)
       const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
@@ -34,7 +53,7 @@
       }
 
       statusText.innerText = "Identity verified! Launching workspace...";
-      setTimeout(() => window.location.href = AUTH_ROUTES.DASHBOARD, 1000);
+      setTimeout(() => window.location.href = dashboardPath, 1000);
     }
 
     handleAuthCallback();
