@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Rules of Origin & Preference Qualification</title>
+    <meta name="description" content="Manage preferential origin criteria, Free Trade Agreements (FTAs), and certificates of origin inside KRIM OS Trade Compliance Portal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f8fafc', 100: '#f1f5f9', 500: '#64748b', 600: '#475569', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold text-lg border border-slate-700">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-slate-400 font-semibold uppercase">Rules of Origin</span>
+                </div>
+            </div>
+            <a href="/public/trade/sanctions-screening.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition font-mono font-semibold">Next: Sanctions & Denied Parties →</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2 text-center">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-slate-500/10 text-slate-300 border border-slate-500/20 uppercase tracking-widest">Trade Compliance Module • Step 6 of 12</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Rules of Origin Qualification</h1>
+            <p class="text-slate-400 text-xs font-mono">Validate Free Trade Agreement (FTA) qualifications, regional value content (RVC), and tariff shift criteria.</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
+            <form onsubmit="handleOriginSubmit(event)" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Qualification Record ID</label>
+                        <input type="text" required value="ORG-2026-OCT-4410" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Applicable Free Trade Agreement</label>
+                        <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                            <option value="usmca">USMCA (United States-Mexico-Canada Agreement)</option>
+                            <option value="eu_kr">EU-Korea Free Trade Agreement</option>
+                            <option value="cptpp">CPTPP (Comprehensive and Progressive Agreement)</option>
+                            <option value="general">Standard MFN / Non-Preferential</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Regional Value Content (RVC %)</label>
+                        <input type="number" step="0.1" required value="65.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-slate-500/10 text-slate-300 border border-slate-500/20 uppercase tracking-widest block text-center mt-6">Origin Status: Fully Qualified ✓</label>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-slate-400 uppercase tracking-wider">Origin Verification & Bill of Materials Notes</label>
+                    <textarea rows="3" required placeholder="Bill of materials analyzed. Non-originating materials undergo required tariff shift under Annex 4-B rules of origin." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg cursor-pointer">
+                    Save Origin Qualification & Proceed →
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Trade Compliance OS © 2026. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleOriginSubmit(e) {
+            e.preventDefault();
+            alert('Rules of origin qualification saved successfully! Proceeding to Sanctions & Denied Parties Screening.');
+            window.location.href = '/public/trade/sanctions-screening.html';
+        }
+    </script>
+</body>
+</html>
