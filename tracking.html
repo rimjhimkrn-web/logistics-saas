@@ -47,14 +47,14 @@
             </div>
             
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-                <a href="/platform.html" class="hover:text-slate-900 transition">Solutions</a>
-                <a href="/network.html" class="hover:text-slate-900 transition">Global Network</a>
-                <a href="/tracking.html" class="text-slate-900 font-semibold transition">Track Shipment</a>
+                <a href="./platform.html" class="hover:text-slate-900 transition">Solutions</a>
+                <a href="./network.html" class="hover:text-slate-900 transition">Global Network</a>
+                <a href="./tracking.html" class="text-slate-900 font-semibold transition">Track Shipment</a>
             </nav>
 
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
-                <a href="/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
+                <a href="./portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
+                <a href="./auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
             </div>
         </div>
     </header>
@@ -85,7 +85,7 @@
                 <form onsubmit="handleTrackingSearch(event)" class="space-y-4">
                     <div class="space-y-2">
                         <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Shipment Reference ID</label>
-                        <input type="text" id="tracking-input" required placeholder="e.g., 1042" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                        <input type="text" id="tracking-input" required placeholder="Paste your secure KRIM tracking reference" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
                     <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-md cursor-pointer">
                         Query Live Telemetry →
@@ -101,60 +101,75 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/network.html" class="hover:text-slate-800 transition">Network</a>
-                <a href="/platform.html" class="hover:text-slate-800 transition">Solutions</a>
-                <a href="/portal.html" class="hover:text-slate-800 transition">Sign In</a>
+                <a href="./network.html" class="hover:text-slate-800 transition">Network</a>
+                <a href="./platform.html" class="hover:text-slate-800 transition">Solutions</a>
+                <a href="./portal.html" class="hover:text-slate-800 transition">Sign In</a>
             </div>
         </div>
     </footer>
 
-    <!-- Tracking Script -->
+    <!-- Secure public tracking uses the server-side tracking gateway; never query shipment tables from this page. -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const KRIM_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+        const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
+        function trackingText(tag, text, className) {
+            const node = document.createElement(tag);
+            node.textContent = text;
+            if (className) node.className = className;
+            return node;
+        }
+        function trackingDate(value) {
+            if (!value) return "Not yet available";
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? "Not yet available" : date.toLocaleString();
+        }
         async function handleTrackingSearch(e) {
             e.preventDefault();
-            const id = document.getElementById('tracking-input').value.trim();
-            const container = document.getElementById('tracking-results-container');
-            container.innerHTML = `<p class="text-slate-500 text-center py-4">Querying database ledger for Shipment #${id}...</p>`;
-
+            const input = document.getElementById("tracking-input");
+            const container = document.getElementById("tracking-results-container");
+            const button = e.currentTarget.querySelector('button[type="submit"]');
+            const trackingNumber = input.value.trim().toUpperCase();
+            container.replaceChildren(trackingText("p", "Looking up secure tracking reference…", "text-slate-500 text-center py-4"));
+            if (button) button.disabled = true;
             try {
-                const { data, error } = await supabaseClient
-                    .from('krim_shipments')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error || !data) {
-                    container.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-center font-bold">Consignment #${id} not found in live network ledger.</div>`;
-                    return;
-                }
-
-                container.innerHTML = `
-                    <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-slate-800 font-sans">
-                        <div class="flex justify-between items-center border-b border-slate-200 pb-3 font-mono">
-                            <span class="font-bold text-slate-900 text-sm">Consignment #${data.id}</span>
-                            <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">${data.status || 'Active'}</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-2">
-                            <div>
-                                <span class="text-slate-400 text-xs uppercase block font-mono">Route Origin → Destination</span>
-                                <p class="font-semibold text-slate-800">${data.origin_location_id || 'Origin Hub'} → ${data.destination_location_id || 'Destination Terminal'}</p>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 text-xs uppercase block font-mono">Cargo Description & Weight</span>
-                                <p class="font-semibold text-slate-800">${data.goods_description || 'General Freight'} (${data.total_weight_kg || 1000} kg)</p>
-                            </div>
-                        </div>
-                        <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 font-mono">
-                            <span>Logged: ${new Date(data.created_at || Date.now()).toLocaleDateString()}</span>
-                            <span class="text-sky-600 font-bold">Verified SECURE RLS Node</span>
-                        </div>
-                    </div>`;
+                const response = await fetch(KRIM_SUPABASE_URL + "/functions/v1/public-shipment-tracking", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "apikey": KRIM_PUBLISHABLE_KEY },
+                    body: JSON.stringify({ tracking_number: trackingNumber })
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || !payload.success) throw new Error(payload.error || "Tracking could not be loaded.");
+                const card = document.createElement("section");
+                card.className = "p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 text-slate-800 font-sans";
+                const top = document.createElement("div");
+                top.className = "flex flex-wrap justify-between gap-2 border-b border-slate-200 pb-3";
+                top.append(trackingText("strong", payload.shipment_number || payload.tracking_number || "KRIM shipment", "text-slate-900"));
+                top.append(trackingText("span", String(payload.status || "unknown").replace(/[_-]+/g, " "), "px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-800"));
+                card.append(top);
+                card.append(trackingText("p", "Route: " + ([payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable"), "text-sm"));
+                if (payload.current_location) card.append(trackingText("p", "Current location: " + payload.current_location, "text-sm"));
+                card.append(trackingText("p", "Estimated delivery: " + trackingDate(payload.delivered_at || payload.estimated_delivery_at), "text-sm"));
+                card.append(trackingText("p", "Shipment created: " + trackingDate(payload.created_at), "text-xs text-slate-500"));
+                card.append(trackingText("h3", "Latest milestones", "font-bold text-sm pt-2"));
+                const list = document.createElement("ol");
+                list.className = "space-y-3 text-sm";
+                const events = Array.isArray(payload.events) ? payload.events : [];
+                if (!events.length) list.append(trackingText("li", "No milestone events have been recorded yet.", "text-slate-500"));
+                events.forEach(function(event) {
+                    const item = document.createElement("li");
+                    item.className = "border-l-2 border-sky-400 pl-3";
+                    item.append(trackingText("div", String(event.event_type || "Shipment update").replace(/[_-]+/g, " "), "font-semibold"));
+                    item.append(trackingText("div", trackingDate(event.event_time), "text-slate-500"));
+                    if (event.location) item.append(trackingText("div", event.location, "text-slate-600"));
+                    list.append(item);
+                });
+                card.append(list);
+                container.replaceChildren(card);
             } catch (err) {
-                container.innerHTML = `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-center font-bold">Error querying telemetry: ${err.message}</div>`;
+                container.replaceChildren(trackingText("p", err.message || "Tracking failed. Please try again.", "p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-center font-semibold"));
+            } finally {
+                if (button) button.disabled = false;
             }
         }
     </script>
