@@ -81,7 +81,7 @@ const mustContain = [
   ["public/shipper/active-shipments.html", '.eq("customer_organization_id", currentUserOrgId)'],
   ["public/shipper/shipment-details.html", '.eq("customer_organization_id", membership.organization_id)'],
   ["public/shipper/booking-request.html", "krim_create_global_shipment"],
-  ["public/shipper/rate-calculator.html", "krim_create_tariff_quote"],
+  ["public/shipper/rate-calculator.html", "krim_create_partner_opportunity"],
   ["public/partner/load-marketplace.html", 'rpc("krim_submit_partner_quote"'],
   ["app/customer/index.html", ".eq('customer_organization_id', membership.organization_id)"],
   ["app/partner/index.html", "krim_partner_opportunities"],
