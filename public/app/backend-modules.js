@@ -288,6 +288,12 @@ async function renderHelp() {
   button(s,"Record that I need support",async()=>{await logEvent("help_opened",{source:"help-centre"});setStatus("Support intent recorded in your activity history. No support ticket or email was created.");});
 }
 async function render() {
+  // Disable legacy mockup buttons so they cannot imply a backend action succeeded.
+  document.querySelectorAll("main button").forEach((b) => {
+    b.disabled = true;
+    b.title = "Legacy preview control. Use the authenticated backend controls below."; 
+    b.classList.add("opacity-50", "cursor-not-allowed");
+  });
   root = node("div", { className: "max-w-5xl mx-auto px-4 pb-12 w-full" });
   const title = node("h2",{className:"text-xl font-bold"},"KRIM Backend Connection");
   const desc = node("p",{className:"text-xs text-slate-400"},"Authenticated account data · row-level security · server-confirmed results");
