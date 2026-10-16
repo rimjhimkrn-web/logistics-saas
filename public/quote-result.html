@@ -153,7 +153,10 @@
                 .order("created_at", { ascending: true })
                 .limit(1)
                 .maybeSingle();
-            if (membershipError) throw membershipError;
+            if (membershipError) {
+                showCheckoutMessage("Unable to verify your organization access. Please sign in again.");
+                return;
+            }
             if (!membership?.organization_id) {
                 showCheckoutMessage("An active customer organization is required before checkout.");
                 return;
