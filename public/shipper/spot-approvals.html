@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Spot Approvals & Carrier Governance</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -56,7 +57,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="../../app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -99,27 +100,58 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Spot Governance © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="./active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="../../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
 
     <!-- Spot Approvals Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
+        let currentUserOrgId = null;
 
         async function initSpotApprovals() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../../auth/login.html";
+                    return;
+                }
+                document.getElementById("session-identity-node").textContent = "Node: " + (session.user.email || "Signed-in user");
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .order("created_at", { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) throw new Error("An active customer organization is required.");
+                currentUserOrgId = membership.organization_id;
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    window.location.href = "../../app/partner/index.html";
+                    return;
+                }
+                await loadSpotApprovals();
+            } catch (error) {
+                const tbody = document.getElementById("spot-approvals-tbody");
+                tbody.textContent = "";
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 6;
+                cell.className = "py-8 text-center text-rose-600 font-mono text-xs";
+                cell.textContent = error?.message || "Unable to initialize quote approvals.";
+                row.appendChild(cell);
+                tbody.appendChild(row);
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
-            loadSpotApprovals();
         }
 
         function escapeQuoteText(value) {
@@ -137,8 +169,14 @@
                     p_quote_id: Number(quoteId)
                 });
                 if (error) throw error;
-                if (!data) throw new Error("The server did not confirm quote acceptance.");
-                window.alert("Quote accepted. You can now proceed to secure checkout.");
+                const acceptedQuote = Array.isArray(data) ? data[0] : data;
+                if (!acceptedQuote) throw new Error("The server did not confirm quote acceptance.");
+                const acceptedShipmentId = Number(acceptedQuote.shipment_id);
+                if (Number.isSafeInteger(acceptedShipmentId) && acceptedShipmentId > 0) {
+                    window.location.href = "../quote-result.html?shipment_id=" + encodeURIComponent(acceptedShipmentId);
+                    return;
+                }
+                window.alert("Quote acceptance was confirmed. Open the accepted quote to continue to checkout.");
                 await loadSpotApprovals();
             } catch (err) {
                 window.alert("Quote could not be accepted: " + (err.message || "Unknown error"));
@@ -151,7 +189,8 @@
             try {
                 const { data, error } = await supabaseClient
                     .from("krim_quotes")
-                    .select("id, shipment_id, amount, currency_code, status, valid_until, created_at")
+                    .select("id, shipment_id, customer_organization_id, amount, currency_code, status, valid_until, created_at")
+                    .eq("customer_organization_id", currentUserOrgId)
                     .order("created_at", { ascending: false });
                 if (error) throw error;
                 if (!data || data.length === 0) {
@@ -172,7 +211,7 @@
                     if (status === "sent" && Number.isInteger(id) && id > 0) {
                         action = '<button type="button" onclick="acceptGlobalQuote(' + id + ')" class="bg-slate-900 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Accept Quote</button>';
                     } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0) {
-                        action = '<a href="/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
+                        action = '<a href="../quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
                     } else if (status === "pending" || status === "draft" || status === "quoted") {
                         action = '<span class="text-xs text-amber-700">Needs quote review / reissue</span>';
                     }
