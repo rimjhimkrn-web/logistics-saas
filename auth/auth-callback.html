@@ -30,11 +30,14 @@
       // and performs organization/member/role writes on the backend.
       const user = session.user;
       const accountType = String(user.user_metadata?.account_type || "customer").toLowerCase();
-      if (accountType === "customer") {
+      if (accountType === "customer" || accountType === "partner") {
         const organizationName = String(user.user_metadata?.organization_name || user.user_metadata?.company_name || "").trim();
         if (organizationName) {
+          const rpcName = accountType === "partner"
+            ? "krim_provision_partner_organization"
+            : "krim_provision_customer_organization";
           const { error: organizationError } = await supabase.rpc(
-            "krim_provision_customer_organization",
+            rpcName,
             { p_legal_name: organizationName }
           );
           if (organizationError) {
