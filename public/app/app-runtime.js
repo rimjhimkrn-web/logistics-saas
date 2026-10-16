@@ -120,8 +120,14 @@ class AppRuntime {
           return { id: org.id, name: org.display_name || org.legal_name || ("Organization " + org.id), role: membership?.role || "member" };
         });
 
-        const savedOrg = localStorage.getItem("krim_active_org");
-        const selected = store.state.availableOrgs.find((org) => savedOrg && String(org.id) === String(JSON.parse(savedOrg).id))
+        let savedOrgId = null;
+        try {
+          const savedOrg = localStorage.getItem("krim_active_org");
+          savedOrgId = savedOrg ? JSON.parse(savedOrg)?.id ?? null : null;
+        } catch (_) {
+          localStorage.removeItem("krim_active_org");
+        }
+        const selected = store.state.availableOrgs.find((org) => savedOrgId !== null && String(org.id) === String(savedOrgId))
           || store.state.availableOrgs[0];
         store.state.currentOrg = selected
           ? { id: selected.id, name: selected.name, code: "", plan: "", sandboxMode: false }
