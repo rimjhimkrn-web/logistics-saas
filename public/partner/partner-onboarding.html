@@ -98,10 +98,7 @@
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Country of Incorporation *</label>
               <select id="partner-country" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
-                <option value="DE">Germany (DE)</option>
-                <option value="IN">India (IN)</option>
-                <option value="SG">Singapore (SG)</option>
-                <option value="US">United States (US)</option>
+                <option value="">Loading supported countries…</option>
               </select>
             </div>
 
@@ -190,6 +187,28 @@
         const metadata = onboardingSession.user.user_metadata || {};
         const legalName = document.getElementById("partner-legal-name");
         if (metadata.company_name && !legalName.value) legalName.value = String(metadata.company_name).slice(0, 200);
+
+        const countrySelect = document.getElementById("partner-country");
+        const { data: countries, error: countriesError } = await onboardingClient
+          .from("krim_countries")
+          .select("iso2_code, code, name")
+          .eq("is_active", true)
+          .order("name", { ascending: true });
+        if (countriesError) throw countriesError;
+        countrySelect.replaceChildren();
+        const countryPlaceholder = document.createElement("option");
+        countryPlaceholder.value = "";
+        countryPlaceholder.textContent = "Select country of incorporation";
+        countrySelect.appendChild(countryPlaceholder);
+        (countries || []).forEach(country => {
+          const code = String(country.iso2_code || country.code || "").toUpperCase();
+          if (!/^[A-Z]{2}$/.test(code)) return;
+          const option = document.createElement("option");
+          option.value = code;
+          option.textContent = String(country.name || code) + " (" + code + ")";
+          countrySelect.appendChild(option);
+        });
+        if (countrySelect.options.length < 2) throw new Error("No supported countries are available. Contact KRIM support.");
 
         const { data: memberships, error: membershipError } = await onboardingClient
           .from("krim_organization_members")
