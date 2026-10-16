@@ -125,6 +125,7 @@
 
         let activeFactorId = null;
         let activeAccountType = 'customer';
+        let activeWorkspacePath = '../app/customer/index.html';
 
         // 1. Sign In & MFA Assurance Level Evaluation
         document.getElementById('form-login').addEventListener('submit', async function(e) {
@@ -153,6 +154,21 @@
                 if (organizationError) throw organizationError;
                 if (!organizationId) throw new Error('KRIM organization setup did not return an organization reference.');
 
+                if (activeAccountType === 'partner') {
+                    const { data: partnerOrg, error: partnerStatusError } = await window.KRIM_SUPABASE
+                        .from('krim_organizations')
+                        .select('partner_verification_status, partner_onboarding_status')
+                        .eq('id', organizationId)
+                        .maybeSingle();
+                    if (partnerStatusError) throw partnerStatusError;
+                    const verified = ['verified', 'approved'].includes(String(partnerOrg?.partner_verification_status || '').toLowerCase());
+                    activeWorkspacePath = verified
+                        ? '../app/partner/index.html'
+                        : '../public/partner/partner-onboarding.html';
+                } else {
+                    activeWorkspacePath = '../app/customer/index.html';
+                }
+
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
                 if (aalErr) throw aalErr;
@@ -175,9 +191,7 @@
                 }
 
                 // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
-                window.location.href = activeAccountType === 'partner'
-                    ? "../app/partner/index.html"
-                    : "../app/customer/index.html";
+                window.location.href = activeWorkspacePath;
 
             } catch (err) {
                 feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
@@ -227,9 +241,7 @@
 
                 feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Verified Successfully! Entering Workspace...</p>`;
                 setTimeout(() => {
-                    window.location.href = activeAccountType === 'partner'
-                    ? "../app/partner/index.html"
-                    : "../app/customer/index.html";
+                    window.location.href = activeWorkspacePath;
                 }, 1000);
 
             } catch (err) {
