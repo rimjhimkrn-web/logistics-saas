@@ -157,6 +157,7 @@
                     .select("organization_id")
                     .eq("user_id", session.user.id)
                     .eq("status", "active")
+                    .order("created_at", { ascending: true })
                     .limit(1)
                     .maybeSingle();
                 if (error) throw error;
@@ -164,6 +165,19 @@
                     throw new Error("Your account is not linked to an active KRIM organization. Please contact support.");
                 }
                 currentUserOrgId = membership.organization_id;
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (organization?.organization_type === "partner") {
+                    window.location.href = "../../app/partner/index.html";
+                    return;
+                }
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    throw new Error("This account is not authorized to create customer shipments.");
+                }
                 await loadBookingLocations();
             } catch (err) {
                 document.getElementById("booking-feedback").textContent = "Booking setup error: " + (err.message || "Unknown error");
@@ -199,7 +213,7 @@
 
                 if (error) throw error;
 
-                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Shipment successfully registered! Redirecting to tariff calculation...</p>`;
+                feedback.textContent = "Shipment created. Opening the server-calculated quote flow…";
 
                 // Extract shipment ID from result (handling array or direct object response)
                 let shipmentId = null;
