@@ -132,6 +132,7 @@
         
 
         let activeFactorId = null;
+        let loginDestination = window.KRIM_ROUTE("app/customer/index.html");
 
         // 1. Sign In & MFA Assurance Level Evaluation
         document.getElementById('form-login').addEventListener('submit', async function(e) {
@@ -148,13 +149,22 @@
 
                 const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                const organizationName = String(data.user.user_metadata?.company_name || (data.user.email ? data.user.email.split('@')[0] + ' Workspace' : '')).trim();
+                const accountType = String(data.user.user_metadata?.account_type || "customer").toLowerCase();
+                const organizationName = String(data.user.user_metadata?.organization_name || data.user.user_metadata?.company_name || (data.user.email ? data.user.email.split('@')[0] + ' Workspace' : '')).trim();
+                const provisioningRpc = accountType === "partner"
+                    ? "krim_provision_partner_organization"
+                    : "krim_provision_customer_organization";
                 const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
-                    'krim_provision_customer_organization',
+                    provisioningRpc,
                     { p_legal_name: organizationName }
                 );
                 if (organizationError) throw organizationError;
                 if (!organizationId) throw new Error('KRIM organization setup did not return an organization reference.');
+                loginDestination = accountType === "partner"
+                    ? window.KRIM_ROUTE("app/partner/index.html")
+                    : accountType === "enterprise"
+                        ? window.KRIM_ROUTE("app/enterprise/index.html")
+                        : window.KRIM_ROUTE("app/customer/index.html");
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -178,7 +188,7 @@
                 }
 
                 // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
-                window.location.href = window.KRIM_ROUTE("app/customer/index.html");
+                window.location.href = loginDestination;
 
             } catch (err) {
                 feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
@@ -228,7 +238,7 @@
 
                 feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Verified Successfully! Entering Workspace...</p>`;
                 setTimeout(() => {
-                    window.location.href = window.KRIM_ROUTE("app/customer/index.html");
+                    window.location.href = loginDestination;
                 }, 1000);
 
             } catch (err) {
