@@ -70,7 +70,7 @@
                     Track Global Consignments Instantly
                 </h1>
                 <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
-                    Enter your enterprise consignment tracking identifier or bill of lading number below to retrieve live GPS telemetry and terminal milestone status.
+                    Enter the secure tracking reference shown in your shipment details to retrieve approved status and milestone updates.
                 </p>
             </div>
 
@@ -84,7 +84,7 @@
                     <div class="space-y-2">
                         <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Tracking / Consignment ID</label>
                         <div class="flex gap-3">
-                            <input type="text" id="tracking-input" required placeholder="e.g. KRIM-9842-AX" class="flex-grow bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm font-mono focus:outline-none focus:border-sky-500 transition">
+                            <input type="text" id="tracking-input" required placeholder="KRIM-0123456789ABCDEF0123456789ABCDEF" class="flex-grow bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm font-mono focus:outline-none focus:border-sky-500 transition">
                             <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md shadow-sky-600/20 cursor-pointer">
                                 Track →
                             </button>
@@ -176,7 +176,7 @@
 
                 document.getElementById("res-id").textContent = payload.shipment_number || payload.tracking_number || trackingNumber;
                 document.getElementById("res-status").textContent = String(payload.status || "Unknown").replace(/[_-]+/g, " ");
-                document.getElementById("res-corridor").textContent = [payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable";
+                document.getElementById("res-corridor").textContent = ([payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable") + (payload.current_location ? " · Current: " + payload.current_location : "");
                 document.getElementById("res-eta").textContent = payload.delivered_at ? "Delivered " + displayDate(payload.delivered_at) : displayDate(payload.estimated_delivery_at);
 
                 const events = Array.isArray(payload.events) ? payload.events : [];
