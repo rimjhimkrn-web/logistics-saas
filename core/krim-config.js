@@ -8,8 +8,8 @@ const KRIM_CONFIG = {
   SYSTEM_CLOCK_YEAR: 2026,
   
   // Backend Integration Endpoint
-  SUPABASE_URL: "https://your-supabase-instance.supabase.co", 
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  SUPABASE_URL: "https://ebltviniygljwwseplph.supabase.co", 
+  SUPABASE_ANON_KEY: "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
 
   // Roles & Access Levels
   ROLES: {
