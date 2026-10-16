@@ -115,6 +115,7 @@
         const supabaseClient = window.KRIM_SUPABASE;
         let activeQuoteRecord = null;
         let currentSession = null;
+        let currentUserOrgId = null;
 
         function showCheckoutMessage(message, type = "error") {
             const feedback = document.getElementById("checkout-feedback");
@@ -142,12 +143,28 @@
                 return;
             }
             currentSession = session;
-            document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
+            document.getElementById("session-identity-node").textContent = "Node: " + (session.user.email || "Signed-in user");
+
+            const { data: membership, error: membershipError } = await supabaseClient
+                .from("krim_organization_members")
+                .select("organization_id")
+                .eq("user_id", session.user.id)
+                .eq("status", "active")
+                .order("created_at", { ascending: true })
+                .limit(1)
+                .maybeSingle();
+            if (membershipError) throw membershipError;
+            if (!membership?.organization_id) {
+                showCheckoutMessage("An active customer organization is required before checkout.");
+                return;
+            }
+            currentUserOrgId = membership.organization_id;
 
             const { data: quote, error } = await supabaseClient
                 .from("krim_quotes")
-                .select("id, shipment_id, amount, currency_code, status, valid_until")
+                .select("id, shipment_id, customer_organization_id, amount, currency_code, status, valid_until")
                 .eq("shipment_id", Number(shipmentId))
+                .eq("customer_organization_id", currentUserOrgId)
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
