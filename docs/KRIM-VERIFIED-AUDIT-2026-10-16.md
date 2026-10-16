@@ -32,7 +32,7 @@ Disabled five scheduled jobs that were either broken or recording success withou
 - `krim-partner-discovery` (job 9) — wrote synthetic prospect counts.
 - `krim-autonomous-outreach` (job 10) — wrote synthetic outreach counts.
 - `krim-daily-settlement` (job 11) — wrote synthetic settlement success.
-The database confirmed all five were unscheduled. The actual worker jobs (IDs 2 and 3) remain enabled. No live payment keys were changed, no payment was initiated, and no payout was sent.
+The database confirmed all five were unscheduled. The actual worker jobs (IDs 2 and 3) remain enabled and their latest inspected runs succeeded. Also revoked direct table privileges on `public.krim_recovery_checkpoints` from `anon` and `authenticated`; the `service_role` privileges remain. This table has no RLS policies, so it remains inaccessible to browser roles by design until its internal access model is formally documented. No live payment keys were changed, no payment was initiated, and no payout was sent.
 
 ## Changes proposed in this branch
 - Correct the shared Supabase browser-client module to use the actual `window.KRIM_CONFIG.supabase` configuration contract.
