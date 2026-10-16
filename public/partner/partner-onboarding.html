@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KRIM OS — Transporter Onboarding & KYC Compliance Audit</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -79,7 +80,7 @@
       </div>
 
       <!-- FORM FIELDS -->
-      <form onsubmit="event.preventDefault(); alert('Carrier KYC Documents Submitted for Verification!');" class="space-y-6">
+      <form id="partner-onboarding-form" class="space-y-6">
         
         <!-- SECTION 1: LEGAL ENTITY DETAILS -->
         <div class="space-y-4">
@@ -90,12 +91,13 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered Transporter Name *</label>
-              <input type="text" placeholder="e.g., EuroTrans Logistics GmbH" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
+              <input id="partner-legal-name" type="text" maxlength="200" placeholder="e.g., EuroTrans Logistics GmbH" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
             </div>
 
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Country of Incorporation *</label>
-              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
+              <select id="partner-country-code" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
+                <option value="IN">India (IN)</option>
                 <option value="DE">Germany (DE)</option>
                 <option value="IN">India (IN)</option>
                 <option value="SG">Singapore (SG)</option>
@@ -105,12 +107,12 @@
 
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Operating Authority ID (DOT / MC / GSTIN) *</label>
-              <input type="text" placeholder="e.g., DE892104991 or 27AAAAA0000A1Z5" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
+              <input id="partner-authority-id" type="text" maxlength="100" placeholder="e.g., GSTIN / VAT / DOT / MC ID" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required />
             </div>
 
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Primary Fleet Operational Category *</label>
-              <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
+              <select id="partner-operational-category" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500">
                 <option value="ROAD_FTL">Road Freight (FTL / LTL)</option>
                 <option value="OCEAN_NVOCC">Ocean Carrier / NVOCC</option>
                 <option value="AIR_CHARTER">Air Cargo Charter</option>
@@ -130,17 +132,17 @@
             <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
               <span class="text-white font-bold block">Certificate of Cargo Insurance ($1M+ Policy)</span>
               <p class="text-slate-500 text-[10px]">PDF format required. Must state marine & cargo liability limits.</p>
-              <button type="button" onclick="alert('File Dialog Opened')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-300 rounded-lg text-[10px] font-bold">
-                📎 Attach Insurance Certificate
-              </button>
+              <label class="block text-slate-300 text-[10px] font-bold">📎 Attach Insurance Certificate (PDF/JPG/PNG)
+                <input id="partner-insurance-file" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required class="mt-2 block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-slate-200" />
+              </label>
             </div>
 
             <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
               <span class="text-white font-bold block">Tax Registration & Tax Clearance Certificate</span>
               <p class="text-slate-500 text-[10px]">Official government tax filing certificate (W-9 / GSTIN / VAT ID).</p>
-              <button type="button" onclick="alert('File Dialog Opened')" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-slate-300 rounded-lg text-[10px] font-bold">
-                📎 Attach Tax Certificate
-              </button>
+              <label class="block text-slate-300 text-[10px] font-bold">📎 Attach Tax Certificate (PDF/JPG/PNG)
+                <input id="partner-tax-file" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required class="mt-2 block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-slate-200" />
+              </label>
             </div>
           </div>
         </div>
@@ -148,12 +150,13 @@
         <!-- SUBMIT ACTION -->
         <div class="pt-4 flex items-center justify-between border-t border-slate-800">
           <a href="/partner/partner-directory.html" class="text-slate-400 hover:text-white">Cancel</a>
-          <button type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
+          <button id="partner-onboarding-submit" type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-amber-500/20">
             Submit KYC Verification Packet →
           </button>
         </div>
 
       </form>
+      <div id="partner-onboarding-feedback" role="status" aria-live="polite" class="text-sm text-slate-300 break-words"></div>
     </section>
 
   </main>
@@ -168,6 +171,101 @@
 
   <script src="../../platform/krim-config.js"></script>
   <script src="../../platform/krim-navigation.js"></script>
+  <script>
+    window.KRIM_SUPABASE = window.KRIM_SUPABASE || window.supabase.createClient(
+      window.KRIM_CONFIG.supabase.url,
+      window.KRIM_CONFIG.supabase.publishableKey,
+      { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } }
+    );
+
+    (function () {
+      const client = window.KRIM_SUPABASE;
+      const form = document.getElementById("partner-onboarding-form");
+      const button = document.getElementById("partner-onboarding-submit");
+      const feedback = document.getElementById("partner-onboarding-feedback");
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+      const maxBytes = 10 * 1024 * 1024;
+
+      function message(text, type) {
+        feedback.textContent = text;
+        feedback.className = "text-sm break-words " + (type === "success" ? "text-emerald-300" : type === "info" ? "text-sky-300" : "text-rose-300");
+      }
+
+      async function uploadDocument(bucket, organizationId, userId, file, label) {
+        if (!file) throw new Error("Select the " + label + " document.");
+        if (!allowedTypes.includes(file.type)) throw new Error(label + " must be a PDF, JPG, or PNG file.");
+        if (file.size <= 0 || file.size > maxBytes) throw new Error(label + " must be smaller than 10 MB.");
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100) || label + ".pdf";
+        const path = organizationId + "/" + userId + "/" + crypto.randomUUID() + "-" + safeName;
+        const { error } = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        return path;
+      }
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        if (button.disabled) return;
+        button.disabled = true;
+        button.textContent = "Checking account and uploading documents…";
+        message("", "info");
+
+        try {
+          const { data: sessionData, error: sessionError } = await client.auth.getSession();
+          if (sessionError) throw sessionError;
+          const session = sessionData?.session;
+          if (!session) {
+            message("Sign in with your verified partner account before submitting KYC documents.", "error");
+            window.location.assign(window.KRIM_ROUTE("auth/login.html"));
+            return;
+          }
+
+          const legalName = document.getElementById("partner-legal-name").value.trim();
+          const countryCode = document.getElementById("partner-country-code").value;
+          const authorityId = document.getElementById("partner-authority-id").value.trim();
+          const category = document.getElementById("partner-operational-category").value;
+
+          const { data: organizationId, error: provisionError } = await client.rpc(
+            "krim_provision_partner_organization",
+            { p_legal_name: legalName }
+          );
+          if (provisionError) throw provisionError;
+          if (!organizationId) throw new Error("KRIM did not return your partner organization.");
+
+          const bucket = "krim-partner-verification";
+          const insurancePath = await uploadDocument(
+            bucket, organizationId, session.user.id,
+            document.getElementById("partner-insurance-file").files[0],
+            "insurance"
+          );
+          const taxPath = await uploadDocument(
+            bucket, organizationId, session.user.id,
+            document.getElementById("partner-tax-file").files[0],
+            "tax"
+          );
+
+          const { data: submittedOrganizationId, error: submitError } = await client.rpc(
+            "krim_submit_partner_onboarding",
+            {
+              p_legal_name: legalName,
+              p_country_code: countryCode,
+              p_authority_id: authorityId,
+              p_operational_category: category,
+              p_document_paths: [insurancePath, taxPath]
+            }
+          );
+          if (submitError) throw submitError;
+          if (!submittedOrganizationId) throw new Error("The backend did not confirm the KYC submission.");
+
+          message("KYC packet submitted successfully. Your partner account remains pending verification until KRIM reviews the documents.", "success");
+          button.textContent = "KYC Submitted — Pending Review";
+        } catch (error) {
+          message("KYC submission failed: " + (error?.message || "Unknown error"), "error");
+          button.disabled = false;
+          button.textContent = "Submit KYC Verification Packet →";
+        }
+      });
+    })();
+  </script>
   <script type="module" src="../app/app-runtime.js"></script>
 </body>
           </html>
