@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Outbound Dispatch & Staging</title>
+    <meta name="description" content="Manage outbound truck loading, staging lane assignments, and shipping manifest finalization inside KRIM OS Warehouse Portal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-emerald-400 font-semibold uppercase">Outbound Dispatch</span>
+                </div>
+            </div>
+            <a href="/public/warehouse/cross-docking.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Cross-Docking →</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2 text-center">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Warehouse Module • Step 15 of 22</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Outbound Dispatch & Staging</h1>
+            <p class="text-slate-400 text-xs font-mono">Assign staging lanes, coordinate outbound truck loading, and transmit final shipping manifests to carriers.</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
+            <form onsubmit="handleDispatchSubmit(event)" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Outbound Staging Lane</label>
+                        <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                            <option value="lane_east_01">Lane East 01 (TL Direct Express)</option>
+                            <option value="lane_east_02">Lane East 02 (LTL Hub Consolidated)</option>
+                            <option value="lane_west_04">Lane West 04 (Priority Air Freight)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Carrier Manifest Ref</label>
+                        <input type="text" required value="MAN-2026-OCT-901" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Assigned Dock Door</label>
+                        <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                            <option value="door_11">Dock Door 11</option>
+                            <option value="door_15">Dock Door 15</option>
+                            <option value="door_18">Dock Door 18</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Total Pallets / Cartons</label>
+                        <input type="number" required placeholder="32 Pallets" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-slate-400 uppercase tracking-wider">Dispatch Verification Notes</label>
+                    <textarea rows="3" required placeholder="Driver identification verified, trailer security seal applied and recorded..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-emerald-600/25 cursor-pointer">
+                    Finalize Dispatch & Proceed →
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Warehouse Management OS © 2026. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleDispatchSubmit(e) {
+            e.preventDefault();
+            alert('Outbound dispatch finalized successfully! Proceeding to Cross-Docking.');
+            window.location.href = '/public/warehouse/cross-docking.html';
+        }
+    </script>
+</body>
+</html>
