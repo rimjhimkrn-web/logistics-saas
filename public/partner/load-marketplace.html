@@ -243,14 +243,16 @@
         }
 
         async function submitCarrierBid(opportunityId, shipment, responseDeadline) {
-            const defaultAmount = Math.max(1, Number(shipment.total_weight_kg || 1) * 18).toFixed(2);
-            const enteredAmount = prompt(`Enter your proposed freight price (INR) for ${shipment.shipment_number || ("Shipment #" + shipment.id)} (${shipment.total_weight_kg || 0} kg):`, defaultAmount);
+            const defaultAmount = "";
+            const enteredAmount = prompt(`Enter your total customer-payable freight price (INR, including applicable charges) for ${shipment.shipment_number || ("Shipment #" + shipment.id)} (${shipment.total_weight_kg || 0} kg):`, defaultAmount);
             if (enteredAmount === null || enteredAmount.trim() === "") return;
             const amount = Number(enteredAmount);
             if (!Number.isFinite(amount) || amount <= 0) {
                 showMarketplaceMessage("Enter a positive numeric bid amount.", "error");
                 return;
             }
+            const confirmsTotal = window.confirm("Confirm this is your total customer-facing freight price, including applicable charges. KRIM does not yet calculate a separate market-specific tax breakdown, so do not submit a price unless you can provide the required tax invoice details.");
+            if (!confirmsTotal) return;
 
             const deadline = responseDeadline ? new Date(responseDeadline).getTime() : Date.now() + 5 * 24 * 60 * 60 * 1000;
             const validUntil = new Date(Math.min(Date.now() + 5 * 24 * 60 * 60 * 1000, deadline)).toISOString();
@@ -265,7 +267,7 @@
                     p_amount: amount,
                     p_currency_code: "INR",
                     p_valid_until: validUntil,
-                    p_notes: null
+                    p_notes: "Partner confirms this is the total customer-facing freight price including applicable charges; separate tax breakdown remains subject to market-specific invoice review."
                 });
                 if (error) throw error;
                 if (!data || !(data.id || data.quote_number)) throw new Error("Server did not confirm a partner quote reference.");
