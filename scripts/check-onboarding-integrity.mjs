@@ -15,6 +15,7 @@ const requiredFiles = [
   "public/partner/load-marketplace.html",
   "app/customer/index.html",
   "app/partner/index.html",
+  "domains/shipments.html",
   "config.js",
   "core/krim-config.js",
   "public/app/app-store.js",
@@ -40,6 +41,15 @@ function resolveLocalReference(fromFile, reference) {
 for (const file of requiredFiles.filter((name) => name.endsWith(".html"))) {
   if (!fs.existsSync(file)) continue;
   const html = fs.readFileSync(file, "utf8");
+  const scriptBlocks = [...html.matchAll(/<script([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  for (const [, attributes, source] of scriptBlocks) {
+    if (/\\bsrc=/i.test(attributes) || /type=["']module["']/i.test(attributes) || !source.trim()) continue;
+    try {
+      new Function(source);
+    } catch (error) {
+      errors.push(`Inline JavaScript syntax error in ${file}: ${error.message}`);
+    }
+  }
   const refs = [...html.matchAll(/(?:href|src)=["']([^"']+)["']/g)].map((match) => match[1]);
   for (const ref of refs) {
     const target = resolveLocalReference(file, ref);
@@ -66,6 +76,8 @@ const mustContain = [
   ["app/customer/index.html", ".eq('customer_organization_id', membership.organization_id)"],
   ["app/partner/index.html", "krim_partner_opportunities"],
   ["app/partner/index.html", "getAuthenticatorAssuranceLevel"],
+  ["domains/shipments.html", 'rpc("krim_create_global_shipment"'],
+  ["domains/shipments.html", 'from("krim_locations")'],
   ["public/app/app-runtime.js", "client.auth.getSession()"],
   ["public/app/app-store.js", 'permissions: []'],
   ["core/krim-config.js", "https://ebltviniygljwwseplph.supabase.co"]
@@ -87,7 +99,9 @@ const mustNotContain = [
   ["public/quote-result.html", "/logistics-saas/"],
   ["app/partner/index.html", "9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E"],
   ["public/partner/load-marketplace.html", "00000000-0000-0000-0000-000000000002"],
-  ["public/partner/load-marketplace.html", "from('krim_quotes').insert"]
+  ["public/partner/load-marketplace.html", "from('krim_quotes').insert"],
+  ["domains/shipments.html", "9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E"],
+  ["domains/shipments.html", "from('krim_shipments').insert"]
 ];
 for (const [file, text] of mustNotContain) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8").includes(text)) {
