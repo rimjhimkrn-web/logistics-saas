@@ -122,30 +122,40 @@
             public: Object.freeze({
                 home: route("index.html"),
                 index: route("index.html"),
+                solutions: route("public/solutions.html"),
+                network: route("public/network.html"),
+                tracking: route("public/tracking.html"),
                 terms: route("terms.html"),
                 privacy: route("privacy.html"),
                 refund: route("refund.html"),
-                acceptableUse: route("acceptable-use.html"),
-                cookies: route("cookies.html")
+                acceptableUse: route("public/legal/acceptable-use.html"),
+                cookies: route("public/legal/cookie-policy.html")
             }),
 
             auth: Object.freeze({
                 login: route("auth/login.html"),
+                signup: route("auth/signup.html"),
+                partnerSignup: route("auth/partner-signup.html"),
+                callback: route("auth/auth-callback.html"),
                 mfa: route("auth/mfa.html"),
+                mfaChallenge: route("auth/mfa-challenge.html"),
                 mfaEnroll: route("auth/mfa-enroll.html"),
-                forgotPassword:
-                    route("auth/forgot-password.html"),
-                resetPassword:
-                    route("auth/reset-password.html")
+                forgotPassword: route("auth/forgot-password.html"),
+                resetPassword: route("auth/reset-password.html")
             }),
 
             workspaces: Object.freeze({
-                customer:
-                    route("workspaces/customer-workspace.html"),
-                partner:
-                    route("workspaces/partner-workspace.html"),
-                operations:
-                    route("workspaces/operations-workspace.html")
+                customer: route("app/customer/index.html"),
+                partner: route("app/partner/index.html"),
+                enterprise: route("app/enterprise/index.html"),
+                driver: route("app/field/index.html"),
+                warehouse: route("app/field/index.html"),
+                operations: route("public/operations/control-tower.html"),
+                finance: route("domains/finance.html"),
+                compliance: route("domains/compliance.html"),
+                support: route("public/support/ticket-desk.html"),
+                developer: route("public/developer/api-docs.html"),
+                superAdmin: route("public/admin/control-tower.html")
             }),
 
             domains: Object.freeze({
