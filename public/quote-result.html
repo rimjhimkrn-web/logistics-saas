@@ -31,7 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
+    <script src="../platform/krim-config.js"></script>
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -41,7 +41,7 @@
     <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
         <span class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">RAZORPAY GATEWAY: SECURE</span>
+            <span class="text-emerald-400 font-bold">RAZORPAY: SERVER VERIFICATION REQUIRED</span>
         </span>
         <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
     </div>
@@ -112,9 +112,16 @@
 
     <!-- Secure Checkout: server-created Razorpay order + server-side verification -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const krimSupabaseConfig = window.KRIM_CONFIG?.supabase;
+        if (!krimSupabaseConfig?.url || !krimSupabaseConfig?.publishableKey) {
+            throw new Error("KRIM configuration did not load. Please refresh or contact support.");
+        }
+        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(
+            krimSupabaseConfig.url,
+            krimSupabaseConfig.publishableKey,
+            { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+        );
+        window.KRIM_SUPABASE = supabaseClient;
         let activeQuoteRecord = null;
         let currentSession = null;
 
