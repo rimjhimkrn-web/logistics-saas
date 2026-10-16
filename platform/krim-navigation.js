@@ -31,7 +31,26 @@
     "/partner/workspace.html": "app/partner/index.html",
     "/enterprise/portal.html": "app/enterprise/index.html",
     "/driver/app.html": "app/field/index.html",
-    "/warehouse/workspace.html": "app/field/index.html"
+    "/warehouse/workspace.html": "app/field/index.html",
+    "/app/app-shell.html": "public/app/app-shell.html",
+    "/app/app-runtime.js": "public/app/app-runtime.js",
+    "/js/app/app-runtime.js": "public/app/app-runtime.js",
+    "/app/app-store.js": "public/app/app-store.js",
+    "/app/dashboard-framework.html": "public/app/dashboard-framework.html",
+    "/app/global-search.html": "public/app/global-search.html",
+    "/app/messaging-center.html": "public/app/messaging-center.html",
+    "/app/document-vault.html": "public/app/document-vault.html",
+    "/app/org-switcher.html": "public/app/org-switcher.html",
+    "/app/profile-settings.html": "public/app/profile-settings.html",
+    "/app/app-settings.html": "public/app/app-settings.html",
+    "/app/notifications.html": "public/app/notifications.html",
+    "/partner/partner-directory.html": "public/partner/partner-directory.html",
+    "/partner/partner-onboarding.html": "public/partner/partner-onboarding.html",
+    "/partner/load-marketplace.html": "public/partner/load-marketplace.html",
+    "/shipper/booking-request.html": "public/shipper/booking-request.html",
+    "/shipper/active-shipments.html": "public/shipper/active-shipments.html",
+    "/shipper/spot-approvals.html": "public/shipper/spot-approvals.html",
+    "/shipper/rate-calculator.html": "public/shipper/rate-calculator.html"
   });
   const API_PREFIXES = ["/rest/","/auth/v1/","/storage/v1/","/realtime/v1/","/functions/v1/","/graphql/v1/","/.well-known/"];
   function route(input) {
