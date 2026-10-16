@@ -31,16 +31,16 @@
 - [x] Repair email verification callback so it uses the shared Supabase client and provisions the correct organization type.
 - [ ] Verify email-confirmation redirect URLs are allowlisted in Supabase Auth.
 - [ ] Run real browser tests for signup, email verification, login, MFA, and role routing.
-- [ ] Review and patch partner onboarding form; its current document-upload controls include demo behavior.
-- [ ] Repair all GitHub Pages root-absolute links and broken import paths.
-- [ ] Replace placeholder Supabase configuration in `core/krim-config.js`.
-- [ ] Remove fake/demo authentication behavior from workspace runtime.
+- [x] Connect partner onboarding form to private document storage and the `krim_submit_partner_onboarding` RPC; browser/storage/RPC execution still needs a live test.
+- [x] Repair root-absolute links and the broken callback import in the critical signup/login/checkout/onboarding path; the full 625-file site still needs a global link audit.
+- [x] Replace placeholder Supabase configuration in `core/krim-config.js` with the project URL and publishable key.
+- [x] Remove fabricated workspace identity, organization, notifications, permissions, and demo local session; runtime now requires a real Supabase session and fails closed for unavailable permissions.
 - [ ] Establish canonical route registry and check all navigation buttons.
 - [ ] Inventory every page's data source, action contract, role policy, loading state, empty state, and error state.
 - [ ] Reconcile live Supabase schema with version-controlled SQL migrations without recreating existing objects.
 - [ ] Resolve security advisor findings with tests.
 - [ ] Audit Razorpay order creation, signature verification, webhooks, ledger writes, refunds, and settlement idempotency.
-- [ ] Add CI checks, browser tests, security checks, release gates, and rollback instructions.
+- [x] Add initial GitHub Actions onboarding integrity checks; comprehensive browser, security, release and rollback tests remain pending.
 - [ ] Prove customer and partner lifecycle end to end in test mode before considering production payment keys.
 
 ## Production readiness gates
@@ -57,3 +57,12 @@
 
 ## Working rule
 Make small, auditable changes on this branch, preserve existing design components, verify every change, then review the diff before merging to `main`. Never label a lifecycle complete until there is test evidence.
+
+
+## Branch verification snapshot (after initial changes)
+- Branch: `krim/global-lifecycle-foundation`.
+- Static checks across 12 critical files: all required files present, expected integration markers found, no forbidden demo markers found, and no broken relative references in the checked HTML pages.
+- Inline JavaScript syntax check: passed for the seven changed/critical HTML entry pages.
+- GitHub Actions execution and browser-based verification: not yet confirmed.
+- Supabase Auth email redirect allowlist: not yet confirmed.
+- The live Supabase security advisor findings remain open; no live Razorpay keys should be enabled.
