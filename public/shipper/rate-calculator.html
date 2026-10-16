@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Dynamic Tariff Calculator & Quote Registry</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -114,18 +115,15 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Tariff Engine © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-                <a href="/logistics-saas/public/shipper/spot-approvals.html" class="hover:text-slate-800 transition">Spot Approvals</a>
+                <a href="../../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="./spot-approvals.html" class="hover:text-slate-800 transition">Spot Approvals</a>
             </div>
         </div>
     </footer>
 
     <!-- Calculator Logic Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
         let loadedShipmentData = null;
 
         async function initCalculator() {
@@ -138,7 +136,7 @@
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = "../../auth/login.html";
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
@@ -207,7 +205,7 @@
 
                 feedback.innerHTML = "<p class='text-emerald-600 font-semibold'>Server-calculated quote created. Open Spot Approvals to review and accept it.</p>";
                 setTimeout(() => {
-                    window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
+                    window.location.href = "./spot-approvals.html";
                 }, 1000);
             } catch (err) {
                 feedback.textContent = "Quote creation failed: " + (err.message || "Unknown error");
