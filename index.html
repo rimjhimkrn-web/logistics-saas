@@ -104,8 +104,8 @@
                 </div>
                 <form onsubmit="handleQuickTrack(event)" class="space-y-4">
                     <div class="space-y-2">
-                        <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Shipment ID Reference</label>
-                        <input type="text" id="quick-track-input" required placeholder="e.g., 1042" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                        <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Public Tracking Number</label>
+                        <input type="text" id="quick-track-input" required placeholder="e.g., KRIM-AB12-CD34" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
                     <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-md cursor-pointer">
                         Inspect Telemetry Status →
@@ -171,39 +171,32 @@
 
     <!-- Quick Track Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
+        const KRIM_TRACKING_URL = "https://ebltviniygljwwseplph.supabase.co/functions/v1/public-shipment-tracking";
+        const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
         async function handleQuickTrack(e) {
             e.preventDefault();
-            const id = document.getElementById('quick-track-input').value.trim();
-            const resBox = document.getElementById('quick-track-result');
-            resBox.innerHTML = `<span class="text-slate-500">Querying ledger for Shipment #${id}...</span>`;
-
+            const input = document.getElementById("quick-track-input");
+            const resBox = document.getElementById("quick-track-result");
+            const trackingNumber = input.value.trim().toUpperCase();
+            resBox.textContent = "Looking up the tracking number securely...";
             try {
-                const { data, error } = await supabaseClient
-                    .from('krim_shipments')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error || !data) {
-                    resBox.innerHTML = `<span class="text-rose-600 font-bold">Consignment #${id} not found in live network ledger.</span>`;
-                    return;
+                if (trackingNumber.length < 8 || trackingNumber.length > 100 || !/^[A-Z0-9-]+$/.test(trackingNumber)) {
+                    throw new Error("Enter the tracking number supplied by KRIM.");
                 }
-
-                resBox.innerHTML = `
-                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2 text-slate-800">
-                        <div class="flex justify-between items-center font-bold">
-                            <span class="text-emerald-800">Consignment #${data.id}</span>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">${data.status || 'Active'}</span>
-                        </div>
-                        <p class="text-slate-600">Route: ${data.origin_location_id || 'Origin'} → ${data.destination_location_id || 'Destination'}</p>
-                        <p class="text-slate-500 text-[11px]">Cargo: ${data.goods_description || 'General Cargo'} (${data.total_weight_kg || 1000} kg)</p>
-                    </div>`;
+                const response = await fetch(KRIM_TRACKING_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "apikey": KRIM_PUBLISHABLE_KEY },
+                    body: JSON.stringify({ tracking_number: trackingNumber })
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok || !result.success) throw new Error(result.error || "Tracking record could not be found.");
+                const route = [result.origin, result.destination].filter(Boolean).join(" → ") || "Route details unavailable";
+                resBox.textContent = "Tracking: " + (result.tracking_number || trackingNumber) +
+                    " | Status: " + (result.status || "Unknown") +
+                    " | Route: " + route +
+                    " | ETA: " + (result.estimated_delivery_at ? new Date(result.estimated_delivery_at).toLocaleString() : "Not available");
             } catch (err) {
-                resBox.innerHTML = `<span class="text-rose-600 font-bold">Lookup error: ${err.message}</span>`;
+                resBox.textContent = err.message || "Tracking lookup failed.";
             }
         }
     </script>
