@@ -41,9 +41,9 @@ function resolveLocalReference(fromFile, reference) {
 for (const file of requiredFiles.filter((name) => name.endsWith(".html"))) {
   if (!fs.existsSync(file)) continue;
   const html = fs.readFileSync(file, "utf8");
-  const scriptBlocks = [...html.matchAll(/<script([^>]*)>([\\s\\S]*?)<\\/script>/gi)];
+  const scriptBlocks = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
   for (const [, attributes, source] of scriptBlocks) {
-    if (/\\bsrc=/i.test(attributes) || /type=["']module["']/i.test(attributes) || !source.trim()) continue;
+    if (/\bsrc=/i.test(attributes) || /type=["']module["']/i.test(attributes) || !source.trim()) continue;
     try {
       new Function(source);
     } catch (error) {
