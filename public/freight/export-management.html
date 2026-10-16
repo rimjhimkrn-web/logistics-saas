@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRIM OS — Export Management & Compliance</title>
+    <meta name="description" content="Manage outbound export shipments, export licenses, and compliance filings inside KRIM OS Trade Compliance Portal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f8fafc', 100: '#f1f5f9', 500: '#64748b', 600: '#475569', 900: '#0f172a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold text-lg border border-slate-700">K</div>
+                <div>
+                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
+                    <span class="block text-[10px] tracking-widest text-slate-400 font-semibold uppercase">Export Management</span>
+                </div>
+            </div>
+            <a href="/public/trade/customs-declarations.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition font-mono font-semibold">Next: Customs Declarations →</a>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
+        <div class="space-y-2 text-center">
+            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-slate-500/10 text-slate-300 border border-slate-500/20 uppercase tracking-widest">Trade Compliance Module • Step 2 of 12</span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Export Management & Licensing</h1>
+            <p class="text-slate-400 text-xs font-mono">Manage outbound trade documentation, export control classifications (ECCN), and government agency filings.</p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
+            <form onsubmit="handleExportSubmit(event)" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Export Shipment Reference</label>
+                        <input type="text" required value="EXP-2026-OCT-8821" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Destination Country</label>
+                        <input type="text" required placeholder="Germany (DE)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Exporter / Shipper of Record</label>
+                        <input type="text" required placeholder="KRIM Global Exports Inc" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-slate-400 uppercase tracking-wider">Export License Status</label>
+                        <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">
+                            <option value="ear99">EAR99 (No License Required - NLR)</option>
+                            <option value="licensed">Validated Export License Attached</option>
+                            <option value="exempt">Government Regulatory Exemption</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-slate-400 uppercase tracking-wider">Export Compliance & Screening Notes</label>
+                    <textarea rows="3" required placeholder="Consignee and end-user screened against denied persons lists. AES / EEI electronic filing scheduled..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg cursor-pointer">
+                    Save Export Record & Proceed →
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
+        <p>KRIM Trade Compliance OS © 2026. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleExportSubmit(e) {
+            e.preventDefault();
+            alert('Export management record saved successfully! Proceeding to Customs Declarations.');
+            window.location.href = '/public/trade/customs-declarations.html';
+        }
+    </script>
+</body>
+</html>
