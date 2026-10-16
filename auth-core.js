@@ -2,8 +2,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // Global KRIM OS Configuration
-export const SUPABASE_URL = "https://your-supabase-project.supabase.co";
-export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+export const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -27,7 +27,7 @@ export const AUTH_ROUTES = {
   RECOVERY: 'recovery.html',
   INVITATION: 'invitation.html',
   DISABLED: 'disabled.html',
-  DASHBOARD: 'dashboard.html'
+  DASHBOARD: '../app/customer/index.html'
 };
 
 // Global Session Health & RBAC Guard
