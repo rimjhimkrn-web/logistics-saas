@@ -31,7 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
+    <script src="../config.js"></script>
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -140,7 +140,7 @@
 
             const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
             if (sessionError || !session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = window.KRIM_ROUTE("auth/login.html");
                 return;
             }
             currentSession = session;
@@ -229,7 +229,7 @@
                             }
                             showCheckoutMessage("Payment verified successfully. Redirecting to your shipments...", "success");
                             setTimeout(() => {
-                                window.location.href = "/logistics-saas/public/shipper/active-shipments.html";
+                                window.location.href = window.KRIM_ROUTE("public/shipper/active-shipments.html");
                             }, 1400);
                         } catch (err) {
                             showCheckoutMessage("Payment verification failed: " + (err.message || "Unknown error") + ". Do not retry until payment status is checked.");
@@ -260,5 +260,6 @@
         document.getElementById("btn-pay-now").addEventListener("click", startRazorpayCheckout);
         initCheckout();
     </script>
+  <script src="../platform/krim-navigation.js"></script>
 </body>
 </html>
