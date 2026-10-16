@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Carrier Partner Command Workspace</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -57,7 +58,7 @@
             </div>
             
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/public/partner/load-marketplace.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl transition shadow-sm">Load Marketplace →</a>
+                <a href="../../public/partner/load-marketplace.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl transition shadow-sm">Load Marketplace →</a>
                 <button onclick="handleSignOut()" class="text-slate-600 hover:text-slate-900 border border-slate-300 px-4 py-2.5 rounded-xl transition">Sign Out</button>
             </div>
         </div>
@@ -74,7 +75,7 @@
                 <p class="text-slate-600 text-sm">Accept freight spot requests, assign driver telemetry units, and manage active transport capacity.</p>
             </div>
             <div class="flex space-x-3">
-                <a href="/public/partner/load-marketplace.html" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm">Browse Load Board →</a>
+                <a href="../../public/partner/load-marketplace.html" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm">Browse Load Board →</a>
             </div>
         </div>
 
@@ -86,14 +87,14 @@
                 <p class="text-xs text-emerald-600 font-medium">Synced with enterprise demand ledger</p>
             </div>
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Fleet Assignments</span>
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Partner Assignments</span>
                 <p id="metric-assigned-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
                 <p class="text-xs text-sky-600 font-medium">Assigned transit consignments</p>
             </div>
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Network Security</span>
-                <p class="text-3xl font-extrabold text-slate-900 font-mono">AAL2</p>
-                <p class="text-xs text-emerald-600 font-medium">MFA Verified & Partner Tenancy Active</p>
+                <p id="metric-security-level" class="text-3xl font-extrabold text-slate-900 font-mono">Checking…</p>
+                <p id="metric-security-note" class="text-xs text-slate-600 font-medium">Security level from current session</p>
             </div>
         </div>
 
@@ -101,15 +102,15 @@
         <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
             <h2 class="text-lg font-bold text-slate-900">Partner Execution Modules</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono">
-                <a href="/public/partner/load-marketplace.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
+                <a href="../../public/partner/load-marketplace.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
                     <span class="text-emerald-600 font-bold block">01 / LOAD MARKETPLACE</span>
                     <p class="text-slate-700 font-sans">Browse available shipments and submit carrier spot bids.</p>
                 </a>
-                <a href="/public/shipper/active-shipments.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
+                <a href="../../public/partner/fleet-assignment.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
                     <span class="text-emerald-600 font-bold block">02 / FLEET TELEMETRY</span>
                     <p class="text-slate-700 font-sans">Monitor active transit routes and update milestones.</p>
                 </a>
-                <a href="/public/shipper/epod-vault.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
+                <a href="../../public/partner/pod-submission.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
                     <span class="text-emerald-600 font-bold block">03 / EPOD VAULT</span>
                     <p class="text-slate-700 font-sans">Upload and verify digital recipient delivery signatures.</p>
                 </a>
@@ -123,42 +124,86 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Carrier Command Workspace © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
+                <a href="../../index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="../../public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
             </div>
         </div>
     </footer>
 
     <!-- Partner Workspace Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
 
         async function initPartnerWorkspace() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/auth/login.html";
-                return;
-            }
-
-            document.getElementById('session-identity-node').innerText = `Partner Node: ${session.user.email}`;
-
             try {
-                const { count: shipCount } = await supabaseClient.from('krim_shipments').select('*', { count: 'exact', head: true });
-                const { count: quoteCount } = await supabaseClient.from('krim_quotes').select('*', { count: 'exact', head: true });
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../../auth/login.html";
+                    return;
+                }
 
-                document.getElementById('metric-loads-count').innerText = shipCount || 0;
-                document.getElementById('metric-assigned-count').innerText = quoteCount || 0;
+                document.getElementById('session-identity-node').textContent = `Partner Node: ${session.user.email || "Signed-in user"}`;
+
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('organization_id')
+                    .eq('user_id', session.user.id)
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) {
+                    window.location.href = "../../auth/partner-signup.html";
+                    return;
+                }
+
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from('krim_organizations')
+                    .select('organization_type, status, partner_verification_status, partner_lifecycle_status, partner_compliance_status')
+                    .eq('id', membership.organization_id)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (!organization || !['partner', 'carrier', 'forwarder'].includes(organization.organization_type)) {
+                    window.location.href = "../../app/customer/index.html";
+                    return;
+                }
+
+                const verified = ['verified', 'approved'].includes(String(organization.partner_verification_status || '').toLowerCase())
+                    && ['active', 'verified'].includes(String(organization.partner_lifecycle_status || '').toLowerCase())
+                    && ['clear', 'compliant', 'approved', 'verified', 'not_required', 'not_applicable'].includes(String(organization.partner_compliance_status || '').toLowerCase());
+                if (!verified) {
+                    window.location.href = "../../public/partner/partner-onboarding.html";
+                    return;
+                }
+
+                const [opportunities, assignments, assurance] = await Promise.all([
+                    supabaseClient.from('krim_partner_opportunities').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+                    supabaseClient.from('krim_shipment_partner_assignments').select('id', { count: 'exact', head: true }).eq('partner_organization_id', membership.organization_id),
+                    supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel()
+                ]);
+                if (opportunities.error) throw opportunities.error;
+                if (assignments.error) throw assignments.error;
+
+                document.getElementById('metric-loads-count').textContent = String(opportunities.count || 0);
+                document.getElementById('metric-assigned-count').textContent = String(assignments.count || 0);
+                const level = assurance?.data?.currentLevel || 'unknown';
+                document.getElementById('metric-security-level').textContent = level.toUpperCase();
+                document.getElementById('metric-security-note').textContent = level === 'aal2'
+                    ? 'MFA verified for this session'
+                    : 'Additional authentication may be required for sensitive actions';
             } catch (err) {
-                console.error("Error loading partner metrics:", err);
+                console.error("Error loading partner workspace:", err);
+                document.getElementById('session-identity-node').textContent = "Partner workspace data unavailable";
+                document.getElementById('metric-security-level').textContent = "Restricted";
+                document.getElementById('metric-security-note').textContent = "Could not verify organization and permission context";
             }
         }
 
         async function handleSignOut() {
-            await supabaseClient.auth.signOut();
-            window.location.href = "/auth/login.html";
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) console.error("Sign out failed:", error);
+            window.location.href = "../../auth/login.html";
         }
 
         initPartnerWorkspace();

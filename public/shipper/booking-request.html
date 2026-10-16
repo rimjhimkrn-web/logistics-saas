@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Global Shipment Booking Gateway</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -56,7 +57,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="../../app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Back to Workspace
             </a>
         </div>
@@ -110,18 +111,15 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Booking Gateway © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="../../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="./active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
             </div>
         </div>
     </footer>
 
     <!-- Booking RPC Execution Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
         let currentUserOrgId = null;
 
         async function loadBookingLocations() {
@@ -148,7 +146,7 @@
         async function initBooking() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
+                window.location.href = "../../auth/login.html";
                 return;
             }
             document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
@@ -159,6 +157,7 @@
                     .select("organization_id")
                     .eq("user_id", session.user.id)
                     .eq("status", "active")
+                    .order("created_at", { ascending: true })
                     .limit(1)
                     .maybeSingle();
                 if (error) throw error;
@@ -166,6 +165,19 @@
                     throw new Error("Your account is not linked to an active KRIM organization. Please contact support.");
                 }
                 currentUserOrgId = membership.organization_id;
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (organization?.organization_type === "partner") {
+                    window.location.href = "../../app/partner/index.html";
+                    return;
+                }
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    throw new Error("This account is not authorized to create customer shipments.");
+                }
                 await loadBookingLocations();
             } catch (err) {
                 document.getElementById("booking-feedback").textContent = "Booking setup error: " + (err.message || "Unknown error");
@@ -201,7 +213,7 @@
 
                 if (error) throw error;
 
-                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>Shipment successfully registered! Redirecting to tariff calculation...</p>`;
+                feedback.textContent = "Shipment created. Opening the server-calculated quote flow…";
 
                 // Extract shipment ID from result (handling array or direct object response)
                 let shipmentId = null;
@@ -217,7 +229,7 @@
                 }
 
                 setTimeout(() => {
-                    window.location.href = `/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${shipmentId}`;
+                    window.location.href = `./rate-calculator.html?shipment_id=${shipmentId}`;
                 }, 1200);
 
             } catch (err) {

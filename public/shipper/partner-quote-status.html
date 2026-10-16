@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Partner Assignment Status | KRIM Logistics</title>
+  <link rel="manifest" href="../../manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../config.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+      <div><p class="text-xs font-mono uppercase tracking-widest text-sky-700">KRIM Logistics OS</p><h1 class="text-xl font-bold">Partner Assignment Status</h1></div>
+      <a href="./active-shipments.html" class="text-sm font-semibold text-sky-700">Shipments</a>
+    </div>
+  </header>
+  <main class="mx-auto max-w-3xl space-y-5 px-4 py-10">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p class="text-xs font-mono uppercase tracking-widest text-sky-700">Verified state from KRIM backend</p>
+      <h2 class="mt-2 text-2xl font-bold">Waiting for partner acceptance</h2>
+      <p class="mt-2 text-sm leading-6 text-slate-600">Awarding a quote sends an assignment offer to the selected partner. Payment remains disabled until the partner explicitly accepts that assignment.</p>
+      <div id="assignment-summary" class="mt-5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">Loading assignment state…</div>
+      <p id="assignment-feedback" role="status" aria-live="polite" class="mt-4 text-sm text-slate-600"></p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a id="checkout-link" href="#" class="pointer-events-none rounded-lg bg-slate-300 px-4 py-2 text-sm font-semibold text-white" aria-disabled="true">Payment locked until partner accepts</a>
+        <a id="quotes-link" href="./active-shipments.html" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Back to shipments</a>
+        <button id="refresh-status" type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Refresh status</button>
+      </div>
+    </section>
+    <p class="text-xs leading-5 text-slate-500">This page checks the current assignment state while it remains open. It does not assume acceptance based on the quote award alone.</p>
+  </main>
+  <script>
+    const client = window.KRIM_SUPABASE;
+    let currentUserOrgId = null;
+    let shipmentId = null;
+    let requestedQuoteId = null;
+    let pollTimer = null;
+    const summary = document.getElementById("assignment-summary");
+    const feedback = document.getElementById("assignment-feedback");
+    const checkoutLink = document.getElementById("checkout-link");
+    const quotesLink = document.getElementById("quotes-link");
+
+    function setFeedback(message, kind) {
+      feedback.textContent = message;
+      feedback.className = "mt-4 text-sm " + (kind === "success" ? "text-emerald-700" : kind === "error" ? "text-rose-700" : "text-slate-600");
+    }
+    function lockCheckout(label) {
+      checkoutLink.textContent = label;
+      checkoutLink.href = "#";
+      checkoutLink.className = "pointer-events-none rounded-lg bg-slate-300 px-4 py-2 text-sm font-semibold text-white";
+      checkoutLink.setAttribute("aria-disabled", "true");
+    }
+    function unlockCheckout() {
+      checkoutLink.textContent = "Continue to secure checkout";
+      checkoutLink.href = "../quote-result.html?shipment_id=" + encodeURIComponent(shipmentId);
+      checkoutLink.className = "rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600";
+      checkoutLink.removeAttribute("aria-disabled");
+    }
+
+    async function initialize() {
+      try {
+        const { data: { session }, error: sessionError } = await client.auth.getSession();
+        if (sessionError || !session) {
+          window.location.href = "../../auth/login.html";
+          return;
+        }
+        const params = new URLSearchParams(window.location.search);
+        shipmentId = params.get("shipment_id");
+        requestedQuoteId = params.get("quote_id");
+        if (!shipmentId || !/^\d+$/.test(shipmentId)) throw new Error("A valid shipment reference is required.");
+
+        const { data: membership, error: membershipError } = await client
+          .from("krim_organization_members")
+          .select("organization_id")
+          .eq("user_id", session.user.id)
+          .eq("status", "active")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (membershipError) throw membershipError;
+        if (!membership?.organization_id) throw new Error("An active customer organization is required.");
+        currentUserOrgId = membership.organization_id;
+
+        const { data: shipment, error: shipmentError } = await client
+          .from("krim_shipments")
+          .select("id, shipment_number, status")
+          .eq("id", Number(shipmentId))
+          .eq("customer_organization_id", currentUserOrgId)
+          .maybeSingle();
+        if (shipmentError) throw shipmentError;
+        if (!shipment) throw new Error("Shipment not found for this organization.");
+        summary.textContent = "Shipment " + (shipment.shipment_number || shipment.id) + " · Current shipment state: " + shipment.status;
+        await refreshStatus();
+        pollTimer = window.setInterval(() => refreshStatus().catch((error) => setFeedback(error?.message || "Status refresh failed.", "error")), 15000);
+      } catch (error) {
+        summary.textContent = "Assignment status unavailable.";
+        setFeedback(error?.message || "Unable to load assignment status.", "error");
+        lockCheckout("Payment locked");
+      }
+    }
+
+    async function refreshStatus() {
+      if (!currentUserOrgId || !shipmentId) return;
+      lockCheckout("Payment locked until partner accepts");
+      let quoteQuery = client.from("krim_quotes")
+        .select("id, shipment_id, customer_organization_id, partner_quote_id, amount, currency_code, status, valid_until")
+        .eq("shipment_id", Number(shipmentId))
+        .eq("customer_organization_id", currentUserOrgId)
+        .not("partner_quote_id", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (requestedQuoteId && /^\d+$/.test(requestedQuoteId)) {
+        quoteQuery = client.from("krim_quotes")
+          .select("id, shipment_id, customer_organization_id, partner_quote_id, amount, currency_code, status, valid_until")
+          .eq("id", Number(requestedQuoteId))
+          .eq("shipment_id", Number(shipmentId))
+          .eq("customer_organization_id", currentUserOrgId)
+          .limit(1);
+      }
+      const { data: quotes, error: quoteError } = await quoteQuery;
+      if (quoteError) throw quoteError;
+      const quote = quotes?.[0];
+      if (!quote) {
+        summary.textContent = "No customer quote is linked to a partner award for this shipment.";
+        setFeedback("Return to partner quotes and award an eligible offer before payment.", "info");
+        return;
+      }
+      quotesLink.href = "./partner-quotes.html?opportunity_id=";
+      if (quote.status === "cancelled") {
+        const { data: opportunity } = await client.from("krim_partner_opportunities")
+          .select("id").eq("shipment_id", Number(shipmentId)).eq("customer_organization_id", currentUserOrgId)
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        quotesLink.href = opportunity?.id ? "./partner-quotes.html?opportunity_id=" + encodeURIComponent(opportunity.id) : "./active-shipments.html";
+        quotesLink.textContent = "Choose another partner offer";
+        summary.textContent = "The selected partner assignment was declined and its customer quote was cancelled.";
+        setFeedback("Choose another available partner offer. Payment remains locked.", "error");
+        return;
+      }
+
+      const { data: assignments, error: assignmentError } = await client
+        .from("krim_shipment_partner_assignments")
+        .select("id, assignment_number, status, partner_organization_id, partner_quote_id, response_deadline")
+        .eq("shipment_id", Number(shipmentId))
+        .eq("partner_quote_id", quote.partner_quote_id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (assignmentError) throw assignmentError;
+      const assignment = assignments?.[0];
+      if (!assignment) {
+        summary.textContent = "Customer quote " + quote.id + " exists, but no partner assignment was returned.";
+        setFeedback("Do not pay until assignment status is verified. Contact support if this persists.", "error");
+        return;
+      }
+
+      let partnerName = "Selected partner";
+      const { data: partner } = await client.from("krim_organizations").select("display_name, legal_name").eq("id", assignment.partner_organization_id).maybeSingle();
+      if (partner) partnerName = partner.display_name || partner.legal_name || partnerName;
+      summary.textContent = "Customer quote #" + quote.id + " · " + quote.currency_code + " " + Number(quote.amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+        " · Assignment " + (assignment.assignment_number || assignment.id) + " · " + partnerName + " · State: " + assignment.status;
+
+      if (assignment.status === "accepted" && quote.status === "accepted") {
+        if (quote.valid_until && new Date(quote.valid_until).getTime() <= Date.now()) {
+          setFeedback("Partner accepted, but this customer quote has expired. Contact support for a refreshed quote; payment remains locked.", "error");
+          return;
+        }
+        unlockCheckout();
+        setFeedback("Partner acceptance is confirmed by the backend. Secure checkout is now available.", "success");
+        return;
+      }
+      if (assignment.status === "rejected") {
+        const { data: opportunity } = await client.from("krim_partner_opportunities")
+          .select("id").eq("shipment_id", Number(shipmentId)).eq("customer_organization_id", currentUserOrgId)
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        quotesLink.href = opportunity?.id ? "./partner-quotes.html?opportunity_id=" + encodeURIComponent(opportunity.id) : "./active-shipments.html";
+        quotesLink.textContent = "Choose another partner offer";
+        setFeedback("The partner declined the assignment. Select another offer; payment remains locked.", "error");
+        return;
+      }
+      const deadlinePassed = assignment.response_deadline && new Date(assignment.response_deadline).getTime() <= Date.now();
+      setFeedback(deadlinePassed ? "Partner response deadline has passed. Contact operations; payment remains locked." : "Waiting for the selected partner to accept the assignment. This page refreshes while open.", "info");
+    }
+
+    document.getElementById("refresh-status").addEventListener("click", () => refreshStatus().catch((error) => setFeedback(error?.message || "Status refresh failed.", "error")));
+    window.addEventListener("beforeunload", () => { if (pollTimer) window.clearInterval(pollTimer); });
+    initialize();
+  </script>
+</body>
+</html>

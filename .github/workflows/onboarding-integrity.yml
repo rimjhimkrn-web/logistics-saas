@@ -1,0 +1,24 @@
+name: KRIM Onboarding Integrity
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "krim/**"
+
+permissions:
+  contents: read
+
+jobs:
+  onboarding-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check onboarding routes and integration markers
+        run: node scripts/check-onboarding-integrity.mjs

@@ -28,6 +28,8 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
@@ -45,13 +47,13 @@
             </div>
             
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="/public/partners.html" class="hover:text-white transition">Carrier Network</a>
-                <a href="/public/network.html" class="hover:text-white transition">Global Corridors</a>
-                <a href="/public/tracking.html" class="hover:text-white transition">Track Shipment</a>
+                <a href="../public/partners.html" class="hover:text-white transition">Carrier Network</a>
+                <a href="../public/network.html" class="hover:text-white transition">Global Corridors</a>
+                <a href="../public/tracking.html" class="hover:text-white transition">Track Shipment</a>
             </nav>
 
             <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-400 hover:text-white transition">Sign In</a>
+                <a href="../portal.html" class="text-slate-400 hover:text-white transition">Sign In</a>
             </div>
         </div>
     </header>
@@ -69,6 +71,7 @@
                 <p class="text-slate-400 text-xs font-mono">Connect Fleet Telemetry & Instant Razorpay Escrow Payouts</p>
             </div>
 
+            <div id="signup-feedback" role="status" aria-live="polite" class="hidden rounded-xl border px-4 py-3 text-sm"></div>
             <form onsubmit="handlePartnerSignup(event)" class="space-y-5">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -98,7 +101,7 @@
 
             <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
                 <p>Are you an enterprise shipper organization?</p>
-                <a href="/auth/signup.html" class="inline-block text-sky-400 hover:underline font-bold">Deploy Shipper Tenant instead →</a>
+                <a href="./signup.html" class="inline-block text-sky-400 hover:underline font-bold">Deploy Shipper Tenant instead →</a>
             </div>
         </div>
     </main>
@@ -108,21 +111,59 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/public/network.html" class="hover:text-slate-300 transition">Network</a>
-                <a href="/public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
-                <a href="/portal.html" class="hover:text-slate-300 transition">Sign In</a>
+                <a href="../public/network.html" class="hover:text-slate-300 transition">Network</a>
+                <a href="../public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
+                <a href="../portal.html" class="hover:text-slate-300 transition">Sign In</a>
             </div>
         </div>
     </footer>
 
-    <!-- Partner Signup Script -->
     <script>
-        function handlePartnerSignup(e) {
-            e.preventDefault();
-            const fleet = document.getElementById('partner-fleet').value;
-            alert('Registering carrier fleet for ' + fleet + ' with Supabase Auth & Escrow Integration...');
-            window.location.href = '/portal.html';
+      function signupMessage(message, kind = "error") {
+        const box = document.getElementById("signup-feedback");
+        box.textContent = message;
+        box.className = "rounded-xl border px-4 py-3 text-sm " +
+          (kind === "success" ? "border-emerald-700 bg-emerald-950/40 text-emerald-300" :
+           kind === "info" ? "border-sky-700 bg-sky-950/40 text-sky-300" :
+           "border-rose-700 bg-rose-950/40 text-rose-300");
+      }
+      async function handlePartnerSignup(event) {
+        event.preventDefault();
+        const button = event.submitter || document.querySelector('form button[type="submit"]');
+        const fleet = document.getElementById("partner-fleet").value.trim();
+        const fullName = document.getElementById("partner-name").value.trim();
+        const email = document.getElementById("partner-email").value.trim().toLowerCase();
+        const password = document.getElementById("partner-password").value;
+        if (fleet.length < 2 || fullName.length < 2) return signupMessage("Enter a valid fleet/business name and operator name.");
+        if (!window.KRIM_SUPABASE) return signupMessage("Secure registration service is unavailable. Please try again later.");
+        button.disabled = true;
+        button.textContent = "Creating secure partner account…";
+        try {
+          const redirectTo = new URL("../auth/auth-callback.html", window.location.href).href;
+          const { data, error } = await window.KRIM_SUPABASE.auth.signUp({
+            email, password,
+            options: { emailRedirectTo: redirectTo, data: { full_name: fullName, company_name: fleet, krim_account_type: "partner" } }
+          });
+          if (error) throw error;
+          if (!data.user) throw new Error("Registration did not return an account.");
+          if (!data.session) {
+            signupMessage("Check your email to verify your address, then sign in to continue partner onboarding. Your carrier profile remains unverified until reviewed.", "info");
+            button.textContent = "Verification email requested";
+            return;
+          }
+          const { data: organizationId, error: provisionError } = await window.KRIM_SUPABASE.rpc(
+            "krim_provision_partner_organization", { p_legal_name: fleet }
+          );
+          if (provisionError) throw provisionError;
+          if (!organizationId) throw new Error("Partner organization setup was not confirmed. Sign in to retry.");
+          signupMessage("Partner account created. Verification is pending; loads and payouts remain restricted until approval.", "success");
+          window.location.href = "../public/partner/partner-onboarding.html";
+        } catch (error) {
+          signupMessage(error?.message || "Partner registration failed. Please try again.");
+          button.disabled = false;
+          button.textContent = "Register Carrier Fleet →";
         }
+      }
     </script>
 </body>
 </html>

@@ -10,50 +10,12 @@
 class AppStore {
   constructor() {
     this.state = {
-      user: {
-        id: "usr_9982401",
-        name: "Operations Director",
-        email: "ops.director@krim.os",
-        avatar: "OP",
-        role: "ENTERPRISE_ADMIN",
-        permissions: [
-          "shipment:read",
-          "shipment:write",
-          "shipment:delete",
-          "org:manage",
-          "billing:access",
-          "telemetry:live",
-          "customs:submit"
-        ]
-      },
-      currentOrg: {
-        id: "org_global_01",
-        name: "Global Supply Chain Corp",
-        code: "GSCC-GLOBAL",
-        plan: "ENTERPRISE_TIER_1",
-        sandboxMode: false
-      },
-      availableOrgs: [
-        { id: "org_global_01", name: "Global Supply Chain Corp", role: "ENTERPRISE_ADMIN" },
-        { id: "org_apac_02", name: "KRIM APAC Freight Hub", role: "REGIONAL_DISPATCHER" },
-        { id: "org_emea_03", name: "EuroTrans Logistics GmbH", role: "AUDITOR" }
-      ],
-      preferences: {
-        currency: "USD",
-        locale: "en-US",
-        timezone: "UTC",
-        theme: "dark"
-      },
-      notifications: [
-        { id: "n_101", type: "WARN", title: "Customs Hold Alert", msg: "Container MSCU892101 held at Rotterdam Gate 4", time: "2m ago", unread: true },
-        { id: "n_102", type: "INFO", title: "e-POD Received", msg: "AOG Shipment AWB-7720-90 signed by Receiver", time: "12m ago", unread: true },
-        { id: "n_103", type: "SUCCESS", title: "EDI 315 Synced", msg: "Vessel MAERSK MC-KINNEY MOLLER departed SIN", time: "1h ago", unread: true }
-      ],
-      telemetrySocket: {
-        connected: true,
-        latencyMs: 14,
-        lastHeartbeat: new Date().toISOString()
-      }
+      user: { id: null, name: "", email: "", avatar: "", role: "UNASSIGNED", permissions: [] },
+      currentOrg: { id: null, name: "No organization selected", code: "", plan: "", sandboxMode: true },
+      availableOrgs: [],
+      preferences: { currency: "INR", locale: "en-IN", timezone: "Asia/Kolkata", theme: "dark" },
+      notifications: [],
+      telemetrySocket: { connected: false, latencyMs: null, lastHeartbeat: null }
     };
 
     this.listeners = new Set();
@@ -119,7 +81,7 @@ class AppStore {
    * Check RBAC Permission
    */
   hasPermission(permission) {
-    return this.state.user.permissions.includes(permission) || this.state.user.role === "ENTERPRISE_ADMIN";
+    return Array.isArray(this.state.user.permissions) && this.state.user.permissions.includes(permission);
   }
 
   /**

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Enterprise Sign In & MFA Challenge</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>window.KRIM_SUPABASE = window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co", "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");</script>
+    <script src="../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -50,7 +50,7 @@
             
             <div class="flex items-center space-x-3 text-sm">
                 <span class="text-slate-500 hidden sm:inline">New to KRIM OS?</span>
-                <a href="/logistics-saas/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
+                <a href="./signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
             </div>
         </div>
     </header>
@@ -112,9 +112,9 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="/logistics-saas/auth/signup.html" class="hover:text-slate-800 transition">Register</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+                <a href="../index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="./signup.html" class="hover:text-slate-800 transition">Register</a>
+                <a href="../public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
             </div>
         </div>
     </footer>
@@ -124,6 +124,8 @@
         
 
         let activeFactorId = null;
+        let activeAccountType = 'customer';
+        let activeWorkspacePath = '../app/customer/index.html';
 
         // 1. Sign In & MFA Assurance Level Evaluation
         document.getElementById('form-login').addEventListener('submit', async function(e) {
@@ -140,13 +142,32 @@
 
                 const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+                activeAccountType = data.user.user_metadata?.krim_account_type === 'partner' ? 'partner' : 'customer';
                 const organizationName = String(data.user.user_metadata?.company_name || (data.user.email ? data.user.email.split('@')[0] + ' Workspace' : '')).trim();
+                const provisioningFunction = activeAccountType === 'partner'
+                    ? 'krim_provision_partner_organization'
+                    : 'krim_provision_customer_organization';
                 const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
-                    'krim_provision_customer_organization',
+                    provisioningFunction,
                     { p_legal_name: organizationName }
                 );
                 if (organizationError) throw organizationError;
                 if (!organizationId) throw new Error('KRIM organization setup did not return an organization reference.');
+
+                if (activeAccountType === 'partner') {
+                    const { data: partnerOrg, error: partnerStatusError } = await window.KRIM_SUPABASE
+                        .from('krim_organizations')
+                        .select('partner_verification_status, partner_onboarding_status')
+                        .eq('id', organizationId)
+                        .maybeSingle();
+                    if (partnerStatusError) throw partnerStatusError;
+                    const verified = ['verified', 'approved'].includes(String(partnerOrg?.partner_verification_status || '').toLowerCase());
+                    activeWorkspacePath = verified
+                        ? '../app/partner/index.html'
+                        : '../public/partner/partner-onboarding.html';
+                } else {
+                    activeWorkspacePath = '../app/customer/index.html';
+                }
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -170,7 +191,7 @@
                 }
 
                 // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
-                window.location.href = "/logistics-saas/app/customer/index.html";
+                window.location.href = activeWorkspacePath;
 
             } catch (err) {
                 feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
@@ -220,7 +241,7 @@
 
                 feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Verified Successfully! Entering Workspace...</p>`;
                 setTimeout(() => {
-                    window.location.href = "/logistics-saas/app/customer/index.html";
+                    window.location.href = activeWorkspacePath;
                 }, 1000);
 
             } catch (err) {

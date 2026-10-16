@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Shipment Management</title>
     <!-- PWA & Mobile Installable Configuration -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#06b6d4">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,6 +28,7 @@
     </script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
 </head>
 <body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-cyan-500 selection:text-gray-950">
 
@@ -46,14 +47,14 @@
             
             <!-- Desktop / Tablet Navigation Pills -->
             <nav class="hidden lg:flex items-center space-x-1 text-xs font-medium text-gray-400">
-                <a href="/tracking.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Tracking</a>
-                <a href="/domains/quotes.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Rate Engine</a>
-                <a href="/ocean.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Ocean</a>
-                <a href="/air-freight.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Air Freight</a>
-                <a href="/road-rail.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Road & Rail</a>
-                <a href="/express.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Express</a>
-                <a href="/portal.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Enterprise OS</a>
-                <a href="/domains/shipments.html" class="px-3 py-1.5 rounded-lg text-white bg-purple-600/30 border border-purple-500/30 transition">Book Express</a>
+                <a href="../tracking.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Tracking</a>
+                <a href="../public/shipper/rate-calculator.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Rate Engine</a>
+                <a href="../public/ocean.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Ocean</a>
+                <a href="../public/air.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Air Freight</a>
+                <a href="../public/road-rail.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Road & Rail</a>
+                <a href="../public/express.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Express</a>
+                <a href="../portal.html" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-gray-800/50 transition">Enterprise OS</a>
+                <a href="./shipments.html" class="px-3 py-1.5 rounded-lg text-white bg-purple-600/30 border border-purple-500/30 transition">Book Express</a>
             </nav>
 
             <div id="user-session-badge" class="text-xs font-mono text-gray-400 px-3 py-1 rounded bg-[#111827] border border-gray-800">
@@ -90,14 +91,12 @@
                 <form id="shipment-creation-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Origin Hub / Location</label>
-                        <input type="text" id="shipment-origin" required placeholder="e.g., Jharkhand Hub (Ranchi)" 
-                               class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                        <select id="shipment-origin" required class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition font-mono text-sm"><option value="">Loading active locations…</option></select>
                     </div>
 
                     <div>
                         <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Destination Terminal</label>
-                        <input type="text" id="shipment-destination" required placeholder="e.g., New Delhi Distribution Terminal" 
-                               class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                        <select id="shipment-destination" required class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition font-mono text-sm"><option value="">Loading active locations…</option></select>
                     </div>
 
                     <div>
@@ -163,95 +162,199 @@
 
     <!-- Integration Logic -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
+        let currentUserOrgId = null;
+        const shipmentForm = document.getElementById("shipment-creation-form");
+        const shipmentButton = document.getElementById("submit-shipment-btn");
+        const shipmentFeedback = document.createElement("p");
+        shipmentFeedback.id = "shipment-feedback";
+        shipmentFeedback.setAttribute("role", "status");
+        shipmentFeedback.setAttribute("aria-live", "polite");
+        shipmentFeedback.className = "text-xs font-mono";
+        shipmentForm.after(shipmentFeedback);
+
+        function showShipmentMessage(message, kind) {
+            shipmentFeedback.textContent = message;
+            shipmentFeedback.className = "text-xs font-mono " + (kind === "success" ? "text-emerald-400" : kind === "info" ? "text-sky-300" : "text-rose-400");
+        }
+
+        function appendOption(select, value, label) {
+            const option = document.createElement("option");
+            option.value = String(value);
+            option.textContent = label;
+            select.appendChild(option);
+        }
+
+        function appendCell(row, value, className) {
+            const cell = document.createElement("td");
+            cell.className = className;
+            cell.textContent = value == null || value === "" ? "—" : String(value);
+            row.appendChild(cell);
+            return cell;
+        }
 
         async function initSession() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                document.getElementById('user-session-badge').innerText = "Guest Mode Active";
-            } else {
-                document.getElementById('user-session-badge').innerText = `Node: ${session.user.email}`;
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../auth/login.html";
+                    return;
+                }
+                document.getElementById("user-session-badge").textContent = "Node: " + (session.user.email || "Signed-in user");
+
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .order("created_at", { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) {
+                    window.location.href = "../auth/signup.html";
+                    return;
+                }
+                currentUserOrgId = membership.organization_id;
+
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (organization?.organization_type === "partner") {
+                    window.location.href = "../app/partner/index.html";
+                    return;
+                }
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    throw new Error("This account is not authorized for customer shipment management.");
+                }
+
+                await Promise.all([loadLocations(), loadUserShipments()]);
+            } catch (error) {
+                console.error("Shipment workspace initialization failed:", error);
+                showShipmentMessage(error?.message || "Shipment workspace could not be initialized.", "error");
+                shipmentButton.disabled = true;
             }
-            loadUserShipments();
+        }
+
+        async function loadLocations() {
+            const originSelect = document.getElementById("shipment-origin");
+            const destinationSelect = document.getElementById("shipment-destination");
+            const { data, error } = await supabaseClient
+                .from("krim_locations")
+                .select("id, city, location_code, state_region, is_active")
+                .eq("is_active", true)
+                .order("city", { ascending: true });
+            if (error) throw error;
+
+            originSelect.replaceChildren();
+            destinationSelect.replaceChildren();
+            appendOption(originSelect, "", "Select origin location");
+            appendOption(destinationSelect, "", "Select destination location");
+            (data || []).forEach((location) => {
+                const label = [location.city, location.state_region, location.location_code].filter(Boolean).join(" · ");
+                appendOption(originSelect, location.id, label || ("Location #" + location.id));
+                appendOption(destinationSelect, location.id, label || ("Location #" + location.id));
+            });
+            if (!data?.length) showShipmentMessage("No active locations are available to this account. Add/activate locations before booking.", "info");
         }
 
         async function loadUserShipments() {
+            const tbody = document.getElementById("shipments-table-body");
             try {
-                const { data, error } = await supabaseClient
-                    .from('krim_shipments')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                if (!currentUserOrgId) return;
+                const { data: shipments, error } = await supabaseClient
+                    .from("krim_shipments")
+                    .select("id, shipment_number, origin_location_id, destination_location_id, goods_description, total_weight_kg, status, created_at")
+                    .eq("customer_organization_id", currentUserOrgId)
+                    .order("created_at", { ascending: false });
+                if (error) throw error;
 
-                const tbody = document.getElementById('shipments-table-body');
-                tbody.innerHTML = '';
+                const locationIds = [...new Set((shipments || []).flatMap((item) => [item.origin_location_id, item.destination_location_id]).filter(Boolean))];
+                let locations = [];
+                if (locationIds.length) {
+                    const { data, error: locationError } = await supabaseClient
+                        .from("krim_locations")
+                        .select("id, city, location_code, state_region")
+                        .in("id", locationIds);
+                    if (locationError) throw locationError;
+                    locations = data || [];
+                }
+                const locationById = new Map(locations.map((item) => [String(item.id), [item.city, item.state_region, item.location_code].filter(Boolean).join(" · ") || ("Location #" + item.id)]));
+                tbody.replaceChildren();
 
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-500 font-mono text-xs">No shipments found. Register your first shipment above.</td></tr>`;
+                if (!shipments?.length) {
+                    const row = document.createElement("tr");
+                    const cell = appendCell(row, "No shipments found for this organization. Create your first shipment above.", "py-8 text-center text-gray-500 font-mono text-xs");
+                    cell.colSpan = 6;
+                    tbody.appendChild(row);
                     return;
                 }
 
-                data.forEach(s => {
-                    const statusColor = s.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/40 border-emerald-900' : 'text-amber-400 bg-amber-950/40 border-amber-900';
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-900/40 transition">
-                            <td class="py-4 px-4 font-mono font-medium text-white">#${s.id}</td>
-                            <td class="py-4 px-4 text-gray-300 font-medium">${s.origin || 'Ranchi'} → ${s.destination || 'New Delhi'}</td>
-                            <td class="py-4 px-4 text-gray-400">${s.goods_description || 'Standard Freight'}</td>
-                            <td class="py-4 px-4 font-mono">${s.total_weight_kg || '1,250'} kg</td>
-                            <td class="py-4 px-4">
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-mono border ${statusColor}">
-                                    ${s.status || 'pending'}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right">
-                                <a href="/domains/quotes.html?shipment_id=${s.id}" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition">
-                                    Proceed to Quote →
-                                </a>
-                            </td>
-                        </tr>
-                    `;
+                shipments.forEach((shipment) => {
+                    const row = document.createElement("tr");
+                    row.className = "hover:bg-gray-900/40 transition";
+                    appendCell(row, "#" + (shipment.shipment_number || shipment.id), "py-4 px-4 font-mono font-medium text-white");
+                    const origin = locationById.get(String(shipment.origin_location_id)) || ("Location #" + shipment.origin_location_id);
+                    const destination = locationById.get(String(shipment.destination_location_id)) || ("Location #" + shipment.destination_location_id);
+                    appendCell(row, origin + " → " + destination, "py-4 px-4 text-gray-300 font-medium");
+                    appendCell(row, shipment.goods_description || "—", "py-4 px-4 text-gray-400");
+                    appendCell(row, (shipment.total_weight_kg == null ? "—" : Number(shipment.total_weight_kg).toLocaleString("en-IN")) + " kg", "py-4 px-4 font-mono");
+                    const statusCell = appendCell(row, shipment.status || "unknown", "py-4 px-4");
+                    statusCell.className += " uppercase";
+                    const linkCell = document.createElement("td");
+                    linkCell.className = "py-4 px-4 text-right";
+                    const link = document.createElement("a");
+                    link.className = "bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition";
+                    link.textContent = "Proceed to Quote →";
+                    link.href = "../public/shipper/rate-calculator.html?shipment_id=" + encodeURIComponent(shipment.id);
+                    linkCell.appendChild(link);
+                    row.appendChild(linkCell);
+                    tbody.appendChild(row);
                 });
-            } catch (err) {
-                console.error("Error loading shipments:", err);
+            } catch (error) {
+                console.error("Unable to load customer shipments:", error);
+                tbody.replaceChildren();
+                const row = document.createElement("tr");
+                const cell = appendCell(row, "Shipment records could not be loaded. Please retry after checking your organization access.", "py-8 text-center text-rose-400 font-mono text-xs");
+                cell.colSpan = 6;
+                tbody.appendChild(row);
             }
         }
 
-        document.getElementById('shipment-creation-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submit-shipment-btn');
-            btn.disabled = true;
-            btn.innerText = "Registering Shipment in Backend...";
+        shipmentForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const origin = Number(document.getElementById("shipment-origin").value);
+            const destination = Number(document.getElementById("shipment-destination").value);
+            const goods = document.getElementById("goods-description").value.trim();
+            const weight = Number(document.getElementById("total-weight").value);
+            if (!currentUserOrgId) return showShipmentMessage("A verified customer organization is required.", "error");
+            if (!Number.isInteger(origin) || origin <= 0 || !Number.isInteger(destination) || destination <= 0 || origin === destination) return showShipmentMessage("Choose two different valid locations.", "error");
+            if (!goods || goods.length > 500 || !Number.isFinite(weight) || weight <= 0) return showShipmentMessage("Enter a cargo description and positive weight.", "error");
 
+            shipmentButton.disabled = true;
+            shipmentButton.textContent = "Creating shipment securely…";
+            showShipmentMessage("Submitting the shipment to KRIM's authorized backend workflow.", "info");
             try {
-                const origin = document.getElementById('shipment-origin').value;
-                const destination = document.getElementById('shipment-destination').value;
-                const goods_description = document.getElementById('goods-description').value;
-                const total_weight_kg = Number(document.getElementById('total-weight').value);
-
-                const { data, error } = await supabaseClient
-                    .from('krim_shipments')
-                    .insert([{
-                        origin,
-                        destination,
-                        goods_description,
-                        total_weight_kg,
-                        status: 'pending'
-                    }])
-                    .select();
-
+                const { data, error } = await supabaseClient.rpc("krim_create_global_shipment", {
+                    p_customer_organization_id: currentUserOrgId,
+                    p_origin_location_id: origin,
+                    p_destination_location_id: destination,
+                    p_goods_description: goods,
+                    p_total_weight_kg: weight
+                });
                 if (error) throw error;
-
-                alert("Shipment registered successfully!");
-                document.getElementById('shipment-creation-form').reset();
-                loadUserShipments();
-            } catch (err) {
-                alert("Failed to register shipment: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Register & Initialize Shipment →";
+                const shipment = Array.isArray(data) ? data[0] : data;
+                const shipmentId = shipment?.id || shipment?.shipment_id;
+                if (!shipmentId) throw new Error("The server did not return a shipment reference. Check your shipment list before retrying.");
+                showShipmentMessage("Shipment created. Opening the server-calculated quote flow…", "success");
+                window.location.href = "../public/shipper/rate-calculator.html?shipment_id=" + encodeURIComponent(shipmentId);
+            } catch (error) {
+                showShipmentMessage(error?.message || "Shipment creation failed. No success was recorded.", "error");
+                shipmentButton.disabled = false;
+                shipmentButton.textContent = "Register & Initialize Shipment →";
             }
         });
 

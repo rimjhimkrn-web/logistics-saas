@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Partner Quotes | KRIM Logistics</title>
+  <link rel="manifest" href="../../manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../config.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+      <div>
+        <p class="text-xs font-mono uppercase tracking-widest text-sky-700">KRIM Logistics OS</p>
+        <h1 class="text-xl font-bold">Partner Quotes</h1>
+      </div>
+      <nav class="flex flex-wrap gap-3 text-sm">
+        <a href="./active-shipments.html" class="text-slate-600 hover:text-sky-700">Shipments</a>
+        <a href="../../app/customer/index.html" class="text-slate-600 hover:text-sky-700">Workspace</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl space-y-6 px-4 py-8">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-xs font-mono uppercase tracking-widest text-sky-700">Verified partner network</p>
+          <h2 class="mt-1 text-2xl font-bold">Compare real partner bids</h2>
+          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">The estimate is not a binding price. Review submitted partner offers, award one only when you are ready, and continue once the selected partner accepts the assignment.</p>
+        </div>
+        <button id="refresh-quotes" type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Refresh bids</button>
+      </div>
+      <div id="opportunity-summary" class="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">Loading your shipment opportunity…</div>
+      <p id="partner-quotes-feedback" role="status" aria-live="polite" class="mt-4 text-sm"></p>
+    </section>
+
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-5 py-4">
+        <h3 class="font-bold">Available partner offers</h3>
+        <p class="mt-1 text-xs text-slate-500">Only offers visible to your authorized organization are shown.</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th class="px-4 py-3">Partner quote</th>
+              <th class="px-4 py-3">Partner</th>
+              <th class="px-4 py-3">Proposed total</th>
+              <th class="px-4 py-3">Valid until</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="partner-quotes-tbody" class="divide-y divide-slate-100">
+            <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Loading partner bids…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+      <strong>Price and tax notice:</strong> The selected partner bid becomes the customer-facing freight total. This interface does not calculate a separate jurisdiction-specific tax breakdown yet; tax invoice readiness and finance reconciliation remain production gates. Do not use this workflow for a live market until those controls are approved.
+    </section>
+  </main>
+
+  <script>
+    const client = window.KRIM_SUPABASE;
+    let currentUserOrgId = null;
+    let currentOpportunity = null;
+    let currentShipment = null;
+    const tbody = document.getElementById("partner-quotes-tbody");
+    const feedback = document.getElementById("partner-quotes-feedback");
+    const summary = document.getElementById("opportunity-summary");
+
+    function showMessage(message, kind) {
+      feedback.textContent = message;
+      feedback.className = "mt-4 text-sm " + (kind === "success" ? "text-emerald-700" : kind === "error" ? "text-rose-700" : "text-slate-600");
+    }
+    function addCell(row, value, className) {
+      const cell = document.createElement("td");
+      cell.className = className || "px-4 py-4";
+      cell.textContent = value == null || value === "" ? "—" : String(value);
+      row.appendChild(cell);
+      return cell;
+    }
+    function formatMoney(amount, currency) {
+      const value = Number(amount);
+      if (!Number.isFinite(value)) return "—";
+      try { return new Intl.NumberFormat("en-IN", { style: "currency", currency: currency || "INR" }).format(value); }
+      catch (_) { return String(currency || "") + " " + value.toFixed(2); }
+    }
+
+    async function initialize() {
+      try {
+        const { data: { session }, error: sessionError } = await client.auth.getSession();
+        if (sessionError || !session) {
+          window.location.href = "../../auth/login.html";
+          return;
+        }
+        const { data: membership, error: membershipError } = await client
+          .from("krim_organization_members")
+          .select("organization_id")
+          .eq("user_id", session.user.id)
+          .eq("status", "active")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (membershipError) throw membershipError;
+        if (!membership?.organization_id) throw new Error("An active customer organization is required.");
+        currentUserOrgId = membership.organization_id;
+
+        const { data: organization, error: orgError } = await client
+          .from("krim_organizations")
+          .select("organization_type")
+          .eq("id", currentUserOrgId)
+          .maybeSingle();
+        if (orgError) throw orgError;
+        if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+          window.location.href = "../../app/partner/index.html";
+          return;
+        }
+
+        await loadOpportunity();
+      } catch (error) {
+        showMessage(error?.message || "Unable to initialize partner quote comparison.", "error");
+      }
+    }
+
+    async function loadOpportunity() {
+      const requestedId = new URLSearchParams(window.location.search).get("opportunity_id");
+      let query = client.from("krim_partner_opportunities")
+        .select("id, shipment_id, opportunity_number, status, response_deadline, service_lane, customer_organization_id")
+        .eq("customer_organization_id", currentUserOrgId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (requestedId && /^\d+$/.test(requestedId)) query = client.from("krim_partner_opportunities")
+        .select("id, shipment_id, opportunity_number, status, response_deadline, service_lane, customer_organization_id")
+        .eq("customer_organization_id", currentUserOrgId)
+        .eq("id", Number(requestedId))
+        .limit(1);
+      const { data: opportunities, error } = await query;
+      if (error) throw error;
+      currentOpportunity = opportunities?.[0] || null;
+      if (!currentOpportunity) {
+        summary.textContent = "No partner opportunity is linked to this organization yet. Create a shipment and request partner bids first.";
+        tbody.replaceChildren();
+        const row = document.createElement("tr");
+        const cell = addCell(row, "No opportunity found.", "px-4 py-8 text-center text-slate-500");
+        cell.colSpan = 6;
+        tbody.appendChild(row);
+        return;
+      }
+
+      const { data: shipment, error: shipmentError } = await client
+        .from("krim_shipments")
+        .select("id, shipment_number, goods_description, total_weight_kg, status")
+        .eq("id", currentOpportunity.shipment_id)
+        .eq("customer_organization_id", currentUserOrgId)
+        .maybeSingle();
+      if (shipmentError) throw shipmentError;
+      currentShipment = shipment;
+      summary.textContent = "Opportunity " + currentOpportunity.opportunity_number +
+        " · Shipment " + (shipment?.shipment_number || currentOpportunity.shipment_id) +
+        " · Lane " + (currentOpportunity.service_lane || "not available") +
+        " · Status " + currentOpportunity.status +
+        (currentOpportunity.response_deadline ? " · Response deadline " + new Date(currentOpportunity.response_deadline).toLocaleString() : "");
+
+      if (currentOpportunity.status === "awarded") {
+        showMessage("A partner quote has already been awarded. Check assignment acceptance before payment.", "info");
+        const row = document.createElement("tr");
+        const cell = addCell(row, "Partner selection has been made. Use the assignment status page to check whether the partner accepted.", "px-4 py-8 text-center text-slate-500");
+        cell.colSpan = 6;
+        tbody.replaceChildren(row);
+        const statusLink = document.createElement("a");
+        statusLink.href = "./partner-quote-status.html?shipment_id=" + encodeURIComponent(currentOpportunity.shipment_id);
+        statusLink.textContent = "View assignment status";
+        statusLink.className = "mt-3 inline-block font-semibold text-sky-700 underline";
+        summary.appendChild(document.createElement("br"));
+        summary.appendChild(statusLink);
+        return;
+      }
+      if (currentOpportunity.status !== "open") {
+        showMessage("This opportunity is not open for new awards.", "info");
+        return;
+      }
+      await loadPartnerQuotes();
+    }
+
+    async function loadPartnerQuotes() {
+      showMessage("Loading partner offers…", "info");
+      const { data: quotes, error } = await client
+        .from("krim_partner_quotes")
+        .select("id, opportunity_id, shipment_id, partner_organization_id, quote_number, amount, currency_code, valid_until, status, submitted_at, notes")
+        .eq("opportunity_id", currentOpportunity.id)
+        .in("status", ["submitted", "under_review", "shortlisted"])
+        .order("amount", { ascending: true });
+      if (error) throw error;
+      tbody.replaceChildren();
+      if (!quotes?.length) {
+        const row = document.createElement("tr");
+        const cell = addCell(row, "No partner bids have arrived yet. Refresh this page after partners have had time to respond.", "px-4 py-8 text-center text-slate-500");
+        cell.colSpan = 6;
+        tbody.appendChild(row);
+        showMessage("No partner bids yet. The opportunity remains open until its response deadline.", "info");
+        return;
+      }
+
+      const partnerIds = [...new Set(quotes.map((quote) => quote.partner_organization_id).filter(Boolean))];
+      let organizations = [];
+      if (partnerIds.length) {
+        const { data, error: partnerError } = await client
+          .from("krim_organizations")
+          .select("id, display_name, legal_name")
+          .in("id", partnerIds);
+        if (!partnerError) organizations = data || [];
+      }
+      const names = new Map(organizations.map((org) => [String(org.id), org.display_name || org.legal_name || "Verified logistics partner"]));
+
+      for (const quote of quotes) {
+        const row = document.createElement("tr");
+        row.className = "hover:bg-slate-50";
+        addCell(row, quote.quote_number || ("Quote #" + quote.id), "px-4 py-4 font-mono font-semibold");
+        addCell(row, names.get(String(quote.partner_organization_id)) || "Verified logistics partner", "px-4 py-4");
+        addCell(row, formatMoney(quote.amount, quote.currency_code), "px-4 py-4 font-semibold");
+        addCell(row, quote.valid_until ? new Date(quote.valid_until).toLocaleString() : "No expiry provided", "px-4 py-4 text-xs text-slate-500");
+        addCell(row, quote.status, "px-4 py-4 uppercase text-xs");
+        const actionCell = document.createElement("td");
+        actionCell.className = "px-4 py-4 text-right";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "Award & Continue";
+        button.className = "rounded-lg bg-sky-700 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-600";
+        button.addEventListener("click", () => awardPartnerQuote(quote));
+        actionCell.appendChild(button);
+        row.appendChild(actionCell);
+        tbody.appendChild(row);
+      }
+      showMessage("Loaded " + quotes.length + " partner offer(s). Review the total before awarding.", "info");
+    }
+
+    async function awardPartnerQuote(quote) {
+      const price = formatMoney(quote.amount, quote.currency_code);
+      const approved = window.confirm(
+        "Award " + (quote.quote_number || ("partner quote #" + quote.id)) + " at " + price +
+        "? This creates the assignment and accepted customer quote. Payment will remain blocked until the partner accepts the assignment."
+      );
+      if (!approved) return;
+
+      showMessage("Awarding partner quote and creating the customer quote…", "info");
+      for (const button of tbody.querySelectorAll("button")) button.disabled = true;
+      try {
+        const { data, error } = await client.rpc("krim_award_partner_quote_for_checkout", {
+          p_partner_quote_id: Number(quote.id),
+          p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        });
+        if (error) throw error;
+        const customerQuote = Array.isArray(data) ? data[0] : data;
+        if (!customerQuote?.id || customerQuote.status !== "accepted" || !customerQuote.shipment_id) {
+          throw new Error("The server did not confirm an accepted customer quote. Check the quote list before retrying.");
+        }
+        showMessage("Partner award and accepted customer quote are recorded. Waiting for partner assignment acceptance before checkout.", "success");
+        window.location.href = "./partner-quote-status.html?shipment_id=" + encodeURIComponent(customerQuote.shipment_id) + "&quote_id=" + encodeURIComponent(customerQuote.id);
+      } catch (error) {
+        showMessage(error?.message || "Partner award failed. No success was recorded.", "error");
+        for (const button of tbody.querySelectorAll("button")) button.disabled = false;
+      }
+    }
+
+    document.getElementById("refresh-quotes").addEventListener("click", async () => {
+      try { await loadOpportunity(); }
+      catch (error) { showMessage(error?.message || "Refresh failed.", "error"); }
+    });
+    initialize();
+  </script>
+</body>
+</html>

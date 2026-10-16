@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Active Fleet Telemetry & Consignments</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
+    <script src="../../config.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
@@ -57,7 +57,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="../../app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -100,27 +100,51 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Active Fleet © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/booking-request.html" class="hover:text-slate-800 transition">Book Shipment</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="./booking-request.html" class="hover:text-slate-800 transition">Book Shipment</a>
+                <a href="../../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
 
     <!-- Active Fleet Script -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.KRIM_SUPABASE;
+        let currentUserOrgId = null;
 
         async function initActiveFleet() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../../auth/login.html";
+                    return;
+                }
+                document.getElementById("session-identity-node").textContent = "Node: " + (session.user.email || "Signed-in user");
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .order("created_at", { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) throw new Error("An active customer organization is required.");
+                currentUserOrgId = membership.organization_id;
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    window.location.href = "../../app/partner/index.html";
+                    return;
+                }
+                await loadActiveShipments();
+            } catch (error) {
+                console.error("Shipment list initialization failed:", error);
+                document.getElementById("session-identity-node").textContent = "Shipment data unavailable";
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
-            loadActiveShipments();
         }
 
         function escapeFleetText(value) {
@@ -137,9 +161,21 @@
                 const { data, error } = await supabaseClient
                     .from("krim_shipments")
                     .select("id, shipment_number, origin_location_id, destination_location_id, goods_description, total_weight_kg, status, created_at")
+                    .eq("customer_organization_id", currentUserOrgId)
                     .order("created_at", { ascending: false });
 
                 if (error) throw error;
+                const locationIds = [...new Set((data || []).flatMap((shipment) => [shipment.origin_location_id, shipment.destination_location_id]).filter(Boolean))];
+                let locations = [];
+                if (locationIds.length) {
+                    const { data: locationRows, error: locationError } = await supabaseClient
+                        .from("krim_locations")
+                        .select("id, city, location_code, state_region")
+                        .in("id", locationIds);
+                    if (locationError) throw locationError;
+                    locations = locationRows || [];
+                }
+                const locationById = new Map(locations.map((location) => [String(location.id), [location.city, location.state_region, location.location_code].filter(Boolean).join(" · ") || ("Location #" + location.id)]));
 
                 if (!Array.isArray(data) || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No shipments are currently available to this account.</td></tr>';
@@ -149,8 +185,8 @@
                 tbody.innerHTML = data.map(function (shipment) {
                     const id = Number(shipment.id);
                     if (!Number.isSafeInteger(id) || id <= 0) return "";
-                    const origin = escapeFleetText(shipment.origin_location_id ?? "—");
-                    const destination = escapeFleetText(shipment.destination_location_id ?? "—");
+                    const origin = escapeFleetText(locationById.get(String(shipment.origin_location_id)) || ("Location #" + (shipment.origin_location_id ?? "—")));
+                    const destination = escapeFleetText(locationById.get(String(shipment.destination_location_id)) || ("Location #" + (shipment.destination_location_id ?? "—")));
                     const goods = escapeFleetText(shipment.goods_description || "Goods not specified");
                     const status = escapeFleetText(shipment.status || "unknown");
                     const weight = Number(shipment.total_weight_kg);
@@ -165,8 +201,8 @@
                             <td class="py-4 px-4 font-mono text-slate-600">${weightText}</td>
                             <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold text-amber-600 bg-amber-50 border-amber-200">${status}</span></td>
                             <td class="py-4 px-4 text-right space-x-2">
-                                <a href="/logistics-saas/public/shipper/shipment-details.html?shipment_id=${id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">Details →</a>
-                                <a href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id=${id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">Calculate Rate →</a>
+                                <a href="./shipment-details.html?shipment_id=${id}" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition border border-slate-300">Details →</a>
+                                <a href="./rate-calculator.html?shipment_id=${id}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">Calculate Rate →</a>
                             </td>
                         </tr>`;
                 }).join("");
