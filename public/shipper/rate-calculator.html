@@ -129,31 +129,43 @@
         let loadedShipmentData = null;
 
         async function initCalculator() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipmentId = urlParams.get('shipment_id');
-            if (shipmentId) {
-                document.getElementById('calc-shipment-id').value = shipmentId;
-                fetchShipmentWeight(shipmentId);
-            }
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !session) {
                 window.location.href = "/logistics-saas/auth/login.html";
                 return;
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+            document.getElementById('session-identity-node').textContent = "Node: " + session.user.email;
+
+            const shipmentId = new URLSearchParams(window.location.search).get('shipment_id');
+            if (shipmentId) {
+                document.getElementById('calc-shipment-id').value = shipmentId;
+                try {
+                    await fetchShipmentWeight(shipmentId);
+                } catch (err) {
+                    document.getElementById('calculator-feedback').textContent =
+                        "Shipment could not be loaded: " + (err.message || "Unknown error");
+                    document.getElementById('calculator-feedback').className = "text-sm font-semibold text-red-700";
+                }
+            }
         }
 
         async function fetchShipmentWeight(id) {
-            try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
-                if (data) {
-                    loadedShipmentData = data;
-                    calculateRate();
-                }
-            } catch (err) {
-                console.error("Error fetching shipment weight:", err);
+            const { data, error } = await supabaseClient
+                .from("krim_shipments")
+                .select("id, customer_organization_id, total_weight_kg, status")
+                .eq("id", id)
+                .single();
+            if (error) {
+                loadedShipmentData = null;
+                throw error;
             }
+            if (!data) {
+                loadedShipmentData = null;
+                throw new Error("Shipment record was not returned for this account.");
+            }
+            loadedShipmentData = data;
+            calculateRate();
+            return data;
         }
 
         function calculateRate() {
@@ -173,9 +185,16 @@
         }
 
         document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
-        document.getElementById('calc-shipment-id').addEventListener('blur', function() {
+        document.getElementById('calc-shipment-id').addEventListener('blur', async function() {
             const id = this.value.trim();
-            if (id) fetchShipmentWeight(id);
+            if (!id) return;
+            try {
+                await fetchShipmentWeight(id);
+            } catch (err) {
+                document.getElementById('calculator-feedback').textContent =
+                    "Shipment could not be loaded: " + (err.message || "Unknown error");
+                document.getElementById('calculator-feedback').className = "text-sm font-semibold text-red-700";
+            }
         });
 
         document.getElementById('form-calculator').addEventListener('submit', async function(e) {
