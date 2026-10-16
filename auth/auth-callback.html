@@ -5,38 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KRIM OS — Authenticating Session...</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
 </head>
 <body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans text-center">
   <div class="w-12 h-12 mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-xl text-cyan-400 animate-pulse">⚡</div>
   <h1 class="text-lg font-bold text-white">Verifying Identity Token...</h1>
   <p id="status-text" class="text-xs text-slate-400 mt-1 font-mono">Exchanging PKCE authorization code with Supabase backend.</p>
 
-  <script type="module">
-    import { supabase, AUTH_ROUTES } from './js/auth-core.js';
-
+  <script>
     async function handleAuthCallback() {
-      const statusText = document.getElementById('status-text');
+      const statusText = document.getElementById("status-text");
+      try {
+        const client = window.KRIM_SUPABASE;
+        if (!client) throw new Error("Secure authentication client is unavailable.");
+        const { data: { session }, error } = await client.auth.getSession();
+        if (error) throw error;
+        if (!session) throw new Error("Verification session was not found or has expired.");
 
-      // Detect session automatically parsed by Supabase JS client from hash/query params
-      const { data: { session }, error } = await supabase.auth.getSession();
+        const accountType = session.user.user_metadata?.krim_account_type === "partner" ? "partner" : "customer";
+        const organizationName = String(session.user.user_metadata?.company_name || (session.user.email ? session.user.email.split("@")[0] + " Workspace" : "")).trim();
+        const rpcName = accountType === "partner" ? "krim_provision_partner_organization" : "krim_provision_customer_organization";
+        const { data: organizationId, error: provisionError } = await client.rpc(rpcName, { p_legal_name: organizationName });
+        if (provisionError) throw provisionError;
+        if (!organizationId) throw new Error("Organization setup was not confirmed. Please sign in to retry.");
 
-      if (error || !session) {
-        statusText.innerText = "Authentication failed or token expired. Redirecting to login...";
-        setTimeout(() => window.location.href = AUTH_ROUTES.SIGN_IN, 2000);
-        return;
+        const { data: mfaData, error: mfaError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (mfaError) throw mfaError;
+        if (mfaData?.nextLevel === "aal2" && mfaData?.currentLevel !== "aal2") {
+          window.location.href = "./mfa-challenge.html";
+          return;
+        }
+        statusText.textContent = "Identity verified. Opening your workspace…";
+        window.location.href = accountType === "partner" ? "../app/partner/index.html" : "../app/customer/index.html";
+      } catch (error) {
+        statusText.textContent = (error?.message || "Authentication failed.") + " Redirecting to sign in…";
+        setTimeout(() => { window.location.href = "./login.html"; }, 2500);
       }
-
-      // Check MFA requirement (AAL level)
-      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
-        window.location.href = AUTH_ROUTES.MFA_CHALLENGE;
-        return;
-      }
-
-      statusText.innerText = "Identity verified! Launching workspace...";
-      setTimeout(() => window.location.href = AUTH_ROUTES.DASHBOARD, 1000);
     }
-
     handleAuthCallback();
   </script>
 </body>
