@@ -125,68 +125,106 @@
     <script>
         const supabaseClient = window.KRIM_SUPABASE;
         let loadedShipmentData = null;
+        let currentUserOrgId = null;
 
         async function initCalculator() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipmentId = urlParams.get('shipment_id');
-            if (shipmentId) {
-                document.getElementById('calc-shipment-id').value = shipmentId;
-                fetchShipmentWeight(shipmentId);
-            }
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = "../../auth/login.html";
+                    return;
+                }
+                document.getElementById("session-identity-node").textContent = "Node: " + (session.user.email || "Signed-in user");
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "../../auth/login.html";
-                return;
+                const { data: membership, error: membershipError } = await supabaseClient
+                    .from("krim_organization_members")
+                    .select("organization_id")
+                    .eq("user_id", session.user.id)
+                    .eq("status", "active")
+                    .order("created_at", { ascending: true })
+                    .limit(1)
+                    .maybeSingle();
+                if (membershipError) throw membershipError;
+                if (!membership?.organization_id) throw new Error("An active customer organization is required.");
+                currentUserOrgId = membership.organization_id;
+
+                const { data: organization, error: organizationError } = await supabaseClient
+                    .from("krim_organizations")
+                    .select("organization_type")
+                    .eq("id", currentUserOrgId)
+                    .maybeSingle();
+                if (organizationError) throw organizationError;
+                if (!organization || !["customer", "enterprise"].includes(organization.organization_type)) {
+                    window.location.href = "../../app/partner/index.html";
+                    return;
+                }
+
+                const shipmentId = new URLSearchParams(window.location.search).get("shipment_id");
+                if (shipmentId) {
+                    document.getElementById("calc-shipment-id").value = shipmentId;
+                    await fetchShipmentWeight(shipmentId);
+                }
+            } catch (error) {
+                document.getElementById("calculator-feedback").textContent = error?.message || "Quote workflow could not be initialized.";
+                document.getElementById("calculator-feedback").className = "text-sm font-semibold text-red-700";
+                document.getElementById("btn-commit-quote").disabled = true;
             }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
         }
 
         async function fetchShipmentWeight(id) {
+            loadedShipmentData = null;
             try {
-                const { data, error } = await supabaseClient.from('krim_shipments').select('*').eq('id', id).single();
-                if (data) {
-                    loadedShipmentData = data;
-                    calculateRate();
-                }
-            } catch (err) {
-                console.error("Error fetching shipment weight:", err);
+                const { data, error } = await supabaseClient
+                    .from("krim_shipments")
+                    .select("id, shipment_number, customer_organization_id, total_weight_kg, status")
+                    .eq("id", Number(id))
+                    .eq("customer_organization_id", currentUserOrgId)
+                    .maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error("Shipment was not found in your organization.");
+                loadedShipmentData = data;
+                calculateRate();
+                return data;
+            } catch (error) {
+                console.error("Authorized shipment lookup failed:", error);
+                loadedShipmentData = null;
+                document.getElementById("preview-amount").textContent = "Load a valid shipment first";
+                return null;
             }
         }
 
         function calculateRate() {
-            const tier = document.getElementById('calc-service-tier').value;
+            const tier = document.getElementById("calc-service-tier").value;
             if (!loadedShipmentData || !Number(loadedShipmentData.total_weight_kg)) {
-                document.getElementById('preview-amount').innerText = "Load a valid shipment first";
+                document.getElementById("preview-amount").textContent = "Load a valid shipment first";
                 return null;
             }
             const weight = Number(loadedShipmentData.total_weight_kg);
-            let ratePerKg = 15;
-            if (tier === 'air_priority') ratePerKg = 45;
-            if (tier === 'heavy_haul') ratePerKg = 10;
+            const ratePerKg = tier === "air_priority" ? 45 : tier === "heavy_haul" ? 10 : 15;
             const total = weight * ratePerKg;
-            document.getElementById('preview-amount').innerText =
-                `Indicative estimate: ₹${total.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})} — server will calculate the final quote`;
+            document.getElementById("preview-amount").textContent =
+                "Indicative estimate only: ₹" + total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+                " — final customer price comes from verified partner bids";
             return total;
         }
 
-        document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
-        document.getElementById('calc-shipment-id').addEventListener('blur', function() {
+        document.getElementById("calc-service-tier").addEventListener("change", calculateRate);
+        document.getElementById("calc-shipment-id").addEventListener("blur", function() {
             const id = this.value.trim();
-            if (id) fetchShipmentWeight(id);
+            if (id && currentUserOrgId) fetchShipmentWeight(id);
         });
 
-        document.getElementById('form-calculator').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-commit-quote');
-            const feedback = document.getElementById('calculator-feedback');
-            btn.disabled = true;
-            btn.innerText = "Requesting Server-Calculated Quote...";
+        document.getElementById("form-calculator").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const button = document.getElementById("btn-commit-quote");
+            const feedback = document.getElementById("calculator-feedback");
+            button.disabled = true;
+            button.textContent = "Requesting Partner Bids…";
             feedback.textContent = "";
 
             try {
-                const shipmentId = document.getElementById('calc-shipment-id').value.trim();
-                const tier = document.getElementById('calc-service-tier').value;
+                const shipmentId = document.getElementById("calc-shipment-id").value.trim();
+                const tier = document.getElementById("calc-service-tier").value;
                 if (!/^\d+$/.test(shipmentId)) throw new Error("Enter a valid shipment ID.");
                 if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
                     await fetchShipmentWeight(shipmentId);
@@ -195,23 +233,25 @@
                     throw new Error("Shipment could not be loaded. Check the ID and your organization access.");
                 }
 
-                const { data, error } = await supabaseClient.rpc('krim_create_tariff_quote', {
+                const { data, error } = await supabaseClient.rpc("krim_create_partner_opportunity", {
                     p_shipment_id: Number(shipmentId),
-                    p_service_tier: tier,
-                    p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                    p_response_deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+                    p_service_tier: tier
                 });
                 if (error) throw error;
-                if (!data || !data.id) throw new Error("The server did not return a quotation reference.");
+                const opportunity = Array.isArray(data) ? data[0] : data;
+                if (!opportunity?.id) throw new Error("The server did not return a partner opportunity reference.");
 
-                feedback.innerHTML = "<p class='text-emerald-600 font-semibold'>Server-calculated quote created. Open Spot Approvals to review and accept it.</p>";
-                setTimeout(() => {
-                    window.location.href = "./spot-approvals.html";
-                }, 1000);
-            } catch (err) {
-                feedback.textContent = "Quote creation failed: " + (err.message || "Unknown error");
+                feedback.textContent = "Partner opportunity opened. You can compare verified partner bids as they arrive.";
+                feedback.className = "text-sm font-semibold text-emerald-700";
+                setTimeout(function() {
+                    window.location.href = "./partner-quotes.html?opportunity_id=" + encodeURIComponent(opportunity.id);
+                }, 900);
+            } catch (error) {
+                feedback.textContent = "Partner bid request failed: " + (error?.message || "Unknown error");
                 feedback.className = "text-sm font-semibold text-red-700";
-                btn.disabled = false;
-                btn.innerText = "Request Quote & Review →";
+                button.disabled = false;
+                button.textContent = "Request Partner Bids & Compare Offers →";
             }
         });
 
