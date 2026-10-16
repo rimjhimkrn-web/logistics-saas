@@ -160,10 +160,11 @@ async function renderPrivacy() {
   f.addEventListener("submit",async e=>{
     e.preventDefault();
     const choices={marketing_email:marketing.checked,product_analytics:analytics.checked,personalization:personalization.checked};
-    for(const [consent_type,granted] of Object.entries(choices)){
-      const {error}=await supabase.from("krim_user_consent_events").insert({user_id:user.id,consent_type,granted,policy_version:"2026-10"});
-      if(error) throw error;
-    }
+    const consentRows = Object.entries(choices).map(([consent_type,granted]) => ({
+      user_id:user.id, consent_type, granted, policy_version:"2026-10"
+    }));
+    const {error:consentError}=await supabase.from("krim_user_consent_events").insert(consentRows);
+    if(consentError) throw consentError;
     await savePreferences({...prefs,privacy:choices},"privacy_settings_saved");
     const {data,error}=await supabase.from("krim_user_consent_events").select("consent_type,granted,policy_version,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(12);
     if(error) throw error;
