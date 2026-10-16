@@ -41,9 +41,54 @@ class AppRuntime {
     currencySelectEl?.addEventListener("change", (e) => {
       store.setCurrency(e.target.value).catch(error => console.error("[KRIM] Preference save failed:", error));
     });
+    document.getElementById("org-switcher-btn")?.addEventListener("click", () => {
+      document.getElementById("krim-org-switcher-modal")?.remove();
+      if (!store.state.user) { this.showRuntimeMessage("Sign in to switch organizations."); return; }
+      if (!store.state.availableOrgs.length) { this.showRuntimeMessage("No active organization membership was returned by the backend."); return; }
+      const modal = document.createElement("div");
+      modal.id = "krim-org-switcher-modal";
+      modal.className = "fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4";
+      const panel = document.createElement("div");
+      panel.className = "w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-4 space-y-2";
+      const heading = document.createElement("h2");
+      heading.className = "font-bold text-white mb-3";
+      heading.textContent = "Choose an authorized organization";
+      panel.append(heading);
+      for (const org of store.state.availableOrgs) {
+        const choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = "block w-full rounded-lg bg-slate-800 p-3 text-left text-sm hover:bg-slate-700";
+        choice.textContent = org.name + " · " + (org.role || "member");
+        choice.addEventListener("click", async () => {
+          choice.disabled = true;
+          try { await store.setOrganization(org.id); modal.remove(); }
+          catch (error) { this.showRuntimeMessage(error?.message || "Organization switch failed."); }
+          finally { choice.disabled = false; }
+        });
+        panel.append(choice);
+      }
+      const close = document.createElement("button");
+      close.type = "button"; close.className = "mt-2 rounded-lg border border-slate-700 px-3 py-2 text-xs";
+      close.textContent = "Close"; close.addEventListener("click", () => modal.remove());
+      panel.append(close); modal.append(panel);
+      modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
+      document.body.append(modal);
+    });
     store.subscribe((state, key) => {
       if (["ORGANIZATION_CHANGED","CURRENCY_CHANGED","INITIALIZED"].includes(key)) refresh(state);
     });
+  }
+
+  showRuntimeMessage(message) {
+    let box = document.getElementById("krim-runtime-message");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "krim-runtime-message";
+      box.className = "fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-slate-700 bg-slate-900 p-4 text-sm text-white shadow-xl";
+      document.body.append(box);
+    }
+    box.textContent = message;
+    window.setTimeout(() => box?.remove(), 5000);
   }
 
   registerGlobalShortcuts() {
