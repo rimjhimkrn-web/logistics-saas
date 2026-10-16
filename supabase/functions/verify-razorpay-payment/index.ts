@@ -297,16 +297,19 @@ error:
 // Global payment only
 // --------------------------------------------------
 
-if (
-!paymentOrder.krim_shipment_id ||
-!paymentOrder.krim_quote_id ||
-!paymentOrder.partner_quote_id ||
-!paymentOrder.customer_organization_id
-) {
+if (!paymentOrder.krim_shipment_id) {
 return jsonResponse(
 {
-error:
-"This payment order is not linked to a global KRIM shipment",
+error: "This payment order is not linked to a global KRIM shipment",
+},
+400
+);
+}
+
+if (!legacyAlreadyPaid && (!paymentOrder.krim_quote_id || !paymentOrder.partner_quote_id || !paymentOrder.customer_organization_id)) {
+return jsonResponse(
+{
+error: "This payment order is not bound to a partner-awarded customer quote.",
 },
 400
 );
@@ -336,6 +339,9 @@ error:
 const alreadyPaid =
 paymentOrder.status === "paid" &&
 paymentOrder.razorpay_payment_id === razorpayPaymentId;
+
+const legacyAlreadyPaid = alreadyPaid &&
+(!paymentOrder.krim_quote_id || !paymentOrder.partner_quote_id || !paymentOrder.customer_organization_id);
 
 if (paymentOrder.status === "paid" && !alreadyPaid) {
 return jsonResponse({
@@ -446,62 +452,72 @@ error:
 // Verify the exact quote and accepted partner assignment
 // --------------------------------------------------
 
-if (paymentOrder.customer_organization_id !== shipment.customer_organization_id) {
-return jsonResponse({ error: "Payment order organization does not match the shipment." }, 403);
+if (!legacyAlreadyPaid) {
+  // Verify the exact quote and accepted partner assignment
+  // --------------------------------------------------
+  
+  if (paymentOrder.customer_organization_id !== shipment.customer_organization_id) {
+  return jsonResponse({ error: "Payment order organization does not match the shipment." }, 403);
+  }
+  
+  const {
+  data: acceptedQuote,
+  error: acceptedQuoteError,
+  } = await supabase
+  .from("krim_quotes")
+  .select("id, shipment_id, customer_organization_id, partner_quote_id, amount, currency_code, status, valid_until")
+  .eq("id", paymentOrder.krim_quote_id)
+  .eq("shipment_id", shipment.id)
+  .eq("customer_organization_id", shipment.customer_organization_id)
+  .eq("partner_quote_id", paymentOrder.partner_quote_id)
+  .maybeSingle();
+  
+  if (acceptedQuoteError) {
+  console.error("Accepted quote verification lookup failed:", acceptedQuoteError);
+  return jsonResponse({ error: "Unable to verify the accepted customer quote." }, 500);
+  }
+  
+  if (!acceptedQuote || acceptedQuote.status !== "accepted") {
+  return jsonResponse({ error: "The payment order is not bound to an accepted customer quote." }, 409);
+  }
+  
+  if (acceptedQuote.valid_until && new Date(acceptedQuote.valid_until).getTime() <= Date.now()) {
+  return jsonResponse({ error: "The accepted customer quote has expired." }, 409);
+  }
+  
+  if (Math.round(Number(acceptedQuote.amount) * 100) !== Number(paymentOrder.amount_paise)
+      || String(acceptedQuote.currency_code || "").toUpperCase() !== String(paymentOrder.currency || "").toUpperCase()) {
+  return jsonResponse({ error: "Payment order amount or currency does not match the accepted customer quote." }, 400);
+  }
+  
+  const {
+  data: acceptedAssignment,
+  error: acceptedAssignmentError,
+  } = await supabase
+  .from("krim_shipment_partner_assignments")
+  .select("id, status, partner_quote_id")
+  .eq("shipment_id", shipment.id)
+  .eq("partner_quote_id", acceptedQuote.partner_quote_id)
+  .order("created_at", { ascending: false })
+  .limit(1)
+  .maybeSingle();
+  
+  if (acceptedAssignmentError) {
+  console.error("Partner assignment verification lookup failed:", acceptedAssignmentError);
+  return jsonResponse({ error: "Unable to verify partner assignment acceptance." }, 500);
+  }
+  
+  if (!acceptedAssignment || acceptedAssignment.status !== "accepted") {
+  return jsonResponse({ error: "Partner assignment is not accepted; payment verification is blocked." }, 409);
+  }
+  
+  // --------------------------------------------------
+} else {
+  // Legacy paid orders have no quote binding; only recover their idempotent financial record.
+  // They cannot be used to create or verify a new payment.
+  console.warn("Recovering an already-paid legacy order without quote binding:", paymentOrder.id);
 }
 
-const {
-data: acceptedQuote,
-error: acceptedQuoteError,
-} = await supabase
-.from("krim_quotes")
-.select("id, shipment_id, customer_organization_id, partner_quote_id, amount, currency_code, status, valid_until")
-.eq("id", paymentOrder.krim_quote_id)
-.eq("shipment_id", shipment.id)
-.eq("customer_organization_id", shipment.customer_organization_id)
-.eq("partner_quote_id", paymentOrder.partner_quote_id)
-.maybeSingle();
-
-if (acceptedQuoteError) {
-console.error("Accepted quote verification lookup failed:", acceptedQuoteError);
-return jsonResponse({ error: "Unable to verify the accepted customer quote." }, 500);
-}
-
-if (!acceptedQuote || acceptedQuote.status !== "accepted") {
-return jsonResponse({ error: "The payment order is not bound to an accepted customer quote." }, 409);
-}
-
-if (acceptedQuote.valid_until && new Date(acceptedQuote.valid_until).getTime() <= Date.now()) {
-return jsonResponse({ error: "The accepted customer quote has expired." }, 409);
-}
-
-if (Math.round(Number(acceptedQuote.amount) * 100) !== Number(paymentOrder.amount_paise)
-    || String(acceptedQuote.currency_code || "").toUpperCase() !== String(paymentOrder.currency || "").toUpperCase()) {
-return jsonResponse({ error: "Payment order amount or currency does not match the accepted customer quote." }, 400);
-}
-
-const {
-data: acceptedAssignment,
-error: acceptedAssignmentError,
-} = await supabase
-.from("krim_shipment_partner_assignments")
-.select("id, status, partner_quote_id")
-.eq("shipment_id", shipment.id)
-.eq("partner_quote_id", acceptedQuote.partner_quote_id)
-.order("created_at", { ascending: false })
-.limit(1)
-.maybeSingle();
-
-if (acceptedAssignmentError) {
-console.error("Partner assignment verification lookup failed:", acceptedAssignmentError);
-return jsonResponse({ error: "Unable to verify partner assignment acceptance." }, 500);
-}
-
-if (!acceptedAssignment || acceptedAssignment.status !== "accepted") {
-return jsonResponse({ error: "Partner assignment is not accepted; payment verification is blocked." }, 409);
-}
-
-// --------------------------------------------------
 // Verify Razorpay signature
 // --------------------------------------------------
 
