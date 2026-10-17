@@ -150,6 +150,7 @@
                 .from("krim_quotes")
                 .select("id, shipment_id, amount, currency_code, status, valid_until, partner_quote_id")
                 .eq("shipment_id", Number(shipmentId))
+                .eq("status", "accepted")
                 .order("created_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
