@@ -173,6 +173,25 @@
                 return;
             }
 
+            // Mirror the server-side checkout guard so customers are not offered
+            // payment until the awarded partner has accepted the shipment assignment.
+            const { data: assignment, error: assignmentError } = await supabaseClient
+                .from("krim_shipment_partner_assignments")
+                .select("id, status")
+                .eq("shipment_id", Number(shipmentId))
+                .eq("partner_quote_id", quote.partner_quote_id)
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (assignmentError || !assignment || assignment.status !== "accepted") {
+                showCheckoutMessage(
+                    "Checkout is locked until the selected partner accepts the shipment assignment. No payment order has been created.",
+                    "info"
+                );
+                return;
+            }
+
             if (quote.status !== "accepted") {
                 showCheckoutMessage(
                     quote.status === "sent"
