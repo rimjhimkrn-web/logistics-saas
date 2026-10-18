@@ -67,7 +67,7 @@ $("export-csv").addEventListener("click",function(){
  if(!filtered.length){$("last-updated").textContent="Nothing to export";return;}
  const cols=[...new Set(filtered.flatMap(r=>Object.keys(r)))];
  const csv=[cols.map(csvCell).join(","),...filtered.map(r=>cols.map(k=>csvCell(r[k]&&typeof r[k]==="object"?JSON.stringify(r[k]):r[k])).join(","))].join("\r\n");
- const blob=new Blob(["\\uFEFF",csv],{type:"text/csv;charset=utf-8;"});
+ const blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="krim-"+page+"-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
  $("last-updated").textContent="Exported "+filtered.length+" rows";
 });
