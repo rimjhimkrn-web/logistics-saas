@@ -10,6 +10,7 @@ const required = [
   "public/partner/dispatch-assignment.html",
   "config.js",
   "platform/krim-supabase.js",
+  "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
 ];
 
 const failures = [];
