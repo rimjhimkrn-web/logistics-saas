@@ -254,6 +254,9 @@
                             if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
                                 throw new Error("Razorpay returned an incomplete payment response.");
                             }
+                            if (response.razorpay_order_id !== order.razorpay_order_id) {
+                                throw new Error("Payment order reference mismatch. Do not retry until payment status is checked.");
+                            }
                             const { data: verification, error: verifyError } = await supabaseClient.functions.invoke(
                                 "verify-razorpay-payment",
                                 { body: {
