@@ -163,8 +163,10 @@
         p_service_tier: tier
       });
       if (opportunityError) {
-        message("Shipment " + (shipment.shipment_number || "#" + shipmentId) + " was created, but the partner bid request failed: " + opportunityError.message + ". Open My shipments; do not create a duplicate shipment.", "error");
-        button.textContent = "Shipment created — request needs attention";
+        message("Shipment " + (shipment.shipment_number || "#" + shipmentId) + " was created, but the partner bid request failed: " + opportunityError.message + ". Opening My shipments so you can review the saved shipment; do not submit again.", "error");
+        button.disabled = true;
+        button.textContent = "Opening My shipments…";
+        setTimeout(() => { window.location.href = "shipment-list.html"; }, 2500);
         return;
       }
       message("Shipment " + (shipment.shipment_number || "#" + shipmentId) + " created and sent to the partner network. Bids and assignment still require real partner participation.", "success");
