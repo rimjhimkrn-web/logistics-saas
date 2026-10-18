@@ -1,1 +1,33 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f8fafc"><title>KRIM Logistics | Operations Dashboard</title><meta name="description" content="Live operations overview for authorized KRIM users. Review shipment status, route records, and operational exceptions from Supabase."></head><body data-operations-page="operations-dashboard"><p style="padding:24px;font:16px system-ui;color:#334155">Loading KRIM Operations…</p><script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";window.KRIM_BASE=b;["public/operations/operations-pages.css","core/krim-unified-page.css"].forEach(function(x){var l=document.createElement("link");l.rel="stylesheet";l.href=b+x;document.head.appendChild(l)});var c=document.createElement("script");c.src=b+"platform/krim-config.js";c.onload=function(){var s=document.createElement("script");s.src=b+"public/operations/operations-pages.js";document.body.appendChild(s)};c.onerror=function(){document.body.textContent="KRIM configuration could not be loaded."};document.body.appendChild(c)})();</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f8fafc"><title>KRIM Logistics | Operations Dashboard</title><meta name="description" content="Live operations overview for authorized KRIM users. Review shipment status, route records, and operational exceptions from Supabase."></head><body data-operations-page="operations-dashboard">
+  <main aria-live="polite" style="max-width:760px;margin:12vh auto;padding:24px;font:16px/1.6 system-ui,sans-serif;color:#334155">
+    <p>Loading KRIM Operations…</p>
+    <noscript>JavaScript is required to use the KRIM operations workspace.</noscript>
+  </main>
+  <script>
+  (function () {
+    "use strict";
+    var path = location.pathname;
+    var base = path.indexOf("/logistics-saas/") === 0 ? "/logistics-saas/" : "/";
+    window.KRIM_BASE = base;
+    ["public/operations/operations-pages.css", "core/krim-unified-page.css"].forEach(function (file) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = base + file;
+      document.head.appendChild(link);
+    });
+    function showError(message) {
+      document.body.innerHTML = '<main role="alert" style="max-width:760px;margin:12vh auto;padding:24px;font:16px/1.6 system-ui,sans-serif;color:#334155"><h1>KRIM Operations unavailable</h1><p>' + message + '</p><a href="' + base + 'public/index.html">Return to KRIM home</a></main>';
+    }
+    var config = document.createElement("script");
+    config.src = base + "platform/krim-config.js";
+    config.onload = function () {
+      var app = document.createElement("script");
+      app.src = base + "public/operations/operations-pages.js";
+      app.onerror = function () { showError("The operations workbench could not be loaded. Please try again later."); };
+      document.body.appendChild(app);
+    };
+    config.onerror = function () { showError("Platform configuration could not be loaded."); };
+    document.body.appendChild(config);
+  }());
+  </script>
+</body></html>
