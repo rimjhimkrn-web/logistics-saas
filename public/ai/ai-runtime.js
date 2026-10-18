@@ -139,7 +139,7 @@
             .from("ai_conversations")
             .insert({
               user_id: sessionData.session.user.id,
-              user_role: "user",
+              user_role: "customer",
               title: (entries[0]?.[1] || page).slice(0, 160),
               status: "active"
             })
