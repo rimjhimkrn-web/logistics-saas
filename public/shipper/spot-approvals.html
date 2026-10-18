@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Spot Approvals & Carrier Governance</title>
-    <link rel="manifest" href="/logistics-saas/logistics-saas/logistics-saas/manifest.json">
+    <link rel="manifest" href="/logistics-saas/manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,7 +59,7 @@
                 </div>
             </div>
             
-            <a href="/logistics-saas/logistics-saas/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
+            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
                 ← Workspace
             </a>
         </div>
@@ -102,8 +102,8 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Spot Governance © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/logistics-saas/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/logistics-saas/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
+                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
+                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
             </div>
         </div>
     </footer>
@@ -118,7 +118,7 @@
         async function initSpotApprovals() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
-                window.location.href = "/logistics-saas/logistics-saas/logistics-saas/logistics-saas/logistics-saas/auth/login.html";
+                window.location.href = "/logistics-saas/auth/login.html";
                 return;
             }
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
@@ -175,7 +175,7 @@
                     if (status === "sent" && Number.isInteger(id) && id > 0) {
                         action = '<button type="button" onclick="acceptGlobalQuote(' + id + ')" class="bg-slate-900 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Accept Quote</button>';
                     } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0 && Number(q.partner_quote_id) > 0) {
-                        action = '<a href="/logistics-saas/logistics-saas/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
+                        action = '<a href="/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
                     } else if (status === "accepted" && !Number(q.partner_quote_id)) {
                         action = '<span class="text-xs text-amber-700">Waiting for verified partner award and assignment acceptance</span>';
                     } else if (status === "pending" || status === "draft" || status === "quoted") {
