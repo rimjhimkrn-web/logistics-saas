@@ -11,6 +11,7 @@ const required = [
   "config.js",
   "platform/krim-supabase.js",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
+  "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
 ];
 
 const failures = [];
@@ -51,6 +52,8 @@ if (existsSync(pricingMigration)) {
   if (!/Tariff quote unavailable: no approved active rate card is configured/i.test(sql)) {
     failures.push("Fail-closed tariff pricing guard missing from migration.");
   }
+} else {
+  failures.push("Required fail-closed tariff pricing migration is missing.");
 }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked.`);
