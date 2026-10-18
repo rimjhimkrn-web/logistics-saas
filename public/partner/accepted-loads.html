@@ -1,67 +1,57 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Accepted Loads & Contracts</title>
-    <meta name="description" content="Manage confirmed freight contracts and assigned shipments inside KRIM OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_4 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Partner — Assignment Offers</title>
+<meta name="description" content="Review and accept or reject live KRIM shipment assignment offers.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<script>(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l)}())</script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-emerald-400 font-semibold uppercase">Accepted Loads</span>
-                </div>
-            </div>
-            <a href="/public/partner/dispatch-assignment.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Dispatch Assignment →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Partner Operations • Step 16 of 35</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Accepted Loads & Contracts</h1>
-            <p class="text-slate-400 text-xs font-mono">Confirmed institutional shipments ready for asset allocation, driver assignment, and physical dispatch.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <div class="space-y-4">
-                <div class="p-4 bg-slate-900 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <span class="text-white font-bold block text-sm">Load #LD-2026-881 • Mumbai to Delhi Express</span>
-                        <span class="text-slate-400 text-[11px]">Final Contract Value: ₹1,42,500 • Escrow Secured</span>
-                    </div>
-                    <span class="px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px]">Contract Executed</span>
-                </div>
-            </div>
-
-            <a href="/public/partner/dispatch-assignment.html" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 text-center">
-                Proceed to Dispatch & Asset Assignment →
-            </a>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+<header class="border-b border-slate-800 bg-slate-900"><div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center gap-3"><a href="../../index.html" class="font-extrabold">KRIM Logistics OS</a><a href="available-loads.html" class="text-sm text-emerald-300">Open opportunities</a></div></header>
+<main class="max-w-5xl mx-auto px-4 py-10">
+<p class="text-xs uppercase tracking-widest text-emerald-300 font-bold">Partner workspace</p>
+<h1 class="text-3xl font-extrabold mt-2">Shipment assignment offers</h1>
+<p class="text-slate-400 text-sm mt-3 max-w-3xl">Only assignments returned by the authenticated KRIM backend appear here. Accept only after confirming price, route, capacity and operating terms. Acceptance does not itself confirm customer payment or payout.</p>
+<div id="status" role="status" aria-live="polite" class="my-6 text-sm text-slate-300">Checking secure session…</div>
+<div id="assignments" class="space-y-4"></div>
+</main>
+<script>
+(async function(){
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const status=document.getElementById("status"),root=document.getElementById("assignments");
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function msg(t,bad=false){status.textContent=t;status.className="my-6 text-sm "+(bad?"text-rose-300":"text-slate-300")}
+async function load(){
+root.innerHTML='<p class="text-slate-400">Loading assignment offers…</p>';
+try{
+if(!client)throw new Error("Backend configuration failed to load.");
+const {data:{session},error:authError}=await client.auth.getSession();if(authError)throw authError;if(!session){location.href="../../auth/login.html";return}
+const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(memberError)throw memberError;
+const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error("No active organization is linked to this account.");
+const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);if(orgError)throw orgError;
+const partnerOrgs=(orgs||[]).filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active");
+if(!partnerOrgs.length)throw new Error("No active partner organization is linked to this account.");
+const eligible=partnerOrgs.filter(o=>["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
+const partnerIds=eligible.map(o=>Number(o.id));
+if(!partnerIds.length){msg("Assignment acceptance is locked until partner verification, compliance and lifecycle approval are complete.",true);root.innerHTML="";return}
+const {data:rows,error}=await client.from("krim_shipment_partner_assignments").select("id,shipment_id,partner_organization_id,partner_quote_id,assignment_number,status,offered_at,response_deadline").in("partner_organization_id",partnerIds).order("offered_at",{ascending:false}).limit(100);
+if(error)throw error;
+if(!rows||!rows.length){root.innerHTML='<div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">No shipment assignment offers are currently available. No sample loads are displayed.</div>';msg("No live assignment offers found.");return}
+const shipmentIds=[...new Set(rows.map(x=>Number(x.shipment_id)).filter(Number.isSafeInteger))];
+const {data:shipments,error:shipError}=await client.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id,status").in("id",shipmentIds);if(shipError)throw shipError;
+const locIds=[...new Set((shipments||[]).flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];
+const {data:locs,error:locError}=locIds.length?await client.from("krim_locations").select("id,city,state_region,location_code").in("id",locIds):{data:[],error:null};if(locError)throw locError;
+const locMap=new Map((locs||[]).map(l=>[Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(", ")]));
+const shipMap=new Map((shipments||[]).map(s=>[Number(s.id),s]));
+root.innerHTML=rows.map(a=>{const s=shipMap.get(Number(a.shipment_id))||{};const actionable=a.status==="offered"&&(!a.response_deadline||new Date(a.response_deadline).getTime()>Date.now());const deadline=a.response_deadline?new Date(a.response_deadline).toLocaleString():"Not specified";
+return '<article class="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6"><div class="flex flex-col md:flex-row md:justify-between gap-4"><div class="min-w-0"><p class="text-xs text-emerald-300 font-bold">'+esc(a.assignment_number||("Assignment #"+a.id))+'</p><h2 class="text-xl font-bold mt-2">'+esc(locMap.get(Number(s.origin_location_id))||"Origin pending")+' → '+esc(locMap.get(Number(s.destination_location_id))||"Destination pending")+'</h2><p class="text-sm text-slate-300 mt-2">'+esc(s.goods_description||"Cargo details unavailable")+' · '+esc(s.total_weight_kg??"Weight not provided")+' kg</p><p class="text-xs text-slate-400 mt-2">Shipment '+esc(s.shipment_number||("#"+a.shipment_id))+' · Assignment status: '+esc(a.status)+' · Response deadline: '+esc(deadline)+'</p></div><div class="flex flex-wrap items-start gap-2">'+(actionable?'<button data-response="accept" data-id="'+Number(a.id)+'" class="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-3 text-sm font-bold">Accept assignment</button><button data-response="reject" data-id="'+Number(a.id)+'" class="rounded-xl bg-rose-700 hover:bg-rose-600 px-4 py-3 text-sm font-bold">Reject</button>':'<span class="rounded-xl bg-slate-800 px-4 py-3 text-sm">'+esc(a.status)+'</span>')+'</div></div></article>'
+}).join("");
+root.querySelectorAll("button[data-response]").forEach(btn=>btn.addEventListener("click",async()=>{const id=Number(btn.dataset.id),accept=btn.dataset.response==="accept";if(!Number.isSafeInteger(id)||id<=0)return;const reason=accept?"":(window.prompt("Optional reason for rejecting this assignment:")||"Partner declined assignment");if(!accept&&!reason.trim())return;if(!window.confirm((accept?"Accept":"Reject")+" assignment #"+id+"? This updates the live backend assignment."))return;btn.disabled=true;try{const {data,error}=await client.rpc("krim_respond_to_partner_assignment",{p_assignment_id:id,p_accept:accept,p_reason:reason});if(error)throw error;if(!data||!data.id)throw new Error("Backend did not confirm the assignment response.");msg("Assignment response recorded by KRIM backend.");await load()}catch(e){msg("Response failed: "+(e.message||"Unknown error")+". Refresh before retrying.",true);btn.disabled=false}}));
+msg("Loaded "+rows.length+" live assignment record(s). Only offers awaiting a response can be accepted or rejected.");
+}catch(e){root.innerHTML="";msg(e.message||"Could not load assignment offers.",true)}
+}
+await load();
+})();
+</script>
+</body></html>
