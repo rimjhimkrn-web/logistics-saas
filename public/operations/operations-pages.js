@@ -1,108 +1,38 @@
-/* KRIM Operations pages — shared, read-only live shipment workbench.
- * Data is fetched from Supabase under the current user's session and RLS.
- * No simulated shipment, carrier, route, or milestone records are created.
- */
-(function () {
-  "use strict";
-  const cfg = window.KRIM_CONFIG || {};
-  const base = cfg.platform?.basePath || (location.pathname.startsWith("/logistics-saas/") ? "/logistics-saas/" : "/");
-  const page = document.body.dataset.operationsPage || "operations-dashboard";
-  const pages = {
-    "operations-dashboard": ["Operations Dashboard", "A live overview of shipment operations and execution exceptions.", "Operations overview"],
-    "dispatch-queue": ["Dispatch Queue", "Review shipments that may need dispatch attention. Confirm assignments in the authorized workflow.", "Dispatch work queue"],
-    "load-planning": ["Load Planning", "Review shipment requirements and plan load consolidation with verified capacity data.", "Load planning"],
-    "carrier-matching": ["Carrier Matching", "Review shipment records before matching them with eligible, verified carrier capacity.", "Carrier matching"],
-    "route-planner": ["Route Planner", "Review shipment origin and destination details before selecting an approved route.", "Route planning"],
-    "vehicle-capacity": ["Vehicle Capacity", "Use shipment requirements to review capacity needs. Live vehicle capacity requires connected fleet data.", "Capacity review"],
-    "trip-monitoring": ["Trip Monitoring", "Monitor shipment records and operational status. Live GPS telemetry is shown only when a real source is connected.", "Trip monitoring"],
-    "dispatch-confirmation": ["Dispatch Confirmation", "Review shipment records before confirming dispatch in the authorized backend workflow.", "Dispatch confirmation"],
-    "pickup-monitoring": ["Pickup Monitoring", "Review shipment status for pickup follow-up. Pickup events are not inferred when absent from backend data.", "Pickup monitoring"],
-    "delivery-monitoring": ["Delivery Monitoring", "Review shipment status for delivery follow-up. Delivery completion must be confirmed by an authorized workflow.", "Delivery monitoring"],
-    "missed-milestones": ["Missed Milestones", "Identify records with available status and timestamp data; missing milestone timestamps are not fabricated.", "Milestone review"],
-    "late-shipment-management": ["Late Shipment Management", "Review records for delay follow-up. This page does not invent ETA or lateness predictions.", "Delay review"],
-    "rerouting-approvals": ["Rerouting Approvals", "Review shipments before a reroute is approved. No route changes are submitted by this read-only workbench.", "Reroute review"],
-    "incident-management": ["Incident Management", "Review shipment records and use the existing exception workflow to record verified incidents.", "Incident review"],
-    "control-room-handover": ["Control Room Handover", "Review current operational records before completing a handover through an authorized workflow.", "Handover review"],
-    "service-level-monitoring": ["Service Level Monitoring", "Review live shipment status. SLA calculations require configured service-level rules and verified event timestamps.", "Service-level review"],
-    "capacity-planning": ["Capacity Planning", "Review current shipment volume. Forecasts require verified capacity, demand, and historical data.", "Capacity planning"],
-    "operations-reports": ["Operations Reports", "Search and inspect the shipment records your account is permitted to access.", "Operational report"]
-  };
-  const current = pages[page] || pages["operations-dashboard"];
-  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const $ = (id) => document.getElementById(id);
-  function sessionToken() {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith("sb-") || !key.includes("auth-token")) continue;
-      try {
-        const data = JSON.parse(localStorage.getItem(key));
-        if (data?.access_token) return data.access_token;
-      } catch (_) {}
-    }
-    return "";
-  }
-  function renderRows(rows) {
-    const query = ($("search")?.value || "").trim().toLowerCase();
-    const status = ($("status-filter")?.value || "").toLowerCase();
-    const filtered = rows.filter(row => {
-      const text = Object.values(row).map(v => typeof v === "object" ? JSON.stringify(v) : String(v ?? "")).join(" ").toLowerCase();
-      const s = String(row.status ?? row.shipment_status ?? "").toLowerCase();
-      return (!query || text.includes(query)) && (!status || s === status || s.includes(status));
-    });
-    $("record-count").textContent = String(filtered.length);
-    $("table-body").innerHTML = filtered.length ? filtered.map(row => {
-      const id = row.shipment_number || row.reference_number || row.public_tracking_number || row.id || "—";
-      const origin = row.origin_name || row.origin || row.origin_location || row.origin_country || "—";
-      const destination = row.destination_name || row.destination || row.destination_location || row.destination_country || "—";
-      const state = row.status || row.shipment_status || "Unspecified";
-      const mode = row.transport_mode || row.mode || "—";
-      const updated = row.updated_at || row.created_at || "—";
-      return "<tr><td><strong>"+esc(id)+"</strong></td><td>"+esc(origin)+"</td><td>"+esc(destination)+"</td><td><span class='status'>"+esc(state)+"</span></td><td>"+esc(mode)+"</td><td>"+esc(updated === "—" ? updated : new Date(updated).toLocaleString())+"</td></tr>";
-    }).join("") : "<tr><td colspan='6' class='empty'>No records match this view.</td></tr>";
-  }
-  async function load() {
-    const cfgSupabase = cfg.supabase || {};
-    const url = cfgSupabase.url || cfg.SUPABASE_URL;
-    const key = cfgSupabase.publishableKey || cfg.SUPABASE_ANON_KEY;
-    const token = sessionToken();
-    if (!url || !key) {
-      $("connection-state").textContent = "Configuration unavailable";
-      $("table-body").innerHTML = "<tr><td colspan='6' class='empty'>Supabase configuration was not found. Check platform/krim-config.js.</td></tr>";
-      return;
-    }
-    if (!token) {
-      $("connection-state").textContent = "Sign in required";
-      $("table-body").innerHTML = "<tr><td colspan='6' class='empty'>Sign in to view shipment records permitted for your account. <a href='"+esc(base+"auth/login.html")+"'>Sign in</a></td></tr>";
-      return;
-    }
-    $("connection-state").textContent = "Connecting…";
-    try {
-      const response = await fetch(url.replace(/\/$/, "") + "/rest/v1/krim_shipments?select=*&order=created_at.desc&limit=100", {
-        headers: { apikey: key, Authorization: "Bearer " + token, Accept: "application/json" }
-      });
-      if (response.status === 401 || response.status === 403) throw new Error("Your session or permissions do not allow this data. Sign in again or contact your administrator.");
-      if (!response.ok) throw new Error("Shipment data could not be loaded (HTTP " + response.status + ").");
-      const data = await response.json();
-      if (!Array.isArray(data)) throw new Error("The shipment endpoint returned an unexpected response.");
-      window.KRIM_OPERATIONS_SHIPMENTS = data;
-      $("connection-state").textContent = "Connected · live data";
-      $("last-updated").textContent = "Refreshed " + new Date().toLocaleTimeString();
-      const statuses = [...new Set(data.map(r => String(r.status || r.shipment_status || "")).filter(Boolean))].sort();
-      $("status-filter").innerHTML = "<option value=''>All statuses</option>" + statuses.map(s => "<option value='"+esc(s)+"'>"+esc(s)+"</option>").join("");
-      renderRows(data);
-    } catch (error) {
-      $("connection-state").textContent = "Data unavailable";
-      $("table-body").innerHTML = "<tr><td colspan='6' class='empty'>"+esc(error.message || "Unable to load shipment records.")+"</td></tr>";
-      $("record-count").textContent = "—";
-    }
-  }
-  document.title = "KRIM Logistics | " + current[0];
-  $("page-title").textContent = current[0];
-  $("page-description").textContent = current[1];
-  $("section-title").textContent = current[2];
-  $("refresh").addEventListener("click", load);
-  $("search").addEventListener("input", () => renderRows(window.KRIM_OPERATIONS_SHIPMENTS || []));
-  $("status-filter").addEventListener("change", () => renderRows(window.KRIM_OPERATIONS_SHIPMENTS || []));
-  $("menu-toggle").addEventListener("click", () => $("operations-nav").classList.toggle("open"));
-  load();
+/* KRIM operations workbench. Shipment data is read from Supabase under the current session/RLS. */
+(function(){
+"use strict";
+const base=window.KRIM_BASE||(location.pathname.startsWith("/logistics-saas/")?"/logistics-saas/":"/");
+const page=document.body.dataset.operationsPage||"operations-dashboard";
+const pages=[
+["operations-dashboard","Operations Dashboard","A live overview of shipment operations and execution exceptions."],
+["dispatch-queue","Dispatch Queue","Review shipments that may need dispatch attention. Confirm assignments only in an authorized workflow."],
+["load-planning","Load Planning","Review shipment requirements before planning loads and consolidation."],
+["carrier-matching","Carrier Matching","Review shipment records before matching eligible, verified carrier capacity."],
+["route-planner","Route Planner","Review shipment origin and destination details before selecting an approved route."],
+["vehicle-capacity","Vehicle Capacity","Review capacity requirements. Live vehicle availability requires connected fleet data."],
+["trip-monitoring","Trip Monitoring","Monitor shipment records. GPS telemetry appears only when a real source is connected."],
+["dispatch-confirmation","Dispatch Confirmation","Review shipment records before confirming dispatch in the authorized backend workflow."],
+["pickup-monitoring","Pickup Monitoring","Review shipment status for pickup follow-up; absent pickup events are not fabricated."],
+["delivery-monitoring","Delivery Monitoring","Review shipment status for delivery follow-up; completion requires an authorized confirmation."],
+["missed-milestones","Missed Milestones","Review records with available event timestamps; missing milestones are not inferred."],
+["late-shipment-management","Late Shipment Management","Review records for delay follow-up. No ETA or lateness prediction is fabricated."],
+["rerouting-approvals","Rerouting Approvals","Review shipments before reroute approval. This workbench does not submit route changes."],
+["incident-management","Incident Management","Review shipment records and use an authorized exception workflow to record verified incidents."],
+["control-room-handover","Control Room Handover","Review operational records before completing a handover through an authorized workflow."],
+["service-level-monitoring","Service Level Monitoring","Review live status; SLA calculations require configured rules and verified event timestamps."],
+["capacity-planning","Capacity Planning","Review current shipment volume. Forecasts require verified capacity, demand, and historical data."],
+["operations-reports","Operations Reports","Search and inspect shipment records your account is permitted to access."]
+];
+const current=pages.find(x=>x[0]===page)||pages[0];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nav=pages.map(x=>'<a data-route="public/operations/'+x[0]+'.html" href="'+base+'public/operations/'+x[0]+'.html">'+esc(x[1])+'</a>').join("");
+document.title="KRIM Logistics | "+current[1];
+document.body.innerHTML='<header class="krim-top"><div class="krim-topinner"><a class="krim-brand" href="'+base+'public/index.html"><span class="krim-mark">K</span>KRIM <span style="font-weight:500;color:#64748b">Operations</span></a><div style="display:flex;gap:10px;align-items:center"><span id="connection-state" class="krim-muted">Checking session…</span><button id="menu-toggle" class="krim-button krim-mobile" type="button">Menu</button><a class="krim-button" href="'+base+'workspaces/operations-workspace.html">Workspace</a></div></div></header><div class="krim-layout"><aside id="operations-nav" class="krim-sidebar"><div class="krim-side-title">Operations Workspace</div><nav class="krim-nav">'+nav+'</nav></aside><main class="krim-main"><div class="krim-heading"><div><div class="krim-eyebrow">Operations · Global Logistics OS</div><h1>'+esc(current[1])+'</h1><p>'+esc(current[2])+'</p></div><button id="refresh" type="button" class="krim-button krim-primary">Refresh data</button></div><div class="krim-notice"><strong>Live-data integrity:</strong> records are returned by Supabase under your signed-in session and row-level security. This page does not fabricate vehicles, routes, ETAs, incidents, milestones, or carrier assignments. Operational changes must be completed through an authorized workflow.</div><section class="krim-metrics"><div class="krim-card krim-metric"><div class="krim-metric-label">Records in current view</div><div class="krim-metric-value" id="record-count">—</div><div class="krim-metric-sub">Filtered shipment records</div></div><div class="krim-card krim-metric"><div class="krim-metric-label">Data connection</div><div class="krim-metric-value" style="font-size:17px">Supabase</div><div class="krim-metric-sub">Session and RLS protected</div></div><div class="krim-card krim-metric"><div class="krim-metric-label">Refresh status</div><div class="krim-metric-value" style="font-size:17px" id="last-updated">Waiting</div><div class="krim-metric-sub">Manual refresh; no background polling</div></div></section><section class="krim-card"><div class="krim-cardhead"><h2>Shipment records</h2><span class="krim-muted">Maximum 100 records per request</span></div><div class="krim-tools"><input id="search" type="search" placeholder="Search shipment, route, status…" aria-label="Search shipment records"><select id="status-filter" aria-label="Filter by shipment status"><option value="">All statuses</option></select></div><div class="krim-tablewrap"><table><thead><tr><th>Shipment reference</th><th>Origin</th><th>Destination</th><th>Status</th><th>Mode</th><th>Last updated</th></tr></thead><tbody id="table-body"><tr><td colspan="6" class="krim-empty">Loading records…</td></tr></tbody></table></div></section><div class="krim-footer">KRIM Logistics · Access controlled by Supabase authentication and RLS. <span style="float:right">Page: '+esc(page)+'</span></div></main></div>';
+const $=id=>document.getElementById(id);
+const activeLink=[...document.querySelectorAll(".krim-nav a")].find(a=>a.getAttribute("href").endsWith("/"+page+".html"));if(activeLink)activeLink.classList.add("active");
+$("menu-toggle").addEventListener("click",()=>$("operations-nav").classList.toggle("open"));
+function token(){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("sb-")&&k.includes("auth-token")){try{const v=JSON.parse(localStorage.getItem(k));if(v?.access_token)return v.access_token;}catch(_){}}}return"";}
+function render(rows){const q=$("search").value.trim().toLowerCase(),s=$("status-filter").value.toLowerCase();const filtered=rows.filter(r=>{const all=Object.values(r).map(v=>typeof v==="object"?JSON.stringify(v):String(v??"")).join(" ").toLowerCase();const st=String(r.status||r.shipment_status||"").toLowerCase();return(!q||all.includes(q))&&(!s||st===s||st.includes(s));});$("record-count").textContent=filtered.length;$("table-body").innerHTML=filtered.length?filtered.map(r=>{const id=r.shipment_number||r.reference_number||r.public_tracking_number||r.id||"—",o=r.origin_name||r.origin||r.origin_location||r.origin_country||"—",d=r.destination_name||r.destination||r.destination_location||r.destination_country||"—",st=r.status||r.shipment_status||"Unspecified",mode=r.transport_mode||r.mode||"—",date=r.updated_at||r.created_at||"—";let dt=date;try{if(date!=="—")dt=new Date(date).toLocaleString();}catch(_){}return"<tr><td><strong>"+esc(id)+"</strong></td><td>"+esc(o)+"</td><td>"+esc(d)+"</td><td><span class='krim-status'>"+esc(st)+"</span></td><td>"+esc(mode)+"</td><td>"+esc(dt)+"</td></tr>";}).join(""):"<tr><td colspan='6' class='krim-empty'>No records match this view.</td></tr>";}
+async function load(){const c=window.KRIM_CONFIG||{},sc=c.supabase||{},url=sc.url||c.SUPABASE_URL,key=sc.publishableKey||c.SUPABASE_ANON_KEY,t=token();if(!url||!key){$("connection-state").textContent="Configuration unavailable";$("table-body").innerHTML="<tr><td colspan='6' class='krim-empty'>Supabase configuration is unavailable. Check platform/krim-config.js.</td></tr>";return;}if(!t){$("connection-state").textContent="Sign in required";$("table-body").innerHTML="<tr><td colspan='6' class='krim-empty'>Sign in to view shipment records permitted for your account. <a href='"+base+"auth/login.html'>Sign in</a></td></tr>";return;}$("connection-state").textContent="Connecting…";try{const res=await fetch(url.replace(/\/$/,"")+"/rest/v1/krim_shipments?select=*&order=created_at.desc&limit=100",{headers:{apikey:key,Authorization:"Bearer "+t,Accept:"application/json"}});if(res.status===401||res.status===403)throw Error("Your session or permissions do not allow this data. Sign in again or contact your administrator.");if(!res.ok)throw Error("Shipment data could not be loaded (HTTP "+res.status+").");const data=await res.json();if(!Array.isArray(data))throw Error("Unexpected shipment response.");window.KRIM_OPERATIONS_SHIPMENTS=data;$("connection-state").textContent="Connected · live data";$("last-updated").textContent=new Date().toLocaleTimeString();const statuses=[...new Set(data.map(r=>String(r.status||r.shipment_status||"")).filter(Boolean))].sort();$("status-filter").innerHTML="<option value=''>All statuses</option>"+statuses.map(s=>"<option value='"+esc(s)+"'>"+esc(s)+"</option>").join("");render(data);}catch(e){$("connection-state").textContent="Data unavailable";$("table-body").innerHTML="<tr><td colspan='6' class='krim-empty'>"+esc(e.message||"Unable to load shipment records.")+"</td></tr>";$("record-count").textContent="—";}}
+$("refresh").addEventListener("click",load);$("search").addEventListener("input",()=>render(window.KRIM_OPERATIONS_SHIPMENTS||[]));$("status-filter").addEventListener("change",()=>render(window.KRIM_OPERATIONS_SHIPMENTS||[]));load();
 })();
