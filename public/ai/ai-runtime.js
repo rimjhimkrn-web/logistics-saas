@@ -131,7 +131,36 @@
         }
         if (!data || data.error) throw new Error(data?.error || "The AI service returned no usable response.");
         renderResult(form, data);
-        setStatus(form, "Response received from KRIM AI. Recommendations are advisory; verify source data before acting.");
+        // Persist the exchange under the authenticated user. RLS policies remain the authority;
+        // if persistence is denied, show a warning instead of claiming the history was saved.
+        const replyText = data.reply || data.answer || data.response || data.output_text || data.message;
+        if (typeof replyText === "string" && replyText.trim()) {
+          const { data: conversation, error: conversationError } = await client
+            .from("ai_conversations")
+            .insert({
+              user_id: sessionData.session.user.id,
+              user_role: "user",
+              title: (entries[0]?.[1] || page).slice(0, 160),
+              status: "active"
+            })
+            .select("id")
+            .single();
+          if (conversationError) {
+            setStatus(form, "AI response received, but conversation history was not saved: " + conversationError.message);
+          } else {
+            const { error: messageError } = await client.from("ai_messages").insert([
+              { conversation_id: conversation.id, sender: "user", message: prompt },
+              { conversation_id: conversation.id, sender: "assistant", message: replyText.trim() }
+            ]);
+            if (messageError) {
+              setStatus(form, "AI response received, but message history was not fully saved: " + messageError.message);
+            } else {
+              setStatus(form, "AI response received and conversation saved. Recommendations are advisory; verify source data before acting.");
+            }
+          }
+        } else {
+          setStatus(form, "AI response received, but no text field was returned for conversation persistence.");
+        }
       }
             form.dispatchEvent(new CustomEvent("krim:ai-response", {
         bubbles: true, detail: { page, received: true }
