@@ -27,7 +27,7 @@ try{
  if(memberError)throw memberError;
  const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
  if(!ids.length)throw new Error("No active partner organization is linked to this account.");
- const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);
+ const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);
  if(orgError)throw orgError;
  const partners=(orgs||[]).filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type).toLowerCase())&&String(o.status||"").toLowerCase()==="active");
  if(!partners.length)throw new Error("This account has no partner organization. Use customer workspace for shipment booking.");
