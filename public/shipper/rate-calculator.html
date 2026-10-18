@@ -72,7 +72,7 @@
             <div class="space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Authoritative Pricing Core</span>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Calculate Service Tariff</h1>
-                <p class="text-slate-600 text-sm">Select service tier, compute freight coefficients, and commit authoritative quotations to the financial ledger (`krim_quotes`).</p>
+                <p class="text-slate-600 text-sm">Select a service tier and request an authoritative quote. No commercial price is shown until an approved active rate card is configured.</p>
             </div>
 
             <form id="form-calculator" class="space-y-6">
@@ -84,16 +84,16 @@
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Service Tier</label>
                         <select id="calc-service-tier" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
-                            <option value="surface_express">Surface Express (₹15 / kg)</option>
-                            <option value="air_priority">Air Priority (₹45 / kg)</option>
-                            <option value="heavy_haul">Heavy Haul (₹10 / kg)</option>
+                            <option value="surface_express">Surface Express (approved rate required)</option>
+                            <option value="air_priority">Air Priority (approved rate required)</option>
+                            <option value="heavy_haul">Heavy Haul (approved rate required)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
                     <div class="flex justify-between">
-                        <span class="text-slate-500">Calculated Tariff Amount:</span>
+                        <span class="text-slate-500">Pricing status:</span>
                         <span id="preview-amount" class="text-slate-900 font-bold text-sm">₹0.00</span>
                     </div>
                     <div class="flex justify-between">
@@ -103,7 +103,7 @@
                 </div>
 
                 <button type="submit" id="btn-commit-quote" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                    Commit Quote & Proceed to Checkout →
+                    Request Authoritative Quote →
                 </button>
             </form>
 
@@ -172,19 +172,13 @@
         }
 
         function calculateRate() {
-            const tier = document.getElementById('calc-service-tier').value;
+            const preview = document.getElementById("preview-amount");
             if (!loadedShipmentData || !Number(loadedShipmentData.total_weight_kg)) {
-                document.getElementById('preview-amount').innerText = "Load a valid shipment first";
+                preview.textContent = "Load an authorized shipment first";
                 return null;
             }
-            const weight = Number(loadedShipmentData.total_weight_kg);
-            let ratePerKg = 15;
-            if (tier === 'air_priority') ratePerKg = 45;
-            if (tier === 'heavy_haul') ratePerKg = 10;
-            const total = weight * ratePerKg;
-            document.getElementById('preview-amount').innerText =
-                `Indicative estimate: ₹${total.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})} — server will calculate the final quote`;
-            return total;
+            preview.textContent = "No approved active rate card configured";
+            return null;
         }
 
         document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
