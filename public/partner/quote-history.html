@@ -1,67 +1,21 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Quote History & Active Bids</title>
-    <meta name="description" content="Track submitted freight quotations, active shipper negotiations, and bid statuses inside KRIM OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-emerald-400 font-semibold uppercase">Quote History</span>
-                </div>
-            </div>
-            <a href="/public/partner/negotiations.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Negotiations →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Partner Operations • Step 14 of 35</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Quote History & Active Bids</h1>
-            <p class="text-slate-400 text-xs font-mono">Monitor real-time status of your submitted freight bids, counter-offers, and shipper reviews.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <div class="space-y-4">
-                <div class="p-4 bg-slate-900 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <span class="text-white font-bold block text-sm">Load #LD-2026-881 • Mumbai to Delhi</span>
-                        <span class="text-slate-400 text-[11px]">Bid Amount: ₹1,40,000 • Submitted: Today, 05:10 PM</span>
-                    </div>
-                    <span class="px-3 py-1 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Under Shipper Review</span>
-                </div>
-            </div>
-
-            <a href="/public/partner/negotiations.html" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 text-center">
-                Proceed to Negotiations & Counter-Offers →
-            </a>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KRIM Partner — Quote History</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<script>(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l)}())</script></head>
+<body class="min-h-screen bg-slate-950 text-slate-100"><header class="border-b border-slate-800 bg-slate-900"><div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center"><a href="../../index.html" class="font-extrabold">KRIM Logistics OS</a><a href="available-loads.html" class="text-sm text-emerald-300">Available loads</a></div></header>
+<main class="max-w-4xl mx-auto px-4 py-10"><p class="text-xs uppercase tracking-widest text-emerald-300 font-bold">Partner workspace</p><h1 class="text-3xl font-extrabold mt-2">Submitted bids</h1><p class="text-slate-400 text-sm mt-3">Actual quote records from your partner organization. Customer acceptance and settlement are separate steps.</p><div id="status" role="status" aria-live="polite" class="my-6 text-sm text-slate-300">Loading quote history…</div><div id="quotes" class="space-y-4"></div></main>
+<script>(async function(){
+const client=window.KRIM_SUPABASE||window.supabaseClient,status=document.getElementById("status"),list=document.getElementById("quotes");
+function msg(t,bad=false){status.textContent=t;status.className="my-6 text-sm "+(bad?"text-rose-300":"text-slate-300")}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+try{
+if(!client)throw new Error("Backend configuration failed.");const {data:{session},error:ae}=await client.auth.getSession();if(ae)throw ae;if(!session){location.href="../../auth/login.html";return}
+const {data:members,error:me}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(me)throw me;
+const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error("No active organization is linked to this account.");
+const {data:orgs,error:oe}=await client.from("krim_organizations").select("id,organization_type").in("id",ids);if(oe)throw oe;
+const partnerIds=(orgs||[]).filter(o=>["partner","carrier","forwarder","warehouse"].includes(String(o.organization_type).toLowerCase())).map(o=>Number(o.id));if(!partnerIds.length)throw new Error("No partner organization is linked to this account.");
+const {data:quotes,error:qe}=await client.from("krim_partner_quotes").select("id,opportunity_id,shipment_id,quote_number,amount,currency_code,status,submitted_at,valid_until,notes").in("partner_organization_id",partnerIds).order("submitted_at",{ascending:false}).limit(100);if(qe)throw qe;
+if(!quotes||!quotes.length){msg("No bids have been submitted by this partner organization yet.");return}
+list.innerHTML=quotes.map(q=>'<article class="rounded-2xl border border-slate-800 bg-slate-900 p-5"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3"><div><p class="text-xs text-emerald-300 font-bold">'+esc(q.quote_number||("Quote #"+q.id))+'</p><h2 class="text-xl font-bold mt-2">'+esc(q.currency_code||"INR")+' '+esc(Number(q.amount).toLocaleString())+'</h2><p class="text-sm text-slate-300 mt-2">Shipment #'+esc(q.shipment_id)+' · Opportunity #'+esc(q.opportunity_id)+'</p><p class="text-xs text-slate-400 mt-2">Submitted: '+esc(q.submitted_at?new Date(q.submitted_at).toLocaleString():"—")+' · Valid until: '+esc(q.valid_until?new Date(q.valid_until).toLocaleString():"—")+'</p>'+(q.notes?'<p class="text-sm text-slate-400 mt-3">'+esc(q.notes)+'</p>':"")+'</div><span class="self-start rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs uppercase font-bold">'+esc(String(q.status||"unknown").replace(/_/g," "))+'</span></div></article>').join("");
+msg("Loaded "+quotes.length+" bid record(s).");
+}catch(e){msg(e.message||"Could not load quote history.",true)}
+})();</script></body></html>
