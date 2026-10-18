@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics OS — Enterprise Sign In & MFA Challenge</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,7 +53,7 @@
             
             <div class="flex items-center space-x-3 text-sm">
                 <span class="text-slate-500 hidden sm:inline">New to KRIM OS?</span>
-                <a href="/logistics-saas/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
+                <a href="signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
             </div>
         </div>
     </header>
@@ -115,9 +115,9 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
             <div class="flex space-x-6">
-                <a href="/logistics-saas/index.html" class="hover:text-slate-800 transition">Home</a>
+                <a href="../index.html" class="hover:text-slate-800 transition">Home</a>
                 <a href="/logistics-saas/auth/signup.html" class="hover:text-slate-800 transition">Register</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
+                <a href="../public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
             </div>
         </div>
     </footer>
@@ -127,7 +127,7 @@
         
 
         let activeFactorId = null;
-        let postLoginPath = "/logistics-saas/app/customer/index.html";
+        let postLoginPath = "../app/customer/index.html";
 
         // 1. Sign In & MFA Assurance Level Evaluation
         document.getElementById('form-login').addEventListener('submit', async function(e) {
@@ -158,8 +158,8 @@
                 if (organizationError) throw organizationError;
                 if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
                 postLoginPath = accountType === "partner"
-                    ? "/logistics-saas/public/partner/partner-onboarding.html"
-                    : "/logistics-saas/app/customer/index.html";
+                    ? "../public/partner/partner-onboarding.html"
+                    : "../app/customer/index.html";
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
