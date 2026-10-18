@@ -32,8 +32,9 @@ try{
  if(!opps||!opps.length)throw new Error("No open opportunities are available for bidding right now.");
  select.replaceChildren();opps.forEach(o=>select.add(new Option((o.opportunity_number||("Opportunity #"+o.id))+" — "+(o.service_lane||"Route pending")+" — deadline "+new Date(o.response_deadline).toLocaleString(),String(o.id))));
  if(queryId&&opps.some(o=>String(o.id)===queryId))select.value=queryId;
- const defaultExpiry=new Date(Date.now()+24*60*60*1000);defaultExpiry.setMinutes(defaultExpiry.getMinutes()-defaultExpiry.getTimezoneOffset());
- document.getElementById("valid-until").value=defaultExpiry.toISOString().slice(0,16);
+ const expiryInput=document.getElementById("valid-until");
+ function setSuggestedExpiry(){const chosen=opps.find(o=>Number(o.id)===Number(select.value));const now=Date.now();const deadline=chosen&&chosen.response_deadline?new Date(chosen.response_deadline).getTime():NaN;const latest=Number.isFinite(deadline)?Math.min(now+24*60*60*1000,deadline-5*60*1000):now+24*60*60*1000;if(latest<=now){expiryInput.value="";return}const suggested=new Date(latest);suggested.setMinutes(suggested.getMinutes()-suggested.getTimezoneOffset());expiryInput.value=suggested.toISOString().slice(0,16);}
+ setSuggestedExpiry();select.addEventListener("change",setSuggestedExpiry);
  if(!eligible)throw new Error("Bidding is locked. Your partner organization must be verified, compliant, and active before submitting a quote.");
  button.disabled=false;msg("Partner eligibility checks passed. Submit only an accurate operational offer.");
  form.addEventListener("submit",async function(e){
