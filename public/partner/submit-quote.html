@@ -27,20 +27,21 @@ try{
  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(memberError)throw memberError;
  const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
  const {data:orgs,error:orgError}=ids.length?await client.from("krim_organizations").select("id,organization_type,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids):{data:[],error:null};if(orgError)throw orgError;
- const eligible=(orgs||[]).some(o=>["partner","carrier","forwarder","warehouse"].includes(String(o.organization_type).toLowerCase())&&["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["compliant","approved","clear"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified","approved"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
- const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,response_deadline,service_lane,metadata").eq("status","open").gt("response_deadline",new Date().toISOString()).order("requested_at",{ascending:false}).limit(100);if(oppError)throw oppError;
- if(!opps||!opps.length)throw new Error("No open opportunities are available for bidding right now.");
- select.replaceChildren();opps.forEach(o=>select.add(new Option((o.opportunity_number||("Opportunity #"+o.id))+" — "+(o.service_lane||"Route pending")+" — deadline "+new Date(o.response_deadline).toLocaleString(),String(o.id))));
- if(queryId&&opps.some(o=>String(o.id)===queryId))select.value=queryId;
+ const eligible=(orgs||[]).some(o=>["partner","carrier","forwarder","warehouse"].includes(String(o.organization_type).toLowerCase())&&["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
+ const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,response_deadline,service_lane,metadata").eq("status","open").order("requested_at",{ascending:false}).limit(100);if(oppError)throw oppError;
+ const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
+ if(!liveOpps.length)throw new Error("No open opportunities are available for bidding right now.");
+ select.replaceChildren();liveOpps.forEach(o=>select.add(new Option((o.opportunity_number||("Opportunity #"+o.id))+" — "+(o.service_lane||"Route pending")+" — deadline "+(o.response_deadline?new Date(o.response_deadline).toLocaleString():"not specified"),String(o.id))));
+ if(queryId&&liveOpps.some(o=>String(o.id)===queryId))select.value=queryId;
  const expiryInput=document.getElementById("valid-until");
- function setSuggestedExpiry(){const chosen=opps.find(o=>Number(o.id)===Number(select.value));const now=Date.now();const deadline=chosen&&chosen.response_deadline?new Date(chosen.response_deadline).getTime():NaN;const latest=Number.isFinite(deadline)?Math.min(now+24*60*60*1000,deadline-5*60*1000):now+24*60*60*1000;if(latest<=now){expiryInput.value="";return}const suggested=new Date(latest);suggested.setMinutes(suggested.getMinutes()-suggested.getTimezoneOffset());expiryInput.value=suggested.toISOString().slice(0,16);}
+ function setSuggestedExpiry(){const chosen=liveOpps.find(o=>Number(o.id)===Number(select.value));const now=Date.now();const deadline=chosen&&chosen.response_deadline?new Date(chosen.response_deadline).getTime():NaN;const latest=Number.isFinite(deadline)?Math.min(now+24*60*60*1000,deadline-5*60*1000):now+24*60*60*1000;if(latest<=now){expiryInput.value="";return}const suggested=new Date(latest);suggested.setMinutes(suggested.getMinutes()-suggested.getTimezoneOffset());expiryInput.value=suggested.toISOString().slice(0,16);}
  setSuggestedExpiry();select.addEventListener("change",setSuggestedExpiry);
  if(!eligible)throw new Error("Bidding is locked. Your partner organization must be verified, compliant, and active before submitting a quote.");
  button.disabled=false;msg("Partner eligibility checks passed. Submit only an accurate operational offer.");
  form.addEventListener("submit",async function(e){
  e.preventDefault();const id=Number(select.value),amount=Number(document.getElementById("amount").value),expiry=new Date(document.getElementById("valid-until").value),notes=document.getElementById("notes").value.trim();
- const chosen=opps.find(o=>Number(o.id)===id);
- if(!chosen||!Number.isFinite(amount)||amount<=0||!Number.isFinite(expiry.getTime())||expiry<=new Date()||expiry>=new Date(chosen.response_deadline)||!notes||notes.length>2000){msg("Check the bid amount, notes, and offer expiry. Offer must expire before the opportunity deadline.",true);return}
+ const chosen=liveOpps.find(o=>Number(o.id)===id);
+ if(!chosen||!Number.isFinite(amount)||amount<=0||!Number.isFinite(expiry.getTime())||expiry<=new Date()||(chosen.response_deadline&&expiry>=new Date(chosen.response_deadline))||!notes||notes.length>1000){msg("Check the bid amount, notes (maximum 1,000 characters), and offer expiry. The offer must expire before the opportunity deadline when one is set.",true);return}
  button.disabled=true;button.textContent="Submitting securely…";msg("Submitting offer to KRIM backend…");
  try{const {data,error}=await client.rpc("krim_submit_partner_quote",{p_opportunity_id:id,p_amount:amount,p_currency_code:"INR",p_valid_until:expiry.toISOString(),p_notes:notes});if(error)throw error;
  msg("Bid submitted to the backend. The customer must review and accept it; no assignment or payment is implied.");
