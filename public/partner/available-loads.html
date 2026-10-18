@@ -29,9 +29,9 @@ try{
  if(!ids.length)throw new Error("No active partner organization is linked to this account.");
  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);
  if(orgError)throw orgError;
- const partners=(orgs||[]).filter(o=>["partner","carrier","forwarder","warehouse"].includes(String(o.organization_type).toLowerCase()));
+ const partners=(orgs||[]).filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type).toLowerCase())&&String(o.status||"").toLowerCase()==="active");
  if(!partners.length)throw new Error("This account has no partner organization. Use customer workspace for shipment booking.");
- const verified=partners.some(o=>["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
+ const verified=partners.some(o=>["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active"&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
  const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,status,response_deadline,service_lane,metadata,shipment_id").eq("status","open").order("requested_at",{ascending:false}).limit(100);
  const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
  if(oppError)throw oppError;
