@@ -571,7 +571,7 @@ output.style.display="none";
 output.textContent="";
 });
 
-ask.addEventListener("click",()=>{
+ask.addEventListener("click", async ()=>{
 
 const text=prompt.value.trim();
 
@@ -580,9 +580,49 @@ output.textContent="Enter an operational question first.";
 output.style.display="block";
 return;
 }
-
-output.textContent="AI execution is not connected to a verified backend contract. No request was sent.";
+if(text.length>2000){
+output.textContent="Please keep the question under 2,000 characters.";
 output.style.display="block";
+return;
+}
+
+ask.disabled=true;
+output.textContent="Connecting securely to KRIM AI…";
+output.style.display="block";
+
+try {
+  const cfg=window.KRIM_CONFIG?.supabase;
+  if(!cfg?.url || !cfg?.publishableKey) throw new Error("Supabase configuration is missing.");
+  if(!window.__KRIM_AI_SUPABASE__) {
+    if(!window.supabase?.createClient) throw new Error("Supabase client library did not load.");
+    window.__KRIM_AI_SUPABASE__=window.supabase.createClient(cfg.url,cfg.publishableKey,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+  }
+  const client=window.__KRIM_AI_SUPABASE__;
+  const {data:sessionData,error:sessionError}=await client.auth.getSession();
+  if(sessionError) throw sessionError;
+  if(!sessionData?.session?.access_token) {
+    output.textContent="Please sign in to KRIM before using AI. No request was sent.";
+    return;
+  }
+  const {data,error}=await client.functions.invoke("krim-ai",{
+    body:{message:"KRIM Logistics AI command. Provide decision support only; do not claim to execute actions or alter operational records. State assumptions and uncertainty.\nQuestion: "+text,page:"domains-ai-command"}
+  });
+  if(error) {
+    let detail=error.message||"AI service returned an error.";
+    try { if(error.context?.json) { const body=await error.context.json(); detail=body.error||body.message||detail; } } catch(_){}
+    throw new Error(detail);
+  }
+  if(!data || data.error) throw new Error(data?.error||"No response returned.");
+  const answer=data.answer??data.response??data.message??data.output??data.result??data;
+  output.textContent=typeof answer==="string"?answer:JSON.stringify(answer,null,2);
+} catch(error) {
+  console.error("KRIM AI command failed:",error);
+  output.textContent="KRIM AI request failed: "+(error?.message||"Unknown error")+". Check authentication, network, and backend secrets.";
+} finally {
+  ask.disabled=false;
+}
 
 });
 
