@@ -73,7 +73,7 @@
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Spot Approvals & Quotes</h1>
                 <p class="text-slate-600 text-sm">Review incoming carrier spot quotations, verify tariff ledgers, and authorize secure payment settlements.</p>
             </div>
-            <button onclick="loadSpotApprovals()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition border border-slate-300">
+            <button onclick="loadSpotApprovals(); loadPartnerBids()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition border border-slate-300">
                 Refresh Approvals ⟳
             </button>
         </div>
@@ -97,7 +97,22 @@
         </div>
     </main>
 
-    <!-- Global Footer -->
+<!-- Live partner bid review -->
+        <section class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 overflow-x-auto">
+            <div class="mb-5">
+                <h2 class="text-xl font-extrabold text-slate-900">Live partner bids</h2>
+                <p class="text-slate-600 text-sm mt-1">Review actual verified-partner offers for your open shipments. Awarding an offer creates an assignment request; checkout remains locked until the partner accepts.</p>
+            </div>
+            <div id="partner-bids-status" role="status" aria-live="polite" class="mb-4 text-sm text-slate-500">Loading partner bids…</div>
+            <table class="w-full text-left border-collapse">
+                <thead><tr class="border-b border-slate-200 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
+                    <th class="py-3 px-3">Opportunity</th><th class="py-3 px-3">Partner offer</th><th class="py-3 px-3">Amount</th><th class="py-3 px-3">Valid until</th><th class="py-3 px-3 text-right">Action</th>
+                </tr></thead>
+                <tbody id="partner-bids-tbody" class="divide-y divide-slate-100 text-sm text-slate-700"><tr><td colspan="5" class="py-6 text-center text-slate-500">Loading…</td></tr></tbody>
+            </table>
+        </section>
+
+            <!-- Global Footer -->
     <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p>KRIM Logistics OS Spot Governance © 2026. All rights reserved.</p>
@@ -197,7 +212,83 @@
             }
         }
 
+
+        async function loadPartnerBids() {
+            const statusNode = document.getElementById("partner-bids-status");
+            const tbody = document.getElementById("partner-bids-tbody");
+            const esc = escapeQuoteText;
+            tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Loading live partner bids…</td></tr>';
+            try {
+                const { data: opportunities, error: opportunityError } = await supabaseClient
+                    .from("krim_partner_opportunities")
+                    .select("id, opportunity_number, shipment_id, status, response_deadline")
+                    .eq("status", "open")
+                    .order("requested_at", { ascending: false })
+                    .limit(100);
+                if (opportunityError) throw opportunityError;
+                const live = (opportunities || []).filter(o => !o.response_deadline || new Date(o.response_deadline).getTime() > Date.now());
+                if (!live.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">No open partner opportunities are available to this organization.</td></tr>';
+                    statusNode.textContent = "No open opportunities to review.";
+                    return;
+                }
+                const ids = live.map(o => Number(o.id)).filter(Number.isSafeInteger);
+                const { data: quotes, error: quoteError } = await supabaseClient
+                    .from("krim_partner_quotes")
+                    .select("id, opportunity_id, quote_number, partner_organization_id, amount, currency_code, status, valid_until, notes")
+                    .in("opportunity_id", ids)
+                    .in("status", ["submitted", "under_review", "shortlisted"])
+                    .order("created_at", { ascending: false });
+                if (quoteError) throw quoteError;
+                const oppMap = new Map(live.map(o => [Number(o.id), o]));
+                const bids = (quotes || []).filter(q => {
+                    const o = oppMap.get(Number(q.opportunity_id));
+                    return o && (!q.valid_until || new Date(q.valid_until).getTime() > Date.now());
+                });
+                if (!bids.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Open opportunities exist, but no eligible partner bids have been submitted yet.</td></tr>';
+                    statusNode.textContent = "Waiting for real partner bids; no sample offers are shown.";
+                    return;
+                }
+                tbody.innerHTML = bids.map(q => {
+                    const o = oppMap.get(Number(q.opportunity_id));
+                    const amount = Number(q.amount);
+                    const amountText = Number.isFinite(amount) ? esc(q.currency_code || "INR") + " " + amount.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2}) : "—";
+                    const expiry = q.valid_until ? new Date(q.valid_until).toLocaleString() : "Not specified";
+                    return '<tr><td class="py-4 px-3"><span class="font-bold">#' + esc(o.opportunity_number || o.id) + '</span><div class="text-xs text-slate-500 mt-1">Shipment #' + esc(o.shipment_id) + '</div></td>' +
+                        '<td class="py-4 px-3"><span class="font-mono">' + esc(q.quote_number || ("Bid #" + q.id)) + '</span><div class="text-xs text-slate-500 mt-1">Partner org #' + esc(q.partner_organization_id) + '</div><div class="text-xs text-slate-500 mt-1 whitespace-pre-wrap">' + esc(q.notes || "No operational notes supplied") + '</div></td>' +
+                        '<td class="py-4 px-3 font-mono font-bold">' + amountText + '</td><td class="py-4 px-3 text-xs">' + esc(expiry) + '</td>' +
+                        '<td class="py-4 px-3 text-right"><button type="button" data-award-partner-quote="' + Number(q.id) + '" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs font-semibold">Award & request acceptance</button></td></tr>';
+                }).join("");
+                statusNode.textContent = "Showing " + bids.length + " live eligible partner bid(s). Award only after reviewing commercial terms and partner details.";
+                tbody.querySelectorAll("[data-award-partner-quote]").forEach(button => {
+                    button.addEventListener("click", async () => {
+                        const quoteId = Number(button.getAttribute("data-award-partner-quote"));
+                        if (!Number.isSafeInteger(quoteId) || quoteId <= 0) return;
+                        if (!window.confirm("Award this partner bid? KRIM will create an assignment offer and accepted customer quote. No payment is taken until the partner accepts and checkout is verified.")) return;
+                        button.disabled = true;
+                        button.textContent = "Awarding…";
+                        try {
+                            const { data, error } = await supabaseClient.rpc("krim_award_partner_quote_for_checkout", { p_partner_quote_id: quoteId });
+                            if (error) throw error;
+                            if (!data || !data.id) throw new Error("Backend did not confirm the award. Refresh before retrying.");
+                            window.alert("Partner bid awarded. Assignment request created. Payment remains locked until the partner accepts.");
+                            await Promise.all([loadSpotApprovals(), loadPartnerBids()]);
+                        } catch (err) {
+                            window.alert("Could not award bid: " + (err.message || "Unknown error") + ". Refresh the page to check the current status before retrying.");
+                            button.disabled = false;
+                            button.textContent = "Award & request acceptance";
+                        }
+                    });
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-red-600">Unable to load live partner bids: ' + esc(err.message || "Unknown error") + '</td></tr>';
+                statusNode.textContent = "Partner bid review is unavailable; no action has been taken.";
+            }
+        }
+
         initSpotApprovals();
+        loadPartnerBids();
     </script>
 </body>
 </html>
