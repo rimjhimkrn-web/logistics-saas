@@ -67,7 +67,7 @@
       output.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border:1px solid #d7deea;border-radius:8px;background:#f8fafc;color:#172033;font:inherit;";
       (scope.querySelector("[data-krim-ai-status]") || form).insertAdjacentElement("afterend", output);
     }
-    const answer = result?.answer ?? result?.response ?? result?.message ?? result?.output ?? result?.result;
+    const answer = result?.answer ?? result?.reply ?? result?.response ?? result?.message ?? result?.output ?? result?.result;
     output.textContent = typeof answer === "string" ? answer : JSON.stringify(result, null, 2);
   }
 
