@@ -26,7 +26,7 @@ try{
  if(!session){location.href="../../auth/login.html";return}
  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(memberError)throw memberError;
  const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
- const {data:orgs,error:orgError}=ids.length?await client.from("krim_organizations").select("id,organization_type,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids):{data:[],error:null};if(orgError)throw orgError;
+ const {data:orgs,error:orgError}=ids.length?await client.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids):{data:[],error:null};if(orgError)throw orgError;
  const eligible=(orgs||[]).some(o=>["partner","carrier","forwarder"].includes(String(o.organization_type).toLowerCase())&&["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active"&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
  const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,response_deadline,service_lane,metadata").eq("status","open").order("requested_at",{ascending:false}).limit(100);if(oppError)throw oppError;
  const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
