@@ -154,7 +154,8 @@
                 .select("id, shipment_id, amount, currency_code, status, valid_until, partner_quote_id")
                 .eq("shipment_id", Number(shipmentId))
                 .eq("status", "accepted")
-                .order("created_at", { ascending: false })
+                // Match the server's deterministic quote selection order.
+                .order("id", { ascending: false })
                 .limit(1)
                 .maybeSingle();
 
@@ -232,6 +233,13 @@
                 if (!order?.success || !order.razorpay_order_id || !order.key_id || !Number.isFinite(Number(order.amount_paise))) {
                     throw new Error(order?.error || "The server did not return a valid Razorpay order.");
                 }
+                // Never open checkout if the server selected a different quote
+                // from the one shown to the customer.
+                if (Number(order.quote_id) !== Number(activeQuoteRecord.id)) {
+                    throw new Error("The accepted quote changed. Refresh checkout and review the current quotation before paying.");
+                }
+                document.getElementById("checkout-amount").textContent =
+                    (order.currency || "INR") + " " + (Number(order.amount_paise) / 100).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
 
                 const options = {
                     key: order.key_id,
