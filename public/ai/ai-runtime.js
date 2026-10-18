@@ -98,23 +98,42 @@
         setStatus(form, "Sign in to KRIM before using AI. No request was sent.");
         return;
       }
-      const { data, error } = await client.functions.invoke("krim-ai", {
-        body: { message: prompt, page, fields: entries.map(([key]) => key) }
-      });
-      if (error) {
-        let detail = error.message || "The AI service returned an error.";
-        try {
-          if (error.context && typeof error.context.json === "function") {
-            const body = await error.context.json();
-            detail = body.error || body.message || detail;
-          }
-        } catch (_) {}
-        throw new Error(detail);
+      // Read-only workspaces use the signed-in Supabase client; database RLS remains authoritative.
+      if (page === "conversation-history") {
+        const { data, error } = await client.from("ai_conversations").select("id,title,status,created_at,updated_at").order("updated_at", { ascending: false }).limit(50);
+        if (error) throw error;
+        renderResult(form, { records: data || [], note: "Conversation records visible to this session under database RLS." });
+        setStatus(form, "Loaded " + (data || []).length + " conversation record(s).");
+      } else if (page === "ai-audit-history") {
+        const { data, error } = await client.from("ai_actions").select("id,action_type,status,created_at,approved_at,executed_at,error_message").order("created_at", { ascending: false }).limit(50);
+        if (error) throw error;
+        renderResult(form, { records: data || [], note: "Read-only audit records visible under database RLS. This page does not execute actions." });
+        setStatus(form, "Loaded " + (data || []).length + " audit record(s).");
+      } else if (page === "human-review-queue") {
+        const { data, error } = await client.from("ai_actions").select("id,action_type,status,requested_data,created_at,approved_at,executed_at").order("created_at", { ascending: false }).limit(50);
+        if (error) throw error;
+        const reviewable = (data || []).filter(row => /pending|review|approval/i.test(String(row.status || "")));
+        renderResult(form, { records: reviewable, note: "Read-only review candidates from actual AI action rows. Approval and execution are disabled until a server-side role-checked workflow is configured." });
+        setStatus(form, "Loaded " + reviewable.length + " candidate review record(s); no action was approved or executed.");
+      } else {
+        const { data, error } = await client.functions.invoke("krim-ai", {
+          body: { message: prompt, page, fields: entries.map(([key]) => key) }
+        });
+        if (error) {
+          let detail = error.message || "The AI service returned an error.";
+          try {
+            if (error.context && typeof error.context.json === "function") {
+              const body = await error.context.json();
+              detail = body.error || body.message || detail;
+            }
+          } catch (_) {}
+          throw new Error(detail);
+        }
+        if (!data || data.error) throw new Error(data?.error || "The AI service returned no usable response.");
+        renderResult(form, data);
+        setStatus(form, "Response received from KRIM AI. Recommendations are advisory; verify source data before acting.");
       }
-      if (!data || data.error) throw new Error(data?.error || "The AI service returned no usable response.");
-      renderResult(form, data);
-      setStatus(form, "Response received from KRIM AI. Review all recommendations before acting.");
-      form.dispatchEvent(new CustomEvent("krim:ai-response", {
+            form.dispatchEvent(new CustomEvent("krim:ai-response", {
         bubbles: true, detail: { page, received: true }
       }));
     } catch (error) {
