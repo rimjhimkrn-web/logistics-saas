@@ -7,8 +7,10 @@
   "use strict";
 
   const MAX_INPUT_LENGTH = 2000;
-  const runtimeScript = document.currentScript;
-  const base = runtimeScript ? runtimeScript.src : new URL("ai-runtime.js", location.href).href;
+  // This runtime is loaded as a module on AI workspace pages, where document.currentScript is null.
+  // Find the actual script URL so nested pages resolve platform/ correctly on GitHub Pages and custom domains.
+  const runtimeScript = document.currentScript || document.querySelector('script[src*="/ai/ai-runtime.js"]') || document.querySelector('script[src$="ai-runtime.js"]');
+  const base = runtimeScript && runtimeScript.src ? runtimeScript.src : new URL("ai-runtime.js", location.href).href;
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
