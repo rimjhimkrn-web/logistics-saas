@@ -36,7 +36,8 @@ try{
  if(oppError)throw oppError;
  const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
  if(!liveOpps.length){msg("No open partner opportunities are currently available. Refresh later; no demo loads are shown.");return}
- const shipmentIds=[...new Set(liveOpps.map(o=>Number(o.shipment_id)).filter(Number.isSafeInteger))];
+ const shipmentIds=[...new Set(liveOpps.map(o=>Number(o.shipment_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
+ if(!shipmentIds.length){msg("Open opportunities were found, but none is linked to a valid shipment. No bids can be submitted until the backend records are corrected.",true);return;}
  const {data:shipments,error:shipmentError}=await client.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id").in("id",shipmentIds);
  if(shipmentError)throw shipmentError;
  const locationIds=[...new Set((shipments||[]).flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];
@@ -44,8 +45,10 @@ try{
  if(locationError)throw locationError;
  const locMap=new Map((locations||[]).map(l=>[Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(", ")]));
  const shipMap=new Map((shipments||[]).map(s=>[Number(s.id),s]));
- loads.innerHTML=liveOpps.map(o=>{
- const s=shipMap.get(Number(o.shipment_id))||{};
+ const actionableOpps=liveOpps.filter(o=>shipMap.has(Number(o.shipment_id)));
+ if(!actionableOpps.length){msg("Open opportunities exist, but their shipment details are unavailable. No bids are shown until the shipment links are valid.",true);return;}
+ loads.innerHTML=actionableOpps.map(o=>{
+ const s=shipMap.get(Number(o.shipment_id));
  const origin=locMap.get(Number(s.origin_location_id))||"Origin pending", dest=locMap.get(Number(s.destination_location_id))||"Destination pending";
  const canBid=verified;
  return '<article class="rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"><div><p class="text-xs text-emerald-300 font-bold">'+esc(o.opportunity_number||("Opportunity #"+o.id))+'</p><h2 class="text-xl font-bold mt-2">'+esc(origin)+' → '+esc(dest)+'</h2><p class="text-sm text-slate-300 mt-2">'+esc(s.goods_description||"Cargo details not available")+' · '+esc(s.total_weight_kg??"Weight not provided")+' kg</p><p class="text-xs text-slate-400 mt-2">Shipment: '+esc(s.shipment_number||("#"+o.shipment_id))+' · Tier: '+esc(o.metadata?.service_tier||"Partner quote")+'</p><p class="text-xs text-slate-400 mt-1">Deadline: '+esc(o.response_deadline?new Date(o.response_deadline).toLocaleString():"Not provided")+'</p></div><a class="inline-flex justify-center rounded-xl px-4 py-3 text-sm font-bold '+(canBid?"bg-emerald-600 hover:bg-emerald-500":"bg-slate-700 text-slate-300")+'" '+(canBid?'href="submit-quote.html?opportunity_id='+encodeURIComponent(o.id)+'"': 'aria-disabled="true"')+'>'+ (canBid?"Submit bid":"Verification required")+'</a></div></article>';
