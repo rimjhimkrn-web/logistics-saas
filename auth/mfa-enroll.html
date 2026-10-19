@@ -34,7 +34,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
 <div id="feedback" role="status" aria-live="polite">Checking your sign-in session…</div>
 <div id="qr-container" aria-label="Authenticator QR code">QR code will appear here after enrollment starts.</div>
 <div class="or-divider" aria-label="or use manual setup"><span>OR</span></div>
-<div id="secret-wrap" hidden><p style="text-align:left;font-weight:700;color:#334155">Manual setup key</p><p id="secret"></p><p style="text-align:left;font-size:12px">If your authenticator app cannot scan the QR code, enter this key manually in the app. Keep it private.</p></div>
+<div id="secret-wrap"><p style="text-align:left;font-weight:700;color:#334155">Manual setup key</p><p id="secret">Loading manual setup key…</p><button type="button" id="copy-secret-btn" style="margin-top:8px;background:#334155">Copy manual key</button><p style="text-align:left;font-size:12px">Use this key to set up the same authenticator account manually if you cannot scan the QR code. Keep it private and do not share it.</p></div>
 <form id="mfa-enroll-form">
 <label for="totp-code">Authenticator code</label>
 <input id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000">
@@ -81,12 +81,19 @@ footer{text-align:center;color:#64748b;font-size:12px}
    }
    if(totp?.secret){
     document.getElementById("secret").textContent=totp.secret;
-    document.getElementById("secret-wrap").hidden=false;
+   }else{
+    document.getElementById("secret").textContent="Manual setup key was not returned by Supabase. Try refreshing or contact the administrator.";
    }
    show("Scan the QR code and enter a fresh six-digit authenticator code.",true);
    button.disabled=false;
   }catch(error){show(error&&error.message?error.message:"Could not start MFA enrollment.",false);button.disabled=true;}
  }
+ document.getElementById("copy-secret-btn").addEventListener("click",async function(){
+  const secret=document.getElementById("secret").textContent;
+  if(!secret||secret.startsWith("Loading")||secret.startsWith("Manual setup key was not")){show("The manual setup key is not available to copy.",false);return;}
+  try{await navigator.clipboard.writeText(secret);show("Manual setup key copied. Keep it private.",true);}
+  catch(error){show("Copy was blocked by this browser. Select and copy the manual setup key directly.",false);}
+ });
  form.addEventListener("submit",async function(event){
   event.preventDefault();
   const code=codeInput.value.trim();
