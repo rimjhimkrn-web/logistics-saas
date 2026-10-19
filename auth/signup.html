@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics | Create Your Account</title>
-    <meta name="description" content="Create a KRIM Logistics customer account and access your workspace.">
+    <title>KRIM Logistics | Phone OTP Signup</title>
+    <meta name="description" content="Create a KRIM Logistics account using phone number verification.">
     <!-- Tailwind CSS Modern Styling Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Simple Account Setup</span>
+                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Phone OTP Signup</span>
                 </div>
             </div>
             
@@ -72,53 +72,40 @@
                     KRIM Customer Registration
                 </span>
                 <h1 class="text-2xl font-extrabold text-white tracking-tight">Create your KRIM account</h1>
-                <p class="text-slate-400 text-xs font-mono">Create an account and continue directly when Confirm Email is disabled in Supabase</p>
+                <p class="text-slate-400 text-xs font-mono">Verify your mobile number with a one-time SMS code</p>
             </div>
 
             <button id="google-signup" type="button" class="w-full rounded-xl bg-white px-4 py-3.5 font-semibold text-slate-900">G&nbsp; Continue with Google</button>
             <p id="google-signup-feedback" class="text-sm" role="status" aria-live="polite"></p>
-            <p class="text-center text-xs text-slate-400">Or register using email</p>
-            <form onsubmit="handleSignup(event)" class="space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider">Organization Name</label>
-                        <input type="text" id="signup-org" required minlength="2" autocomplete="organization" placeholder="Acme Global Freight" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider">Admin Full Name</label>
-                        <input type="text" id="signup-name" required minlength="2" autocomplete="name" placeholder="Jane Doe" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                </div>
-
+            <p class="text-center text-xs text-slate-400">Register with your mobile number</p>
+            <form id="signup-form" class="space-y-5">
                 <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider">Email Address</label>
-                    <input type="email" id="signup-email" required autocomplete="email" placeholder="jane.doe@acme-global.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500 transition">
+                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-org">Organization Name</label>
+                    <input type="text" id="signup-org" required minlength="2" autocomplete="organization" placeholder="Your company name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
                 </div>
-
                 <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider">Password</label>
-                    <input type="password" id="signup-password" required minlength="10" autocomplete="new-password" aria-describedby="signup-password-help" placeholder="At least 10 characters" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500 transition">
-                    <p id="signup-password-help" class="text-xs text-slate-400">Use at least 10 characters. Keep your password private.</p>
+                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required minlength="2" autocomplete="name" placeholder="Your full name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
                 </div>
-
-                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                    Create Account →
-                </button>
+                <div class="space-y-2">
+                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-phone">Mobile Number</label>
+                    <input type="tel" id="signup-phone" required autocomplete="tel" inputmode="tel" pattern="\\+[1-9][0-9]{7,14}" placeholder="+919876543210" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
+                    <p class="text-xs text-slate-400">Include country code, e.g. +91 for India.</p>
+                </div>
+                <button id="send-phone-otp" type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-sm transition">Send SMS verification code →</button>
             </form>
             <div id="signup-feedback" class="mt-4 text-sm" role="status" aria-live="polite"></div>
-            <section id="email-verification-panel" class="hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3" aria-live="polite">
-                <h2 class="text-lg font-bold text-emerald-300">Verify your email with a one-time code</h2>
-                <p class="text-sm text-slate-200">Enter the verification code from the email sent by Supabase. The code is not generated by this page.</p>
-                <p class="text-sm text-slate-300">Code sent to: <strong id="verification-email" class="break-all text-white"></strong></p>
-                <form id="verify-otp-form" class="space-y-3">
-                    <label for="verification-otp" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Email verification code</label>
-                    <input id="verification-otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" minlength="6" maxlength="8" required placeholder="Enter code" class="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-4 text-center font-mono text-2xl tracking-[0.35em] text-white" aria-describedby="otp-help">
-                    <p id="otp-help" class="text-xs text-slate-400">Enter the digits exactly as shown in your email.</p>
-                    <button id="verify-otp-button" type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500">Verify code and activate account</button>
+            <section id="phone-verification-panel" class="hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3" aria-live="polite">
+                <h2 class="text-lg font-bold text-emerald-300">Enter your SMS code</h2>
+                <p class="text-sm text-slate-200">We requested a one-time code for:</p>
+                <p id="verification-phone" class="break-all text-white font-semibold"></p>
+                <form id="verify-phone-otp-form" class="space-y-3">
+                    <label for="phone-otp" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">6-digit code</label>
+                    <input id="phone-otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" minlength="6" maxlength="8" required placeholder="123456" class="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-4 text-center font-mono text-2xl tracking-[0.35em] text-white">
+                    <button id="verify-phone-otp" type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500">Verify number and create account</button>
                 </form>
-                <button id="resend-verification" type="button" class="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/10">Resend code</button>
-                <p id="resend-feedback" class="text-sm" role="status" aria-live="polite"></p>
-                <a href="login.html" class="inline-block text-sm font-semibold text-sky-300 hover:underline">Back to sign in →</a>
+                <button id="resend-phone-otp" type="button" class="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200">Send code again</button>
+                <p id="phone-otp-feedback" class="text-sm" role="status" aria-live="polite"></p>
             </section>
 
             <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
@@ -143,164 +130,128 @@
 
     <!-- Signup Script -->
     <script>
-        const verificationPanel = document.getElementById("email-verification-panel");
-        const verificationEmail = document.getElementById("verification-email");
-        const resendButton = document.getElementById("resend-verification");
-        const resendFeedback = document.getElementById("resend-feedback");
-        const verifyOtpForm = document.getElementById("verify-otp-form");
-        let pendingVerificationEmail = "";
-        let pendingOrganizationName = "";
+        const client = window.KRIM_SUPABASE || window.supabaseClient;
+        const signupForm = document.getElementById("signup-form");
+        const otpPanel = document.getElementById("phone-verification-panel");
+        const feedback = document.getElementById("signup-feedback");
+        const otpFeedback = document.getElementById("phone-otp-feedback");
+        let pendingPhone = "";
+        let pendingOrganization = "";
+        let pendingFullName = "";
+
         document.getElementById("google-signup").addEventListener("click", async function () {
-            const feedback = document.getElementById("google-signup-feedback");
-            const client = window.KRIM_SUPABASE || window.supabaseClient;
-            if (!client) { feedback.textContent = "Authentication service unavailable. Refresh and try again."; return; }
+            const msg = document.getElementById("google-signup-feedback");
+            if (!client) { msg.textContent = "Authentication service is unavailable. Refresh and try again."; return; }
             this.disabled = true;
-            feedback.textContent = "Opening Google sign-in...";
+            msg.textContent = "Opening Google sign-in...";
             try {
-                const result = await client.auth.signInWithOAuth({
+                const { error } = await client.auth.signInWithOAuth({
                     provider: "google",
                     options: { redirectTo: new URL("./auth-callback.html", window.location.href).href }
                 });
-                if (result.error) throw result.error;
+                if (error) throw error;
             } catch (err) {
-                feedback.textContent = err.message || "Google sign-in failed. Enable Google in Supabase Auth first.";
+                msg.textContent = err.message || "Google sign-in failed. Check Google provider settings in Supabase.";
                 this.disabled = false;
             }
         });
 
-
-        resendButton.addEventListener("click", async function () {
-            const client = window.KRIM_SUPABASE || window.supabaseClient;
-            if (!client || !pendingVerificationEmail) {
-                resendFeedback.textContent = "Please submit the registration form again to request verification.";
-                resendFeedback.className = "text-sm text-amber-300";
-                return;
+        async function sendPhoneOtp() {
+            if (!client) throw new Error("Authentication service unavailable. Refresh and try again.");
+            const phone = document.getElementById("signup-phone").value.trim().replace(/[\\s()-]/g, "");
+            if (!/^\\+[1-9][0-9]{7,14}$/.test(phone)) {
+                throw new Error("Enter your phone in international format, e.g. +919876543210.");
             }
-            resendButton.disabled = true;
-            resendButton.textContent = "Requesting email...";
-            resendFeedback.textContent = "";
+            pendingPhone = phone;
+            pendingOrganization = document.getElementById("signup-org").value.trim();
+            pendingFullName = document.getElementById("signup-name").value.trim();
+            const { error } = await client.auth.signInWithOtp({
+                phone,
+                options: {
+                    shouldCreateUser: true,
+                    data: {
+                        full_name: pendingFullName,
+                        company_name: pendingOrganization,
+                        krim_account_type: "customer"
+                    }
+                }
+            });
+            if (error) throw error;
+            document.getElementById("verification-phone").textContent = phone;
+            otpPanel.classList.remove("hidden");
+            otpFeedback.textContent = "Supabase accepted the request. If no SMS arrives, phone authentication and an SMS provider must be enabled/configured in Supabase.";
+            otpFeedback.className = "text-sm text-emerald-300";
+            document.getElementById("phone-otp").focus();
+            otpPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        signupForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const button = document.getElementById("send-phone-otp");
+            button.disabled = true;
+            button.textContent = "Requesting SMS code...";
+            feedback.textContent = "";
             try {
-                const redirectTo = new URL("./auth-callback.html", window.location.href).href;
-                const { error } = await client.auth.resend({
-                    type: "signup",
-                    email: pendingVerificationEmail,
-                    options: { emailRedirectTo: redirectTo }
-                });
-                if (error) throw error;
-                resendFeedback.textContent = "Supabase accepted the resend request. Check Inbox and Spam/Junk. If nothing arrives, the SMTP sender/provider must be configured in Supabase.";
-                resendFeedback.className = "text-sm text-emerald-300";
+                await sendPhoneOtp();
+                feedback.textContent = "Code request submitted. Enter the SMS code below to finish registration.";
+                feedback.className = "mt-4 text-sm text-emerald-300";
             } catch (err) {
-                const message = String(err.message || "");
-                resendFeedback.textContent = /rate|limit|too many/i.test(message)
-                    ? "Too many email requests. Wait a few minutes before trying again."
-                    : (message || "Could not request another email. Check Supabase Auth SMTP settings and try again.");
-                resendFeedback.className = "text-sm text-red-300";
+                feedback.textContent = err.message || "Could not send the SMS code.";
+                feedback.className = "mt-4 text-sm text-red-400";
             } finally {
-                resendButton.disabled = false;
-                resendButton.textContent = "Resend verification email";
+                button.disabled = false;
+                button.textContent = "Send SMS verification code →";
             }
         });
 
-
-        verifyOtpForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const client = window.KRIM_SUPABASE || window.supabaseClient;
-            const token = document.getElementById("verification-otp").value.trim();
-            const verifyButton = document.getElementById("verify-otp-button");
-            const feedback = document.getElementById("signup-feedback");
-            if (!client || !pendingVerificationEmail) {
-                feedback.textContent = "Please submit the registration form again before entering your code.";
-                feedback.className = "mt-4 text-sm text-amber-300";
-                return;
+        document.getElementById("resend-phone-otp").addEventListener("click", async function () {
+            const button = this;
+            button.disabled = true;
+            button.textContent = "Requesting code...";
+            otpFeedback.textContent = "";
+            try {
+                await sendPhoneOtp();
+            } catch (err) {
+                otpFeedback.textContent = /rate|limit|too many/i.test(String(err.message || ""))
+                    ? "Too many requests. Wait before asking for another code."
+                    : (err.message || "Could not resend SMS code.");
+                otpFeedback.className = "text-sm text-red-300";
+            } finally {
+                button.disabled = false;
+                button.textContent = "Send code again";
             }
-            verifyButton.disabled = true;
-            verifyButton.textContent = "Verifying code...";
+        });
+
+        document.getElementById("verify-phone-otp-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const button = document.getElementById("verify-phone-otp");
+            button.disabled = true;
+            button.textContent = "Verifying...";
             feedback.textContent = "";
             try {
+                if (!client || !pendingPhone) throw new Error("Request an SMS code first.");
+                const token = document.getElementById("phone-otp").value.trim();
                 const { data, error } = await client.auth.verifyOtp({
-                    email: pendingVerificationEmail,
+                    phone: pendingPhone,
                     token,
-                    type: "signup"
+                    type: "sms"
                 });
                 if (error) throw error;
-                if (!data.session) throw new Error("The code was accepted but no session was returned. Please sign in.");
+                if (!data.session) throw new Error("The code was accepted, but no login session was returned. Please sign in.");
                 const { error: provisionError } = await client.rpc("krim_provision_customer_organization", {
-                    p_legal_name: pendingOrganizationName
+                    p_legal_name: pendingOrganization
                 });
-                if (provisionError) throw new Error("Email verified, but organization setup needs attention: " + provisionError.message);
-                feedback.textContent = "Email verified. Opening your KRIM workspace...";
+                if (provisionError) throw new Error("Phone verified, but workspace setup failed: " + provisionError.message);
+                feedback.textContent = "Phone verified. Opening your KRIM workspace...";
                 feedback.className = "mt-4 text-sm text-emerald-300";
                 window.location.href = window.krimPath ? window.krimPath("app/customer/index.html") : "../app/customer/index.html";
             } catch (err) {
-                feedback.textContent = /expired|invalid|token/i.test(String(err.message || ""))
-                    ? "That code is invalid or expired. Request a new code and try again."
-                    : (err.message || "Could not verify this code. Please try again.");
-                feedback.className = "mt-4 text-sm text-red-400";
-                verifyButton.disabled = false;
-                verifyButton.textContent = "Verify code and activate account";
-            }
-        });
-
-        async function handleSignup(e) {
-            e.preventDefault();
-            const button = e.target.querySelector('button[type="submit"]');
-            const feedback = document.getElementById("signup-feedback");
-            const organizationName = document.getElementById("signup-org").value.trim();
-            const fullName = document.getElementById("signup-name").value.trim();
-            const email = document.getElementById("signup-email").value.trim();
-            const password = document.getElementById("signup-password").value;
-            const client = window.KRIM_SUPABASE || window.supabaseClient;
-            if (!client) {
-                feedback.textContent = "Authentication service did not initialize. Refresh the page and try again.";
-                feedback.className = "mt-4 text-sm text-red-400";
-                return;
-            }
-            if (organizationName.length < 2 || fullName.length < 2 || password.length < 10) {
-                feedback.textContent = "Enter an organization name and full name. Use a password of at least 10 characters.";
-                feedback.className = "mt-4 text-sm text-amber-300";
-                return;
-            }
-            button.disabled = true;
-            button.textContent = "Creating secure account...";
-            feedback.textContent = "";
-            try {
-                const { data, error } = await client.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        emailRedirectTo: new URL("./auth-callback.html", window.location.href).href,
-                        data: { full_name: fullName, company_name: organizationName, krim_account_type: "customer" }
-                    }
-                });
-                if (error) throw error;
-                if (data.session) {
-                    const { error: provisionError } = await client.rpc("krim_provision_customer_organization", {
-                        p_legal_name: organizationName
-                    });
-                    if (provisionError) {
-                        throw new Error("Account created, but organization setup needs support: " + provisionError.message);
-                    }
-                    feedback.textContent = "Account and organization created. Opening your KRIM workspace...";
-                    feedback.className = "mt-4 text-sm text-emerald-300";
-                    window.location.href = window.krimPath ? window.krimPath("app/customer/index.html") : "../app/customer/index.html";
-                    return;
-                }
-                pendingVerificationEmail = email;
-                pendingOrganizationName = organizationName;
-                verificationEmail.textContent = email;
-                verificationPanel.classList.remove("hidden");
-                feedback.textContent = "Signup did not create an active session because email confirmation is enabled. For instant signup, turn OFF Confirm Email in Supabase Authentication settings, save, then submit this form again.";
-                feedback.className = "mt-4 text-sm text-emerald-300";
-                button.textContent = "Registration Submitted";
-                button.disabled = true;
-                verificationPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-            } catch (err) {
-                feedback.textContent = err.message || "Registration failed. Please try again.";
+                feedback.textContent = err.message || "Verification failed. Check the code and try again.";
                 feedback.className = "mt-4 text-sm text-red-400";
                 button.disabled = false;
-                button.textContent = "Create Account →";
+                button.textContent = "Verify number and create account";
             }
-        }
+        });
     </script>
 </body>
 </html>
