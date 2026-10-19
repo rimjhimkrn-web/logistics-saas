@@ -132,49 +132,36 @@ try{
 </script>
 
 <script>
-/* Canonicalize internal links for GitHub Pages and local-root deployments. */
+/* Make both My Bids entry points navigate to the canonical My Bids page. */
 (function(){
   var base = window.KRIM_BASE_PATH || (location.pathname.indexOf("/logistics-saas/")===0 ? "/logistics-saas/" : "/");
-  var routes = {
-    "home": "public/index.html",
-    "solutions": "public/solutions.html",
-    "global": "public/global-coverage.html",
-    "loads": "public/partner/available-loads.html",
-    "bids": "public/partner/quote-history.html",
-    "submit": "public/partner/submit-quote.html",
-    "login": "auth/login.html",
-    "register": "auth/partner-signup.html"
-  };
-  document.querySelectorAll("a[data-krim-route]").forEach(function(a){
-    var key=a.getAttribute("data-krim-route");
-    if(routes[key]) a.setAttribute("href",base+routes[key]);
-  });
-  document.querySelectorAll('a[href]').forEach(function(a){
-    var raw=a.getAttribute("href");
-    if(!raw || raw.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(raw)) return;
-    var clean=raw.split("?")[0].replace(/^\.\//,"");
-    var known={
-      "../index.html":routes.home,
-      "../../public/index.html":routes.home,
-      "../solutions.html":routes.solutions,
-      "../../public/solutions.html":routes.solutions,
-      "../global-coverage.html":routes.global,
-      "../../public/global-coverage.html":routes.global,
-      "available-loads.html":routes.loads,
-      "quote-history.html":routes.bids,
-      "submit-quote.html":routes.submit,
-      "../../auth/login.html":routes.login,
-      "../../auth/partner-signup.html":routes.register
-    };
-    if(known[clean]) a.href=base+known[clean]+(raw.indexOf("?")>=0?raw.slice(raw.indexOf("?")):"");
-  });
+  var bidsUrl = base + "public/partner/quote-history.html";
+  function isBidsLink(a){
+    if(!a) return false;
+    var route = (a.getAttribute("data-krim-route") || "").toLowerCase();
+    var label = (a.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
+    var href = (a.getAttribute("href") || "").split("?")[0];
+    return route === "bids" || label === "my bids" || label === "view my bids" ||
+      label === "my submitted bids" || href === "quote-history.html" ||
+      href.endsWith("/quote-history.html");
+  }
+  function connectBidsLinks(){
+    document.querySelectorAll("a").forEach(function(a){
+      if(isBidsLink(a)){
+        a.setAttribute("href",bidsUrl);
+        a.setAttribute("data-krim-route","bids");
+      }
+    });
+  }
+  connectBidsLinks();
   document.addEventListener("click",function(e){
-    var a=e.target.closest("a[data-krim-route]");
-    if(!a)return;
-    var key=a.getAttribute("data-krim-route");
-    if(routes[key]){e.preventDefault();location.assign(base+routes[key]);}
+    var a=e.target.closest("a");
+    if(!a || !isBidsLink(a)) return;
+    e.preventDefault();
+    location.assign(bidsUrl);
   });
+  var observer = new MutationObserver(connectBidsLinks);
+  observer.observe(document.body,{childList:true,subtree:true});
 })();
-</script>
 </body>
 </html>
