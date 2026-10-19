@@ -229,7 +229,10 @@
                 try {
                     const result = await supabaseClient.functions.invoke("verify-global-cashfree-payment", { body: { order_id: cashfreeReturnOrder } });
                     if (result.error) throw result.error;
-                    if (result.data && result.data.verified) showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
+                    if (result.data && result.data.verified) {
+                        setGatewayStatus("SERVER-VERIFIED", "verified");
+                        showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
+                    }
                     else showCheckoutMessage((result.data && (result.data.message || result.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
                 } catch (err) {
                     setGatewayStatus("VERIFICATION UNAVAILABLE", "error");
@@ -313,6 +316,7 @@
                     modal: {
                         ondismiss: function () {
                             button.disabled = false;
+                            setGatewayStatus("CHECKOUT CLOSED — NOT VERIFIED", "pending");
                             showCheckoutMessage("Checkout was closed. No payment success has been recorded.", "info");
                         }
                     },
@@ -322,6 +326,7 @@
                 const checkout = new Razorpay(options);
                 checkout.on("payment.failed", function (response) {
                     button.disabled = false;
+                    setGatewayStatus("PAYMENT FAILED — VERIFY STATUS", "error");
                     showCheckoutMessage(response.error?.description || "Payment failed. Please verify payment status before retrying.");
                 });
                 checkout.open();
