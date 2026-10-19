@@ -1,113 +1,62 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Supply Chain Disruption Simulator & Stress Testing Desk</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              purple: '#8b5cf6',
-              rose: '#f43f5e',
-              blue: '#3b82f6'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Logistics | Disruption Simulation Room</title>
+<link rel="stylesheet" href="../../core/krim-unified-page.css">
+<style>
+:root{color-scheme:light;--ink:#17233b;--muted:#65738a;--line:#dce4ef;--panel:#fff;--blue:#245fe5;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit;text-decoration:none}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.brand{font-weight:850;letter-spacing:.02em}.brand span{background:#e9efff;color:var(--blue);padding:7px 10px;border-radius:10px;margin-right:8px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:white;font-weight:700;font-size:13px}.wrap{max-width:1100px;margin:auto;padding:24px 16px 40px}.hero{background:linear-gradient(115deg,#fff,#eef4ff);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:18px}.eyebrow{color:var(--blue);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}h1{font-size:clamp(25px,4vw,34px);line-height:1.15;margin:8px 0}p{color:var(--muted);margin:8px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.panel,.metric{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0}.panel h2{font-size:17px;margin:0 0 14px}.field{margin:12px 0}.field label{display:block;font-size:13px;font-weight:750;margin-bottom:6px}.field select,.field input{width:100%;min-height:44px;border:1px solid #cbd6e5;border-radius:9px;padding:10px;background:#fff;color:var(--ink);font:inherit}.hint{font-size:12px;color:var(--muted)}.primary{background:var(--blue);color:#fff;border-color:var(--blue);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}.metric small{display:block;color:var(--muted);font-weight:700}.metric strong{display:block;font-size:25px;margin-top:6px;overflow-wrap:anywhere}.bar{height:10px;background:#e8edf5;border-radius:99px;overflow:hidden;margin:7px 0 14px}.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#2d6be8,#17a673);transition:width .25s}.results{margin-top:18px}.status{padding:12px;border-radius:10px;background:#eef4ff;color:#244a9b;font-size:13px;margin-top:12px}.warning{background:#fff7e7;color:#82530a}.result-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:10px 0}.result-row:last-child{border-bottom:0}.foot{font-size:12px;margin-top:16px;color:var(--muted)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9bb9ff;outline-offset:2px}@media(max-width:760px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding:19px}.top{align-items:flex-start}}@media(max-width:360px){.metrics{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-blue-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Supply Chain Disruption Simulator Desk</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="/control-centre/digital-twin-map.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← Digital Twin Map
-      </a>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN WORKSPACE ==================== -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
-
-    <!-- HERO BANNER -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <span class="text-[11px] font-bold text-blue-400 uppercase tracking-widest block">Monte Carlo Stress Testing & Resilience Modeling</span>
-        <h1 class="text-xl font-extrabold text-white mt-1">Disruption Simulator & Stress Testing Desk</h1>
-        <p class="text-slate-400 text-[11px] mt-1">Simulate port closures, canal blockages, and fuel price spikes to measure supply chain vulnerability and buffer stock sufficiency.</p>
-      </div>
-
-      <button onclick="alert('Running Monte Carlo Disruption Simulation model...')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-blue-500/20 shrink-0">
-        🧪 Run Disruption Simulation
-      </button>
-    </section>
-
-    <!-- SIMULATOR CONTROLS -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-6">
-      <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
-        <span>⚙️</span> Simulation Scenario Parameters
-      </h3>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="space-y-1">
-          <label class="text-slate-400 text-[10px] uppercase font-bold block">Disruption Event *</label>
-          <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none">
-            <option value="SUEZ_CLOSURE">Suez Canal Total Blockage (14 Days)</option>
-            <option value="PANAMA_DROUGHT">Panama Canal Draft Restriction (-30%)</option>
-            <option value="FUEL_SPIKE">Bunker Fuel Price Spike (+50%)</option>
-          </select>
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-slate-400 text-[10px] uppercase font-bold block">Affected Trade Corridor</label>
-          <select class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none">
-            <option value="ASIA_EUROPE">Asia → Europe Mainline</option>
-            <option value="TRANS_PACIFIC">Trans-Pacific Express</option>
-          </select>
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-slate-400 text-[10px] uppercase font-bold block">Simulation Iterations</label>
-          <input type="number" value="1000" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3 py-2 text-white font-bold outline-none" />
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Simulation Core.</p>
-    </div>
-  </footer>
-
-  <script type="module" src="/platform/krim-config.js"></script>
-  <script type="module" src="/app/app-runtime.js"></script>
-</body>
-</html>
+<body>
+<header class="top"><a class="brand" href="../index.html"><span>K</span>KRIM Logistics OS</a><nav class="nav" aria-label="Control centre navigation"><a href="../operations/control-tower.html">Control Tower</a><a href="exception-dispatch.html">Exceptions</a><a href="digital-twin-map.html">Digital Twin</a><a href="facility-matrix.html">Facilities</a></nav></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Resilience planning · Scenario lab</div><h1>Disruption Simulation Room</h1><p>Stress-test a corridor against a hypothetical disruption. Run a repeatable local Monte Carlo-style estimate to compare possible delay and cost exposure before making an operational decision.</p><div class="status warning">Planning estimate only: this page uses illustrative assumptions, not live carrier, port, fuel-price, shipment, or weather feeds. Results are not a forecast.</div></section>
+<section class="grid">
+<div class="panel"><h2>01 · Scenario inputs</h2>
+<div class="field"><label for="event">Disruption event</label><select id="event"><option value="suez">Suez Canal closure · 14 days</option><option value="panama">Panama Canal capacity restriction</option><option value="fuel">Fuel price spike · 50%</option><option value="port">Major port congestion</option><option value="border">Border / customs interruption</option></select></div>
+<div class="field"><label for="corridor">Affected corridor</label><select id="corridor"><option value="asiaeu">Asia → Europe</option><option value="transpac">Trans-Pacific</option><option value="india">India domestic road freight</option></select></div>
+<div class="field"><label for="shipments">Shipments exposed</label><input id="shipments" type="number" min="1" max="1000000" value="100"></div>
+<div class="field"><label for="value">Average freight cost per shipment (₹)</label><input id="value" type="number" min="1" max="100000000" value="45000"></div>
+<div class="field"><label for="buffer">Available buffer / slack (days)</label><input id="buffer" type="number" min="0" max="90" value="3"></div>
+<div class="field"><label for="iterations">Simulation runs</label><select id="iterations"><option value="500">500 · quick</option><option value="1000" selected>1,000 · standard</option><option value="5000">5,000 · detailed</option><option value="10000">10,000 · extended</option></select></div>
+<button class="btn primary" id="run" type="button">Run simulation</button> <button class="btn" id="reset" type="button">Reset inputs</button><div id="message" class="hint" role="status" aria-live="polite" style="margin-top:10px">Ready. Adjust inputs and run the scenario.</div>
+</div>
+<div class="panel"><h2>02 · Scenario assumptions</h2><p id="assumptionIntro">Choose an event to see its illustrative planning assumptions.</p><div class="result-row"><span>Base disruption duration</span><strong id="duration">14 days</strong></div><div class="result-row"><span>Delay variability</span><strong id="variability">Medium</strong></div><div class="result-row"><span>Estimated cost uplift range</span><strong id="uplift">8–30%</strong></div><div class="result-row"><span>Corridor multiplier</span><strong id="corridorFactor">1.00×</strong></div><p class="foot">Assumptions are intentionally visible so users can challenge them. Replace these with validated historical and live operational data before production decisions.</p></div>
+<div class="panel"><h2>03 · How to interpret</h2><div class="result-row"><span>Delay beyond buffer</span><strong>Potential service risk</strong></div><div class="result-row"><span>Cost exposure</span><strong>Illustrative additional cost</strong></div><div class="result-row"><span>P90 outcome</span><strong>Higher-stress case</strong></div><p class="foot">Monte Carlo-style runs vary duration and cost uplift within the selected assumption ranges. This is a lightweight browser model, not a certified risk engine.</p></div>
+</section>
+<section class="results panel" aria-labelledby="resultsHeading"><h2 id="resultsHeading">Simulation results</h2><p id="resultIntro">Run a simulation to calculate the scenario estimates.</p>
+<div class="metrics"><div class="metric"><small>Expected extra delay</small><strong id="avgDelay">—</strong><small>days / shipment</small></div><div class="metric"><small>Shipments at risk</small><strong id="atRisk">—</strong><small>estimated count</small></div><div class="metric"><small>Expected added cost</small><strong id="addedCost">—</strong><small>₹ across exposed shipments</small></div><div class="metric"><small>P90 added cost</small><strong id="p90Cost">—</strong><small>higher-stress estimate</small></div></div>
+<div style="margin-top:18px"><strong>Estimated shipment risk share</strong><div class="bar" aria-label="Estimated shipment risk share"><span id="riskBar"></span></div><div id="riskLabel" class="hint">No simulation run yet.</div></div>
+<div id="detail" class="status" aria-live="polite">Results will appear here. No data is sent to a server by this local simulation.</div>
+</section>
+<p class="foot">KRIM Logistics OS · Scenario modelling is advisory. Validate assumptions with operations, finance, partners, and customer commitments before acting.</p>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const profiles={
+suez:{duration:14,low:.08,high:.30,variability:"High",intro:"Illustrative ocean-routing shock; not a live canal status report."},
+panama:{duration:8,low:.06,high:.22,variability:"High",intro:"Illustrative draft/capacity restriction affecting routing and schedule slack."},
+fuel:{duration:7,low:.10,high:.50,variability:"Medium",intro:"Illustrative fuel cost shock; actual pass-through depends on contracts and mode."},
+port:{duration:5,low:.05,high:.25,variability:"High",intro:"Illustrative terminal congestion and queueing scenario."},
+border:{duration:4,low:.04,high:.20,variability:"Medium",intro:"Illustrative border or customs processing interruption."}
+};
+function profile(){return profiles[$("event").value]}
+function corridor(){return {asiaeu:1.15,transpac:1.1,india:.75}[$("corridor").value]}
+function updateAssumptions(){$("duration").textContent=profile().duration+" days";$("variability").textContent=profile().variability;$("uplift").textContent=Math.round(profile().low*100)+"–"+Math.round(profile().high*100)+"%";$("corridorFactor").textContent=corridor().toFixed(2)+"×";$("assumptionIntro").textContent=profile().intro}
+function fmtMoney(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function run(){
+const count=Number($("shipments").value),cost=Number($("value").value),buffer=Number($("buffer").value),n=Number($("iterations").value);
+if(!Number.isFinite(count)||count<1||count>1000000||!Number.isInteger(count)||!Number.isFinite(cost)||cost<1||cost>100000000||!Number.isFinite(buffer)||buffer<0||buffer>90){$("message").textContent="Check inputs: shipments 1–1,000,000; cost ₹1–₹100,000,000; buffer 0–90 days.";return}
+const p=profile(),factor=corridor(),delays=[],costs=[];let risk=0,delayTotal=0,costTotal=0;
+let seed=2166136261;const seedText=$("event").value+"|"+$("corridor").value+"|"+count+"|"+cost+"|"+buffer+"|"+n;for(let i=0;i<seedText.length;i++){seed^=seedText.charCodeAt(i);seed=Math.imul(seed,16777619)}function rand(){seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}
+for(let i=0;i<n;i++){const variation=.55+rand()*.9;const delay=p.duration*factor*variation;const uplift=(p.low+rand()*(p.high-p.low))*factor;const exposure=cost*uplift*count;delays.push(delay);costs.push(exposure);delayTotal+=delay;costTotal+=exposure;if(delay>buffer)risk++}
+delays.sort((a,b)=>a-b);costs.sort((a,b)=>a-b);const avgDelay=delayTotal/n,share=risk/n;
+$("avgDelay").textContent=avgDelay.toFixed(1);$("atRisk").textContent=Math.round(count*share).toLocaleString("en-IN");$("addedCost").textContent=fmtMoney(costTotal/n);$("p90Cost").textContent=fmtMoney(costs[Math.min(n-1,Math.ceil(n*.9)-1)]);$("riskBar").style.width=(share*100).toFixed(1)+"%";$("riskLabel").textContent=(share*100).toFixed(1)+"% of simulated outcomes exceed the available buffer."; $("resultIntro").textContent=n.toLocaleString("en-IN")+" repeatable runs · "+p.duration+"-day base disruption · "+$("corridor").selectedOptions[0].text; $("detail").textContent="Model complete. Estimated delay is "+avgDelay.toFixed(1)+" days per shipment; the added-cost figure is an assumption-based scenario average, not a quote or booked liability. Use the P90 result as a stress case, then validate with real shipment and partner data."; $("message").textContent="Simulation completed locally. No backend workflow or shipment records were changed."
+}
+$("event").addEventListener("change",updateAssumptions);$("corridor").addEventListener("change",updateAssumptions);$("run").addEventListener("click",run);$("reset").addEventListener("click",()=>{$("event").value="suez";$("corridor").value="asiaeu";$("shipments").value="100";$("value").value="45000";$("buffer").value="3";$("iterations").value="1000";["avgDelay","atRisk","addedCost","p90Cost"].forEach(id=>$(id).textContent="—");$("riskBar").style.width="0";$("riskLabel").textContent="No simulation run yet.";$("resultIntro").textContent="Run a simulation to calculate the scenario estimates.";$("detail").textContent="Results will appear here. No data is sent to a server by this local simulation.";$("message").textContent="Inputs reset.";updateAssumptions()});updateAssumptions();
+})();
+</script>
+</body></html>
