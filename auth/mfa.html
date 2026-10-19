@@ -1,131 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MFA Verification — KRIM LOGISTICS OS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/core/krim-config.js"></script>
-  <script src="/core/krim-supabase.js"></script>
-  <script src="/core/krim-mfa.js"></script>
-  <script src="/js/session.js"></script>
-
-  <style>
-    :root {
-      --krim-bg: #030712;
-      --krim-surface: #0b1329;
-      --krim-surface-card: #0f172a;
-      --krim-border: rgba(255, 255, 255, 0.08);
-      --krim-cyan: #00d2ff;
-      --krim-emerald: #10b981;
-      --krim-rose: #f43f5e;
-      --krim-text-muted: #94a3b8;
-      --font-code: "JetBrains Mono", monospace;
-      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--krim-bg);
-      color: #fff;
-      font-family: var(--font-sans);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    .mfa-card {
-      background: var(--krim-surface-card);
-      border: 1px solid var(--krim-border);
-      border-radius: 20px;
-      padding: 40px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-
-    .otp-input {
-      font-family: var(--font-code);
-      font-size: 2rem;
-      letter-spacing: 0.4em;
-      text-align: center;
-      background: var(--krim-surface);
-      border: 1px solid var(--krim-border);
-      color: var(--krim-cyan);
-      padding: 12px;
-      border-radius: 12px;
-      width: 100%;
-      margin: 20px 0;
-      outline: none;
-    }
-    .otp-input:focus { border-color: var(--krim-cyan); }
-
-    .btn-primary {
-      width: 100%;
-      background: linear-gradient(135deg, #00d2ff 0%, #0072ff 100%);
-      color: #fff;
-      font-weight: 700;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-  </style>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>KRIM Logistics OS — MFA Verification</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#f8fafc;color:#0f172a;font-family:Inter,system-ui,-apple-system,sans-serif}
+header,footer{padding:22px max(20px,calc((100% - 1000px)/2))}header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:800;letter-spacing:.06em}
+main{width:min(100% - 32px,460px);margin:auto;padding:34px 28px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 18px 50px #0f172a0d}
+.badge{width:48px;height:48px;margin:0 auto 16px;display:grid;place-items:center;border-radius:15px;background:#dbeafe;color:#1d4ed8;font-size:22px}
+h1{text-align:center;font-size:25px;margin:0 0 10px}p{text-align:center;color:#64748b;font-size:14px;line-height:1.6}
+label{display:block;margin:22px 0 8px;font-size:13px;font-weight:700}
+input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:24px;text-align:center;letter-spacing:.4em;font-family:ui-monospace,monospace}
+input:focus{outline:2px solid #0284c7;border-color:#0284c7}
+button{width:100%;margin-top:20px;padding:14px;border:0;border-radius:10px;background:#0369a1;color:#fff;font-weight:750;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}#feedback{margin-top:16px;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-align:center;margin-top:20px;font-size:14px}
+footer{text-align:center;color:#64748b;font-size:12px}
+</style>
 </head>
 <body>
-
-  <div class="mfa-card">
-    <div style="font-size: 2.5rem; margin-bottom: 12px;">🛡️</div>
-    <h2 style="font-size: 1.3rem; font-weight: 800;">MFA Verification Required</h2>
-    <p style="color: var(--krim-text-muted); font-size: 0.82rem; margin-top: 6px;">Enter the 6-digit verification code from your Authenticator App.</p>
-
-    <div id="error-msg" style="color: var(--krim-rose); font-size: 0.8rem; margin-top: 10px; display: none;"></div>
-
-    <input type="text" id="mfa-code" class="otp-input" maxlength="6" placeholder="000000" autofocus>
-
-    <button onclick="verifyMFA()" class="btn-primary">Verify & Access OS →</button>
-  </div>
-
-  <script>
-    async function verifyMFA() {
-      const code = document.getElementById('mfa-code').value;
-      const factorId = sessionStorage.getItem('KRIM_MFA_FACTOR_ID');
-      const errorMsg = document.getElementById('error-msg');
-
-      if (!code || code.length !== 6) {
-        errorMsg.innerText = "Please enter a valid 6-digit TOTP code.";
-        errorMsg.style.display = "block";
-        return;
-      }
-
-      try {
-        await KrimMFA.challengeAndVerify(factorId, code);
-        
-        // Fetch current session info
-        const session = await window.KrimBackend.getSession();
-        const role = session.user.user_metadata?.role || KRIM_CONFIG.ROLES.PARTNER;
-
-        KrimSession.set({
-          token: session.access_token,
-          user: session.user,
-          role: role,
-          mfaVerified: true
-        });
-
-        window.location.href = KRIM_CONFIG.ROUTES[role] || KRIM_CONFIG.ROUTES.partner;
-      } catch (e) {
-        errorMsg.innerText = e.message || "Invalid authentication code.";
-        errorMsg.style.display = "block";
-      }
-    }
-  </script>
+<header>KRIM <span style="color:#0284c7">LOGISTICS OS</span></header>
+<main>
+<div class="badge" aria-hidden="true">🛡</div>
+<h1>Multi-factor verification</h1>
+<p>Enter the current six-digit code from the authenticator app enrolled on your KRIM account.</p>
+<div id="feedback" role="status" aria-live="polite" hidden></div>
+<form id="mfa-form">
+<label for="mfa-code">Authenticator code</label>
+<input id="mfa-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000" autofocus>
+<button id="verify-btn" type="submit">Verify and continue</button>
+</form>
+<a class="back" href="login.html">← Back to sign in</a>
+</main>
+<footer>© 2026 KRIM Logistics</footer>
+<script>
+(function(){
+ const client=window.KRIM_SUPABASE;
+ const form=document.getElementById("mfa-form");
+ const codeInput=document.getElementById("mfa-code");
+ const button=document.getElementById("verify-btn");
+ const feedback=document.getElementById("feedback");
+ function show(message,ok){
+  feedback.hidden=false;feedback.textContent=message;
+  feedback.style.background=ok?"#ecfdf5":"#fff1f2";
+  feedback.style.color=ok?"#065f46":"#9f1239";
+ }
+ function destination(user){
+  const type=String(user.user_metadata?.krim_account_type||user.app_metadata?.krim_account_type||user.user_metadata?.account_type||"customer").toLowerCase();
+  const routes={customer:"../app/customer/index.html",partner:"../app/partner/index.html",enterprise:"../app/enterprise/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html"};
+  return routes[type]||"../app/customer/index.html";
+ }
+ form.addEventListener("submit",async function(event){
+  event.preventDefault();
+  const code=codeInput.value.trim();
+  if(!/^\d{6}$/.test(code)){show("Enter the six-digit code from your authenticator app.",false);return;}
+  button.disabled=true;button.textContent="Verifying…";
+  try{
+   if(!client)throw new Error("Supabase configuration did not load. Refresh this page and try again.");
+   const sessionResult=await client.auth.getSession();
+   if(sessionResult.error)throw sessionResult.error;
+   const session=sessionResult.data.session;
+   if(!session?.user)throw new Error("Your sign-in session has expired. Please sign in again.");
+   const factorId=sessionStorage.getItem("KRIM_MFA_FACTOR_ID");
+   const factorsResult=await client.auth.mfa.listFactors();
+   if(factorsResult.error)throw factorsResult.error;
+   const factors=factorsResult.data?.totp||[];
+   const factor=factors.find(item=>item.id===factorId&&item.status==="verified")||factors.find(item=>item.status==="verified");
+   if(!factor)throw new Error("No verified authenticator factor was found for this account. Sign in again or enroll MFA in account security settings.");
+   const challengeResult=await client.auth.mfa.challenge({factorId:factor.id});
+   if(challengeResult.error)throw challengeResult.error;
+   const verifyResult=await client.auth.mfa.verify({factorId:factor.id,challengeId:challengeResult.data.id,code});
+   if(verifyResult.error)throw verifyResult.error;
+   sessionStorage.removeItem("KRIM_MFA_FACTOR_ID");
+   show("MFA verified successfully. Opening your workspace…",true);
+   form.hidden=true;
+   setTimeout(function(){location.replace(destination(session.user));},700);
+  }catch(error){
+   show(error&&error.message?error.message:"MFA verification failed. Check the code and try again.",false);
+   button.disabled=false;button.textContent="Verify and continue";
+  }
+ });
+})();
+</script>
 </body>
 </html>
