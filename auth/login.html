@@ -70,6 +70,9 @@
                     <p class="text-slate-600 text-sm">Authenticate session token and evaluate multi-factor security clearance.</p>
                 </div>
 
+                <button type="button" id="btn-google-login" class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 font-semibold text-slate-900">G&nbsp; Continue with Google</button>
+                <p id="google-login-feedback" class="text-xs" role="status" aria-live="polite"></p>
+                <p class="text-center text-xs text-slate-400">Or sign in using email</p>
                 <form id="form-login" class="space-y-5">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Corporate Email</label>
@@ -127,6 +130,23 @@
     <!-- Institutional Sign In & MFA Challenge Logic -->
     <script>
         
+
+
+        document.getElementById("btn-google-login").addEventListener("click", async function () {
+            const feedback = document.getElementById("google-login-feedback");
+            this.disabled = true;
+            feedback.textContent = "Opening Google sign-in...";
+            try {
+                const result = await window.KRIM_SUPABASE.auth.signInWithOAuth({
+                    provider: "google",
+                    options: { redirectTo: new URL("./auth-callback.html", window.location.href).href }
+                });
+                if (result.error) throw result.error;
+            } catch (err) {
+                feedback.textContent = err.message || "Google sign-in failed. Enable Google in Supabase Auth first.";
+                this.disabled = false;
+            }
+        });
 
         let activeFactorId = null;
         let postLoginPath = "../app/customer/index.html";
