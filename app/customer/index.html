@@ -96,8 +96,8 @@
             </div>
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Security Assurance</span>
-                <p class="text-3xl font-extrabold text-slate-900 font-mono">AAL2</p>
-                <p class="text-xs text-sky-600 font-medium">Hardware MFA & Tenant RLS Active</p>
+                <p id="metric-security-level" class="text-3xl font-extrabold text-slate-900 font-mono">Checking…</p>
+                <p id="metric-security-note" class="text-xs text-sky-600 font-medium">Checking current session assurance.</p>
             </div>
         </div>
 
@@ -160,6 +160,24 @@
             }
 
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
+
+            // Display actual Supabase session assurance instead of a hardcoded AAL2 claim.
+            try {
+                const { data: assuranceData, error: assuranceError } =
+                    await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (assuranceError) throw assuranceError;
+                const currentLevel = assuranceData?.currentLevel || 'unknown';
+                const nextLevel = assuranceData?.nextLevel || currentLevel;
+                document.getElementById('metric-security-level').textContent = currentLevel.toUpperCase();
+                document.getElementById('metric-security-note').textContent =
+                    currentLevel === 'aal2' ? 'MFA verified for this session.' :
+                    nextLevel === 'aal2' ? 'MFA challenge required to reach AAL2.' :
+                    'AAL2 has not been verified for this session.';
+            } catch (assuranceError) {
+                document.getElementById('metric-security-level').textContent = 'UNKNOWN';
+                document.getElementById('metric-security-note').textContent = 'Session assurance could not be verified.';
+                console.error('Session assurance check failed:', assuranceError);
+            }
 
             // Load metrics
             try {
