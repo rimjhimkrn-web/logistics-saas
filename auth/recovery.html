@@ -1,116 +1,77 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Password Recovery & Account Restoration</title>
-    <meta name="description" content="Securely recover access to your KRIM OS enterprise tenant account with Supabase cryptographic token verification.">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>KRIM Logistics OS — Account Recovery</title>
+<meta name="description" content="Request a secure KRIM Logistics account password recovery email.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#f8fafc;color:#0f172a;font-family:Inter,system-ui,-apple-system,sans-serif}
+header,footer{padding:22px max(20px,calc((100% - 1000px)/2))}header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:800;letter-spacing:.06em}
+main{width:min(100% - 32px,480px);margin:auto;padding:32px 26px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 18px 50px #0f172a0d}
+h1{text-align:center;font-size:25px;margin:0 0 10px}p{color:#64748b;font-size:14px;line-height:1.6;text-align:center}
+label{display:block;margin:22px 0 8px;font-size:13px;font-weight:700}
+input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+input:focus{outline:2px solid #0284c7;border-color:#0284c7}
+button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:#0369a1;color:#fff;font-weight:750;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}#feedback{margin-top:16px;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-align:center;margin-top:20px;font-size:14px}footer{text-align:center;color:#64748b;font-size:12px}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Institutional Navigation Header -->
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Account Restoration</span>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="/public/solutions.html" class="hover:text-white transition">Solutions</a>
-                <a href="/public/network.html" class="hover:text-white transition">Global Network</a>
-                <a href="/public/tracking.html" class="hover:text-white transition">Track Shipment</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/portal.html" class="text-slate-400 hover:text-white transition">Sign In</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center px-6 py-16">
-        
-        <!-- Recovery Card -->
-        <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-8">
-            <div class="space-y-2 text-center">
-                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest">
-                    Tenant Recovery
-                </span>
-                <h1 class="text-2xl font-extrabold text-white tracking-tight">Reset Password</h1>
-                <p class="text-slate-400 text-xs font-mono">Enter your corporate email to receive a secure Supabase reset token.</p>
-            </div>
-
-            <form onsubmit="handleRecovery(event)" class="space-y-5">
-                <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider">Corporate Email</label>
-                    <input type="email" id="recovery-email" required placeholder="manager@enterprise.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500 transition">
-                </div>
-
-                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                    Send Recovery Token →
-                </button>
-            </form>
-
-            <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
-                <p>Remembered your credentials?</p>
-                <a href="/portal.html" class="inline-block text-sky-400 hover:underline font-bold">Return to Portal Sign In →</a>
-            </div>
-        </div>
-    </main>
-
-    <!-- Clean Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/public/network.html" class="hover:text-slate-300 transition">Network</a>
-                <a href="/public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
-                <a href="/portal.html" class="hover:text-slate-300 transition">Sign In</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Recovery Script -->
-    <script>
-        function handleRecovery(e) {
-            e.preventDefault();
-            const email = document.getElementById('recovery-email').value;
-            alert('A cryptographic recovery link has been dispatched to ' + email + ' via Supabase Auth.');
-            window.location.href = '/portal.html';
-        }
-    </script>
+<body>
+<header>KRIM <span style="color:#0284c7">LOGISTICS OS</span></header>
+<main>
+<h1>Recover your account</h1>
+<p>Enter the email address associated with your KRIM account. If an eligible account exists, Supabase will send a secure password-reset link.</p>
+<form id="recovery-form">
+<label for="recovery-email">Email address</label>
+<input type="email" id="recovery-email" name="email" required maxlength="254" autocomplete="email" inputmode="email" placeholder="you@company.com">
+<button id="submit-btn" type="submit">Send recovery email</button>
+</form>
+<div id="feedback" role="status" aria-live="polite" hidden></div>
+<a class="back" href="login.html">← Return to sign in</a>
+</main>
+<footer>© 2026 KRIM Logistics</footer>
+<script>
+(function(){
+ const client=window.KRIM_SUPABASE;
+ const form=document.getElementById("recovery-form");
+ const emailInput=document.getElementById("recovery-email");
+ const button=document.getElementById("submit-btn");
+ const feedback=document.getElementById("feedback");
+ function show(message,ok){
+  feedback.hidden=false;
+  feedback.textContent=message;
+  feedback.style.background=ok?"#ecfdf5":"#fff1f2";
+  feedback.style.color=ok?"#065f46":"#9f1239";
+ }
+ form.addEventListener("submit",async function(event){
+  event.preventDefault();
+  if(!client){show("The secure authentication service did not load. Refresh the page and try again.",false);return;}
+  const email=emailInput.value.trim();
+  if(!email){show("Enter your account email address.",false);return;}
+  button.disabled=true;
+  button.textContent="Sending…";
+  try{
+   const basePath=typeof window.krimPath==="function"?window.krimPath("auth/reset-password.html"):"/auth/reset-password.html";
+   const redirectTo=new URL(basePath,window.location.origin).toString();
+   const result=await client.auth.resetPasswordForEmail(email,{redirectTo});
+   if(result.error)throw result.error;
+   show("If an account matches that email and recovery is permitted, a password-reset email will arrive shortly. Check your inbox and spam folder, then open the link on this device or browser.",true);
+   form.reset();
+  }catch(error){
+   show("We could not submit the recovery request right now. Please check your connection and try again. If the issue continues, contact KRIM support.",false);
+   button.disabled=false;
+   button.textContent="Send recovery email";
+  }
+ });
+})();
+</script>
 </body>
 </html>
-
