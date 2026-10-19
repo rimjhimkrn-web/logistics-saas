@@ -34,6 +34,7 @@
     <script src="../config.js"></script>
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
 <!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
 <script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
@@ -97,6 +98,7 @@
                 Authorize & Pay via Razorpay Secure →
             </button>
 
+            <button id="btn-cashfree" class="w-full mt-3 bg-emerald-700 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider" disabled>Test with Cashfree Sandbox →</button>
             <div id="checkout-feedback" class="text-xs"></div>
 
         </div>
@@ -300,6 +302,37 @@
         }
 
         document.getElementById("btn-pay-now").addEventListener("click", startRazorpayCheckout);
+        document.getElementById("btn-cashfree").addEventListener("click", startCashfreeCheckout);
+        async function startCashfreeCheckout() {
+            const button = document.getElementById("btn-cashfree");
+            if (!activeQuoteRecord || !currentSession) { showCheckoutMessage("Sign in and load an accepted quote first."); return; }
+            button.disabled = true;
+            try {
+                showCheckoutMessage("Creating Cashfree sandbox order on KRIM's server...", "info");
+                const result = await supabaseClient.functions.invoke("create-global-cashfree-order", {
+                    body: { krim_shipment_id: Number(activeQuoteRecord.shipment_id) }
+                });
+                if (result.error) throw result.error;
+                const order = result.data;
+                if (!order || !order.success || !order.payment_session_id || !order.order_id || order.sandbox !== true)
+                    throw new Error((order && order.error) || "Cashfree sandbox order was not returned.");
+                if (Number(order.quote_id) !== Number(activeQuoteRecord.id)) throw new Error("Quote changed; refresh checkout.");
+                const cashfree = await window.Cashfree({ mode: "sandbox" });
+                await cashfree.checkout({ paymentSessionId: order.payment_session_id, redirectTarget: "_self" });
+            } catch (err) {
+                showCheckoutMessage("Cashfree sandbox error: " + (err.message || "Unknown error"));
+                button.disabled = false;
+            }
+        }
+        const cashfreeReturnOrder = new URLSearchParams(location.search).get("cashfree_order_id");
+        if (cashfreeReturnOrder) {
+            supabaseClient.functions.invoke("verify-global-cashfree-payment", { body: { order_id: cashfreeReturnOrder } })
+              .then(function(r) {
+                if (r.error) throw r.error;
+                if (r.data && r.data.verified) showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
+                else showCheckoutMessage((r.data && (r.data.message || r.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
+              }).catch(function(e) { showCheckoutMessage("Payment verification unavailable: " + (e.message || "Unknown error")); });
+        }
         initCheckout();
     </script>
 </body>
