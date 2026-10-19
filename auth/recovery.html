@@ -28,10 +28,10 @@ a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-al
 <header>KRIM <span style="color:#0284c7">LOGISTICS OS</span></header>
 <main>
 <h1>Recover your account</h1>
-<p>Enter the email address associated with your KRIM account. If an eligible account exists, Supabase will send a secure password-reset link.</p>
+<p>Enter your KRIM account email. For account privacy, this page gives the same confirmation whether or not the address matches an account.</p>
 <form id="recovery-form">
 <label for="recovery-email">Email address</label>
-<input type="email" id="recovery-email" name="email" required maxlength="254" autocomplete="email" inputmode="email" placeholder="you@company.com">
+<input type="email" id="recovery-email" name="email" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@company.com" aria-describedby="email-help"><p id="email-help" style="text-align:left;font-size:12px;margin-top:8px">Use an email address you can access. Check spam or junk if the message does not arrive.</p>
 <button id="submit-btn" type="submit">Send recovery email</button>
 </form>
 <div id="feedback" role="status" aria-live="polite" hidden></div>
@@ -59,12 +59,13 @@ a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-al
   button.disabled=true;
   button.textContent="Sending…";
   try{
-   const basePath=typeof window.krimPath==="function"?window.krimPath("auth/reset-password.html"):"/auth/reset-password.html";
-   const redirectTo=new URL(basePath,window.location.origin).toString();
+   if(typeof window.krimPath!=="function")throw new Error("KRIM route configuration did not load. Refresh the page.");
+   const redirectTo=new URL(window.krimPath("auth/reset-password.html"),window.location.origin).toString();
    const result=await client.auth.resetPasswordForEmail(email,{redirectTo});
    if(result.error)throw result.error;
-   show("If an account matches that email and recovery is permitted, a password-reset email will arrive shortly. Check your inbox and spam folder, then open the link on this device or browser.",true);
+   show("Request submitted. If an eligible account exists, a password-reset email will arrive shortly. Check your inbox and spam folder. Open the email link to set a new password. If it does not arrive, verify the email address and try again later.",true);
    form.reset();
+   button.textContent="Request submitted";
   }catch(error){
    show("We could not submit the recovery request right now. Please check your connection and try again. If the issue continues, contact KRIM support.",false);
    button.disabled=false;
