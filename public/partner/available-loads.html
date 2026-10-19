@@ -38,8 +38,20 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Sego
   </nav>
   <div class="flex items-center gap-2 sm:gap-3">
    <a href="../../auth/login.html" class="focus-ring rounded-xl border border-white/50 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/10 sm:px-5">Secure Sign In</a>
+   <button id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-navigation" class="focus-ring rounded-xl border border-white/40 px-3 py-2.5 text-sm font-bold text-white md:hidden">Menu ☰</button>
   </div>
  </div>
+ <nav id="mobile-navigation" aria-label="Mobile navigation" hidden class="border-t border-white/10 bg-[#07182a] px-5 py-3 text-sm font-semibold text-white md:hidden">
+  <div class="mx-auto flex max-w-7xl flex-col gap-1">
+   <a href="../index.html" class="rounded-lg px-3 py-3 hover:bg-white/10">KRIM Home</a>
+   <a href="../solutions.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Solutions</a>
+   <a href="../global-coverage.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Global Network</a>
+   <a href="available-loads.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Available Loads</a>
+   <a href="quote-history.html" class="rounded-lg px-3 py-3 hover:bg-white/10">My Bids</a>
+   <a href="submit-quote.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Submit a Bid</a>
+   <a href="../../auth/partner-signup.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Partner Registration</a>
+  </div>
+ </nav>
 </header>
 <main id="main">
  <section class="exchange-hero text-white">
@@ -77,7 +89,9 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Sego
 <script>
 (async function(){
 const client=window.KRIM_SUPABASE||window.supabaseClient,status=document.getElementById("status"),dot=document.getElementById("status-dot"),loads=document.getElementById("loads"),refresh=document.getElementById("refresh-loads");
-refresh.addEventListener("click",()=>location.reload());
+const menuButton=document.getElementById("mobile-menu-toggle"),mobileNav=document.getElementById("mobile-navigation");
+if(menuButton&&mobileNav){menuButton.addEventListener("click",()=>{const open=menuButton.getAttribute("aria-expanded")!=="true";menuButton.setAttribute("aria-expanded",String(open));mobileNav.hidden=!open;menuButton.textContent=open?"Close ✕":"Menu ☰";});}
+refresh.addEventListener("click",()=>{refresh.disabled=true;refresh.textContent="Refreshing…";location.reload();});
 function msg(t,bad=false){status.textContent=t;dot.className="status-dot"+(bad?" warn":"")}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function showAccess(reason){loads.innerHTML='<section class="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-8 lg:col-span-2"><div class="flex items-start gap-4"><span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-100 text-2xl">🔐</span><div><p class="text-xs font-extrabold uppercase tracking-[.18em] text-amber-800">Partner access</p><h3 class="mt-2 text-xl font-black text-slate-900">Partner organization setup required</h3><p class="mt-3 max-w-2xl text-sm leading-6 text-slate-700">'+esc(reason)+' If you already registered, your organization or membership may still need activation. Do not create a duplicate account.</p><div class="mt-5 flex flex-wrap gap-3"><a class="rounded-xl bg-sky-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-sky-500" href="../../auth/partner-signup.html">Partner registration ↗</a><a class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800" href="quote-history.html">My submitted bids</a></div></div></div></section>'}
