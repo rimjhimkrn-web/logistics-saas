@@ -107,7 +107,7 @@
                 <h2 class="text-lg font-bold text-emerald-300">Check your inbox to verify your email</h2>
                 <p class="text-sm text-slate-200">KRIM has submitted your registration request. Open the verification email and tap its confirmation button to activate your account.</p>
                 <p class="text-sm text-slate-300">Verification email for: <strong id="verification-email" class="break-all text-white"></strong></p>
-                <p class="text-xs text-slate-400">If it is not visible yet, check Spam/Junk and wait a few minutes. Delivery speed depends on your email provider and Supabase SMTP configuration.</p>
+                <p class="text-xs text-slate-300">First check Spam/Junk. If no email arrives after a few minutes, KRIM email delivery needs to be configured in Supabase SMTP. Rebuilding this page alone cannot make the mail provider deliver messages.</p>
                 <button id="resend-verification" type="button" class="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/10">Resend verification email</button>
                 <p id="resend-feedback" class="text-sm" role="status" aria-live="polite"></p>
                 <a href="login.html" class="inline-block text-sm font-semibold text-sky-300 hover:underline">Already verified? Sign in →</a>
@@ -159,10 +159,13 @@
                     options: { emailRedirectTo: redirectTo }
                 });
                 if (error) throw error;
-                resendFeedback.textContent = "Verification email requested. Check your inbox and Spam/Junk folder.";
+                resendFeedback.textContent = "Supabase accepted the resend request. Check Inbox and Spam/Junk. If nothing arrives, the SMTP sender/provider must be configured in Supabase.";
                 resendFeedback.className = "text-sm text-emerald-300";
             } catch (err) {
-                resendFeedback.textContent = err.message || "Could not resend the email. Wait a little and try again.";
+                const message = String(err.message || "");
+                resendFeedback.textContent = /rate|limit|too many/i.test(message)
+                    ? "Too many email requests. Wait a few minutes before trying again."
+                    : (message || "Could not request another email. Check Supabase Auth SMTP settings and try again.");
                 resendFeedback.className = "text-sm text-red-300";
             } finally {
                 resendButton.disabled = false;
@@ -217,7 +220,7 @@
                 pendingVerificationEmail = email;
                 verificationEmail.textContent = email;
                 verificationPanel.classList.remove("hidden");
-                feedback.textContent = "Registration submitted. Email confirmation is required before sign-in.";
+                feedback.textContent = "Registration request accepted. You must verify your email before signing in. If no message arrives, the Supabase SMTP sender must be configured.";
                 feedback.className = "mt-4 text-sm text-emerald-300";
                 button.textContent = "Registration Submitted";
                 button.disabled = true;
