@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KRIM Acquisition Performance Dashboard</title>
+</head>
+<body style="margin:0;padding:20px;font-family:Arial,sans-serif;background:#fff;color:#111">
+<div style="max-width:800px;margin:auto">
+<p style="color:#087f5b;font-weight:bold">KRIM LOGISTICS · GLOBAL GROWTH</p>
+<h1>Acquisition Performance Dashboard</h1>
+<p>If you can read this, the page is rendering. This dashboard is a local planning view; figures below are not live business metrics.</p>
+<hr>
+<h2>Acquisition funnel</h2>
+<table border="1" cellpadding="10" cellspacing="0" style="border-collapse:collapse;width:100%;text-align:left">
+<thead><tr><th>Stage</th><th>What counts</th><th>Live count</th></tr></thead>
+<tbody>
+<tr><td>Discovered</td><td>Candidate with source provenance</td><td>Not connected</td></tr>
+<tr><td>Qualified</td><td>Evidence reviewed by a human</td><td>Not connected</td></tr>
+<tr><td>Onboarding</td><td>Verification and setup underway</td><td>Not connected</td></tr>
+<tr><td>Activated</td><td>Required checks passed and approved</td><td>Not connected</td></tr>
+<tr><td>Retained</td><td>Repeat usage in a defined time window</td><td>Not connected</td></tr>
+</tbody></table>
+<h2>Metrics to measure</h2>
+<ul>
+<li>New source-attributed opportunities per week.</li>
+<li>Qualification rate = qualified candidates ÷ reviewed candidates.</li>
+<li>Onboarding conversion = onboarded accounts ÷ qualified candidates.</li>
+<li>Activation rate = approved active accounts ÷ onboarded accounts.</li>
+<li>Time to first quote, shipment, or completed partner assignment.</li>
+<li>Repeat-use and retention rates by customer cohort.</li>
+<li>Cost per qualified opportunity and contribution margin by market.</li>
+<li>Opt-outs, complaints, duplicate rate, and invalid lead rate as quality guardrails.</li>
+</ul>
+<h2>Reporting period</h2>
+<form id="periodForm">
+<p><label>Start date <input type="date" id="start"></label></p>
+<p><label>End date <input type="date" id="end"></label></p>
+<p><label>Market <select id="market"><option>All markets</option><option>India</option><option>Middle East</option><option>Europe</option><option>Other</option></select></label></p>
+<p><button type="submit">Prepare reporting brief</button> <button type="reset">Clear</button></p>
+</form>
+<pre id="brief" style="white-space:pre-wrap;background:#f2f5f7;padding:12px;display:none"></pre>
+<p><strong>Data integrity note:</strong> No fabricated counts are displayed. A production dashboard must use authorized, tenant-safe backend queries and validated event definitions.</p>
+<p>Related pages: <a href="discovery-workbench.html">Discovery Workbench</a> | <a href="signal-intake.html">Signal Intake</a> | <a href="prospect-review.html">Prospect Review</a> | <a href="onboarding-tracker.html">Onboarding Tracker</a></p>
+</div>
+<script>
+document.getElementById('periodForm').addEventListener('submit',function(e){e.preventDefault();var t='REPORTING BRIEF — TEMPLATE ONLY, NO LIVE METRICS\nStart: '+(document.getElementById('start').value||'Not set')+'\nEnd: '+(document.getElementById('end').value||'Not set')+'\nMarket: '+document.getElementById('market').value+'\n\nMetrics still need to be connected to verified backend events. Do not treat this brief as measured performance.';var b=document.getElementById('brief');b.style.display='block';b.textContent=t;});
+</script>
+</body>
+</html>
