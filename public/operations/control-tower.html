@@ -21,6 +21,16 @@
 .eyebrow{font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#087fd5}
 .iconbox{display:grid;width:48px;height:48px;flex-shrink:0;place-items:center;border-radius:15px;background:#eaf6ff;color:#087fd5;font-size:23px}
 .status{display:inline-flex;align-items:center;gap:8px;border:1px solid #f3d7a0;background:#fff9eb;color:#87580a;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800}
+/* Polished global interface and clearer interactive states */
+:root{--navy:#081b32;--blue:#1769e8;--cyan:#42c9ed;--line:#dbe6f2}
+body{background:radial-gradient(ellipse at 90% 8%,#dff5ff 0,transparent 31%),radial-gradient(ellipse at 4% 38%,#e8eaff 0,transparent 26%),#f7faff}
+header{box-shadow:0 8px 28px #07182a18}
+.card{border-radius:20px}
+.btn{cursor:pointer}
+.btn:focus-visible,.navlink:focus-visible,#menu-toggle:focus-visible{outline:3px solid #55d5ef;outline-offset:3px}
+#mobile-menu{box-shadow:0 18px 30px #07182a20}
+.status{box-shadow:0 3px 12px #87580a0b}
+@media(max-width:640px){header .mx-auto{min-height:66px}main#main{padding-top:22px}.card:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -73,7 +83,7 @@
    <article class="card flex flex-col p-5 sm:p-6"><div class="flex items-start justify-between gap-3"><span class="iconbox" aria-hidden="true">▤</span><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">Workspace</span></div><h3 class="mt-5 text-lg font-extrabold">Shipment Workspace</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Open the authorized workspace to review shipment records and recorded status updates.</p><a class="btn btn-light focus-ring mt-5 w-full" data-krim-path="workspaces/operations-workspace.html" href="../../workspaces/operations-workspace.html">Open workspace <span>→</span></a></article>
    <article class="card flex flex-col p-5 sm:p-6"><div class="flex items-start justify-between gap-3"><span class="iconbox" aria-hidden="true">⚑</span><span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">Exceptions</span></div><h3 class="mt-5 text-lg font-extrabold">Exception Desk</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Open the exception workflow to review and dispatch recorded operational issues.</p><a class="btn btn-primary focus-ring mt-5 w-full" data-krim-path="public/control-centre/exception-dispatch.html" href="../control-centre/exception-dispatch.html">Review exceptions <span>→</span></a></article>
    <article class="card flex flex-col p-5 sm:p-6"><div class="flex items-start justify-between gap-3"><span class="iconbox" aria-hidden="true">⌁</span><span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-800">Route planning</span></div><h3 class="mt-5 text-lg font-extrabold">Rerouting Tools</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Open the rerouting interface. Execution requires eligible shipment data and backend validation.</p><a class="btn btn-light focus-ring mt-5 w-full" data-krim-path="public/operations/autonomous-reroute.html" href="autonomous-reroute.html">Open rerouting <span>→</span></a></article>
-   <article class="card flex flex-col p-5 sm:p-6"><div class="flex items-start justify-between gap-3"><span class="iconbox" aria-hidden="true">◷</span><span class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800">ETA</span></div><h3 class="mt-5 text-lg font-extrabold">Shipment Tracking & ETA</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Open the ETA tools page to inspect its available arrival-estimation workflow.</p><a class="btn btn-light focus-ring mt-5 w-full" data-krim-path="public/tracking.html" href="../ai-ops/eta-predictor.html">Open tracking page <span>→</span></a></article>
+   <article class="card flex flex-col p-5 sm:p-6"><div class="flex items-start justify-between gap-3"><span class="iconbox" aria-hidden="true">◷</span><span class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800">ETA</span></div><h3 class="mt-5 text-lg font-extrabold">Shipment Tracking & ETA</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Open the ETA tools page to inspect its available arrival-estimation workflow.</p><a class="btn btn-light focus-ring mt-5 w-full" data-krim-path="public/tracking.html" href="../tracking.html">Open tracking page <span>→</span></a></article>
   </div>
  </section>
  <section class="grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_.75fr]">
@@ -84,7 +94,20 @@
 </main>
 <footer class="mt-5 border-t border-slate-200 bg-white"><div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8"><span class="font-black tracking-[.18em] text-slate-700">KRIM GLOBAL LOGISTICS OS</span><span>Operations Control Tower · Global-ready by design</span><a class="font-bold text-sky-700 hover:text-sky-900" data-krim-path="public/" href="../">Back to homepage ↑</a></div></footer>
 <script>
-(function(){var button=document.getElementById('menu-toggle');var menu=document.getElementById('mobile-menu');if(button&&menu){button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!open));button.setAttribute('aria-label',open?'Open navigation menu':'Close navigation menu');menu.classList.toggle('hidden',open);});menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){menu.classList.add('hidden');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation menu');});});}var refresh=document.getElementById('refresh-page');if(refresh)refresh.addEventListener('click',function(){document.getElementById('refresh-status').textContent='Refreshing page…';window.location.reload();});}());
+(function(){
+var button=document.getElementById('menu-toggle'),menu=document.getElementById('mobile-menu');
+function closeMenu(){if(!button||!menu)return;menu.classList.add('hidden');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation menu');}
+function toggleMenu(){if(!button||!menu)return;var open=button.getAttribute('aria-expanded')==='true';menu.classList.toggle('hidden',open);button.setAttribute('aria-expanded',String(!open));button.setAttribute('aria-label',open?'Open navigation menu':'Close navigation menu');}
+if(button&&menu){
+button.addEventListener('click',toggleMenu);
+menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',closeMenu);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu();});
+document.addEventListener('click',function(e){if(button.getAttribute('aria-expanded')==='true'&&!menu.contains(e.target)&&!button.contains(e.target))closeMenu();});
+window.addEventListener('resize',function(){if(window.matchMedia('(min-width:1024px)').matches)closeMenu();});
+}
+var refresh=document.getElementById('refresh-page');
+if(refresh)refresh.addEventListener('click',function(){var status=document.getElementById('refresh-status');if(status)status.textContent='Refreshing page…';window.location.reload();});
+}());
 </script>
 </body>
 </html>
