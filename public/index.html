@@ -9,19 +9,41 @@
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://rimjhimkrn-web.github.io/logistics-saas/public/">
   <script>
-    /* Resolve links correctly on GitHub Pages project hosting and on a root custom domain. */
+    /* One reliable URL resolver for every KRIM page link, including GitHub Pages project hosting. */
     (function () {
-      var base = location.pathname.indexOf('/logistics-saas/') === 0 ? '/logistics-saas/' : '/';
-      window.KRIM_BASE_PATH = base;
-      var css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = base + 'core/krim-unified-page.css';
-      document.head.appendChild(css);
-      document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[data-krim-path]').forEach(function (el) {
-          el.setAttribute('href', base + el.getAttribute('data-krim-path').replace(/^\/+/, ''));
+      var isGitHubPages = /(^|\\.)github\\.io$/i.test(location.hostname);
+      var pathParts = location.pathname.split('/').filter(Boolean);
+      var projectBase = '/';
+      if (isGitHubPages) {
+        var repo = pathParts[0] || 'logistics-saas';
+        projectBase = '/' + repo + '/';
+      } else if (pathParts[0] === 'logistics-saas') {
+        projectBase = '/logistics-saas/';
+      }
+      window.KRIM_BASE_PATH = projectBase;
+      window.KRIM_URL = function (path) {
+        var clean = String(path || '').replace(/^\\/+/, '');
+        return projectBase + clean;
+      };
+      function resolvePageLinks() {
+        document.querySelectorAll('a[data-krim-path]').forEach(function (link) {
+          var destination = link.getAttribute('data-krim-path');
+          if (destination) link.href = window.KRIM_URL(destination);
         });
-      });
+        var stylesheet = document.querySelector('link[data-krim-shared-css]');
+        if (!stylesheet) {
+          stylesheet = document.createElement('link');
+          stylesheet.rel = 'stylesheet';
+          stylesheet.setAttribute('data-krim-shared-css', 'true');
+          document.head.appendChild(stylesheet);
+        }
+        stylesheet.href = window.KRIM_URL('core/krim-unified-page.css');
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', resolvePageLinks, { once: true });
+      } else {
+        resolvePageLinks();
+      }
     }());
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
