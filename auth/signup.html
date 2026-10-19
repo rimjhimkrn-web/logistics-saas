@@ -75,6 +75,9 @@
                 <p class="text-slate-400 text-xs font-mono">Supabase RLS Tenant Isolation & Razorpay Escrow Setup</p>
             </div>
 
+            <button id="google-signup" type="button" class="w-full rounded-xl bg-white px-4 py-3.5 font-semibold text-slate-900">G&nbsp; Continue with Google</button>
+            <p id="google-signup-feedback" class="text-sm" role="status" aria-live="polite"></p>
+            <p class="text-center text-xs text-slate-400">Or register using email</p>
             <form onsubmit="handleSignup(event)" class="space-y-5">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-2">
@@ -140,6 +143,24 @@
         const resendButton = document.getElementById("resend-verification");
         const resendFeedback = document.getElementById("resend-feedback");
         let pendingVerificationEmail = "";
+        document.getElementById("google-signup").addEventListener("click", async function () {
+            const feedback = document.getElementById("google-signup-feedback");
+            const client = window.KRIM_SUPABASE || window.supabaseClient;
+            if (!client) { feedback.textContent = "Authentication service unavailable. Refresh and try again."; return; }
+            this.disabled = true;
+            feedback.textContent = "Opening Google sign-in...";
+            try {
+                const result = await client.auth.signInWithOAuth({
+                    provider: "google",
+                    options: { redirectTo: new URL("./auth-callback.html", window.location.href).href }
+                });
+                if (result.error) throw result.error;
+            } catch (err) {
+                feedback.textContent = err.message || "Google sign-in failed. Enable Google in Supabase Auth first.";
+                this.disabled = false;
+            }
+        });
+
 
         resendButton.addEventListener("click", async function () {
             const client = window.KRIM_SUPABASE || window.supabaseClient;
