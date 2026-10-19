@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   try {
     const url = Deno.env.get("SUPABASE_URL"), serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const clientId = Deno.env.get("CASHFREE_CLIENT_ID"), clientSecret = Deno.env.get("CASHFREE_CLIENT_SECRET");
-    if (!url || !serviceKey || !clientId || !clientSecret || (Deno.env.get("CASHFREE_ENV") || "sandbox") !== "sandbox")
+    if (!url || !serviceKey || !clientId || !clientSecret || (Deno.env.get("CASHFREE_ENV") || "sandbox").toLowerCase() !== "sandbox")
       return reply({ error: "Cashfree sandbox is not configured; live verification is disabled" }, 503);
     const auth = req.headers.get("Authorization") || "";
     if (!auth.startsWith("Bearer ")) return reply({ error: "Login required" }, 401);
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const payments: any = await paymentsRes.json();
     const paymentList = Array.isArray(payments) ? payments : [];
     const paidPayment = paymentList.find((p: any) => p?.payment_status === "SUCCESS" &&
-      Number(p?.payment_amount) * 100 === Number(order.amount_paise) &&
+      Math.round(Number(p?.payment_amount) * 100) === Number(order.amount_paise) &&
       String(p?.payment_currency || order.currency).toUpperCase() === String(order.currency).toUpperCase());
     if (cashOrder?.order_status !== "PAID" || !paidPayment) {
       return reply({ success: true, verified: false, status: cashOrder?.order_status || "PENDING",
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabase.from("payment_orders").update({
       status: "paid", cashfree_payment_id: String(paidPayment.cf_payment_id || paidPayment.payment_id || ""),
       paid_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-    }).eq("id", order.id).eq("status", "created");
+    }).eq("id", order.id).in("status", ["created", "pending"]);
     if (updateError) {
       console.error("Cashfree payment status update failed", updateError.message);
       return reply({ error: "Payment verified with Cashfree but KRIM ledger update failed; contact support" }, 500);
