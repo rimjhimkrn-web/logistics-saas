@@ -33,9 +33,8 @@ try{
  if(!partners.length)throw new Error("This account has no partner organization. Use customer workspace for shipment booking.");
  const verified=partners.some(o=>["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active"&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
  const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,status,response_deadline,service_lane,metadata,shipment_id").eq("status","open").order("requested_at",{ascending:false}).limit(100);
+ if(oppError)throw oppError;
  const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
- if(oppError)throw oppError;
- if(oppError)throw oppError;
  if(!liveOpps.length){msg("No open partner opportunities are currently available. Refresh later; no demo loads are shown.");return}
  const shipmentIds=[...new Set(liveOpps.map(o=>Number(o.shipment_id)).filter(Number.isSafeInteger))];
  const {data:shipments,error:shipmentError}=await client.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id").in("id",shipmentIds);
