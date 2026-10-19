@@ -216,14 +216,15 @@ td{border-top:1px solid #edf0f4;padding:9px 8px;font-size:8px;color:#526077}td b
 <div><small>Environment</small><b>Production</b></div>
 </section>
 
-<section class="kpis">
-<div class="kpi"><small>Active shipments</small><b>—</b><span>Global operations</span></div>
-<div class="kpi"><small>In transit</small><b>—</b><span>Current movement</span></div>
-<div class="kpi"><small>Exceptions</small><b>—</b><span>Attention required</span></div>
-<div class="kpi"><small>Open quotes</small><b>—</b><span>Commercial pipeline</span></div>
-<div class="kpi"><small>Network capacity</small><b>—</b><span>Available resources</span></div>
-<div class="kpi"><small>Pending actions</small><b>—</b><span>Operational queue</span></div>
+<section class="kpis" aria-label="Live operational metrics">
+<div class="kpi"><small>Shipments</small><b id="kpiShipments">—</b><span id="shipmentMetricNote">Awaiting authorized data</span></div>
+<div class="kpi"><small>In transit</small><b id="kpiTransit">—</b><span>Based on shipment status</span></div>
+<div class="kpi"><small>Open exceptions</small><b id="kpiExceptions">—</b><span>Items needing attention</span></div>
+<div class="kpi"><small>Open quotes</small><b id="kpiQuotes">—</b><span>Commercial pipeline</span></div>
+<div class="kpi"><small>Network capacity</small><b>—</b><span>Not connected to capacity feed</span></div>
+<div class="kpi"><small>Data status</small><b id="kpiDataStatus" style="font-size:13px">Connecting…</b><span id="lastUpdated">Live read check</span></div>
 </section>
+<div id="dataNotice" role="status" aria-live="polite" style="display:none;margin:-3px 0 14px;padding:10px 12px;border-radius:8px;background:#fff5e8;color:#80520d;border:1px solid #f6dfb7;font-size:10px"></div>
 
 <section class="grid">
 
@@ -235,15 +236,9 @@ td{border-top:1px solid #edf0f4;padding:9px 8px;font-size:8px;color:#526077}td b
 
 <div class="body">
 <div class="tools">
-<input placeholder="Search shipment, tracking number or organization">
-<select>
-<option>All markets</option>
-<option>India</option>
-<option>UAE</option>
-<option>Singapore</option>
-<option>Europe</option>
-<option>United States</option>
-</select>
+<input id="shipmentFilter" aria-label="Search shipments" placeholder="Search shipment number, status or goods…">
+<select id="statusFilter" aria-label="Filter shipment status"><option value="">All statuses</option><option value="in transit">In transit</option><option value="confirmed">Confirmed</option><option value="draft">Draft</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
+<button id="refreshData" class="btn" type="button" style="padding:0 11px">↻ Refresh</button>
 </div>
 
 <div class="table">
@@ -253,12 +248,8 @@ td{border-top:1px solid #edf0f4;padding:9px 8px;font-size:8px;color:#526077}td b
 <th>Shipment</th><th>Market</th><th>Route</th><th>Status</th><th>Risk</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td colspan="5">
-<div class="empty">Authorized operational shipment records will appear here.</div>
-</td>
-</tr>
+<tbody id="shipmentRows">
+<tr><td colspan="5"><div class="empty">Sign in to load shipment records permitted by your account’s access policies.</div></td></tr>
 </tbody>
 </table>
 </div>
@@ -499,6 +490,58 @@ if(e.key==="Enter"&&e.target.value.trim())
 location.href="../domains/shipments.html?search="+encodeURIComponent(e.target.value.trim());
 };
 
+let shipmentData=[];
+const esc=v=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const db=()=>window.KRIM_SUPABASE||window.supabaseClient||window.supabase;
+function showNotice(message){const n=$("dataNotice");n.textContent=message;n.style.display="block";}
+function renderShipments(){
+const q=$("shipmentFilter").value.trim().toLowerCase();
+const st=$("statusFilter").value.toLowerCase();
+const rows=shipmentData.filter(s=>{
+const status=String(s.status||"").toLowerCase();
+const hay=[s.shipment_number,s.status,s.goods_description,s.id].join(" ").toLowerCase();
+return (!q||hay.includes(q))&&(!st||status.includes(st));
+});
+$("shipmentRows").innerHTML=rows.length?rows.map(s=>{
+const status=String(s.status||"Unknown");
+const tone=/delivered|closed|completed/.test(status.toLowerCase())?"green":/exception|cancel|failed/.test(status.toLowerCase())?"red":/transit|confirmed|active/.test(status.toLowerCase())?"orange":"";
+return "<tr><td><b>"+esc(s.shipment_number||("KRIM-"+s.id))+"</b><br><span style='color:#8994a5'>ID "+esc(s.id)+"</span></td><td>—</td><td>"+esc(s.goods_description||"Route details unavailable")+"</td><td><span class='status "+tone+"'>"+esc(status)+"</span></td><td>"+(/exception|late|delay/.test(status.toLowerCase())?"<span class='status red'>Review</span>":"—")+"</td></tr>";
+}).join(""):'<tr><td colspan="5"><div class="empty">No accessible shipments match these filters.</div></td></tr>';
+}
+async function loadOperationalData(){
+const client=db();
+if(!client||typeof client.from!=="function"){showNotice("Supabase client is not available on this page. Check the platform configuration scripts.");$("kpiDataStatus").textContent="Offline";return;}
+$("kpiDataStatus").textContent="Loading…";
+try{
+const results=await Promise.all([
+client.from("krim_shipments").select("id,shipment_number,goods_description,status,created_at").order("created_at",{ascending:false}).limit(100),
+client.from("krim_exceptions").select("id,status,severity").limit(500),
+client.from("krim_quotes").select("id,status").limit(500)
+]);
+const shipments=results[0],exceptions=results[1],quotes=results[2];
+if(shipments.error)throw shipments.error;
+shipmentData=shipments.data||[];
+$("kpiShipments").textContent=String(shipmentData.length);
+$("kpiTransit").textContent=String(shipmentData.filter(s=>/transit|in_transit|picked_up|dispatched/.test(String(s.status||"").toLowerCase())).length);
+$("shipmentMetricNote").textContent=shipmentData.length===100?"Latest 100 accessible records":"Accessible records";
+if(exceptions.error){$("kpiExceptions").textContent="—";showNotice("Shipment data loaded, but exception metrics are unavailable under current database permissions.");}
+else $("kpiExceptions").textContent=String((exceptions.data||[]).filter(e=>!/resolved|closed|dismissed|completed/i.test(String(e.status||""))).length);
+if(quotes.error){$("kpiQuotes").textContent="—";showNotice("Shipment data loaded, but quote metrics are unavailable under current database permissions.");}
+else $("kpiQuotes").textContent=String((quotes.data||[]).filter(q=>/pending|submitted|open|draft/i.test(String(q.status||""))).length);
+renderShipments();
+$("kpiDataStatus").textContent="Connected";
+$("lastUpdated").textContent="Updated "+new Date().toLocaleTimeString();
+if(!exceptions.error&&!quotes.error)$("dataNotice").style.display="none";
+}catch(e){
+console.error("KRIM operational data read failed:",e);
+$("kpiDataStatus").textContent="Restricted";
+showNotice("Live data could not be loaded. Sign in and check Supabase table permissions/RLS. No sample operational data is being shown.");
+$("shipmentRows").innerHTML='<tr><td colspan="5"><div class="empty">No live records shown because the authorized data request did not succeed.</div></td></tr>';
+}
+}
+$("shipmentFilter").addEventListener("input",renderShipments);
+$("statusFilter").addEventListener("change",renderShipments);
+$("refreshData").addEventListener("click",loadOperationalData);
 async function init(){
 try{
 if(window.KRIM_SECURITY?.requireUser){
@@ -509,11 +552,9 @@ $("email").textContent=email;
 $("avatar").textContent=email.charAt(0).toUpperCase();
 }
 }
-}catch(e){
-console.error("KRIM operations authentication:",e);
+}catch(e){console.error("KRIM operations authentication:",e);}
+await loadOperationalData();
 }
-}
-
 init();
 })();
 </script>
