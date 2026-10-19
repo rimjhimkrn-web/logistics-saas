@@ -1,55 +1,86 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Instant Freight Quote</title>
-    <link rel="manifest" href="../manifest.json">
-    <meta name="theme-color" content="#06b6d4">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { dark: { bg: '#090d16', card: '#111827', border: '#1f2937', accent: '#06b6d4' } } } } }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071a2d">
+  <title>Request a Freight Quote | KRIM Logistics</title>
+  <meta name="description" content="Start a KRIM freight quote request. Sign in to provide shipment details and receive verified pricing based on available rates and partner quotes.">
+  <script>
+    (function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";window.KRIM_BASE_PATH=b;var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("[data-krim-path]").forEach(function(a){a.href=b+a.dataset.krimPath.replace(/^\/+/, "");});});}());
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{color-scheme:light;--navy:#071a2d;--blue:#078df4}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .quote-hero{background:linear-gradient(100deg,rgba(4,18,34,.97),rgba(4,18,34,.88) 52%,rgba(4,18,34,.58)),url("https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1800&q=85") center/cover}
+    .focus-ring:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
+    .mode-card{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+    .mode-card:hover{transform:translateY(-3px);border-color:#7dd3fc;box-shadow:0 12px 26px rgba(7,26,45,.08)}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
 </head>
-<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-purple-500 selection:text-white">
-
-    <div class="w-full bg-[#05080f] border-b border-gray-900 text-[11px] text-gray-400 py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-emerald-400 font-semibold">KRIM LOGISTICS</span></span>
-        <span class="text-amber-400">Verified pricing only</span>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">Skip to main content</a>
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#07182a]/95 text-white backdrop-blur">
+    <div class="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+      <a data-krim-path="public/" href="./" aria-label="KRIM Logistics home" class="focus-ring flex items-center gap-3 rounded-lg">
+        <span class="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-sky-300 to-blue-700 text-xl font-black">↗</span>
+        <span><span class="block text-xl font-black tracking-tight">KRIM</span><span class="-mt-1 block text-[10px] font-bold uppercase tracking-[.28em] text-sky-200">LOGISTICS</span></span>
+      </a>
+      <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-200 md:flex" aria-label="Main navigation">
+        <a data-krim-path="public/solutions.html" href="solutions.html" class="focus-ring rounded hover:text-sky-300">Solutions</a>
+        <a data-krim-path="public/network.html" href="network.html" class="focus-ring rounded hover:text-sky-300">Network</a>
+        <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring rounded hover:text-sky-300">Track Shipment</a>
+      </nav>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring rounded-xl border border-white/50 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/10 sm:px-5">Sign In</a>
+        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring rounded-xl bg-sky-500 px-3 py-2.5 text-sm font-extrabold text-white hover:bg-sky-400 sm:px-5">Get Started</a>
+      </div>
     </div>
+  </header>
 
-    <header class="border-b border-gray-800 bg-[#090d16]/95 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow">K</div>
-                <span class="text-sm font-extrabold tracking-wider text-white">KRIM OS — INSTANT QUOTE</span>
-            </div>
-            <a href="../auth/login.html" class="text-xs font-mono text-purple-400 bg-purple-950/40 border border-purple-900 px-3 py-1.5 rounded-lg hover:bg-purple-950 transition">Customer Login →</a>
+  <main id="main">
+    <section class="quote-hero text-white">
+      <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+        <p class="text-xs font-extrabold uppercase tracking-[.24em] text-sky-300 sm:text-sm">Freight quote request</p>
+        <h1 class="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">Move your shipment forward.</h1>
+        <p class="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">Tell KRIM what you need to move. Sign in to submit shipment details and follow your quote through the connected workflow.</p>
+      </div>
+    </section>
+
+    <section class="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[1.2fr_.8fr] lg:py-14">
+      <div>
+        <p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">How it works</p>
+        <h2 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">A clear path from request to booking</h2>
+        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">KRIM does not display invented prices. Final pricing depends on an approved rate card or a valid quote from an eligible logistics partner.</p>
+        <div class="mt-7 grid gap-4 sm:grid-cols-3">
+          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">01</span><h3 class="mt-4 font-extrabold">Share details</h3><p class="mt-2 text-sm leading-6 text-slate-600">Provide origin, destination, cargo and preferred transport mode in your workspace.</p></article>
+          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">02</span><h3 class="mt-4 font-extrabold">Review pricing</h3><p class="mt-2 text-sm leading-6 text-slate-600">Review a quote only when valid pricing is available and confirmed.</p></article>
+          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">03</span><h3 class="mt-4 font-extrabold">Confirm & track</h3><p class="mt-2 text-sm leading-6 text-slate-600">Accept the quote when ready, then use shipment tracking for available updates.</p></article>
         </div>
-    </header>
+        <div class="mt-6 rounded-2xl border border-sky-100 bg-sky-50 p-5"><p class="font-bold text-slate-900">Pricing transparency</p><p class="mt-1 text-sm leading-6 text-slate-700">A request is not a confirmed booking. Transport capacity, rate validity, payment status and booking confirmation must be verified in the system.</p></div>
+      </div>
 
-    <main class="max-w-3xl mx-auto px-4 py-12 flex-grow w-full space-y-8">
-        <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 shadow-2xl space-y-6">
-            <div>
-                <span class="text-[10px] font-mono uppercase tracking-widest text-purple-400">FREIGHT QUOTE REQUEST</span>
-                <h1 class="text-2xl font-bold text-white mt-1">Request a Verified Freight Quote</h1>
-                <p class="text-xs text-gray-400 mt-1">Sign in to create a shipment request and receive partner pricing. Instant tariff quotes are unavailable until an approved rate card is configured.</p>
-            </div>
+      <aside class="self-start rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-sky-100 text-2xl text-sky-700" aria-hidden="true">↗</div>
+        <p class="mt-5 text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Get started</p>
+        <h2 class="mt-2 text-2xl font-black tracking-tight">Request your freight quote</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">Sign in to submit and manage shipment requests. New to KRIM? Create an account first.</p>
+        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-sky-500 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-900/10 hover:bg-sky-400">Sign in to continue <span class="ml-2" aria-hidden="true">→</span></a>
+        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-800 hover:bg-slate-50">Create an account</a>
+        <div class="mt-6 border-t border-slate-100 pt-5"><p class="text-xs leading-5 text-slate-500">Are you a transport provider? Join the partner network to register your business.</p><a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="mt-2 inline-flex text-sm font-bold text-sky-700 hover:text-sky-900">Register as a carrier →</a></div>
+      </aside>
+    </section>
+  </main>
 
-            <div class="p-6 bg-[#090d16] rounded-xl border border-gray-800 space-y-4 font-mono text-xs">
-                <p class="text-gray-300">Create an account or sign in to submit shipment details and invite eligible logistics partners to quote. KRIM will not display invented prices; confirmed pricing requires an approved rate card or a valid partner quote.</p>
-                <div class="pt-2 flex space-x-4">
-                    <a href="../auth/login.html" class="flex-1 text-center bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 px-4 rounded-xl uppercase tracking-wider transition shadow">Sign In to Workspace →</a>
-                    <a href="../auth/signup.html" class="flex-1 text-center bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3.5 px-4 rounded-xl uppercase tracking-wider transition border border-gray-700">Create Account →</a>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="border-t border-gray-800 py-8 text-center text-xs text-gray-500 font-mono">KRIM Logistics OS © 2026.</footer>
+  <footer class="border-t border-slate-200 bg-[#071a2d] text-slate-300">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <a data-krim-path="public/" href="./" class="font-extrabold text-white">KRIM LOGISTICS</a>
+      <div class="flex flex-wrap gap-x-5 gap-y-2"><a data-krim-path="public/global-coverage.html" href="global-coverage.html" class="hover:text-white">Global coverage</a><a data-krim-path="public/tracking.html" href="tracking.html" class="hover:text-white">Tracking</a><a data-krim-path="auth/login.html" href="../auth/login.html" class="hover:text-white">Sign in</a></div>
+      <p class="text-xs text-slate-400">© <span id="year">2026</span> KRIM Logistics. All rights reserved.</p>
+    </div>
+  </footer>
+  <script>document.getElementById("year").textContent=String(new Date().getFullYear());</script>
 </body>
 </html>
