@@ -40,30 +40,34 @@
   <style>
     :root { color-scheme: light; }
     body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .krim-gradient { background: radial-gradient(ellipse at 80% 10%, rgba(57,198,216,.20), transparent 34%), linear-gradient(135deg,#0b1220 0%,#102442 58%,#123a5a 100%); }
-    .krim-grid { background-image: linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px); background-size: 36px 36px; }
+    .krim-gradient { background: #061426; background-image: linear-gradient(90deg,rgba(4,17,32,.98) 0%,rgba(4,17,32,.88) 38%,rgba(4,17,32,.25) 72%,rgba(4,17,32,.12) 100%),linear-gradient(0deg,rgba(4,17,32,.42),transparent 42%),url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=2000&q=85'); background-position: center,center,center 56%; background-size: cover; }
+    .krim-grid { background-image: radial-gradient(circle at 70% 20%,rgba(56,189,248,.16),transparent 28%); }
+    .krim-glass { background: linear-gradient(145deg,rgba(9,31,54,.78),rgba(8,25,43,.48)); border:1px solid rgba(255,255,255,.2); box-shadow:0 24px 70px rgba(0,0,0,.2); backdrop-filter:blur(12px); }
+    .krim-card { transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease; }
+    .krim-card:hover { transform:translateY(-5px); border-color:#7dd3fc; box-shadow:0 18px 36px rgba(15,42,70,.1); }
     .focus-ring:focus-visible { outline: 3px solid #39c6d8; outline-offset: 3px; }
+    @media(max-width:640px){.krim-gradient{background-position:center,center,58% center}.krim-hero-inner{padding-top:4.5rem;padding-bottom:4.5rem}}
     @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
   </style>
 </head>
 <body class="bg-white text-slate-900 antialiased">
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-white focus:p-3">Skip to main content</a>
 
-  <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-[#07182a]/95 text-white backdrop-blur">
     <div class="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
       <a data-krim-path="public/" href="./" class="focus-ring flex items-center gap-3 rounded-lg" aria-label="KRIM Logistics home">
-        <span class="grid h-11 w-11 place-items-center rounded-xl bg-krim-ink text-lg font-black text-white shadow-sm">K</span>
+        <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-700 text-lg font-black text-white shadow-lg shadow-sky-950/40">K</span>
         <span><span class="block text-base font-extrabold tracking-wide">KRIM LOGISTICS</span><span class="block text-[10px] font-bold uppercase tracking-[.2em] text-sky-700">Global logistics OS</span></span>
       </a>
-      <nav class="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex" aria-label="Main navigation">
-        <a data-krim-path="public/solutions.html" href="solutions.html" class="focus-ring rounded hover:text-sky-700">Solutions</a>
+      <nav class="hidden items-center gap-7 text-sm font-semibold text-slate-200 md:flex" aria-label="Main navigation">
+        <a data-krim-path="public/solutions.html" href="solutions.html" class="focus-ring rounded hover:text-sky-300">Solutions</a>
         <a data-krim-path="public/network.html" href="network.html" class="focus-ring rounded hover:text-sky-700">Network</a>
         <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring rounded hover:text-sky-700">Track shipment</a>
         <a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="focus-ring rounded hover:text-sky-700">For carriers</a>
       </nav>
       <div class="hidden items-center gap-3 md:flex">
-        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Sign in</a>
-        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring rounded-xl bg-sky-700 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-sky-800">Get started <span aria-hidden="true">→</span></a>
+        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">Sign in</a>
+        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring rounded-xl bg-sky-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-sky-950/40 hover:bg-sky-400">Get started <span aria-hidden="true">→</span></a>
       </div>
       <button id="menu-toggle" class="focus-ring inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-300 text-slate-800 md:hidden" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation menu">
         <svg id="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -84,21 +88,21 @@
 
   <main id="main">
     <section class="krim-gradient krim-grid relative overflow-hidden text-white">
-      <div class="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.1fr_.9fr] lg:py-28">
+      <div class="krim-hero-inner mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.1fr_.9fr] lg:py-28">
         <div class="relative z-10">
-          <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[.16em] text-cyan-100">
+          <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200/30 bg-slate-950/40 px-4 py-2 text-xs font-bold uppercase tracking-[.16em] text-cyan-100">
             <span class="h-2 w-2 rounded-full bg-cyan-300"></span> India-first operations · Global-ready architecture
           </div>
-          <h1 class="max-w-3xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">Move freight.<br><span class="text-cyan-300">Connect globally.</span></h1>
+          <h1 class="max-w-3xl text-5xl font-black leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">Move freight.<br><span class="text-sky-400">Connect globally.</span></h1>
           <p class="mt-6 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">A connected logistics workflow for requesting freight, coordinating transport partners, and keeping shipment progress visible—from booking request to delivery.</p>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a data-krim-path="public/quote.html" href="quote.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl bg-cyan-300 px-6 py-3 font-extrabold text-slate-950 shadow-lg transition hover:bg-cyan-200">Request a freight quote <span class="ml-2" aria-hidden="true">→</span></a>
+            <a data-krim-path="public/quote.html" href="quote.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl bg-sky-500 px-6 py-3 font-extrabold text-white shadow-xl shadow-sky-950/40 transition hover:bg-sky-400">Request a freight quote <span class="ml-2" aria-hidden="true">→</span></a>
             <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-white/5 px-6 py-3 font-bold text-white transition hover:bg-white/10">Track a shipment</a>
           </div>
           <p class="mt-5 text-xs leading-5 text-slate-300">Quote availability, transport capacity, and delivery timelines are confirmed for each request. Submitting a request does not itself confirm a booking.</p>
         </div>
         <div class="relative z-10">
-          <div class="rounded-3xl border border-white/15 bg-white/[.08] p-5 shadow-2xl backdrop-blur sm:p-7">
+          <div class="krim-glass rounded-3xl p-5 sm:p-7">
             <div class="flex items-center justify-between border-b border-white/15 pb-5">
               <div><p class="text-xs font-bold uppercase tracking-[.18em] text-cyan-200">One connected workflow</p><h2 class="mt-2 text-xl font-extrabold">Freight, coordinated.</h2></div>
               <span class="rounded-xl bg-cyan-300/15 px-3 py-2 text-xs font-bold text-cyan-100">KRIM OS</span>
@@ -126,9 +130,9 @@
       <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
         <div class="max-w-2xl"><p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Explore KRIM</p><h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">The tools to move your shipment forward</h2><p class="mt-4 leading-7 text-slate-600">Choose the next step that matches what you need today.</p></div>
         <div class="mt-9 grid gap-5 md:grid-cols-3">
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="text-2xl" aria-hidden="true">↗</div><h3 class="mt-4 text-lg font-extrabold">Request a quote</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Submit cargo and route details to start a freight quotation request.</p><a data-krim-path="public/quote.html" href="quote.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">Start a request <span class="ml-2" aria-hidden="true">→</span></a></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="text-2xl" aria-hidden="true">⌖</div><h3 class="mt-4 text-lg font-extrabold">Track shipment</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Open the tracking page to check shipment progress using the supported tracking flow.</p><a data-krim-path="public/tracking.html" href="tracking.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">Open tracking <span class="ml-2" aria-hidden="true">→</span></a></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="text-2xl" aria-hidden="true">◎</div><h3 class="mt-4 text-lg font-extrabold">Explore solutions</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Learn about KRIM's logistics services and network approach.</p><a data-krim-path="public/solutions.html" href="solutions.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">View solutions <span class="ml-2" aria-hidden="true">→</span></a></article>
+          <article class="krim-card rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl text-sky-600" aria-hidden="true">↗</div><h3 class="mt-4 text-lg font-extrabold">Request a quote</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Submit cargo and route details to start a freight quotation request.</p><a data-krim-path="public/quote.html" href="quote.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">Start a request <span class="ml-2" aria-hidden="true">→</span></a></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl text-sky-600" aria-hidden="true">⌖</div><h3 class="mt-4 text-lg font-extrabold">Track shipment</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Open the tracking page to check shipment progress using the supported tracking flow.</p><a data-krim-path="public/tracking.html" href="tracking.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">Open tracking <span class="ml-2" aria-hidden="true">→</span></a></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl text-sky-600" aria-hidden="true">◎</div><h3 class="mt-4 text-lg font-extrabold">Explore solutions</h3><p class="mt-2 min-h-[48px] text-sm leading-6 text-slate-600">Learn about KRIM's logistics services and network approach.</p><a data-krim-path="public/solutions.html" href="solutions.html" class="mt-5 inline-flex font-bold text-sky-800 hover:text-sky-950">View solutions <span class="ml-2" aria-hidden="true">→</span></a></article>
         </div>
       </div>
     </section>
