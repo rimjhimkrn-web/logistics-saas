@@ -1,87 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KRIM OS — Driver SMS Auth</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>KRIM Logistics OS — Phone Verification</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#f8fafc;color:#0f172a;font-family:Inter,system-ui,-apple-system,sans-serif}
+header,footer{padding:22px max(20px,calc((100% - 1000px)/2))}header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:800;letter-spacing:.06em}
+main{width:min(100% - 32px,460px);margin:auto;padding:32px 26px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 18px 50px #0f172a0d}
+.badge{width:48px;height:48px;margin:0 auto 16px;display:grid;place-items:center;border-radius:15px;background:#e0f2fe;color:#0369a1;font-size:22px}
+h1{text-align:center;font-size:25px;margin:0 0 10px}p{text-align:center;color:#64748b;font-size:14px;line-height:1.6}
+label{display:block;margin:20px 0 8px;font-size:13px;font-weight:700}
+input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+input:focus{outline:2px solid #0284c7;border-color:#0284c7}
+#sms-code{text-align:center;font-size:24px;letter-spacing:.4em;font-family:ui-monospace,monospace}
+button{width:100%;margin-top:20px;padding:14px;border:0;border-radius:10px;background:#0369a1;color:#fff;font-weight:750;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}#feedback{margin-top:16px;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-align:center;margin-top:20px;font-size:14px}
+footer{text-align:center;color:#64748b;font-size:12px}
+</style>
 </head>
-<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans">
-  <header class="w-full max-w-7xl flex justify-between items-center py-4">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
-      <span class="font-extrabold text-lg tracking-wider text-white">KRIM <span class="text-xs font-mono text-cyan-400 block -mt-1">LOGISTICS OS</span></span>
-    </div>
-  </header>
-
-  <main class="w-full max-w-md p-8 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl">
-    <div class="text-center mb-6">
-      <div class="w-12 h-12 mx-auto mb-3 bg-cyan-500/10 border border-cyan-500/30 rounded-full flex items-center justify-center text-xl text-cyan-400">📱</div>
-      <h1 class="text-xl font-extrabold text-white">Driver SMS Gateway</h1>
-      <p class="text-xs text-slate-400 mt-1">Authenticate using mobile mobile phone number (E.164)</p>
-    </div>
-
-    <div id="alert-box" class="hidden p-3 mb-4 rounded-lg text-xs"></div>
-
-    <form id="phone-form" class="space-y-4">
-      <div id="phone-step">
-        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Mobile Number</label>
-        <input type="tel" id="phone" required placeholder="+1234567890" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
-      </div>
-
-      <div id="code-step" class="hidden">
-        <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">SMS Code</label>
-        <input type="text" id="sms-code" maxlength="6" placeholder="000000" class="w-full py-2.5 text-center text-xl font-mono tracking-[0.3em] bg-[#0b1329] border border-white/10 rounded-lg text-cyan-400 focus:outline-none focus:border-cyan-400">
-      </div>
-
-      <button type="submit" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider hover:opacity-90 transition-all">
-        Send SMS Verification →
-      </button>
-    </form>
-  </main>
-
-  <footer class="text-[11px] font-mono text-slate-500 py-4">© 2026 KRIM Logistics Engine</footer>
-
-  <script type="module">
-    import { supabase, AUTH_ROUTES, renderTestSwitcher } from './js/auth-core.js';
-    renderTestSwitcher();
-
-    let step = 'send';
-    const form = document.getElementById('phone-form');
-    const alertBox = document.getElementById('alert-box');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = document.getElementById('phone').value;
-      const btn = document.getElementById('submit-btn');
-
-      if (step === 'send') {
-        const { error } = await supabase.auth.signInWithOtp({ phone });
-        if (error) {
-          alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
-          alertBox.innerText = error.message;
-          alertBox.classList.remove('hidden');
-        } else {
-          document.getElementById('phone-step').classList.add('hidden');
-          document.getElementById('code-step').classList.remove('hidden');
-          btn.innerText = 'Verify & Launch Terminal →';
-          step = 'verify';
-        }
-      } else {
-        const code = document.getElementById('sms-code').value;
-        const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
-        if (error) {
-          alertBox.className = 'p-3 mb-4 rounded-lg text-xs bg-rose-500/10 border border-rose-500/30 text-rose-400';
-          alertBox.innerText = error.message;
-          alertBox.classList.remove('hidden');
-        } else {
-          window.location.href = 'driver-terminal.html';
-        }
-      }
-    });
-  </script>
+<body>
+<header>KRIM <span style="color:#0284c7">LOGISTICS OS</span></header>
+<main>
+<div class="badge" aria-hidden="true">📱</div>
+<h1>Verify your phone</h1>
+<p>Use an international phone number in E.164 format (for example, +919876543210). SMS verification works only when phone auth and an SMS provider are configured in Supabase.</p>
+<div id="feedback" role="status" aria-live="polite" hidden></div>
+<form id="phone-form">
+<div id="phone-step">
+<label for="phone">Mobile number</label>
+<input id="phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="16" pattern="\+[1-9][0-9]{7,14}" placeholder="+919876543210">
+<button id="send-btn" type="submit">Send verification code</button>
+</div>
+<div id="code-step" hidden>
+<label for="sms-code">Six-digit SMS code</label>
+<input id="sms-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+<button id="verify-btn" type="button">Verify phone</button>
+<button id="resend-btn" type="button" style="margin-top:10px;background:#e2e8f0;color:#0f172a">Send a new code</button>
+</div>
+</form>
+<a class="back" href="login.html">← Back to sign in</a>
+</main>
+<footer>© 2026 KRIM Logistics</footer>
+<script>
+(function(){
+ const client=window.KRIM_SUPABASE;
+ const form=document.getElementById("phone-form");
+ const phoneInput=document.getElementById("phone");
+ const codeInput=document.getElementById("sms-code");
+ const phoneStep=document.getElementById("phone-step");
+ const codeStep=document.getElementById("code-step");
+ const sendBtn=document.getElementById("send-btn");
+ const verifyBtn=document.getElementById("verify-btn");
+ const resendBtn=document.getElementById("resend-btn");
+ const feedback=document.getElementById("feedback");
+ let verifiedPhone="";
+ function show(message,ok){
+  feedback.hidden=false;feedback.textContent=message;
+  feedback.style.background=ok?"#ecfdf5":"#fff1f2";
+  feedback.style.color=ok?"#065f46":"#9f1239";
+ }
+ async function sendCode(){
+  const phone=phoneInput.value.trim().replace(/[\s()-]/g,"");
+  if(!/^\+[1-9]\d{7,14}$/.test(phone)){show("Enter a valid international number, including country code, such as +919876543210.",false);return;}
+  sendBtn.disabled=true;resendBtn.disabled=true;sendBtn.textContent="Sending…";resendBtn.textContent="Sending…";
+  try{
+   const result=await client.auth.signInWithOtp({phone});
+   if(result.error) throw result.error;
+   verifiedPhone=phone;phoneInput.value=phone;phoneStep.hidden=true;codeStep.hidden=false;
+   show("If SMS delivery is configured, a verification code has been sent. Enter it below.",true);
+   codeInput.focus();
+  }catch(error){
+   show(error&&error.message?error.message:"Could not send a verification code. Check Supabase phone-auth and SMS-provider settings.",false);
+  }finally{
+   sendBtn.disabled=false;resendBtn.disabled=false;sendBtn.textContent="Send verification code";resendBtn.textContent="Send a new code";
+  }
+ }
+ form.addEventListener("submit",function(event){event.preventDefault();if(phoneStep.hidden)return;sendCode();});
+ resendBtn.addEventListener("click",sendCode);
+ verifyBtn.addEventListener("click",async function(){
+  const code=codeInput.value.trim();
+  if(!verifiedPhone||!/^\d{6}$/.test(code)){show("Enter the six-digit code sent to your phone.",false);return;}
+  verifyBtn.disabled=true;verifyBtn.textContent="Verifying…";
+  try{
+   const result=await client.auth.verifyOtp({phone:verifiedPhone,token:code,type:"sms"});
+   if(result.error)throw result.error;
+   show("Phone verified. Returning you to sign in…",true);
+   form.hidden=true;
+   setTimeout(function(){location.replace("login.html");},900);
+  }catch(error){
+   show(error&&error.message?error.message:"Phone verification failed. The code may be invalid or expired.",false);
+  }finally{verifyBtn.disabled=false;verifyBtn.textContent="Verify phone";}
+ });
+})();
+</script>
 </body>
 </html>
