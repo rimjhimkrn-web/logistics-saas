@@ -75,6 +75,24 @@ if (existsSync(pricingMigration)) {
   failures.push("Required fail-closed tariff pricing migration is missing.");
 }
 
+const restoredPricingMigration = "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql";
+if (existsSync(restoredPricingMigration)) {
+  const sql = readFileSync(restoredPricingMigration, "utf8");
+  for (const [label, pattern] of [
+    ["restored tariff function remains SECURITY DEFINER", /SECURITY\\s+DEFINER/i],
+    ["restored tariff function pins search_path", /SET\\s+search_path\\s+TO\\s+'public',\\s*'pg_temp'/i],
+    ["restored tariff function requires an active global rate card", /r\\.status\\s*=\\s*'active'[\\s\\S]*?r\\.effective_from\\s*<=\\s*now\\(\)/i],
+    ["restored tariff function fails closed when no rate card matches", /Tariff quote unavailable: no approved active global rate card matches this route and service tier\\./i],
+  ]) {
+    if (!pattern.test(sql)) failures.push(`Restored tariff migration safety check missing: ${label}`);
+  }
+  if (/INSERT\\s+INTO\\s+public\\.krim_pricing_rate_cards/i.test(sql)) {
+    failures.push("Restored tariff migration must not seed unapproved commercial rates.");
+  }
+} else {
+  failures.push("Required restored rate-card-backed tariff migration is missing.");
+}
+
 const securityMigration = "supabase/migrations/20261019020919_restrict_privileged_krim_rpc_to_authenticated.sql";
 if (existsSync(securityMigration)) {
   const sql = readFileSync(securityMigration, "utf8");
