@@ -65,8 +65,9 @@
     feedback.textContent = text;
     feedback.className = "text-sm " + (kind === "success" ? "text-emerald-300" : kind === "info" ? "text-sky-300" : "text-rose-300");
   }
-  function locationLabel(row) {
-    return [row.city, row.state_region || row.region, row.location_code].filter(Boolean).join(" — ");
+  function locationLabel(row, countries) {
+    const country = countries.get(Number(row.country_id));
+    return [row.city, row.state_region || row.region, country ? country.name : "Country pending", row.location_code].filter(Boolean).join(" — ");
   }
   async function initialize() {
     try {
@@ -106,13 +107,21 @@
         customerOrganizationId = Number(customerOrg.id);
       }
       const {data: locations, error: locationError} = await client.from("krim_locations")
-        .select("id, city, region, state_region, location_code").eq("is_active", true).order("city");
+        .select("id, country_id, city, region, state_region, location_code").eq("is_active", true).order("city");
       if (locationError) throw locationError;
       if (!locations || locations.length < 2) throw new Error("KRIM needs at least two active configured locations before a shipment can be created.");
+      const {data: countryRows, error: countryError} = await client.from("krim_countries")
+        .select("id, name, code").eq("is_active", true);
+      if (countryError) throw countryError;
+      const countryMap = new Map((countryRows || []).map(country => [Number(country.id), country]));
+      const distinctCountries = new Set(locations.map(loc => Number(loc.country_id)).filter(Boolean));
+      if (distinctCountries.size < 2) {
+        message("Location catalogue currently covers only one country. Global city options are being prepared; check back shortly.", "info");
+      }
       for (const selectId of ["origin-id","destination-id"]) {
         const select = document.getElementById(selectId);
         select.replaceChildren(new Option("Select location", ""));
-        locations.forEach(loc => select.add(new Option(locationLabel(loc), String(loc.id))));
+        locations.forEach(loc => select.add(new Option(locationLabel(loc, countryMap), String(loc.id))));
       }
       locationsReady = true;
       button.disabled = false;
