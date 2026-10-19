@@ -1,127 +1,20 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Exception Command & Automated Rerouting Dispatch</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              purple: '#8b5cf6',
-              rose: '#f43f5e',
-              blue: '#3b82f6'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-</head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="../../app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-blue-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Exception Command & Automated Rerouting Desk</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="digital-twin-map.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← Digital Twin Map
-      </a>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN WORKSPACE ==================== -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
-
-    <!-- HERO BANNER -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-widest block">Autonomous Incident Command & Triage</span>
-        <h1 class="text-xl font-extrabold text-white mt-1">Exception Dispatch & Rerouting Desk</h1>
-        <p class="text-slate-400 text-[11px] mt-1">Identify shipping delays, weather disruptions, and customs holds with instant AI-suggested rerouting protocols.</p>
-      </div>
-
-      <div class="p-3 bg-[#040814] border border-amber-500/40 rounded-xl text-right shrink-0">
-        <span class="text-amber-400 text-[10px] font-bold block">ACTIVE EXCEPTIONS</span>
-        <span class="text-white font-extrabold text-sm">Demo incident</span>
-      </div>
-    </section>
-
-    <!-- EXCEPTION TABLE -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <span>🚨</span> Active Network Exceptions
-        </h2>
-        <span class="text-[10px] text-slate-500">Triage Engine: <strong class="text-amber-400">Backend unverified</strong></span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left font-mono">
-          <thead>
-            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
-              <th class="py-3 px-2">Incident Ref / Shipment</th>
-              <th class="py-3 px-2">Disruption Type</th>
-              <th class="py-3 px-2">AI Reroute Recommendation</th>
-              <th class="py-3 px-2 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60 text-slate-300">
-            <tr class="hover:bg-slate-900/50 transition-all">
-              <td class="py-3.5 px-2">
-                <span class="font-bold text-white block">INC-2026-8841</span>
-                <span class="text-[10px] text-slate-400">Shipment: MSCU892101</span>
-              </td>
-              <td class="py-3.5 px-2 text-amber-400 font-bold">Suez Canal Convoys Delayed (+18h)</td>
-              <td class="py-3.5 px-2 text-cyan-400">Reroute via Cape of Good Hope corridor</td>
-              <td class="py-3.5 px-2 text-right">
-                <button type="button" onclick="showRerouteStatus()" class="px-3 py-1 bg-blue-500 text-slate-950 font-extrabold rounded-lg hover:bg-blue-400 transition-all">Check Reroute</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Exception Dispatch Core.</p>
-    </div>
-  </footer>
-
-  <div id="action-status" role="status" aria-live="polite" class="fixed bottom-4 left-4 right-4 mx-auto max-w-xl rounded-xl border border-amber-500/50 bg-[#081020] p-4 text-sm text-white shadow-xl" hidden></div>
-  <script>
-    function showRerouteStatus() {
-      const status = document.getElementById("action-status");
-      status.textContent = "Rerouting has not been executed. This screen is not yet connected to a verified backend reroute workflow. No shipment route was changed.";
-      status.hidden = false;
-    }
-  </script>
-  <script type="module" src="../../platform/krim-config.js"></script>
-  <script type="module" src="../../app/app-runtime.js"></script>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f9fc">
+<title>Exception Dispatch | KRIM Logistics</title>
+<link rel="stylesheet" href="../../core/krim-core.css"><link rel="stylesheet" href="../../core/krim-components.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#172033;background:#f7f9fc}*{box-sizing:border-box}body{margin:0;background:#f7f9fc}a{color:inherit;text-decoration:none}.top{background:#fff;border-bottom:1px solid #e2e8f0}.nav,.wrap,.foot{max-width:1160px;margin:auto;padding:16px 20px}.nav{display:flex;align-items:center;justify-content:space-between;gap:14px}.logo{font-size:20px;font-weight:850}.logo b{color:#155eef}.links{display:flex;gap:8px;flex-wrap:wrap}.links a,.btn{display:inline-block;border:1px solid #dbe2ea;background:#fff;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700}.links a:hover,.btn:hover{background:#eff6ff;border-color:#93b4f7}.btn.primary{background:#155eef;color:#fff;border-color:#155eef}.wrap{padding-top:28px;padding-bottom:44px}.crumb{font-size:12px;color:#64748b;margin-bottom:15px}.hero{background:linear-gradient(120deg,#fff,#edf4ff);border:1px solid #dbe7ff;border-radius:20px;padding:26px;display:flex;justify-content:space-between;align-items:center;gap:20px}.eyebrow{color:#155eef;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(26px,4vw,36px);line-height:1.15;letter-spacing:-.04em;margin:8px 0}p{color:#64748b}.hero p{max-width:700px;margin:0}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.pill{white-space:nowrap;background:#fff;border:1px solid #f3d7a3;color:#92400e;border-radius:999px;padding:9px 12px;font-size:12px;font-weight:750}.stats,.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px}.card small{display:block;color:#64748b}.card strong{display:block;font-size:22px;margin-top:5px}.section{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.section h2{font-size:18px;margin:0}.section p{font-size:13px;margin:4px 0}.notice{background:#fffbeb;border:1px solid #f3d7a3;color:#854d0e;border-radius:12px;padding:13px;font-size:13px;margin-bottom:15px}.empty{text-align:center;border:1px dashed #cbd5e1;border-radius:14px;padding:28px 18px;background:#fbfdff}.empty h3{margin:8px 0 4px}.empty p{max-width:570px;margin:0 auto 16px;font-size:13px}.tile h3{margin:9px 0 4px;font-size:15px}.tile p{font-size:13px;min-height:38px}.tile a{color:#155eef;font-size:13px;font-weight:750}footer{background:#fff;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px}.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}@media(max-width:760px){.nav{align-items:flex-start;flex-direction:column}.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.links a{text-align:center}.hero{align-items:flex-start;flex-direction:column}.stats,.tiles{grid-template-columns:1fr}.wrap{padding:20px 14px 34px}.section{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body>
+<header class="top"><nav class="nav" aria-label="Main navigation"><a class="logo" href="../index.html"><b>KRIM</b> Logistics</a><div class="links"><a href="../operations/control-tower.html">Control Tower</a><a href="digital-twin-map.html">Digital Twin Map</a><a href="facility-matrix.html">Facility Matrix</a><a href="simulation-room.html">Simulation Room</a><a href="../tracking.html">Track Shipment</a></div></nav></header>
+<main class="wrap">
+<div class="crumb"><a href="../index.html">Home</a> / Control Centre / Exception Dispatch</div>
+<section class="hero"><div><div class="eyebrow">Operations · Incident management</div><h1>Exception Dispatch Desk</h1><p>Review shipment disruptions, coordinate resolution, and navigate to related operations tools. Shipment changes require a verified and authorized backend workflow.</p><div class="actions"><a class="btn primary" href="../operations/control-tower.html">← Operations Control Tower</a><button class="btn" id="refresh" type="button">↻ Refresh view</button></div></div><span class="pill">● Backend status unverified</span></section>
+<section class="stats"><article class="card"><small>Open exceptions</small><strong>Not verified</strong></article><article class="card"><small>Awaiting action</small><strong>Not verified</strong></article><article class="card"><small>Reroutes completed</small><strong>Not verified</strong></article></section>
+<section class="card"><div class="section"><div><h2>Active exceptions</h2><p>Live incidents appear here only after a production data source is connected and verified.</p></div><button class="btn" id="reload" type="button">Reload exceptions</button></div><div class="notice"><b>Operational safety:</b> this page does not claim a live exception feed or execute route changes. No shipment is changed by refreshing this view.</div><div class="empty"><div style="font-size:28px" aria-hidden="true">🛡️</div><h3 id="state-title">Live exception feed not verified</h3><p id="state-copy">No incident records are shown rather than inventing sample shipments. Connect and verify the backend query and access policies before using this as a live dispatch console.</p><a class="btn primary" href="../operations/control-tower.html">Open Control Tower</a></div><p id="message" role="status" aria-live="polite" hidden></p></section>
+<section style="margin-top:24px"><div class="section"><div><h2>Related operations tools</h2><p>Open the connected KRIM workspace pages.</p></div></div><div class="tiles"><article class="card tile"><div style="font-size:22px">🗺️</div><h3>Digital Twin Map</h3><p>Open the network map workspace.</p><a href="digital-twin-map.html">Open Digital Twin Map →</a></article><article class="card tile"><div style="font-size:22px">🏢</div><h3>Facility Matrix</h3><p>Review the facility and network coverage workspace.</p><a href="facility-matrix.html">Open Facility Matrix →</a></article><article class="card tile"><div style="font-size:22px">🧪</div><h3>Simulation Room</h3><p>Open the simulation and scenario workspace.</p><a href="simulation-room.html">Open Simulation Room →</a></article></div></section>
+</main><footer><div class="foot"><b>KRIM Logistics OS</b><span>Exception Dispatch · Live backend status must be verified before operational use.</span></div></footer>
+<script>(function(){function refresh(){var m=document.getElementById("message");m.textContent="View refreshed. No backend action or shipment change was performed.";m.hidden=false;}document.getElementById("refresh").addEventListener("click",refresh);document.getElementById("reload").addEventListener("click",refresh);})();</script>
+<script src="../../config.js"></script></body></html>
