@@ -1,155 +1,154 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Platform Solutions & Core Infrastructure Architecture</title>
-    <meta name="description" content="Explore KRIM OS enterprise platform solutions featuring Supabase Row Level Security (RLS) multi-tenancy, AAL2 authentication, and secure escrow billing.">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a2d">
+  <title>KRIM Logistics | Global Logistics Solutions & Platform</title>
+  <meta name="description" content="Explore KRIM's global-ready logistics platform: freight quote workflows, shipment visibility, partner coordination and multi-modal logistics architecture. Service availability varies by market and verified capacity.">
+  <script>
+    (function () {
+      var githubPages = /(^|\.)github\.io$/i.test(location.hostname);
+      var parts = location.pathname.split('/').filter(Boolean);
+      var base = githubPages ? '/' + (parts[0] || 'logistics-saas') + '/' : (parts[0] === 'logistics-saas' ? '/logistics-saas/' : '/');
+      window.KRIM_BASE_PATH = base;
+      window.KRIM_URL = function (path) { return base + String(path || '').replace(/^\/+/, ''); };
+      function resolve() {
+        document.querySelectorAll('a[data-krim-path]').forEach(function (a) {
+          var target = a.getAttribute('data-krim-path');
+          if (target) a.href = window.KRIM_URL(target);
+        });
+        var css = document.querySelector('link[data-krim-shared-css]');
+        if (!css) { css = document.createElement('link'); css.rel = 'stylesheet'; css.setAttribute('data-krim-shared-css','true'); document.head.appendChild(css); }
+        css.href = window.KRIM_URL('core/krim-unified-page.css');
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', resolve, {once:true}); else resolve();
+    }());
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--navy:#071a2d;--blue:#078df4;--cyan:#55d5ef;--ink:#11263e}
+    *{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    .hero{position:relative;isolation:isolate;background:#071a2d url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=2200&q=85') center 52%/cover no-repeat}
+    .hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(3,17,32,.97),rgba(3,17,32,.83) 53%,rgba(3,17,32,.4))}
+    .glass{background:linear-gradient(145deg,rgba(7,28,49,.88),rgba(7,28,49,.67));border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(12px);box-shadow:0 22px 65px rgba(0,0,0,.2)}
+    .card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.card:hover{transform:translateY(-4px);border-color:#8bd7ff;box-shadow:0 16px 38px rgba(8,36,65,.1)}
+    .focus-ring:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    @media(max-width:767px){.hero{background-position:60% center}.hero:before{background:linear-gradient(90deg,rgba(3,17,32,.95),rgba(3,17,32,.75))}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
 </head>
-<body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="antialiased">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:bg-white focus:p-4">Skip to content</a>
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-[#07182a]/95 text-white backdrop-blur">
+    <div class="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+      <a data-krim-path="public/" href="./" class="focus-ring flex items-center gap-3 rounded-lg" aria-label="KRIM Logistics home">
+        <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-sky-300 to-blue-700 text-xl font-black shadow-lg">K</span>
+        <span><span class="block text-2xl font-black tracking-tight">KRIM</span><span class="-mt-1 block text-[10px] font-bold uppercase tracking-[.28em] text-sky-200">GLOBAL LOGISTICS OS</span></span>
+      </a>
+      <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-200 lg:flex" aria-label="Main navigation">
+        <a href="#solutions" aria-current="page" class="focus-ring rounded text-sky-300">Solutions</a>
+        <a data-krim-path="public/network.html" href="network.html" class="focus-ring rounded hover:text-sky-300">Global Network</a>
+        <a data-krim-path="public/global-coverage.html" href="global-coverage.html" class="focus-ring rounded hover:text-sky-300">Coverage</a>
+        <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring rounded hover:text-sky-300">Track Shipment</a>
+      </nav>
+      <div class="hidden items-center gap-3 sm:flex">
+        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring rounded-xl border border-white/50 px-4 py-2.5 text-sm font-bold hover:bg-white/10">Sign In</a>
+        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring rounded-xl bg-sky-500 px-4 py-3 text-sm font-extrabold shadow-lg hover:bg-sky-400">Get Started →</a>
+      </div>
+      <button id="menu-toggle" class="focus-ring inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/30 lg:hidden" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav id="mobile-menu" class="hidden border-t border-white/10 bg-[#07182a] px-5 py-4 lg:hidden" aria-label="Mobile navigation">
+      <div class="mx-auto flex max-w-7xl flex-col gap-1 text-sm font-semibold">
+        <a href="#solutions" class="rounded-lg px-3 py-3 text-sky-300 hover:bg-white/10">Solutions</a>
+        <a data-krim-path="public/" href="./" class="rounded-lg px-3 py-3 hover:bg-white/10">Home</a>
+        <a data-krim-path="public/network.html" href="network.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Global Network</a>
+        <a data-krim-path="public/global-coverage.html" href="global-coverage.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Global Coverage</a>
+        <a data-krim-path="public/tracking.html" href="tracking.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Track Shipment</a>
+        <a data-krim-path="public/quote.html" href="quote.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Request a Freight Quote</a>
+        <a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Join as a Logistics Partner</a>
+        <a data-krim-path="auth/login.html" href="../auth/login.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Sign In</a>
+        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="mt-1 rounded-lg bg-sky-500 px-3 py-3 text-center hover:bg-sky-400">Create Account</a>
+      </div>
+    </nav>
+  </header>
 
-    <!-- Institutional Navigation Header -->
-    <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Platform Solutions</span>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-                <a href="/logistics-saas/public/solutions.html" class="text-slate-900 font-semibold transition">Solutions</a>
-                <a href="/logistics-saas/public/network.html" class="hover:text-slate-900 transition">Global Network</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-900 transition">Track Shipment</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/logistics-saas/portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
-                <a href="/logistics-saas/auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
-            </div>
+  <main id="main">
+    <section class="hero overflow-hidden text-white">
+      <div class="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:min-h-[480px] lg:grid-cols-[1.1fr_.9fr] lg:py-20">
+        <div class="relative z-10">
+          <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-300/10 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.2em] text-sky-200 sm:text-xs"><span class="h-2 w-2 rounded-full bg-cyan-300"></span> Global-ready logistics platform</p>
+          <h1 class="max-w-3xl text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">One platform for your <span class="text-sky-400">logistics workflows.</span></h1>
+          <p class="mt-6 max-w-2xl text-base leading-7 text-slate-100 sm:text-lg">Connect quote requests, shipment visibility, partner coordination and operational processes through a consistent digital experience. Built for expansion; services are confirmed by route and available capacity.</p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a data-krim-path="public/quote.html" href="quote.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl bg-sky-500 px-6 py-3 font-extrabold hover:bg-sky-400">Request a Freight Quote →</a>
+            <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl border border-white/70 px-6 py-3 font-bold hover:bg-white/10">Track Shipment</a>
+          </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow">
-        
-        <!-- Hero Section -->
-        <section class="max-w-7xl mx-auto px-6 py-20 lg:py-28 space-y-12 text-center">
-            <div class="space-y-6 max-w-3xl mx-auto">
-                <span class="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-600 border border-sky-200 uppercase tracking-widest">
-                    Enterprise Technical Specifications
-                </span>
-                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                    Institutional Logistics Infrastructure Solutions
-                </h1>
-                <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
-                    Designed for absolute multi-tenant data isolation, sub-second telemetry propagation, and cryptographically verified financial ledgers across global supply chain networks.
-                </p>
-                <div class="flex flex-wrap justify-center gap-4 pt-2">
-                    <a href="/logistics-saas/auth/signup.html" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20">
-                        Deploy Enterprise Tenant →
-                    </a>
-                    <a href="/logistics-saas/public/tracking.html" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition">
-                        Track Consignment
-                    </a>
-                </div>
+        <div class="relative z-10 lg:pl-4">
+          <div class="glass rounded-3xl p-6 sm:p-7">
+            <p class="text-xs font-bold uppercase tracking-[.18em] text-sky-200">Connected logistics lifecycle</p><h2 class="mt-2 text-2xl font-extrabold">Plan. Coordinate. Deliver.</h2>
+            <div class="mt-5 space-y-4">
+              <div class="flex gap-3"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-300/15 font-black text-sky-200">01</span><div><h3 class="font-bold">Shipment planning</h3><p class="mt-1 text-sm text-slate-200">Capture cargo, route and service requirements.</p></div></div>
+              <div class="flex gap-3"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-300/15 font-black text-sky-200">02</span><div><h3 class="font-bold">Quote and partner coordination</h3><p class="mt-1 text-sm text-slate-200">Review pricing and provider availability.</p></div></div>
+              <div class="flex gap-3"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-300/15 font-black text-sky-200">03</span><div><h3 class="font-bold">Tracking and operations</h3><p class="mt-1 text-sm text-slate-200">Follow recorded status and delivery milestones.</p></div></div>
             </div>
-
-            <!-- Architecture Modules Grid -->
-            <div class="max-w-6xl mx-auto pt-16 space-y-12 text-left">
-                <div class="text-center space-y-2 max-w-xl mx-auto">
-                    <span class="text-xs font-semibold uppercase tracking-widest text-sky-600 font-mono">Core Subsystems</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900">Engineered for Zero-Trust Operations</h2>
-                    <p class="text-slate-600 text-sm">Every layer of KRIM OS is architected for maximum security, auditability, and operational resilience.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            01
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Row Level Security (RLS) Tenancy</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Database queries automatically enforce tenant separation based on cryptographic user tokens and organization membership mappings, preventing data leaks across competitors.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            02
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">AAL2 / TOTP Multi-Factor Auth</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Mandatory hardware and authenticator app verification ensures high-privilege administrative and carrier partner nodes remain secure against credential theft.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            03
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Stateless Edge Compute</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Razorpay payment validation, currency conversions, and dynamic rate engines execute via lightning-fast serverless edge functions distributed globally.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            04
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Immutable Audit & ePOD Vaults</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            All electronic proofs of delivery, spot bids, and settlement receipts are permanently stored with cryptographic hashes to ensure full legal non-repudiation.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Clean Footer -->
-    <footer class="bg-white border-t border-slate-100 py-10 text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/public/network.html" class="hover:text-slate-800 transition">Network</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
-                <a href="/logistics-saas/portal.html" class="hover:text-slate-800 transition">Sign In</a>
-            </div>
+            <p class="mt-5 border-t border-white/15 pt-4 text-xs leading-5 text-slate-300">Actual capabilities depend on deployed integrations, account permissions and verified service coverage.</p>
+          </div>
         </div>
-    </footer>
+      </div>
+    </section>
 
+    <section id="solutions" class="bg-white">
+      <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
+        <div class="max-w-3xl"><p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Solutions</p><h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">The capabilities to coordinate freight end to end.</h2><p class="mt-4 text-base leading-7 text-slate-600">Use the relevant workflow to start a request, check a shipment or register as a logistics partner. These links take you to the corresponding KRIM page.</p></div>
+        <div class="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="card flex flex-col rounded-2xl border border-slate-200 bg-white p-6"><span class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl">⇄</span><h3 class="mt-4 text-lg font-extrabold">Freight quote requests</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Submit origin, destination and cargo requirements to start the quotation workflow.</p><a data-krim-path="public/quote.html" href="quote.html" class="mt-5 inline-flex font-extrabold text-sky-700 hover:text-sky-900">Start a quote →</a></article>
+          <article class="card flex flex-col rounded-2xl border border-slate-200 bg-white p-6"><span class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl">⌖</span><h3 class="mt-4 text-lg font-extrabold">Shipment visibility</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Look up an existing shipment using the tracking reference supplied by KRIM.</p><a data-krim-path="public/tracking.html" href="tracking.html" class="mt-5 inline-flex font-extrabold text-sky-700 hover:text-sky-900">Track a shipment →</a></article>
+          <article class="card flex flex-col rounded-2xl border border-slate-200 bg-white p-6"><span class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl">♧</span><h3 class="mt-4 text-lg font-extrabold">Logistics partner network</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Transport providers can submit registration details for review and onboarding.</p><a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="mt-5 inline-flex font-extrabold text-sky-700 hover:text-sky-900">Register as a partner →</a></article>
+          <article class="card flex flex-col rounded-2xl border border-slate-200 bg-white p-6"><span class="grid h-12 w-12 place-items-center rounded-xl bg-sky-50 text-2xl">◈</span><h3 class="mt-4 text-lg font-extrabold">Customer account</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-600">Create an account or sign in to access the workflows enabled for your account.</p><div class="mt-5 flex flex-wrap gap-4"><a data-krim-path="auth/signup.html" href="../auth/signup.html" class="font-extrabold text-sky-700 hover:text-sky-900">Sign up →</a><a data-krim-path="auth/login.html" href="../auth/login.html" class="font-extrabold text-sky-700 hover:text-sky-900">Sign in →</a></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-[#f3f7fb]">
+      <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
+        <div class="max-w-3xl"><p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Platform architecture</p><h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Designed for secure, accountable operations.</h2><p class="mt-4 text-base leading-7 text-slate-600">The platform is intended to support controlled access, traceable workflows and integrations. Security controls and operational guarantees must be verified in the deployed system before being treated as production assurances.</p></div>
+        <div class="mt-9 grid gap-5 md:grid-cols-2">
+          <article class="card rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"><span class="text-xs font-extrabold uppercase tracking-[.18em] text-sky-700">01 · Access control</span><h3 class="mt-3 text-xl font-extrabold">Organization-aware data access</h3><p class="mt-3 text-sm leading-6 text-slate-600">Role-based permissions and database row-level security can help isolate organization data when policies are correctly configured and tested.</p></article>
+          <article class="card rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"><span class="text-xs font-extrabold uppercase tracking-[.18em] text-sky-700">02 · Identity</span><h3 class="mt-3 text-xl font-extrabold">Authentication and account protection</h3><p class="mt-3 text-sm leading-6 text-slate-600">Sign-in, account recovery and optional stronger verification should follow the security settings enabled for each account and role.</p></article>
+          <article class="card rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"><span class="text-xs font-extrabold uppercase tracking-[.18em] text-sky-700">03 · Integrations</span><h3 class="mt-3 text-xl font-extrabold">Server-side workflow processing</h3><p class="mt-3 text-sm leading-6 text-slate-600">Payment verification, notifications and other privileged actions should be validated by trusted backend functions rather than frontend claims alone.</p></article>
+          <article class="card rounded-2xl border border-slate-200 bg-white p-6 sm:p-7"><span class="text-xs font-extrabold uppercase tracking-[.18em] text-sky-700">04 · Accountability</span><h3 class="mt-3 text-xl font-extrabold">Operational events and audit trails</h3><p class="mt-3 text-sm leading-6 text-slate-600">Shipment milestones and financial events should be recorded with appropriate permissions, timestamps and reconciliation controls.</p></article>
+        </div>
+        <div class="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm leading-6 text-sky-950"><strong>Global readiness:</strong> country-specific services, currencies, regulations, carrier coverage and data-hosting requirements must be confirmed market by market. A global-ready architecture does not imply that every international lane is already live.</div>
+      </div>
+    </section>
+
+    <section class="bg-[#071a2d] text-white">
+      <div class="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div><p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-300">Ready to move forward?</p><h2 class="mt-2 text-2xl font-black sm:text-3xl">Start with your shipment or join the network.</h2><p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">Choose the next step that matches your role. Service and partner availability are subject to confirmation.</p></div>
+        <div class="flex flex-col gap-3 sm:flex-row"><a data-krim-path="public/quote.html" href="quote.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl bg-sky-500 px-5 py-3 font-extrabold hover:bg-sky-400">Request a Quote →</a><a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="focus-ring inline-flex min-h-12 items-center justify-center rounded-xl border border-white/60 px-5 py-3 font-bold hover:bg-white/10">Join as Partner</a></div>
+      </div>
+    </section>
+  </main>
+  <footer class="bg-[#04111f] text-slate-300">
+    <div class="mx-auto grid max-w-7xl gap-8 px-5 py-9 sm:px-8 md:grid-cols-[1fr_1fr]">
+      <div><a data-krim-path="public/" href="./" class="inline-flex items-center gap-3 font-extrabold text-white"><span class="grid h-9 w-9 place-items-center rounded-lg bg-sky-700">K</span> KRIM LOGISTICS</a><p class="mt-3 max-w-lg text-sm leading-6 text-slate-400">Global-ready logistics workflows, built around transparent service scope and verified operating capability.</p></div>
+      <div class="flex flex-wrap gap-x-6 gap-y-3 text-sm md:justify-end md:pt-2"><a data-krim-path="public/" href="./" class="hover:text-white">Home</a><a data-krim-path="public/network.html" href="network.html" class="hover:text-white">Network</a><a data-krim-path="public/global-coverage.html" href="global-coverage.html" class="hover:text-white">Global Coverage</a><a data-krim-path="public/quote.html" href="quote.html" class="hover:text-white">Request Quote</a><a data-krim-path="public/tracking.html" href="tracking.html" class="hover:text-white">Tracking</a><a data-krim-path="auth/login.html" href="../auth/login.html" class="hover:text-white">Sign In</a></div>
+    </div>
+    <div class="border-t border-white/10 px-5 py-4 text-center text-xs text-slate-500">© <span id="year">2026</span> KRIM Logistics. Actual service availability varies by market, route and verified partner capacity.</div>
+  </footer>
+  <script>
+    (function(){
+      var button=document.getElementById('menu-toggle'),menu=document.getElementById('mobile-menu');
+      if(button&&menu){
+        button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!open));button.setAttribute('aria-label',open?'Open navigation menu':'Close navigation menu');menu.classList.toggle('hidden',open);});
+        menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){menu.classList.add('hidden');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation menu');});});
+        document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!menu.classList.contains('hidden')){menu.classList.add('hidden');button.setAttribute('aria-expanded','false');button.focus();}});
+      }
+      var year=document.getElementById('year');if(year)year.textContent=String(new Date().getFullYear());
+    }());
+  </script>
 </body>
 </html>
-
