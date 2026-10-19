@@ -328,4 +328,19 @@ async function render() {
     setStatus("Backend request failed: "+(e?.message||"unknown error"),true);
   }
 }
-document.addEventListener("DOMContentLoaded", () => { render().catch(e => console.error(e)); });
+// Surface rejected form/query promises in the visible module status instead of leaving users with silent failures.
+window.addEventListener("unhandledrejection", event => {
+  const reason = event.reason;
+  const message = reason && reason.message ? reason.message : "An unexpected backend request failed.";
+  console.error("KRIM backend module rejected promise:", reason);
+  setStatus("Request failed: " + message, true);
+  event.preventDefault();
+});
+window.addEventListener("online", () => setStatus("Browser network restored. Refresh this page's data to retry."));
+window.addEventListener("offline", () => setStatus("Browser is offline. Backend changes cannot be confirmed.", true));
+document.addEventListener("DOMContentLoaded", () => {
+  render().catch(e => {
+    console.error("KRIM backend module startup failed:", e);
+    setStatus("Module startup failed: " + (e && e.message ? e.message : "unknown error"), true);
+  });
+});
