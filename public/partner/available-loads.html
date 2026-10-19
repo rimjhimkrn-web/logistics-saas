@@ -130,5 +130,28 @@ try{
 }catch(e){const reason=e.message||"Could not load freight opportunities.";msg(reason,true);loads.innerHTML='<section class="rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8 lg:col-span-2"><p class="text-xs font-extrabold uppercase tracking-[.18em] text-rose-700">Connection / access notice</p><h3 class="mt-2 text-xl font-black text-slate-900">We could not load the freight exchange</h3><p class="mt-3 text-sm leading-6 text-slate-700">'+esc(reason)+'</p><p class="mt-2 text-sm leading-6 text-slate-600">No sample loads are substituted. Try refreshing; if the issue continues, the backend query, access policy, or organization membership needs investigation.</p><button type="button" onclick="location.reload()" class="mt-5 rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">Try again</button></section>'}
 })();
 </script>
+
+<script>
+/* Resolve every internal destination from the repository base, not the current folder. */
+(function(){
+  var base=window.KRIM_BASE_PATH || (location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/");
+  var routes={
+    "../index.html":"public/index.html",
+    "../solutions.html":"public/solutions.html",
+    "../global-coverage.html":"public/global-coverage.html",
+    "quote-history.html":"public/partner/quote-history.html",
+    "submit-quote.html":"public/partner/submit-quote.html",
+    "../../auth/login.html":"auth/login.html",
+    "../../auth/partner-signup.html":"auth/partner-signup.html",
+    "available-loads.html":"public/partner/available-loads.html"
+  };
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var href=a.getAttribute("href");
+    if(!href || href.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(href)) return;
+    var path=href.split("?")[0];
+    if(routes[path]) a.href=base+routes[path]+(href.indexOf("?")>=0?href.slice(href.indexOf("?")):"");
+  });
+})();
+</script>
 </body>
 </html>
