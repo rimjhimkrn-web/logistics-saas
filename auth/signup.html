@@ -1,258 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics | Phone OTP Signup</title>
-    <meta name="description" content="Create a KRIM Logistics account using phone number verification.">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../config.js"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KRIM Logistics | Create Account</title>
+<meta name="description" content="Create your KRIM Logistics customer account securely with Supabase Auth.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--card:#101e30;--line:#26384e;--text:#f4f7fb;--muted:#a9b8ca;--blue:#1686e8;--green:#21b879}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#07111f,#10243a);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:flex;flex-direction:column}header,footer{padding:18px 22px;border-bottom:1px solid var(--line)}header{display:flex;justify-content:space-between;align-items:center;gap:12px}a{color:#83c7ff;text-decoration:none}a:hover{text-decoration:underline}.brand{font-weight:800;letter-spacing:.08em}.wrap{width:100%;max-width:520px;margin:auto;padding:28px 16px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 18px 60px #0004}h1{font-size:28px;margin:8px 0}p{color:var(--muted);line-height:1.5}.tag{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#83c7ff}label{display:block;margin:17px 0 7px;font-size:13px;color:#c4d2e3}input{width:100%;padding:14px;border:1px solid #34485f;border-radius:10px;background:#07111f;color:white;font:inherit}button{width:100%;margin-top:22px;padding:15px;border:0;border-radius:10px;background:var(--blue);color:white;font-weight:750;font-size:15px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#feedback{padding:12px 0;overflow-wrap:anywhere}.success{color:#6ee7b7}.error{color:#fca5a5}.note{font-size:12px}footer{border-top:1px solid var(--line);border-bottom:0;text-align:center;font-size:12px;color:var(--muted)}@media(max-width:480px){.card{padding:22px}h1{font-size:24px}}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Institutional Navigation Header -->
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Phone OTP Signup</span>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
-                <a href="../public/index.html" class="hover:text-white transition">Home</a>
-                <a href="../public/solutions.html" class="hover:text-white transition">Solutions</a>
-                <a href="../public/network.html" class="hover:text-white transition">Global Network</a>
-                <a href="../public/tracking.html" class="hover:text-white transition">Track Shipment</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="../auth/login.html" class="text-slate-400 hover:text-white transition">Sign In</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center px-6 py-16">
-        
-        <!-- Signup Card -->
-        <div class="w-full max-w-lg bg-slate-800 border border-slate-700 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-8">
-            <div class="space-y-2 text-center">
-                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest">
-                    KRIM Customer Registration
-                </span>
-                <h1 class="text-2xl font-extrabold text-white tracking-tight">Create your KRIM account</h1>
-                <p class="text-slate-400 text-xs font-mono">Verify your mobile number with a one-time SMS code</p>
-            </div>
-
-            <button id="google-signup" type="button" class="w-full rounded-xl bg-white px-4 py-3.5 font-semibold text-slate-900">G&nbsp; Continue with Google</button>
-            <p id="google-signup-feedback" class="text-sm" role="status" aria-live="polite"></p>
-            <p class="text-center text-xs text-slate-400">Register with your mobile number</p>
-            <form id="signup-form" class="space-y-5">
-                <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-org">Organization Name</label>
-                    <input type="text" id="signup-org" required minlength="2" autocomplete="organization" placeholder="Your company name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-name">Full Name</label>
-                    <input type="text" id="signup-name" required minlength="2" autocomplete="name" placeholder="Your full name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider" for="signup-phone">Mobile Number</label>
-                    <input type="tel" id="signup-phone" required autocomplete="tel" inputmode="tel" pattern="\\+[1-9][0-9]{7,14}" placeholder="+919876543210" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-sky-500">
-                    <p class="text-xs text-slate-400">Include country code, e.g. +91 for India.</p>
-                </div>
-                <button id="send-phone-otp" type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-sm transition">Send SMS verification code →</button>
-            </form>
-            <div id="signup-feedback" class="mt-4 text-sm" role="status" aria-live="polite"></div>
-            <section id="phone-verification-panel" class="hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3" aria-live="polite">
-                <h2 class="text-lg font-bold text-emerald-300">Enter your SMS code</h2>
-                <p class="text-sm text-slate-200">We requested a one-time code for:</p>
-                <p id="verification-phone" class="break-all text-white font-semibold"></p>
-                <form id="verify-phone-otp-form" class="space-y-3">
-                    <label for="phone-otp" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">6-digit code</label>
-                    <input id="phone-otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" minlength="6" maxlength="8" required placeholder="123456" class="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-4 text-center font-mono text-2xl tracking-[0.35em] text-white">
-                    <button id="verify-phone-otp" type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500">Verify number and create account</button>
-                </form>
-                <button id="resend-phone-otp" type="button" class="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200">Send code again</button>
-                <p id="phone-otp-feedback" class="text-sm" role="status" aria-live="polite"></p>
-            </section>
-
-            <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
-                <p>Are you a transport carrier fleet operator?</p>
-                <a href="./partner-signup.html" class="inline-block text-emerald-400 hover:underline font-bold">Register Carrier Fleet instead →</a>
-            </div>
-        </div>
-    </main>
-
-    <!-- Clean Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="../public/index.html" class="hover:text-slate-300 transition">Home</a>
-                <a href="../public/network.html" class="hover:text-slate-300 transition">Network</a>
-                <a href="../public/tracking.html" class="hover:text-slate-300 transition">Tracking</a>
-                <a href="../auth/login.html" class="hover:text-slate-300 transition">Sign In</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Signup Script -->
-    <script>
-        const client = window.KRIM_SUPABASE || window.supabaseClient;
-        const signupForm = document.getElementById("signup-form");
-        const otpPanel = document.getElementById("phone-verification-panel");
-        const feedback = document.getElementById("signup-feedback");
-        const otpFeedback = document.getElementById("phone-otp-feedback");
-        let pendingPhone = "";
-        let pendingOrganization = "";
-        let pendingFullName = "";
-
-        document.getElementById("google-signup").addEventListener("click", async function () {
-            const msg = document.getElementById("google-signup-feedback");
-            if (!client) { msg.textContent = "Authentication service is unavailable. Refresh and try again."; return; }
-            this.disabled = true;
-            msg.textContent = "Opening Google sign-in...";
-            try {
-                const { error } = await client.auth.signInWithOAuth({
-                    provider: "google",
-                    options: { redirectTo: new URL("./auth-callback.html", window.location.href).href }
-                });
-                if (error) throw error;
-            } catch (err) {
-                msg.textContent = err.message || "Google sign-in failed. Check Google provider settings in Supabase.";
-                this.disabled = false;
-            }
-        });
-
-        async function sendPhoneOtp() {
-            if (!client) throw new Error("Authentication service unavailable. Refresh and try again.");
-            const phone = document.getElementById("signup-phone").value.trim().replace(/[\\s()-]/g, "");
-            if (!/^\\+[1-9][0-9]{7,14}$/.test(phone)) {
-                throw new Error("Enter your phone in international format, e.g. +919876543210.");
-            }
-            pendingPhone = phone;
-            pendingOrganization = document.getElementById("signup-org").value.trim();
-            pendingFullName = document.getElementById("signup-name").value.trim();
-            const { error } = await client.auth.signInWithOtp({
-                phone,
-                options: {
-                    shouldCreateUser: true,
-                    data: {
-                        full_name: pendingFullName,
-                        company_name: pendingOrganization,
-                        krim_account_type: "customer"
-                    }
-                }
-            });
-            if (error) throw error;
-            document.getElementById("verification-phone").textContent = phone;
-            otpPanel.classList.remove("hidden");
-            otpFeedback.textContent = "Supabase accepted the request. If no SMS arrives, phone authentication and an SMS provider must be enabled/configured in Supabase.";
-            otpFeedback.className = "text-sm text-emerald-300";
-            document.getElementById("phone-otp").focus();
-            otpPanel.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-
-        signupForm.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const button = document.getElementById("send-phone-otp");
-            button.disabled = true;
-            button.textContent = "Requesting SMS code...";
-            feedback.textContent = "";
-            try {
-                await sendPhoneOtp();
-                feedback.textContent = "Code request submitted. Enter the SMS code below to finish registration.";
-                feedback.className = "mt-4 text-sm text-emerald-300";
-            } catch (err) {
-                feedback.textContent = err.message || "Could not send the SMS code.";
-                feedback.className = "mt-4 text-sm text-red-400";
-            } finally {
-                button.disabled = false;
-                button.textContent = "Send SMS verification code →";
-            }
-        });
-
-        document.getElementById("resend-phone-otp").addEventListener("click", async function () {
-            const button = this;
-            button.disabled = true;
-            button.textContent = "Requesting code...";
-            otpFeedback.textContent = "";
-            try {
-                await sendPhoneOtp();
-            } catch (err) {
-                otpFeedback.textContent = /rate|limit|too many/i.test(String(err.message || ""))
-                    ? "Too many requests. Wait before asking for another code."
-                    : (err.message || "Could not resend SMS code.");
-                otpFeedback.className = "text-sm text-red-300";
-            } finally {
-                button.disabled = false;
-                button.textContent = "Send code again";
-            }
-        });
-
-        document.getElementById("verify-phone-otp-form").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const button = document.getElementById("verify-phone-otp");
-            button.disabled = true;
-            button.textContent = "Verifying...";
-            feedback.textContent = "";
-            try {
-                if (!client || !pendingPhone) throw new Error("Request an SMS code first.");
-                const token = document.getElementById("phone-otp").value.trim();
-                const { data, error } = await client.auth.verifyOtp({
-                    phone: pendingPhone,
-                    token,
-                    type: "sms"
-                });
-                if (error) throw error;
-                if (!data.session) throw new Error("The code was accepted, but no login session was returned. Please sign in.");
-                const { error: provisionError } = await client.rpc("krim_provision_customer_organization", {
-                    p_legal_name: pendingOrganization
-                });
-                if (provisionError) throw new Error("Phone verified, but workspace setup failed: " + provisionError.message);
-                feedback.textContent = "Phone verified. Opening your KRIM workspace...";
-                feedback.className = "mt-4 text-sm text-emerald-300";
-                window.location.href = window.krimPath ? window.krimPath("app/customer/index.html") : "../app/customer/index.html";
-            } catch (err) {
-                feedback.textContent = err.message || "Verification failed. Check the code and try again.";
-                feedback.className = "mt-4 text-sm text-red-400";
-                button.disabled = false;
-                button.textContent = "Verify number and create account";
-            }
-        });
-    </script>
+<body>
+<header><a class="brand" href="../public/index.html">KRIM LOGISTICS</a><a href="login.html">Sign in</a></header>
+<main class="wrap"><section class="card">
+<div class="tag">Customer registration</div>
+<h1>Create your KRIM account</h1>
+<p>Register with your email and password. No external sign-in provider is used on this page.</p>
+<form id="signup-form">
+<label for="org">Organization name</label><input id="org" name="organization" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your company name">
+<label for="name">Your full name</label><input id="name" name="name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Full name">
+<label for="email">Email address</label><input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com">
+<label for="password">Password</label><input id="password" name="password" type="password" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters">
+<p class="note">Use a unique password with at least 10 characters.</p>
+<button id="submit-button" type="submit">Create account</button>
+</form>
+<div id="feedback" role="status" aria-live="polite"></div>
+<p class="note">If email confirmation is disabled in Supabase, signup should create a session without sending a verification email. If confirmation is still required by project settings, this page cannot bypass it.</p>
+<p>Are you a transport carrier? <a href="partner-signup.html">Register as a partner</a>.</p>
+</section></main>
+<footer>KRIM Logistics OS · Secure account access powered by Supabase</footer>
+<script>
+(function(){
+ const form=document.getElementById("signup-form");
+ const button=document.getElementById("submit-button");
+ const feedback=document.getElementById("feedback");
+ function show(message,type){feedback.textContent=message;feedback.className=type||"";}
+ form.addEventListener("submit",async function(event){
+  event.preventDefault();
+  const client=window.KRIM_SUPABASE||window.supabaseClient;
+  if(!client){show("Supabase could not initialize. Refresh the page and try again.","error");return;}
+  const organization=document.getElementById("org").value.trim();
+  const fullName=document.getElementById("name").value.trim();
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  if(organization.length<2||fullName.length<2||password.length<10){show("Please complete every field and use a password of at least 10 characters.","error");return;}
+  button.disabled=true;button.textContent="Creating account…";show("");
+  try{
+   const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName,company_name:organization,krim_account_type:"customer"},emailRedirectTo:new URL("./auth-callback.html",window.location.href).href}});
+   if(error)throw error;
+   if(!data.session){
+    show("Supabase accepted the signup, but did not return a login session. Check that Confirm Email is OFF under Supabase Authentication → Sign In / Providers → Email, then retry. If this email was already registered, sign in instead.","error");
+    button.disabled=false;button.textContent="Create account";return;
+   }
+   const {error:provisionError}=await client.rpc("krim_provision_customer_organization",{p_legal_name:organization});
+   if(provisionError)throw new Error("Account created, but workspace setup did not finish: "+provisionError.message+". Please sign in and contact support before retrying signup.");
+   show("Account created successfully. Opening your KRIM workspace…","success");
+   window.location.href=window.krimPath?window.krimPath("app/customer/index.html"):"../app/customer/index.html";
+  }catch(error){
+   show(error.message||"Signup failed. Please try again.","error");
+   button.disabled=false;button.textContent="Create account";
+  }
+ });
+})();
+</script>
 </body>
 </html>
-
