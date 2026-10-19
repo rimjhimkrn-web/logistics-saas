@@ -218,10 +218,37 @@
                     p_service_tier: tier,
                     p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 });
-                if (error) throw error;
+
+                if (error) {
+                    const message = String(error.message || "");
+                    // Hybrid pricing: if no approved tariff matches, request carrier bids instead
+                    // of inventing a price or blocking the customer workflow.
+                    if (/no approved active global rate card matches|tariff quote unavailable/i.test(message)) {
+                        const { data: opportunity, error: opportunityError } = await supabaseClient.rpc(
+                            "krim_create_partner_opportunity",
+                            {
+                                p_shipment_id: Number(shipmentId),
+                                p_response_deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+                                p_service_tier: tier
+                            }
+                        );
+                        if (opportunityError) throw opportunityError;
+                        if (!opportunity || !opportunity.id) {
+                            throw new Error("The server did not confirm the partner-bid request.");
+                        }
+                        feedback.textContent = "No approved tariff matches this route. Your request was sent to the partner network; no customer price has been invented. Open Spot Approvals to monitor partner bids.";
+                        feedback.className = "text-sm font-semibold text-emerald-700";
+                        setTimeout(() => {
+                            window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
+                        }, 1200);
+                        return;
+                    }
+                    throw error;
+                }
                 if (!data || !data.id) throw new Error("The server did not return a quotation reference.");
 
-                feedback.innerHTML = "<p class='text-emerald-600 font-semibold'>Server-calculated quote created. Open Spot Approvals to review and accept it.</p>";
+                feedback.textContent = "Server-calculated quote created. Open Spot Approvals to review and accept it.";
+                feedback.className = "text-sm font-semibold text-emerald-700";
                 setTimeout(() => {
                     window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
                 }, 1000);
