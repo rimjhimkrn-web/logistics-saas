@@ -1,168 +1,104 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Operations Control Tower & Live AIS/GPS Command</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Operations Control Tower | KRIM Logistics</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              purple: '#a855f7',
-              rose: '#f43f5e'
-            }
-          }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { colors: { krim: { navy: '#12304a', blue: '#1769aa', teal: '#0f766e' } } } } };
   </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_4 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+  <script>
+    (function () {
+      var base = location.pathname.indexOf('/logistics-saas/') === 0 ? '/logistics-saas/' : '/';
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = base + 'core/krim-unified-page.css';
+      document.head.appendChild(link);
+    })();
+  </script>
+  <style>
+    body { background:#f5f8fc; color:#172b3a; }
+    .krim-card { background:#fff; border:1px solid #e2e8f0; border-radius:18px; box-shadow:0 5px 18px rgba(15,45,70,.045); }
+    .krim-link { display:inline-flex; align-items:center; justify-content:center; gap:.45rem; padding:.7rem 1rem; border-radius:10px; font-weight:700; font-size:.875rem; transition:background .15s ease; }
+    .krim-primary { background:#1769aa; color:#fff; } .krim-primary:hover { background:#12568d; }
+    .krim-secondary { background:#eff6ff; color:#17476b; border:1px solid #dbeafe; } .krim-secondary:hover { background:#dbeafe; }
+    .status-dot { width:9px;height:9px;border-radius:50%;display:inline-block;background:#d97706; }
+  </style>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="../../app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-rose-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
+<body class="min-h-screen">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <a href="../index.html" class="flex items-center gap-3 no-underline">
+        <span class="w-10 h-10 rounded-xl bg-krim-navy text-white flex items-center justify-center font-black text-xl">K</span>
+        <span><strong class="block text-krim-navy text-lg leading-tight">KRIM Logistics</strong><span class="text-xs text-slate-500">Global Logistics Operating System</span></span>
       </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Phase 7 • Operations Control Tower & Telemetry</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-[11px] text-slate-300">AIS/GPS Feed: <strong class="text-amber-300">Not connected</strong></span>
-      </div>
-      <a href="../control-centre/exception-dispatch.html" class="px-3 py-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/40 hover:bg-rose-500 hover:text-slate-950 font-bold rounded-lg transition-all">
-        ⚠️ Exception Desk (3 Holds)
-      </a>
-      <a href="../../app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← App Shell
-      </a>
+      <nav aria-label="Main navigation" class="flex flex-wrap gap-2">
+        <a class="krim-link krim-secondary" href="../index.html">Home</a>
+        <a class="krim-link krim-secondary" href="../../app/app-shell.html">Workspace</a>
+        <a class="krim-link krim-secondary" href="../control-centre/exception-dispatch.html">Exception Desk</a>
+      </nav>
     </div>
   </header>
 
-  <!-- ==================== MAIN CONTROL TOWER WORKSPACE ==================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono">
-
-    <!-- HERO / COMMAND BANNER -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-      <div class="space-y-2">
-        <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[9px] font-bold rounded uppercase">Global Operational Command</span>
-          <span class="text-slate-500 text-[10px]">Telemetry demo panel • live feed not connected</span>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-7">
+    <section class="rounded-3xl bg-gradient-to-r from-[#12304a] to-[#1769aa] text-white p-6 sm:p-9">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="max-w-2xl">
+          <p class="text-sm font-bold uppercase tracking-widest text-sky-200">Operations workspace</p>
+          <h1 class="text-3xl sm:text-4xl font-extrabold mt-2">Operations Control Tower</h1>
+          <p class="mt-3 text-sky-50 leading-relaxed">A central starting point for shipment operations, exceptions, rerouting, and ETA tools. Live GPS/AIS telemetry is not connected on this page, so no sample positions are presented as live tracking.</p>
+          <div class="mt-5 inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-2 text-sm"><span class="status-dot"></span><strong>Live telemetry:</strong> <span>Not connected</span></div>
         </div>
-        <h1 class="text-2xl font-extrabold text-white">Live AIS / GPS Operations Control Tower</h1>
-        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Real-time satellite positioning, maritime AIS vessel pings, air cargo flight telemetry, and automated route bottleneck detection.</p>
-      </div>
-
-      <div class="flex items-center gap-3 shrink-0 text-xs">
-        <a href="autonomous-reroute.html" class="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-rose-500/50 text-slate-200 font-bold rounded-xl transition-all">
-          ⚡ AI Rerouting Engine
-        </a>
-        <a href="../ai-ops/eta-predictor.html" class="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-rose-500/20">
-          🔮 Predictive ETA Models
-        </a>
+        <div class="flex flex-wrap gap-3">
+          <a class="krim-link bg-white text-krim-navy hover:bg-sky-50" href="../control-centre/exception-dispatch.html">Open Exception Desk →</a>
+          <a class="krim-link bg-white/10 border border-white/30 text-white hover:bg-white/20" href="autonomous-reroute.html">Explore Rerouting →</a>
+        </div>
       </div>
     </section>
 
-    <!-- SIMULATED MAP DISPLAY & STREAM MATRIX -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
-
-      <!-- LEFT 2 COLUMNS: MAP VISUALIZATION PANEL -->
-      <div class="lg:col-span-2 bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between relative overflow-hidden min-h-[420px]">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span>🌍</span> Active Spatial Vessel & Cargo Telemetry Map
-          </h2>
-          <span class="text-[10px] text-amber-300 font-bold">Sample telemetry • not live</span>
-        </div>
-
-        <!-- SIMULATED RADAR GRID OVERLAY -->
-        <div class="flex-1 bg-[#040814] border border-slate-800 rounded-xl p-6 relative flex flex-col justify-center items-center space-y-4 overflow-hidden">
-          <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
-          
-          <div class="z-10 text-center space-y-2">
-            <div class="w-16 h-16 mx-auto bg-rose-500/10 border-2 border-rose-500/40 text-rose-400 rounded-full flex items-center justify-center font-black text-xl animate-pulse">
-              📡
-            </div>
-            <h3 class="font-extrabold text-white text-sm">Telemetry Preview</h3>
-            <p class="text-slate-400 text-[11px] max-w-md">The positions below are illustrative examples. A verified AIS/GPS provider and shipment-linked telemetry feed must be connected before this page can display live tracking.</p>
-          </div>
-
-          <!-- MAP PINGS GRID -->
-          <div class="z-10 w-full grid grid-cols-2 sm:grid-cols-3 gap-3 text-[10px]">
-            <div class="p-2.5 bg-[#081020]/90 border border-emerald-500/40 rounded-lg">
-              <span class="text-emerald-400 font-bold block">MSC OSCAR (Ocean)</span>
-              <span class="text-slate-400">Lat: 1.2902° N, Long: 103.8519° E</span>
-            </div>
-            <div class="p-2.5 bg-[#081020]/90 border border-cyan-500/40 rounded-lg">
-              <span class="text-cyan-400 font-bold block">LH8220 (Air Cargo)</span>
-              <span class="text-slate-400">Alt: 34,000 ft • Speed: 890 km/h</span>
-            </div>
-            <div class="p-2.5 bg-[#081020]/90 border border-amber-500/40 rounded-lg">
-              <span class="text-amber-400 font-bold block">TRK-IND-9910 (Road)</span>
-              <span class="text-slate-400">NH-48 Corridor • Speed: 62 km/h</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT COLUMN: DISPATCH CRITICAL EVENTS -->
-      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
-          <span>🚨</span> Critical Dispatch Alerts
-        </h3>
-
-        <div class="space-y-3">
-
-          <div class="p-3 bg-[#040814] border-l-2 border-l-amber-500 border-y border-r border-slate-800 rounded-xl space-y-1">
-            <div class="flex justify-between items-center">
-              <span class="text-white font-bold">MSCU892101</span>
-              <span class="text-amber-400 font-bold text-[10px]">HOLD</span>
-            </div>
-            <p class="text-slate-400 text-[10px]">Customs inspection hold at Rotterdam Gate 4 under EU ICS2 protocol.</p>
-            <a href="../control-centre/exception-dispatch.html" class="text-rose-400 hover:underline font-bold text-[10px] block pt-1">Resolve in Exception Desk →</a>
-          </div>
-
-          <div class="p-3 bg-[#040814] border-l-2 border-l-emerald-400 border-y border-r border-slate-800 rounded-xl space-y-1">
-            <div class="flex justify-between items-center">
-              <span class="text-white font-bold">AWB-7720-90</span>
-              <span class="text-emerald-400 font-bold text-[10px]">DELIVERED</span>
-            </div>
-            <p class="text-slate-400 text-[10px]">e-POD signature verified at JFK Air Terminal.</p>
-          </div>
-
-        </div>
-      </div>
-
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" aria-label="Operations status">
+      <article class="krim-card p-5"><p class="text-sm text-slate-500">Shipment visibility</p><p class="text-xl font-extrabold text-krim-navy mt-2">Workspace required</p><p class="text-sm text-slate-600 mt-2">Open the workspace to view authorized shipment records.</p><a class="text-sm font-bold text-blue-700 inline-block mt-4" href="../../app/app-shell.html">Open workspace →</a></article>
+      <article class="krim-card p-5"><p class="text-sm text-slate-500">Exception handling</p><p class="text-xl font-extrabold text-krim-navy mt-2">Exception Desk</p><p class="text-sm text-slate-600 mt-2">Review and manage recorded operational exceptions.</p><a class="text-sm font-bold text-blue-700 inline-block mt-4" href="../control-centre/exception-dispatch.html">Review exceptions →</a></article>
+      <article class="krim-card p-5"><p class="text-sm text-slate-500">Route planning</p><p class="text-xl font-extrabold text-krim-navy mt-2">Rerouting tools</p><p class="text-sm text-slate-600 mt-2">Open the route-planning interface; automated execution requires backend validation.</p><a class="text-sm font-bold text-blue-700 inline-block mt-4" href="autonomous-reroute.html">Open rerouting →</a></article>
+      <article class="krim-card p-5"><p class="text-sm text-slate-500">Arrival estimates</p><p class="text-xl font-extrabold text-krim-navy mt-2">Predictive ETA</p><p class="text-sm text-slate-600 mt-2">Open ETA tools to review their current capabilities.</p><a class="text-sm font-bold text-blue-700 inline-block mt-4" href="../ai-ops/eta-predictor.html">Open ETA tools →</a></article>
     </section>
 
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <article class="krim-card p-6 lg:col-span-2">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div><p class="text-sm font-bold text-blue-700">Visibility & data integrity</p><h2 class="text-xl font-extrabold text-krim-navy mt-1">Tracking feed status</h2></div>
+          <span class="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-800">Awaiting provider integration</span>
+        </div>
+        <p class="text-slate-600 mt-4 leading-relaxed">This page does not currently receive verified shipment-linked GPS coordinates or maritime AIS events. To enable live tracking, connect an authorized provider, map provider events to shipment IDs, and enforce access policies before displaying positions.</p>
+        <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><span class="text-sm text-slate-500">Road GPS</span><strong class="block mt-1 text-slate-800">Not connected</strong></div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><span class="text-sm text-slate-500">Ocean AIS</span><strong class="block mt-1 text-slate-800">Not connected</strong></div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4"><span class="text-sm text-slate-500">Air telemetry</span><strong class="block mt-1 text-slate-800">Not connected</strong></div>
+        </div>
+      </article>
+      <aside class="krim-card p-6">
+        <p class="text-sm font-bold text-blue-700">Quick actions</p><h2 class="text-xl font-extrabold text-krim-navy mt-1">Go to a tool</h2>
+        <div class="mt-5 flex flex-col gap-3">
+          <a class="krim-link krim-primary w-full" href="../../app/app-shell.html">Open KRIM Workspace</a>
+          <a class="krim-link krim-secondary w-full" href="../control-centre/exception-dispatch.html">Manage Exceptions</a>
+          <a class="krim-link krim-secondary w-full" href="autonomous-reroute.html">AI Rerouting Engine</a>
+          <a class="krim-link krim-secondary w-full" href="../ai-ops/eta-predictor.html">Predictive ETA Models</a>
+          <button id="refresh-page" type="button" class="krim-link border border-slate-300 text-slate-700 hover:bg-slate-50 w-full">Refresh this page ↻</button>
+        </div>
+        <p id="refresh-status" class="text-xs text-slate-500 mt-3" aria-live="polite">Links open the corresponding KRIM pages.</p>
+      </aside>
+    </section>
+    <p class="text-xs text-slate-500">Operational note: navigation is wired to the listed pages. Backend records, permissions, route actions, and third-party telemetry must be verified separately before operational use.</p>
   </main>
 
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Control Tower Core.</p>
-    </div>
-  </footer>
-
-  <script type="module" src="../../platform/krim-config.js"></script>
-  <script type="module" src="../../app/app-runtime.js"></script>
+  <footer class="border-t border-slate-200 bg-white mt-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-wrap justify-between gap-2 text-sm text-slate-500"><span class="font-bold text-krim-navy">KRIM LOGISTICS OS</span><span>Operations Control Tower</span></div></footer>
+  <script>
+    document.getElementById('refresh-page').addEventListener('click', function () {
+      document.getElementById('refresh-status').textContent = 'Refreshing page…';
+      window.location.reload();
+    });
+  </script>
 </body>
 </html>
