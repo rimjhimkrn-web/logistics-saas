@@ -214,7 +214,25 @@
 
             button.disabled = false;
             document.getElementById("btn-cashfree").disabled = false;
-            showCheckoutMessage("Accepted quote loaded. Payment amount and order will be verified by KRIM's server.", "info");
+            const cashfreeReturnOrder = new URLSearchParams(location.search).get("cashfree_order_id");
+            if (cashfreeReturnOrder) {
+                button.disabled = true;
+                document.getElementById("btn-cashfree").disabled = true;
+                showCheckoutMessage("Verifying Cashfree payment with KRIM's server...", "info");
+                try {
+                    const result = await supabaseClient.functions.invoke("verify-global-cashfree-payment", { body: { order_id: cashfreeReturnOrder } });
+                    if (result.error) throw result.error;
+                    if (result.data && result.data.verified) showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
+                    else showCheckoutMessage((result.data && (result.data.message || result.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
+                } catch (err) {
+                    showCheckoutMessage("Payment verification unavailable: " + (err.message || "Unknown error"));
+                } finally {
+                    button.disabled = false;
+                    document.getElementById("btn-cashfree").disabled = false;
+                }
+            } else {
+                showCheckoutMessage("Accepted quote loaded. Payment amount and order will be verified by KRIM's server.", "info");
+            }
         }
 
         async function startRazorpayCheckout() {
@@ -324,15 +342,6 @@
                 showCheckoutMessage("Cashfree sandbox error: " + (err.message || "Unknown error"));
                 button.disabled = false;
             }
-        }
-        const cashfreeReturnOrder = new URLSearchParams(location.search).get("cashfree_order_id");
-        if (cashfreeReturnOrder) {
-            supabaseClient.functions.invoke("verify-global-cashfree-payment", { body: { order_id: cashfreeReturnOrder } })
-              .then(function(r) {
-                if (r.error) throw r.error;
-                if (r.data && r.data.verified) showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
-                else showCheckoutMessage((r.data && (r.data.message || r.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
-              }).catch(function(e) { showCheckoutMessage("Payment verification unavailable: " + (e.message || "Unknown error")); });
         }
         initCheckout();
     </script>
