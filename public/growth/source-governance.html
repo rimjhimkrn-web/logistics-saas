@@ -1,38 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KRIM Source Governance Registry</title>
+<title>KRIM Source Governance</title>
 </head>
 <body>
-<h1>KRIM Source Governance Registry</h1>
-<p>PAGE 6 — Source Governance & Consent Checklist</p>
-<p>If this heading is visible, the HTML page is rendering.</p>
+<h1>KRIM SOURCE GOVERNANCE — REBUILT</h1>
+<p>Page 7? No — this is the rebuilt Source Governance page.</p>
+<p>If you can read this text, the page has loaded.</p>
 <hr>
-<h2>Before activating any acquisition source</h2>
-<form id="sourceForm">
-<p><label>Source name <input id="name" required></label></p>
-<p><label>Source type
-<select id="type"><option>Public directory</option><option>Inbound form</option><option>Partner referral</option><option>Public API</option><option>Manual research</option></select></label></p>
-<p><label>Source URL or identifier <input id="url" required></label></p>
-<p><label>Market <select id="market"><option>India</option><option>Middle East</option><option>Europe</option><option>Global / other</option></select></label></p>
-<p><label><input type="checkbox" id="terms" required> I reviewed the source terms and allowed use.</label></p>
-<p><label><input type="checkbox" id="privacy" required> Privacy, purpose limitation and data minimisation reviewed.</label></p>
-<p><label><input type="checkbox" id="contact" required> Contact permission / lawful basis and opt-out handling reviewed.</label></p>
-<p><label><input type="checkbox" id="attribution" required> Attribution, licensing and redistribution requirements reviewed.</label></p>
-<p><label>Reviewer notes <br><textarea id="notes" rows="4" cols="35"></textarea></label></p>
-<button type="submit">Prepare review record</button>
+<h2>Source review checklist</h2>
+<form>
+<p>Source name<br><input type="text" required></p>
+<p>Source URL / identifier<br><input type="text" required></p>
+<p>Market<br><select><option>India</option><option>Middle East</option><option>Europe</option><option>Global / other</option></select></p>
+<p><label><input type="checkbox" required> Source terms and permitted use reviewed</label></p>
+<p><label><input type="checkbox" required> Privacy and data minimisation reviewed</label></p>
+<p><label><input type="checkbox" required> Contact permission and opt-out reviewed</label></p>
+<p><label><input type="checkbox" required> Licensing and attribution reviewed</label></p>
+<p>Reviewer notes<br><textarea rows="3"></textarea></p>
+<button type="button" onclick="document.getElementById('status').textContent='Checklist filled locally only. Nothing has been saved or activated.'">Review checklist</button>
 </form>
-<pre id="result" hidden></pre>
-<p><strong>Important:</strong> This form creates a local review draft only. It does not save to Supabase, approve a source, or send messages. A human must verify the source and approve activation.</p>
-<p>Next: <a href="discovery-workbench.html">Discovery Workbench</a> | <a href="signal-intake.html">Signal Intake</a> | <a href="prospect-review.html">Prospect Review</a> | <a href="onboarding-tracker.html">Onboarding Tracker</a> | <a href="acquisition-performance.html">Acquisition Performance</a></p>
-<script>
-document.getElementById('sourceForm').addEventListener('submit',function(e){
-e.preventDefault();
-var record={status:'DRAFT — NOT SAVED',source_name:document.getElementById('name').value,source_type:document.getElementById('type').value,source_identifier:document.getElementById('url').value,market:document.getElementById('market').value,terms_reviewed:document.getElementById('terms').checked,privacy_reviewed:document.getElementById('privacy').checked,contact_basis_reviewed:document.getElementById('contact').checked,licensing_reviewed:document.getElementById('attribution').checked,reviewer_notes:document.getElementById('notes').value};
-var out=document.getElementById('result');out.hidden=false;out.textContent=JSON.stringify(record,null,2);
-});
-</script>
+<p id="status"></p>
+<p><strong>Notice:</strong> This is a local checklist only. It does not save to Supabase or automatically activate a source.</p>
 </body>
 </html>
