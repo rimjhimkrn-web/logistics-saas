@@ -35,7 +35,7 @@
   <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
   <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
     <div class="flex items-center space-x-4 font-mono">
-      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
+      <a href="../../app/app-shell.html" class="flex items-center space-x-2.5">
         <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-blue-500/20">K</div>
         <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
       </a>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="/control-centre/digital-twin-map.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
+      <a href="digital-twin-map.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
         ← Digital Twin Map
       </a>
     </div>
@@ -63,7 +63,7 @@
 
       <div class="p-3 bg-[#040814] border border-amber-500/40 rounded-xl text-right shrink-0">
         <span class="text-amber-400 text-[10px] font-bold block">ACTIVE EXCEPTIONS</span>
-        <span class="text-white font-extrabold text-sm">2 Unresolved Incidents</span>
+        <span class="text-white font-extrabold text-sm">Demo incident</span>
       </div>
     </section>
 
@@ -73,7 +73,7 @@
         <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <span>🚨</span> Active Network Exceptions
         </h2>
-        <span class="text-[10px] text-slate-500">Triage Engine: <strong class="text-emerald-400">ONLINE</strong></span>
+        <span class="text-[10px] text-slate-500">Triage Engine: <strong class="text-amber-400">Backend unverified</strong></span>
       </div>
 
       <div class="overflow-x-auto">
@@ -95,7 +95,7 @@
               <td class="py-3.5 px-2 text-amber-400 font-bold">Suez Canal Convoys Delayed (+18h)</td>
               <td class="py-3.5 px-2 text-cyan-400">Reroute via Cape of Good Hope corridor</td>
               <td class="py-3.5 px-2 text-right">
-                <button onclick="alert('Executing Autonomous AI Reroute Protocol...')" class="px-3 py-1 bg-blue-500 text-slate-950 font-extrabold rounded-lg hover:bg-blue-400 transition-all">Execute Reroute</button>
+                <button type="button" onclick="showRerouteStatus()" class="px-3 py-1 bg-blue-500 text-slate-950 font-extrabold rounded-lg hover:bg-blue-400 transition-all">Check Reroute</button>
               </td>
             </tr>
           </tbody>
@@ -113,7 +113,15 @@
     </div>
   </footer>
 
-  <script type="module" src="/platform/krim-config.js"></script>
-  <script type="module" src="/app/app-runtime.js"></script>
+  <div id="action-status" role="status" aria-live="polite" class="fixed bottom-4 left-4 right-4 mx-auto max-w-xl rounded-xl border border-amber-500/50 bg-[#081020] p-4 text-sm text-white shadow-xl" hidden></div>
+  <script>
+    function showRerouteStatus() {
+      const status = document.getElementById("action-status");
+      status.textContent = "Rerouting has not been executed. This screen is not yet connected to a verified backend reroute workflow. No shipment route was changed.";
+      status.hidden = false;
+    }
+  </script>
+  <script type="module" src="../../platform/krim-config.js"></script>
+  <script type="module" src="../../app/app-runtime.js"></script>
 </body>
 </html>
