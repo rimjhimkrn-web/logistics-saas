@@ -103,6 +103,15 @@
                 </button>
             </form>
             <div id="signup-feedback" class="mt-4 text-sm" role="status" aria-live="polite"></div>
+            <section id="email-verification-panel" class="hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 space-y-3" aria-live="polite">
+                <h2 class="text-lg font-bold text-emerald-300">Check your inbox to verify your email</h2>
+                <p class="text-sm text-slate-200">KRIM has submitted your registration request. Open the verification email and tap its confirmation button to activate your account.</p>
+                <p class="text-sm text-slate-300">Verification email for: <strong id="verification-email" class="break-all text-white"></strong></p>
+                <p class="text-xs text-slate-400">If it is not visible yet, check Spam/Junk and wait a few minutes. Delivery speed depends on your email provider and Supabase SMTP configuration.</p>
+                <button id="resend-verification" type="button" class="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/10">Resend verification email</button>
+                <p id="resend-feedback" class="text-sm" role="status" aria-live="polite"></p>
+                <a href="login.html" class="inline-block text-sm font-semibold text-sky-300 hover:underline">Already verified? Sign in →</a>
+            </section>
 
             <div class="pt-4 border-t border-slate-700 text-center space-y-3 text-xs font-mono text-slate-400">
                 <p>Are you a transport carrier fleet operator?</p>
@@ -126,6 +135,41 @@
 
     <!-- Signup Script -->
     <script>
+        const verificationPanel = document.getElementById("email-verification-panel");
+        const verificationEmail = document.getElementById("verification-email");
+        const resendButton = document.getElementById("resend-verification");
+        const resendFeedback = document.getElementById("resend-feedback");
+        let pendingVerificationEmail = "";
+
+        resendButton.addEventListener("click", async function () {
+            const client = window.KRIM_SUPABASE || window.supabaseClient;
+            if (!client || !pendingVerificationEmail) {
+                resendFeedback.textContent = "Please submit the registration form again to request verification.";
+                resendFeedback.className = "text-sm text-amber-300";
+                return;
+            }
+            resendButton.disabled = true;
+            resendButton.textContent = "Requesting email...";
+            resendFeedback.textContent = "";
+            try {
+                const redirectTo = new URL("./auth-callback.html", window.location.href).href;
+                const { error } = await client.auth.resend({
+                    type: "signup",
+                    email: pendingVerificationEmail,
+                    options: { emailRedirectTo: redirectTo }
+                });
+                if (error) throw error;
+                resendFeedback.textContent = "Verification email requested. Check your inbox and Spam/Junk folder.";
+                resendFeedback.className = "text-sm text-emerald-300";
+            } catch (err) {
+                resendFeedback.textContent = err.message || "Could not resend the email. Wait a little and try again.";
+                resendFeedback.className = "text-sm text-red-300";
+            } finally {
+                resendButton.disabled = false;
+                resendButton.textContent = "Resend verification email";
+            }
+        });
+
         async function handleSignup(e) {
             e.preventDefault();
             const button = e.target.querySelector('button[type="submit"]');
@@ -170,10 +214,14 @@
                     window.location.href = window.krimPath ? window.krimPath("app/customer/index.html") : "../app/customer/index.html";
                     return;
                 }
-                feedback.textContent = "Account created. Check your email to confirm the address, then sign in to finish organization setup.";
+                pendingVerificationEmail = email;
+                verificationEmail.textContent = email;
+                verificationPanel.classList.remove("hidden");
+                feedback.textContent = "Registration submitted. Email confirmation is required before sign-in.";
                 feedback.className = "mt-4 text-sm text-emerald-300";
-                button.disabled = false;
-                button.textContent = "Account Created — Check Email";
+                button.textContent = "Registration Submitted";
+                button.disabled = true;
+                verificationPanel.scrollIntoView({ behavior: "smooth", block: "center" });
             } catch (err) {
                 feedback.textContent = err.message || "Registration failed. Please try again.";
                 feedback.className = "mt-4 text-sm text-red-400";
