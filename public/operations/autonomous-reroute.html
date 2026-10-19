@@ -1,143 +1,33 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Autonomous Cargo Rerouting Engine</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              purple: '#a855f7',
-              rose: '#f43f5e'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_4 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Logistics | Route Resilience Planner</title>
+<link rel="stylesheet" href="../../core/krim-unified-page.css">
+<style>
+:root{color-scheme:light;--ink:#17233b;--muted:#65738a;--line:#dce4ef;--blue:#245fe5;--navy:#14284d;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit;text-decoration:none}.top{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.brand{font-weight:850}.brand-mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#e9efff;color:var(--blue);margin-right:8px}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:750;font-size:13px}.wrap{max-width:1120px;margin:auto;padding:24px 16px 42px}.hero{background:linear-gradient(115deg,#fff,#edf3ff);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:18px}.eyebrow{color:var(--blue);font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.09em}h1{font-size:clamp(25px,4vw,35px);line-height:1.15;margin:8px 0}h2{font-size:18px;margin:0 0 14px}p{color:var(--muted);margin:8px 0}.badge{display:inline-block;border-radius:99px;background:#e9efff;color:#244a9b;padding:5px 9px;font-size:11px;font-weight:850}.notice{padding:12px 14px;border-radius:10px;background:#fff7e7;color:#80520a;font-size:13px;margin-top:14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0}.route-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:13px}.route-head h3{font-size:17px;margin:6px 0}.route{padding:13px;border:1px solid #d5e2fa;background:#f5f8ff;border-radius:11px;margin:14px 0}.route strong{color:#183b79}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.stat{padding:11px;background:#f7f9fc;border:1px solid var(--line);border-radius:10px}.stat small{display:block;color:var(--muted);font-weight:700}.stat strong{display:block;font-size:18px;margin-top:3px}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.result{margin-top:12px;padding:11px;border-radius:10px;background:#eef4ff;color:#244a9b;font-size:13px}.foot{font-size:12px;color:var(--muted);margin-top:18px}button:focus-visible,a:focus-visible{outline:3px solid #9bb9ff;outline-offset:2px}@media(max-width:720px){.grid{grid-template-columns:1fr}.hero{padding:19px}.top{align-items:flex-start}}@media(max-width:360px){.stats{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="/app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-rose-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Autonomous Disruption Mitigation & Rerouting Engine</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="/operations/control-tower.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← Control Tower
-      </a>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN REROUTE WORKSPACE ==================== -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
-
-    <!-- HERO BANNER -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-          <span class="text-[10px] text-rose-400 font-bold uppercase tracking-widest">AI Bottleneck Resolution Active</span>
-        </div>
-        <h1 class="text-2xl font-extrabold text-white mt-1">Autonomous Route Optimizer</h1>
-        <p class="text-slate-400 leading-relaxed text-[11px] mt-1">Automated lane bypassing proposals for active shipments impacted by port strike actions, severe weather, or customs bottlenecks.</p>
-      </div>
-
-      <button onclick="alert('Executing Batch Rerouting Matrix across 3 impacted shipments!')" class="px-5 py-3 bg-rose-500 hover:bg-rose-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-rose-500/20 shrink-0">
-        ⚡ Execute Autonomous Batch Reroute
-      </button>
-    </section>
-
-    <!-- REROUTING PROPOSALS GRID -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      <!-- PROPOSAL 1 -->
-      <div class="bg-[#081020] border-2 border-rose-500/50 rounded-2xl p-6 space-y-5 shadow-2xl relative flex flex-col justify-between">
-        <div class="space-y-4">
-          <div class="flex items-start justify-between border-b border-slate-800 pb-3">
-            <div>
-              <span class="px-2 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[9px] font-bold rounded uppercase">DISRUPTED_LANE</span>
-              <h3 class="font-extrabold text-white text-base pt-1">MSCU892101 — Ocean FCL</h3>
-              <span class="text-[10px] text-slate-500 block">Original Route: Singapore (SIN) → Rotterdam (ROT)</span>
-            </div>
-            <span class="text-amber-400 font-bold text-[10px]">Rotterdam Congestion +48h</span>
-          </div>
-
-          <div class="p-3 bg-[#040814] rounded-xl border border-emerald-500/40 space-y-2">
-            <span class="text-emerald-400 font-bold block text-[10px] uppercase">AI Recommended Alternate Path</span>
-            <p class="text-white font-bold">Divert to Antwerp Port (BEANTW) + Feeder Rail</p>
-            <div class="flex justify-between text-slate-400 text-[10px] pt-1">
-              <span>Transit Delta: <strong class="text-emerald-400">-32 Hours Saved</strong></span>
-              <span>Cost Delta: <strong class="text-white">+$120.00 USD</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <button onclick="alert('Reroute executed! MSCU892101 diverted to Antwerp Port.')" class="w-full py-2.5 bg-rose-500 hover:bg-rose-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-rose-500/20">
-          Apply Divert Route & Update Manifest →
-        </button>
-      </div>
-
-      <!-- PROPOSAL 2 -->
-      <div class="bg-[#081020] border border-slate-800 rounded-2xl p-6 space-y-5 flex flex-col justify-between">
-        <div class="space-y-4">
-          <div class="flex items-start justify-between border-b border-slate-800 pb-3">
-            <div>
-              <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded uppercase">ROAD_MONSOON_DELAY</span>
-              <h3 class="font-extrabold text-white text-base pt-1">TRK-IND-9910 — Inland FTL</h3>
-              <span class="text-[10px] text-slate-500 block">Original Route: Nhava Sheva → Delhi via NH-48</span>
-            </div>
-            <span class="text-slate-400 font-bold text-[10px]">Flood Warning Zone 4</span>
-          </div>
-
-          <div class="p-3 bg-[#040814] rounded-xl border border-emerald-500/40 space-y-2">
-            <span class="text-emerald-400 font-bold block text-[10px] uppercase">AI Recommended Alternate Path</span>
-            <p class="text-white font-bold">Reroute via Western Dedicated Freight Corridor (DFC Rail)</p>
-            <div class="flex justify-between text-slate-400 text-[10px] pt-1">
-              <span>Transit Delta: <strong class="text-emerald-400">-18 Hours Saved</strong></span>
-              <span>Cost Delta: <strong class="text-emerald-400">-$45.00 USD</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <button onclick="alert('Reroute executed! TRK-IND-9910 assigned to DFC Rail Hub.')" class="w-full py-2.5 bg-slate-900 border border-slate-800 hover:border-rose-500/50 text-slate-200 font-bold rounded-xl transition-all">
-          Apply Divert Route & Update Manifest →
-        </button>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Rerouting Engine.</p>
-    </div>
-  </footer>
-
-  <script type="module" src="/platform/krim-config.js"></script>
-  <script type="module" src="/app/app-runtime.js"></script>
-</body>
-</html>
+<body>
+<header class="top"><a class="brand" href="../index.html"><span class="brand-mark">K</span>KRIM Logistics OS</a><nav class="nav" aria-label="Operations navigation"><a href="control-tower.html">Control Tower</a><a href="../control-centre/exception-dispatch.html">Exceptions</a><a href="../control-centre/digital-twin-map.html">Digital Twin</a><a href="../control-centre/simulation-room.html">Simulation Room</a><a href="../tracking.html">Tracking</a></nav></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Global operations · Route resilience</div><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap"><div><h1>Autonomous Reroute Planner</h1><p>Review alternate-route proposals for hypothetical disruptions, compare time and cost trade-offs, and record which option should move to human review.</p></div><span class="badge">PLANNING SANDBOX</span></div>
+<div class="notice">Safety & integrity notice: the routes and shipment identifiers below are illustrative demo scenarios. This page does not contact carriers, update manifests, dispatch vehicles, or change shipment records.</div></section>
+<section class="grid" aria-label="Route proposals">
+<article class="card" data-proposal="ocean"><div class="route-head"><div><span class="badge">OCEAN · PORT CONGESTION</span><h3>Singapore → Rotterdam</h3><p>Example shipment: DEMO-OCEAN-001</p></div><span class="badge">Review needed</span></div><div class="route"><small>PROPOSED ALTERNATIVE</small><p><strong>Rotterdam → Antwerp diversion + onward feeder/rail review</strong></p><p>Check terminal acceptance, carrier approval, customs implications and onward capacity before choosing.</p></div><div class="stats"><div class="stat"><small>Illustrative time impact</small><strong>Up to 32h saved*</strong></div><div class="stat"><small>Illustrative cost impact</small><strong>+$120 USD*</strong></div></div><button class="btn primary review" type="button">Send for human review</button><div class="result" role="status" hidden></div></article>
+<article class="card" data-proposal="road"><div class="route-head"><div><span class="badge">ROAD · WEATHER RISK</span><h3>Nhava Sheva → Delhi</h3><p>Example shipment: DEMO-ROAD-002</p></div><span class="badge">Review needed</span></div><div class="route"><small>PROPOSED ALTERNATIVE</small><p><strong>Compare alternate road corridor and rail-intermodal option</strong></p><p>Verify current road conditions, truck availability, cargo compatibility, terminal handling and delivery commitment.</p></div><div class="stats"><div class="stat"><small>Illustrative time impact</small><strong>Up to 18h saved*</strong></div><div class="stat"><small>Illustrative cost impact</small><strong>−$45 USD*</strong></div></div><button class="btn primary review" type="button">Send for human review</button><div class="result" role="status" hidden></div></article>
+</section>
+<section class="card" style="margin-top:14px"><h2>Review workflow</h2><div class="stats"><div class="stat"><small>Proposal status</small><strong id="reviewCount">0 of 2 reviewed</strong></div><div class="stat"><small>Execution status</small><strong>Not executed</strong></div></div><p>Use the review control to mark a demo proposal for follow-up in this page session. Production execution requires authenticated permissions, validated live route data, carrier/customer approval and a server-side audit trail.</p><button class="btn" id="reset" type="button">Reset review statuses</button><div id="summary" class="result" role="status" aria-live="polite">No proposals marked for review.</div></section>
+<p class="foot">*Illustrative figures only; not live estimates or guarantees. KRIM Logistics OS · Route decisions should be validated against current operational data and customer commitments.</p>
+</main>
+<script>
+(function(){
+const cards=[...document.querySelectorAll('[data-proposal]')];const summary=document.getElementById('summary');const count=document.getElementById('reviewCount');
+function update(){const n=cards.filter(c=>c.dataset.reviewed==='true').length;count.textContent=n+' of '+cards.length+' reviewed';summary.textContent=n? n+' demo proposal(s) marked for human review in this browser session. No backend record was changed.':'No proposals marked for review.'}
+cards.forEach(card=>{const button=card.querySelector('.review'),result=card.querySelector('.result');button.addEventListener('click',()=>{card.dataset.reviewed='true';button.disabled=true;button.textContent='Marked for review';result.hidden=false;result.textContent='Marked locally for human follow-up. This is not a submitted backend task or an executed reroute.';update()})});
+document.getElementById('reset').addEventListener('click',()=>{cards.forEach(card=>{delete card.dataset.reviewed;const button=card.querySelector('.review'),result=card.querySelector('.result');button.disabled=false;button.textContent='Send for human review';result.hidden=true;result.textContent='' });update()});
+update();
+})();
+</script>
+</body></html>
