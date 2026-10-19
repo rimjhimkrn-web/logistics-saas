@@ -256,14 +256,14 @@ body{background:radial-gradient(ellipse at 85% 0%,#e0f2fe 0,transparent 34%),#f4
 <div class="tools">
 <input id="shipmentFilter" aria-label="Search shipments" placeholder="Search shipment number, status or goods…">
 <select id="statusFilter" aria-label="Filter shipment status"><option value="">All statuses</option><option value="in transit">In transit</option><option value="confirmed">Confirmed</option><option value="draft">Draft</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
-<button id="refreshData" class="btn" type="button" style="padding:0 11px">↻ Refresh</button>
+<button id="exportCsv" class="btn" type="button" style="padding:0 11px">⇩ Export CSV</button><button id="refreshData" class="btn" type="button" style="padding:0 11px">↻ Refresh</button>
 </div>
 
 <div class="table">
 <table>
 <thead>
 <tr>
-<th>Shipment</th><th>Market</th><th>Route</th><th>Status</th><th>Risk</th>
+<th>Shipment</th><th>Origin</th><th>Destination</th><th>Status</th><th>Risk</th>
 </tr>
 </thead>
 <tbody id="shipmentRows">
@@ -558,13 +558,16 @@ const q=$("shipmentFilter").value.trim().toLowerCase();
 const st=$("statusFilter").value.toLowerCase();
 const rows=shipmentData.filter(s=>{
 const status=String(s.status||"").toLowerCase();
-const hay=[s.shipment_number,s.status,s.goods_description,s.id].join(" ").toLowerCase();
-return (!q||hay.includes(q))&&(!st||status.includes(st));
+const hay=[s.shipment_number,s.status,s.goods_description,s.id,s.origin?.city,s.origin?.state_region,s.destination?.city,s.destination?.state_region].join(" ").toLowerCase();
+const normalizedStatus=status.replace(/[_-]+/g," ");
+return (!q||hay.includes(q))&&(!st||normalizedStatus.includes(st));
 });
 $("shipmentRows").innerHTML=rows.length?rows.map(s=>{
 const status=String(s.status||"Unknown");
 const tone=/delivered|closed|completed/.test(status.toLowerCase())?"green":/exception|cancel|failed/.test(status.toLowerCase())?"red":/transit|confirmed|active/.test(status.toLowerCase())?"orange":"";
-return "<tr><td><b>"+esc(s.shipment_number||("KRIM-"+s.id))+"</b><br><span style='color:#8994a5'>ID "+esc(s.id)+"</span></td><td>—</td><td>"+esc(s.goods_description||"Route details unavailable")+"</td><td><span class='status "+tone+"'>"+esc(status)+"</span></td><td>"+(/exception|late|delay/.test(status.toLowerCase())?"<span class='status red'>Review</span>":"—")+"</td></tr>";
+const origin=[s.origin?.city,s.origin?.state_region].filter(Boolean).join(", ")||"Not recorded";
+const destination=[s.destination?.city,s.destination?.state_region].filter(Boolean).join(", ")||"Not recorded";
+return "<tr><td><b>"+esc(s.shipment_number||("KRIM-"+s.id))+"</b><br><span style='color:#8994a5'>"+esc(s.goods_description||("Shipment ID "+s.id))+"</span></td><td>"+esc(origin)+"</td><td>"+esc(destination)+"</td><td><span class='status "+tone+"'>"+esc(status)+"</span></td><td>"+(/exception|late|delay/.test(status.toLowerCase())?"<span class='status red'>Review</span>":"—")+"</td></tr>";
 }).join(""):'<tr><td colspan="5"><div class="empty">No accessible shipments match these filters.</div></td></tr>';
 }
 async function loadOperationalData(){
@@ -573,7 +576,7 @@ if(!client||typeof client.from!=="function"){showNotice("Supabase client is not 
 $("kpiDataStatus").textContent="Loading…";
 try{
 const results=await Promise.all([
-client.from("krim_shipments").select("id,shipment_number,goods_description,status,created_at").order("created_at",{ascending:false}).limit(100),
+client.from("krim_shipments").select("id,shipment_number,goods_description,status,created_at,origin:krim_locations!krim_shipments_origin_location_id_fkey(city,state_region),destination:krim_locations!krim_shipments_destination_location_id_fkey(city,state_region)").order("created_at",{ascending:false}).limit(100),
 client.from("krim_exceptions").select("id,status,severity").limit(500),
 client.from("krim_quotes").select("id,status").limit(500)
 ]);
@@ -601,6 +604,15 @@ $("shipmentRows").innerHTML='<tr><td colspan="5"><div class="empty">No live reco
 $("shipmentFilter").addEventListener("input",renderShipments);
 $("statusFilter").addEventListener("change",renderShipments);
 $("refreshData").addEventListener("click",loadOperationalData);
+$("exportCsv").addEventListener("click",()=>{
+const q=$("shipmentFilter").value.trim().toLowerCase();
+const st=$("statusFilter").value.toLowerCase();
+const rows=shipmentData.filter(s=>{const status=String(s.status||"").toLowerCase();const hay=[s.shipment_number,s.status,s.goods_description,s.id,s.origin?.city,s.origin?.state_region,s.destination?.city,s.destination?.state_region].join(" ").toLowerCase();return (!q||hay.includes(q))&&(!st||status.replace(/[_-]+/g," ").includes(st));});
+if(!rows.length){toast("No filtered shipment records to export.");return;}
+const cell=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+const csv=[["Shipment number","Shipment ID","Origin city","Origin region","Destination city","Destination region","Status","Goods description","Created at"],...rows.map(s=>[s.shipment_number||("KRIM-"+s.id),s.id,s.origin?.city,s.origin?.state_region,s.destination?.city,s.destination?.state_region,s.status,s.goods_description,s.created_at])].map(row=>row.map(cell).join(",")).join("\r\n");
+const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="krim-shipments-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);toast("Exported "+rows.length+" shipment records.");
+});
 async function init(){
 try{
 if(window.KRIM_SECURITY?.requireUser){
