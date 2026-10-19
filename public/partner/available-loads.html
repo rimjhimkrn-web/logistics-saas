@@ -132,24 +132,47 @@ try{
 </script>
 
 <script>
-/* Resolve every internal destination from the repository base, not the current folder. */
+/* Canonicalize internal links for GitHub Pages and local-root deployments. */
 (function(){
-  var base=window.KRIM_BASE_PATH || (location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/");
-  var routes={
-    "../index.html":"public/index.html",
-    "../solutions.html":"public/solutions.html",
-    "../global-coverage.html":"public/global-coverage.html",
-    "quote-history.html":"public/partner/quote-history.html",
-    "submit-quote.html":"public/partner/submit-quote.html",
-    "../../auth/login.html":"auth/login.html",
-    "../../auth/partner-signup.html":"auth/partner-signup.html",
-    "available-loads.html":"public/partner/available-loads.html"
+  var base = window.KRIM_BASE_PATH || (location.pathname.indexOf("/logistics-saas/")===0 ? "/logistics-saas/" : "/");
+  var routes = {
+    "home": "public/index.html",
+    "solutions": "public/solutions.html",
+    "global": "public/global-coverage.html",
+    "loads": "public/partner/available-loads.html",
+    "bids": "public/partner/quote-history.html",
+    "submit": "public/partner/submit-quote.html",
+    "login": "auth/login.html",
+    "register": "auth/partner-signup.html"
   };
+  document.querySelectorAll("a[data-krim-route]").forEach(function(a){
+    var key=a.getAttribute("data-krim-route");
+    if(routes[key]) a.setAttribute("href",base+routes[key]);
+  });
   document.querySelectorAll('a[href]').forEach(function(a){
-    var href=a.getAttribute("href");
-    if(!href || href.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(href)) return;
-    var path=href.split("?")[0];
-    if(routes[path]) a.href=base+routes[path]+(href.indexOf("?")>=0?href.slice(href.indexOf("?")):"");
+    var raw=a.getAttribute("href");
+    if(!raw || raw.charAt(0)==="#" || /^(https?:|mailto:|tel:|javascript:)/i.test(raw)) return;
+    var clean=raw.split("?")[0].replace(/^\.\//,"");
+    var known={
+      "../index.html":routes.home,
+      "../../public/index.html":routes.home,
+      "../solutions.html":routes.solutions,
+      "../../public/solutions.html":routes.solutions,
+      "../global-coverage.html":routes.global,
+      "../../public/global-coverage.html":routes.global,
+      "available-loads.html":routes.loads,
+      "quote-history.html":routes.bids,
+      "submit-quote.html":routes.submit,
+      "../../auth/login.html":routes.login,
+      "../../auth/partner-signup.html":routes.register
+    };
+    if(known[clean]) a.href=base+known[clean]+(raw.indexOf("?")>=0?raw.slice(raw.indexOf("?")):"");
+  });
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a[data-krim-route]");
+    if(!a)return;
+    var key=a.getAttribute("data-krim-route");
+    if(routes[key]){e.preventDefault();location.assign(base+routes[key]);}
   });
 })();
 </script>
