@@ -1,1 +1,38 @@
-<!-- test -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Logistics — Acquisition Command</title>
+<link rel="stylesheet" href="../../core/krim-unified-page.css">
+<style>
+:root{color-scheme:dark}body{margin:0;background:#02050e;color:#e2e8f0;font:16px system-ui,sans-serif}.wrap{max-width:1000px;margin:auto;padding:24px}.panel{background:#081020;border:1px solid #263449;border-radius:16px;padding:20px;margin:16px 0}h1,h2{color:white}.links{display:flex;flex-wrap:wrap;gap:12px}a{display:inline-block;padding:12px 15px;border-radius:10px;background:#2563eb;color:white;text-decoration:none;font-weight:700}.muted{color:#a5b4c7}.status{font-weight:700}
+</style>
+</head>
+<body><main class="wrap">
+<header class="panel"><p class="muted">KRIM LOGISTICS OS · GROWTH</p><h1>Acquisition Command Centre</h1><p>Coordinate verified partner onboarding and customer acquisition. Counts below are shown only when retrieved from the database.</p></header>
+<section class="panel"><h2>Launch channels</h2><div class="links">
+<a href="./prospect-registry.html">Prospect Registry</a>
+<a href="../../auth/partner-signup.html">Register as a Partner</a>
+<a href="../../auth/signup.html">Create Customer Account</a>
+<a href="../../public/index.html">Public Website</a>
+</div></section>
+<section class="panel"><h2>Acquisition pipeline status</h2><p id="status" class="status">Checking Supabase connection…</p><div id="summary" class="muted">No counts shown until a live query succeeds.</div></section>
+<section class="panel"><h2>Safe launch checklist</h2><ul><li>Partner registration and organization provisioning</li><li>Customer registration and organization provisioning</li><li>Verify accounts and compliance before granting restricted access</li><li>Record consent before promotional follow-up</li><li>Do not claim live revenue or conversions without verified records</li></ul></section>
+</main>
+<script type="module">
+const status=document.getElementById('status'), summary=document.getElementById('summary');
+try {
+ const base=location.pathname.startsWith('/logistics-saas/')?'/logistics-saas/':'/';
+ const {supabase}=await import(base+'platform/krim-supabase.js');
+ const {data:{session},error:sessionError}=await supabase.auth.getSession();
+ if(sessionError) throw sessionError;
+ if(!session){status.textContent='Sign in required to view secured pipeline data.';summary.textContent='Use the Prospect Registry after signing in.';}
+ else {
+  const {count,error}=await supabase.from('krim_growth_opportunities').select('id',{count:'exact',head:true});
+  if(error) throw error;
+  status.textContent='Supabase connection verified for this session.';
+  summary.textContent=(count??0)+' growth opportunity record(s) visible under current database permissions. This is not a count of customers or revenue.';
+ }
+} catch(e) {status.textContent='Live pipeline metrics unavailable.';summary.textContent=(e&&e.message)?e.message:'Check the Supabase configuration and permissions.';}
+</script>
+</body></html>
