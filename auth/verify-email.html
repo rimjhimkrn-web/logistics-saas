@@ -40,6 +40,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
 <label for="otp-code">Six-digit confirmation code</label>
 <input id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000">
 <button id="submit-btn" type="submit">Verify email</button>
+<button id="resend-btn" type="button" style="margin-top:10px;background:#334155">Resend confirmation email</button>
 </form>
 <a class="back" href="login.html">← Back to sign in</a>
 </main>
@@ -51,6 +52,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
  const email=document.getElementById("email");
  const token=document.getElementById("otp-code");
  const button=document.getElementById("submit-btn");
+ const resendButton=document.getElementById("resend-btn");
  const feedback=document.getElementById("feedback");
  email.value=(new URLSearchParams(location.search).get("email")||"").trim().toLowerCase();
  function show(message,ok){
@@ -60,6 +62,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
  }
  form.addEventListener("submit",async function(event){
   event.preventDefault();
+  if(!client){show("The secure authentication service did not load. Refresh the page and try again.",false);return;}
   const address=email.value.trim().toLowerCase();
   const code=token.value.trim();
   if(!address||!/^\d{6}$/.test(code)){show("Enter a valid email address and six-digit code.",false);return;}
@@ -74,6 +77,18 @@ footer{text-align:center;color:#64748b;font-size:12px}
    show(error&&error.message?error.message:"Email verification failed. The code may be invalid or expired.",false);
    button.disabled=false;button.textContent="Verify email";
   }
+ });
+ resendButton.addEventListener("click",async function(){
+  if(!client){show("The secure authentication service did not load. Refresh the page and try again.",false);return;}
+  const address=email.value.trim().toLowerCase();
+  if(!address||!email.checkValidity()){show("Enter a valid email address before requesting another confirmation email.",false);email.focus();return;}
+  resendButton.disabled=true;resendButton.textContent="Sending…";
+  try{
+   const result=await client.auth.resend({type:"signup",email:address,options:{emailRedirectTo:new URL(typeof window.krimPath==="function"?window.krimPath("auth/auth-callback.html"):"auth/auth-callback.html",location.origin).toString()}});
+   if(result.error)throw result.error;
+   show("If this address has a pending signup confirmation, a new email may arrive shortly. Check your inbox and spam folder.",true);
+  }catch(error){show("Could not request another confirmation email. Check your connection and Supabase email settings, then try again.",false);}
+  finally{resendButton.disabled=false;resendButton.textContent="Resend confirmation email";}
  });
 })();
 </script>
