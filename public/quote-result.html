@@ -45,7 +45,7 @@
     <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
         <span class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">PAYMENT GATEWAY: SERVER-VERIFIED</span>
+            <span id="payment-gateway-status" class="text-amber-300 font-bold">PAYMENT GATEWAY: VERIFICATION PENDING</span>
         </span>
         <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
     </div>
@@ -122,6 +122,13 @@
         const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
         let activeQuoteRecord = null;
         let currentSession = null;
+
+        function setGatewayStatus(label, state = "pending") {
+            const node = document.getElementById("payment-gateway-status");
+            if (!node) return;
+            node.textContent = "PAYMENT GATEWAY: " + label;
+            node.className = "font-bold " + (state === "verified" ? "text-emerald-400" : state === "error" ? "text-red-300" : "text-amber-300");
+        }
 
         function showCheckoutMessage(message, type = "error") {
             const feedback = document.getElementById("checkout-feedback");
@@ -225,6 +232,7 @@
                     if (result.data && result.data.verified) showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
                     else showCheckoutMessage((result.data && (result.data.message || result.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
                 } catch (err) {
+                    setGatewayStatus("VERIFICATION UNAVAILABLE", "error");
                     showCheckoutMessage("Payment verification unavailable: " + (err.message || "Unknown error"));
                 } finally {
                     button.disabled = false;
@@ -288,13 +296,16 @@
                             );
                             if (verifyError) throw verifyError;
                             if (!verification?.success || !verification?.verified) {
+                                setGatewayStatus("VERIFICATION NOT CONFIRMED", "error");
                                 throw new Error(verification?.error || "Server could not confirm the payment.");
                             }
+                            setGatewayStatus("SERVER-VERIFIED", "verified");
                             showCheckoutMessage("Payment verified successfully. Redirecting to your shipments...", "success");
                             setTimeout(() => {
                                 window.location.href = "shipper/active-shipments.html";
                             }, 1400);
                         } catch (err) {
+                            setGatewayStatus("VERIFICATION FAILED", "error");
                             showCheckoutMessage("Payment verification failed: " + (err.message || "Unknown error") + ". Do not retry until payment status is checked.");
                             button.disabled = false;
                         }
