@@ -1,41 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KRIM — Discovery Workbench</title>
-<link rel="stylesheet" href="../../core/krim-unified-page.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>KRIM | Business Discovery Workbench</title>
 <style>
-:root{color-scheme:dark}body{margin:0;background:#02050e;color:#e2e8f0;font:15px system-ui,sans-serif}.wrap{max-width:1050px;margin:auto;padding:20px}.panel{background:#081020;border:1px solid #263449;border-radius:16px;padding:18px;margin:14px 0}h1,h2{color:#fff}.muted{color:#a5b4c7}.row{display:flex;flex-wrap:wrap;gap:10px}.btn{border:0;border-radius:9px;background:#2563eb;color:white;padding:11px 14px;font-weight:700;cursor:pointer}.btn:disabled{opacity:.5;cursor:wait}.status{padding:12px;border-radius:9px;background:#101b2d;white-space:pre-wrap;overflow-wrap:anywhere}.source{border:1px solid #334155;padding:12px;border-radius:10px;margin:8px 0}.pill{display:inline-block;border-radius:20px;padding:3px 9px;background:#713f12;color:#fde68a;font-size:12px}a{color:#93c5fd}
+*{box-sizing:border-box}body{margin:0;background:#07111f;color:#e8eef7;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:960px;margin:auto;padding:20px}.top,.card{background:#0d1b2d;border:1px solid #263a52;border-radius:16px;padding:20px;margin:14px 0}.brand{color:#70d7ff;font-size:12px;font-weight:800;letter-spacing:2px}h1{font-size:clamp(26px,5vw,40px);line-height:1.15;margin:8px 0}h2{font-size:20px;margin:0 0 10px}p{color:#c1cede}.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}a,.button{display:inline-block;background:#1769e0;color:white;text-decoration:none;border:0;border-radius:10px;padding:12px 15px;font-weight:700;cursor:pointer}.secondary{background:#1b2c42;border:1px solid #39516d}.status{padding:14px;border-radius:10px;background:#07111f;color:#b8c8dc;overflow-wrap:anywhere;white-space:pre-wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.metric{padding:14px;background:#07111f;border:1px solid #263a52;border-radius:10px}.metric strong{display:block;font-size:24px;color:#fff}.small{font-size:13px;color:#91a5bd}.source{padding:12px;border:1px solid #30455d;border-radius:10px;margin-top:8px}.tag{display:inline-block;font-size:12px;border-radius:30px;padding:3px 8px;background:#493817;color:#ffe2a3}footer{padding:20px 4px;color:#91a5bd;font-size:13px}
 </style>
 </head>
 <body><main class="wrap">
-<header class="panel"><p class="muted">KRIM LOGISTICS OS · GROWTH</p><h1>Discovery Workbench</h1><p>Admin-only control panel for inspecting discovery sources and the real acquisition pipeline. This page does not invent leads or send outreach.</p><div class="row"><a href="./acquisition-command.html">Acquisition Command Centre</a><a href="./prospect-registry.html">Prospect Registry</a></div></header>
-<section class="panel"><h2>Connection & permissions</h2><div id="status" class="status" role="status">Checking Supabase session…</div><div class="row" style="margin-top:12px"><button id="refresh" class="btn">Refresh live status</button></div></section>
-<section class="panel"><h2>Pipeline overview</h2><div id="counts" class="status">No data loaded yet.</div><p class="muted">Counts are returned by the secured KRIM Edge Function. A running scheduler does not by itself prove that new prospects are being discovered.</p></section>
-<section class="panel"><h2>Configured sources</h2><div id="sources" class="status">Loading source registry…</div><p class="muted">A source marked “planned” is intentionally not ingestible. Review source terms, rate limits, attribution and commercial suitability before activation.</p></section>
-<section class="panel"><h2>Next safe step</h2><p>Once an approved source is active, the next stage is a rate-limited discovery runner that validates source provenance, deduplicates records and submits them through the secured growth operations function. Outreach remains disabled until a separate permission and consent workflow is verified.</p><p class="muted">OpenStreetMap data is not proof of a company's current operations, service capacity, or willingness to work with KRIM.</p></section>
+<header class="top">
+<div class="brand">KRIM LOGISTICS OS · GROWTH SYSTEM</div>
+<h1>Business Discovery Workbench</h1>
+<p>Inspect KRIM’s acquisition pipeline and configured discovery sources. This is an administration page—not a claim that live worldwide discovery is already running.</p>
+<nav class="links">
+<a href="./acquisition-command.html">Acquisition Command Centre</a>
+<a class="secondary" href="./prospect-registry.html">Prospect Registry</a>
+<a class="secondary" href="../../auth/partner-signup.html">Partner signup</a>
+<a class="secondary" href="../../auth/signup.html">Customer signup</a>
+</nav>
+</header>
+<section class="card"><h2>1. Connection status</h2><div id="status" class="status">Page loaded. Connect to Supabase to read secured live data.</div><div class="links"><button id="connect" class="button">Connect & refresh</button></div><p class="small">Use a signed-in KRIM platform administrator account. Access is checked by the backend function.</p></section>
+<section class="card"><h2>2. Acquisition pipeline</h2><div id="metrics" class="grid"><div class="metric"><span class="small">Sources</span><strong>—</strong></div><div class="metric"><span class="small">Growth signals</span><strong>—</strong></div><div class="metric"><span class="small">Opportunities</span><strong>—</strong></div><div class="metric"><span class="small">Acquisition profiles</span><strong>—</strong></div></div><p class="small">Values appear only after a successful database response. A zero is a real count; a dash means not loaded.</p></section>
+<section class="card"><h2>3. Configured discovery sources</h2><div id="sources" class="status">Not loaded yet. Select “Connect & refresh”.</div></section>
+<section class="card"><h2>4. Build status</h2><div class="source"><span class="tag">Discovery ingestion</span><p>Not confirmed operational. The source must be approved, activated and connected to a rate-limited discovery runner.</p></div><div class="source"><span class="tag">Lead qualification</span><p>Requires testing against genuine source records and deduplication.</p></div><div class="source"><span class="tag">Outreach</span><p>Disabled until permissions, consent, opt-out handling and a sending provider are verified.</p></div></section>
+<footer>KRIM Logistics · Internal operations interface · Do not treat directory listings as verified partners or customer consent.</footer>
 </main>
 <script type="module">
-const statusEl=document.getElementById('status'), countsEl=document.getElementById('counts'), sourcesEl=document.getElementById('sources'), button=document.getElementById('refresh');
-const base=location.pathname.startsWith('/logistics-saas/')?'/logistics-saas/':'/';
-async function load(){
- button.disabled=true; statusEl.textContent='Checking session and secured growth operations…';countsEl.textContent='Loading…';sourcesEl.textContent='Loading…';
- try{
-  const {supabase}=await import(base+'platform/krim-supabase.js');
-  const {data:{session},error:sessionError}=await supabase.auth.getSession();
-  if(sessionError)throw sessionError;
-  if(!session){statusEl.textContent='Sign in with an authorized KRIM platform administrator account, then refresh.';countsEl.textContent='Unavailable without an authorized session.';sourcesEl.textContent='Unavailable without an authorized session.';return;}
-  async function call(action){const {data,error}=await supabase.functions.invoke('krim-global-growth-operations',{body:{action}});if(error)throw error;if(data?.error)throw new Error(data.error+(data.detail_code?': '+data.detail_code:''));return data;}
-  const overview=await call('overview');
-  statusEl.textContent='Authenticated. Growth operations function responded successfully. Admin authorization is enforced by the backend.';
-  countsEl.textContent=JSON.stringify({...overview.counts,automation:overview.automation,signal_statuses:overview.signal_statuses},null,2);
-  const result=await call('list_sources');
-  const rows=Array.isArray(result.sources)?result.sources:(Array.isArray(result.data)?result.data:[]);
-  if(!rows.length){sourcesEl.textContent='No source records returned. Check function response and database configuration.';}
-  else {sourcesEl.textContent='';for(const s of rows){const div=document.createElement('div');div.className='source';const title=document.createElement('strong');title.textContent=s.name||s.source_code||'Unnamed source';const badge=document.createElement('span');badge.className='pill';badge.textContent=String(s.status||'unknown').toUpperCase();const detail=document.createElement('p');detail.className='muted';detail.textContent=[s.source_code,s.discovery_method,s.automation_level,s.region_scope].filter(Boolean).join(' · ');div.append(title,' ',badge,detail);sourcesEl.append(div);}}
- }catch(e){statusEl.textContent='Could not load secured growth operations. '+(e?.message||'Unknown error')+' Check sign-in, platform-admin role, Edge Function deployment and network.';countsEl.textContent='No metrics available; errors are not converted into zero counts.';sourcesEl.textContent='Source list unavailable until the secured function succeeds.';}
- finally{button.disabled=false;}
-}
-button.addEventListener('click',load);load();
+const status=document.getElementById('status'), metrics=document.getElementById('metrics'), sources=document.getElementById('sources'), button=document.getElementById('connect');
+function setMetrics(counts){metrics.replaceChildren();for(const [label,key] of [['Sources','sources'],['Growth signals','signals'],['Opportunities','opportunities'],['Acquisition profiles','customer_acquisition_profiles']]){const box=document.createElement('div');box.className='metric';const l=document.createElement('span');l.className='small';l.textContent=label;const n=document.createElement('strong');n.textContent=String(counts?.[key]??0);box.append(l,n);metrics.append(box)}}
+async function refresh(){button.disabled=true;status.textContent='Connecting…';sources.textContent='Loading source registry…';try{const base=location.pathname.startsWith('/logistics-saas/')?'/logistics-saas/':'/';const {supabase}=await import(base+'platform/krim-supabase.js');const {data:{session},error:se}=await supabase.auth.getSession();if(se)throw se;if(!session){status.textContent='Please sign in with a KRIM platform administrator account, then retry.';sources.textContent='Sign-in required.';return;}const invoke=async action=>{const {data,error}=await supabase.functions.invoke('krim-global-growth-operations',{body:{action}});if(error)throw error;if(data?.error)throw new Error(data.error);return data};const o=await invoke('overview');setMetrics(o.counts||{});const src=await invoke('list_sources');const list=src.sources||src.data||[];sources.replaceChildren();if(!list.length){sources.textContent='No source rows returned by the backend.'}else for(const s of list){const box=document.createElement('div');box.className='source';const title=document.createElement('strong');title.textContent=s.name||s.source_code||'Unnamed source';const p=document.createElement('p');p.className='small';p.textContent=[s.source_code,s.status,s.discovery_method,s.automation_level,s.region_scope].filter(Boolean).join(' · ');box.append(title,p);sources.append(box)}status.textContent='Live backend response received. Counts reflect the authorized backend response; they do not prove discovery is running.'}catch(e){status.textContent='Could not load live data: '+(e?.message||'unknown error')+'. The page itself is available. Check the published URL, sign-in, administrator role and Edge Function.';sources.textContent='Live source list unavailable. No sample records are shown.'}finally{button.disabled=false}}
+button.addEventListener('click',refresh);
 </script>
 </body></html>
