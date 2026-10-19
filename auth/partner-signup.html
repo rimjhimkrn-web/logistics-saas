@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KRIM Logistics | Carrier Partner Registration</title>
+<title>KRIM Logistics | Partner Registration</title>
 <meta name="description" content="Register your carrier or transport fleet on KRIM Logistics using Supabase authentication.">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
@@ -17,7 +17,7 @@
 <main class="wrap"><section class="card">
 <div class="tag">Carrier partner registration</div>
 <h1>Register your transport fleet</h1>
-<p>Create your carrier account with KRIM. Account creation does not automatically approve a carrier; verification is required before access to restricted freight opportunities.</p>
+<p>Create your carrier account using KRIM Supabase authentication. Registration is not carrier approval; business verification is required before access to restricted freight opportunities.</p>
 <form id="partner-signup-form">
 <label for="fleet">Fleet / company name</label><input id="fleet" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your transport company">
 <label for="full-name">Fleet operator full name</label><input id="full-name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Your full name">
@@ -27,7 +27,7 @@
 <button id="submit-button" type="submit">Create carrier account</button>
 </form>
 <div id="feedback" role="status" aria-live="polite"></div>
-<p class="note">If Confirm Email is OFF in Supabase, signup should return an active session without email verification. If no session is returned, check the Supabase Email provider setting.</p>
+<p class="note">Email confirmation is controlled by your Supabase project. With Confirm Email turned OFF, a new signup should return an active session without sending a verification email. If no session is returned, check the Email provider setting in Supabase.</p>
 <div class="divider"><p>Registering as a shipper instead? <a href="signup.html">Create a customer account</a>.</p><p>Already registered? <a href="login.html">Sign in</a>.</p></div>
 </section></main>
 <footer>KRIM Logistics OS · Carrier approval is a separate operational process</footer>
@@ -46,7 +46,7 @@
   if(!client){show("Supabase could not initialize. Refresh the page and try again.","error");return;}
   const fleet=document.getElementById("fleet").value.trim();
   const fullName=document.getElementById("full-name").value.trim();
-  const email=document.getElementById("email").value.trim();
+  const email=document.getElementById("email").value.trim().toLowerCase();
   const password=document.getElementById("password").value;
   if(fleet.length<2||fullName.length<2||password.length<10){show("Enter a company name and full name, and use a password of at least 10 characters.","error");return;}
   button.disabled=true;button.textContent="Creating carrier account…";show("");
@@ -54,7 +54,7 @@
    const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName,company_name:fleet,krim_account_type:"partner"},emailRedirectTo:new URL("./auth-callback.html",window.location.href).href}});
    if(error)throw error;
    if(!data.session){
-    show("Supabase accepted the signup but returned no active session. Check that Confirm Email is OFF in Supabase Authentication → Sign In / Providers → Email. If this email is already registered, sign in instead.","error");
+    show("No active session was returned. Check Supabase Authentication → Sign In / Providers → Email and confirm Confirm Email is OFF. If this email is already registered, use Sign In. No carrier organization was provisioned by this page.","error");
     button.disabled=false;button.textContent="Create carrier account";return;
    }
    const {error:provisionError}=await client.rpc("krim_provision_partner_organization",{p_legal_name:fleet});
