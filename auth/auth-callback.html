@@ -1,65 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KRIM OS — Authenticating Session...</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>KRIM Logistics OS — Authentication Callback</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f8fafc;color:#0f172a;font-family:Inter,system-ui,sans-serif;padding:24px}
+main{width:min(100%,480px);text-align:center;background:white;border:1px solid #e2e8f0;border-radius:20px;padding:36px 28px;box-shadow:0 18px 50px #0f172a0d}
+.mark{width:48px;height:48px;margin:0 auto 18px;border-radius:14px;background:#e0f2fe;color:#0369a1;display:grid;place-items:center;font-size:24px}
+h1{font-size:22px;margin:0 0 10px}p{font-size:14px;line-height:1.6;color:#64748b}
+a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decoration:none}
+</style>
 </head>
-<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans text-center">
-  <div class="w-12 h-12 mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-xl text-cyan-400 animate-pulse">⚡</div>
-  <h1 class="text-lg font-bold text-white">Verifying Identity Token...</h1>
-  <p id="status-text" class="text-xs text-slate-400 mt-1 font-mono">Exchanging PKCE authorization code with Supabase backend.</p>
-
-  <script type="module">
-    import { supabase, AUTH_ROUTES } from '../auth-core.js';
-
-    async function handleAuthCallback() {
-      const statusText = document.getElementById('status-text');
-
-      // Detect session automatically parsed by Supabase JS client from hash/query params
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error || !session) {
-        statusText.innerText = "Authentication failed or token expired. Redirecting to login...";
-        setTimeout(() => window.location.href = AUTH_ROUTES.SIGN_IN, 2000);
-        return;
-      }
-
-      // Complete idempotent organization provisioning after email-confirmation callbacks.
-      const metadata = session.user?.user_metadata || {};
-      const accountType = metadata.krim_account_type;
-      const organizationName = String(metadata.company_name || "").trim();
-      let dashboardPath = AUTH_ROUTES.DASHBOARD;
-      if ((accountType === "customer" || accountType === "partner") && organizationName.length >= 2) {
-        const provisionRpc = accountType === "partner"
-          ? "krim_provision_partner_organization"
-          : "krim_provision_customer_organization";
-        const { error: provisionError } = await supabase.rpc(provisionRpc, {
-          p_legal_name: organizationName
-        });
-        if (provisionError) {
-          statusText.innerText = "Identity verified, but organization setup could not be completed. Please sign in to retry or contact support.";
-          return;
-        }
-        if (accountType === "partner") dashboardPath = "../app/partner/index.html";
-      }
-
-      // Check MFA requirement (AAL level)
-      const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (mfaData?.nextLevel === 'aal2' && mfaData?.currentLevel !== 'aal2') {
-        window.location.href = AUTH_ROUTES.MFA_CHALLENGE;
-        return;
-      }
-
-      statusText.innerText = "Identity verified! Launching workspace...";
-      setTimeout(() => window.location.href = dashboardPath, 1000);
+<body>
+<main>
+<div class="mark" aria-hidden="true">K</div>
+<h1>Completing secure sign-in</h1>
+<p id="status-text" role="status" aria-live="polite">Validating your session with KRIM authentication services…</p>
+<a id="login-link" href="login.html" hidden>Return to sign in</a>
+</main>
+<script>
+(async function(){
+  const client=window.KRIM_SUPABASE;
+  const base=window.KRIM_BASE_PATH||"";
+  const status=document.getElementById("status-text");
+  const loginLink=document.getElementById("login-link");
+  const loginPath=base+"/auth/login.html";
+  function fail(message){
+    status.textContent=message;
+    loginLink.href=loginPath;
+    loginLink.hidden=false;
+  }
+  try{
+    const params=new URLSearchParams(location.search);
+    const code=params.get("code");
+    let session=null;
+    if(code){
+      const result=await client.auth.exchangeCodeForSession(code);
+      if(result.error) throw result.error;
+      session=result.data&&result.data.session;
+    }else{
+      const result=await client.auth.getSession();
+      if(result.error) throw result.error;
+      session=result.data&&result.data.session;
     }
-
-    handleAuthCallback();
-  </script>
+    if(!session){
+      fail("This sign-in link is invalid or expired. Return to sign in and try again.");
+      return;
+    }
+    const metadata=session.user&&session.user.user_metadata||{};
+    const accountType=metadata.krim_account_type;
+    const organizationName=String(metadata.company_name||"").trim();
+    let destination=base+"/app/customer/index.html";
+    if(accountType==="partner") destination=base+"/app/partner/index.html";
+    if(accountType==="enterprise") destination=base+"/app/enterprise/index.html";
+    if(accountType==="customer"||accountType==="partner"){
+      if(organizationName.length<2){
+        fail("Your account is authenticated, but organization details are incomplete. Sign in again or contact support.");
+        return;
+      }
+      const rpc=accountType==="partner"?"krim_provision_partner_organization":"krim_provision_customer_organization";
+      const provision=await client.rpc(rpc,{p_legal_name:organizationName});
+      if(provision.error){
+        fail("Your identity is verified, but workspace setup could not finish. Please sign in to retry.");
+        return;
+      }
+    }
+    const mfa=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+    if(mfa.data&&mfa.data.nextLevel==="aal2"&&mfa.data.currentLevel!=="aal2"){
+      location.replace(base+"/auth/mfa-challenge.html");
+      return;
+    }
+    status.textContent="Identity verified. Opening your KRIM workspace…";
+    setTimeout(function(){location.replace(destination);},800);
+  }catch(error){
+    console.error("KRIM auth callback error:",error);
+    fail("We could not complete sign-in. The link may have expired, or authentication configuration needs attention.");
+  }
+})();
+</script>
 </body>
 </html>
