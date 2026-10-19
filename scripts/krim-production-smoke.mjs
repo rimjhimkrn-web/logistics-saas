@@ -11,6 +11,7 @@ const required = [
   "config.js",
   "platform/krim-supabase.js",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
+  "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
   "supabase/migrations/20261019020919_restrict_privileged_krim_rpc_to_authenticated.sql",
   "supabase/functions/create-global-cashfree-order/index.ts",
