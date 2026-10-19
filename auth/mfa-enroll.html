@@ -16,7 +16,7 @@ header,footer{padding:22px max(20px,calc((100% - 1000px)/2))}header{background:#
 main{width:min(100% - 32px,500px);margin:auto;padding:32px 26px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 18px 50px #0f172a0d}
 h1{text-align:center;font-size:25px;margin:0 0 10px}p{color:#64748b;font-size:14px;line-height:1.6;text-align:center}
 #qr-container{margin:22px auto;padding:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;width:220px;min-height:220px;display:grid;place-items:center;text-align:center;overflow-wrap:anywhere}
-#qr-container img{display:block;width:100%;height:auto}#secret{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#334155}
+#qr-container img{display:block;width:100%;height:auto}.or-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#64748b;font-size:12px;font-weight:800;letter-spacing:.12em}.or-divider:before,.or-divider:after{content:"";height:1px;flex:1;background:#e2e8f0}#secret{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere;color:#334155}
 label{display:block;margin:18px 0 8px;font-size:13px;font-weight:700}
 input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:24px;text-align:center;letter-spacing:.4em;font-family:ui-monospace,monospace}
 input:focus{outline:2px solid #0284c7;border-color:#0284c7}
@@ -33,7 +33,8 @@ footer{text-align:center;color:#64748b;font-size:12px}
 <p>Scan the QR code with your authenticator app, then enter the six-digit code it generates. Keep the secret private.</p>
 <div id="feedback" role="status" aria-live="polite">Checking your sign-in session…</div>
 <div id="qr-container" aria-label="Authenticator QR code">QR code will appear here after enrollment starts.</div>
-<div id="secret-wrap" hidden><p style="text-align:left;font-weight:700;color:#334155">Manual setup key</p><p id="secret"></p></div>
+<div class="or-divider" aria-label="or use manual setup"><span>OR</span></div>
+<div id="secret-wrap" hidden><p style="text-align:left;font-weight:700;color:#334155">Manual setup key</p><p id="secret"></p><p style="text-align:left;font-size:12px">If your authenticator app cannot scan the QR code, enter this key manually in the app. Keep it private.</p></div>
 <form id="mfa-enroll-form">
 <label for="totp-code">Authenticator code</label>
 <input id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000">
