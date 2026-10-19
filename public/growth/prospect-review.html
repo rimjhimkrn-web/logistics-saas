@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM | Prospect Review & Qualification</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--line:#29374b;--text:#edf3fb;--muted:#9aabc0;--accent:#55d6a7;--blue:#80b8ff;--warn:#f5c66a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:22px 16px;border-bottom:1px solid var(--line);background:#0f1929}main{max-width:1050px;margin:auto;padding:18px 14px 50px}h1{font-size:clamp(23px,5vw,34px);margin:4px 0}h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted)}.tag{display:inline-block;color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}label{display:block;color:#c7d4e5;font-size:13px;margin:10px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #3a4a61;border-radius:9px;background:#0b1423;color:var(--text);font:inherit}textarea{min-height:75px}button,.button{display:inline-block;border:0;border-radius:9px;padding:11px 14px;background:var(--accent);color:#071710;font-weight:750;cursor:pointer;text-decoration:none;margin:8px 7px 0 0}button.secondary{background:#26364d;color:var(--text);border:1px solid #40516a}button:disabled{opacity:.5;cursor:not-allowed}.status{white-space:pre-wrap;padding:12px;border-radius:9px;background:#0a1524;border:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}.small{font-size:12px}.record{padding:12px 0;border-bottom:1px solid var(--line)}.record:last-child{border:0}.pill{display:inline-block;border:1px solid #40516a;border-radius:99px;padding:2px 8px;font-size:12px;color:var(--blue)}a{color:var(--blue)}footer{color:var(--muted);font-size:12px;padding:10px 0}
+</style>
+</head>
+<body>
+<header><main style="padding:0 14px"><span class="tag">KRIM Global Logistics OS · Growth</span><h1>Prospect Review & Qualification</h1><div class="muted">Review evidence before a candidate is treated as a real customer or operating partner.</div></main></header>
+<main>
+<section class="panel"><h2>1 · Connect to secure backend</h2><p class="muted">Sign in with an authorized KRIM platform administrator account. This page does not expose service-role credentials or automatically contact prospects.</p><button id="connect">Connect & load opportunities</button><button id="reload" class="secondary">Refresh</button><div id="status" class="status" role="status" aria-live="polite">Page loaded. Connect to Supabase to load the current opportunity queue.</div></section>
+<section class="panel"><h2>2 · Opportunity queue</h2><div class="grid"><div><div class="muted small">Visible opportunities</div><strong id="count">—</strong></div><div><div class="muted small">Review rule</div><strong>Evidence first · Human approval</strong></div></div><div id="queue" class="muted" style="margin-top:12px">No records loaded.</div></section>
+<section class="panel"><h2>3 · Qualification checklist</h2><p class="muted">Select a candidate from the queue to draft an internal review. Do not mark a business verified without evidence and direct confirmation.</p>
+<form id="reviewForm"><input id="opportunityId" type="hidden">
+<div class="grid"><div><label for="business">Business / contact label</label><input id="business" maxlength="160" required placeholder="Candidate business name"></div><div><label for="kind">Candidate type</label><select id="kind"><option value="customer">Customer</option><option value="carrier">Carrier / truck operator</option><option value="warehouse">Warehouse</option><option value="freight_forwarder">Freight forwarder</option><option value="logistics_provider">Other logistics provider</option></select></div><div><label for="country">Country / market</label><input id="country" maxlength="100" placeholder="India"></div><div><label for="stage">Review decision</label><select id="stage"><option value="needs_review">Needs review</option><option value="qualified_candidate">Qualified candidate — evidence required</option><option value="follow_up_needed">Follow-up needed</option><option value="not_a_fit">Not a fit</option><option value="duplicate">Duplicate</option></select></div></div>
+<label for="evidence">Evidence checked (public source URL or direct confirmation details)</label><input id="evidence" type="url" maxlength="1000" placeholder="https://...">
+<label for="notes">Reviewer notes / next action</label><textarea id="notes" maxlength="2000" placeholder="Capacity, service area, source reliability, consent status, next verification step"></textarea>
+<label><input id="confirmed" type="checkbox" style="width:auto;margin-right:8px">I reviewed the evidence and did not infer consent, capacity, or legitimacy from a directory listing alone.</label>
+<button id="save" type="submit">Save internal review</button></form><div class="small muted" style="margin-top:10px">If the existing backend does not expose a review-save action, this page will report that clearly rather than pretending it saved.</div></section>
+<section class="panel"><h2>Responsible acquisition</h2><p class="muted">This is a review workbench, not an automatic outreach tool. Respect source terms, privacy/data protection rules, and opt-in/consent requirements. No bulk messaging is sent from this page.</p><a href="discovery-workbench.html">← Discovery Workbench</a> · <a href="signal-intake.html">Growth Signal Intake</a> · <a href="../../auth/partner-signup.html">Partner signup</a> · <a href="../../auth/signup.html">Customer signup</a></section>
+<footer>KRIM internal workflow · UI creation does not prove backend persistence or production readiness.</footer>
+</main>
+<script type="module">
+const $=id=>document.getElementById(id);let sb=null,rows=[];
+const say=(s)=>{$('status').textContent=s};
+function loadClient(){
+ const cfg=window.KRIM_CONFIG||window.krimConfig||{};
+ const url=cfg.supabaseUrl||cfg.SUPABASE_URL||cfg.url;
+ const key=cfg.supabaseAnonKey||cfg.SUPABASE_ANON_KEY||cfg.anonKey||cfg.publishableKey;
+ return {url,key};
+}
+async function connect(){
+ say('Connecting…');
+ try{
+  if(!sb){
+   const c=loadClient();
+   if(!c.url||!c.key) throw new Error('Supabase configuration was not found in the page global. Backend connection not attempted.');
+   const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');
+   sb=createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  }
+  const {data:{session},error:se}=await sb.auth.getSession();if(se)throw se;
+  if(!session){say('No signed-in session detected. Sign in as a KRIM platform administrator, then return to this page and refresh.');return}
+  const {data,error}=await sb.functions.invoke('krim-global-growth-operations',{body:{action:'list_opportunities'}});
+  if(error)throw error;
+  rows=Array.isArray(data?.opportunities)?data.opportunities:Array.isArray(data?.data)?data.data:Array.isArray(data)?data:[];
+  $('count').textContent=String(rows.length);render();
+  say('Backend request completed. '+rows.length+' opportunity record(s) returned. Check each record’s source and evidence before qualification.');
+ }catch(e){say('Could not load the review queue. '+(e?.message||String(e))+'\nNo save or qualification is assumed. Check the signed-in session, config, function response, and admin role.')}
+}
+function render(){
+ const q=$('queue');q.replaceChildren();
+ if(!rows.length){q.textContent='No opportunities returned by the backend. This is not evidence of a working worldwide discovery feed; confirm source ingestion separately.';return}
+ rows.forEach((r,i)=>{
+  const box=document.createElement('div');box.className='record';
+  const title=document.createElement('strong');title.textContent=r.display_name||r.business_name||r.name||('Opportunity '+(i+1));
+  const meta=document.createElement('div');meta.className='muted small';meta.textContent=[r.opportunity_type||r.type||'type unknown',r.country||r.market||'market unknown',r.status||r.stage||'status unknown',r.source_name||r.source_id?'source: '+(r.source_name||r.source_id):'source unknown'].join(' · ');
+  const notes=document.createElement('div');notes.className='small';notes.textContent=r.source_record_id?'Reference: '+r.source_record_id:'';
+  const pick=document.createElement('button');pick.className='secondary';pick.textContent='Review this candidate';pick.addEventListener('click',()=>selectRow(r));
+  box.append(title,meta,notes,pick);q.append(box);
+ });
+}
+function selectRow(r){
+ $('opportunityId').value=r.id||r.opportunity_id||'';
+ $('business').value=r.display_name||r.business_name||r.name||'';
+ $('kind').value=['customer','carrier','warehouse','freight_forwarder','logistics_provider'].includes(r.opportunity_type)?r.opportunity_type:'customer';
+ $('country').value=r.country||r.market||'';
+ $('evidence').value=r.source_url||r.evidence_url||'';
+ $('notes').value='Source: '+(r.source_name||r.source_id||'not recorded')+'\nExisting status: '+(r.status||r.stage||'unknown')+'\n';
+ $('stage').value='needs_review';$('confirmed').checked=false;
+ $('reviewForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('connect').addEventListener('click',connect);$('reload').addEventListener('click',connect);
+$('reviewForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!$('confirmed').checked){say('Please confirm that you reviewed the evidence checklist before saving.');return}
+ if(!sb){say('Connect to the backend first.');return}
+ if(!$('opportunityId').value){say('No saved opportunity ID selected. Creating a review record is not enabled unless the backend provides a dedicated review action. No data saved.');return}
+ say('Checking whether the backend supports a review action…');
+ try{
+  const payload={action:'review_opportunity',opportunity_id:$('opportunityId').value,decision:$('stage').value,reviewer_notes:$('notes').value,evidence_url:$('evidence').value||null,evidence_checked:true};
+  const {data,error}=await sb.functions.invoke('krim-global-growth-operations',{body:payload});
+  if(error)throw error;
+  if(data?.success===false||data?.error)throw new Error(data.error||'Backend did not confirm success.');
+  say('Backend returned a response for the review request. Verify the returned record and audit log before treating this review as persisted.\n'+JSON.stringify(data).slice(0,1600));
+ }catch(err){say('Review was NOT confirmed as saved. '+(err?.message||String(err))+'\nThis may mean the review_opportunity action is not implemented. No success is claimed.')}
+});
+</script>
+</body></html>
