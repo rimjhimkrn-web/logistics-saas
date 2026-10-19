@@ -1,57 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KRIM OS — Accept Enterprise Invite</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>KRIM Logistics OS — Accept Invitation</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#f8fafc;color:#0f172a;font-family:Inter,system-ui,-apple-system,sans-serif}
+header,footer{padding:22px max(20px,calc((100% - 1000px)/2))}header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:800;letter-spacing:.06em}
+main{width:min(100% - 32px,480px);margin:auto;padding:34px 28px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 18px 50px #0f172a0d}
+.badge{width:48px;height:48px;margin:0 auto 16px;display:grid;place-items:center;border-radius:15px;background:#e0f2fe;color:#0369a1;font-size:22px}
+h1{text-align:center;font-size:25px;margin:0 0 10px}p{font-size:14px;line-height:1.6;color:#64748b;text-align:center}
+label{display:block;margin:20px 0 8px;font-size:13px;font-weight:700}
+input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+input:focus{outline:2px solid #0284c7;border-color:#0284c7}
+button{width:100%;padding:14px;margin-top:22px;border:0;border-radius:10px;background:#0369a1;color:white;font-size:14px;font-weight:750;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+#feedback{margin-top:18px;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+a{color:#0369a1;font-weight:700;text-decoration:none}.back{display:block;text-align:center;margin-top:20px;font-size:14px}
+footer{text-align:center;color:#64748b;font-size:12px}
+</style>
 </head>
-<body class="bg-[#060b17] text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 font-sans">
-  <header class="w-full max-w-7xl flex justify-between items-center py-4">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
-      <span class="font-extrabold text-lg tracking-wider text-white">KRIM <span class="text-xs font-mono text-cyan-400 block -mt-1">LOGISTICS OS</span></span>
-    </div>
-  </header>
-
-  <main class="w-full max-w-md p-8 bg-[#0f172a] border border-cyan-500/30 rounded-2xl shadow-2xl text-center">
-    <div class="w-12 h-12 mx-auto mb-3 bg-cyan-500/10 border border-cyan-500/30 rounded-full flex items-center justify-center text-xl text-cyan-400">🏢</div>
-    <h1 class="text-xl font-extrabold text-white">Join Organization</h1>
-    <p id="invite-desc" class="text-xs text-slate-400 mt-1">Accept organization invite token.</p>
-
-    <form id="invite-form" class="mt-6 space-y-4">
-      <input type="password" id="password" required placeholder="Set Account Password" class="w-full px-3 py-2.5 bg-[#0b1329] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-400">
-
-      <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider hover:opacity-90 transition-all">
-        Accept Invitation & Access Workspace →
-      </button>
-    </form>
-  </main>
-
-  <footer class="text-[11px] font-mono text-slate-500 py-4">© 2026 KRIM Logistics Engine</footer>
-
-  <script type="module">
-    import { supabase, AUTH_ROUTES, renderTestSwitcher } from './js/auth-core.js';
-    renderTestSwitcher();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const orgName = urlParams.get('org') || 'Enterprise Workspace';
-    document.getElementById('invite-desc').innerText = `You are joining organization: ${orgName}`;
-
-    document.getElementById('invite-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const password = document.getElementById('password').value;
-      const { error } = await supabase.auth.updateUser({ password });
-
-      if (error) {
-        alert(error.message);
-      } else {
-        window.location.href = AUTH_ROUTES.DASHBOARD;
-      }
-    });
-  </script>
+<body>
+<header>KRIM <span style="color:#0284c7">LOGISTICS OS</span></header>
+<main>
+<div class="badge" aria-hidden="true">🏢</div>
+<h1>Accept your invitation</h1>
+<p id="invite-desc">Set a password to finish activating your invited KRIM account. Invitation links are time-limited.</p>
+<div id="feedback" role="status" aria-live="polite" hidden></div>
+<form id="invite-form" hidden>
+<label for="password">Create password (at least 12 characters)</label>
+<input id="password" type="password" autocomplete="new-password" minlength="12" required>
+<label for="confirm-password">Confirm password</label>
+<input id="confirm-password" type="password" autocomplete="new-password" minlength="12" required>
+<button id="submit-btn" type="submit">Accept invitation & continue</button>
+</form>
+<a class="back" href="login.html">← Back to sign in</a>
+</main>
+<footer>© 2026 KRIM Logistics</footer>
+<script>
+(async function(){
+ const client=window.KRIM_SUPABASE;
+ const form=document.getElementById("invite-form");
+ const feedback=document.getElementById("feedback");
+ const button=document.getElementById("submit-btn");
+ const password=document.getElementById("password");
+ const confirmPassword=document.getElementById("confirm-password");
+ const params=new URLSearchParams(location.search);
+ const hash=new URLSearchParams(location.hash.replace(/^#/,""));
+ function show(message,ok){
+   feedback.hidden=false;feedback.textContent=message;
+   feedback.style.background=ok?"#ecfdf5":"#fff1f2";
+   feedback.style.color=ok?"#065f46":"#9f1239";
+ }
+ try{
+   const type=hash.get("type")||params.get("type");
+   const code=params.get("code");
+   if(code){
+     const exchange=await client.auth.exchangeCodeForSession(code);
+     if(exchange.error) throw exchange.error;
+   }
+   const result=await client.auth.getSession();
+   if(result.error) throw result.error;
+   const session=result.data&&result.data.session;
+   if(!session || (type && type!=="invite")){
+     show("This invitation link is invalid, expired, or already used. Ask your organization administrator to send a new invitation.",false);
+     return;
+   }
+   document.getElementById("invite-desc").textContent="Invitation session verified for "+(session.user.email||"your account")+". Choose a strong password to continue.";
+   form.hidden=false;
+ }catch(error){
+   show(error&&error.message?error.message:"Unable to validate the invitation. Ask the organization administrator for a new link.",false);
+ }
+ form.addEventListener("submit",async function(event){
+   event.preventDefault();
+   if(password.value.length<12){show("Use a password with at least 12 characters.",false);return;}
+   if(password.value!==confirmPassword.value){show("The passwords do not match.",false);confirmPassword.focus();return;}
+   button.disabled=true;button.textContent="Activating account…";
+   try{
+     const updated=await client.auth.updateUser({password:password.value});
+     if(updated.error) throw updated.error;
+     const user=updated.data&&updated.data.user;
+     const role=(user&&user.user_metadata&&user.user_metadata.krim_account_type)||"";
+     const base=window.KRIM_BASE_PATH||"";
+     let target=base+"/app/customer/index.html";
+     if(role==="partner") target=base+"/app/partner/index.html";
+     else if(role==="enterprise") target=base+"/app/enterprise/index.html";
+     show("Invitation accepted. Opening your workspace…",true);
+     setTimeout(function(){location.replace(target);},800);
+   }catch(error){
+     show(error&&error.message?error.message:"Could not accept invitation. The link may have expired.",false);
+     button.disabled=false;button.textContent="Accept invitation & continue";
+   }
+ });
+})();
+</script>
 </body>
 </html>
