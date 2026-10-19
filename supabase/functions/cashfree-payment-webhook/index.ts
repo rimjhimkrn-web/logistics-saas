@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const secret = Deno.env.get("CASHFREE_CLIENT_SECRET");
     const url = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!secret || !url || !serviceKey || (Deno.env.get("CASHFREE_ENV") || "sandbox") !== "sandbox")
+    if (!secret || !url || !serviceKey || (Deno.env.get("CASHFREE_ENV") || "sandbox").toLowerCase() !== "sandbox")
       return reply({ error: "Cashfree sandbox webhook is not configured" }, 503);
 
     const signature = req.headers.get("x-webhook-signature") || "";
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabase.from("payment_orders").update({
       status: "paid", cashfree_payment_id: String(successful.cf_payment_id || successful.payment_id || ""),
       paid_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-    }).eq("id", local.id).eq("status", "created");
+    }).eq("id", local.id).in("status", ["created", "pending"]);
     if (updateError) {
       console.error("Cashfree webhook ledger update failed", updateError.message);
       return reply({ error: "Ledger update failed; retry webhook" }, 500);
