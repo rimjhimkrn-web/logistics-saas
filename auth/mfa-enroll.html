@@ -34,7 +34,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
 <div id="feedback" role="status" aria-live="polite">Checking your sign-in session…</div>
 <div id="qr-container" aria-label="Authenticator QR code">QR code will appear here after enrollment starts.</div>
 <div class="or-divider" aria-label="or use manual setup"><span>OR</span></div>
-<div id="secret-wrap"><p style="text-align:left;font-weight:700;color:#334155">Manual setup key</p><p id="secret">Loading manual setup key…</p><button type="button" id="copy-secret-btn" style="margin-top:8px;background:#334155">Copy manual key</button><p style="text-align:left;font-size:12px">Use this key to set up the same authenticator account manually if you cannot scan the QR code. Keep it private and do not share it.</p></div>
+<div id="secret-wrap"><label for="secret">Manual setup key (copy and paste)</label><input id="secret" type="text" readonly value="Loading manual setup key…" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-size:14px;letter-spacing:.08em;text-align:left;overflow-wrap:anywhere"><button type="button" id="copy-secret-btn" style="margin-top:8px;background:#334155">Copy manual setup key</button><p style="text-align:left;font-size:12px">In your authenticator app, choose “Enter setup key” / “Enter key manually”, name the account KRIM Logistics, select Time-based (TOTP) if asked, and paste this key. The app will then generate a fresh six-digit code. The QR code and manual key represent the same authenticator setup. Keep the key private.</p></div>
 <form id="mfa-enroll-form">
 <label for="totp-code">Authenticator code</label>
 <input id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="000000">
@@ -80,19 +80,20 @@ footer{text-align:center;color:#64748b;font-size:12px}
     qr.textContent="QR code unavailable. Use the manual setup key below if provided.";
    }
    if(totp?.secret){
-    document.getElementById("secret").textContent=totp.secret;
+    document.getElementById("secret").value=totp.secret;
    }else{
-    document.getElementById("secret").textContent="Manual setup key was not returned by Supabase. Try refreshing or contact the administrator.";
+    document.getElementById("secret").value="Manual setup key was not returned by Supabase. Try refreshing or contact the administrator.";
    }
    show("Scan the QR code and enter a fresh six-digit authenticator code.",true);
    button.disabled=false;
   }catch(error){show(error&&error.message?error.message:"Could not start MFA enrollment.",false);button.disabled=true;}
  }
  document.getElementById("copy-secret-btn").addEventListener("click",async function(){
-  const secret=document.getElementById("secret").textContent;
+  const field=document.getElementById("secret");
+  const secret=field.value;
   if(!secret||secret.startsWith("Loading")||secret.startsWith("Manual setup key was not")){show("The manual setup key is not available to copy.",false);return;}
-  try{await navigator.clipboard.writeText(secret);show("Manual setup key copied. Keep it private.",true);}
-  catch(error){show("Copy was blocked by this browser. Select and copy the manual setup key directly.",false);}
+  try{await navigator.clipboard.writeText(secret);show("Manual setup key copied. Open your authenticator app and paste it into the manual setup field.",true);}
+  catch(error){field.focus();field.select();show("Automatic copy was blocked. The key is selected—tap Copy in your phone menu, then paste it into your authenticator app.",false);}
  });
  form.addEventListener("submit",async function(event){
   event.preventDefault();
