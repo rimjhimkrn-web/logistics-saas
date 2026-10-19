@@ -22,7 +22,7 @@
 <label for="fleet">Fleet / company name</label><input id="fleet" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your transport company">
 <label for="full-name">Fleet operator full name</label><input id="full-name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Your full name">
 <label for="email">Dispatch email address</label><input id="email" type="email" required autocomplete="email" placeholder="dispatch@example.com">
-<label for="password">Password</label><input id="password" type="password" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters">
+<label for="password">Password</label><div style="display:flex;gap:8px;align-items:center"><input id="password" type="password" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters" style="flex:1;min-width:0"><button id="toggle-password" type="button" style="width:auto;margin:0;padding:12px;background:#26384e;white-space:nowrap" aria-controls="password" aria-pressed="false">Show</button></div>
 <p class="note">Use a unique password with at least 10 characters. This page uses KRIM's Supabase authentication; no Google or SMS sign-in is used.</p>
 <button id="submit-button" type="submit">Create carrier account</button>
 </form>
@@ -36,6 +36,9 @@
  const form=document.getElementById("partner-signup-form");
  const button=document.getElementById("submit-button");
  const feedback=document.getElementById("feedback");
+ const passwordInput=document.getElementById("password");
+ const togglePassword=document.getElementById("toggle-password");
+ togglePassword.addEventListener("click",function(){const reveal=passwordInput.type==="password";passwordInput.type=reveal?"text":"password";togglePassword.textContent=reveal?"Hide":"Show";togglePassword.setAttribute("aria-pressed",String(reveal));});
  function show(message,type){feedback.textContent=message;feedback.className=type||"";}
  form.addEventListener("submit",async function(event){
   event.preventDefault();
