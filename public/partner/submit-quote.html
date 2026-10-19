@@ -86,5 +86,31 @@ try{
 }catch(e){msg(e.message||"Could not initialize bidding.",true);button.disabled=true;button.textContent="Bidding unavailable"}
 })();
 </script>
+
+<script>
+/* Keep partner navigation on the correct GitHub Pages base path. */
+(function(){
+  var base=window.KRIM_BASE_PATH||(location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/");
+  var routes={
+    "../index.html":"public/index.html",
+    "../../public/index.html":"public/index.html",
+    "../solutions.html":"public/solutions.html",
+    "../../public/solutions.html":"public/solutions.html",
+    "../global-coverage.html":"public/global-coverage.html",
+    "../../public/global-coverage.html":"public/global-coverage.html",
+    "available-loads.html":"public/partner/available-loads.html",
+    "quote-history.html":"public/partner/quote-history.html",
+    "submit-quote.html":"public/partner/submit-quote.html",
+    "../../auth/login.html":"auth/login.html",
+    "../../auth/partner-signup.html":"auth/partner-signup.html"
+  };
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var raw=a.getAttribute('href');
+    if(!raw||raw.charAt(0)==='#'||/^(https?:|mailto:|tel:|javascript:)/i.test(raw))return;
+    var path=raw.split('?')[0].replace(/^\.\//,'');
+    if(routes[path])a.href=base+routes[path]+(raw.indexOf('?')>=0?raw.slice(raw.indexOf('?')):'');
+  });
+})();
+</script>
 </body>
 </html>
