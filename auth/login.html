@@ -184,22 +184,22 @@
                     ["enterprise", /enterprise/],
                     ["customer", /customer|shipper|client/]
                 ];
-                // Prefer the account type selected during signup for workspace routing.
-                // Memberships are a fallback only when signup metadata is absent/generic;
-                // never let an unrelated enterprise membership silently override a partner signup.
+                // Resolve role from customer/partner signup type or active organization membership.
+                // A URL query parameter is never an authorization source.
                 const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise","platform_admin"];
-                // Explicit public sign-in links may request only customer or partner routing.
-                // This is a navigation preference, not an authorization grant; Supabase RLS
-                // and the partner provisioning/verification workflow still control data access.
                 const requestedType = normalize(new URLSearchParams(window.location.search).get("role"));
-                const publicRequestedType = ["customer","partner"].includes(requestedType) ? requestedType : "";
-                let accountType = publicRequestedType || (knownTypes.includes(metadataType) ? metadataType : "");
+                let accountType = ["customer","partner"].includes(metadataType) ? metadataType : "";
                 if (!accountType) {
                     for (const [type, pattern] of roleRules) {
                         if (pattern.test(membershipsText)) { accountType = type; break; }
                     }
                 }
-                if (!accountType || accountType === "user" || accountType === "member") accountType = "customer";
+                if (!accountType || accountType === "user" || accountType === "member") {
+                    throw new Error("We could not verify a KRIM workspace for this account. Ask your organization administrator to finish account setup.");
+                }
+                if (requestedType && knownTypes.includes(requestedType) && requestedType !== accountType) {
+                    throw new Error("This account is not verified for the selected workspace. Choose the correct role or contact your organization administrator.");
+                }
 
                 const workspacePaths = {
                     customer: "../app/customer/index.html",
