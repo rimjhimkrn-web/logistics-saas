@@ -69,6 +69,18 @@ BEGIN
     RAISE EXCEPTION USING errcode='22023', message='The optional insurance document path is invalid';
   END IF;
 
+  IF EXISTS (
+    SELECT 1
+    FROM unnest(p_document_paths) AS submitted_path(path)
+    WHERE NOT EXISTS (
+      SELECT 1 FROM storage.objects so
+      WHERE so.bucket_id='krim-partner-verification'
+        AND so.name=submitted_path.path
+    )
+  ) THEN
+    RAISE EXCEPTION USING errcode='22023', message='Each submitted document must exist in the private KRIM verification bucket';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1 FROM public.krim_organization_members m
     JOIN public.krim_organizations o ON o.id=m.organization_id
@@ -140,5 +152,5 @@ $function$
 
 REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding_global_v2(text,text,text,text,text[],text,text,text,text,text,text,text,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.krim_submit_partner_onboarding_global_v2(text,text,text,text,text[],text,text,text,text,text,text,text,text,text) TO authenticated;
-REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding_global(text,text,text,text,text[],text,text,text,text,text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding_global(text,text,text,text[],text,text,text,text,text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding(text,text,text,text[]) FROM PUBLIC, anon, authenticated;
