@@ -118,7 +118,7 @@ async function loadQueue(){
    document.getElementById("rejected-count").textContent=rows.filter(r=>r.case_status==="rejected").length;
    if(!rows.length){queue.append(node("div","No partner verification cases have been submitted yet.","empty"));message("Administrator access confirmed. The queue is empty.");return}
    message("Administrator access confirmed. Showing up to 100 recent verification cases.");
-   for(const row of rows){queue.append(await renderCase(row))}
+   const cards=await Promise.all(rows.map(row=>renderCase(row)));cards.forEach(card=>queue.append(card))
  }catch(error){
    const msg=error&&error.message?error.message:"Unable to load verification queue.";
    message(msg.toLowerCase().includes("permission")||msg.toLowerCase().includes("admin")?"Access denied: this account needs the KRIM platform admin.platform permission. "+msg:msg,"error");
