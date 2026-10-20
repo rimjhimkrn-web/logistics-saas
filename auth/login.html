@@ -98,7 +98,7 @@
     if (!relativePath) throw new Error("No supported workspace is mapped to this account.");
     const target = new URL(relativePath, window.location.href);
     target.searchParams.set("krim_workspace", accountType);
-    const releases = { customer: "20261020-customer-route-2", partner: "20261020-partner-workspace-v3", driver: "20261021-driver-workspace-v1" };
+    const releases = { customer: "20261020-customer-route-2", partner: "20261020-partner-workspace-v3", driver: "20261021-driver-workspace-v2" };
     target.searchParams.set("release", releases[accountType] || "20261021-role-routing-v1");
     return target.href;
   }
@@ -124,16 +124,25 @@
     }
 
     let memberships = Array.isArray(membershipResult.data) ? membershipResult.data : [];
-    if (memberships.length === 0 && ["customer", "partner"].includes(metadataType)) {
-      const company = String(metadata.company_name || "").trim();
-      if (company.length < 2) {
-        throw new Error("Your account exists, but organization details are incomplete. Contact KRIM support; do not register again.");
+    if (memberships.length === 0 && ["customer", "partner", "driver"].includes(metadataType)) {
+      let provision;
+      if (metadataType === "driver") {
+        // A driver may self-provision only their own limited driver workspace.
+        // This does not approve a licence or grant access to any shipment.
+        provision = await client.rpc("krim_provision_driver_organization");
+      } else {
+        const company = String(metadata.company_name || "").trim();
+        if (company.length < 2) {
+          throw new Error("Your account exists, but organization details are incomplete. Contact KRIM support; do not register again.");
+        }
+        const rpc = metadataType === "partner" ? "krim_provision_partner_organization" : "krim_provision_customer_organization";
+        provision = await client.rpc(rpc, { p_legal_name: company });
       }
-      const rpc = metadataType === "partner" ? "krim_provision_partner_organization" : "krim_provision_customer_organization";
-      const provision = await client.rpc(rpc, { p_legal_name: company });
       if (provision.error) {
         console.error("KRIM organization provisioning failed:", provision.error);
-        throw new Error("Your login was accepted, but organization setup is not complete. Please send support this error code: ORGANIZATION_SETUP_FAILED. Do not register again.");
+        throw new Error(metadataType === "driver"
+          ? "Your account is signed in, but driver workspace setup could not finish. Refresh and sign in again. Reference: DRIVER_SETUP_FAILED."
+          : "Your login was accepted, but organization setup is not complete. Please send support this error code: ORGANIZATION_SETUP_FAILED. Do not register again.");
       }
       const retry = await client.from("krim_organization_members")
         .select("organization_id,role,status")
@@ -141,7 +150,7 @@
         .eq("status", "active");
       if (retry.error) {
         console.error("KRIM membership recheck failed:", retry.error);
-        throw new Error("Organization setup was submitted, but membership could not be verified. Please retry sign-in later. Reference: MEMBERSHIP_RECHECK_FAILED.");
+        throw new Error("Workspace setup was submitted, but membership could not be verified. Please retry sign-in later. Reference: MEMBERSHIP_RECHECK_FAILED.");
       }
       memberships = Array.isArray(retry.data) ? retry.data : [];
     }
