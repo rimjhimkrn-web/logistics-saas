@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#102b50">
-<meta name="description" content="KRIM Enterprise workspace for shipment visibility, commercial oversight, analytics, integrations and governed approvals.">
+<meta name="description" content="KRIM Enterprise Command — permission-scoped enterprise shipment visibility, commercial oversight, analytics and governed operational workspaces.">
 <title>Enterprise Command | KRIM Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="/core/styles/main.css">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="/config.js"></script>
@@ -13,96 +14,36 @@
 <script defer src="/core/localization/catalog.js"></script>
 <script defer src="/core/js/platform.js"></script>
 <script defer src="/core/js/portal.js"></script>
-<script>(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
+<script>
+(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());
+</script>
 <style>
-:root{--ent-navy:#102b50;--ent-ink:#172b45;--ent-blue:#2463eb;--ent-pale:#eef5ff;--ent-line:#e1e8f1;--ent-muted:#66758b}
-body[data-portal="enterprise"]{background:#f5f8fc;color:var(--ent-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-body[data-portal="enterprise"] .portal-layout{min-height:100vh}
-body[data-portal="enterprise"] .portal-side{background:linear-gradient(180deg,#102b50 0%,#0b1e38 100%);color:#fff;border-right:1px solid #203d61;box-shadow:8px 0 30px #102b5010}
-body[data-portal="enterprise"] .brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.06em}
-body[data-portal="enterprise"] .brand small{display:block;color:#b7c8df;font-size:9px;letter-spacing:.17em;margin-top:4px}
-body[data-portal="enterprise"] .brand-mark{background:linear-gradient(135deg,#77b7ff,#fff);color:#102b50;border-radius:12px;box-shadow:0 8px 20px #0002}
-body[data-portal="enterprise"] .portal-role{color:#a9c5e7;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:800;margin-top:30px}
-body[data-portal="enterprise"] .portal-nav a{border-radius:10px;margin:4px 0;color:#d5e1f1;padding:11px 13px;transition:background .18s ease,color .18s ease,transform .18s ease}
-body[data-portal="enterprise"] .portal-nav a:hover{background:#ffffff12;color:#fff;transform:translateX(2px)}
-body[data-portal="enterprise"] .portal-nav a[aria-current="page"]{background:#eaf3ff;color:#102b50;font-weight:750;box-shadow:inset 3px 0 #4d8cff}
-body[data-portal="enterprise"] .language-select{background:#19395f;color:#fff;border:1px solid #426080;border-radius:9px;padding:9px;max-width:100%}
-body[data-portal="enterprise"] .portal-side-bottom .button{color:#e7eff9}
-body[data-portal="enterprise"] .portal-main{min-width:0}
-body[data-portal="enterprise"] .portal-topbar{position:sticky;top:0;z-index:10;min-height:64px;background:#ffffffed;backdrop-filter:blur(12px);border-bottom:1px solid var(--ent-line);padding:12px clamp(16px,3vw,34px);display:flex;align-items:center;gap:16px}
-body[data-portal="enterprise"] .portal-topbar:after{content:"ENTERPRISE NETWORK";margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.14em;color:#58708e;background:#f0f5fc;border:1px solid #dce6f3;border-radius:999px;padding:8px 12px}
-body[data-portal="enterprise"] .portal-content{max-width:1600px;margin:0 auto;padding:clamp(18px,3vw,38px)}
-body[data-portal="enterprise"] .portal-content> .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#2857a4;font-weight:800;font-size:10px;letter-spacing:.16em;text-transform:uppercase;background:#e8f1ff;border:1px solid #d6e5ff;border-radius:999px;padding:8px 12px}
-body[data-portal="enterprise"] .portal-content> .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#3679f6;box-shadow:0 0 0 4px #3679f61b}
-body[data-portal="enterprise"] .portal-content>h1{font-size:clamp(30px,4vw,46px);line-height:1.08;letter-spacing:-.045em;color:#102b50;margin:17px 0 10px;font-weight:850}
-body[data-portal="enterprise"] .portal-content>p.muted{font-size:14px;line-height:1.75;color:var(--ent-muted);max-width:780px;margin:0 0 24px}
-body[data-portal="enterprise"] .portal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0 28px}
-body[data-portal="enterprise"] .portal-card,body[data-portal="enterprise"] .surface{background:#fff;border:1px solid var(--ent-line);border-radius:18px;box-shadow:0 8px 24px #1d3b6208;min-width:0;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-body[data-portal="enterprise"] .portal-card:hover{border-color:#c6d8f3;box-shadow:0 14px 30px #1d3b6210;transform:translateY(-2px)}
-body[data-portal="enterprise"] .portal-card h2{font-size:16px;letter-spacing:-.02em;color:#17375f;margin:0 0 10px}
-body[data-portal="enterprise"] .portal-card p{font-size:13px;line-height:1.65;color:#6b7b90}
-body[data-portal="enterprise"] .portal-card a{display:inline-flex;align-items:center;gap:8px;color:#215fca;font-size:13px;font-weight:750;text-decoration:none;margin-top:8px}
-body[data-portal="enterprise"] .portal-card a:hover{text-decoration:underline}
-body[data-portal="enterprise"] .data-table-wrap{overflow:auto;border:1px solid var(--ent-line);border-radius:16px;background:#fff;box-shadow:0 8px 24px #1d3b6208}
-body[data-portal="enterprise"] .data-table{width:100%;border-collapse:collapse;min-width:680px}
-body[data-portal="enterprise"] .data-table th{background:#f1f6fd;color:#526882;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 16px;white-space:nowrap}
-body[data-portal="enterprise"] .data-table td{padding:14px 16px;border-top:1px solid #edf1f7;font-size:13px;color:#34465e}
-body[data-portal="enterprise"] .empty-state{background:#fff;border:1px dashed #c7d6e9;border-radius:18px;padding:24px;color:#66758b;line-height:1.7}
-body[data-portal="enterprise"] .empty-state h2,body[data-portal="enterprise"] .empty-state h3{color:#17375f}
-body[data-portal="enterprise"] .button{border-radius:10px;font-weight:750}
-body[data-portal="enterprise"] input,body[data-portal="enterprise"] select,body[data-portal="enterprise"] textarea{border:1px solid #d7e1ee;border-radius:10px;background:#fff;padding:11px 12px;max-width:100%}
-body[data-portal="enterprise"] :focus-visible{outline:3px solid #80b4ff;outline-offset:3px}
-@media(max-width:1050px){body[data-portal="enterprise"] .portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){body[data-portal="enterprise"] .portal-content{padding:18px 14px 28px}body[data-portal="enterprise"] .portal-grid{grid-template-columns:1fr;gap:12px}body[data-portal="enterprise"] .portal-content>h1{font-size:32px}body[data-portal="enterprise"] .portal-topbar:after{font-size:8px;padding:7px 9px;letter-spacing:.08em}}
-@media(prefers-reduced-motion:reduce){body[data-portal="enterprise"] *{transition:none!important;scroll-behavior:auto!important}}
-
-/* Enterprise workspace finishing layer — premium global command interface */
-body[data-portal="enterprise"]{background:#f4f7fb}
-body[data-portal="enterprise"] .portal-layout{display:grid;grid-template-columns:268px minmax(0,1fr)}
-body[data-portal="enterprise"] .portal-side{width:268px;position:sticky;top:0;height:100dvh;overflow:auto;padding:24px 18px;display:flex;flex-direction:column}
-body[data-portal="enterprise"] .brand{display:flex;align-items:center;gap:12px;font-size:17px}
-body[data-portal="enterprise"] .brand-mark{display:grid;place-items:center;width:42px;height:42px;font-size:22px;font-weight:900}
-body[data-portal="enterprise"] .portal-nav{display:grid;gap:5px;margin-top:16px}
-body[data-portal="enterprise"] .portal-nav a{display:flex;align-items:center;min-height:42px}
-body[data-portal="enterprise"] .portal-side-bottom{margin-top:auto;padding-top:24px;display:grid;gap:10px}
-body[data-portal="enterprise"] .portal-main{min-width:0}
-body[data-portal="enterprise"] .portal-topbar{min-height:70px}
-body[data-portal="enterprise"] .portal-content{width:100%}
-body[data-portal="enterprise"] .portal-content h1{font-weight:850}
-body[data-portal="enterprise"] .portal-content .portal-grid{align-items:stretch}
-body[data-portal="enterprise"] .portal-card{padding:22px}
-body[data-portal="enterprise"] .portal-card h2{font-size:17px}
-body[data-portal="enterprise"] .portal-card p{margin:0;line-height:1.7}
-body[data-portal="enterprise"] .portal-card a{padding:8px 0}
-body[data-portal="enterprise"] .portal-content section,body[data-portal="enterprise"] .portal-content [class*="panel"],body[data-portal="enterprise"] .portal-content [class*="section"]{min-width:0}
-body[data-portal="enterprise"] .portal-content button,body[data-portal="enterprise"] .portal-content a,body[data-portal="enterprise"] .portal-side button{touch-action:manipulation}
-body[data-portal="enterprise"] .portal-content :is(input,select,textarea){width:100%;min-height:42px}
-body[data-portal="enterprise"] .portal-content :is(button,.button){min-height:40px}
-body[data-portal="enterprise"] .portal-content .data-table-wrap{max-width:100%}
-body[data-portal="enterprise"] .portal-content .empty-state{max-width:100%}
-body[data-portal="enterprise"] .portal-content :is(h2,h3){letter-spacing:-.025em}
-body[data-portal="enterprise"] .portal-content :is(.status,.badge,[class*="badge"],[class*="status"]){border-radius:999px}
-@media(max-width:900px){
- body[data-portal="enterprise"] .portal-layout{display:block}
- body[data-portal="enterprise"] .portal-side{position:fixed;z-index:40;left:0;top:0;bottom:0;height:100dvh;width:min(300px,86vw);transform:translateX(-105%);transition:transform .2s ease}
- body[data-portal="enterprise"] .portal-side.is-open,body[data-portal="enterprise"] .portal-side[data-open="true"]{transform:translateX(0)}
- body[data-portal="enterprise"] .portal-topbar{padding:12px 16px}
- body[data-portal="enterprise"] .portal-topbar:after{content:"KRIM ENTERPRISE"}
-}
-@media(max-width:640px){
- body[data-portal="enterprise"] .portal-content .portal-grid{grid-template-columns:minmax(0,1fr)}
- body[data-portal="enterprise"] .portal-content .portal-card{padding:18px}
- body[data-portal="enterprise"] .portal-content>h1{font-size:clamp(28px,8vw,36px)}
- body[data-portal="enterprise"] .portal-topbar>span{font-size:12px}
-}
-
+:root{color-scheme:light;--navy:#102b50;--navy2:#183e68;--blue:#2868d7;--cyan:#23a4bd;--ink:#20344c;--muted:#6d7f95;--line:#dfe7f1;--wash:#f4f7fb;--card:#fff;--shadow:0 12px 32px rgba(16,43,80,.055);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:92px}body[data-portal="enterprise"]{margin:0;min-height:100vh;background:var(--wash);color:var(--ink)}button,input,select,textarea{font:inherit}a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}:focus-visible{outline:3px solid #79b8ff!important;outline-offset:3px!important}
+.skip-link{position:fixed;z-index:100;top:8px;left:8px;transform:translateY(-160%);padding:10px 14px;background:#fff;color:var(--navy);border-radius:9px}.skip-link:focus{transform:translateY(0)}
+.portal-layout{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100vh}
+.portal-side{position:sticky;top:0;align-self:start;width:264px;height:100dvh;overflow:auto;padding:24px 17px 18px;background:linear-gradient(165deg,#102b50 0%,#0c203a 70%,#0a1b31 100%);color:#fff;border-right:1px solid #284565;display:flex;flex-direction:column;box-shadow:8px 0 30px #102b500c;z-index:40}
+.brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font-size:17px;font-weight:950;letter-spacing:.055em}.brand-mark{display:grid;place-items:center;width:43px;height:43px;flex:0 0 43px;border-radius:13px;background:linear-gradient(145deg,#9bd0ff,#fff);color:var(--navy);font-size:22px;font-weight:1000;box-shadow:0 8px 20px #0002}.brand small{display:block;margin-top:4px;color:#b5c9e1;font-size:8px;letter-spacing:.16em}
+.portal-role{margin:30px 8px 10px;color:#8fb4dc;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.17em}
+.portal-nav{display:grid;gap:4px;margin-top:7px}.portal-nav a{display:flex;align-items:center;gap:10px;min-height:43px;padding:10px 12px;border:1px solid transparent;border-radius:11px;color:#d4e1f1;text-decoration:none;font-size:12px;font-weight:750;line-height:1.35;transition:background .16s,color .16s,border-color .16s}.portal-nav a:before{content:"";width:7px;height:7px;flex:0 0 7px;border:1.5px solid #8aa9cc;border-radius:3px;transform:rotate(45deg)}.portal-nav a:hover{background:#ffffff12;color:#fff;border-color:#ffffff0c}.portal-nav a[aria-current="page"]{background:#edf5ff;color:#102b50;font-weight:850;box-shadow:inset 3px 0 #4e91ff}.portal-nav a[aria-current="page"]:before{background:#3276e7;border-color:#3276e7}
+.portal-side-bottom{display:grid;gap:10px;margin-top:auto;padding-top:24px}.language-select{width:100%;min-height:42px;padding:10px;border:1px solid #355579;border-radius:10px;background:#18395e;color:#fff}.portal-side-bottom .button{min-height:42px;border:1px solid #355579;border-radius:10px;background:#ffffff09;color:#e8f1fc;font-weight:800;cursor:pointer}.portal-side-bottom .button:hover{background:#ffffff16}
+.portal-main{min-width:0}.portal-topbar{position:sticky;top:0;z-index:20;min-height:70px;padding:13px clamp(15px,3vw,38px);display:flex;align-items:center;gap:14px;background:#ffffffed;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}.portal-topbar>span{color:#667b94;font-size:11px;font-weight:750}.portal-topbar:after{content:"ENTERPRISE NETWORK";margin-left:auto;padding:8px 11px;border:1px solid #dce6f3;border-radius:999px;background:#f3f7fd;color:#526b88;font-size:9px;font-weight:950;letter-spacing:.12em;white-space:nowrap}.mobile-nav-toggle{display:none;min-width:40px;min-height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);font-size:19px;cursor:pointer}
+.portal-content{width:100%;max-width:1600px;margin:0 auto;padding:clamp(20px,3vw,38px);min-width:0}.portal-content>.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid #d8e7fb;border-radius:999px;background:#eaf3ff;color:#285da6;font-size:9px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}.portal-content>.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#3278e8;box-shadow:0 0 0 4px #3278e81b}
+.portal-content>h1{margin:17px 0 10px;color:var(--navy);font-size:clamp(30px,4.2vw,46px);line-height:1.07;letter-spacing:-.05em;font-weight:900}.portal-content>p.muted{max-width:790px;margin:0 0 24px;color:var(--muted);font-size:13px;line-height:1.8}
+.portal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:22px 0 27px;align-items:stretch}.portal-card,.surface{min-width:0;padding:21px;border:1px solid var(--line);border-radius:17px;background:var(--card);box-shadow:var(--shadow);transition:transform .18s,border-color .18s,box-shadow .18s}.portal-card:hover{border-color:#c6d8f2;box-shadow:0 15px 32px #102b5010;transform:translateY(-2px)}.portal-card h2{margin:0 0 9px;color:#17375f;font-size:15px;line-height:1.4;letter-spacing:-.02em}.portal-card p{margin:0;color:#6b7d93;font-size:12px;line-height:1.75;overflow-wrap:anywhere}.portal-card a{display:inline-flex;align-items:center;gap:7px;margin-top:14px;color:#215fca;text-decoration:none;font-size:12px;font-weight:850}.portal-card a:hover{text-decoration:underline}
+.data-table-wrap{width:100%;overflow:auto;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:var(--shadow)}.data-table{width:100%;min-width:650px;border-collapse:collapse}.data-table th{padding:13px 15px;background:#f1f6fd;color:#526882;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}.data-table td{padding:14px 15px;border-top:1px solid #edf1f7;color:#34465e;font-size:12px}.empty-state{padding:22px;border:1px dashed #c8d7e9;border-radius:16px;background:#fff;color:#65788f;font-size:12px;line-height:1.8}.empty-state h2,.empty-state h3{color:#17375f}.button{min-height:40px;padding:9px 13px;border-radius:10px;font-weight:800}.button--quiet{background:transparent}.button--outline{border:1px solid #d6e1ee;background:#fff;color:var(--navy)}input,select,textarea{max-width:100%;border:1px solid #d6e1ee;border-radius:10px;background:#fff;padding:11px 12px;color:var(--ink)}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:12px;font-weight:800;color:#405773}.request-form{max-width:700px;padding:20px;border:1px solid var(--line);border-radius:17px;background:#fff}.request-form .button{background:var(--navy);color:#fff;border:0}.notice{padding:13px 15px;border-radius:12px;background:#f0f6ff;border:1px solid #dce9fb;color:#496685;font-size:12px;line-height:1.7}
+#appContent[aria-busy="true"]{opacity:.75}
+@media(max-width:1150px){.portal-layout{grid-template-columns:240px minmax(0,1fr)}.portal-side{width:240px;padding-inline:13px}.portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.portal-layout{display:block}.portal-side{position:fixed;left:0;top:0;bottom:0;width:min(300px,88vw);height:100dvh;transform:translateX(-105%);transition:transform .2s ease;box-shadow:18px 0 45px #07172d35}.portal-side.is-open{transform:translateX(0)}.mobile-nav-toggle{display:inline-grid;place-items:center}.portal-topbar{min-height:64px;padding:10px 14px}.portal-topbar:after{content:"KRIM ENTERPRISE";font-size:8px;letter-spacing:.07em;padding:7px 8px}.portal-content{padding:22px 18px 30px}}
+@media(max-width:580px){.portal-grid{grid-template-columns:minmax(0,1fr);gap:11px}.portal-content{padding:20px 13px 26px}.portal-content>h1{font-size:32px}.portal-card{padding:18px}.portal-topbar>span{font-size:10px;line-height:1.5}.portal-topbar:after{max-width:112px;white-space:normal;text-align:center;line-height:1.35}.data-table{min-width:610px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body class="portal-body" data-portal="enterprise">
 <a class="skip-link" href="#appContent">Skip to content</a>
 <div class="portal-layout">
-<aside class="portal-side" id="portalSide">
-<a class="brand" href="/"><span class="brand-mark">K</span><span>KRIM<small>GLOBAL LOGISTICS OS</small></span></a>
+<aside class="portal-side" id="portalSide" aria-label="Enterprise workspace sidebar">
+<a class="brand" href="/"><span class="brand-mark" aria-hidden="true">K</span><span>KRIM<small>GLOBAL LOGISTICS OS</small></span></a>
 <p class="portal-role">Enterprise workspace</p>
 <nav class="portal-nav" id="appNav" aria-label="Enterprise navigation"></nav>
 <div class="portal-side-bottom">
@@ -114,9 +55,17 @@ body[data-portal="enterprise"] .portal-content :is(.status,.badge,[class*="badge
 </div>
 </aside>
 <div class="portal-main">
-<header class="portal-topbar"><button class="mobile-nav-toggle" type="button" aria-label="Open workspace navigation" aria-expanded="false" aria-controls="portalSide" data-portal-menu>☰</button><span class="muted">Global enterprise operations · India active market</span><div data-notifications aria-live="polite"></div></header>
-<main class="portal-content" id="appContent" tabindex="-1"></main>
+<header class="portal-topbar"><button class="mobile-nav-toggle" type="button" aria-label="Open workspace navigation" aria-expanded="false" aria-controls="portalSide" data-portal-menu>☰</button><span>Enterprise operations · India active market · Global-ready architecture</span><div data-notifications aria-live="polite"></div></header>
+<main class="portal-content" id="appContent" tabindex="-1" aria-live="polite"></main>
 </div>
 </div>
+<script>
+(function(){
+  var menu=document.querySelector('[data-portal-menu]'),side=document.getElementById('portalSide');
+  if(!menu||!side)return;
+  menu.addEventListener('click',function(){var open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));side.classList.toggle('is-open',open);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){side.classList.remove('is-open');menu.setAttribute('aria-expanded','false');}});
+})();
+</script>
 </body>
 </html>
