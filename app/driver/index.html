@@ -68,6 +68,16 @@ async function loadProfile(){
   const m=session.user.user_metadata||{};
   profile={user_id:session.user.id,organization_id:membership.organization_id,full_name:String(m.full_name||''),country_code:String(m.country_code||'').toUpperCase(),phone:String(m.phone||''),company_name:String(m.company_name||''),licence_number:String(m.driver_licence_number||''),verification_status:'pending',onboarding_mode:m.driver_onboarding_mode==='development_test'?'development_test':'standard'};
   if(!profile.full_name)profile.full_name=String(session.user.email||'').split('@')[0]||'';
+  // Persist registration details immediately when the required profile fields are valid.
+  if(profile.full_name.trim().length>=2 && /^[A-Z]{2}$/.test(profile.country_code)){
+   const created=await client.from('krim_driver_profiles').upsert({
+    user_id:session.user.id,organization_id:membership.organization_id,full_name:profile.full_name.trim(),
+    country_code:profile.country_code,phone:profile.phone||'',company_name:profile.company_name||'',
+    licence_number:profile.licence_number||'',verification_status:'pending',
+    onboarding_mode:profile.onboarding_mode||'standard',updated_at:new Date().toISOString()
+   },{onConflict:'user_id'}).select('id,user_id,organization_id,full_name,country_code,phone,company_name,licence_number,verification_status,onboarding_mode').single();
+   if(!created.error)profile=created.data;else console.warn('Driver profile will need manual save:',created.error.message);
+  }
  }
  $('fullName').value=profile.full_name||'';countrySelect.value=profile.country_code||'';$('phone').value=profile.phone||'';$('company').value=profile.company_name||'';$('licence').value=profile.licence_number||'';$('verification').textContent=profile.verification_status||'Pending';
 }
