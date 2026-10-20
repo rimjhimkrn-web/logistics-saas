@@ -243,6 +243,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
     const onboardingClient = window.KRIM_SUPABASE || window.supabaseClient;
     let onboardingSession = null;
     let onboardingOrganizationId = null;
+    let uploadedDocumentPaths = [];
 
     function onboardingMessage(message, type = "error") {
       const node = document.getElementById("onboarding-feedback");
@@ -336,6 +337,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
         .from("krim-partner-verification")
         .upload(path, file, { contentType: file.type, upsert: false });
       if (error) throw new Error("Could not upload " + label + ": " + error.message);
+      uploadedDocumentPaths.push(data.path);
       return data.path;
     }
 
@@ -390,11 +392,20 @@ body>footer .text-white{color:var(--krim-navy)!important}
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
         onboardingMessage("Verification packet submitted successfully. Your status is pending human compliance review; partner access remains restricted until approval.", "success");
+        uploadedDocumentPaths = [];
         button.textContent = "Verification Packet Submitted";
       } catch (error) {
+        if (uploadedDocumentPaths.length) {
+          try {
+            await onboardingClient.storage.from("krim-partner-verification").remove(uploadedDocumentPaths);
+            uploadedDocumentPaths = [];
+          } catch (cleanupError) {
+            console.warn("Temporary verification upload cleanup did not complete.", cleanupError);
+          }
+        }
         onboardingMessage(error.message || "Partner onboarding submission failed.");
         button.disabled = false;
-        button.textContent = "Retry KYC Verification Submission →";
+        button.textContent = "Retry Business Verification Submission →";
       }
     });
 
