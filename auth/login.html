@@ -74,6 +74,17 @@
     enterprise: "../app/enterprise/index.html"
   };
 
+  // Always send a customer account to the dedicated customer workspace.
+  // A release query parameter avoids stale cached workspace HTML on GitHub Pages.
+  function workspaceUrl(accountType) {
+    const relativePath = workspacePaths[accountType];
+    if (!relativePath) throw new Error("No supported workspace is mapped to this account.");
+    const target = new URL(relativePath, window.location.href);
+    target.searchParams.set("krim_workspace", accountType);
+    target.searchParams.set("release", "20261020-customer-route-2");
+    return target.href;
+  }
+
   async function finishLogin(user) {
     if (!client) throw new Error("Secure sign-in did not initialize. Refresh and try again.");
 
@@ -155,7 +166,7 @@
       const factor = (factors?.totp || []).find(item => item.status === "verified");
       if (!factor) throw new Error("Multi-factor authentication is required, but no verified authenticator is enrolled. Contact your administrator.");
       factorId = factor.id;
-      postLoginPath = workspacePaths[accountType];
+      postLoginPath = workspaceUrl(accountType);
       document.getElementById("stage-login").classList.add("hidden");
       document.getElementById("stage-mfa").classList.remove("hidden");
       document.getElementById("mfa-code").focus();
@@ -168,10 +179,9 @@
       throw new Error("Your credentials were accepted, but the browser session was not saved. Enable site storage for GitHub Pages and try again.");
     }
 
-    postLoginPath = workspacePaths[accountType];
+    postLoginPath = workspaceUrl(accountType);
     say(loginFeedback, "Sign-in verified. Opening your authorized workspace…", "success");
-    const destination = new URL(postLoginPath, window.location.href);
-    window.location.replace(destination.href);
+    window.location.replace(postLoginPath);
   }
 
   loginForm.addEventListener("submit", async function (event) {
@@ -212,7 +222,7 @@
       if (sessionResult.error) throw sessionResult.error;
       if (!sessionResult.data?.session) throw new Error("MFA was verified but the browser session is unavailable. Please sign in again.");
       say(mfaFeedback, "Identity verified. Opening your workspace…", "success");
-      window.location.replace(new URL(postLoginPath, window.location.href).href);
+      window.location.replace(postLoginPath);
     } catch (error) {
       console.error("KRIM MFA verification failed:", error);
       say(mfaFeedback, error.message || "Verification failed. Check the code and retry.", "error");
