@@ -296,17 +296,77 @@
     content.append(eyebrow, title);
 
     if (selected[0] === "overview") {
-      content.append(node("p", "Workspace information is shown only when an authorized data source is available.", "muted"));
-      const cards = node("div", null, "grid portal-grid");
-      currentViews.filter((view) => view[0] !== "overview").slice(0, 6).forEach((view) => {
-        const card = node("article", null, "portal-card surface");
-        card.append(node("h2", view[1]), node("p", "No connected records are displayed here until the authorized source is available."));
-        const action = node("a", "Open " + view[1] + " →");
-        action.href = "#" + view[0];
-        card.append(action);
-        cards.append(card);
-      });
-      content.append(cards);
+      if (role === "enterprise") {
+        const hero = node("section", null, "enterprise-hero");
+        const heroCopy = node("div", null, "enterprise-hero-copy");
+        heroCopy.append(
+          node("span", "GLOBAL ENTERPRISE OPERATIONS · KRIM LOGISTICS OS", "enterprise-kicker"),
+          node("h2", "One command layer.\nGlobal freight visibility.", "enterprise-hero-title"),
+          node("p", "A unified control surface for enterprise shipment oversight, commercial coordination, financial visibility, integrations and governed decision workflows—across markets, organizations and transport modes.")
+        );
+        const heroActions = node("div", null, "enterprise-hero-actions");
+        [["#shipments","View shipments"],["#analytics","Explore analytics"],["#approvals","Approval queue"]].forEach(([href,label],index)=>{
+          const action=node("a",label+(index===0?" ↗":""));
+          action.href=href;
+          action.className=index===0?"enterprise-action enterprise-action-primary":"enterprise-action";
+          heroActions.append(action);
+        });
+        hero.append(heroCopy,heroActions);
+        const signals=node("div",null,"enterprise-signal-row");
+        [
+          ["01","GLOBAL NETWORK","Multi-market architecture"],
+          ["02","CONTROLLED ACCESS","Existing session & policy checks"],
+          ["03","DATA INTEGRITY","No fabricated operational metrics"]
+        ].forEach(([num,label,detail])=>{
+          const item=node("article",null,"enterprise-signal");
+          item.append(node("span",num,"enterprise-signal-number"),node("div",null,"enterprise-signal-copy"));
+          const copy=item.lastChild;copy.append(node("strong",label),node("small",detail));signals.append(item);
+        });
+        content.append(hero,signals);
+        const sectionHead=node("div",null,"enterprise-section-head");
+        const sectionCopy=node("div");
+        sectionCopy.append(node("h2","Enterprise workspaces"),node("p","Select a domain to open its dedicated workspace view. Data and actions remain subject to your account permissions."));
+        sectionHead.append(sectionCopy,node("span","14 OPERATIONAL DOMAINS","enterprise-section-tag"));
+        content.append(sectionHead);
+        const descriptions={
+          users:"Manage enterprise workspace access and review user visibility.",
+          shipments:"Review shipment records returned by the authorized platform data source.",
+          quotes:"Commercial quote visibility and enterprise rate coordination.",
+          finance:"Financial oversight, invoices and settlement visibility.",
+          analytics:"Operational reporting and performance insight readiness.",
+          documents:"Shipment documents and evidence visibility.",
+          integrations:"External-system connection readiness and integration governance.",
+          "ai-activity":"Review AI activity and responsible-use oversight.",
+          recommendations:"Recommendations, decision context and supporting evidence.",
+          approvals:"Review approval workflow visibility and pending decisions.",
+          automation:"Inspect automation health and workflow execution visibility.",
+          pause:"Emergency-control readiness and authorized pause procedures.",
+          memory:"Institutional knowledge, decisions and operational continuity."
+        };
+        const cards=node("div",null,"grid portal-grid enterprise-domain-grid");
+        currentViews.filter(view=>view[0]!=="overview").forEach((view,index)=>{
+          const card=node("article",null,"portal-card surface enterprise-domain-card");
+          card.append(node("span",String(index+1).padStart(2,"0"),"enterprise-domain-number"),node("h3",view[1]),node("p",descriptions[view[0]]||"Open this enterprise domain to review its current authorized view."));
+          const action=node("a","Open workspace →");action.href="#"+view[0];action.className="enterprise-domain-link";
+          card.append(action);cards.append(card);
+        });
+        content.append(cards);
+        const guard=node("div",null,"enterprise-integrity-note");
+        guard.append(node("strong","Operational integrity by design"),node("p","Unavailable integrations, approvals, automation and emergency controls are identified honestly. This dashboard does not invent shipment totals or claim that a backend action has run."));
+        content.append(guard);
+      } else {
+        content.append(node("p", "Workspace information is shown only when an authorized data source is available.", "muted"));
+        const cards = node("div", null, "grid portal-grid");
+        currentViews.filter((view) => view[0] !== "overview").slice(0, 6).forEach((view) => {
+          const card = node("article", null, "portal-card surface");
+          card.append(node("h2", view[1]), node("p", "No connected records are displayed here until the authorized source is available."));
+          const action = node("a", "Open " + view[1] + " →");
+          action.href = "#" + view[0];
+          card.append(action);
+          cards.append(card);
+        });
+        content.append(cards);
+      }
       if (role === "customer") await renderShipments(content);
       return;
     }
