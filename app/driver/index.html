@@ -19,7 +19,7 @@
 <script>
 (async()=>{const $=id=>document.getElementById(id),client=window.KRIM_SUPABASE;function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function date(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.valueOf())?'—':d.toLocaleString();}
 if(!client){$('notice').textContent='Supabase client is not configured. Check config.js.';$('authState').textContent='Unavailable';return;}
-try{const {data:{session},error}=await client.auth.getSession();if(error)throw error;if(!session){window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');return;}
+try{const {data:{session},error}=await client.auth.getSession();if(error)throw error;if(!session){window.location.replace(window.krimPath?window.krimPath('auth/login.html?role=driver'):'../../auth/login.html?role=driver');return;}
 const memberResult=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
 if(memberResult.error)throw new Error('Driver authorization could not be verified. No driver records were loaded. Please retry or contact your organization administrator.');
 const driverMemberships=(memberResult.data||[]).filter(m=>/^(driver|fleet_driver)$/i.test(String(m.role||'').trim()));
