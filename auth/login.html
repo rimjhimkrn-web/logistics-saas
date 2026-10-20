@@ -173,15 +173,21 @@
     if (mapped.includes("platform_admin")) {
       throw new Error("Platform administration uses a separate privileged sign-in.");
     }
-    if (mapped.length !== 1) {
+    // A user may hold multiple authorized roles. The workspace chosen on the
+    // public access portal is a routing preference only; it is accepted only if
+    // the authenticated user already has a matching active backend membership.
+    let accountType;
+    if (requestedRole && publicRoles.includes(requestedRole)) {
+      if (!mapped.includes(requestedRole)) {
+        throw new Error("This account is not registered for the selected workspace. Choose a workspace for which you have active access, or ask the organization administrator to provision it.");
+      }
+      accountType = requestedRole;
+    } else if (mapped.length === 1) {
+      accountType = mapped[0];
+    } else {
       throw new Error(mapped.length
-        ? "This account has multiple workspace roles. Ask your organization administrator to configure one primary workspace."
+        ? "This account has multiple authorized workspaces. Return to the KRIM access portal and choose the workspace you want to open."
         : "Your organization membership does not map to a supported workspace. Contact KRIM support.");
-    }
-
-    const accountType = mapped[0];
-    if (requestedRole && publicRoles.includes(requestedRole) && requestedRole !== accountType) {
-      throw new Error("This account is not registered for the selected workspace. Choose the matching sign-in option.");
     }
     if (!workspacePaths[accountType]) throw new Error("No supported workspace is mapped to this account.");
 
