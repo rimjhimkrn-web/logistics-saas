@@ -46,9 +46,12 @@
   function normalize(value) {
     return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   }
-  function mapMembership(m) {
-    const org = m.krim_organizations || {};
-    const values = [normalize(org.organization_type), normalize(org.organization_type_code), normalize(m.role)];
+  function mapMembership(m, org) {
+    const values = [
+      normalize(org && org.organization_type),
+      normalize(org && org.organization_type_code),
+      normalize(m && m.role)
+    ];
     if (values.some(v => /platform_admin|platform_superadmin|superadmin/.test(v))) return "platform_admin";
     if (values.some(v => /operations|dispatcher|control_tower/.test(v))) return "operations";
     if (values.some(v => /finance|accountant|settlement/.test(v))) return "finance";
@@ -72,51 +75,73 @@
   };
 
   async function finishLogin(user) {
+    if (!client) throw new Error("Secure sign-in did not initialize. Refresh and try again.");
+
     const metadata = user.user_metadata || {};
     const metadataType = normalize(metadata.krim_account_type || metadata.account_type);
     if (["platform_admin", "platform_superadmin", "superadmin", "admin"].includes(metadataType)) {
       throw new Error("Platform administration uses a separate privileged sign-in.");
     }
 
-    let memberships = [];
-    let membershipLookupFailed = false;
-    const lookup = await client.from("krim_organization_members")
-      .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
-      .eq("user_id", user.id).eq("status", "active");
-    if (lookup.error) {
-      membershipLookupFailed = true;
-      console.warn("KRIM membership lookup failed; provisioning will be attempted only for public self-service account types.", lookup.error);
-    } else {
-      memberships = Array.isArray(lookup.data) ? lookup.data : [];
+    // Resolve memberships and organizations separately. This avoids a fragile
+    // nested PostgREST relationship lookup being mistaken for a missing role.
+    const membershipResult = await client.from("krim_organization_members")
+      .select("organization_id,role,status")
+      .eq("user_id", user.id)
+      .eq("status", "active");
+    if (membershipResult.error) {
+      console.error("KRIM membership lookup failed:", membershipResult.error);
+      throw new Error("Sign-in succeeded, but KRIM could not verify your active organization membership. Please retry; if it continues, send support the error code: MEMBERSHIP_LOOKUP_FAILED.");
     }
 
-    let accountType = "";
-    if (!membershipLookupFailed && memberships.length) {
-      const mapped = [...new Set(memberships.map(mapMembership).filter(Boolean))];
-      if (mapped.includes("platform_admin")) throw new Error("Platform administration uses a separate privileged sign-in.");
-      if (mapped.length !== 1) {
-        throw new Error(mapped.length
-          ? "This account has multiple workspace roles. Ask your organization administrator to configure one primary workspace."
-          : "Your active organization membership does not map to a supported workspace. Contact KRIM support.");
-      }
-      accountType = mapped[0];
-    } else if (["customer", "partner"].includes(metadataType)) {
+    let memberships = Array.isArray(membershipResult.data) ? membershipResult.data : [];
+    if (memberships.length === 0 && ["customer", "partner"].includes(metadataType)) {
       const company = String(metadata.company_name || "").trim();
       if (company.length < 2) {
-        throw new Error("Your account is signed in, but organization details are incomplete. Contact KRIM support; do not create another account.");
+        throw new Error("Your account exists, but organization details are incomplete. Contact KRIM support; do not register again.");
       }
       const rpc = metadataType === "partner" ? "krim_provision_partner_organization" : "krim_provision_customer_organization";
       const provision = await client.rpc(rpc, { p_legal_name: company });
       if (provision.error) {
-        throw new Error("Your password was accepted, but workspace setup could not be verified: " + provision.error.message + ". Do not create another account.");
+        console.error("KRIM organization provisioning failed:", provision.error);
+        throw new Error("Your login was accepted, but organization setup is not complete. Please send support this error code: ORGANIZATION_SETUP_FAILED. Do not register again.");
       }
-      accountType = metadataType;
-    } else {
-      throw new Error(membershipLookupFailed
-        ? "We could not verify your active organization access. Retry once; if this continues, contact KRIM support."
-        : "No active KRIM organization membership was found. Ask your organization administrator to finish account setup.");
+      const retry = await client.from("krim_organization_members")
+        .select("organization_id,role,status")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+      if (retry.error) {
+        console.error("KRIM membership recheck failed:", retry.error);
+        throw new Error("Organization setup was submitted, but membership could not be verified. Please retry sign-in later. Reference: MEMBERSHIP_RECHECK_FAILED.");
+      }
+      memberships = Array.isArray(retry.data) ? retry.data : [];
     }
 
+    if (!memberships.length) {
+      throw new Error("No active KRIM organization membership was found for this account. Ask KRIM support to finish account setup; do not create another account.");
+    }
+
+    const orgIds = [...new Set(memberships.map(m => m.organization_id).filter(id => id !== null && id !== undefined))];
+    if (!orgIds.length) throw new Error("Your active membership is missing its organization link. Contact KRIM support.");
+    const orgResult = await client.from("krim_organizations")
+      .select("id,organization_type,organization_type_code")
+      .in("id", orgIds);
+    if (orgResult.error) {
+      console.error("KRIM organization lookup failed:", orgResult.error);
+      throw new Error("Your membership exists, but KRIM could not verify its organization type. Reference: ORGANIZATION_LOOKUP_FAILED.");
+    }
+    const orgById = new Map((orgResult.data || []).map(org => [String(org.id), org]));
+    const mapped = [...new Set(memberships.map(m => mapMembership(m, orgById.get(String(m.organization_id)))).filter(Boolean))];
+    if (mapped.includes("platform_admin")) {
+      throw new Error("Platform administration uses a separate privileged sign-in.");
+    }
+    if (mapped.length !== 1) {
+      throw new Error(mapped.length
+        ? "This account has multiple workspace roles. Ask your organization administrator to configure one primary workspace."
+        : "Your organization membership does not map to a supported workspace. Contact KRIM support.");
+    }
+
+    const accountType = mapped[0];
     if (requestedRole && publicRoles.includes(requestedRole) && requestedRole !== accountType) {
       throw new Error("This account is not registered for the selected workspace. Choose the matching sign-in option.");
     }
@@ -128,9 +153,7 @@
       const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();
       if (factorsError) throw factorsError;
       const factor = (factors?.totp || []).find(item => item.status === "verified");
-      if (!factor) {
-        throw new Error("Multi-factor authentication is required, but no verified authenticator is enrolled. Contact your administrator.");
-      }
+      if (!factor) throw new Error("Multi-factor authentication is required, but no verified authenticator is enrolled. Contact your administrator.");
       factorId = factor.id;
       postLoginPath = workspacePaths[accountType];
       document.getElementById("stage-login").classList.add("hidden");
@@ -139,14 +162,14 @@
       return;
     }
 
-    // Confirm the browser has persisted a usable session before navigating.
     const sessionResult = await client.auth.getSession();
     if (sessionResult.error) throw sessionResult.error;
-    if (!sessionResult.data || !sessionResult.data.session || sessionResult.data.session.user.id !== user.id) {
+    if (!sessionResult.data?.session || sessionResult.data.session.user.id !== user.id) {
       throw new Error("Your credentials were accepted, but the browser session was not saved. Enable site storage for GitHub Pages and try again.");
     }
+
     postLoginPath = workspacePaths[accountType];
-    say(loginFeedback, "Sign-in successful. Opening your authorized workspace…", "success");
+    say(loginFeedback, "Sign-in verified. Opening your authorized workspace…", "success");
     const destination = new URL(postLoginPath, window.location.href);
     window.location.replace(destination.href);
   }
