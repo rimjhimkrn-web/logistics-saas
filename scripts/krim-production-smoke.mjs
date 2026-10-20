@@ -26,11 +26,11 @@ const required = [
   "public/partner/accepted-loads.html",
   "public/shipper/booking-request.html",
   "public/shipper/active-shipments.html",
-  "public/partner/partner-verification-control.html",
+  "control/partner-verification.html",
   "supabase/migrations/20261020074510_global_partner_onboarding_location_hardening.sql",
   "supabase/migrations/20261020074900_partner_verification_admin_review_workflow.sql",
-  "supabase/migrations/20261020075927_partner_account_modes_test_and_individual_interest.sql",
-  "supabase/migrations/20261020080517_add_partner_account_mode_column.sql",
+  "supabase/migrations/20261020133000_partner_account_modes_test_and_individual_interest.sql",
+  "supabase/migrations/20261020141000_add_partner_account_mode_column.sql",
 ];
 
 const failures = [];
