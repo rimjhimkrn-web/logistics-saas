@@ -159,33 +159,62 @@
                 return;
             }
 
-            // Prevent an authenticated partner from remaining on the customer command center.
-            // Metadata is the first signal; active organization membership is a fallback for older accounts.
+            // Resolve the signed-in user's workspace. This browser guard improves routing;
+            // Supabase RLS and server-side permissions remain the actual data-security boundary.
             const metadata = session.user?.user_metadata || {};
-            let partnerAccount = metadata.krim_account_type === 'partner';
-            if (!partnerAccount) {
-                try {
-                    const { data: memberships, error: membershipError } = await supabaseClient
-                        .from('krim_organization_members')
-                        .select('role,status,krim_organizations(organization_type,organization_type_code)')
-                        .eq('user_id', session.user.id)
-                        .eq('status', 'active');
-                    if (!membershipError && Array.isArray(memberships)) {
-                        partnerAccount = memberships.some(m => {
-                            const org = m.krim_organizations || {};
-                            return /partner|carrier|transport|forwarder/i.test(
-                                String(org.organization_type || '') + ' ' +
-                                String(org.organization_type_code || '') + ' ' +
-                                String(m.role || '')
-                            );
-                        });
-                    }
-                } catch (roleLookupError) {
-                    console.warn('Partner role fallback lookup failed.', roleLookupError);
+            const metadataType = String(metadata.krim_account_type || metadata.account_type || "").toLowerCase();
+            let membershipRows = [];
+            let membershipLookupFailed = false;
+            try {
+                const { data: memberships, error: membershipError } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('role,status,krim_organizations(organization_type,organization_type_code)')
+                    .eq('user_id', session.user.id)
+                    .eq('status', 'active');
+                if (membershipError) throw membershipError;
+                membershipRows = Array.isArray(memberships) ? memberships : [];
+            } catch (roleLookupError) {
+                membershipLookupFailed = true;
+                console.warn('Workspace membership lookup failed.', roleLookupError);
+            }
+
+            const membershipText = membershipRows.map(m => {
+                const org = m.krim_organizations || {};
+                return [m.role, org.organization_type, org.organization_type_code].join(' ').toLowerCase();
+            }).join(' ');
+            const hasPartnerMembership = /partner|carrier|transport|forwarder/.test(membershipText);
+            const hasEnterpriseMembership = /enterprise/.test(membershipText);
+            const hasCustomerMembership = /customer|shipper|client/.test(membershipText);
+
+            if (metadataType === 'partner' || hasPartnerMembership) {
+                window.location.replace('/logistics-saas/app/partner/index.html');
+                return;
+            }
+            if (hasEnterpriseMembership) {
+                window.location.replace('/logistics-saas/app/enterprise/index.html');
+                return;
+            }
+            if (/(driver|warehouse|fulfilment|fulfillment|customs|clearance|finance|accountant|settlement|operations|dispatcher|control_tower)/.test(membershipText)) {
+                const roleRoutes = [
+                    [/driver|fleet_driver/, 'driver'],
+                    [/warehouse|fulfilment|fulfillment/, 'warehouse'],
+                    [/customs|clearance/, 'customs'],
+                    [/finance|accountant|settlement/, 'finance'],
+                    [/operations|dispatcher|control_tower/, 'operations']
+                ];
+                const match = roleRoutes.find(([pattern]) => pattern.test(membershipText));
+                if (match) {
+                    window.location.replace('/logistics-saas/app/' + match[1] + '/index.html');
+                    return;
                 }
             }
-            if (partnerAccount) {
-                window.location.replace('/logistics-saas/app/partner/index.html');
+
+            // Customer accounts are the only public self-registration path.
+            // If membership lookup failed, allow only an explicitly registered customer
+            // account to continue; never interpret a failed lookup as staff authorization.
+            const isCustomer = metadataType === 'customer' || hasCustomerMembership;
+            if (!isCustomer || (membershipLookupFailed && metadataType !== 'customer')) {
+                window.location.replace('/logistics-saas/auth/login.html?reason=workspace_access_denied');
                 return;
             }
 
