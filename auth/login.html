@@ -48,20 +48,36 @@
     return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   }
   function mapMembership(m, org) {
-    const values = [
-      normalize(org && org.organization_type),
-      normalize(org && org.organization_type_code),
-      normalize(m && m.role)
+    // The membership role is the user's assigned workspace. Organization type
+    // describes the employer and must not override a driver employed by a carrier.
+    const role = normalize(m && m.role);
+    const directRoles = [
+      [/platform_admin|platform_superadmin|superadmin/, "platform_admin"],
+      [/^driver$|fleet_driver/, "driver"],
+      [/^warehouse$|warehouse_operator|fulfilment|fulfillment/, "warehouse"],
+      [/^customs$|customs_clearance|trade_compliance/, "customs"],
+      [/^finance$|accountant|settlement/, "finance"],
+      [/^operations$|dispatcher|control_tower/, "operations"],
+      [/^partner$|carrier|transport_partner|forwarder/, "partner"],
+      [/^enterprise$|enterprise_member/, "enterprise"],
+      [/^customer$|shipper|client/, "customer"]
     ];
-    if (values.some(v => /platform_admin|platform_superadmin|superadmin/.test(v))) return "platform_admin";
-    if (values.some(v => /operations|dispatcher|control_tower/.test(v))) return "operations";
-    if (values.some(v => /finance|accountant|settlement/.test(v))) return "finance";
-    if (values.some(v => /customs|clearance/.test(v))) return "customs";
-    if (values.some(v => /warehouse|fulfilment|fulfillment/.test(v))) return "warehouse";
-    if (values.some(v => /^driver$|fleet_driver/.test(v))) return "driver";
-    if (values.some(v => /partner|carrier|transport|forwarder/.test(v))) return "partner";
-    if (values.some(v => /enterprise/.test(v))) return "enterprise";
-    if (values.some(v => /customer|shipper|client/.test(v))) return "customer";
+    for (const [pattern, accountType] of directRoles) {
+      if (pattern.test(role)) return accountType;
+    }
+    const orgTypes = [
+      normalize(org && org.organization_type),
+      normalize(org && org.organization_type_code)
+    ];
+    if (orgTypes.some(v => /platform_admin|platform_superadmin|superadmin/.test(v))) return "platform_admin";
+    if (orgTypes.some(v => /operations|dispatcher|control_tower/.test(v))) return "operations";
+    if (orgTypes.some(v => /finance|accountant|settlement/.test(v))) return "finance";
+    if (orgTypes.some(v => /customs|clearance/.test(v))) return "customs";
+    if (orgTypes.some(v => /warehouse|fulfilment|fulfillment/.test(v))) return "warehouse";
+    if (orgTypes.some(v => /driver|fleet_driver/.test(v))) return "driver";
+    if (orgTypes.some(v => /partner|carrier|transport|forwarder/.test(v))) return "partner";
+    if (orgTypes.some(v => /enterprise/.test(v))) return "enterprise";
+    if (orgTypes.some(v => /customer|shipper|client/.test(v))) return "customer";
     return "";
   }
   const workspacePaths = {
@@ -202,7 +218,7 @@
       if (!user || !data.session) throw new Error("Authentication did not return a usable session. Please sign in again.");
       await finishLogin(user);
     } catch (error) {
-      console.error("KRIM customer sign-in/routing failed:", error);
+      console.error("KRIM role-checked sign-in/routing failed:", error);
       say(loginFeedback, error.message || "Sign-in failed. Please try again.", "error");
       loginBtn.disabled = false; loginBtn.textContent = "Sign in securely →";
     }
