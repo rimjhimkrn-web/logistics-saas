@@ -1,6 +1,81 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#091b28"><title>Enterprise workspace | KRIM</title><link rel="stylesheet" href="/core/styles/main.css"><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script defer src="/config.js"></script><script defer src="/config/markets.js"></script><script defer src="/core/localization/catalog.js"></script><script defer src="/core/js/platform.js"></script><script defer src="/core/js/portal.js"></script>
-    <!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-    <script>(function(){var p=location.pathname;var b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102b50">
+<meta name="description" content="KRIM Enterprise workspace for shipment visibility, commercial oversight, analytics, integrations and governed approvals.">
+<title>Enterprise Command | KRIM Logistics</title>
+<link rel="stylesheet" href="/core/styles/main.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="/config.js"></script>
+<script defer src="/config/markets.js"></script>
+<script defer src="/core/localization/catalog.js"></script>
+<script defer src="/core/js/platform.js"></script>
+<script defer src="/core/js/portal.js"></script>
+<script>(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
+<style>
+:root{--ent-navy:#102b50;--ent-ink:#172b45;--ent-blue:#2463eb;--ent-pale:#eef5ff;--ent-line:#e1e8f1;--ent-muted:#66758b}
+body[data-portal="enterprise"]{background:#f5f8fc;color:var(--ent-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body[data-portal="enterprise"] .portal-layout{min-height:100vh}
+body[data-portal="enterprise"] .portal-side{background:linear-gradient(180deg,#102b50 0%,#0b1e38 100%);color:#fff;border-right:1px solid #203d61;box-shadow:8px 0 30px #102b5010}
+body[data-portal="enterprise"] .brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.06em}
+body[data-portal="enterprise"] .brand small{display:block;color:#b7c8df;font-size:9px;letter-spacing:.17em;margin-top:4px}
+body[data-portal="enterprise"] .brand-mark{background:linear-gradient(135deg,#77b7ff,#fff);color:#102b50;border-radius:12px;box-shadow:0 8px 20px #0002}
+body[data-portal="enterprise"] .portal-role{color:#a9c5e7;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:800;margin-top:30px}
+body[data-portal="enterprise"] .portal-nav a{border-radius:10px;margin:4px 0;color:#d5e1f1;padding:11px 13px;transition:background .18s ease,color .18s ease,transform .18s ease}
+body[data-portal="enterprise"] .portal-nav a:hover{background:#ffffff12;color:#fff;transform:translateX(2px)}
+body[data-portal="enterprise"] .portal-nav a[aria-current="page"]{background:#eaf3ff;color:#102b50;font-weight:750;box-shadow:inset 3px 0 #4d8cff}
+body[data-portal="enterprise"] .language-select{background:#19395f;color:#fff;border:1px solid #426080;border-radius:9px;padding:9px;max-width:100%}
+body[data-portal="enterprise"] .portal-side-bottom .button{color:#e7eff9}
+body[data-portal="enterprise"] .portal-main{min-width:0}
+body[data-portal="enterprise"] .portal-topbar{position:sticky;top:0;z-index:10;min-height:64px;background:#ffffffed;backdrop-filter:blur(12px);border-bottom:1px solid var(--ent-line);padding:12px clamp(16px,3vw,34px);display:flex;align-items:center;gap:16px}
+body[data-portal="enterprise"] .portal-topbar:after{content:"ENTERPRISE NETWORK";margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.14em;color:#58708e;background:#f0f5fc;border:1px solid #dce6f3;border-radius:999px;padding:8px 12px}
+body[data-portal="enterprise"] .portal-content{max-width:1600px;margin:0 auto;padding:clamp(18px,3vw,38px)}
+body[data-portal="enterprise"] .portal-content> .eyebrow{display:inline-flex;align-items:center;gap:8px;color:#2857a4;font-weight:800;font-size:10px;letter-spacing:.16em;text-transform:uppercase;background:#e8f1ff;border:1px solid #d6e5ff;border-radius:999px;padding:8px 12px}
+body[data-portal="enterprise"] .portal-content> .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#3679f6;box-shadow:0 0 0 4px #3679f61b}
+body[data-portal="enterprise"] .portal-content>h1{font-size:clamp(30px,4vw,46px);line-height:1.08;letter-spacing:-.045em;color:#102b50;margin:17px 0 10px;font-weight:850}
+body[data-portal="enterprise"] .portal-content>p.muted{font-size:14px;line-height:1.75;color:var(--ent-muted);max-width:780px;margin:0 0 24px}
+body[data-portal="enterprise"] .portal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0 28px}
+body[data-portal="enterprise"] .portal-card,body[data-portal="enterprise"] .surface{background:#fff;border:1px solid var(--ent-line);border-radius:18px;box-shadow:0 8px 24px #1d3b6208;min-width:0;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+body[data-portal="enterprise"] .portal-card:hover{border-color:#c6d8f3;box-shadow:0 14px 30px #1d3b6210;transform:translateY(-2px)}
+body[data-portal="enterprise"] .portal-card h2{font-size:16px;letter-spacing:-.02em;color:#17375f;margin:0 0 10px}
+body[data-portal="enterprise"] .portal-card p{font-size:13px;line-height:1.65;color:#6b7b90}
+body[data-portal="enterprise"] .portal-card a{display:inline-flex;align-items:center;gap:8px;color:#215fca;font-size:13px;font-weight:750;text-decoration:none;margin-top:8px}
+body[data-portal="enterprise"] .portal-card a:hover{text-decoration:underline}
+body[data-portal="enterprise"] .data-table-wrap{overflow:auto;border:1px solid var(--ent-line);border-radius:16px;background:#fff;box-shadow:0 8px 24px #1d3b6208}
+body[data-portal="enterprise"] .data-table{width:100%;border-collapse:collapse;min-width:680px}
+body[data-portal="enterprise"] .data-table th{background:#f1f6fd;color:#526882;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:14px 16px;white-space:nowrap}
+body[data-portal="enterprise"] .data-table td{padding:14px 16px;border-top:1px solid #edf1f7;font-size:13px;color:#34465e}
+body[data-portal="enterprise"] .empty-state{background:#fff;border:1px dashed #c7d6e9;border-radius:18px;padding:24px;color:#66758b;line-height:1.7}
+body[data-portal="enterprise"] .empty-state h2,body[data-portal="enterprise"] .empty-state h3{color:#17375f}
+body[data-portal="enterprise"] .button{border-radius:10px;font-weight:750}
+body[data-portal="enterprise"] input,body[data-portal="enterprise"] select,body[data-portal="enterprise"] textarea{border:1px solid #d7e1ee;border-radius:10px;background:#fff;padding:11px 12px;max-width:100%}
+body[data-portal="enterprise"] :focus-visible{outline:3px solid #80b4ff;outline-offset:3px}
+@media(max-width:1050px){body[data-portal="enterprise"] .portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){body[data-portal="enterprise"] .portal-content{padding:18px 14px 28px}body[data-portal="enterprise"] .portal-grid{grid-template-columns:1fr;gap:12px}body[data-portal="enterprise"] .portal-content>h1{font-size:32px}body[data-portal="enterprise"] .portal-topbar:after{font-size:8px;padding:7px 9px;letter-spacing:.08em}}
+@media(prefers-reduced-motion:reduce){body[data-portal="enterprise"] *{transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
-<body class="portal-body" data-portal="enterprise"><a class="skip-link" href="#appContent">Skip to content</a><div class="portal-layout"><aside class="portal-side" id="portalSide"><a class="brand" href="/"><span class="brand-mark">K</span><span>KRIM<small>LOGISTICS SYSTEMS</small></span></a><p class="portal-role">Enterprise workspace</p><nav class="portal-nav" id="appNav" aria-label="Enterprise navigation"></nav><div class="portal-side-bottom"><label class="visually-hidden" for="language">Language</label><select class="language-select" id="language" data-language-select aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="tr">Türkçe</option><option value="zh-CN">简体中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="ru">Русский</option><option value="bn">বাংলা</option></select><button class="button button--quiet" type="button" data-logout data-i18n="signOut">Sign out</button></div></aside><div class="portal-main"><header class="portal-topbar"><button class="mobile-nav-toggle" type="button" aria-label="Open workspace navigation" aria-expanded="false" aria-controls="portalSide" data-portal-menu>☰</button><span class="muted">India · Initial active market</span><div data-notifications aria-live="polite"></div></header><main class="portal-content" id="appContent" tabindex="-1"></main></div></div></body></html>
+<body class="portal-body" data-portal="enterprise">
+<a class="skip-link" href="#appContent">Skip to content</a>
+<div class="portal-layout">
+<aside class="portal-side" id="portalSide">
+<a class="brand" href="/"><span class="brand-mark">K</span><span>KRIM<small>GLOBAL LOGISTICS OS</small></span></a>
+<p class="portal-role">Enterprise workspace</p>
+<nav class="portal-nav" id="appNav" aria-label="Enterprise navigation"></nav>
+<div class="portal-side-bottom">
+<label class="visually-hidden" for="language">Language</label>
+<select class="language-select" id="language" data-language-select aria-label="Language">
+<option value="en">English</option><option value="hi">हिन्दी</option><option value="ar">العربية</option><option value="es">Español</option><option value="fr">Français</option><option value="pt">Português</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="tr">Türkçe</option><option value="zh-CN">简体中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="ru">Русский</option><option value="bn">বাংলা</option>
+</select>
+<button class="button button--quiet" type="button" data-logout data-i18n="signOut">Sign out</button>
+</div>
+</aside>
+<div class="portal-main">
+<header class="portal-topbar"><button class="mobile-nav-toggle" type="button" aria-label="Open workspace navigation" aria-expanded="false" aria-controls="portalSide" data-portal-menu>☰</button><span class="muted">Global enterprise operations · India active market</span><div data-notifications aria-live="polite"></div></header>
+<main class="portal-content" id="appContent" tabindex="-1"></main>
+</div>
+</div>
+</body>
+</html>
