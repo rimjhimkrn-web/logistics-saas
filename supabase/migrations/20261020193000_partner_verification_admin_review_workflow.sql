@@ -21,9 +21,9 @@ BEGIN
   JOIN public.krim_organizations o ON o.id=c.organization_id
   ORDER BY CASE WHEN c.status IN ('open','in_review','pending_information') THEN 0 ELSE 1 END,
            c.submitted_at DESC NULLS LAST
-  LIMIT 100;
+  LIMIT 50;
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION public.krim_admin_review_partner_verification(p_case_id bigint, p_decision text, p_reason text DEFAULT NULL::text)
  RETURNS jsonb
@@ -119,8 +119,7 @@ BEGIN
 
   RETURN jsonb_build_object('case_id',p_case_id,'organization_id',v_org_id,'decision',v_decision,'status',v_new_state->>'case_status');
 END;
-$function$
-
+$function$;
 REVOKE ALL ON FUNCTION public.krim_admin_list_partner_verification_cases() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.krim_admin_list_partner_verification_cases() TO authenticated;
 REVOKE ALL ON FUNCTION public.krim_admin_review_partner_verification(bigint,text,text) FROM PUBLIC, anon;
