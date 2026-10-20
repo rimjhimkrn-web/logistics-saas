@@ -32,6 +32,7 @@
   document.getElementById("role-note").textContent =
     requestedRole === "customer" ? "Customer / shipper sign-in." :
     requestedRole === "partner" ? "Logistics partner sign-in." :
+    requestedRole === "driver" ? "Driver sign-in. Successful authentication opens the Driver Workspace after role verification." :
     "Enter your registered account credentials to continue.";
 
   document.getElementById("toggle").addEventListener("click", function () {
@@ -81,7 +82,8 @@
     if (!relativePath) throw new Error("No supported workspace is mapped to this account.");
     const target = new URL(relativePath, window.location.href);
     target.searchParams.set("krim_workspace", accountType);
-    target.searchParams.set("release", accountType === "partner" ? "20261020-partner-workspace-v3" : "20261020-customer-route-2");
+    const releases = { customer: "20261020-customer-route-2", partner: "20261020-partner-workspace-v3", driver: "20261021-driver-workspace-v1" };
+    target.searchParams.set("release", releases[accountType] || "20261021-role-routing-v1");
     return target.href;
   }
 
