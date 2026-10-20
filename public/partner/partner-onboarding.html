@@ -92,7 +92,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
         <span class="text-slate-500 text-[10px]">Review timeline varies by jurisdiction and document completeness</span>
       </div>
       <h1 class="text-2xl font-extrabold text-white">Partner Business Verification</h1>
-      <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Submit business identity and operating-authority details for compliance review. Approval depends on jurisdiction, transport category, document completeness, and independent verification.</p>
+      <p class="text-slate-400 leading-relaxed text-[11px] max-w-2xl">Choose the pathway that matches your situation. You can explore KRIM in development/test mode without company documents. Live commercial partner access always requires the applicable checks and approval.</p>
     </section>
 
     <!-- FORM STEPS CONTAINER -->
@@ -116,7 +116,34 @@ body>footer .text-white{color:var(--krim-navy)!important}
 
       <!-- FORM FIELDS -->
       <form id="partner-onboarding-form" class="space-y-6">
-        
+        <div class="rounded-2xl border border-slate-800 bg-[#040814] p-5 space-y-3">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider">Choose your partner pathway</h3>
+          <label for="partner-account-mode" class="block text-[10px] font-bold uppercase">Account pathway *</label>
+          <select id="partner-account-mode" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white">
+            <option value="">Choose the pathway that fits you</option>
+            <option value="development_test">Development / Test Account — no business documents</option>
+            <option value="individual_interest">Individual / Independent Partner</option>
+            <option value="registered_business">Registered Logistics Business</option>
+          </select>
+          <p class="text-slate-400 text-[11px]">Use Development / Test if you are building or testing KRIM and do not yet operate a registered logistics business.</p>
+          <div id="development-test-note" hidden class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            <strong>Development / Test mode</strong>
+            <p class="mt-1">No company name, registration number, or documents are needed. You can explore the partner workspace using clearly labelled sample records. This does not verify a business and cannot access real loads, customer data, bookings, or payouts.</p>
+          </div>
+        </div>
+
+        <div id="individual-interest-fields" hidden class="rounded-2xl border border-slate-800 bg-[#040814] p-5 space-y-4">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider">Independent partner interest</h3>
+          <p class="text-slate-400 text-[11px]">For an individual who may provide transport, forwarding, warehouse, or customs-support services. This records interest only; it does not verify identity or grant commercial access. Country-specific requirements will be confirmed before activation.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label for="individual-display-name" class="block text-[10px] font-bold uppercase mb-1">Your name *</label><input id="individual-display-name" maxlength="120" required disabled autocomplete="name" placeholder="Your full name" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white"></div>
+            <div><label for="individual-country" class="block text-[10px] font-bold uppercase mb-1">Country where you operate *</label><select id="individual-country" required disabled class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white"><option value="">Loading country list…</option></select></div>
+            <div><label for="individual-city" class="block text-[10px] font-bold uppercase mb-1">Operating city *</label><input id="individual-city" maxlength="120" required disabled placeholder="City / municipality" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white"></div>
+            <div><label for="individual-service-category" class="block text-[10px] font-bold uppercase mb-1">Service interest *</label><select id="individual-service-category" required disabled class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white"><option value="road_transport">Road transport</option><option value="freight_forwarding">Freight forwarding</option><option value="warehouse">Warehouse services</option><option value="customs_support">Customs support</option><option value="other">Other logistics services</option></select></div>
+          </div>
+        </div>
+
+        <div id="registered-business-fields">
         <!-- SECTION 1: LEGAL ENTITY DETAILS -->
         <div class="space-y-4">
           <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
@@ -215,6 +242,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
             </div>
           </div>
         </div>
+        </div>
 
         <div id="onboarding-feedback" class="text-sm" role="status" aria-live="polite"></div>
 
@@ -297,6 +325,24 @@ body>footer .text-white{color:var(--krim-navy)!important}
         }
         populateCountrySelect("partner-country", "Select country of incorporation");
         populateCountrySelect("partner-operating-country", "Select primary operating country");
+        populateCountrySelect("individual-country", "Select your operating country");
+
+        function updatePartnerModeUI() {
+          const mode = document.getElementById("partner-account-mode").value;
+          const businessFields = document.getElementById("registered-business-fields");
+          const individualFields = document.getElementById("individual-interest-fields");
+          const registered = mode === "registered_business";
+          const individual = mode === "individual_interest";
+          businessFields.hidden = !registered;
+          individualFields.hidden = !individual;
+          businessFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !registered; });
+          individualFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !individual; });
+          document.getElementById("development-test-note").hidden = mode !== "development_test";
+          const button = document.querySelector("#partner-onboarding-form button[type=submit]");
+          button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : "Submit Business Verification →";
+        }
+        document.getElementById("partner-account-mode").addEventListener("change", updatePartnerModeUI);
+        updatePartnerModeUI();
 
         const { data: memberships, error: membershipError } = await onboardingClient
           .from("krim_organization_members")
@@ -344,11 +390,40 @@ body>footer .text-white{color:var(--krim-navy)!important}
     document.getElementById("partner-onboarding-form").addEventListener("submit", async function(event) {
       event.preventDefault();
       const button = this.querySelector("button[type=submit]");
+      const mode = document.getElementById("partner-account-mode").value;
       button.disabled = true;
-      button.textContent = "Uploading secure verification packet...";
-      onboardingMessage("Uploading documents to the private KRIM verification vault.", "info");
+      button.textContent = mode === "development_test" ? "Enabling test mode…" : mode === "individual_interest" ? "Saving interest…" : "Uploading secure verification packet…";
+      onboardingMessage(mode === "registered_business" ? "Preparing the private KRIM verification packet." : "Saving your selected partner pathway securely.", "info");
       try {
         if (!onboardingSession || !onboardingOrganizationId) throw new Error("Your partner session is not ready. Refresh the page and try again.");
+        if (mode === "development_test") {
+          const { data, error } = await onboardingClient.rpc("krim_set_partner_account_mode", { p_mode: mode, p_profile: {} });
+          if (error) throw error;
+          if (!data || data.account_mode !== mode || data.commercial_access !== false) throw new Error("KRIM did not confirm development/test mode.");
+          onboardingMessage("Development / Test mode enabled. No business details or documents were required. Live commercial operations remain locked.", "success");
+          const link = document.createElement("a"); link.href = "../../app/partner/index.html?release=partner-test-mode-v1"; link.textContent = "Open your Test Partner Workspace →"; link.className = "inline-block mt-3 font-bold underline";
+          document.getElementById("onboarding-feedback").append(document.createElement("br"), link);
+          button.textContent = "Development / Test Mode Enabled";
+          return;
+        }
+        if (mode === "individual_interest") {
+          const profile = {
+            display_name: document.getElementById("individual-display-name").value.trim(),
+            country_code: document.getElementById("individual-country").value,
+            city: document.getElementById("individual-city").value.trim(),
+            service_category: document.getElementById("individual-service-category").value
+          };
+          if (profile.display_name.length < 2 || !profile.country_code || profile.city.length < 2) throw new Error("Enter your name, operating country, and city.");
+          const { data, error } = await onboardingClient.rpc("krim_set_partner_account_mode", { p_mode: mode, p_profile: profile });
+          if (error) throw error;
+          if (!data || data.account_mode !== mode || data.commercial_access !== false) throw new Error("KRIM did not confirm the independent-partner interest.");
+          onboardingMessage("Your independent-partner interest has been saved. This is not identity verification or commercial approval; KRIM must confirm the requirements for your country and services.", "success");
+          const link = document.createElement("a"); link.href = "../../app/partner/index.html?release=partner-test-mode-v1"; link.textContent = "Return to Partner Workspace →"; link.className = "inline-block mt-3 font-bold underline";
+          document.getElementById("onboarding-feedback").append(document.createElement("br"), link);
+          button.textContent = "Independent Partner Interest Saved";
+          return;
+        }
+        if (mode !== "registered_business") throw new Error("Choose a partner pathway before continuing.");
         const legalName = document.getElementById("partner-legal-name").value.trim();
         const countryCode = document.getElementById("partner-country").value;
         const authorityId = document.getElementById("partner-authority-id").value.trim();
@@ -405,7 +480,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
         }
         onboardingMessage(error.message || "Partner onboarding submission failed.");
         button.disabled = false;
-        button.textContent = "Retry Business Verification Submission →";
+        button.textContent = mode === "development_test" ? "Retry Development / Test Setup →" : mode === "individual_interest" ? "Retry Independent Partner Interest →" : "Retry Business Verification Submission →";
       }
     });
 
