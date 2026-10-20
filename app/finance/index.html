@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="krim-environment" content="production"><title>KRIM OS — Finance Workspace</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.top{background:#101827;color:#dbeafe;padding:10px 16px;font-size:12px;display:flex;justify-content:space-between;gap:10px}.nav{background:#fff;border-bottom:1px solid #e4eaf2;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;letter-spacing:.04em}.brand small{display:block;font-size:10px;color:#1596c2;margin-top:4px}.btn{border:1px solid #d4deea;background:#fff;border-radius:10px;padding:10px 14px;color:#243247;text-decoration:none;font-weight:600;cursor:pointer}.wrap{max-width:1000px;margin:28px auto;padding:0 16px}.hero,.card{background:#fff;border:1px solid #e4eaf2;border-radius:18px;box-shadow:0 8px 24px #152c4a0a}.hero{padding:26px;margin-bottom:18px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:#1596c2;text-transform:uppercase}h1{font-size:clamp(25px,5vw,34px);margin:9px 0}p{color:#617086;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{padding:20px}.card h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;background:#fff7e6;color:#975d09;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:700}.status{margin-top:14px;padding:12px;border-radius:10px;background:#edf8ff;color:#12577a;font-size:13px}.foot{text-align:center;color:#778397;font-size:12px;padding:30px}.hidden{display:none!important}
+</style></head><body>
+<div class="top"><span>● KRIM OS · FINANCE WORKSPACE</span><span id="identity">Checking session…</span></div>
+<header class="nav"><div class="brand">K&nbsp; KRIM OS<small>FINANCE COMMAND WORKSPACE</small></div><button class="btn" id="signout">Sign Out</button></header>
+<main class="wrap"><section class="hero"><div class="eyebrow">Role-specific operations</div><h1>Finance Workspace</h1><p>Invoices, payment status and settlement reconciliation. This workspace is a structural baseline; live actions are enabled only after role-specific backend authorization and workflow verification.</p><div class="status" id="status">Verifying authenticated session…</div></section><section class="grid"><article class="card"><h2>Invoices</h2><p>Review finance records visible to your organization.</p><span class="tag">Backend authorization required</span></article>
+<article class="card"><h2>Payment Reconciliation</h2><p>Match verified payment events to ledger entries.</p><span class="tag">Backend authorization required</span></article>
+<article class="card"><h2>Partner Settlements</h2><p>Review eligible settlement records and exceptions.</p><span class="tag">Backend authorization required</span></article>
+<article class="card"><h2>Audit Trail</h2><p>Inspect finance actions permitted to your role.</p><span class="tag">Backend authorization required</span></article></section><div class="foot">KRIM Logistics OS © 2026 · Access is governed by authenticated session, organization membership and backend policies.</div></main>
+<script>
+(async function(){
+ const client=window.KRIM_SUPABASE;
+ const status=document.getElementById('status');
+ if(!client){status.textContent='Connection unavailable. Please retry later.';return;}
+ try{
+  const {data:{session},error}=await client.auth.getSession();
+  if(error)throw error;
+  if(!session){window.location.replace(window.krimPath('auth/login.html'));return;}
+  document.getElementById('identity').textContent=session.user.email||'Authenticated session';
+  status.textContent='Signed in. Role-specific data and actions remain disabled until the backend confirms your finance permissions.';
+ }catch(e){status.textContent='Session verification failed. Please sign in again.';console.error(e);}
+ document.getElementById('signout').addEventListener('click',async()=>{await client.auth.signOut();window.location.replace(window.krimPath('auth/login.html'));});
+})();
+</script></body></html>
