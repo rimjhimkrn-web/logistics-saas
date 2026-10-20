@@ -1,72 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KRIM Logistics | Partner Registration</title>
-<meta name="description" content="Register your carrier or transport fleet on KRIM Logistics using Supabase authentication.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../config.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f">
+<title>Partner Registration | KRIM Logistics OS</title><meta name="description" content="Register a logistics partner account and begin carrier verification with KRIM Logistics.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#07111f;--card:#101e30;--line:#26384e;--text:#f4f7fb;--muted:#a9b8ca;--green:#159b69;--green2:#22c58b;--blue:#1686e8}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#07111f,#10243a);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:flex;flex-direction:column}header,footer{padding:18px 22px;border-bottom:1px solid var(--line)}header{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;letter-spacing:.08em;color:#fff;text-decoration:none}a{color:#83c7ff;text-decoration:none}a:hover{text-decoration:underline}.wrap{width:100%;max-width:560px;margin:auto;padding:28px 16px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 18px 60px #0004}.tag{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7}h1{font-size:28px;margin:8px 0}p{color:var(--muted);line-height:1.5}label{display:block;margin:17px 0 7px;font-size:13px;color:#c4d2e3}input{width:100%;padding:14px;border:1px solid #34485f;border-radius:10px;background:#07111f;color:white;font:inherit}button{width:100%;margin-top:22px;padding:15px;border:0;border-radius:10px;background:var(--green);color:white;font-weight:750;font-size:15px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#feedback{padding:12px 0;overflow-wrap:anywhere}.success{color:#6ee7b7}.error{color:#fca5a5}.note{font-size:12px}.divider{border-top:1px solid var(--line);margin-top:22px;padding-top:18px}footer{border-top:1px solid var(--line);border-bottom:0;text-align:center;font-size:12px;color:var(--muted)}@media(max-width:480px){.card{padding:22px}h1{font-size:24px}}
-</style>
-</head>
+:root{color-scheme:light;--navy:#07152f;--blue:#1769ff;--green:#07845f;--ink:#172942;--muted:#66758b;--line:#dce5f0;--bg:#f3f7fc}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 42%),var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+header{height:72px;padding:0 clamp(16px,5vw,64px);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;color:var(--navy);font-weight:900;letter-spacing:.04em}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--blue),#6247ed,#36c9d8);color:#fff;font-size:19px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em}
+main{width:min(1020px,calc(100% - 32px));margin:auto;padding:38px 0;display:grid;grid-template-columns:1fr minmax(300px,480px);gap:clamp(24px,6vw,70px);align-items:center;flex:1}.intro .eyebrow,.kicker{font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--green)}h1{font-size:clamp(32px,4vw,48px);line-height:1.08;letter-spacing:-.04em;margin:13px 0;color:var(--navy)}.intro p{color:var(--muted);max-width:420px}.steps{display:grid;gap:12px;margin-top:26px}.step{display:flex;gap:11px;align-items:flex-start;font-size:13px;color:#435773}.num{width:26px;height:26px;border-radius:8px;background:#e4f7ef;color:var(--green);display:grid;place-items:center;font-weight:900;flex:none}
+.card{background:#fff;border:1px solid var(--line);border-radius:23px;padding:clamp(22px,4vw,32px);box-shadow:0 22px 70px #102b4d12}.card h2{margin:7px 0 3px;font-size:26px;color:var(--navy);letter-spacing:-.03em}.sub{margin:0 0 20px;color:var(--muted);font-size:13px}label{display:block;font-size:12px;font-weight:800;color:#334660;margin:15px 0 6px}input{width:100%;padding:13px 14px;border:1px solid #cdd8e7;border-radius:11px;background:#fbfdff;color:var(--ink);font:inherit;outline:none}input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1769ff1b}.row{display:flex;gap:8px}.row input{min-width:0;flex:1}.toggle{border:1px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;color:#354a68;font-weight:750}.submit{width:100%;margin-top:20px;padding:14px;border:0;border-radius:12px;background:var(--blue);color:#fff;font:inherit;font-weight:850;cursor:pointer}.submit:disabled{opacity:.6;cursor:wait}.feedback{margin-top:14px;font-size:12px;overflow-wrap:anywhere}.feedback:not(:empty){padding:12px;border-radius:10px;background:#f1f6fc}.feedback.error{background:#fff0ef;color:#b42318}.feedback.success{background:#eafaf3;color:#087e5b}.links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;font-size:12px}.note{font-size:11px;color:#718198;margin-top:18px;padding-top:15px;border-top:1px solid #edf1f6}footer{text-align:center;padding:18px;color:#718198;font-size:11px;border-top:1px solid var(--line);background:#fff}
+@media(max-width:760px){main{grid-template-columns:1fr;max-width:520px;padding:28px 0;gap:22px}.intro h1{font-size:34px}.steps{margin-top:17px}.card{border-radius:19px}header{height:64px}}
+</style></head>
 <body>
-<header><a class="brand" href="../public/index.html">KRIM LOGISTICS</a><a href="partner-signin.html">Partner sign in</a></header>
-<main class="wrap"><section class="card">
-<div class="tag">Carrier partner registration</div>
-<h1>Register your transport fleet</h1>
-<p>Create your carrier account using KRIM Supabase authentication. Registration is not carrier approval; business verification is required before access to restricted freight opportunities.</p>
-<form id="partner-signup-form">
-<label for="fleet">Fleet / company name</label><input id="fleet" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your transport company">
-<label for="full-name">Fleet operator full name</label><input id="full-name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Your full name">
-<label for="email">Dispatch email address</label><input id="email" type="email" required autocomplete="email" placeholder="dispatch@example.com">
-<label for="password">Password</label><div style="display:flex;gap:8px;align-items:center"><input id="password" type="password" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters" style="flex:1;min-width:0"><button id="toggle-password" type="button" style="width:auto;margin:0;padding:12px;background:#26384e;white-space:nowrap" aria-controls="password" aria-pressed="false">Show</button></div>
-<p class="note">Use a unique password with at least 10 characters. This page uses KRIM's Supabase authentication; no Google or SMS sign-in is used.</p>
-<button id="submit-button" type="submit">Create carrier account</button>
+<header><a class="brand" href="../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span></a><a href="partner-signin.html">Partner sign in →</a></header>
+<main>
+<section class="intro"><div class="eyebrow">KRIM partner network</div><h1>Build your freight business with KRIM.</h1><p>Create one secure account for your transport company. Registration starts your partner setup; restricted freight access is available only after the required verification and approval.</p><div class="steps"><div class="step"><span class="num">1</span><span><b>Create your account</b><br>Use a work email and a unique password.</span></div><div class="step"><span class="num">2</span><span><b>Complete business verification</b><br>Provide country, operating authority and requested documents.</span></div><div class="step"><span class="num">3</span><span><b>Wait for review</b><br>KRIM reviews your application before restricted partner operations are enabled.</span></div></div></section>
+<section class="card"><div class="kicker">Partner onboarding · Step 1 of 2</div><h2>Create partner account</h2><p class="sub">Enter your transport business and account details.</p>
+<form id="partner-signup-form" novalidate>
+<label for="fleet">Transport company / fleet name</label><input id="fleet" name="company" required minlength="2" maxlength="200" autocomplete="organization" placeholder="Registered business name">
+<label for="full-name">Your full name</label><input id="full-name" name="name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Account owner or authorized operator">
+<label for="email">Work email</label><input id="email" name="email" type="email" required maxlength="254" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@transportcompany.com">
+<label for="password">Password (at least 10 characters)</label><div class="row"><input id="password" name="password" type="password" required minlength="10" autocomplete="new-password" placeholder="Create a strong password"><button class="toggle" id="toggle-password" type="button" aria-controls="password" aria-pressed="false">Show</button></div>
+<button class="submit" id="submit-button" type="submit">Create partner account →</button><div class="feedback" id="feedback" role="status" aria-live="polite"></div>
 </form>
-<div id="feedback" role="status" aria-live="polite"></div>
-<p class="note">Email confirmation is controlled by your Supabase project. With Confirm Email turned OFF, a new signup should return an active session without sending a verification email. If no session is returned, check the Email provider setting in Supabase.</p>
-<div class="divider"><p>Registering as a shipper instead? <a href="signup.html">Create a customer account</a>.</p><p>Already registered? <a href="login.html">Sign in</a>.</p></div>
-</section></main>
-<footer>KRIM Logistics OS · Carrier approval is a separate operational process</footer>
+<p class="note">Your account password is handled by Supabase Authentication. Do not reuse another service's password. Account creation is not business approval.</p><div class="links"><a href="access.html">← All KRIM access options</a><a href="login.html">General sign in</a></div>
+</section></main><footer>KRIM Logistics OS · Partner identity and business verification are separate controls.</footer>
 <script>
 (function(){
- const form=document.getElementById("partner-signup-form");
- const button=document.getElementById("submit-button");
- const feedback=document.getElementById("feedback");
- const passwordInput=document.getElementById("password");
- const togglePassword=document.getElementById("toggle-password");
- togglePassword.addEventListener("click",function(){const reveal=passwordInput.type==="password";passwordInput.type=reveal?"text":"password";togglePassword.textContent=reveal?"Hide":"Show";togglePassword.setAttribute("aria-pressed",String(reveal));});
- function show(message,type){feedback.textContent=message;feedback.className=type||"";}
- form.addEventListener("submit",async function(event){
-  event.preventDefault();
-  const client=window.KRIM_SUPABASE||window.supabaseClient;
-  if(!client){show("Supabase could not initialize. Refresh the page and try again.","error");return;}
-  const fleet=document.getElementById("fleet").value.trim();
-  const fullName=document.getElementById("full-name").value.trim();
-  const email=document.getElementById("email").value.trim().toLowerCase();
-  const password=document.getElementById("password").value;
-  if(fleet.length<2||fullName.length<2||password.length<10){show("Enter a company name and full name, and use a password of at least 10 characters.","error");return;}
-  button.disabled=true;button.textContent="Creating carrier account…";show("");
-  try{
-   const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName,company_name:fleet,krim_account_type:"partner"},emailRedirectTo:new URL("./auth-callback.html",window.location.href).href}});
-   if(error)throw error;
-   if(!data.session){
-    show("No active session was returned. Check Supabase Authentication → Sign In / Providers → Email and confirm Confirm Email is OFF. If this email is already registered, use Sign In. No carrier organization was provisioned by this page.","error");
-    button.disabled=false;button.textContent="Create carrier account";return;
-   }
-   const {error:provisionError}=await client.rpc("krim_provision_partner_organization",{p_legal_name:fleet});
-   if(provisionError)throw new Error("Carrier account was created, but organization setup failed: "+provisionError.message+". Please sign in and ask for support before retrying.");
-   show("Carrier account created. Carrier verification is still pending. Opening partner onboarding…","success");
-   window.location.href=window.krimPath?window.krimPath("public/partner/partner-onboarding.html"):"../public/partner/partner-onboarding.html";
-  }catch(error){
-   show(error.message||"Carrier registration failed. Please try again.","error");
-   button.disabled=false;button.textContent="Create carrier account";
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const form=document.getElementById("partner-signup-form"),button=document.getElementById("submit-button"),feedback=document.getElementById("feedback"),password=document.getElementById("password");
+function show(message,type){feedback.textContent=message;feedback.className="feedback "+(type||"")}
+document.getElementById("toggle-password").addEventListener("click",function(){const visible=password.type==="password";password.type=visible?"text":"password";this.textContent=visible?"Hide":"Show";this.setAttribute("aria-pressed",String(visible))});
+form.addEventListener("submit",async function(e){
+ e.preventDefault();if(!client){show("Secure registration could not initialize. Refresh the page and try again.","error");return}
+ const company=document.getElementById("fleet").value.trim(),name=document.getElementById("full-name").value.trim(),email=document.getElementById("email").value.trim().toLowerCase(),pass=password.value;
+ if(company.length<2||name.length<2||pass.length<10){show("Check the company name, full name and password length.","error");return}
+ button.disabled=true;button.textContent="Creating secure account…";show("");
+ try{
+  const {data,error}=await client.auth.signUp({email,password:pass,options:{data:{full_name:name,company_name:company,krim_account_type:"partner"},emailRedirectTo:new URL("auth-callback.html",window.location.href).href}});
+  if(error)throw error;
+  if(!data.user)throw new Error("Supabase did not return an account. Please retry.");
+  if(!data.session){
+   show("Account request received. Check your email for the confirmation link, then return to Partner Sign In. Your organization will be provisioned after confirmation. If this email is already registered, sign in instead.","success");
+   button.textContent="Account request submitted";return;
   }
- });
+  const {error:provisionError}=await client.rpc("krim_provision_partner_organization",{p_legal_name:company});
+  if(provisionError){
+   show("Your login account was created, but partner setup could not finish. Do not register again. Use Partner Sign In with this email; the sign-in flow will retry organization setup. Details: "+provisionError.message,"error");
+   button.disabled=false;button.textContent="Retry partner setup";return;
+  }
+  show("Account and partner organization are ready. Opening business verification…","success");
+  location.replace(window.krimPath("public/partner/partner-onboarding.html"));
+ }catch(error){
+  const message=String(error&&error.message||"Registration failed.");
+  show(/already registered|already been registered|user already exists/i.test(message)?"This email may already have an account. Use Partner Sign In or password recovery instead.":message,"error");
+  button.disabled=false;button.textContent="Create partner account →";
+ }
+});
 })();
-</script>
-</body>
-</html>
+</script></body></html>
