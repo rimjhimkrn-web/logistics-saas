@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07152f"><meta name="description" content="Secure KRIM driver workspace for profile, assigned trips, milestones and proof of delivery.">
-<title>Driver Workspace | KRIM Logistics</title>
+<title>Driver Workspace | KRIM Logistics · Journey v5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
 <style>
 :root{--navy:#07152f;--navy2:#0e2440;--blue:#1769ff;--cyan:#36c9d8;--ink:#182741;--muted:#65758d;--line:#dce5f0;--bg:#f3f7fc;--green:#087e5b;--amber:#8a5a00;--red:#b42318;--card:#fff}
@@ -18,7 +18,7 @@ a{color:var(--blue);text-decoration:none}.top{background:var(--navy);color:#d8e4
 <div class="top"><span>● KRIM GLOBAL LOGISTICS OS</span><span id="identity">SECURE DRIVER SESSION · CHECKING</span></div>
 <header class="nav"><a class="brand" href="../../index.html">KRIM LOGISTICS<small>DRIVER COMMAND WORKSPACE</small></a><div class="nav-actions"><a class="btn" href="../../index.html">← Platform</a><button class="btn" id="refresh">↻ Refresh</button><button class="btn dark" id="signout">Sign out</button></div></header>
 <main class="wrap">
-<section class="hero"><div class="eyebrow">TRANSPORT EXECUTION · DRIVER PORTAL</div><h1>Every trip.<br>Clearly in control.</h1><p>One secure workspace for your driver profile, assigned trips, pickup and transit milestones, delivery evidence, and incident reporting. Operational records appear only when KRIM has assigned them to your account.</p><div class="chips"><span class="chip">Verified session</span><span class="chip">Assigned trips only</span><span class="chip">Private delivery evidence</span><span class="chip">Global-ready profile</span></div><div class="statusbar"><span class="dot" id="statusDot"></span><span id="notice" role="status" aria-live="polite">Checking your secure session and driver permissions…</span></div></section>
+<section class="hero"><div class="eyebrow">TRANSPORT EXECUTION · DRIVER PORTAL</div><h1>Every trip.<br>Clearly in control.</h1><p>One secure workspace for your driver profile, assigned trips, pickup and transit milestones, delivery evidence, and incident reporting. Operational records appear only when KRIM has assigned them to your account.</p><div class="chips"><span class="chip">Role-verified session</span><span class="chip">Assigned trips only</span><span class="chip">Private delivery evidence</span><span class="chip">Global-ready profile</span></div><div class="statusbar"><span class="dot" id="statusDot"></span><span id="notice" role="status" aria-live="polite">Checking your secure session and driver permissions…</span></div></section>
 <section class="metrics"><article class="metric"><div class="label">MY ASSIGNMENTS</div><strong id="assignedCount">—</strong><small>Assigned directly to your account</small></article><article class="metric"><div class="label">ACTIVE TRIPS</div><strong id="activeCount">—</strong><small>Trips not yet closed</small></article><article class="metric"><div class="label">DELIVERY EVIDENCE</div><strong id="proofCount">—</strong><small>Evidence records you submitted</small></article></section>
 <div class="grid"><div>
 <section class="panel"><div class="panel-head"><div><h2>My assigned trips</h2><p class="sub">Only records assigned to your signed-in driver account are displayed.</p></div><span class="badge" id="assignmentBadge">Live data</span></div><div id="assignments"><div class="empty">Loading your assignments from KRIM…</div></div><div id="assignmentFeedback" class="feedback" aria-live="polite"></div></section>
@@ -110,7 +110,7 @@ async function loadEvidence(){
 async function loadWorkspace(){
  if(!client)throw new Error('Supabase client is not configured. Check config.js.');
  const s=await client.auth.getSession();if(s.error)throw s.error;session=s.data.session;
- if(!session){location.replace((window.krimPath?window.krimPath('auth/login.html?role=driver'):'../../auth/login.html?role=driver'));return false;}
+ if(!session){location.replace((window.krimPath?window.krimPath('auth/driver-signin.html'):'../../auth/driver-signin.html'));return false;}
  const m=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
  if(m.error)throw new Error('KRIM could not verify your active membership: '+m.error.message);
  const driverMembers=(m.data||[]).filter(x=>/^(driver|fleet_driver)$/i.test(String(x.role||'').trim()));
