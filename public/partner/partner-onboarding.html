@@ -120,7 +120,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
         <!-- SECTION 1: LEGAL ENTITY DETAILS -->
         <div class="space-y-4">
           <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center gap-2">
-            <span>🏢</span> Transporter Legal Business Identity
+            <span>🏢</span> Registered Business & Operating Profile
           </h3>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -135,6 +135,23 @@ body>footer .text-white{color:var(--krim-navy)!important}
                 <option value="">Loading global country list…</option>
               </select>
               <p class="text-slate-500 text-[10px]">Choose the country where the business is legally registered.</p>
+            </div>
+            <div class="space-y-1 sm:col-span-2">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered Business Street Address *</label>
+              <input id="partner-registered-address" type="text" autocomplete="street-address" maxlength="240" placeholder="Registered office / principal business address" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+              <p class="text-slate-500 text-[10px]">Enter the official address shown on your business registration or licence.</p>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered City *</label>
+              <input id="partner-registered-city" type="text" autocomplete="address-level2" maxlength="120" placeholder="City / municipality" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered Region / State / Province</label>
+              <input id="partner-registered-region" type="text" autocomplete="address-level1" maxlength="120" placeholder="Region / state / province" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Registered Postal / ZIP Code</label>
+              <input id="partner-registered-postal-code" type="text" autocomplete="postal-code" maxlength="32" placeholder="If used in your country" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
             </div>
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Primary Operating Country *</label>
@@ -161,8 +178,9 @@ body>footer .text-white{color:var(--krim-navy)!important}
             </div>
 
             <div class="space-y-1">
-              <label class="text-slate-400 text-[10px] uppercase font-bold block">Operating Authority ID (DOT / MC / GSTIN) *</label>
-              <input id="partner-authority-id" type="text" placeholder="e.g., DE892104991 or 27AAAAA0000A1Z5" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required minlength="3" maxlength="100" />
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Business Registration / Operating Authority ID *</label>
+              <input id="partner-authority-id" type="text" placeholder="Company registry / carrier licence / tax ID" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required minlength="3" maxlength="100" />
+              <p class="text-slate-500 text-[10px]">Use the official identifier applicable in your country; formats vary by jurisdiction.</p>
             </div>
 
             <div class="space-y-1">
@@ -185,15 +203,15 @@ body>footer .text-white{color:var(--krim-navy)!important}
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
-              <span class="text-white font-bold block">Cargo Insurance Certificate (where required)</span>
-              <p class="text-slate-500 text-[10px]">PDF, JPEG, or PNG accepted. Provide current coverage and liability details where applicable.</p>
-              <input id="insurance-file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required class="block w-full text-[10px] text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-slate-200" />
+              <span class="text-white font-bold block">Insurance / Liability Certificate (where required)</span>
+              <p class="text-slate-500 text-[10px]">PDF, JPEG, or PNG accepted. Optional at initial submission unless required for your transport category or jurisdiction.</p>
+              <input id="insurance-file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" class="block w-full text-[10px] text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-slate-200" />
             </div>
 
             <div class="p-4 bg-[#040814] border border-slate-800 rounded-xl space-y-2">
-              <span class="text-white font-bold block">Tax Registration & Tax Clearance Certificate</span>
-              <p class="text-slate-500 text-[10px]">Official government tax filing certificate (W-9 / GSTIN / VAT ID).</p>
-              <input id="tax-file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required class="block w-full text-[10px] text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-slate-200" />
+              <span class="text-white font-bold block">Business Registration / Operating Authority Certificate *</span>
+              <p class="text-slate-500 text-[10px]">Upload an official company registry extract, trade licence, carrier permit, or equivalent business-registration document.</p>
+              <input id="registration-file" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required class="block w-full text-[10px] text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-slate-200" />
             </div>
           </div>
         </div>
@@ -293,10 +311,10 @@ body>footer .text-white{color:var(--krim-navy)!important}
           .select("id, organization_type")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
-        const partnerOrg = (organizations || []).find(org => ["partner", "carrier", "forwarder"].includes(String(org.organization_type || "").toLowerCase()));
+        const partnerOrg = (organizations || []).find(org => ["partner", "carrier", "forwarder", "warehouse"].includes(String(org.organization_type || "").toLowerCase()));
         if (!partnerOrg) throw new Error("This account does not have an active partner organization. Register as a carrier partner first.");
         onboardingOrganizationId = Number(partnerOrg.id);
-        onboardingMessage("Secure session verified. Upload both required documents to submit your partner verification packet.", "info");
+        onboardingMessage("Secure session verified. Upload your required business-registration document; add an insurance certificate when applicable.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
         document.querySelector("#partner-onboarding-form button[type=submit]").disabled = true;
@@ -334,35 +352,44 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const authorityId = document.getElementById("partner-authority-id").value.trim();
         const category = document.getElementById("partner-category").value;
         const operatingCountryCode = document.getElementById("partner-operating-country").value;
+        const registeredAddress = document.getElementById("partner-registered-address").value.trim();
+        const registeredCity = document.getElementById("partner-registered-city").value.trim();
+        const registeredRegion = document.getElementById("partner-registered-region").value.trim();
+        const registeredPostalCode = document.getElementById("partner-registered-postal-code").value.trim();
         const operatingRegion = document.getElementById("partner-operating-region").value.trim();
         const operatingCity = document.getElementById("partner-operating-city").value.trim();
         const postalCode = document.getElementById("partner-postal-code").value.trim();
         const website = document.getElementById("partner-website").value.trim();
         if (!operatingCountryCode) throw new Error("Choose your primary operating country.");
+        if (registeredAddress.length < 5 || registeredCity.length < 2) throw new Error("Enter the official registered business street address and city.");
         if (website && !/^https?:\/\/[^\s]+\.[^\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
-        if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and operating authority ID.");
+        if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and business registration / operating authority ID.");
         const insuranceFile = document.getElementById("insurance-file").files[0];
-        const taxFile = document.getElementById("tax-file").files[0];
-        validateDocument(insuranceFile, "insurance certificate");
-        validateDocument(taxFile, "tax registration certificate");
-        const insurancePath = await uploadPartnerDocument(insuranceFile, "insurance certificate");
-        const taxPath = await uploadPartnerDocument(taxFile, "tax registration certificate");
+        const registrationFile = document.getElementById("registration-file").files[0];
+        validateDocument(registrationFile, "business registration certificate");
+        if (insuranceFile) validateDocument(insuranceFile, "insurance certificate");
+        const documentPaths = [await uploadPartnerDocument(registrationFile, "business registration certificate")];
+        if (insuranceFile) documentPaths.push(await uploadPartnerDocument(insuranceFile, "insurance certificate"));
 
-        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding_global", {
+        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding_global_v2", {
           p_legal_name: legalName,
           p_country_code: countryCode,
           p_authority_id: authorityId,
           p_operational_category: category,
-          p_document_paths: [insurancePath, taxPath],
+          p_document_paths: documentPaths,
           p_operating_country_code: operatingCountryCode,
+          p_registered_address: registeredAddress,
+          p_registered_city: registeredCity,
           p_operating_region: operatingRegion || null,
           p_operating_city: operatingCity || null,
           p_postal_code: postalCode || null,
-          p_website: website || null
+          p_website: website || null,
+          p_registered_region: registeredRegion || null,
+          p_registered_postal_code: registeredPostalCode || null
         });
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
-        onboardingMessage("Verification packet submitted successfully. Your status is pending human compliance review; partner access is not approved yet.", "success");
+        onboardingMessage("Verification packet submitted successfully. Your status is pending human compliance review; partner access remains restricted until approval.", "success");
         button.textContent = "Verification Packet Submitted";
       } catch (error) {
         onboardingMessage(error.message || "Partner onboarding submission failed.");
