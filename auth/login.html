@@ -150,7 +150,34 @@
                 const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const metadata = data.user?.user_metadata || {};
-                const accountType = metadata.krim_account_type === "partner" ? "partner" : "customer";
+                // Prefer registered account type; recover older accounts from active organization membership.
+                let accountType = metadata.krim_account_type === "partner" ? "partner" :
+                    (metadata.krim_account_type === "enterprise" ? "enterprise" : "customer");
+                try {
+                    const { data: memberships, error: membershipError } = await window.KRIM_SUPABASE
+                        .from("krim_organization_members")
+                        .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
+                        .eq("user_id", data.user.id)
+                        .eq("status", "active");
+                    if (!membershipError && Array.isArray(memberships) && memberships.length) {
+                        const partnerMembership = memberships.find(m => {
+                            const org = m.krim_organizations || {};
+                            return /partner|carrier|transport|forwarder/i.test(
+                                String(org.organization_type || "") + " " +
+                                String(org.organization_type_code || "") + " " +
+                                String(m.role || "")
+                            );
+                        });
+                        const enterpriseMembership = memberships.find(m => /enterprise/i.test(
+                            String((m.krim_organizations || {}).organization_type || "") + " " +
+                            String((m.krim_organizations || {}).organization_type_code || "")
+                        ));
+                        if (partnerMembership) accountType = "partner";
+                        else if (enterpriseMembership) accountType = "enterprise";
+                    }
+                } catch (membershipLookupError) {
+                    console.warn("KRIM membership role lookup unavailable; using registered account type.", membershipLookupError);
+                }
                 const organizationName = String(metadata.company_name || (data.user.email ? data.user.email.split("@")[0] + " Workspace" : "")).trim();
                 if (organizationName.length < 2) throw new Error("Your KRIM organization name is missing. Contact support to complete account setup.");
                 const provisionRpc = accountType === "partner"
