@@ -22,8 +22,8 @@ try{
  if(!org)throw new Error("Your active organization is not registered as a transport partner. Partner access was not granted.");
  if(String(org.status||"").toLowerCase()!=="active")throw new Error("Your partner organization is not active. Contact KRIM support.");
  if(!["verified","approved"].includes(String(org.partner_verification_status||"").toLowerCase())){
-  status.textContent="Your account is valid, but business verification is still pending. Opening your onboarding checklist…";
-  location.replace(base+"/public/partner/partner-onboarding.html");return;
+  status.textContent="Your account is valid. Opening the KRIM Partner Workspace; pending verification will be shown there…";
+  location.replace(base+"/app/partner/index.html?release=partner-workspace-v2");return;
  }
  status.textContent="Partner membership and business approval verified. Opening your workspace…";
  location.replace(base+"/app/partner/index.html?release=partner-route-3");
