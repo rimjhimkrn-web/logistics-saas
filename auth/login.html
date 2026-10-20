@@ -188,7 +188,12 @@
                 // Memberships are a fallback only when signup metadata is absent/generic;
                 // never let an unrelated enterprise membership silently override a partner signup.
                 const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise","platform_admin"];
-                let accountType = knownTypes.includes(metadataType) ? metadataType : "";
+                // Explicit public sign-in links may request only customer or partner routing.
+                // This is a navigation preference, not an authorization grant; Supabase RLS
+                // and the partner provisioning/verification workflow still control data access.
+                const requestedType = normalize(new URLSearchParams(window.location.search).get("role"));
+                const publicRequestedType = ["customer","partner"].includes(requestedType) ? requestedType : "";
+                let accountType = publicRequestedType || (knownTypes.includes(metadataType) ? metadataType : "");
                 if (!accountType) {
                     for (const [type, pattern] of roleRules) {
                         if (pattern.test(membershipsText)) { accountType = type; break; }
