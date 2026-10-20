@@ -174,7 +174,6 @@
                 const metadataType = normalize(metadata.krim_account_type || metadata.account_type || metadata.role);
                 const membershipsText = roleWords(memberships);
                 const roleRules = [
-                    ["platform_admin", /platform_superadmin|platform_admin|global_admin|super_admin/],
                     ["operations", /operations|dispatcher|control_tower/],
                     ["finance", /finance|accountant|settlement/],
                     ["customs", /customs|clearance/],
@@ -186,8 +185,11 @@
                 ];
                 // Resolve role from customer/partner signup type or active organization membership.
                 // A URL query parameter is never an authorization source.
-                const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise","platform_admin"];
+                const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise"];
                 const requestedType = normalize(new URLSearchParams(window.location.search).get("role"));
+                if (requestedType === "platform_admin" || requestedType === "platform_superadmin") {
+                    throw new Error("Platform administration uses a separate privileged sign-in. Open the KRIM Admin Access page.");
+                }
                 let accountType = ["customer","partner"].includes(metadataType) ? metadataType : "";
                 if (!accountType) {
                     for (const [type, pattern] of roleRules) {
@@ -210,7 +212,6 @@
                     finance: "../app/finance/index.html",
                     operations: "../app/operations/index.html",
                     enterprise: "../app/enterprise/index.html",
-                    platform_admin: "../public/operations/control-tower.html"
                 };
                 postLoginPath = workspacePaths[accountType];
                 if (!postLoginPath) {
