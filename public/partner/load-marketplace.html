@@ -60,9 +60,10 @@
                 </div>
             </div>
             
-            <a href="../../app/partner/index.html?release=partner-workspace-v3" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Partner Workspace
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="../partner-onboarding.html?release=partner-pathway-v1" class="text-xs font-mono text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-2.5 rounded-xl transition border border-emerald-200">Onboarding</a>
+                <a href="../../app/partner/index.html?release=partner-workspace-v3" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">← Partner Workspace</a>
+            </div>
         </div>
     </header>
 
@@ -187,7 +188,11 @@
                     .select('id,legal_name,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,partner_compliance_status,partner_account_mode,default_currency_code')
                     .in('id', ids);
                 if (orgError) throw new Error('Could not verify the partner organization.');
-                const org = (orgs || []).find(o => ['partner','carrier','forwarder'].includes(String(o.organization_type_code || o.organization_type || '').toLowerCase()));
+                const org = (orgs || []).find(o => {
+                    const type = String(o.organization_type || '').toLowerCase();
+                    const typeCode = String(o.organization_type_code || '').toLowerCase();
+                    return ['partner','carrier','forwarder'].includes(type) || ['partner','carrier','forwarder'].includes(typeCode);
+                });
                 if (!org) throw new Error('This account has no active partner organization. Open Partner Onboarding to choose a pathway.');
                 currentPartnerOrgId = Number(org.id);
                 currentCurrencyCode = String(org.default_currency_code || 'INR').toUpperCase();
