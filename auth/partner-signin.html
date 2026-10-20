@@ -1,54 +1,44 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#07111f"><title>Partner Sign In | KRIM Logistics OS</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07111f">
+<title>Partner Sign In | KRIM Logistics OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../config.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#07111f;--card:#101e30;--line:#2a3d53;--text:#f4f7fb;--muted:#a9b8ca;--green:#19a974;--blue:#1686e8}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top right,#123d43 0,transparent 45%),linear-gradient(145deg,#07111f,#10243a);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif}.card{width:min(100%,460px);padding:30px;background:#101e30;border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 80px #0006}.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.logo{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#1ab981,#075e55);font-weight:900;font-size:22px}.eyebrow{color:#6ee7b7;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:.15em}h1{margin:8px 0;font-size:30px;line-height:1.15}p{color:var(--muted);line-height:1.55}label{display:block;margin:18px 0 7px;font-size:13px;color:#d4deea}input{width:100%;padding:14px;border-radius:11px;border:1px solid #354b63;background:#07111f;color:#fff;font:inherit}input:focus{outline:2px solid #19a974;border-color:transparent}button{width:100%;margin-top:22px;padding:15px;border:0;border-radius:11px;background:var(--green);color:#041b14;font-weight:800;font-size:15px;cursor:pointer}button:disabled{opacity:.65;cursor:wait}a{color:#8ed6ff;text-decoration:none}a:hover{text-decoration:underline}.links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:13px}#feedback{min-height:24px;margin-top:12px;overflow-wrap:anywhere;font-size:13px}.error{color:#fca5a5}.success{color:#6ee7b7}.note{font-size:12px}@media(max-width:420px){.card{padding:23px}h1{font-size:26px}}
+:root{color-scheme:dark;--bg:#07111f;--panel:#102137;--line:#2b425b;--text:#f3f7fb;--muted:#a9bbcf;--green:#4ce0a2;--blue:#6dbbff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(900px 600px at 90% -10%,#14504c88,transparent 65%),radial-gradient(700px 500px at -10% 110%,#174d7a66,transparent 65%),var(--bg);display:flex;flex-direction:column}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,5vw,64px);border-bottom:1px solid #ffffff12;background:#07111fcc;backdrop-filter:blur(14px)}.brand{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none}.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#42e0a1,#087f72);color:#06241d;font-weight:950;font-size:22px;box-shadow:0 8px 30px #1fc58a30}.brand b{display:block;letter-spacing:.1em;font-size:13px}.brand small{display:block;color:#80dcb8;font-size:10px;letter-spacing:.14em;text-transform:uppercase}.headlink{color:#b9d4e9;text-decoration:none;font-size:13px}.layout{width:min(1080px,100%);margin:auto;padding:44px 22px;display:grid;grid-template-columns:1fr minmax(300px,430px);gap:clamp(28px,7vw,90px);align-items:center;flex:1}.story .eyebrow,.eyebrow{font-size:10px;font-weight:850;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}.story h1{font-size:clamp(34px,5vw,58px);line-height:1.03;letter-spacing:-.045em;margin:16px 0}.story h1 span{color:var(--green)}.story p{color:var(--muted);max-width:440px;font-size:16px}.pills{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}.pill{border:1px solid #ffffff18;border-radius:999px;padding:8px 12px;color:#c5d5e4;font-size:11px}.card{padding:clamp(24px,4vw,34px);border-radius:25px;background:linear-gradient(160deg,#122940,#0c1b2c);border:1px solid #ffffff1c;box-shadow:0 30px 100px #0005}.card h2{margin:8px 0 4px;font-size:27px;letter-spacing:-.03em}.sub{margin:0 0 23px;color:var(--muted);font-size:13px}label{display:block;margin:17px 0 7px;color:#d6e1ed;font-size:12px;font-weight:700}input{width:100%;padding:14px 15px;border:1px solid #344c65;border-radius:12px;background:#071522;color:#fff;font:inherit;outline:none}input:focus{border-color:var(--green);box-shadow:0 0 0 3px #4ce0a21c}.passrow{display:flex;gap:8px}.passrow input{min-width:0;flex:1}.passrow button{border:1px solid #344c65;background:#152a40;color:#dce9f5;border-radius:11px;padding:0 13px;cursor:pointer}.submit{width:100%;border:0;border-radius:12px;padding:15px;margin-top:22px;background:linear-gradient(100deg,#4ce0a2,#83f0be);color:#06271d;font-weight:900;font-size:14px;cursor:pointer}.submit:disabled{opacity:.65;cursor:wait}#feedback{min-height:24px;margin-top:14px;font-size:12px;overflow-wrap:anywhere}.error{color:#ffaaa9}.success{color:#7df0bb}.links{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:16px;font-size:12px}.links a{color:#9ed4ff;text-decoration:none}.note{margin-top:22px;padding-top:16px;border-top:1px solid #ffffff12;color:#8fa7bd;font-size:11px}footer{text-align:center;padding:18px;color:#71869c;font-size:11px;border-top:1px solid #ffffff10}@media(max-width:760px){.layout{grid-template-columns:1fr;max-width:520px;padding:32px 18px;gap:26px}.story h1{font-size:38px}.story p{font-size:14px}.pills{margin-top:17px}header{height:66px}.card{border-radius:20px}}
 </style></head>
-<body><main class="card">
-<div class="brand"><div class="logo">K</div><div><strong>KRIM LOGISTICS OS</strong><div class="eyebrow">Carrier Partner Portal</div></div></div>
-<div class="eyebrow">Secure partner access</div><h1>Sign in to your Partner Workspace</h1>
-<p>Use the email and password for your registered transport or carrier account. Partner access is checked before opening the workspace.</p>
-<form id="partner-login">
-<label for="email">Registered email</label><input id="email" type="email" autocomplete="username" required placeholder="dispatch@company.com">
-<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Your password">
-<button id="submit" type="submit">Sign in to Partner Workspace →</button>
-</form><div id="feedback" role="status" aria-live="polite"></div>
-<div class="links"><a href="partner-signup.html">Register as a partner</a><a href="forgot-password.html">Forgot password?</a><a href="login.html">Main sign-in</a></div>
-<p class="note">Signing in does not mean carrier verification is complete. Freight access remains subject to KRIM's partner approval and permissions.</p>
-</main>
+<body>
+<header><a class="brand" href="../public/index.html"><span class="mark">K</span><span><b>KRIM LOGISTICS OS</b><small>Global freight network</small></span></a><a class="headlink" href="login.html">Main sign-in ↗</a></header>
+<main class="layout">
+<section class="story"><div class="eyebrow">Carrier & transport partners</div><h1>Move freight.<br><span>Grow together.</span></h1><p>Your partner workspace for freight opportunities, quotations, assignments and delivery execution—connected to the KRIM logistics network.</p><div class="pills"><span class="pill">Secure account access</span><span class="pill">Partner operations</span><span class="pill">Live workflow data</span></div></section>
+<section class="card"><div class="eyebrow">Partner portal · Sign in</div><h2>Welcome back</h2><p class="sub">Sign in with the account you registered as a transport partner.</p>
+<form id="partner-login"><label for="email">Registered email address</label><input id="email" type="email" required autocomplete="username" placeholder="you@transportcompany.com"><label for="password">Password</label><div class="passrow"><input id="password" type="password" required autocomplete="current-password" placeholder="Enter your password"><button id="toggle" type="button">Show</button></div><button class="submit" id="submit" type="submit">Sign in to Partner Workspace <span aria-hidden="true">→</span></button></form>
+<div id="feedback" role="status" aria-live="polite"></div><div class="links"><a href="partner-signup.html">Create partner account</a><a href="forgot-password.html">Forgot password?</a></div><div class="note">Partner login does not automatically approve a carrier. Restricted loads and assignments remain subject to verified partner status and workspace permissions.</div>
+</section></main><footer>KRIM Logistics OS · Trusted freight coordination · © 2026</footer>
 <script>
 (function(){
- const client=window.KRIM_SUPABASE||window.supabaseClient;
- const form=document.getElementById("partner-login"),button=document.getElementById("submit"),feedback=document.getElementById("feedback");
- function show(message,type){feedback.textContent=message;feedback.className=type||"";}
- if(!client){show("Secure sign-in could not initialize. Refresh and try again.","error");return;}
+ const BASE=location.hostname.endsWith("github.io")&&location.pathname.startsWith("/logistics-saas/")?"/logistics-saas":"";
+ const client=window.supabase&&window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co","sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");
+ const form=document.getElementById("partner-login"),button=document.getElementById("submit"),feedback=document.getElementById("feedback"),password=document.getElementById("password");
+ function show(msg,type){feedback.textContent=msg;feedback.className=type||""}
+ document.getElementById("toggle").addEventListener("click",()=>{const reveal=password.type==="password";password.type=reveal?"text":"password";document.getElementById("toggle").textContent=reveal?"Hide":"Show"});
+ if(!client){show("Sign-in service did not load. Check your internet connection and refresh this page.","error");return}
  form.addEventListener("submit",async e=>{
   e.preventDefault();button.disabled=true;button.textContent="Verifying account…";show("");
   try{
-   const email=document.getElementById("email").value.trim().toLowerCase(),password=document.getElementById("password").value;
-   const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;
-   const user=data.user,meta=user.user_metadata||{};
-   const type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
-   const {data:members,error:memberError}=await client.from("krim_organization_members").select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)").eq("user_id",user.id).eq("status","active");
-   const partnerMembership=Array.isArray(members)&&members.some(m=>{
-    const org=m.krim_organizations||{};
-    const words=[m.role,org.organization_type,org.organization_type_code,org.legal_name,org.display_name].join(" ").toLowerCase();
-    return /partner|carrier|transport|forwarder/.test(words);
-   });
-   const partnerMetadata=["partner","carrier","transport_partner","transport"].includes(type);
-   if(!partnerMetadata&&!partnerMembership){
-    await client.auth.signOut();
-    throw new Error(memberError?"This account is not marked as a partner, and membership verification failed. Use the main sign-in page or ask KRIM support to correct the account role.":"This account is not registered as a transport partner. Please use the correct account or contact KRIM support.");
-   }
-   show("Partner account verified. Opening your workspace…","success");
-   const target=window.krimPath?window.krimPath("auth/partner-redirect.html"):"partner-redirect.html";
-   window.location.replace(target);
-  }catch(err){show(err.message||"Sign-in failed. Please try again.","error");button.disabled=false;button.textContent="Sign in to Partner Workspace →";}
+   const {data,error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim().toLowerCase(),password:password.value});if(error)throw error;
+   const user=data.user||data.session?.user;if(!user)throw new Error("Sign-in did not return an authenticated user.");
+   const meta=user.user_metadata||{},type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
+   let isPartner=["partner","carrier","transport_partner","transport"].includes(type),membershipError=null;
+   const result=await client.from("krim_organization_members").select("role,status,krim_organizations(organization_type,organization_type_code,display_name,legal_name)").eq("user_id",user.id).eq("status","active");
+   membershipError=result.error;
+   if(Array.isArray(result.data))isPartner=isPartner||result.data.some(m=>{const o=m.krim_organizations||{};return /partner|carrier|transport|forwarder/.test([m.role,o.organization_type,o.organization_type_code,o.display_name,o.legal_name].join(" ").toLowerCase())});
+   if(!isPartner){await client.auth.signOut();throw new Error(membershipError?"Could not verify partner membership (database policy/query issue). Please use the main sign-in or ask KRIM support to check your role.":"This account is not identified as a transport partner. Use the account created through Partner Registration or ask KRIM support to correct its account type.");}
+   show("Partner account accepted. Opening your workspace…","success");
+   window.location.replace(BASE+"/auth/partner-redirect.html?source=partner-signin");
+  }catch(err){show(err.message||"Unable to sign in. Please try again.","error");button.disabled=false;button.textContent="Sign in to Partner Workspace →"}
  });
 })();
 </script></body></html>
