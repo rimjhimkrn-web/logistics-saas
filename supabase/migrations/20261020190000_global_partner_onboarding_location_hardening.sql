@@ -148,8 +148,7 @@ BEGIN
 
   RETURN v_org_id;
 END;
-$function$
-
+$function$;
 REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding_global_v2(text,text,text,text,text[],text,text,text,text,text,text,text,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.krim_submit_partner_onboarding_global_v2(text,text,text,text,text[],text,text,text,text,text,text,text,text,text) TO authenticated;
 REVOKE ALL ON FUNCTION public.krim_submit_partner_onboarding_global(text,text,text,text,text[],text,text,text,text,text) FROM PUBLIC, anon, authenticated;
