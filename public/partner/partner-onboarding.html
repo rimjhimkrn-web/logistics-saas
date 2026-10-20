@@ -340,8 +340,8 @@ body>footer .text-white{color:var(--krim-navy)!important}
           document.getElementById("development-test-note").hidden = mode !== "development_test";
           document.getElementById("registered-business-steps").hidden = !registered;
           const button = document.querySelector("#partner-onboarding-form button[type=submit]");
-          button.disabled = false;
-          button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : "Submit Business Verification →";
+          button.disabled = !mode;
+          button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : mode === "registered_business" ? "Submit Business Verification →" : "Choose a Partner Pathway →";
         }
         document.getElementById("partner-account-mode").addEventListener("change", updatePartnerModeUI);
         updatePartnerModeUI();
