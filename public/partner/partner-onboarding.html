@@ -99,7 +99,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
     <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
 
       <!-- STEP INDICATORS -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-slate-800 pb-6">
+      <div id="registered-business-steps" class="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-slate-800 pb-6">
         <div class="p-3 bg-[#040814] border border-amber-500/50 rounded-xl space-y-1">
           <span class="text-amber-400 font-bold block text-[10px]">STEP 01</span>
           <span class="text-white font-extrabold">Entity & Authority ID</span>
@@ -338,7 +338,9 @@ body>footer .text-white{color:var(--krim-navy)!important}
           businessFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !registered; });
           individualFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !individual; });
           document.getElementById("development-test-note").hidden = mode !== "development_test";
+          document.getElementById("registered-business-steps").hidden = !registered;
           const button = document.querySelector("#partner-onboarding-form button[type=submit]");
+          button.disabled = false;
           button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : "Submit Business Verification →";
         }
         document.getElementById("partner-account-mode").addEventListener("change", updatePartnerModeUI);
