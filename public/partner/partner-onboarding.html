@@ -131,9 +131,33 @@ body>footer .text-white{color:var(--krim-navy)!important}
 
             <div class="space-y-1">
               <label class="text-slate-400 text-[10px] uppercase font-bold block">Country of Incorporation *</label>
-              <select id="partner-country" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
-                <option value="">Loading supported countries…</option>
+              <select id="partner-country" autocomplete="country-name" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
+                <option value="">Loading global country list…</option>
               </select>
+              <p class="text-slate-500 text-[10px]">Choose the country where the business is legally registered.</p>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Primary Operating Country *</label>
+              <select id="partner-operating-country" autocomplete="country-name" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
+                <option value="">Loading global country list…</option>
+              </select>
+              <p class="text-slate-500 text-[10px]">Where your team or fleet mainly operates. This can differ from incorporation.</p>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Operating Region / State / Province</label>
+              <input id="partner-operating-region" type="text" autocomplete="address-level1" maxlength="120" placeholder="e.g., Jharkhand / Bavaria / California" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Operating City</label>
+              <input id="partner-operating-city" type="text" autocomplete="address-level2" maxlength="120" placeholder="e.g., Ranchi / Berlin / Dubai" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Postal / ZIP Code</label>
+              <input id="partner-postal-code" type="text" autocomplete="postal-code" maxlength="32" placeholder="Postal code (if used locally)" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-400 text-[10px] uppercase font-bold block">Business Website (optional)</label>
+              <input id="partner-website" type="url" autocomplete="url" maxlength="255" placeholder="https://yourcompany.example" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" />
             </div>
 
             <div class="space-y-1">
@@ -222,27 +246,38 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const legalName = document.getElementById("partner-legal-name");
         if (metadata.company_name && !legalName.value) legalName.value = String(metadata.company_name).slice(0, 200);
 
-        const countrySelect = document.getElementById("partner-country");
-        const { data: countries, error: countriesError } = await onboardingClient
-          .from("krim_countries")
-          .select("iso2_code, code, name")
-          .eq("is_active", true)
-          .order("name", { ascending: true });
-        if (countriesError) throw countriesError;
-        countrySelect.replaceChildren();
-        const countryPlaceholder = document.createElement("option");
-        countryPlaceholder.value = "";
-        countryPlaceholder.textContent = "Select country of incorporation";
-        countrySelect.appendChild(countryPlaceholder);
-        (countries || []).forEach(country => {
-          const code = String(country.iso2_code || country.code || "").toUpperCase();
-          if (!/^[A-Z]{2}$/.test(code)) return;
-          const option = document.createElement("option");
-          option.value = code;
-          option.textContent = String(country.name || code) + " (" + code + ")";
-          countrySelect.appendChild(option);
-        });
-        if (countrySelect.options.length < 2) throw new Error("No supported countries are available. Contact KRIM support.");
+        // Global ISO-3166-1 alpha-2 list is the baseline; the database catalog can add/override display names.
+        // This prevents onboarding from being blocked when a market has not yet been seeded in krim_countries.
+        const globalCountryCodes = ("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(/\\s+/);
+        const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+        let countryMap = new Map(globalCountryCodes.map(code => [code, regionNames.of(code) || code]));
+        try {
+          const { data: countries } = await onboardingClient.from("krim_countries")
+            .select("iso2_code, code, name").eq("is_active", true).order("name", { ascending: true });
+          (countries || []).forEach(country => {
+            const code = String(country.iso2_code || country.code || "").toUpperCase();
+            if (/^[A-Z]{2}$/.test(code) && country.name) countryMap.set(code, String(country.name));
+          });
+        } catch (catalogError) {
+          console.warn("Using built-in global country catalog; database country lookup unavailable.", catalogError);
+        }
+        function populateCountrySelect(selectId, placeholderText) {
+          const select = document.getElementById(selectId);
+          select.replaceChildren();
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = placeholderText;
+          select.appendChild(placeholder);
+          [...countryMap.entries()].sort((a,b) => a[1].localeCompare(b[1])).forEach(([code,name]) => {
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent = name + " (" + code + ")";
+            select.appendChild(option);
+          });
+          if (select.options.length < 200) throw new Error("The global country catalog could not be loaded. Refresh and retry.");
+        }
+        populateCountrySelect("partner-country", "Select country of incorporation");
+        populateCountrySelect("partner-operating-country", "Select primary operating country");
 
         const { data: memberships, error: membershipError } = await onboardingClient
           .from("krim_organization_members")
@@ -298,6 +333,13 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const countryCode = document.getElementById("partner-country").value;
         const authorityId = document.getElementById("partner-authority-id").value.trim();
         const category = document.getElementById("partner-category").value;
+        const operatingCountryCode = document.getElementById("partner-operating-country").value;
+        const operatingRegion = document.getElementById("partner-operating-region").value.trim();
+        const operatingCity = document.getElementById("partner-operating-city").value.trim();
+        const postalCode = document.getElementById("partner-postal-code").value.trim();
+        const website = document.getElementById("partner-website").value.trim();
+        if (!operatingCountryCode) throw new Error("Choose your primary operating country.");
+        if (website && !/^https?:\\/\\/[^\\s]+\\.[^\\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
         if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and operating authority ID.");
         const insuranceFile = document.getElementById("insurance-file").files[0];
         const taxFile = document.getElementById("tax-file").files[0];
@@ -306,12 +348,17 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const insurancePath = await uploadPartnerDocument(insuranceFile, "insurance certificate");
         const taxPath = await uploadPartnerDocument(taxFile, "tax registration certificate");
 
-        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding", {
+        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding_global", {
           p_legal_name: legalName,
           p_country_code: countryCode,
           p_authority_id: authorityId,
           p_operational_category: category,
-          p_document_paths: [insurancePath, taxPath]
+          p_document_paths: [insurancePath, taxPath],
+          p_operating_country_code: operatingCountryCode,
+          p_operating_region: operatingRegion || null,
+          p_operating_city: operatingCity || null,
+          p_postal_code: postalCode || null,
+          p_website: website || null
         });
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
