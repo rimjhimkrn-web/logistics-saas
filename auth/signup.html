@@ -1,69 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KRIM Logistics | Create Account</title>
-<meta name="description" content="Create your KRIM Logistics customer account securely with Supabase Auth.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../config.js"></script>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><title>Create customer account | KRIM Logistics</title><meta name="description" content="Secure customer registration for KRIM Logistics."><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#07111f;--card:#101e30;--line:#26384e;--text:#f4f7fb;--muted:#a9b8ca;--blue:#1686e8;--green:#21b879}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#07111f,#10243a);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:flex;flex-direction:column}header,footer{padding:18px 22px;border-bottom:1px solid var(--line)}header{display:flex;justify-content:space-between;align-items:center;gap:12px}a{color:#83c7ff;text-decoration:none}a:hover{text-decoration:underline}.brand{font-weight:800;letter-spacing:.08em}.wrap{width:100%;max-width:520px;margin:auto;padding:28px 16px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 18px 60px #0004}h1{font-size:28px;margin:8px 0}p{color:var(--muted);line-height:1.5}.tag{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#83c7ff}label{display:block;margin:17px 0 7px;font-size:13px;color:#c4d2e3}input{width:100%;padding:14px;border:1px solid #34485f;border-radius:10px;background:#07111f;color:white;font:inherit}button{width:100%;margin-top:22px;padding:15px;border:0;border-radius:10px;background:var(--blue);color:white;font-weight:750;font-size:15px;cursor:pointer}button:disabled{opacity:.6;cursor:wait}#feedback{padding:12px 0;overflow-wrap:anywhere}.success{color:#6ee7b7}.error{color:#fca5a5}.note{font-size:12px}footer{border-top:1px solid var(--line);border-bottom:0;text-align:center;font-size:12px;color:var(--muted)}@media(max-width:480px){.card{padding:22px}h1{font-size:24px}}
-</style>
-</head>
-<body>
-<header><a class="brand" href="../public/index.html">KRIM LOGISTICS</a><a href="login.html">Sign in</a></header>
-<main class="wrap"><section class="card">
-<div class="tag">Customer registration</div>
-<h1>Create your KRIM account</h1>
-<p>Register with your email and password. No external sign-in provider is used on this page.</p>
-<form id="signup-form">
-<label for="org">Organization name</label><input id="org" name="organization" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your company name">
-<label for="name">Your full name</label><input id="name" name="name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Full name">
-<label for="email">Email address</label><input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com">
-<label for="password">Password</label><input id="password" name="password" type="password" required minlength="10" autocomplete="new-password" placeholder="At least 10 characters">
-<p class="note">Use a unique password with at least 10 characters.</p>
-<button id="submit-button" type="submit">Create account</button>
-</form>
-<div id="feedback" role="status" aria-live="polite"></div>
-<p class="note">If email confirmation is disabled in Supabase, signup should create a session without sending a verification email. If confirmation is still required by project settings, this page cannot bypass it.</p>
-<p>Are you a transport carrier? <a href="partner-signup.html">Register as a partner</a>.</p>
-</section></main>
-<footer>KRIM Logistics OS · Secure account access powered by Supabase</footer>
+:root{--navy:#07152f;--blue:#1769ff;--ink:#182741;--muted:#63738b;--line:#dce5f0;--bg:#f3f7fc;--green:#087e5b;--red:#b42318}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 0,#dcecff,transparent 38%),var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif;display:flex;flex-direction:column}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.top{background:var(--navy);color:#d8e4f7;padding:11px 20px;font-size:12px}.topin,header,footer{width:min(1080px,calc(100% - 32px));margin:auto}.topin,header{display:flex;align-items:center;justify-content:space-between;gap:16px}.nav{background:#fff;border-bottom:1px solid var(--line)}header{min-height:72px}.brand{font-weight:900;letter-spacing:.04em;color:var(--navy);display:flex;align-items:center;gap:10px}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:#fff;background:linear-gradient(135deg,var(--blue),#6247ed,#36c9d8);font-size:19px}.brand small{display:block;font-size:9px;letter-spacing:.13em;color:var(--muted)}.headlink{font-weight:750;font-size:13px}.layout{width:min(1000px,calc(100% - 32px));margin:42px auto;display:grid;grid-template-columns:1fr minmax(300px,440px);gap:40px;align-items:center;flex:1}.eyebrow,.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:850}.intro h1{font-size:clamp(32px,4vw,46px);line-height:1.08;letter-spacing:-.04em;color:var(--navy);margin:14px 0}.intro p{color:var(--muted);max-width:460px}.points{display:grid;gap:12px;margin-top:26px}.point{display:flex;gap:10px;align-items:flex-start;color:#3d506c;font-size:13px}.check{width:22px;height:22px;border-radius:7px;background:#e0f6ef;color:var(--green);display:grid;place-items:center;font-weight:900;flex:none}.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:29px;box-shadow:0 22px 70px #102b4d12}h2{margin:7px 0 4px;color:var(--navy);font-size:25px;letter-spacing:-.03em}.sub{margin:0 0 20px;color:var(--muted);font-size:13px}label{display:block;font-size:12px;font-weight:800;color:#334660;margin:15px 0 6px}input{width:100%;padding:13px 14px;border:1px solid #cdd8e7;border-radius:11px;background:#fbfdff;color:var(--ink);font:inherit;outline:none}input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1769ff1b}.pwrow{display:flex;gap:8px}.pwrow input{min-width:0}.toggle{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:#354a68;font-weight:750;cursor:pointer}.hint{font-size:11px;color:var(--muted);margin:5px 0}.terms{display:flex;align-items:flex-start;gap:9px;margin-top:17px;font-size:11px;color:var(--muted)}.terms input{width:16px;height:16px;margin:2px 0;flex:none}.submit{width:100%;margin-top:20px;padding:14px;border:0;border-radius:12px;background:var(--blue);color:#fff;font:inherit;font-weight:850;cursor:pointer}.submit:disabled{opacity:.6;cursor:wait}.feedback{margin-top:13px;font-size:12px;overflow-wrap:anywhere}.feedback:not(:empty){padding:12px;border-radius:10px;background:#f1f6fc}.feedback.error{background:#fff0ef;color:var(--red)}.feedback.success{background:#eafaf3;color:var(--green)}.divider{border:0;border-top:1px solid #edf1f6;margin:20px 0}.bottomline{text-align:center;color:var(--muted);font-size:12px}.security{font-size:10px;color:#718198;text-align:center;margin-top:15px}footer{padding:0 0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px}@media(max-width:760px){.layout{grid-template-columns:1fr;gap:22px;margin:24px auto 32px}.intro h1{font-size:34px}.points{grid-template-columns:1fr 1fr;margin-top:18px}.card{padding:23px}}@media(max-width:420px){.points{grid-template-columns:1fr}.card{padding:20px}.topin{justify-content:center;text-align:center}.topin span:last-child{display:none}}
+</style></head><body>
+<div class="top"><div class="topin"><span>KRIM GLOBAL LOGISTICS OS</span><span>Secure customer onboarding · No payment required to register</span></div></div>
+<div class="nav"><header><a class="brand" href="../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span></a><a class="headlink" href="login.html?role=customer">Already registered? Sign in →</a></header></div>
+<main class="layout"><section class="intro"><div class="eyebrow">Customer account setup</div><h1>Move your business forward.</h1><p>Create a customer account to begin your freight journey with KRIM. Your login identity is separate from your organization's access permissions.</p><div class="points"><div class="point"><span class="check">✓</span><span>Request and review freight quotes</span></div><div class="point"><span class="check">✓</span><span>Manage shipment requests and tracking</span></div><div class="point"><span class="check">✓</span><span>Organization-level access controls</span></div><div class="point"><span class="check">✓</span><span>Email/password sign-in through Supabase</span></div></div></section>
+<section class="card"><div class="kicker">New customer</div><h2>Create your account</h2><p class="sub">Use a business email you can access.</p><form id="signup-form" novalidate>
+<label for="org">Organization / business name</label><input id="org" required minlength="2" maxlength="120" autocomplete="organization" placeholder="Your company or business name">
+<label for="name">Full name</label><input id="name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Your full name">
+<label for="email">Business email</label><input id="email" type="email" required maxlength="254" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@company.com">
+<label for="password">Create password</label><div class="pwrow"><input id="password" type="password" required minlength="10" maxlength="72" autocomplete="new-password" placeholder="At least 10 characters"><button class="toggle" type="button" id="toggle">Show</button></div><p class="hint">Use at least 10 characters and a unique password.</p>
+<label for="confirm">Confirm password</label><input id="confirm" type="password" required minlength="10" maxlength="72" autocomplete="new-password" placeholder="Re-enter your password">
+<label class="terms"><input id="terms" type="checkbox" required><span>I confirm these details are accurate and agree to KRIM's <a href="../terms.html" target="_blank" rel="noopener">Terms</a> and <a href="../privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+<button class="submit" id="submit" type="submit">Create customer account →</button><div id="feedback" class="feedback" role="status" aria-live="polite"></div></form><hr class="divider"><div class="bottomline">Transport business? <a href="partner-signup.html">Partner onboarding</a></div><div class="security">Protected by Supabase Authentication. Never share your password or verification codes.</div></section></main>
+<footer><span>© <span id="year"></span> KRIM Logistics OS</span><span><a href="../index.html">Home</a> · <a href="../public/tracking.html">Tracking</a> · <a href="login.html?role=customer">Customer sign in</a></span></footer>
 <script>
-(function(){
- const form=document.getElementById("signup-form");
- const button=document.getElementById("submit-button");
- const feedback=document.getElementById("feedback");
- function show(message,type){feedback.textContent=message;feedback.className=type||"";}
- form.addEventListener("submit",async function(event){
-  event.preventDefault();
-  const client=window.KRIM_SUPABASE||window.supabaseClient;
-  if(!client){show("Supabase could not initialize. Refresh the page and try again.","error");return;}
-  const organization=document.getElementById("org").value.trim();
-  const fullName=document.getElementById("name").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  if(organization.length<2||fullName.length<2||password.length<10){show("Please complete every field and use a password of at least 10 characters.","error");return;}
-  button.disabled=true;button.textContent="Creating account…";show("");
-  try{
-   const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName,company_name:organization,krim_account_type:"customer"},emailRedirectTo:new URL("./auth-callback.html",window.location.href).href}});
-   if(error)throw error;
-   if(!data.session){
-    show("Supabase accepted the signup, but did not return a login session. Check that Confirm Email is OFF under Supabase Authentication → Sign In / Providers → Email, then retry. If this email was already registered, sign in instead.","error");
-    button.disabled=false;button.textContent="Create account";return;
-   }
-   const {error:provisionError}=await client.rpc("krim_provision_customer_organization",{p_legal_name:organization});
-   if(provisionError)throw new Error("Account created, but workspace setup did not finish: "+provisionError.message+". Please sign in and contact support before retrying signup.");
-   show("Account created successfully. Opening your KRIM workspace…","success");
-   window.location.href=window.krimPath?window.krimPath("app/customer/index.html"):"../app/customer/index.html";
-  }catch(error){
-   show(error.message||"Signup failed. Please try again.","error");
-   button.disabled=false;button.textContent="Create account";
-  }
- });
+(function(){"use strict";const form=document.getElementById("signup-form"),btn=document.getElementById("submit"),fb=document.getElementById("feedback");document.getElementById("year").textContent=new Date().getFullYear();document.getElementById("toggle").addEventListener("click",function(){const p=document.getElementById("password"),show=p.type==="password";p.type=show?"text":"password";this.textContent=show?"Hide":"Show";});function say(t,c){fb.textContent=t;fb.className="feedback "+(c||"");}function friendly(e){const m=String(e?.message||"");if(/already registered|user already exists/i.test(m))return "An account may already exist for this email. Please sign in or use password recovery.";if(/rate limit|too many requests/i.test(m))return "Too many attempts. Wait a few minutes and try again.";return m||"We could not create the account. Please try again.";}
+form.addEventListener("submit",async function(e){e.preventDefault();say("");const org=document.getElementById("org").value.trim(),name=document.getElementById("name").value.trim(),email=document.getElementById("email").value.trim().toLowerCase(),password=document.getElementById("password").value,confirm=document.getElementById("confirm").value;if(org.length<2||name.length<2||!document.getElementById("email").validity.valid){say("Enter a valid business name, full name and email address.","error");return;}if(password.length<10){say("Your password must contain at least 10 characters.","error");return;}if(password!==confirm){say("The passwords do not match.","error");document.getElementById("confirm").focus();return;}if(!document.getElementById("terms").checked){say("Please accept the Terms and Privacy Policy to continue.","error");return;}const client=window.KRIM_SUPABASE||window.supabaseClient;if(!client){say("Secure sign-up did not initialize. Refresh and try again.","error");return;}btn.disabled=true;btn.textContent="Creating secure account…";try{const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:name,company_name:org,krim_account_type:"customer"},emailRedirectTo:new URL("auth-callback.html",location.href).href}});if(error)throw error;if(!data.user)throw new Error("The authentication service did not return an account. Please try again.");if(!data.session){say("Registration request accepted. Check your email for a verification link, then sign in. Check spam if it does not arrive.","success");btn.textContent="Registration submitted";return;}const {error:provisionError}=await client.rpc("krim_provision_customer_organization",{p_legal_name:org});if(provisionError){say("Your login account was created, but organization setup could not be confirmed. Do not register again. Use Sign in to retry setup. Details: "+provisionError.message,"error");btn.disabled=false;btn.textContent="Continue via sign in";return;}say("Account and organization setup confirmed. Opening your customer workspace…","success");location.assign("../app/customer/index.html");}catch(err){say(friendly(err),"error");btn.disabled=false;btn.textContent="Create customer account →";}});
 })();
-</script>
-</body>
-</html>
+</script></body></html>
