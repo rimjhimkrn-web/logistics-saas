@@ -25,6 +25,17 @@
 <article class="quick"><div class="icon">✓</div><h3>Business verification</h3><p>Review your onboarding status and complete requested business details.</p><a id="verify-shortcut" href="../../public/partner/partner-onboarding.html">Open verification checklist →</a></article>
 <article class="quick"><div class="icon">⌁</div><h3>Shipment assignments</h3><p>Open the assignment area to review shipment work associated with your organization.</p><a id="assignments-shortcut" href="../../public/partner/load-marketplace.html">View partner loads →</a></article>
 </div>
+<section id="development-demo" hidden style="margin-top:18px;padding:20px;border:1px solid #cbdcf8;border-radius:18px;background:#f8fbff;color:#182741">
+  <div style="font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#1769ff">Safe preview · Sample data only</div>
+  <h2 style="margin:8px 0;color:#07152f;font-size:22px">Development / Test Partner Mode</h2>
+  <p style="margin:0 0 16px;color:#65748b">This workspace is for platform testing. The records below are fictional interface samples, not real freight, customers, partners, bookings, invoices, or payouts. They are not saved as commercial transactions.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+    <article style="padding:15px;border:1px solid #dce5f0;border-radius:13px;background:#fff"><div style="font-size:10px;color:#65748b;font-weight:800;text-transform:uppercase">Sample load</div><strong style="display:block;margin:6px 0;color:#07152f">KRIM-DEMO-001</strong><span style="font-size:12px;color:#65748b">Ranchi → Kolkata · Demo only</span></article>
+    <article style="padding:15px;border:1px solid #dce5f0;border-radius:13px;background:#fff"><div style="font-size:10px;color:#65748b;font-weight:800;text-transform:uppercase">Sample status</div><strong style="display:block;margin:6px 0;color:#07152f">Draft preview</strong><span style="font-size:12px;color:#65748b">No real carrier assignment</span></article>
+    <article style="padding:15px;border:1px solid #dce5f0;border-radius:13px;background:#fff"><div style="font-size:10px;color:#65748b;font-weight:800;text-transform:uppercase">Sample settlement</div><strong style="display:block;margin:6px 0;color:#07152f">Not processed</strong><span style="font-size:12px;color:#65748b">No payment or payout is created</span></article>
+  </div>
+  <p style="margin:14px 0 0;font-size:12px;color:#65748b">When you later operate a real logistics business, choose Registered Logistics Business and submit genuine documents. Independent individuals can register their interest separately.</p>
+</section>
 <div id="workspace-note" class="notice" hidden></div>
 </main>
 <footer><span>© <span id="year"></span> KRIM Logistics OS</span><span>Partner identity · Organization membership · Business approval</span></footer>
@@ -42,13 +53,26 @@ const {data:ud,error:ue}=await client.auth.getUser();if(ue)throw new Error("Your
 const user=ud.user;
 const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");if(memberError)throw new Error("KRIM could not verify organization membership. Please retry.");
 const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){fail("Partner organization not linked","Your account is signed in, but no active organization membership was found. Return to Partner Sign In to retry setup, or contact KRIM support. Workspace data has not been loaded.",false);return}
-const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,display_name,legal_name").in("id",ids);if(orgError)throw new Error("KRIM could not verify your organization type. Workspace data has not been loaded.");
+const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,display_name,legal_name,partner_metadata").in("id",ids);if(orgError)throw new Error("KRIM could not verify your organization type. Workspace data has not been loaded.");
 const org=(orgs||[]).find(isPartner);if(!org){fail("Partner access denied","This account is not linked to a partner, carrier or forwarder organization. Access was not granted.",false);return}
 if(String(org.status||"").toLowerCase()!=="active"){fail("Organization is not active","Your partner organization is not active. Contact KRIM support to resolve the organization status.",false);return}
 const verification=String(org.partner_verification_status||"").trim().toLowerCase(),lifecycle=String(org.partner_lifecycle_status||"").trim().toLowerCase();
+const accountMode=String((org.partner_metadata||{}).account_mode||"").trim().toLowerCase();
 const approved=["verified","approved"].includes(verification)&&["active","verified"].includes(lifecycle);
-gate.hidden=true;main.hidden=false;identity.textContent="Signed in: "+(user.email||"verified partner account");document.getElementById("welcome").textContent=approved?"Welcome to your freight workspace":"Welcome to your partner workspace";document.getElementById("orgline").textContent=(org.display_name||org.legal_name||"Your partner organization")+(approved?" · Organization and business approval verified.":" · Your account is active; business verification is still pending.");document.getElementById("approval-label").textContent=approved?"APPROVED PARTNER":"VERIFICATION PENDING";
-if(!approved){document.getElementById("loads-count").textContent="Locked";document.getElementById("assignments-count").textContent="Locked";document.getElementById("assurance-level").textContent="—";document.getElementById("assurance-detail").textContent="Available after approval";document.getElementById("market-link").hidden=true;document.getElementById("market-shortcut").closest(".quick").hidden=true;document.getElementById("assignments-shortcut").closest(".quick").hidden=true;const note=document.getElementById("workspace-note");note.hidden=false;note.textContent="Your partner workspace is ready. To protect shipment and commercial data, marketplace and assignment tools stay locked until KRIM approves your business verification. Use Business verification when you are ready to submit the required details.";return}
+gate.hidden=true;main.hidden=false;identity.textContent="Signed in: "+(user.email||"verified partner account");
+document.getElementById("development-demo").hidden=accountMode!=="development_test";
+document.getElementById("welcome").textContent=approved?"Welcome to your freight workspace":accountMode==="development_test"?"Welcome to your test workspace":"Welcome to your partner workspace";
+document.getElementById("orgline").textContent=(org.display_name||org.legal_name||"Your partner organization")+(approved?" · Organization and business approval verified.":accountMode==="development_test"?" · Development / Test mode. Live commercial operations are disabled.":accountMode==="individual_interest"?" · Independent partner interest recorded; requirements and verification remain pending.":" · Your account is active; business verification is still pending.");
+document.getElementById("approval-label").textContent=approved?"APPROVED PARTNER":accountMode==="development_test"?"DEVELOPMENT / TEST MODE":accountMode==="individual_interest"?"INDIVIDUAL INTEREST RECORDED":"VERIFICATION PENDING";
+if(!approved){document.getElementById("loads-count").textContent="Locked";document.getElementById("assignments-count").textContent="Locked";document.getElementById("assurance-level").textContent="—";document.getElementById("assurance-detail").textContent="Available after approval";document.getElementById("market-link").hidden=true;document.getElementById("market-shortcut").closest(".quick").hidden=true;document.getElementById("assignments-shortcut").closest(".quick").hidden=true;const note=document.getElementById("workspace-note");note.hidden=false;
+if(accountMode==="development_test"){
+ note.textContent="Development / Test mode is active. You can explore the workspace using the sample preview above. Real loads, customer records, assignments, booking, and payouts remain locked.";
+}else if(accountMode==="individual_interest"){
+ note.textContent="Your independent-partner interest is recorded. This is not verification or commercial approval. KRIM must confirm the identity and operating requirements that apply to your country and service category before activation.";
+}else{
+ note.textContent="Your partner workspace is ready. To protect shipment and commercial data, marketplace and assignment tools stay locked until KRIM approves your business verification. Use Business verification when you are ready to submit genuine business details.";
+}
+return}
 const [loads,assignments,assurance]=await Promise.all([
 client.from("krim_partner_opportunities").select("id",{count:"exact",head:true}).eq("status","open"),
 client.from("krim_shipment_partner_assignments").select("id",{count:"exact",head:true}).eq("partner_organization_id",org.id),
