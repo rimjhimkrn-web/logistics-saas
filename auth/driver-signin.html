@@ -22,14 +22,14 @@ async function verifyDriver(user){
  let q=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',user.id).eq('status','active');
  if(q.error)throw new Error('Your login succeeded, but KRIM could not verify your membership. Reference: DRIVER_MEMBERSHIP_LOOKUP_FAILED.');
  let memberships=q.data||[];
- if(!memberships.some(m=>/^(driver|fleet_driver)$/i.test(String(m.role||'').trim()))&&metaRole==='driver'){
+ if(!memberships.some(m=>/^driver$/i.test(String(m.role||'').trim()))&&metaRole==='driver'){
   const provision=await client.rpc('krim_provision_driver_organization');
   if(provision.error){console.error(provision.error);throw new Error('Your account is signed in, but driver setup could not finish. Reference: DRIVER_SETUP_FAILED. Please retry once; do not register again.');}
   q=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',user.id).eq('status','active');
   if(q.error)throw new Error('Driver setup was requested but could not be verified. Reference: DRIVER_MEMBERSHIP_RECHECK_FAILED.');
   memberships=q.data||[];
  }
- const drivers=memberships.filter(m=>/^(driver|fleet_driver)$/i.test(String(m.role||'').trim()));
+ const drivers=memberships.filter(m=>/^driver$/i.test(String(m.role||'').trim()));
  if(!drivers.length)throw new Error('No active driver membership is linked to this account yet. If you just registered, retry sign-in. Otherwise ask your carrier administrator to add your driver role.');
  if(memberships.some(m=>!drivers.includes(m)))throw new Error('This account has multiple active workspace roles. Ask your organization administrator to configure one primary role before continuing.');
  const ids=[...new Set(drivers.map(m=>m.organization_id).filter(Boolean))];
