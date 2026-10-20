@@ -1,15 +1,98 @@
 <!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KRIM Partner — Dispatch Readiness</title><meta name="description" content="Review accepted KRIM assignments and dispatch readiness."><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script><script>(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l)}())</script></head>
-<body class="min-h-screen bg-slate-950 text-slate-100"><header class="border-b border-slate-800 bg-slate-900"><div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center gap-3"><a href="../../index.html" class="font-extrabold">KRIM Logistics OS</a><a href="accepted-loads.html" class="text-sm text-emerald-300">Assignment offers</a></div></header>
-<main class="max-w-5xl mx-auto px-4 py-10"><p class="text-xs uppercase tracking-widest text-emerald-300 font-bold">Partner operations</p><h1 class="text-3xl font-extrabold mt-2">Dispatch readiness</h1><p class="text-slate-400 text-sm mt-3 max-w-3xl">This page reads accepted assignments from KRIM. Vehicle and driver allocation is not recorded here unless the connected backend asset module is available; this page will never claim a dispatch occurred from a demo form.</p><div id="status" role="status" aria-live="polite" class="my-6 text-sm text-slate-300">Checking secure session…</div><div id="loads" class="space-y-4"></div></main>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07152f"><title>Driver Dispatch | KRIM Logistics</title>
+<meta name="description" content="Securely assign accepted KRIM shipments to authorized drivers.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<style>
+:root{--navy:#07152f;--blue:#1769ff;--cyan:#36c9d8;--ink:#172942;--muted:#62748c;--line:#dce5f0;--bg:#f3f7fc;--green:#087e5b;--red:#b42318;--amber:#8a5a00}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 95% 0,#dcecff,transparent 35%),var(--bg);font:14px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+a{color:var(--blue);text-decoration:none}.top{background:var(--navy);color:#dce9f8;padding:12px max(18px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;letter-spacing:.08em}.top strong{color:#fff;font-size:13px}
+nav{background:#fff;border-bottom:1px solid var(--line);padding:17px max(18px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:950;color:var(--navy);letter-spacing:.04em}.brand small{display:block;font-size:9px;color:var(--blue);letter-spacing:.16em}
+.wrap{width:min(1120px,calc(100% - 30px));margin:26px auto 50px}.hero{padding:clamp(24px,4vw,40px);border-radius:23px;background:linear-gradient(120deg,#0b2340,#123d5b 65%,#34326b);color:#fff;box-shadow:0 20px 45px #102b4d18}.eyebrow{color:#82eef3;font-size:10px;font-weight:900;letter-spacing:.18em}.hero h1{font-size:clamp(30px,5vw,46px);line-height:1.05;letter-spacing:-.05em;margin:12px 0}.hero p{max-width:750px;color:#c7d8e9;line-height:1.8}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:19px}.chip{border:1px solid #45647e;background:#102f49;color:#d9edf9;border-radius:999px;padding:7px 11px;font-size:11px}
+.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:15px;align-items:start;margin-top:15px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 24px #102b4d08;min-width:0}.panel h2{font-size:19px;color:var(--navy);margin:0;letter-spacing:-.03em}.sub{color:var(--muted);font-size:12px;margin:6px 0 16px;line-height:1.7}.label{display:block;color:#344963;font-size:11px;font-weight:850;margin:15px 0 6px}.field{width:100%;min-width:0;padding:12px 13px;border:1px solid #cdd8e7;border-radius:11px;background:#fbfdff;font:inherit;color:var(--ink);outline:none}.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1769ff18}.btn{border:1px solid var(--line);background:#fff;color:#304560;padding:11px 14px;border-radius:11px;font:inherit;font-size:12px;font-weight:850;cursor:pointer}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn:disabled{opacity:.55;cursor:wait}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.status{padding:12px 14px;border:1px solid #d6e3f3;background:#f4f8fd;border-radius:12px;color:#435875;font-size:12px;overflow-wrap:anywhere;margin:14px 0}.status.error{background:#fff0ef;border-color:#ffd0cb;color:var(--red)}.status.success{background:#eafaf3;border-color:#bcebd7;color:var(--green)}.status.warn{background:#fff8e8;border-color:#f0d7a1;color:var(--amber)}.assignment{border:1px solid var(--line);border-radius:13px;padding:14px;margin:10px 0;background:#fbfdff}.assignment strong{display:block;color:var(--navy);font-size:13px}.assignment small{color:var(--muted);font-size:11px;display:block;margin-top:5px}.empty{border:1px dashed #cbd7e6;background:#fbfdff;border-radius:13px;padding:20px;color:var(--muted);font-size:12px;line-height:1.7}.fine{font-size:10px;color:#718198;line-height:1.7;margin-top:16px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.hero h1{font-size:34px}nav{align-items:flex-start}.top span:last-child{display:none}}
+</style></head><body>
+<div class="top"><strong>KRIM LOGISTICS · PARTNER OPERATIONS</strong><span>AUTHORIZED DISPATCH · DRIVER ASSIGNMENT</span></div>
+<nav><a class="brand" href="../../index.html">KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></a><a href="accepted-loads.html">← Assignment offers</a></nav>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">TRANSPORT EXECUTION · SECURE DISPATCH</div><h1>Assign the right driver.<br>Keep every trip accountable.</h1><p>Choose an accepted shipment assignment, select a driver with an active driver membership in your organization, and create a real assignment that appears in that driver's KRIM workspace. Dispatch actions are permission-checked by Supabase; this page never invents shipments or drivers.</p><div class="chips"><span class="chip">✓ Organization-scoped</span><span class="chip">✓ Real shipment records</span><span class="chip">✓ Auditable dispatch</span></div></section>
+<div id="status" class="status" role="status" aria-live="polite">Checking secure session…</div>
+<div class="layout"><section class="panel"><h2>1 · Select accepted shipment</h2><p class="sub">Only accepted assignments belonging to your verified, active partner organization are listed.</p><div id="assignmentList"><div class="empty">Loading accepted assignments…</div></div><label class="label" for="assignment">Accepted assignment</label><select id="assignment" class="field"><option value="">Loading assignments…</option></select><div id="route" class="status">Choose an assignment to see its route.</div><div class="actions"><button class="btn" id="refresh">↻ Refresh assignments</button></div></section>
+<section class="panel"><h2>2 · Assign a driver</h2><p class="sub">Only active drivers explicitly connected to the same organization are eligible. If your driver is missing, invite/add them to your organization with the driver role first.</p><label class="label" for="driver">Eligible driver</label><select id="driver" class="field" disabled><option value="">Choose an accepted assignment first</option></select><div id="driverHelp" class="status">Select an accepted assignment to load eligible drivers.</div><label class="label" for="notes">Dispatch note (optional)</label><input id="notes" class="field" maxlength="500" placeholder="e.g. Gate 3 pickup instructions">
+<div class="actions"><button class="btn primary" id="assign" disabled>Assign driver & create trip →</button></div><p class="fine">Security: KRIM checks shipment.dispatch permission, accepted assignment status, active organization, and active driver membership on the server. The driver cannot assign shipments to themselves. Successful dispatch creates a persistent driver assignment and a dispatch record. Trip milestones and delivery evidence remain separately authenticated and recorded.</p></section></div>
+</main>
 <script>
-(async function(){const c=window.KRIM_SUPABASE||window.supabaseClient,s=document.getElementById("status"),root=document.getElementById("loads");const esc=v=>String(v??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));function msg(t,bad=false){s.textContent=t;s.className="my-6 text-sm "+(bad?"text-rose-300":"text-slate-300")}
-try{if(!c)throw Error("Backend configuration failed to load.");const {data:{session},error:ae}=await c.auth.getSession();if(ae)throw ae;if(!session){location.href="../../auth/login.html";return}
-const {data:m,error:me}=await c.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(me)throw me;const ids=[...new Set((m||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw Error("No active organization is linked to this account.");
-const {data:o,error:oe}=await c.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);if(oe)throw oe;const good=(o||[]).filter(x=>["partner","carrier","forwarder"].includes(String(x.organization_type||"").toLowerCase())&&String(x.status||"").toLowerCase()==="active"&&["verified","approved"].includes(String(x.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(x.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(x.partner_lifecycle_status||"").toLowerCase()));const pids=good.map(x=>Number(x.id));if(!pids.length){msg("Dispatch data is locked until the partner organization is verified and active.",true);return}
-const {data:a,error:ae2}=await c.from("krim_shipment_partner_assignments").select("id,shipment_id,assignment_number,status,accepted_at,partner_quote_id").in("partner_organization_id",pids).eq("status","accepted").order("accepted_at",{ascending:false}).limit(100);if(ae2)throw ae2;if(!a||!a.length){root.innerHTML='<div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">No accepted assignments are ready for dispatch.</div>';msg("No accepted assignments found.");return}
-const shipIds=[...new Set(a.map(x=>Number(x.shipment_id)).filter(Number.isSafeInteger))];const {data:sh,error:se}=await c.from("krim_shipments").select("id,shipment_number,status,goods_description,total_weight_kg,origin_location_id,destination_location_id").in("id",shipIds);if(se)throw se;const ls=[...new Set((sh||[]).flatMap(x=>[Number(x.origin_location_id),Number(x.destination_location_id)]).filter(Number.isSafeInteger))];const {data:loc,error:le}=ls.length?await c.from("krim_locations").select("id,city,state_region,location_code").in("id",ls):{data:[],error:null};if(le)throw le;const lm=new Map((loc||[]).map(x=>[Number(x.id),[x.city,x.state_region,x.location_code].filter(Boolean).join(", ")])),sm=new Map((sh||[]).map(x=>[Number(x.id),x]));
-root.innerHTML=a.map(x=>{const z=sm.get(Number(x.shipment_id))||{};return '<article class="rounded-2xl border border-slate-800 bg-slate-900 p-5"><p class="text-xs text-emerald-300 font-bold">'+esc(x.assignment_number||("Assignment #"+x.id))+'</p><h2 class="text-xl font-bold mt-2">'+esc(lm.get(Number(z.origin_location_id))||"Origin pending")+' → '+esc(lm.get(Number(z.destination_location_id))||"Destination pending")+'</h2><p class="text-sm text-slate-300 mt-2">'+esc(z.goods_description||"Cargo details unavailable")+' · '+esc(z.total_weight_kg??"Weight not provided")+' kg</p><p class="text-xs text-slate-400 mt-2">Shipment '+esc(z.shipment_number||("#"+x.shipment_id))+' · Shipment status: '+esc(z.status||"unknown")+' · Assignment accepted '+esc(x.accepted_at?new Date(x.accepted_at).toLocaleString():"date unavailable")+'</p><p class="mt-4 text-sm text-amber-300">Asset allocation and dispatch confirmation require a verified vehicle/driver backend workflow. No dispatch has been recorded by this page.</p></article>'}).join("");msg("Loaded "+a.length+" accepted assignment(s). Dispatch has not been falsely marked complete.");
-}catch(e){msg(e.message||"Could not load dispatch readiness.",true)}})();
+(async function(){
+'use strict';
+const $=id=>document.getElementById(id),db=window.KRIM_SUPABASE;let session=null,orgIds=[],assignments=[],drivers=[];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function status(t,k=''){const el=$('status');el.textContent=t;el.className='status '+k;}
+function routeText(a){return [a?.pickup_location||'Pickup pending',a?.delivery_location||'Delivery pending'].join(' → ');}
+async function init(){
+ if(!db)throw Error('Supabase configuration did not load. Refresh and retry.');
+ const sr=await db.auth.getSession();if(sr.error)throw sr.error;session=sr.data.session;
+ if(!session){location.replace((window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html'));return;}
+ const mr=await db.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
+ if(mr.error)throw mr.error;
+ const partnerMembers=(mr.data||[]).filter(m=>['partner','partner_admin','operations','platform_admin','platform_superadmin'].includes(String(m.role||'').toLowerCase()));
+ orgIds=[...new Set(partnerMembers.map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+ if(!orgIds.length)throw Error('No active partner/dispatch membership was found for this account.');
+ const or=await db.from('krim_organizations').select('id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status').in('id',orgIds);
+ if(or.error)throw or.error;
+ const valid=(or.data||[]).filter(o=>['partner','carrier','forwarder'].includes(String(o.organization_type||'').toLowerCase())&&String(o.status||'').toLowerCase()==='active'&&['verified','approved'].includes(String(o.partner_verification_status||'').toLowerCase())&&['clear','compliant','approved','verified','not_required','not_applicable'].includes(String(o.partner_compliance_status||'').toLowerCase())&&['active','verified'].includes(String(o.partner_lifecycle_status||'').toLowerCase()));
+ orgIds=valid.map(o=>Number(o.id));
+ if(!orgIds.length)throw Error('Dispatch is locked until your partner organization is verified and active.');
+ await loadAssignments();
+}
+async function loadAssignments(){
+ status('Loading accepted assignments…','warn');
+ const ar=await db.from('krim_shipment_partner_assignments').select('id,shipment_id,shipment_leg_id,partner_organization_id,assignment_number,status,accepted_at').in('partner_organization_id',orgIds).eq('status','accepted').order('accepted_at',{ascending:false}).limit(100);
+ if(ar.error)throw ar.error;assignments=ar.data||[];
+ const ids=[...new Set(assignments.map(a=>Number(a.shipment_id)).filter(Number.isSafeInteger))];
+ let ships=[],locs=[];
+ if(ids.length){const sr=await db.from('krim_shipments').select('id,shipment_number,goods_description,origin_location_id,destination_location_id').in('id',ids);if(sr.error)throw sr.error;ships=sr.data||[];
+ const locIds=[...new Set(ships.flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];
+ if(locIds.length){const lr=await db.from('krim_locations').select('id,city,state_region,location_code').in('id',locIds);if(lr.error)throw lr.error;locs=lr.data||[];}}
+ const lm=new Map(locs.map(l=>[Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(', ')])),sm=new Map(ships.map(s=>[Number(s.id),s]));
+ assignments=assignments.map(a=>{const s=sm.get(Number(a.shipment_id))||{};return {...a,shipment_number:s.shipment_number||('Shipment #'+a.shipment_id),goods_description:s.goods_description||'Cargo details not provided',pickup_location:lm.get(Number(s.origin_location_id))||'Pickup location pending',delivery_location:lm.get(Number(s.destination_location_id))||'Delivery location pending'};});
+ $('assignmentList').innerHTML=assignments.length?assignments.map(a=>'<article class="assignment"><strong>'+esc(a.assignment_number||('Assignment #'+a.id))+' · '+esc(a.shipment_number)+'</strong><small>'+esc(routeText(a))+'</small><small>'+esc(a.goods_description)+' · Accepted '+esc(a.accepted_at?new Date(a.accepted_at).toLocaleString():'date not recorded')+'</small></article>').join(''):'<div class="empty">No accepted assignments are available. Accept a real partner assignment first; then refresh this page.</div>';
+ $('assignment').innerHTML='<option value="">Choose accepted assignment</option>'+assignments.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.assignment_number||('Assignment #'+a.id))+' · '+esc(a.shipment_number)+'</option>').join('');
+ $('driver').innerHTML='<option value="">Choose a driver</option>';$('driver').disabled=true;$('assign').disabled=true;
+ $('route').textContent=assignments.length?'Select an assignment to view route details.':'No accepted assignment is ready for dispatch.';
+ status('Loaded '+assignments.length+' accepted assignment(s). Dispatch permissions are checked again by the secure backend.','success');
+}
+async function loadDrivers(){
+ const id=Number($('assignment').value),a=assignments.find(x=>x.id===id);
+ $('driver').innerHTML='<option value="">Loading eligible drivers…</option>';$('driver').disabled=true;$('assign').disabled=true;drivers=[];
+ if(!a){$('route').textContent='Choose an assignment to see its route.';$('driverHelp').textContent='Select an accepted assignment to load eligible drivers.';return;}
+ $('route').textContent=routeText(a)+' · '+a.shipment_number+' · '+a.goods_description;
+ const r=await db.rpc('krim_list_dispatchable_drivers',{p_partner_assignment_id:id});if(r.error)throw r.error;
+ drivers=r.data||[];
+ $('driver').innerHTML='<option value="">Choose a driver</option>'+drivers.map(d=>'<option value="'+esc(d.user_id)+'">'+esc(d.full_name)+' · '+esc(d.email||'email unavailable')+'</option>').join('');
+ $('driver').disabled=!drivers.length;
+ $('driverHelp').textContent=drivers.length?drivers.length+' active driver(s) are eligible in this organization.':'No active driver memberships found in this organization. Add/invite a driver to this partner organization; separate personal driver accounts are not automatically shared across organizations.';
+ $('assign').disabled=!drivers.length;
+}
+$('assignment').addEventListener('change',()=>loadDrivers().catch(e=>{console.error(e);status(e.message||'Could not load eligible drivers.','error');}));
+$('driver').addEventListener('change',()=>{$('assign').disabled=!$('driver').value||!$('assignment').value;});
+$('refresh').addEventListener('click',async()=>{try{await loadAssignments();}catch(e){console.error(e);status(e.message||'Refresh failed.','error');}});
+$('assign').addEventListener('click',async()=>{
+ const id=Number($('assignment').value),driverId=$('driver').value,a=assignments.find(x=>x.id===id);
+ if(!a||!driverId){status('Choose an accepted shipment and an eligible driver.','error');return;}
+ const b=$('assign');b.disabled=true;b.textContent='Creating secure assignment…';
+ try{
+  const r=await db.rpc('krim_assign_driver_to_partner_shipment',{p_partner_assignment_id:id,p_driver_user_id:driverId});
+  if(r.error)throw r.error;
+  const assigned=(r.data&&Array.isArray(r.data)?r.data[0]:r.data)||{};
+  status('Driver assignment saved. Reference: '+(assigned.assignment_number||assigned.id||'created')+'. Ask the driver to refresh their KRIM Driver Workspace.','success');
+  $('notes').value='';
+  await loadAssignments();
+  $('assignment').value=String(id);
+  await loadDrivers();
+ }catch(e){console.error(e);status(e.message||'Assignment was not saved. Check dispatch permission and driver membership.','error');}
+ finally{b.textContent='Assign driver & create trip →';b.disabled=!$('assignment').value||!$('driver').value;}
+});
+try{await init();}catch(e){console.error(e);status(e.message||'Dispatch page could not initialize.','error');$('assignmentList').innerHTML='<div class="empty">Access or backend verification failed. No dispatch has been recorded.</div>';}
+})();
 </script></body></html>
