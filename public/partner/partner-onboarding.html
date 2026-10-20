@@ -184,7 +184,7 @@
         if (sessionError) throw sessionError;
         onboardingSession = sessionData.session;
         if (!onboardingSession) {
-          window.location.href = "../../auth/login.html";
+          window.location.href = "../../auth/partner-signin.html";
           return;
         }
         const metadata = onboardingSession.user.user_metadata || {};
@@ -227,7 +227,7 @@
           .select("id, organization_type")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
-        const partnerOrg = (organizations || []).find(org => ["partner", "carrier", "warehouse", "forwarder"].includes(org.organization_type));
+        const partnerOrg = (organizations || []).find(org => ["partner", "carrier", "forwarder"].includes(String(org.organization_type || "").toLowerCase()));
         if (!partnerOrg) throw new Error("This account does not have an active partner organization. Register as a carrier partner first.");
         onboardingOrganizationId = Number(partnerOrg.id);
         onboardingMessage("Secure session verified. Upload both required documents to submit your partner verification packet.", "info");
