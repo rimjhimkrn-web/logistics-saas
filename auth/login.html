@@ -1,327 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Enterprise Sign In & MFA Challenge</title>
-    <link rel="manifest" href="../manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>window.KRIM_SUPABASE = window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co", "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");</script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Global Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Global Logistics Network</span>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-3 text-sm">
-                <span class="text-slate-500 hidden sm:inline">New to KRIM OS?</span>
-                <a href="signup.html" class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm">Create Account →</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Sign In & MFA Challenge Main Section -->
-    <main class="max-w-xl mx-auto px-6 py-16 flex-grow w-full">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
-            
-            <!-- STAGE 1: SIGN IN FORM -->
-            <div id="stage-login" class="space-y-6">
-                <div class="space-y-2">
-                    <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Enterprise Authentication</span>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Sign In to Your Node</h1>
-                    <p class="text-slate-600 text-sm">Authenticate session token and evaluate multi-factor security clearance.</p>
-                </div>
-
-                <form id="form-login" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Corporate Email</label>
-                        <input type="email" id="login-email" required placeholder="executive@enterprise.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Secure Passphrase</label>
-                        <input type="password" id="login-password" required placeholder="••••••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                    <button type="submit" id="btn-login" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                        Authenticate & Verify Session →
-                    </button>
-                </form>
-                <div class="flex flex-wrap justify-between gap-3 text-sm"><a href="forgot-password.html" class="text-sky-700 hover:underline">Forgot password?</a><a href="../public/index.html" class="text-slate-600 hover:underline">Back to KRIM home</a></div>
-                <div id="login-feedback" class="text-xs" role="status" aria-live="polite"></div>
-            </div>
-
-            <!-- STAGE 2: MFA CHALLENGE FORM (HIDDEN INITIALLY) -->
-            <div id="stage-mfa-challenge" class="space-y-6 hidden">
-                <div class="space-y-2">
-                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Security Challenge</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Multi-Factor Authentication</h2>
-                    <p class="text-slate-600 text-sm">Enter the 6-digit verification code from your authenticator application.</p>
-                </div>
-
-                <form id="form-mfa" class="space-y-5">
-                    <div class="space-y-2">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Authenticator Code (TOTP)</label>
-                        <input type="text" id="mfa-code" required maxlength="6" placeholder="123456" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-center font-mono text-lg tracking-[0.5em] focus:outline-none focus:border-sky-500 transition">
-                    </div>
-
-                    <button type="submit" id="btn-mfa" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/20 cursor-pointer">
-                        Verify TOTP & Enter Workspace →
-                    </button>
-                </form>
-                <div id="mfa-feedback" class="text-xs"></div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="../public/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="signup.html" class="hover:text-slate-800 transition">Register</a>
-                <a href="forgot-password.html" class="hover:text-slate-800 transition">Password recovery</a>
-                <a href="../public/tracking.html" class="hover:text-slate-800 transition">Tracking</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Institutional Sign In & MFA Challenge Logic -->
-    <script>
-        
-
-
-
-
-        let activeFactorId = null;
-        let postLoginPath = "../app/customer/index.html";
-
-        // 1. Sign In & MFA Assurance Level Evaluation
-        document.getElementById('form-login').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-login');
-            const feedback = document.getElementById('login-feedback');
-            btn.disabled = true;
-            btn.innerText = "Evaluating Credentials...";
-            feedback.innerHTML = "";
-
-            try {
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-
-                const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                const metadata = data.user?.user_metadata || {};
-                const normalize = value => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_");
-                const roleWords = memberships => (memberships || []).map(m => {
-                    const org = m.krim_organizations || {};
-                    return [m.role, org.organization_type, org.organization_type_code, org.legal_name, org.display_name]
-                        .map(normalize).join(" ");
-                }).join(" ");
-
-                // Resolve destination from registered account type and active memberships.
-                // Do not treat a missing membership query as proof of a privileged role.
-                let memberships = [];
-                const { data: memberRows, error: membershipError } = await window.KRIM_SUPABASE
-                    .from("krim_organization_members")
-                    .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
-                    .eq("user_id", data.user.id)
-                    .eq("status", "active");
-                if (membershipError) {
-                    console.warn("Membership lookup failed; using registered account type only.", membershipError);
-                } else if (Array.isArray(memberRows)) {
-                    memberships = memberRows;
-                }
-
-                const metadataType = normalize(metadata.krim_account_type || metadata.account_type || metadata.role);
-                const membershipsText = roleWords(memberships);
-                const roleRules = [
-                    ["operations", /operations|dispatcher|control_tower/],
-                    ["finance", /finance|accountant|settlement/],
-                    ["customs", /customs|clearance/],
-                    ["warehouse", /warehouse|fulfilment|fulfillment/],
-                    ["driver", /\\bdriver\\b|fleet_driver/],
-                    ["partner", /partner|carrier|transport|forwarder/],
-                    ["enterprise", /enterprise/],
-                    ["customer", /customer|shipper|client/]
-                ];
-                // Resolve role from customer/partner signup type or active organization membership.
-                // A URL query parameter is never an authorization source.
-                const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise"];
-                const requestedType = normalize(new URLSearchParams(window.location.search).get("role"));
-                if (requestedType === "platform_admin" || requestedType === "platform_superadmin") {
-                    throw new Error("Platform administration uses a separate privileged sign-in. Open the KRIM Admin Access page.");
-                }
-                let accountType = ["customer","partner"].includes(metadataType) ? metadataType : "";
-                if (!accountType) {
-                    for (const [type, pattern] of roleRules) {
-                        if (pattern.test(membershipsText)) { accountType = type; break; }
-                    }
-                }
-                if (!accountType || accountType === "user" || accountType === "member") {
-                    throw new Error("We could not verify a KRIM workspace for this account. Ask your organization administrator to finish account setup.");
-                }
-                if (requestedType && knownTypes.includes(requestedType) && requestedType !== accountType) {
-                    throw new Error("This account is not verified for the selected workspace. Choose the correct role or contact your organization administrator.");
-                }
-
-                const workspacePaths = {
-                    customer: "../app/customer/index.html",
-                    partner: "../app/partner/index.html",
-                    driver: "../app/driver/index.html",
-                    warehouse: "../app/warehouse/index.html",
-                    customs: "../app/customs/index.html",
-                    finance: "../app/finance/index.html",
-                    operations: "../app/operations/index.html",
-                    enterprise: "../app/enterprise/index.html",
-                };
-                postLoginPath = workspacePaths[accountType];
-                if (!postLoginPath) {
-                    throw new Error("Your account type is not mapped to a KRIM workspace. Contact the administrator to assign the correct role.");
-                }
-
-                // Provision only customer/partner organizations. Staff workspaces must use
-                // their existing authorized organization membership, never auto-create one.
-                if (accountType === "customer" || accountType === "partner") {
-                    const organizationName = String(metadata.company_name ||
-                        (data.user.email ? data.user.email.split("@")[0] + " Workspace" : "")).trim();
-                    if (organizationName.length < 2) {
-                        throw new Error("Your KRIM organization name is missing. Contact support to complete account setup.");
-                    }
-                    const provisionRpc = accountType === "partner"
-                        ? "krim_provision_partner_organization"
-                        : "krim_provision_customer_organization";
-                    const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
-                        provisionRpc, { p_legal_name: organizationName }
-                    );
-                    if (organizationError) throw organizationError;
-                    // Some valid provisioning RPCs return void rather than an organization ID.
-                    // Treat the RPC error as failure; do not block redirect solely on a null return value.
-                } else if (!memberships.length) {
-                    throw new Error("No active organization membership was found for this staff workspace. Ask a KRIM administrator to assign your role.");
-                }
-
-                // Evaluate Multi-Factor Assurance Level (AAL)
-                const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
-                if (aalErr) throw aalErr;
-
-                if (aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
-                    const { data: factors, error: factorsErr } = await window.KRIM_SUPABASE.auth.mfa.listFactors();
-                    if (factorsErr) throw factorsErr;
-
-                    const totpFactor = (factors?.totp || []).find(f => f.status === 'verified');
-                    if (!totpFactor) {
-                        throw new Error("Multi-factor authentication is required for this workspace. Enroll and verify an authenticator before continuing.");
-                    }
-
-                    activeFactorId = totpFactor.id;
-                    feedback.textContent = "MFA challenge required. Enter your authenticator code.";
-                    setTimeout(() => {
-                        document.getElementById('stage-login').classList.add('hidden');
-                        document.getElementById('stage-mfa-challenge').classList.remove('hidden');
-                    }, 250);
-                    return;
-                }
-
-                // If AAL1 is sufficient or no MFA enforced, redirect to Command Workspace
-                window.location.href = postLoginPath;
-
-            } catch (err) {
-                feedback.textContent = "Authentication failed: " + (err.message || "Unknown error");
-                feedback.className = "text-red-600 font-semibold";
-                btn.disabled = false;
-                btn.innerText = "Authenticate & Verify Session →";
-            }
-        });
-
-        // 2. MFA Challenge Verification Execution
-        document.getElementById('form-mfa').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-mfa');
-            const feedback = document.getElementById('mfa-feedback');
-            const code = document.getElementById('mfa-code').value.trim();
-
-            if (!code || code.length !== 6) {
-                feedback.innerHTML = `<p class='text-amber-600 font-semibold'>Please enter a valid 6-digit TOTP code.</p>`;
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Verifying Code...";
-            feedback.innerHTML = "";
-
-            try {
-                if (!activeFactorId) {
-                    const { data: factors } = await window.KRIM_SUPABASE.auth.mfa.listFactors();
-                    const active = factors?.totp?.find(f => f.status === 'verified');
-                    if (!active) throw new Error("No active TOTP factor found.");
-                    activeFactorId = active.id;
-                }
-
-                const { data: challengeData, error: challengeErr } = await window.KRIM_SUPABASE.auth.mfa.challenge({
-                    factorId: activeFactorId
-                });
-
-                if (challengeErr) throw challengeErr;
-
-                const { data: verifyData, error: verifyErr } = await window.KRIM_SUPABASE.auth.mfa.verify({
-                    factorId: activeFactorId,
-                    challengeId: challengeData.id,
-                    code: code
-                });
-
-                if (verifyErr) throw verifyErr;
-
-                feedback.innerHTML = `<p class='text-emerald-600 font-semibold'>MFA Verified Successfully! Entering Workspace...</p>`;
-                setTimeout(() => {
-                    window.location.href = postLoginPath;
-                }, 1000);
-
-            } catch (err) {
-                feedback.textContent = "Verification failed: " + (err.message || "Unknown error");
-                feedback.className = "text-red-600 font-semibold";
-                btn.disabled = false;
-                btn.innerText = "Verify TOTP & Enter Workspace →";
-            }
-        });
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><title>Sign in | KRIM Logistics</title><meta name="description" content="Securely sign in to your authorized KRIM Logistics workspace."><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
+<style>
+:root{--navy:#07152f;--blue:#1769ff;--cyan:#36c9d8;--ink:#182741;--muted:#63738b;--line:#dce5f0;--bg:#f3f7fc;--green:#087e5b;--red:#b42318}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0,#dcecff,transparent 40%),var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.top{background:var(--navy);color:#d8e4f7;padding:11px 20px;font-size:12px}.topin,header,footer{width:min(1080px,calc(100% - 32px));margin:auto}.topin,header{display:flex;align-items:center;justify-content:space-between;gap:16px}.nav{background:#fff;border-bottom:1px solid var(--line)}header{min-height:72px}.brand{font-weight:900;letter-spacing:.04em;color:var(--navy);display:flex;align-items:center;gap:10px}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:#fff;background:linear-gradient(135deg,var(--blue),#6247ed,var(--cyan));font-size:19px}.brand small{display:block;font-size:9px;letter-spacing:.13em;color:var(--muted)}.headlink{font-weight:750;font-size:13px}.layout{width:min(980px,calc(100% - 32px));margin:48px auto;display:grid;grid-template-columns:1fr minmax(300px,430px);gap:44px;align-items:center;flex:1}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:850}.intro h1{font-size:clamp(32px,4vw,46px);line-height:1.08;letter-spacing:-.04em;color:var(--navy);margin:14px 0}.intro p{color:var(--muted);max-width:440px}.bullets{display:grid;gap:12px;margin-top:25px}.bullet{display:flex;gap:10px;align-items:flex-start;color:#3d506c;font-size:13px}.check{width:22px;height:22px;border-radius:7px;background:#e0f6ef;color:var(--green);display:grid;place-items:center;font-weight:900;flex:none}.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:30px;box-shadow:0 22px 70px #102b4d12}.kicker{font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:850;color:var(--blue)}h2{margin:7px 0 4px;color:var(--navy);font-size:26px;letter-spacing:-.03em}.sub{margin:0 0 20px;color:var(--muted);font-size:13px}label{display:block;font-size:12px;font-weight:800;color:#334660;margin:16px 0 6px}input{width:100%;padding:13px 14px;border:1px solid #cdd8e7;border-radius:11px;background:#fbfdff;color:var(--ink);font:inherit;outline:none}input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1769ff1b}.pwrow{display:flex;gap:8px}.pwrow input{min-width:0}.toggle{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:#354a68;font-weight:750;cursor:pointer}.submit{width:100%;margin-top:21px;padding:14px;border:0;border-radius:12px;background:var(--blue);color:#fff;font:inherit;font-weight:850;cursor:pointer}.submit:disabled{opacity:.6;cursor:wait}.links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:12px}.feedback{margin-top:13px;font-size:12px;overflow-wrap:anywhere}.feedback:not(:empty){padding:12px;border-radius:10px;background:#f1f6fc}.feedback.error{background:#fff0ef;color:var(--red)}.feedback.success{background:#eafaf3;color:var(--green)}.hidden{display:none!important}.security{font-size:10px;color:#718198;text-align:center;margin-top:18px}.mfa-title{color:var(--navy);font-size:23px;margin:8px 0}.mfa-copy{color:var(--muted);font-size:13px}.code{font-family:ui-monospace,monospace;text-align:center;letter-spacing:.35em;font-size:21px}footer{padding:0 0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px}@media(max-width:760px){.layout{grid-template-columns:1fr;gap:22px;margin:25px auto 32px}.intro h1{font-size:34px}.bullets{grid-template-columns:1fr 1fr;margin-top:18px}.card{padding:24px}}@media(max-width:420px){.bullets{grid-template-columns:1fr}.card{padding:20px}.topin{justify-content:center;text-align:center}.topin span:last-child{display:none}}
+</style></head><body>
+<div class="top"><div class="topin"><span>KRIM GLOBAL LOGISTICS OS</span><span>Secure sign-in · Role-checked workspace routing</span></div></div>
+<div class="nav"><header><a class="brand" href="../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span></a><a class="headlink" href="signup.html">New customer? Create account →</a></header></div>
+<main class="layout"><section class="intro"><div class="eyebrow">Your work. Your authorized access.</div><h1>Welcome back to KRIM.</h1><p>Sign in with your registered email and password. KRIM checks your account type and active organization membership before choosing a workspace.</p><div class="bullets"><div class="bullet"><span class="check">✓</span><span>Secure Supabase authentication</span></div><div class="bullet"><span class="check">✓</span><span>Workspace selection is not permission</span></div><div class="bullet"><span class="check">✓</span><span>MFA challenge when required by policy</span></div><div class="bullet"><span class="check">✓</span><span>Dedicated recovery flow if you forget your password</span></div></div></section>
+<section class="card"><div id="stage-login"><div class="kicker">Account access</div><h2>Sign in</h2><p class="sub" id="role-note">Enter your account credentials to continue.</p><form id="login-form" novalidate>
+<label for="email">Email address</label><input id="email" type="email" required maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="you@company.com">
+<label for="password">Password</label><div class="pwrow"><input id="password" type="password" required autocomplete="current-password" placeholder="Your password"><button type="button" class="toggle" id="toggle">Show</button></div>
+<button class="submit" id="login-button" type="submit">Sign in securely →</button><div class="links"><a href="forgot-password.html">Forgot password?</a><a href="../index.html">Back to homepage</a></div><div id="login-feedback" class="feedback" role="status" aria-live="polite"></div></form></div>
+<div id="stage-mfa" class="hidden"><div class="kicker">Additional security</div><h2 class="mfa-title">Verify your identity</h2><p class="mfa-copy">Enter the current 6-digit code from your verified authenticator app.</p><form id="mfa-form"><label for="mfa-code">Authenticator code</label><input class="code" id="mfa-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" minlength="6" required placeholder="000000"><button class="submit" id="mfa-button" type="submit">Verify and continue →</button><div id="mfa-feedback" class="feedback" role="status" aria-live="polite"></div></form></div>
+<div class="security">Never share your password or one-time verification code. Platform administration is not available through public customer sign-in.</div></section></main>
+<footer><span>© <span id="year"></span> KRIM Logistics OS</span><span><a href="../index.html">Home</a> · <a href="../public/tracking.html">Tracking</a> · <a href="signup.html">Customer registration</a></span></footer>
+<script>
+(function(){"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient,loginForm=document.getElementById("login-form"),loginBtn=document.getElementById("login-button"),loginFeedback=document.getElementById("login-feedback"),mfaForm=document.getElementById("mfa-form"),mfaBtn=document.getElementById("mfa-button"),mfaFeedback=document.getElementById("mfa-feedback");
+let factorId=null,challengeId=null,postLoginPath="../app/customer/index.html";
+document.getElementById("year").textContent=new Date().getFullYear();
+const requestedRole=String(new URLSearchParams(location.search).get("role")||"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_");
+const publicRoles=["customer","partner","driver","warehouse","customs","finance","operations","enterprise"];
+document.getElementById("role-note").textContent=requestedRole==="customer"?"Customer / shipper sign-in.":requestedRole==="partner"?"Logistics partner sign-in.":"Enter your registered account credentials to continue.";
+document.getElementById("toggle").addEventListener("click",function(){const p=document.getElementById("password"),show=p.type==="password";p.type=show?"text":"password";this.textContent=show?"Hide":"Show";});
+function say(el,text,type){el.textContent=text;el.className="feedback "+(type||"");}
+function normalize(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
+function mapMembership(m){const org=m.krim_organizations||{},orgType=normalize(org.organization_type||org.organization_type_code),role=normalize(m.role);const values=[orgType,role];if(values.some(v=>/platform_admin|platform_superadmin|superadmin/.test(v)))return "platform_admin";if(values.some(v=>/operations|dispatcher|control_tower/.test(v)))return "operations";if(values.some(v=>/finance|accountant|settlement/.test(v)))return "finance";if(values.some(v=>/customs|clearance/.test(v)))return "customs";if(values.some(v=>/warehouse|fulfilment|fulfillment/.test(v)))return "warehouse";if(values.some(v=>/^driver$|fleet_driver/.test(v)))return "driver";if(values.some(v=>/partner|carrier|transport|forwarder/.test(v)))return "partner";if(values.some(v=>/enterprise/.test(v)))return "enterprise";if(values.some(v=>/customer|shipper|client/.test(v)))return "customer";return "";}
+const workspacePaths={customer:"../app/customer/index.html",partner:"../app/partner/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html",operations:"../app/operations/index.html",enterprise:"../app/enterprise/index.html"};
+async function finishLogin(user){const meta=user.user_metadata||{},metaType=normalize(meta.krim_account_type||meta.account_type);if(["platform_admin","platform_superadmin","superadmin","admin"].includes(metaType))throw new Error("Platform administration requires a separate privileged sign-in and cannot be accessed from this public login.");
+let memberships=[];const {data:rows,error:memberError}=await client.from("krim_organization_members").select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)").eq("user_id",user.id).eq("status","active");if(memberError){if(!["customer","partner"].includes(metaType))throw new Error("We could not verify your active organization access. Please retry; if it persists, contact your organization administrator.");}else memberships=Array.isArray(rows)?rows:[];
+let accountType=["customer","partner"].includes(metaType)?metaType:"";if(!accountType){const mapped=[...new Set(memberships.map(mapMembership).filter(Boolean))];if(mapped.includes("platform_admin"))throw new Error("Platform administration uses a separate privileged sign-in.");if(mapped.length!==1)throw new Error(mapped.length?"This account has multiple workspace roles. Ask your organization administrator to select or configure the correct primary role.":"No active KRIM organization membership was found for this account. Ask your organization administrator to finish account setup.");accountType=mapped[0];}
+if(requestedRole&&publicRoles.includes(requestedRole)&&requestedRole!==accountType)throw new Error("This account is not registered for the selected workspace. Please use the matching sign-in option.");
+if(!workspacePaths[accountType])throw new Error("No supported workspace is mapped to this account. Contact KRIM support.");
+if(accountType==="customer"||accountType==="partner"){const company=String(meta.company_name||"").trim();if(company.length<2)throw new Error("Your organization details are incomplete. Contact KRIM support to finish account setup.");const rpc=accountType==="partner"?"krim_provision_partner_organization":"krim_provision_customer_organization";const {error}=await client.rpc(rpc,{p_legal_name:company});if(error)throw new Error("Sign-in succeeded, but organization setup could not be confirmed: "+error.message+". Do not create another account; retry later or contact support.");}
+else if(!memberships.length)throw new Error("No active organization membership was found for this workspace.");
+postLoginPath=workspacePaths[accountType];
+const {data:aal,error:aalError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(aalError)throw aalError;
+if(aal?.nextLevel==="aal2"&&aal?.currentLevel!=="aal2"){const {data:factors,error}=await client.auth.mfa.listFactors();if(error)throw error;const factor=(factors?.totp||[]).find(f=>f.status==="verified");if(!factor)throw new Error("Your organization's policy requires multi-factor authentication, but no verified authenticator is enrolled. Enroll an authenticator or contact your administrator.");factorId=factor.id;document.getElementById("stage-login").classList.add("hidden");document.getElementById("stage-mfa").classList.remove("hidden");document.getElementById("mfa-code").focus();return;}
+location.assign(postLoginPath);}
+loginForm.addEventListener("submit",async function(e){e.preventDefault();say(loginFeedback,"");if(!client){say(loginFeedback,"Secure sign-in did not initialize. Refresh and try again.","error");return;}const email=document.getElementById("email").value.trim().toLowerCase(),password=document.getElementById("password").value;if(!document.getElementById("email").validity.valid||!password){say(loginFeedback,"Enter a valid email address and password.","error");return;}loginBtn.disabled=true;loginBtn.textContent="Verifying account…";try{const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;if(!data.user)throw new Error("Authentication did not return a user account.");await finishLogin(data.user);}catch(err){say(loginFeedback,err.message||"Sign-in failed. Please try again.","error");loginBtn.disabled=false;loginBtn.textContent="Sign in securely →";}});
+mfaForm.addEventListener("submit",async function(e){e.preventDefault();const code=document.getElementById("mfa-code").value.trim();if(!/^[0-9]{6}$/.test(code)){say(mfaFeedback,"Enter the 6-digit code from your authenticator.","error");return;}mfaBtn.disabled=true;mfaBtn.textContent="Verifying code…";say(mfaFeedback,"");try{if(!factorId)throw new Error("No verified authenticator was selected. Please sign in again.");const {data:challenge,error:challengeError}=await client.auth.mfa.challenge({factorId});if(challengeError)throw challengeError;challengeId=challenge.id;const {error:verifyError}=await client.auth.mfa.verify({factorId,challengeId,code});if(verifyError)throw verifyError;say(mfaFeedback,"Identity verified. Opening your workspace…","success");location.assign(postLoginPath);}catch(err){say(mfaFeedback,err.message||"Verification failed. Check the code and retry.","error");mfaBtn.disabled=false;mfaBtn.textContent="Verify and continue →";}});
+})();
+</script></body></html>
