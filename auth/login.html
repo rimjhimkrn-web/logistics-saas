@@ -150,50 +150,81 @@
                 const { data, error } = await window.KRIM_SUPABASE.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const metadata = data.user?.user_metadata || {};
-                // Prefer registered account type; recover older accounts from active organization membership.
-                let accountType = metadata.krim_account_type === "partner" ? "partner" :
-                    (metadata.krim_account_type === "enterprise" ? "enterprise" : "customer");
-                try {
-                    const { data: memberships, error: membershipError } = await window.KRIM_SUPABASE
-                        .from("krim_organization_members")
-                        .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
-                        .eq("user_id", data.user.id)
-                        .eq("status", "active");
-                    if (!membershipError && Array.isArray(memberships) && memberships.length) {
-                        const partnerMembership = memberships.find(m => {
-                            const org = m.krim_organizations || {};
-                            return /partner|carrier|transport|forwarder/i.test(
-                                String(org.organization_type || "") + " " +
-                                String(org.organization_type_code || "") + " " +
-                                String(m.role || "")
-                            );
-                        });
-                        const enterpriseMembership = memberships.find(m => /enterprise/i.test(
-                            String((m.krim_organizations || {}).organization_type || "") + " " +
-                            String((m.krim_organizations || {}).organization_type_code || "")
-                        ));
-                        if (partnerMembership) accountType = "partner";
-                        else if (enterpriseMembership) accountType = "enterprise";
-                    }
-                } catch (membershipLookupError) {
-                    console.warn("KRIM membership role lookup unavailable; using registered account type.", membershipLookupError);
+                const normalize = value => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+                const roleWords = memberships => (memberships || []).map(m => {
+                    const org = m.krim_organizations || {};
+                    return [m.role, org.organization_type, org.organization_type_code, org.legal_name, org.display_name]
+                        .map(normalize).join(" ");
+                }).join(" ");
+
+                // Resolve destination from registered account type and active memberships.
+                // Do not treat a missing membership query as proof of a privileged role.
+                let memberships = [];
+                const { data: memberRows, error: membershipError } = await window.KRIM_SUPABASE
+                    .from("krim_organization_members")
+                    .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
+                    .eq("user_id", data.user.id)
+                    .eq("status", "active");
+                if (membershipError) {
+                    console.warn("Membership lookup failed; using registered account type only.", membershipError);
+                } else if (Array.isArray(memberRows)) {
+                    memberships = memberRows;
                 }
-                const organizationName = String(metadata.company_name || (data.user.email ? data.user.email.split("@")[0] + " Workspace" : "")).trim();
-                if (organizationName.length < 2) throw new Error("Your KRIM organization name is missing. Contact support to complete account setup.");
-                const provisionRpc = accountType === "partner"
-                    ? "krim_provision_partner_organization"
-                    : "krim_provision_customer_organization";
-                const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
-                    provisionRpc,
-                    { p_legal_name: organizationName }
-                );
-                if (organizationError) throw organizationError;
-                if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
-                postLoginPath = accountType === "partner"
-                    ? "../app/partner/index.html"
-                    : (accountType === "enterprise"
-                        ? "../app/enterprise/index.html"
-                        : "../app/customer/index.html");
+
+                const metadataType = normalize(metadata.krim_account_type || metadata.account_type || metadata.role);
+                const membershipsText = roleWords(memberships);
+                const roleRules = [
+                    ["platform_admin", /platform_superadmin|platform_admin|global_admin|super_admin/],
+                    ["operations", /operations|dispatcher|control_tower/],
+                    ["finance", /finance|accountant|settlement/],
+                    ["customs", /customs|clearance/],
+                    ["warehouse", /warehouse|fulfilment|fulfillment/],
+                    ["driver", /(^|\\s)driver(\\s|$)|fleet_driver/],
+                    ["partner", /partner|carrier|transport|forwarder/],
+                    ["enterprise", /enterprise/],
+                    ["customer", /customer|shipper|client/]
+                ];
+                let accountType = metadataType;
+                for (const [type, pattern] of roleRules) {
+                    if (pattern.test(membershipsText)) { accountType = type; break; }
+                }
+                if (!accountType || accountType === "user" || accountType === "member") accountType = "customer";
+
+                const workspacePaths = {
+                    customer: "../app/customer/index.html",
+                    partner: "../app/partner/index.html",
+                    driver: "../app/driver/index.html",
+                    warehouse: "../app/warehouse/index.html",
+                    customs: "../app/customs/index.html",
+                    finance: "../app/finance/index.html",
+                    operations: "../app/operations/index.html",
+                    enterprise: "../app/enterprise/index.html",
+                    platform_admin: "../public/control-centre/control-tower.html"
+                };
+                postLoginPath = workspacePaths[accountType];
+                if (!postLoginPath) {
+                    throw new Error("Your account type is not mapped to a KRIM workspace. Contact the administrator to assign the correct role.");
+                }
+
+                // Provision only customer/partner organizations. Staff workspaces must use
+                // their existing authorized organization membership, never auto-create one.
+                if (accountType === "customer" || accountType === "partner") {
+                    const organizationName = String(metadata.company_name ||
+                        (data.user.email ? data.user.email.split("@")[0] + " Workspace" : "")).trim();
+                    if (organizationName.length < 2) {
+                        throw new Error("Your KRIM organization name is missing. Contact support to complete account setup.");
+                    }
+                    const provisionRpc = accountType === "partner"
+                        ? "krim_provision_partner_organization"
+                        : "krim_provision_customer_organization";
+                    const { data: organizationId, error: organizationError } = await window.KRIM_SUPABASE.rpc(
+                        provisionRpc, { p_legal_name: organizationName }
+                    );
+                    if (organizationError) throw organizationError;
+                    if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
+                } else if (!memberships.length) {
+                    throw new Error("No active organization membership was found for this staff workspace. Ask a KRIM administrator to assign your role.");
+                }
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
