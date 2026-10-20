@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#07152f">
+<title>Privileged Admin Access | KRIM Logistics OS</title>
+<meta name="description" content="Restricted KRIM platform administration sign-in.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#061126;--panel:#0d2038;--line:#263e5b;--ink:#f5f8ff;--muted:#a6b7d0;--blue:#5794ff;--cyan:#53dbe7;--green:#72e5b6;--red:#ff9eaa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 5%,#164a7c70,transparent 36%),radial-gradient(ellipse at 5% 95%,#392c7a55,transparent 34%),var(--bg);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);display:flex;flex-direction:column}a{color:#a8d2ff;text-decoration:none}a:hover{text-decoration:underline}.top{border-bottom:1px solid #ffffff16;padding:17px 22px}.brand{width:min(1040px,100%);margin:auto;display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.08em}.mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#4d8cff,#7954e8,#48d8e7);font-size:21px}.brand small{display:block;font-size:9px;color:#8ea8cb;letter-spacing:.17em}.layout{width:min(1040px,100%);margin:auto;padding:42px 22px;display:grid;grid-template-columns:1fr minmax(300px,420px);gap:clamp(28px,7vw,84px);align-items:center;flex:1}.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;color:var(--cyan)}h1{font-size:clamp(34px,5vw,56px);line-height:1.04;letter-spacing:-.045em;margin:15px 0}.story p{max-width:470px;color:var(--muted)}.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.pill{border:1px solid #ffffff20;border-radius:999px;padding:8px 11px;font-size:11px;color:#d0dff4}.card{background:linear-gradient(150deg,#122943,#0a192d);border:1px solid #ffffff20;border-radius:24px;padding:clamp(23px,4vw,34px);box-shadow:0 30px 90px #0005}.card h2{font-size:25px;margin:8px 0 4px}.sub{font-size:12px;color:var(--muted);margin:0 0 23px}label{display:block;margin:16px 0 7px;font-size:12px;font-weight:750;color:#d8e4f5}input{width:100%;padding:14px;border:1px solid #38506e;border-radius:12px;background:#071526;color:#fff;font:inherit;outline:none}input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #53dbe722}.submit{width:100%;border:0;border-radius:12px;padding:15px;margin-top:22px;background:linear-gradient(100deg,#5e9aff,#6f8cff);color:#07152f;font-weight:900;cursor:pointer}.submit:disabled{opacity:.6;cursor:wait}#feedback{min-height:24px;margin-top:13px;font-size:12px;overflow-wrap:anywhere}.error{color:var(--red)}.success{color:var(--green)}.notice{margin-top:19px;border-top:1px solid #ffffff16;padding-top:15px;font-size:11px;color:#9fb2cb}.foot{text-align:center;border-top:1px solid #ffffff14;padding:18px;color:#8298b7;font-size:11px}@media(max-width:760px){.layout{grid-template-columns:1fr;max-width:540px;padding:30px 18px;gap:26px}.story h1{font-size:38px}.top{padding:13px 18px}}
+</style></head>
+<body>
+<div class="top"><a class="brand" href="../index.html"><span class="mark">K</span><span>KRIM LOGISTICS OS<small>PRIVILEGED CONTROL PLANE</small></span></a></div>
+<main class="layout">
+<section class="story"><div class="eyebrow">Restricted administrative boundary</div><h1>Govern the platform.<br>Protect the network.</h1><p>This entry is reserved for authorized KRIM platform administrators. Public customer, carrier and operational accounts cannot grant themselves administrative privileges.</p><div class="pills"><span class="pill">Server-verified roles</span><span class="pill">Audited admin access</span><span class="pill">No public registration</span></div></section>
+<section class="card"><div class="eyebrow">Privileged sign-in</div><h2>Administrator access</h2><p class="sub">Use your pre-authorized KRIM administrator account.</p>
+<form id="admin-login"><label for="email">Administrator email</label><input id="email" type="email" required autocomplete="username" placeholder="admin@yourcompany.com"><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password" placeholder="Enter your password"><button class="submit" id="submit" type="submit">Verify privileged access →</button></form>
+<div id="feedback" role="status" aria-live="polite"></div><div class="notice">The server checks your active platform role before access is granted. The URL, email address, or selected page does not grant permissions. If you are not an authorized administrator, sign in through the public workspace portal.</div><p style="font-size:12px;margin-top:18px"><a href="access.html">← Public workspace access</a></p></section>
+</main><footer class="foot">KRIM Logistics OS · Restricted access · All access attempts are subject to server-side authorization.</footer>
+<script>
+(function(){
+ const URL="https://ebltviniygljwwseplph.supabase.co",KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+ const client=window.supabase&&window.supabase.createClient(URL,KEY);
+ const form=document.getElementById("admin-login"),button=document.getElementById("submit"),feedback=document.getElementById("feedback");
+ function show(message,type){feedback.textContent=message;feedback.className=type||""}
+ if(!client){show("Secure sign-in service did not load. Check your connection and refresh.","error");button.disabled=true;return}
+ form.addEventListener("submit",async function(e){
+  e.preventDefault();button.disabled=true;button.textContent="Checking identity and role…";show("");
+  try{
+   const {data,error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim().toLowerCase(),password:document.getElementById("password").value});
+   if(error)throw error;if(!data.session)throw new Error("No authenticated session was returned.");
+   const {data:check,error:gateError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+   if(gateError||!check||check.ok!==true){await client.auth.signOut();throw new Error("Privileged access denied. This account does not have an active KRIM platform administrator role.");}
+   show("Identity and platform role verified. Opening the restricted control plane…","success");
+   const parts=location.pathname.split("/").filter(Boolean),base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
+   location.replace(base+"/public/operations/control-tower.html");
+  }catch(err){show(err.message||"Unable to verify privileged access.","error");button.disabled=false;button.textContent="Verify privileged access →"}
+ });
+})();
+</script></body></html>
