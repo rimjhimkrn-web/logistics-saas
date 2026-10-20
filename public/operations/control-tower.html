@@ -33,27 +33,9 @@ header{box-shadow:0 8px 28px #07182a18}
 @media(max-width:640px){header .mx-auto{min-height:66px}main#main{padding-top:22px}.card:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 </style>
+<meta name="robots" content="noindex,nofollow,noarchive">
 <style>html{visibility:hidden}html.krim-admin-authorized{visibility:visible}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(async function(){
-  const KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-  const URL="https://ebltviniygljwwseplph.supabase.co";
-  const parts=location.pathname.split("/").filter(Boolean);
-  const base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
-  const gate=base+"/auth/krim-admin-access.html?reason=required";
-  const client=window.supabase&&window.supabase.createClient(URL,KEY);
-  function deny(){location.replace(gate)}
-  try{
-    if(!client){deny();return}
-    const {data,error}=await client.auth.getSession();
-    if(error||!data.session){deny();return}
-    const result=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
-    if(result.error||!result.data||result.data.ok!==true){deny();return}
-    document.documentElement.classList.add("krim-admin-authorized");
-  }catch(_){deny()}
-})();
-</script>
+<script>(function(){var p=location.pathname.split("/").filter(Boolean),b=location.hostname.endsWith("github.io")?"/"+(p[0]||"logistics-saas"):"",s=document.createElement("script");s.src=b+"/auth/krim-admin-guard.js";s.onerror=function(){location.replace(b+"/auth/krim-admin-access.html?reason=guard-unavailable")};document.head.appendChild(s)})();</script>
 </head>
 <body class="antialiased">
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:z-[100] focus:bg-white focus:p-4">Skip to content</a>
