@@ -14,30 +14,187 @@
 <div class="security">Never share your password or one-time verification code. Platform administration is not available through public customer sign-in.</div></section></main>
 <footer><span>© <span id="year"></span> KRIM Logistics OS</span><span><a href="../index.html">Home</a> · <a href="../public/tracking.html">Tracking</a> · <a href="signup.html">Customer registration</a></span></footer>
 <script>
-(function(){"use strict";
-const client=window.KRIM_SUPABASE||window.supabaseClient,loginForm=document.getElementById("login-form"),loginBtn=document.getElementById("login-button"),loginFeedback=document.getElementById("login-feedback"),mfaForm=document.getElementById("mfa-form"),mfaBtn=document.getElementById("mfa-button"),mfaFeedback=document.getElementById("mfa-feedback");
-let factorId=null,challengeId=null,postLoginPath="../app/customer/index.html";
-document.getElementById("year").textContent=new Date().getFullYear();
-const requestedRole=String(new URLSearchParams(location.search).get("role")||"").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_");
-const publicRoles=["customer","partner","driver","warehouse","customs","finance","operations","enterprise"];
-document.getElementById("role-note").textContent=requestedRole==="customer"?"Customer / shipper sign-in.":requestedRole==="partner"?"Logistics partner sign-in.":"Enter your registered account credentials to continue.";
-document.getElementById("toggle").addEventListener("click",function(){const p=document.getElementById("password"),show=p.type==="password";p.type=show?"text":"password";this.textContent=show?"Hide":"Show";});
-function say(el,text,type){el.textContent=text;el.className="feedback "+(type||"");}
-function normalize(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
-function mapMembership(m){const org=m.krim_organizations||{},orgType=normalize(org.organization_type||org.organization_type_code),role=normalize(m.role);const values=[orgType,role];if(values.some(v=>/platform_admin|platform_superadmin|superadmin/.test(v)))return "platform_admin";if(values.some(v=>/operations|dispatcher|control_tower/.test(v)))return "operations";if(values.some(v=>/finance|accountant|settlement/.test(v)))return "finance";if(values.some(v=>/customs|clearance/.test(v)))return "customs";if(values.some(v=>/warehouse|fulfilment|fulfillment/.test(v)))return "warehouse";if(values.some(v=>/^driver$|fleet_driver/.test(v)))return "driver";if(values.some(v=>/partner|carrier|transport|forwarder/.test(v)))return "partner";if(values.some(v=>/enterprise/.test(v)))return "enterprise";if(values.some(v=>/customer|shipper|client/.test(v)))return "customer";return "";}
-const workspacePaths={customer:"../app/customer/index.html",partner:"../app/partner/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html",operations:"../app/operations/index.html",enterprise:"../app/enterprise/index.html"};
-async function finishLogin(user){const meta=user.user_metadata||{},metaType=normalize(meta.krim_account_type||meta.account_type);if(["platform_admin","platform_superadmin","superadmin","admin"].includes(metaType))throw new Error("Platform administration requires a separate privileged sign-in and cannot be accessed from this public login.");
-let memberships=[];const {data:rows,error:memberError}=await client.from("krim_organization_members").select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)").eq("user_id",user.id).eq("status","active");if(memberError){if(!["customer","partner"].includes(metaType))throw new Error("We could not verify your active organization access. Please retry; if it persists, contact your organization administrator.");}else memberships=Array.isArray(rows)?rows:[];
-let accountType=["customer","partner"].includes(metaType)?metaType:"";if(!accountType){const mapped=[...new Set(memberships.map(mapMembership).filter(Boolean))];if(mapped.includes("platform_admin"))throw new Error("Platform administration uses a separate privileged sign-in.");if(mapped.length!==1)throw new Error(mapped.length?"This account has multiple workspace roles. Ask your organization administrator to select or configure the correct primary role.":"No active KRIM organization membership was found for this account. Ask your organization administrator to finish account setup.");accountType=mapped[0];}
-if(requestedRole&&publicRoles.includes(requestedRole)&&requestedRole!==accountType)throw new Error("This account is not registered for the selected workspace. Please use the matching sign-in option.");
-if(!workspacePaths[accountType])throw new Error("No supported workspace is mapped to this account. Contact KRIM support.");
-if(accountType==="customer"||accountType==="partner"){const company=String(meta.company_name||"").trim();if(company.length<2)throw new Error("Your organization details are incomplete. Contact KRIM support to finish account setup.");const rpc=accountType==="partner"?"krim_provision_partner_organization":"krim_provision_customer_organization";const {error}=await client.rpc(rpc,{p_legal_name:company});if(error)throw new Error("Sign-in succeeded, but organization setup could not be confirmed: "+error.message+". Do not create another account; retry later or contact support.");}
-else if(!memberships.length)throw new Error("No active organization membership was found for this workspace.");
-postLoginPath=workspacePaths[accountType];
-const {data:aal,error:aalError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(aalError)throw aalError;
-if(aal?.nextLevel==="aal2"&&aal?.currentLevel!=="aal2"){const {data:factors,error}=await client.auth.mfa.listFactors();if(error)throw error;const factor=(factors?.totp||[]).find(f=>f.status==="verified");if(!factor)throw new Error("Your organization's policy requires multi-factor authentication, but no verified authenticator is enrolled. Enroll an authenticator or contact your administrator.");factorId=factor.id;document.getElementById("stage-login").classList.add("hidden");document.getElementById("stage-mfa").classList.remove("hidden");document.getElementById("mfa-code").focus();return;}
-location.assign(postLoginPath);}
-loginForm.addEventListener("submit",async function(e){e.preventDefault();say(loginFeedback,"");if(!client){say(loginFeedback,"Secure sign-in did not initialize. Refresh and try again.","error");return;}const email=document.getElementById("email").value.trim().toLowerCase(),password=document.getElementById("password").value;if(!document.getElementById("email").validity.valid||!password){say(loginFeedback,"Enter a valid email address and password.","error");return;}loginBtn.disabled=true;loginBtn.textContent="Verifying account…";try{const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;if(!data.user)throw new Error("Authentication did not return a user account.");await finishLogin(data.user);}catch(err){say(loginFeedback,err.message||"Sign-in failed. Please try again.","error");loginBtn.disabled=false;loginBtn.textContent="Sign in securely →";}});
-mfaForm.addEventListener("submit",async function(e){e.preventDefault();const code=document.getElementById("mfa-code").value.trim();if(!/^[0-9]{6}$/.test(code)){say(mfaFeedback,"Enter the 6-digit code from your authenticator.","error");return;}mfaBtn.disabled=true;mfaBtn.textContent="Verifying code…";say(mfaFeedback,"");try{if(!factorId)throw new Error("No verified authenticator was selected. Please sign in again.");const {data:challenge,error:challengeError}=await client.auth.mfa.challenge({factorId});if(challengeError)throw challengeError;challengeId=challenge.id;const {error:verifyError}=await client.auth.mfa.verify({factorId,challengeId,code});if(verifyError)throw verifyError;say(mfaFeedback,"Identity verified. Opening your workspace…","success");location.assign(postLoginPath);}catch(err){say(mfaFeedback,err.message||"Verification failed. Check the code and retry.","error");mfaBtn.disabled=false;mfaBtn.textContent="Verify and continue →";}});
+(function () {
+  "use strict";
+  const client = window.KRIM_SUPABASE || window.supabaseClient;
+  const loginForm = document.getElementById("login-form");
+  const loginBtn = document.getElementById("login-button");
+  const loginFeedback = document.getElementById("login-feedback");
+  const mfaForm = document.getElementById("mfa-form");
+  const mfaBtn = document.getElementById("mfa-button");
+  const mfaFeedback = document.getElementById("mfa-feedback");
+  let factorId = null, challengeId = null, postLoginPath = "../app/customer/index.html";
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const requestedRole = String(new URLSearchParams(location.search).get("role") || "")
+    .trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  const publicRoles = ["customer", "partner", "driver", "warehouse", "customs", "finance", "operations", "enterprise"];
+  document.getElementById("role-note").textContent =
+    requestedRole === "customer" ? "Customer / shipper sign-in." :
+    requestedRole === "partner" ? "Logistics partner sign-in." :
+    "Enter your registered account credentials to continue.";
+
+  document.getElementById("toggle").addEventListener("click", function () {
+    const p = document.getElementById("password"), show = p.type === "password";
+    p.type = show ? "text" : "password"; this.textContent = show ? "Hide" : "Show";
+  });
+
+  function say(el, message, type) {
+    el.textContent = message;
+    el.className = "feedback " + (type || "");
+  }
+  function normalize(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  }
+  function mapMembership(m) {
+    const org = m.krim_organizations || {};
+    const values = [normalize(org.organization_type), normalize(org.organization_type_code), normalize(m.role)];
+    if (values.some(v => /platform_admin|platform_superadmin|superadmin/.test(v))) return "platform_admin";
+    if (values.some(v => /operations|dispatcher|control_tower/.test(v))) return "operations";
+    if (values.some(v => /finance|accountant|settlement/.test(v))) return "finance";
+    if (values.some(v => /customs|clearance/.test(v))) return "customs";
+    if (values.some(v => /warehouse|fulfilment|fulfillment/.test(v))) return "warehouse";
+    if (values.some(v => /^driver$|fleet_driver/.test(v))) return "driver";
+    if (values.some(v => /partner|carrier|transport|forwarder/.test(v))) return "partner";
+    if (values.some(v => /enterprise/.test(v))) return "enterprise";
+    if (values.some(v => /customer|shipper|client/.test(v))) return "customer";
+    return "";
+  }
+  const workspacePaths = {
+    customer: "../app/customer/index.html",
+    partner: "../app/partner/index.html",
+    driver: "../app/driver/index.html",
+    warehouse: "../app/warehouse/index.html",
+    customs: "../app/customs/index.html",
+    finance: "../app/finance/index.html",
+    operations: "../app/operations/index.html",
+    enterprise: "../app/enterprise/index.html"
+  };
+
+  async function finishLogin(user) {
+    const metadata = user.user_metadata || {};
+    const metadataType = normalize(metadata.krim_account_type || metadata.account_type);
+    if (["platform_admin", "platform_superadmin", "superadmin", "admin"].includes(metadataType)) {
+      throw new Error("Platform administration uses a separate privileged sign-in.");
+    }
+
+    let memberships = [];
+    let membershipLookupFailed = false;
+    const lookup = await client.from("krim_organization_members")
+      .select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)")
+      .eq("user_id", user.id).eq("status", "active");
+    if (lookup.error) {
+      membershipLookupFailed = true;
+      console.warn("KRIM membership lookup failed; provisioning will be attempted only for public self-service account types.", lookup.error);
+    } else {
+      memberships = Array.isArray(lookup.data) ? lookup.data : [];
+    }
+
+    let accountType = "";
+    if (!membershipLookupFailed && memberships.length) {
+      const mapped = [...new Set(memberships.map(mapMembership).filter(Boolean))];
+      if (mapped.includes("platform_admin")) throw new Error("Platform administration uses a separate privileged sign-in.");
+      if (mapped.length !== 1) {
+        throw new Error(mapped.length
+          ? "This account has multiple workspace roles. Ask your organization administrator to configure one primary workspace."
+          : "Your active organization membership does not map to a supported workspace. Contact KRIM support.");
+      }
+      accountType = mapped[0];
+    } else if (["customer", "partner"].includes(metadataType)) {
+      const company = String(metadata.company_name || "").trim();
+      if (company.length < 2) {
+        throw new Error("Your account is signed in, but organization details are incomplete. Contact KRIM support; do not create another account.");
+      }
+      const rpc = metadataType === "partner" ? "krim_provision_partner_organization" : "krim_provision_customer_organization";
+      const provision = await client.rpc(rpc, { p_legal_name: company });
+      if (provision.error) {
+        throw new Error("Your password was accepted, but workspace setup could not be verified: " + provision.error.message + ". Do not create another account.");
+      }
+      accountType = metadataType;
+    } else {
+      throw new Error(membershipLookupFailed
+        ? "We could not verify your active organization access. Retry once; if this continues, contact KRIM support."
+        : "No active KRIM organization membership was found. Ask your organization administrator to finish account setup.");
+    }
+
+    if (requestedRole && publicRoles.includes(requestedRole) && requestedRole !== accountType) {
+      throw new Error("This account is not registered for the selected workspace. Choose the matching sign-in option.");
+    }
+    if (!workspacePaths[accountType]) throw new Error("No supported workspace is mapped to this account.");
+
+    const { data: assurance, error: assuranceError } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assuranceError) throw assuranceError;
+    if (assurance && assurance.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
+      const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();
+      if (factorsError) throw factorsError;
+      const factor = (factors?.totp || []).find(item => item.status === "verified");
+      if (!factor) {
+        throw new Error("Multi-factor authentication is required, but no verified authenticator is enrolled. Contact your administrator.");
+      }
+      factorId = factor.id;
+      postLoginPath = workspacePaths[accountType];
+      document.getElementById("stage-login").classList.add("hidden");
+      document.getElementById("stage-mfa").classList.remove("hidden");
+      document.getElementById("mfa-code").focus();
+      return;
+    }
+
+    // Confirm the browser has persisted a usable session before navigating.
+    const sessionResult = await client.auth.getSession();
+    if (sessionResult.error) throw sessionResult.error;
+    if (!sessionResult.data || !sessionResult.data.session || sessionResult.data.session.user.id !== user.id) {
+      throw new Error("Your credentials were accepted, but the browser session was not saved. Enable site storage for GitHub Pages and try again.");
+    }
+    postLoginPath = workspacePaths[accountType];
+    say(loginFeedback, "Sign-in successful. Opening your authorized workspace…", "success");
+    const destination = new URL(postLoginPath, window.location.href);
+    window.location.replace(destination.href);
+  }
+
+  loginForm.addEventListener("submit", async function (event) {
+    event.preventDefault(); say(loginFeedback, "");
+    if (!client) { say(loginFeedback, "Secure sign-in did not initialize. Refresh and try again.", "error"); return; }
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+    if (!document.getElementById("email").validity.valid || !password) {
+      say(loginFeedback, "Enter a valid email address and password.", "error"); return;
+    }
+    loginBtn.disabled = true; loginBtn.textContent = "Verifying account…";
+    try {
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      const user = data && (data.user || data.session?.user);
+      if (!user || !data.session) throw new Error("Authentication did not return a usable session. Please sign in again.");
+      await finishLogin(user);
+    } catch (error) {
+      console.error("KRIM customer sign-in/routing failed:", error);
+      say(loginFeedback, error.message || "Sign-in failed. Please try again.", "error");
+      loginBtn.disabled = false; loginBtn.textContent = "Sign in securely →";
+    }
+  });
+
+  mfaForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const code = document.getElementById("mfa-code").value.trim();
+    if (!/^[0-9]{6}$/.test(code)) { say(mfaFeedback, "Enter the 6-digit code from your authenticator.", "error"); return; }
+    mfaBtn.disabled = true; mfaBtn.textContent = "Verifying code…"; say(mfaFeedback, "");
+    try {
+      if (!factorId) throw new Error("No verified authenticator was selected. Please sign in again.");
+      const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({ factorId });
+      if (challengeError) throw challengeError;
+      challengeId = challenge.id;
+      const { error: verifyError } = await client.auth.mfa.verify({ factorId, challengeId, code });
+      if (verifyError) throw verifyError;
+      const sessionResult = await client.auth.getSession();
+      if (sessionResult.error) throw sessionResult.error;
+      if (!sessionResult.data?.session) throw new Error("MFA was verified but the browser session is unavailable. Please sign in again.");
+      say(mfaFeedback, "Identity verified. Opening your workspace…", "success");
+      window.location.replace(new URL(postLoginPath, window.location.href).href);
+    } catch (error) {
+      console.error("KRIM MFA verification failed:", error);
+      say(mfaFeedback, error.message || "Verification failed. Check the code and retry.", "error");
+      mfaBtn.disabled = false; mfaBtn.textContent = "Verify and continue →";
+    }
+  });
 })();
 </script></body></html>
