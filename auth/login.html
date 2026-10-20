@@ -81,7 +81,7 @@
     if (!relativePath) throw new Error("No supported workspace is mapped to this account.");
     const target = new URL(relativePath, window.location.href);
     target.searchParams.set("krim_workspace", accountType);
-    target.searchParams.set("release", "20261020-customer-route-2");
+    target.searchParams.set("release", accountType === "partner" ? "20261020-partner-workspace-v3" : "20261020-customer-route-2");
     return target.href;
   }
 
