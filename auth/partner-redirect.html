@@ -1,25 +1,23 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Opening Partner Workspace | KRIM</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07111f;color:#f4f7fb;font:16px system-ui,sans-serif;padding:20px}.box{max-width:520px;text-align:center;background:#101e30;border:1px solid #2a3d53;border-radius:20px;padding:28px}p{color:#a9b8ca;line-height:1.5}a{color:#8ed6ff}#status{overflow-wrap:anywhere}</style></head>
-<body><main class="box"><h1>KRIM Partner Access Check</h1><p id="status" role="status" aria-live="polite">Checking your authenticated account and partner access…</p><p><a id="signin" href="partner-signin.html">Return to Partner Sign In</a></p></main>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#07111f"><title>Opening Partner Workspace | KRIM</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(800px 500px at 90% 0,#14504c66,transparent 70%),#07111f;color:#f3f7fb;font:15px/1.5 system-ui,sans-serif}.box{width:min(100%,500px);padding:32px;text-align:center;background:#102137;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 25px 80px #0005}.spinner{width:36px;height:36px;margin:20px auto;border:3px solid #345064;border-top-color:#4ce0a2;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}p{color:#a9bbcf;overflow-wrap:anywhere}a{color:#9ed4ff}#status{font-weight:650}</style></head><body><main class="box"><div style="color:#4ce0a2;font-size:11px;font-weight:800;letter-spacing:.16em">KRIM LOGISTICS OS</div><h1>Opening Partner Workspace</h1><div class="spinner" id="spinner"></div><p id="status" role="status" aria-live="polite">Checking your secure session…</p><p><a id="back" href="partner-signin.html">Return to Partner Sign In</a></p></main>
 <script>
 (async function(){
- const status=document.getElementById("status"),base=window.krimPath?window.krimPath.bind(window):p=>"/"+String(p).replace(/^\/+/, "");
- const client=window.KRIM_SUPABASE||window.supabaseClient;
- function stop(message){status.textContent=message;}
+ const BASE=location.hostname.endsWith("github.io")&&location.pathname.startsWith("/logistics-saas/")?"/logistics-saas":"";
+ const client=window.supabase&&window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co","sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");
+ const status=document.getElementById("status"),spinner=document.getElementById("spinner");
+ function fail(message){status.textContent=message;spinner.style.display="none"}
  try{
-  if(!client)throw new Error("Authentication service did not initialize. Return to sign-in and retry.");
-  const {data:{session},error}=await client.auth.getSession();if(error)throw error;
-  if(!session){window.location.replace(base("auth/partner-signin.html"));return;}
-  const user=session.user,meta=user.user_metadata||{};
-  const type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
-  const {data:members,error:memberError}=await client.from("krim_organization_members").select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)").eq("user_id",user.id).eq("status","active");
-  const partnerMembership=Array.isArray(members)&&members.some(m=>{const o=m.krim_organizations||{};return /partner|carrier|transport|forwarder/.test([m.role,o.organization_type,o.organization_type_code,o.legal_name,o.display_name].join(" ").toLowerCase());});
-  const partnerMetadata=["partner","carrier","transport_partner","transport"].includes(type);
-  if(!partnerMetadata&&!partnerMembership)throw new Error(memberError?"Could not verify partner membership. Please sign in again or contact KRIM support.":"This account does not have a recognized partner role. It has not been redirected to the partner workspace.");
-  status.textContent="Access confirmed. Redirecting to Partner Workspace…";
-  window.location.replace(base("app/partner/index.html"));
- }catch(e){stop(e.message||"Partner access check failed.");}
+  if(!client)throw new Error("Authentication service failed to load. Please return to sign-in and retry.");
+  const {data,error}=await client.auth.getSession();if(error)throw error;
+  if(!data.session){location.replace(BASE+"/auth/partner-signin.html");return}
+  const user=data.session.user,meta=user.user_metadata||{},type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
+  const r=await client.from("krim_organization_members").select("role,status,krim_organizations(organization_type,organization_type_code,display_name,legal_name)").eq("user_id",user.id).eq("status","active");
+  const memberPartner=Array.isArray(r.data)&&r.data.some(m=>{const o=m.krim_organizations||{};return /partner|carrier|transport|forwarder/.test([m.role,o.organization_type,o.organization_type_code,o.display_name,o.legal_name].join(" ").toLowerCase())});
+  const metaPartner=["partner","carrier","transport_partner","transport"].includes(type);
+  if(!metaPartner&&!memberPartner)throw new Error(r.error?"Partner membership could not be verified. Contact KRIM support to check workspace access.":"Your signed-in account has no recognized partner role. Sign in with your registered partner account.");
+  status.textContent="Access confirmed. Redirecting now…";
+  location.replace(BASE+"/app/partner/index.html");
+ }catch(e){fail(e.message||"Unable to verify partner access.")}
 })();
 </script></body></html>
