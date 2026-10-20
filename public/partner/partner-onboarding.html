@@ -248,7 +248,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
 
         // Global ISO-3166-1 alpha-2 list is the baseline; the database catalog can add/override display names.
         // This prevents onboarding from being blocked when a market has not yet been seeded in krim_countries.
-        const globalCountryCodes = ("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(/\\s+/);
+        const globalCountryCodes = ("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(/\s+/);
         const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
         let countryMap = new Map(globalCountryCodes.map(code => [code, regionNames.of(code) || code]));
         try {
@@ -339,7 +339,7 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const postalCode = document.getElementById("partner-postal-code").value.trim();
         const website = document.getElementById("partner-website").value.trim();
         if (!operatingCountryCode) throw new Error("Choose your primary operating country.");
-        if (website && !/^https?:\\/\\/[^\\s]+\\.[^\\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
+        if (website && !/^https?:\/\/[^\s]+\.[^\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
         if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and operating authority ID.");
         const insuranceFile = document.getElementById("insurance-file").files[0];
         const taxFile = document.getElementById("tax-file").files[0];
