@@ -50,5 +50,32 @@ async function verifyDriver(user){
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!client){feedback('Secure sign-in did not initialize. Refresh the page and retry.','error');return;}const email=$('email').value.trim().toLowerCase(),password=$('password').value;if(!email||!password){feedback('Enter your email and password.','error');return;}const b=$('submit');b.disabled=true;b.textContent='Checking account…';feedback('Authenticating securely…');try{const r=await client.auth.signInWithPassword({email,password});if(r.error)throw r.error;if(!r.data?.user||!r.data?.session)throw new Error('Authentication did not return a valid session.');await verifyDriver(r.data.user);}catch(err){console.error('KRIM driver sign-in:',err);feedback(err.message||'Sign-in failed. Check your details and try again.','error');b.disabled=false;b.textContent='Verify & open Driver Workspace →';}});
 $('mfaForm').addEventListener('submit',async e=>{e.preventDefault();const code=$('code').value.trim();if(!/^[0-9]{6}$/.test(code)){feedback('Enter the six-digit authenticator code.','error');return;}const b=$('mfaSubmit');b.disabled=true;b.textContent='Verifying…';try{if(!factorId)throw new Error('No verified authenticator was selected. Sign in again.');const c=await client.auth.mfa.challenge({factorId});if(c.error)throw c.error;challengeId=c.data.id;const v=await client.auth.mfa.verify({factorId,challengeId,code});if(v.error)throw v.error;const s=await client.auth.getSession();if(s.error)throw s.error;if(!s.data.session)throw new Error('Verified, but the session is unavailable. Sign in again.');feedback('Identity verified. Opening Driver Workspace…','success');location.replace(path('app/driver/index.html?release=20261021-driver-workspace-v5'));}catch(err){feedback(err.message||'Code verification failed.','error');b.disabled=false;b.textContent='Verify and continue →';}});
+/* A confirmed-email callback can return here with a valid Supabase session.
+   Reuse that session and run the exact same role + organization checks instead
+   of making the driver type the same credentials a second time. */
+(async function resumeConfirmedSession(){
+ if(!client){feedback('Secure sign-in did not initialize. Refresh the page and retry.','error');return;}
+ try{
+  const existing=await client.auth.getSession();
+  if(existing.error)throw existing.error;
+  const user=existing.data?.session?.user;
+  if(!user)return;
+  const meta=user.user_metadata||{};
+  const role=normalize(meta.krim_account_type||meta.account_type);
+  if(role!=='driver'){
+   feedback('A different KRIM account is already signed in in this browser. Sign out of that account before using Driver Sign In.','error');
+   return;
+  }
+  $('submit').disabled=true;
+  $('submit').textContent='Verifying confirmed driver…';
+  feedback('Email confirmed. Verifying driver membership and organization…');
+  await verifyDriver(user);
+ }catch(err){
+  console.error('KRIM resume driver session:',err);
+  feedback(err.message||'Your confirmed session could not be verified. Please sign in again.','error');
+  $('submit').disabled=false;
+  $('submit').textContent='Verify & open Driver Workspace →';
+ }
+})();
 })();
 </script></body></html>
