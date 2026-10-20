@@ -41,7 +41,7 @@
     <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
         <span class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">CARRIER NODE: SECURE (AAL2)</span>
+            <span class="text-emerald-400 font-bold">CARRIER NODE: SESSION CHECK</span>
         </span>
         <span id="session-identity-node" class="text-emerald-400">Authenticating partner session...</span>
     </div>
@@ -96,7 +96,7 @@
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Network Security</span>
                 <p class="text-3xl font-extrabold text-slate-900 font-mono">AAL2</p>
-                <p class="text-xs text-emerald-600 font-medium">MFA Verified & Partner Tenancy Active</p>
+                <p class="text-xs text-emerald-600 font-medium">Session and partner access checked</p>
             </div>
         </div>
 
@@ -139,31 +139,51 @@
         
         const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
+        const KRIM_BASE = location.hostname.endsWith("github.io") && location.pathname.startsWith("/logistics-saas/") ? "/logistics-saas" : "";
+        function krimNorm(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""); }
+
         async function initPartnerWorkspace() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-
-            document.getElementById('session-identity-node').innerText = `Partner Node: ${session.user.email}`;
-
+            const identity = document.getElementById("session-identity-node");
             try {
-                const { count: shipCount, error: shipError } = await supabaseClient.from('krim_partner_opportunities').select('id', { count: 'exact', head: true });
-                if (shipError) throw shipError;
-                const { count: quoteCount, error: quoteError } = await supabaseClient.from('krim_shipment_partner_assignments').select('id', { count: 'exact', head: true });
-                if (quoteError) throw quoteError;
+                const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                const session = sessionData.session;
+                if (!session) { location.replace(KRIM_BASE + "/auth/partner-signin.html"); return; }
 
-                document.getElementById('metric-loads-count').innerText = shipCount || 0;
-                document.getElementById('metric-assigned-count').innerText = quoteCount || 0;
+                const { data: memberships, error: memberError } = await supabaseClient
+                    .from("krim_organization_members").select("organization_id,role,status")
+                    .eq("user_id", session.user.id).eq("status", "active");
+                if (memberError) throw new Error("Could not verify your organization membership: " + memberError.message);
+                const ids = [...new Set((memberships || []).map(row => Number(row.organization_id)).filter(Number.isSafeInteger))];
+                if (!ids.length) throw new Error("No active organization membership was found for this account.");
+                const { data: orgs, error: orgError } = await supabaseClient
+                    .from("krim_organizations").select("id,organization_type,organization_type_code,display_name,legal_name").in("id", ids);
+                if (orgError) throw new Error("Could not verify your organization type: " + orgError.message);
+                const partnerOrg = (orgs || []).some(org => /partner|carrier|transport|forwarder/.test([org.organization_type, org.organization_type_code, org.display_name, org.legal_name].map(krimNorm).join(" ")));
+                const partnerRole = (memberships || []).some(row => /partner|carrier|transport|forwarder/.test(krimNorm(row.role)));
+                if (!partnerOrg && !partnerRole) throw new Error("This account is not authorized for the partner workspace.");
+                identity.textContent = "Partner session: " + (session.user.email || "authenticated user");
+
+                const [loads, assignments] = await Promise.all([
+                    supabaseClient.from("krim_partner_opportunities").select("id", { count: "exact", head: true }),
+                    supabaseClient.from("krim_shipment_partner_assignments").select("id", { count: "exact", head: true })
+                ]);
+                if (loads.error) throw loads.error;
+                if (assignments.error) throw assignments.error;
+                document.getElementById("metric-loads-count").textContent = loads.count ?? 0;
+                document.getElementById("metric-assigned-count").textContent = assignments.count ?? 0;
             } catch (err) {
-                console.error("Error loading partner metrics:", err);
+                console.error("Partner workspace initialization failed:", err);
+                identity.textContent = "Access check failed";
+                alert(err.message || "Could not verify partner access. Please sign in again.");
+                await supabaseClient.auth.signOut();
+                location.replace(KRIM_BASE + "/auth/partner-signin.html");
             }
         }
 
         async function handleSignOut() {
             await supabaseClient.auth.signOut();
-            window.location.href = "/logistics-saas/auth/login.html";
+            location.replace(KRIM_BASE + "/index.html");
         }
 
         initPartnerWorkspace();
