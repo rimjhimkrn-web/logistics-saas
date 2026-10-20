@@ -445,6 +445,9 @@ body>footer .text-white{color:var(--krim-navy)!important}
         const registrationFile = document.getElementById("registration-file").files[0];
         validateDocument(registrationFile, "business registration certificate");
         if (insuranceFile) validateDocument(insuranceFile, "insurance certificate");
+        const { data: modeResult, error: modeError } = await onboardingClient.rpc("krim_set_partner_account_mode", { p_mode: "registered_business", p_profile: {} });
+        if (modeError) throw modeError;
+        if (!modeResult || modeResult.account_mode !== "registered_business") throw new Error("KRIM could not confirm the registered-business pathway.");
         const documentPaths = [await uploadPartnerDocument(registrationFile, "business registration certificate")];
         if (insuranceFile) documentPaths.push(await uploadPartnerDocument(insuranceFile, "insurance certificate"));
 
