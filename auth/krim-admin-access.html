@@ -23,19 +23,57 @@
  const URL="https://ebltviniygljwwseplph.supabase.co",KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
  const client=window.supabase&&window.supabase.createClient(URL,KEY);
  const form=document.getElementById("admin-login"),button=document.getElementById("submit"),feedback=document.getElementById("feedback");
+ let pendingMfa=null;
  function show(message,type){feedback.textContent=message;feedback.className=type||""}
+ function addMfaInput(){
+  let input=document.getElementById("mfa-code");
+  if(input)return input;
+  const label=document.createElement("label");label.htmlFor="mfa-code";label.id="mfa-label";label.textContent="Authenticator verification code";
+  input=document.createElement("input");input.id="mfa-code";input.type="text";input.inputMode="numeric";input.autocomplete="one-time-code";input.pattern="[0-9]{6}";input.maxLength=6;input.placeholder="6-digit app code";input.required=true;input.setAttribute("aria-describedby","mfa-help");
+  const help=document.createElement("p");help.id="mfa-help";help.className="sub";help.textContent="Enter the current code from your verified authenticator app.";
+  form.insertBefore(label,button);form.insertBefore(input,button);form.insertBefore(help,button);
+  return input;
+ }
+ async function enterAdmin(){
+  const {data,error}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+  if(error||!data||data.ok!==true){
+   await client.auth.signOut();
+   throw new Error(data&&data.code==="MFA_REQUIRED"?"Multi-factor authentication is required for platform administration.":"Privileged access denied. This account must have an active KRIM platform administrator role.");
+  }
+  show("Identity, MFA and platform role verified. Opening the restricted control plane…","success");
+  const parts=location.pathname.split("/").filter(Boolean),base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
+  location.replace(base+"/public/operations/control-tower.html");
+ }
  if(!client){show("Secure sign-in service did not load. Check your connection and refresh.","error");button.disabled=true;return}
  form.addEventListener("submit",async function(e){
-  e.preventDefault();button.disabled=true;button.textContent="Checking identity and role…";show("");
+  e.preventDefault();button.disabled=true;show("");
   try{
+   if(pendingMfa){
+    const code=document.getElementById("mfa-code").value.trim();
+    if(!/^[0-9]{6}$/.test(code))throw new Error("Enter the 6-digit code from your authenticator app.");
+    const {error}=await client.auth.mfa.verify({factorId:pendingMfa.factorId,challengeId:pendingMfa.challengeId,code});
+    if(error)throw error;
+    pendingMfa=null;await enterAdmin();return;
+   }
+   button.textContent="Checking identity…";
    const {data,error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim().toLowerCase(),password:document.getElementById("password").value});
    if(error)throw error;if(!data.session)throw new Error("No authenticated session was returned.");
-   const {data:check,error:gateError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
-   if(gateError||!check||check.ok!==true){await client.auth.signOut();throw new Error("Privileged access denied. This account does not have an active KRIM platform administrator role.");}
-   show("Identity and platform role verified. Opening the restricted control plane…","success");
-   const parts=location.pathname.split("/").filter(Boolean),base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
-   location.replace(base+"/public/operations/control-tower.html");
-  }catch(err){show(err.message||"Unable to verify privileged access.","error");button.disabled=false;button.textContent="Verify privileged access →"}
+   const {data:aal,error:aalError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+   if(aalError)throw aalError;
+   if(aal.currentLevel!=="aal2"){
+    const {data:factors,error:factorError}=await client.auth.mfa.listFactors();
+    if(factorError)throw factorError;
+    const factor=(factors.totp||[]).find(x=>x.status==="verified");
+    if(!factor){await client.auth.signOut();throw new Error("Admin access requires a verified authenticator MFA factor. Enroll and verify TOTP for this account in Supabase Auth before continuing.");}
+    const {data:challenge,error:challengeError}=await client.auth.mfa.challenge({factorId:factor.id});
+    if(challengeError)throw challengeError;
+    pendingMfa={factorId:factor.id,challengeId:challenge.id};
+    addMfaInput();document.getElementById("mfa-code").focus();
+    show("Password accepted. Complete the second-factor check to continue.","success");
+    button.disabled=false;button.textContent="Verify MFA & continue →";return;
+   }
+   await enterAdmin();
+  }catch(err){show(err.message||"Unable to verify privileged access.","error");button.disabled=false;button.textContent=pendingMfa?"Verify MFA & continue →":"Verify privileged access →"}
  });
 })();
 </script></body></html>
