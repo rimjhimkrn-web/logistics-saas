@@ -17,6 +17,20 @@ const required = [
   "supabase/functions/create-global-cashfree-order/index.ts",
   "supabase/functions/verify-global-cashfree-payment/index.ts",
   "supabase/functions/cashfree-payment-webhook/index.ts",
+  "app/partner/index.html",
+  "public/partner/partner-onboarding.html",
+  "public/partner/load-marketplace.html",
+  "public/partner/available-loads.html",
+  "public/partner/submit-quote.html",
+  "public/partner/quote-history.html",
+  "public/partner/accepted-loads.html",
+  "public/shipper/booking-request.html",
+  "public/shipper/active-shipments.html",
+  "public/partner/partner-verification-control.html",
+  "supabase/migrations/20261020074510_global_partner_onboarding_location_hardening.sql",
+  "supabase/migrations/20261020074900_partner_verification_admin_review_workflow.sql",
+  "supabase/migrations/20261020075927_partner_account_modes_test_and_individual_interest.sql",
+  "supabase/migrations/20261020080517_add_partner_account_mode_column.sql",
 ];
 
 const failures = [];
@@ -104,6 +118,27 @@ if (existsSync(securityMigration)) {
   }
 } else {
   failures.push("Required privileged RPC security migration is missing.");
+}
+
+
+const partnerWorkspace = existsSync("app/partner/index.html") ? readFileSync("app/partner/index.html", "utf8") : "";
+const partnerMarketplace = existsSync("public/partner/load-marketplace.html") ? readFileSync("public/partner/load-marketplace.html", "utf8") : "";
+const partnerOnboarding = existsSync("public/partner/partner-onboarding.html") ? readFileSync("public/partner/partner-onboarding.html", "utf8") : "";
+const partnerBid = existsSync("public/partner/submit-quote.html") ? readFileSync("public/partner/submit-quote.html", "utf8") : "";
+const booking = existsSync("public/shipper/booking-request.html") ? readFileSync("public/shipper/booking-request.html", "utf8") : "";
+for (const [label, source, pattern] of [
+  ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
+  ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
+  ["marketplace reads backend partner account mode", partnerMarketplace, /partner_account_mode/],
+  ["marketplace blocks bidding in development/test mode", partnerMarketplace, /!commercialAccess\s*\|\|\s*!currentPartnerOrgId\s*\|\|\s*demoMode/],
+  ["marketplace submits through the dedicated partner quote RPC", partnerMarketplace, /rpc\(['"]krim_submit_partner_quote['"]/],
+  ["onboarding supports the three explicit partner pathways", partnerOnboarding, /development_test[\s\S]*individual_interest[\s\S]*registered_business/i],
+  ["onboarding saves account mode through the backend RPC", partnerOnboarding, /rpc\(['"]krim_set_partner_account_mode['"]/],
+  ["partner bid page requires verified eligible organization", partnerBid, /Bidding is locked[\s\S]*verified/i],
+  ["customer booking uses the secure shipment creation RPC", booking, /rpc\(['"]krim_create_global_shipment['"]/],
+  ["customer booking rejects identical origin and destination", booking, /origin\s*===\s*destination/],
+]) {
+  if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked.`);
