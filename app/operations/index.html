@@ -11,7 +11,7 @@
 <section class="metrics"><article class="metric"><span class="label">Visible shipments</span><strong id="shipCount">—</strong><small>Within database access scope</small></article><article class="metric"><span class="label">In execution</span><strong id="activeCount">—</strong><small>Based on current status values</small></article><article class="metric"><span class="label">Open exceptions</span><strong id="exceptionCount">—</strong><small>Visible unresolved records</small></article><article class="metric"><span class="label">Tracking events</span><strong id="eventCount">—</strong><small>Visible recorded events</small></article></section>
 <div class="sectionhead"><h2>Execution monitoring</h2><span>Refresh to request latest permitted records</span></div>
 <div class="layout"><div>
-<section class="panel"><h3>Shipment control</h3><p class="desc">Recent shipments available under your current database policies.</p><div class="tablewrap" id="shipments"><div class="empty">Waiting for secure data query…</div></div></section>
+<section class="panel"><h3>Shipment control</h3><p class="desc">Recent shipments available under your current database policies.</p><input id="shipmentSearch" aria-label="Search shipments" placeholder="Search shipment number, ID, or status…" style="width:100%;margin:0 0 12px;padding:11px 12px;border:1px solid #344a65;border-radius:10px;background:#0a1424;color:#e8effa;font:inherit;font-size:12px"><div class="tablewrap" id="shipments"><div class="empty">Waiting for secure data query…</div></div></section>
 <section class="panel"><h3>Recent tracking activity</h3><p class="desc">Events recorded in KRIM's tracking event table, if authorized.</p><div id="events" class="stack"><div class="empty">Waiting for secure data query…</div></div></section>
 </div><div>
 <section class="panel"><h3>Exception queue</h3><p class="desc">Open and unresolved exceptions visible to this account.</p><div id="exceptions" class="stack"><div class="empty">Waiting for secure data query…</div></div></section>
@@ -25,7 +25,7 @@
  const date=s=>{if(!s)return'—';const d=new Date(s);return Number.isNaN(d.valueOf())?'—':d.toLocaleString();};
  const statusClass=s=>'<span class="state">'+esc(s||'unknown')+'</span>';
  if(!client){$('notice').textContent='Supabase client is not configured. Check config.js.';$('authHealth').textContent='Client unavailable.';return;}
- let ready=false;
+ let ready=false,shipmentRows=[];
  async function load(){
   $('notice').textContent='Requesting latest records allowed by your signed-in account…';
   try{
@@ -39,7 +39,7 @@
    ]);
    if(shipRes.error){$('shipments').innerHTML='<div class="empty">Shipment data unavailable under current policies.<br>'+esc(shipRes.error.message)+'</div>';$('shipCount').textContent='!';$('activeCount').textContent='!';$('shipmentHealth').textContent='Query blocked or schema unavailable.';}
    else{
-    const rows=shipRes.data||[];$('shipCount').textContent=rows.length;$('activeCount').textContent=rows.filter(x=>/confirmed|active|transit|progress|booked|assigned/i.test(x.status||'')).length;$('shipmentHealth').textContent='Query succeeded; rows are limited to those visible under current database policies.';
+    const rows=shipRes.data||[];shipmentRows=rows;$('shipCount').textContent=rows.length;$('activeCount').textContent=rows.filter(x=>/confirmed|active|transit|progress|booked|assigned/i.test(x.status||'')).length;$('shipmentHealth').textContent='Query succeeded; rows are limited to those visible under current database policies.';
     $('shipments').innerHTML=rows.length?'<table><thead><tr><th>Shipment</th><th>Status</th><th>Weight</th><th>Created</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><strong>'+esc(x.shipment_number||('#'+x.id))+'</strong><div class="desc">ID '+esc(x.id)+'</div></td><td>'+statusClass(x.status)+'</td><td>'+esc(x.total_weight_kg??'—')+' kg</td><td>'+esc(date(x.created_at))+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No shipment records are visible to this account.<br>This is not proof that the system has no shipments; row-level security may limit access.</div>';
    }
    if(excRes.error){$('exceptions').innerHTML='<div class="empty">Exception queue unavailable under current policies.<br>'+esc(excRes.error.message)+'</div>';$('exceptionCount').textContent='!';$('exceptionHealth').textContent='Query blocked or schema unavailable.';}
@@ -52,6 +52,7 @@
    $('lastUpdated').textContent='Updated '+new Date().toLocaleTimeString();$('notice').textContent='Session verified. Dashboard refreshed from Supabase. Each section reports only records visible under your account’s current database policies; write actions are intentionally disabled.';
   }catch(e){$('notice').textContent='Unable to complete secure refresh: '+esc(e.message||'Unknown error');$('authHealth').textContent='Session or query verification failed.';console.error(e);}
  }
+ $('shipmentSearch').addEventListener('input',()=>{const q=$('shipmentSearch').value.trim().toLowerCase();const rows=shipmentRows.filter(x=>[x.shipment_number,x.id,x.status].some(v=>String(v??'').toLowerCase().includes(q)));$('shipments').innerHTML=rows.length?'<table><thead><tr><th>Shipment</th><th>Status</th><th>Weight</th><th>Created</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><strong>'+esc(x.shipment_number||('#'+x.id))+'</strong><div class="desc">ID '+esc(x.id)+'</div></td><td>'+statusClass(x.status)+'</td><td>'+esc(x.total_weight_kg??'—')+' kg</td><td>'+esc(date(x.created_at))+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No visible shipment matches this search.</div>';});
  $('refresh').addEventListener('click',load);$('signout').addEventListener('click',async()=>{await client.auth.signOut();window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');});
  await load();
 })();
