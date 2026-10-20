@@ -1,284 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Customer Command Workspace</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-    <script>(function(){var p=location.pathname;var b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07152f">
+<title>Customer Workspace | KRIM Logistics</title>
+<meta name="description" content="Your KRIM customer workspace for freight bookings, shipment tracking, quotations and invoices.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../config.js"></script>
+<style>
+:root{--navy:#07152f;--blue:#1769ff;--cyan:#27c5d8;--ink:#182741;--muted:#66768e;--line:#e0e8f2;--bg:#f4f7fc;--green:#087e5b;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.top{background:var(--navy);color:#d8e5f8;font-size:11px;padding:9px 20px}.topin,header,.wrap,footer{width:min(1160px,calc(100% - 32px));margin:auto}.topin{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.nav{background:#fff;border-bottom:1px solid var(--line)}header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.04em;color:var(--navy)}.mark{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,var(--blue),#6547e8,var(--cyan));font-size:19px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em}.navlinks{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.navlinks a,.navlinks button{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;font-size:12px;font-weight:800}.navlinks .primary{background:var(--blue);color:white;border-color:var(--blue)}.wrap{padding:32px 0 54px}.welcome{position:relative;overflow:hidden;background:linear-gradient(115deg,#07152f,#123b78);color:#fff;border-radius:24px;padding:30px;display:flex;align-items:center;justify-content:space-between;gap:24px;box-shadow:0 18px 45px #07152f17}.welcome:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff20;border-radius:50%;right:-45px;top:-100px;box-shadow:0 0 0 30px #ffffff08,0 0 0 60px #ffffff05;pointer-events:none}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:900;color:#7de9ef}.welcome h1{font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.04em;margin:10px 0}.welcome p{color:#d5e1f3;max-width:640px;margin:0}.welcome-actions{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:#fff;color:var(--navy);padding:12px 15px;border-radius:11px;font-size:12px;font-weight:850;transition:transform .15s,filter .15s}.btn:hover{transform:translateY(-1px);filter:brightness(.98)}.btn.blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn.glass{background:#ffffff12;color:#fff;border-color:#ffffff4a}.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:28px 0 14px}.sectionhead h2{font-size:20px;color:var(--navy);margin:0;letter-spacing:-.025em}.sectionhead p{margin:4px 0 0;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.stat{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px;min-width:0}.stat-top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:800}.stat-icon{width:35px;height:35px;border-radius:11px;background:#eaf1ff;color:var(--blue);display:grid;place-items:center;font-size:18px}.stat strong{display:block;color:var(--navy);font-size:30px;line-height:1.2;margin-top:13px;letter-spacing:-.04em}.stat small{display:block;color:var(--muted);font-size:11px;margin-top:6px}.modules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.module{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px;display:flex;flex-direction:column;min-height:190px;transition:border-color .15s,transform .15s,box-shadow .15s}.module:hover{border-color:#b7caff;transform:translateY(-2px);box-shadow:0 12px 28px #07152f0c}.module .icon{width:42px;height:42px;border-radius:13px;background:#edf3ff;color:var(--blue);display:grid;place-items:center;font-size:20px;font-weight:900}.module h3{margin:13px 0 5px;color:var(--navy);font-size:16px}.module p{margin:0 0 15px;color:var(--muted);font-size:12px;flex:1}.module .go{color:var(--blue);font-weight:850;font-size:12px}.notice{margin-top:20px;padding:14px 16px;background:#edf5ff;border:1px solid #d7e7fc;border-radius:13px;color:#455b78;font-size:12px}.notice b{color:var(--navy)}.feedback{margin-top:14px;padding:12px 14px;border-radius:11px;font-size:12px;overflow-wrap:anywhere}.feedback:empty{display:none}.feedback.error{background:#fff0ef;color:var(--red)}.feedback.success{background:#eafaf3;color:var(--green)}.identity{font-size:11px;color:#60718b;overflow-wrap:anywhere}footer{padding:20px 0 30px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+@media(max-width:760px){header{align-items:flex-start;padding:14px 0;flex-direction:column}.navlinks{width:100%}.navlinks a,.navlinks button{flex:1;text-align:center}.welcome{padding:24px;align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.modules{grid-template-columns:1fr 1fr}.wrap{padding-top:22px}}
+@media(max-width:480px){.topin{justify-content:center;text-align:center}.stats,.modules{grid-template-columns:1fr}.stat{padding:16px}.module{min-height:0}.welcome h1{font-size:31px}.welcome-actions{width:100%}.welcome-actions .btn{flex:1}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">WORKSPACE NODE: SECURE</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
-    </div>
-
-    <!-- Workspace Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Command Workspace</span>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/logistics-saas/public/shipper/booking-request.html" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl transition shadow-sm">+ New Shipment</a>
-                <button onclick="handleSignOut()" class="text-slate-600 hover:text-slate-900 border border-slate-300 px-4 py-2.5 rounded-xl transition">Sign Out</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Workspace Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        
-        <!-- Welcome Banner -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div class="space-y-1">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Enterprise Logistics Portal</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Consignment Command Center</h1>
-                <p class="text-slate-600 text-sm">Monitor shipments, review quotations, and manage carrier approvals in real time.</p>
-            </div>
-            <div class="flex space-x-3">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition border border-slate-300">Active Fleet →</a>
-                <a href="/logistics-saas/public/shipper/spot-approvals.html" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm">Spot Approvals →</a>
-            </div>
-        </div>
-
-        <!-- Quick Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Consignments</span>
-                <p id="metric-active-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
-                <p class="text-xs text-sky-600 font-medium">Synced with network database</p>
-            </div>
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pending Quotations</span>
-                <p id="metric-quote-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
-                <p class="text-xs text-emerald-600 font-medium">Authoritative tariff calculations</p>
-            </div>
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Security Assurance</span>
-                <p id="metric-security-level" class="text-3xl font-extrabold text-slate-900 font-mono">Checking…</p>
-                <p id="metric-security-note" class="text-xs text-sky-600 font-medium">Checking current session assurance.</p>
-            </div>
-        </div>
-
-        <!-- Quick Navigation Directory -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
-            <h2 class="text-lg font-bold text-slate-900">Operational Gateway Modules</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
-                <a href="/logistics-saas/public/shipper/booking-request.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">01 / BOOKING</span>
-                    <p class="text-slate-700 font-sans">Create new global shipment with verified RPC contracts.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/rate-calculator.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">02 / TARIFFS</span>
-                    <p class="text-slate-700 font-sans">Calculate service rates and commit quotes to ledger.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">03 / TELEMETRY</span>
-                    <p class="text-slate-700 font-sans">Monitor live transit milestones and route statuses.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/spot-approvals.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">04 / GOVERNANCE</span>
-                    <p class="text-slate-700 font-sans">Review carrier quotes and authorize checkouts.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/epod-vault.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">05 / DELIVERY EVIDENCE</span>
-                    <p class="text-slate-700 font-sans">Review verified proof-of-delivery records for authorized shipments.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/invoices.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-sky-500 transition space-y-1 block">
-                    <span class="text-sky-600 font-bold block">06 / FINANCE</span>
-                    <p class="text-slate-700 font-sans">View authorized invoices, balances, and settlement status.</p>
-                </a>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Command Workspace © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Workspace Initialization Script -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function initWorkspace() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-
-            // Verify the user's active organization membership before rendering customer data.
-            // Separate reads avoid relying on PostgREST nested-relationship metadata.
-            const loginUrl = window.krimPath ? window.krimPath('auth/login.html') : '../../auth/login.html';
-            const metadata = session.user?.user_metadata || {};
-            const membershipResult = await supabaseClient
-                .from('krim_organization_members')
-                .select('organization_id,role,status')
-                .eq('user_id', session.user.id)
-                .eq('status', 'active');
-
-            if (membershipResult.error) {
-                console.error('Customer workspace membership check failed:', membershipResult.error);
-                window.location.replace(loginUrl + '?reason=membership_check_failed');
-                return;
-            }
-
-            const membershipRows = Array.isArray(membershipResult.data) ? membershipResult.data : [];
-            if (!membershipRows.length) {
-                window.location.replace(loginUrl + '?reason=no_active_membership');
-                return;
-            }
-
-            const organizationIds = [...new Set(membershipRows.map(row => row.organization_id).filter(id => id !== null && id !== undefined))];
-            if (!organizationIds.length) {
-                window.location.replace(loginUrl + '?reason=organization_link_missing');
-                return;
-            }
-
-            const organizationResult = await supabaseClient
-                .from('krim_organizations')
-                .select('id,organization_type,organization_type_code')
-                .in('id', organizationIds);
-
-            if (organizationResult.error) {
-                console.error('Customer workspace organization check failed:', organizationResult.error);
-                window.location.replace(loginUrl + '?reason=organization_check_failed');
-                return;
-            }
-
-            const organizationById = new Map((organizationResult.data || []).map(org => [String(org.id), org]));
-            const roleText = membershipRows.map(row => {
-                const org = organizationById.get(String(row.organization_id)) || {};
-                return [row.role, org.organization_type, org.organization_type_code]
-                    .join(' ')
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '_');
-            }).join(' ');
-
-            if (/platform_admin|platform_superadmin|superadmin/.test(roleText)) {
-                window.location.replace(loginUrl + '?reason=privileged_access_separate');
-                return;
-            }
-
-            const hasCustomerAccess = /customer|shipper|client/.test(roleText);
-            const hasPartnerAccess = /partner|carrier|transport|forwarder/.test(roleText);
-            const hasEnterpriseAccess = /enterprise/.test(roleText);
-            const otherRoleRoutes = [
-                [/driver|fleet_driver/, 'driver'],
-                [/warehouse|fulfilment|fulfillment/, 'warehouse'],
-                [/customs|clearance/, 'customs'],
-                [/finance|accountant|settlement/, 'finance'],
-                [/operations|dispatcher|control_tower/, 'operations']
-            ];
-            const otherRole = otherRoleRoutes.find(([pattern]) => pattern.test(roleText));
-
-            if (hasPartnerAccess) {
-                window.location.replace(window.krimPath ? window.krimPath('app/partner/index.html') : '../partner/index.html');
-                return;
-            }
-            if (hasEnterpriseAccess) {
-                window.location.replace(window.krimPath ? window.krimPath('app/enterprise/index.html') : '../enterprise/index.html');
-                return;
-            }
-            if (otherRole) {
-                window.location.replace(window.krimPath ? window.krimPath('app/' + otherRole[1] + '/index.html') : '../' + otherRole[1] + '/index.html');
-                return;
-            }
-            if (!hasCustomerAccess) {
-                window.location.replace(loginUrl + '?reason=workspace_access_denied');
-                return;
-            }
-
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
-
-            // Display actual Supabase session assurance instead of a hardcoded AAL2 claim.
-            try {
-                const { data: assuranceData, error: assuranceError } =
-                    await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
-                if (assuranceError) throw assuranceError;
-                const currentLevel = assuranceData?.currentLevel || 'unknown';
-                const nextLevel = assuranceData?.nextLevel || currentLevel;
-                document.getElementById('metric-security-level').textContent = currentLevel.toUpperCase();
-                document.getElementById('metric-security-note').textContent =
-                    currentLevel === 'aal2' ? 'MFA verified for this session.' :
-                    nextLevel === 'aal2' ? 'MFA challenge required to reach AAL2.' :
-                    'AAL2 has not been verified for this session.';
-            } catch (assuranceError) {
-                document.getElementById('metric-security-level').textContent = 'UNKNOWN';
-                document.getElementById('metric-security-note').textContent = 'Session assurance could not be verified.';
-                console.error('Session assurance check failed:', assuranceError);
-            }
-
-            // Load metrics
-            try {
-                const { count: shipCount } = await supabaseClient.from('krim_shipments').select('*', { count: 'exact', head: true });
-                const { count: quoteCount } = await supabaseClient.from('krim_quotes').select('*', { count: 'exact', head: true });
-
-                document.getElementById('metric-active-count').innerText = shipCount || 0;
-                document.getElementById('metric-quote-count').innerText = quoteCount || 0;
-            } catch (err) {
-                console.error("Error loading workspace metrics:", err);
-            }
-        }
-
-        async function handleSignOut() {
-            await supabaseClient.auth.signOut();
-            window.location.href = "/logistics-saas/auth/login.html";
-        }
-
-        initWorkspace();
-    </script>
-</body>
-</html>
+<body>
+<div class="top"><div class="topin"><span>KRIM LOGISTICS · CUSTOMER PORTAL</span><span>Authenticated customer access · Organization-scoped workspace</span></div></div>
+<div class="nav"><header>
+<a class="brand" href="../../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span></a>
+<nav class="navlinks" aria-label="Customer navigation"><a href="../../public/tracking.html">Track shipment</a><a href="../../public/solutions.html">Services</a><button id="signout-button" type="button">Sign out</button></nav>
+</header></div>
+<main class="wrap">
+<section class="welcome">
+<div><div class="eyebrow">Customer / Shipper Workspace</div><h1>Your logistics, all in one place.</h1><p>Request freight quotes, book shipments, follow delivery progress and manage your logistics documents from your customer workspace.</p><p class="identity" id="customer-identity" style="color:#c7d7ef;margin-top:12px">Verifying your secure session…</p></div>
+<div class="welcome-actions"><a class="btn blue" href="../../public/shipper/booking-request.html">＋ Book a shipment</a><a class="btn glass" href="../../public/tracking.html">Track shipment →</a></div>
+</section>
+<div id="workspace-feedback" class="feedback" role="status" aria-live="polite"></div>
+<section aria-labelledby="overview-title"><div class="sectionhead"><div><h2 id="overview-title">Your account overview</h2><p>Counts are requested from KRIM using your signed-in organization access.</p></div></div>
+<div class="stats">
+<article class="stat"><div class="stat-top"><span>Your shipments</span><span class="stat-icon">↗</span></div><strong id="metric-active-count">—</strong><small>Shipments visible to your organization</small></article>
+<article class="stat"><div class="stat-top"><span>Your quotations</span><span class="stat-icon">≋</span></div><strong id="metric-quote-count">—</strong><small>Quotes visible to your organization</small></article>
+<article class="stat"><div class="stat-top"><span>Session security</span><span class="stat-icon">⌑</span></div><strong id="metric-security-level" style="font-size:22px">Checking…</strong><small id="metric-security-note">Checking current authentication assurance.</small></article>
+</div></section>
+<section aria-labelledby="actions-title"><div class="sectionhead"><div><h2 id="actions-title">Customer services</h2><p>Choose what you want to do next.</p></div></div>
+<div class="modules">
+<a class="module" href="../../public/shipper/booking-request.html"><span class="icon">＋</span><h3>Book a shipment</h3><p>Start a freight booking by entering your shipment requirements and route.</p><span class="go">Create booking →</span></a>
+<a class="module" href="../../public/quote.html"><span class="icon">₹</span><h3>Request a quote</h3><p>Share your freight needs and request a quote for your planned movement.</p><span class="go">Request pricing →</span></a>
+<a class="module" href="../../public/shipper/active-shipments.html"><span class="icon">⌁</span><h3>My shipments</h3><p>Open the shipment list to review the progress of shipments available to your account.</p><span class="go">View shipments →</span></a>
+<a class="module" href="../../public/tracking.html"><span class="icon">◎</span><h3>Track a shipment</h3><p>Check tracking milestones using your shipment reference.</p><span class="go">Open tracking →</span></a>
+<a class="module" href="../../public/shipper/spot-approvals.html"><span class="icon">✓</span><h3>Quotes & approvals</h3><p>Review available quote and approval workflows for your organization.</p><span class="go">Review quotes →</span></a>
+<a class="module" href="../../public/shipper/invoices.html"><span class="icon">▤</span><h3>Invoices & payments</h3><p>Open billing records and payment workflows available to your account.</p><span class="go">Open billing →</span></a>
+</div></section>
+<div class="notice"><b>Account security:</b> This workspace checks your active KRIM organization membership. The visible links are navigation only; access to shipment, quote and billing records must also be enforced by Supabase permissions and row-level security.</div>
+</main>
+<footer><span>© <span id="year"></span> KRIM Logistics · Customer Workspace</span><span><a href="../../index.html">Home</a> · <a href="../../public/tracking.html">Public tracking</a> · <span id="footer-status">Checking access…</span></span></footer>
+<script>
+(function(){
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const path=(p)=>window.krimPath?window.krimPath(p):("../../"+p);
+const el=(id)=>document.getElementById(id);
+el("year").textContent=new Date().getFullYear();
+function feedback(message,type){const box=el("workspace-feedback");box.textContent=message||"";box.className="feedback "+(type||"");}
+function normalized(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
+function mapRole(m,o){
+ const values=[normalized(m&&m.role),normalized(o&&o.organization_type),normalized(o&&o.organization_type_code)];
+ if(values.some(v=>/platform_admin|platform_superadmin|superadmin/.test(v)))return "platform_admin";
+ if(values.some(v=>/operations|dispatcher|control_tower/.test(v)))return "operations";
+ if(values.some(v=>/finance|accountant|settlement/.test(v)))return "finance";
+ if(values.some(v=>/customs|clearance/.test(v)))return "customs";
+ if(values.some(v=>/warehouse|fulfilment|fulfillment/.test(v)))return "warehouse";
+ if(values.some(v=>/^driver$|fleet_driver/.test(v)))return "driver";
+ if(values.some(v=>/partner|carrier|transport|forwarder/.test(v)))return "partner";
+ if(values.some(v=>/enterprise/.test(v)))return "enterprise";
+ if(values.some(v=>/customer|shipper|client/.test(v)))return "customer";
+ return "";
+}
+const destinations={partner:"app/partner/index.html",driver:"app/driver/index.html",warehouse:"app/warehouse/index.html",customs:"app/customs/index.html",finance:"app/finance/index.html",operations:"app/operations/index.html",enterprise:"app/enterprise/index.html"};
+async function init(){
+ if(!client){feedback("Secure workspace setup did not load. Refresh this page; if the issue continues, contact KRIM support.","error");el("footer-status").textContent="Setup error";return;}
+ try{
+  const {data:sessionData,error:sessionError}=await client.auth.getSession();
+  if(sessionError)throw sessionError;
+  const session=sessionData&&sessionData.session;
+  if(!session){window.location.replace(path("auth/login.html")+"?role=customer&reason=session_required");return;}
+  el("customer-identity").textContent="Signed in as "+(session.user.email||"verified account");
+  const mr=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",session.user.id).eq("status","active");
+  if(mr.error)throw new Error("We could not verify your active organization membership. Please sign in again. Reference: MEMBERSHIP_LOOKUP_FAILED.");
+  const memberships=Array.isArray(mr.data)?mr.data:[];
+  if(!memberships.length){window.location.replace(path("auth/login.html")+"?role=customer&reason=no_active_membership");return;}
+  const orgIds=[...new Set(memberships.map(m=>m.organization_id).filter(Boolean))];
+  if(!orgIds.length)throw new Error("Your membership is missing its organization link. Contact KRIM support.");
+  const or=await client.from("krim_organizations").select("id,organization_type,organization_type_code").in("id",orgIds);
+  if(or.error)throw new Error("We could not verify your organization type. Reference: ORGANIZATION_LOOKUP_FAILED.");
+  const byId=new Map((or.data||[]).map(o=>[String(o.id),o]));
+  const roles=[...new Set(memberships.map(m=>mapRole(m,byId.get(String(m.organization_id)))).filter(Boolean))];
+  if(roles.includes("platform_admin"))throw new Error("Platform administration is not available in the customer workspace.");
+  if(roles.length!==1)throw new Error(roles.length?"Your account has multiple workspace roles. Ask your organization administrator to set the correct primary workspace.":"Your membership is not mapped to a supported workspace. Contact KRIM support.");
+  const role=roles[0];
+  if(role!=="customer"){
+   if(destinations[role]){window.location.replace(path(destinations[role]));return;}
+   throw new Error("This account does not have customer workspace access.");
+  }
+  el("footer-status").textContent="Customer access verified";
+  feedback("Customer access verified. Your organization-scoped overview is ready.","success");
+  try{
+   const {data:a,error:ae}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+   if(ae)throw ae;
+   const current=a&&a.currentLevel||"unknown",next=a&&a.nextLevel||current;
+   el("metric-security-level").textContent=current.toUpperCase();
+   el("metric-security-note").textContent=current==="aal2"?"Multi-factor authentication verified.":next==="aal2"?"An additional MFA challenge is required.":"Current session is authenticated; AAL2 is not verified.";
+  }catch(e){el("metric-security-level").textContent="UNKNOWN";el("metric-security-note").textContent="Could not verify session assurance.";}
+  const orgId=memberships.find(m=>mapRole(m,byId.get(String(m.organization_id)))==="customer")?.organization_id;
+  if(!orgId){el("metric-active-count").textContent="—";el("metric-quote-count").textContent="—";return;}
+  const [shipments,quotes]=await Promise.all([
+   client.from("krim_shipments").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
+   client.from("krim_quotes").select("id",{count:"exact",head:true}).eq("organization_id",orgId)
+  ]);
+  el("metric-active-count").textContent=shipments.error?"—":String(shipments.count??0);
+  el("metric-quote-count").textContent=quotes.error?"—":String(quotes.count??0);
+  if(shipments.error||quotes.error){console.warn("Organization-scoped dashboard counts unavailable",{shipments:shipments.error,quotes:quotes.error});feedback("Workspace access is verified, but one or more live metrics are unavailable. Your data access remains subject to database permissions.","error");}
+ }catch(error){console.error("KRIM customer workspace initialization failed:",error);feedback(error.message||"Workspace initialization failed. Please retry.", "error");el("footer-status").textContent="Access check needs attention";}
+}
+el("signout-button").addEventListener("click",async function(){this.disabled=true;this.textContent="Signing out…";try{if(client)await client.auth.signOut();}finally{window.location.replace(path("index.html"));}});
+init();
+})();
+</script>
+</body></html>
