@@ -18,27 +18,35 @@ header{height:76px;display:flex;align-items:center;justify-content:space-between
 <div id="feedback" role="status" aria-live="polite"></div><div class="links"><a href="partner-signup.html">Create partner account</a><a href="forgot-password.html">Forgot password?</a></div><div class="note">Partner login does not automatically approve a carrier. Restricted loads and assignments remain subject to verified partner status and workspace permissions.</div>
 </section></main><footer>KRIM Logistics OS · Trusted freight coordination · © 2026</footer>
 <script>
+
 (function(){
+ "use strict";
  const BASE=location.hostname.endsWith("github.io")&&location.pathname.startsWith("/logistics-saas/")?"/logistics-saas":"";
  const client=window.supabase&&window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co","sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");
  const form=document.getElementById("partner-login"),button=document.getElementById("submit"),feedback=document.getElementById("feedback"),password=document.getElementById("password");
  function show(msg,type){feedback.textContent=msg;feedback.className=type||""}
+ function norm(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}
  document.getElementById("toggle").addEventListener("click",()=>{const reveal=password.type==="password";password.type=reveal?"text":"password";document.getElementById("toggle").textContent=reveal?"Hide":"Show"});
- if(!client){show("Sign-in service did not load. Check your internet connection and refresh this page.","error");return}
+ if(!client){show("Sign-in service did not load. Check your connection and refresh.","error");return}
  form.addEventListener("submit",async e=>{
   e.preventDefault();button.disabled=true;button.textContent="Verifying account…";show("");
   try{
-   const {data,error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim().toLowerCase(),password:password.value});if(error)throw error;
-   const user=data.user||data.session?.user;if(!user)throw new Error("Sign-in did not return an authenticated user.");
-   const meta=user.user_metadata||{},type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
-   let isPartner=["partner","carrier","transport_partner","transport"].includes(type),membershipError=null;
-   const result=await client.from("krim_organization_members").select("role,status,krim_organizations(organization_type,organization_type_code,display_name,legal_name)").eq("user_id",user.id).eq("status","active");
-   membershipError=result.error;
-   if(Array.isArray(result.data))isPartner=isPartner||result.data.some(m=>{const o=m.krim_organizations||{};return /partner|carrier|transport|forwarder/.test([m.role,o.organization_type,o.organization_type_code,o.display_name,o.legal_name].join(" ").toLowerCase())});
-   if(!isPartner){await client.auth.signOut();throw new Error(membershipError?"Could not verify partner membership (database policy/query issue). Please use the main sign-in or ask KRIM support to check your role.":"This account is not identified as a transport partner. Use the account created through Partner Registration or ask KRIM support to correct its account type.");}
-   show("Partner account accepted. Opening your workspace…","success");
-   window.location.replace(BASE+"/auth/partner-redirect.html?source=partner-signin");
-  }catch(err){show(err.message||"Unable to sign in. Please try again.","error");button.disabled=false;button.textContent="Sign in to Partner Workspace →"}
+   const {data,error}=await client.auth.signInWithPassword({email:document.getElementById("email").value.trim().toLowerCase(),password:password.value});
+   if(error)throw error;
+   const user=data.user||data.session?.user;
+   if(!user||!data.session)throw new Error("No active authenticated session was returned. Check your email verification settings.");
+   const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");
+   if(memberError)throw new Error("Signed in, but KRIM could not verify active organization membership: "+memberError.message);
+   const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+   if(!ids.length)throw new Error("Your account has no active organization membership yet. Complete partner registration/onboarding or contact KRIM support.");
+   const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,display_name,legal_name").in("id",ids);
+   if(orgError)throw new Error("KRIM could not verify your organization type: "+orgError.message);
+   const partnerOrg=(orgs||[]).find(o=>/partner|carrier|transport|forwarder/.test([o.organization_type,o.organization_type_code,o.display_name,o.legal_name].map(norm).join(" ")));
+   const partnerMember=(members||[]).some(m=>/partner|carrier|transport|forwarder/.test(norm(m.role)));
+   if(!partnerOrg&&!partnerMember)throw new Error("This account does not have a verified transport-partner organization or role. Public account metadata alone cannot grant partner access.");
+   show("Active partner membership verified. Opening your workspace…","success");
+   location.replace(BASE+"/auth/partner-redirect.html?source=partner-signin&release=20261020-partner-2");
+  }catch(err){show(err.message||"Unable to verify partner access. Please try again.","error");button.disabled=false;button.textContent="Sign in to Partner Workspace →"}
  });
 })();
 </script></body></html>
