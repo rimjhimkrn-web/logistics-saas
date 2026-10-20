@@ -117,5 +117,48 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){side.classList.remove('is-open');menu.setAttribute('aria-expanded','false');}});
 })();
 </script>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.getElementById("appContent");
+  if(!root)return;
+  var sections={
+    users:{label:"IDENTITY & ACCESS GOVERNANCE",intro:"Organization-scoped members, invitations, roles and access review. Access changes require server-side authorization and audit history.",cards:[["Member directory","Not connected","Connect organization-scoped membership data."],["Role review","Backend enforced","Use audited least-privilege permissions."],["Invitations","Not connected","Connect invitation lifecycle, expiry and acceptance."]]},
+    quotes:{label:"COMMERCIAL CONTROL",intro:"Review approved rates, quote validity, lanes, service modes and commercial approval requirements.",cards:[["Rate-card coverage","Not verified","Connect approved rates and effective-date checks."],["Quote review","Not connected","Load authorized quote records and pricing detail."],["Approval rules","Not connected","Enforce commercial thresholds server-side."]]},
+    finance:{label:"FINANCE & TREASURY",intro:"Governed oversight for invoices, receivables, partner settlements, reconciliation and financial exceptions.",cards:[["Receivables","Not loaded","Connect permission-scoped invoices and ledger."],["Partner settlements","Not loaded","Verify settlement ledger and execution history."],["Reconciliation","Not connected","Match payment-provider events to ledger records."]]},
+    analytics:{label:"ENTERPRISE INTELLIGENCE",intro:"Service quality, spend, reliability, capacity and exception reporting based on defined source data.",cards:[["Service performance","Not calculated","Define milestone formulas and timezone rules."],["Spend & conversion","Not calculated","Connect approved quotes, shipments and invoices."],["Data quality","Not verified","Expose source, freshness and completeness."]]},
+    documents:{label:"DOCUMENT CONTROL",intro:"A secure register for shipment documents, commercial files and compliance evidence.",cards:[["Document register","Not connected","Connect access-scoped document metadata."],["Secure storage","Not verified","Use private storage and authorized file access."],["Evidence history","Not connected","Record versions, ownership and review outcome."]]},
+    integrations:{label:"INTEGRATION GOVERNANCE",intro:"Readiness and observability for carrier, port, warehouse, customs, ERP and finance systems.",cards:[["Connection registry","Not connected","Record owner, environment and supported events."],["Event delivery","Not monitored","Add signatures, retries and duplicate protection."],["Health checks","Not connected","Only mark systems live after verification."]]},
+    "ai-activity":{label:"AI OVERSIGHT",intro:"Trace AI-assisted work with provenance, model metadata, human review and measured outcomes.",cards:[["Run registry","Not connected","Connect protected execution logs."],["Human review","Not measured","Record reviewer, override and rationale."],["Quality controls","Not verified","Add evaluation and regression checks."]]},
+    recommendations:{label:"DECISION SUPPORT & EVIDENCE",intro:"Review recommendations with source evidence, owner, impact and explicit human disposition.",cards:[["Recommendation register","Not connected","Connect an authorized record store."],["Evidence review","Not verified","Link claims to access-checked source records."],["Decision outcomes","Not connected","Implement audited accept, reject and defer actions."]]},
+    approvals:{label:"CONTROLLED APPROVALS",intro:"A controlled review queue with separation of duties and traceable commercial, financial and operational decisions.",cards:[["Approval queue","Not connected","Connect authorized pending requests."],["Separation of duties","Not verified","Enforce requester and approver rules server-side."],["Decision history","Not connected","Record actor, timestamp and rationale."]]},
+    automation:{label:"WORKFLOW OBSERVABILITY",intro:"Inspect job history, execution duration, retries, failures and last successful runs.",cards:[["Execution history","Not connected","Connect authorized workflow logs."],["Retry & recovery","Not connected","Add idempotent retries and failure review."],["Service objectives","Not configured","Define freshness and alert targets."]]},
+    pause:{label:"EMERGENCY GOVERNANCE",intro:"Incident readiness, escalation, controlled suspension and recovery review for authorized operators.",cards:[["Incident register","Not connected","Connect protected incident records."],["Controlled pause","Not connected","Define scope and server-side authorization."],["Recovery review","Not configured","Require validation and recorded approval."]]},
+    memory:{label:"INSTITUTIONAL KNOWLEDGE",intro:"Governed decisions, approved runbooks, operating standards and lessons learned with owners and review dates.",cards:[["Decision register","Not connected","Connect a versioned knowledge store."],["Runbooks","Not connected","Add ownership and review cadence."],["Lessons learned","Not connected","Link incidents to corrective actions."]]}
+  };
+  function el(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
+  function render(){
+    var id=location.hash.slice(1),spec=sections[id];
+    if(!spec||!root.querySelector(".empty-state"))return;
+    root.replaceChildren();
+    root.append(el("span","eyebrow","GLOBAL ENTERPRISE OPERATIONS · "+spec.label));
+    root.append(el("h1","",({ "ai-activity":"AI activity",recommendations:"Recommendations & evidence",approvals:"Approval queue",pause:"Emergency pause",memory:"Institutional memory"}[id]||id.replace(/(^|-)([a-z])/g,function(_,a,b){return " "+b.toUpperCase();}).trim())));
+    root.append(el("p","muted",spec.intro));
+    var banner=el("section","enterprise-detail-banner");
+    banner.append(el("strong","", "Governed operational view"));
+    banner.append(el("p","", "Authenticated session required. Organization isolation and backend permissions remain authoritative. No sample business records are displayed."));
+    root.append(banner);
+    var grid=el("div","grid portal-grid enterprise-detail-grid");
+    spec.cards.forEach(function(item,i){var card=el("article","portal-card surface enterprise-detail-card");card.append(el("span","enterprise-domain-number",String(i+1).padStart(2,"0")),el("h3","",item[0]),el("p","",item[1]),el("div","enterprise-detail-next",item[2]));grid.append(card);});
+    var head=el("div","enterprise-section-head"),copy=el("div");copy.append(el("h2","","Implementation and control requirements"),el("p","","Before enabling live operations, verify the data source, organization-scoped row-level security, server-side authorization, audit coverage and end-to-end failure handling."));head.append(copy,el("span","enterprise-section-tag","READINESS VIEW"));
+    var guard=el("div","enterprise-integrity-note");guard.append(el("strong","","Operational integrity"),el("p","","This page describes required capabilities. It does not claim missing backend operations are live or execute actions."));
+    root.append(head,grid,guard);
+  }
+  var observer=new MutationObserver(function(){render();});
+  observer.observe(root,{childList:true,subtree:true});
+  window.addEventListener("hashchange",function(){setTimeout(render,80);});
+})();
+</script>
 </body>
 </html>
