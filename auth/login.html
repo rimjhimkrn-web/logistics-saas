@@ -221,7 +221,8 @@
                         provisionRpc, { p_legal_name: organizationName }
                     );
                     if (organizationError) throw organizationError;
-                    if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
+                    // Some valid provisioning RPCs return void rather than an organization ID.
+                    // Treat the RPC error as failure; do not block redirect solely on a null return value.
                 } else if (!memberships.length) {
                     throw new Error("No active organization membership was found for this staff workspace. Ask a KRIM administrator to assign your role.");
                 }
