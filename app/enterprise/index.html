@@ -55,6 +55,47 @@ body[data-portal="enterprise"] :focus-visible{outline:3px solid #80b4ff;outline-
 @media(max-width:1050px){body[data-portal="enterprise"] .portal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){body[data-portal="enterprise"] .portal-content{padding:18px 14px 28px}body[data-portal="enterprise"] .portal-grid{grid-template-columns:1fr;gap:12px}body[data-portal="enterprise"] .portal-content>h1{font-size:32px}body[data-portal="enterprise"] .portal-topbar:after{font-size:8px;padding:7px 9px;letter-spacing:.08em}}
 @media(prefers-reduced-motion:reduce){body[data-portal="enterprise"] *{transition:none!important;scroll-behavior:auto!important}}
+
+/* Enterprise workspace finishing layer — premium global command interface */
+body[data-portal="enterprise"]{background:#f4f7fb}
+body[data-portal="enterprise"] .portal-layout{display:grid;grid-template-columns:268px minmax(0,1fr)}
+body[data-portal="enterprise"] .portal-side{width:268px;position:sticky;top:0;height:100dvh;overflow:auto;padding:24px 18px;display:flex;flex-direction:column}
+body[data-portal="enterprise"] .brand{display:flex;align-items:center;gap:12px;font-size:17px}
+body[data-portal="enterprise"] .brand-mark{display:grid;place-items:center;width:42px;height:42px;font-size:22px;font-weight:900}
+body[data-portal="enterprise"] .portal-nav{display:grid;gap:5px;margin-top:16px}
+body[data-portal="enterprise"] .portal-nav a{display:flex;align-items:center;min-height:42px}
+body[data-portal="enterprise"] .portal-side-bottom{margin-top:auto;padding-top:24px;display:grid;gap:10px}
+body[data-portal="enterprise"] .portal-main{min-width:0}
+body[data-portal="enterprise"] .portal-topbar{min-height:70px}
+body[data-portal="enterprise"] .portal-content{width:100%}
+body[data-portal="enterprise"] .portal-content h1{font-weight:850}
+body[data-portal="enterprise"] .portal-content .portal-grid{align-items:stretch}
+body[data-portal="enterprise"] .portal-card{padding:22px}
+body[data-portal="enterprise"] .portal-card h2{font-size:17px}
+body[data-portal="enterprise"] .portal-card p{margin:0;line-height:1.7}
+body[data-portal="enterprise"] .portal-card a{padding:8px 0}
+body[data-portal="enterprise"] .portal-content section,body[data-portal="enterprise"] .portal-content [class*="panel"],body[data-portal="enterprise"] .portal-content [class*="section"]{min-width:0}
+body[data-portal="enterprise"] .portal-content button,body[data-portal="enterprise"] .portal-content a,body[data-portal="enterprise"] .portal-side button{touch-action:manipulation}
+body[data-portal="enterprise"] .portal-content :is(input,select,textarea){width:100%;min-height:42px}
+body[data-portal="enterprise"] .portal-content :is(button,.button){min-height:40px}
+body[data-portal="enterprise"] .portal-content .data-table-wrap{max-width:100%}
+body[data-portal="enterprise"] .portal-content .empty-state{max-width:100%}
+body[data-portal="enterprise"] .portal-content :is(h2,h3){letter-spacing:-.025em}
+body[data-portal="enterprise"] .portal-content :is(.status,.badge,[class*="badge"],[class*="status"]){border-radius:999px}
+@media(max-width:900px){
+ body[data-portal="enterprise"] .portal-layout{display:block}
+ body[data-portal="enterprise"] .portal-side{position:fixed;z-index:40;left:0;top:0;bottom:0;height:100dvh;width:min(300px,86vw);transform:translateX(-105%);transition:transform .2s ease}
+ body[data-portal="enterprise"] .portal-side.is-open,body[data-portal="enterprise"] .portal-side[data-open="true"]{transform:translateX(0)}
+ body[data-portal="enterprise"] .portal-topbar{padding:12px 16px}
+ body[data-portal="enterprise"] .portal-topbar:after{content:"KRIM ENTERPRISE"}
+}
+@media(max-width:640px){
+ body[data-portal="enterprise"] .portal-content .portal-grid{grid-template-columns:minmax(0,1fr)}
+ body[data-portal="enterprise"] .portal-content .portal-card{padding:18px}
+ body[data-portal="enterprise"] .portal-content>h1{font-size:clamp(28px,8vw,36px)}
+ body[data-portal="enterprise"] .portal-topbar>span{font-size:12px}
+}
+
 </style>
 </head>
 <body class="portal-body" data-portal="enterprise">
