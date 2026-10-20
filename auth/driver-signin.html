@@ -18,7 +18,9 @@ $('toggle').addEventListener('click',()=>{const p=$('password'),show=p.type==='p
 async function verifyDriver(user){
  const meta=user.user_metadata||{};
  const metaRole=normalize(meta.krim_account_type||meta.account_type);
- if(['platform_admin','platform_superadmin','superadmin','admin','partner','customer','enterprise','warehouse','finance','operations','customs'].includes(metaRole))throw new Error('This account is not a driver account. Use the matching KRIM sign-in option.');
+ // Workspace authorization is determined by the server-backed active membership,
+ // never by editable user_metadata. This also permits a legitimate account to hold
+ // more than one workspace membership without silently changing any existing role.
  let q=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',user.id).eq('status','active');
  if(q.error)throw new Error('Your login succeeded, but KRIM could not verify your membership. Reference: DRIVER_MEMBERSHIP_LOOKUP_FAILED.');
  let memberships=q.data||[];
@@ -31,7 +33,6 @@ async function verifyDriver(user){
  }
  const drivers=memberships.filter(m=>/^driver$/i.test(String(m.role||'').trim()));
  if(!drivers.length)throw new Error('No active driver membership is linked to this account yet. If you just registered, retry sign-in. Otherwise ask your carrier administrator to add your driver role.');
- if(memberships.some(m=>!drivers.includes(m)))throw new Error('This account has multiple active workspace roles. Ask your organization administrator to configure one primary role before continuing.');
  const ids=[...new Set(drivers.map(m=>m.organization_id).filter(Boolean))];
  if(!ids.length)throw new Error('Your driver membership is missing its organization link. Contact KRIM support.');
  const org=await client.from('krim_organizations').select('id,status').in('id',ids);
@@ -62,9 +63,16 @@ $('mfaForm').addEventListener('submit',async e=>{e.preventDefault();const code=$
   if(!user)return;
   const meta=user.user_metadata||{};
   const role=normalize(meta.krim_account_type||meta.account_type);
+  // If this session has no driver membership, do not auto-provision a different
+  // account merely because the user opened the driver sign-in page. Ask them to
+  // sign out and explicitly authenticate the intended driver identity instead.
   if(role!=='driver'){
-   feedback('A different KRIM account is already signed in in this browser. Sign out of that account before using Driver Sign In.','error');
-   return;
+   const membership=await client.from('krim_organization_members').select('organization_id').eq('user_id',user.id).eq('role','driver').eq('status','active').limit(1);
+   if(membership.error)throw membership.error;
+   if(!membership.data?.length){
+    feedback('A different KRIM account is already signed in in this browser. Sign out of that account before using Driver Sign In.','error');
+    return;
+   }
   }
   $('submit').disabled=true;
   $('submit').textContent='Verifying confirmed driver…';
