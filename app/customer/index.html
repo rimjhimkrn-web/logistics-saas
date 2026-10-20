@@ -159,6 +159,36 @@
                 return;
             }
 
+            // Prevent an authenticated partner from remaining on the customer command center.
+            // Metadata is the first signal; active organization membership is a fallback for older accounts.
+            const metadata = session.user?.user_metadata || {};
+            let partnerAccount = metadata.krim_account_type === 'partner';
+            if (!partnerAccount) {
+                try {
+                    const { data: memberships, error: membershipError } = await supabaseClient
+                        .from('krim_organization_members')
+                        .select('role,status,krim_organizations(organization_type,organization_type_code)')
+                        .eq('user_id', session.user.id)
+                        .eq('status', 'active');
+                    if (!membershipError && Array.isArray(memberships)) {
+                        partnerAccount = memberships.some(m => {
+                            const org = m.krim_organizations || {};
+                            return /partner|carrier|transport|forwarder/i.test(
+                                String(org.organization_type || '') + ' ' +
+                                String(org.organization_type_code || '') + ' ' +
+                                String(m.role || '')
+                            );
+                        });
+                    }
+                } catch (roleLookupError) {
+                    console.warn('Partner role fallback lookup failed.', roleLookupError);
+                }
+            }
+            if (partnerAccount) {
+                window.location.replace('/logistics-saas/app/partner/index.html');
+                return;
+            }
+
             document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
 
             // Display actual Supabase session assurance instead of a hardcoded AAL2 claim.
