@@ -57,9 +57,13 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
     const metadata=session.user&&session.user.user_metadata||{};
     const accountType=metadata.krim_account_type;
     const organizationName=String(metadata.company_name||"").trim();
-    let destination=base+"/app/customer/index.html";
-    if(accountType==="partner") destination=base+"/app/partner/index.html?release=partner-workspace-v3";
-    if(accountType==="enterprise") destination=base+"/app/enterprise/index.html";
+    // Driver email confirmation must return through role-checked sign-in.
+    // Never send a newly confirmed driver directly into an operational workspace.
+    let destination=base+"/auth/login.html";
+    if(accountType==="driver") destination=base+"/auth/login.html?role=driver";
+    else if(accountType==="partner") destination=base+"/app/partner/index.html?release=partner-workspace-v3";
+    else if(accountType==="enterprise") destination=base+"/app/enterprise/index.html";
+    else if(accountType==="customer") destination=base+"/app/customer/index.html";
     if(accountType==="customer"||accountType==="partner"){
       if(organizationName.length<2){
         fail("Your account is authenticated, but organization details are incomplete. Sign in again or contact support.");
