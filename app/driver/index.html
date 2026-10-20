@@ -113,7 +113,7 @@ async function loadWorkspace(){
  if(!session){location.replace((window.krimPath?window.krimPath('auth/driver-signin.html'):'../../auth/driver-signin.html'));return false;}
  const m=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
  if(m.error)throw new Error('KRIM could not verify your active membership: '+m.error.message);
- const driverMembers=(m.data||[]).filter(x=>/^(driver|fleet_driver)$/i.test(String(x.role||'').trim()));
+ const driverMembers=(m.data||[]).filter(x=>/^driver$/i.test(String(x.role||'').trim()));
  if(!driverMembers.length)throw new Error('This account has no active driver membership. Sign out and use Driver Sign In, or ask KRIM support to provision driver access.');
  const orgIds=[...new Set(driverMembers.map(x=>x.organization_id).filter(Boolean))];
  const o=await client.from('krim_organizations').select('id,status').in('id',orgIds);
