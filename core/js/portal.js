@@ -293,7 +293,7 @@
     content.replaceChildren();
     const eyebrow = node("span", role.toUpperCase() + " WORKSPACE", "eyebrow");
     const title = node("h1", selected[1]);
-    content.append(eyebrow, title);
+    if (!(role === "enterprise" && selected[0] === "overview")) content.append(eyebrow, title);
 
     if (selected[0] === "overview") {
       if (role === "enterprise") {
