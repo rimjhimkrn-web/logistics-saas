@@ -184,9 +184,15 @@
                     ["enterprise", /enterprise/],
                     ["customer", /customer|shipper|client/]
                 ];
-                let accountType = metadataType;
-                for (const [type, pattern] of roleRules) {
-                    if (pattern.test(membershipsText)) { accountType = type; break; }
+                // Prefer the account type selected during signup for workspace routing.
+                // Memberships are a fallback only when signup metadata is absent/generic;
+                // never let an unrelated enterprise membership silently override a partner signup.
+                const knownTypes = ["customer","partner","driver","warehouse","customs","finance","operations","enterprise","platform_admin"];
+                let accountType = knownTypes.includes(metadataType) ? metadataType : "";
+                if (!accountType) {
+                    for (const [type, pattern] of roleRules) {
+                        if (pattern.test(membershipsText)) { accountType = type; break; }
+                    }
                 }
                 if (!accountType || accountType === "user" || accountType === "member") accountType = "customer";
 
