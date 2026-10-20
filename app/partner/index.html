@@ -1,175 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Carrier Partner Command Workspace</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-    <script>(function(){var p=location.pathname;var b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">CARRIER NODE: SESSION CHECK</span>
-        </span>
-        <span id="session-identity-node" class="text-emerald-400">Authenticating partner session...</span>
-    </div>
-
-    <!-- Workspace Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-emerald-600 font-semibold uppercase">Carrier Command Workspace</span>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="/logistics-saas/public/partner/load-marketplace.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl transition shadow-sm">Load Marketplace →</a>
-                <button onclick="handleSignOut()" class="text-slate-600 hover:text-slate-900 border border-slate-300 px-4 py-2.5 rounded-xl transition">Sign Out</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Workspace Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        
-        <!-- Welcome Banner -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div class="space-y-1">
-                <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600">Carrier Partner Operations</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Fleet Dispatch Center</h1>
-                <p class="text-slate-600 text-sm">Accept freight spot requests, assign driver telemetry units, and manage active transport capacity.</p>
-            </div>
-            <div class="flex space-x-3">
-                <a href="/logistics-saas/public/partner/load-marketplace.html" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm">Browse Load Board →</a>
-            </div>
-        </div>
-
-        <!-- Quick Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Available Loads</span>
-                <p id="metric-loads-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
-                <p class="text-xs text-emerald-600 font-medium">Synced with enterprise demand ledger</p>
-            </div>
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Fleet Assignments</span>
-                <p id="metric-assigned-count" class="text-3xl font-extrabold text-slate-900 font-mono">--</p>
-                <p class="text-xs text-sky-600 font-medium">Assigned transit consignments</p>
-            </div>
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Network Security</span>
-                <p id="metric-assurance-level" class="text-3xl font-extrabold text-slate-900 font-mono">—</p>
-                <p id="metric-assurance-detail" class="text-xs text-slate-600 font-medium">Actual session assurance</p>
-            </div>
-        </div>
-
-        <!-- Operational Gateway Modules -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
-            <h2 class="text-lg font-bold text-slate-900">Partner Execution Modules</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono">
-                <a href="/logistics-saas/public/partner/load-marketplace.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
-                    <span class="text-emerald-600 font-bold block">01 / LOAD MARKETPLACE</span>
-                    <p class="text-slate-700 font-sans">Browse available shipments and submit carrier spot bids.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
-                    <span class="text-emerald-600 font-bold block">02 / FLEET TELEMETRY</span>
-                    <p class="text-slate-700 font-sans">Monitor active transit routes and update milestones.</p>
-                </a>
-                <a href="/logistics-saas/public/shipper/epod-vault.html" class="p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-500 transition space-y-1 block">
-                    <span class="text-emerald-600 font-bold block">03 / EPOD VAULT</span>
-                    <p class="text-slate-700 font-sans">Upload and verify digital recipient delivery signatures.</p>
-                </a>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Carrier Command Workspace © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/index.html" class="hover:text-slate-800 transition">Home</a>
-                <a href="/logistics-saas/public/tracking.html" class="hover:text-slate-800 transition">Public Tracking</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Partner Workspace Script -->
-    <script>
-    (async function () {
-      const BASE = location.hostname.endsWith("github.io") && location.pathname.startsWith("/logistics-saas/") ? "/logistics-saas" : "";
-      const client = window.supabase && window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co", "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa", {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-      const identity = document.getElementById("session-identity-node");
-      const main = document.querySelector("main");
-      main.hidden = true;
-      const gate = document.createElement("section");
-      gate.style.cssText = "max-width:760px;margin:48px auto;padding:28px;border:1px solid #cbd5e1;border-radius:20px;background:#fff;color:#0f172a";
-      gate.innerHTML = '<h1 style="font-size:24px;margin:0 0 10px">Verifying partner access</h1><p id="gate-message">Checking your signed-in identity and active organization membership…</p>';
-      main.before(gate);
-      const message = gate.querySelector("#gate-message");
-      const norm = v => String(v || "").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
-      function fail(title, detail, onboarding) { gate.querySelector("h1").textContent=title; message.textContent=detail; identity.textContent="Access not verified"; if(!gate.querySelector("[data-signin]")){const a=document.createElement("a");a.dataset.signin="true";a.href=BASE+"/auth/partner-signin.html";a.textContent="Return to Partner Sign In";a.style.cssText="display:inline-block;margin:16px 10px 0 0;padding:10px 14px;background:#0f172a;color:white;border-radius:9px;text-decoration:none";gate.appendChild(a);} if(onboarding&&!gate.querySelector("[data-onboarding]")){const b=document.createElement("a");b.dataset.onboarding="true";b.href=BASE+"/public/partner/partner-onboarding.html";b.textContent="Continue Business Verification";b.style.cssText="display:inline-block;margin-top:16px;padding:10px 14px;background:#047857;color:white;border-radius:9px;text-decoration:none";gate.appendChild(b);} }
-      try {
-        if(!client) throw new Error("Authentication service did not load. Refresh and retry.");
-        const {data:ud,error:ue}=await client.auth.getUser();
-        if(ue) throw new Error("Session verification failed. Refresh and sign in again.");
-        if(!ud.user){location.replace(BASE+"/auth/partner-signin.html");return;}
-        const {data:ms,error:me}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",ud.user.id).eq("status","active");
-        if(me) throw new Error("Unable to verify organization membership. Please retry later.");
-        const ids=[...new Set((ms||[]).map(x=>Number(x.organization_id)).filter(x=>Number.isSafeInteger(x)&&x>0))];
-        if(!ids.length){fail("Partner access is not set up","No active organization membership was found. Complete partner onboarding or contact KRIM support. Workspace data has not been loaded.");return;}
-        const {data:os,error:oe}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,display_name,legal_name").in("id",ids);
-        if(oe) throw new Error("Unable to verify your organization type. Workspace data has not been loaded.");
-        const org=(os||[]).find(o=>(["partner","carrier","forwarder"].includes(norm(o.organization_type))||["partner","carrier","forwarder"].includes(norm(o.organization_type_code)))&&norm(o.status)==="active");
-        if(!org){fail("Partner workspace access denied","This account is not linked to an active partner, carrier or forwarder organization. Finish onboarding or contact KRIM support.");return;}
-        if(!["verified","approved"].includes(norm(org.partner_verification_status))||!["active","verified"].includes(norm(org.partner_lifecycle_status))){fail("Business verification is pending","Your account is signed in, but KRIM has not yet approved this partner organization. Workspace data and restricted freight opportunities remain unavailable until approval.",true);return;}
-        gate.hidden=true;main.hidden=false;identity.textContent="Verified partner: "+(ud.user.email||"authenticated account");
-        try{const {data:q,error:qe}=await client.auth.mfa.getAuthenticatorAssuranceLevel();const level=!qe&&q&&q.currentLevel?q.currentLevel.toUpperCase():"N/A";document.getElementById("metric-assurance-level").textContent=level;document.getElementById("metric-assurance-detail").textContent=level==="AAL2"?"Multi-factor assurance confirmed":level==="AAL1"?"MFA not confirmed for this session":"Session assurance unavailable";}catch(_){document.getElementById("metric-assurance-level").textContent="N/A";document.getElementById("metric-assurance-detail").textContent="Session assurance unavailable";}
-        const [loads,assignments]=await Promise.all([client.from("krim_partner_opportunities").select("id",{count:"exact",head:true}).eq("status","open"),client.from("krim_shipment_partner_assignments").select("id",{count:"exact",head:true}).eq("partner_organization_id",org.id)]);
-        document.getElementById("metric-loads-count").textContent=loads.error?"—":String(loads.count??0);
-        document.getElementById("metric-assigned-count").textContent=assignments.error?"—":String(assignments.count??0);
-        if(!["verified","approved"].includes(norm(org.partner_verification_status))||!["active","verified"].includes(norm(org.partner_lifecycle_status))){const n=document.createElement("div");n.style.cssText="margin:0 0 18px;padding:14px;border:1px solid #f3d19c;border-radius:12px;background:#fff8e8;color:#7c4a03";n.textContent="Partner verification is pending. Restricted freight opportunities remain unavailable until KRIM approval.";main.prepend(n);}
-      } catch(e) { console.error("Partner access verification failed",e); fail("We could not verify partner access",e.message||"Refresh and try again."); }
-    })();
-    async function handleSignOut(){const c=window.supabase&&window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co","sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");try{if(c)await c.auth.signOut();}finally{location.replace((location.hostname.endsWith("github.io")&&location.pathname.startsWith("/logistics-saas/")?"/logistics-saas":"")+"/index.html");}}
-    </script>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><meta name="robots" content="noindex,nofollow">
+<title>Partner Workspace | KRIM Logistics OS</title>
+<meta name="description" content="Secure KRIM Logistics transport partner workspace.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<style>
+:root{--navy:#07152f;--blue:#1769ff;--cyan:#37c7d5;--green:#07845f;--ink:#182741;--muted:#65748b;--line:#dce5f0;--bg:#f3f7fc;--amber:#9a5b00;--amberbg:#fff7e6;--red:#b42318}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.top{background:var(--navy);color:#d5e2f7;padding:9px 20px;font-size:11px}.topin,header,.wrap,footer{width:min(1160px,calc(100% - 32px));margin-inline:auto}.topin{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.nav{background:#fff;border-bottom:1px solid var(--line)}header{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:10px;color:var(--navy);font-weight:900;letter-spacing:.04em}.mark{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),#6543eb,var(--cyan));color:#fff;font-size:20px}.brand small{display:block;font-size:9px;letter-spacing:.13em;color:var(--muted)}.actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:12px;font-weight:850;background:#fff;color:#31445e;cursor:pointer}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn:disabled{opacity:.6;cursor:wait}.wrap{padding:30px 0 42px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--green)}.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:clamp(22px,4vw,34px);border-radius:23px;background:linear-gradient(120deg,#07152f,#123a72);color:#fff;box-shadow:0 18px 45px #07152f18}.hero h1{font-size:clamp(27px,4vw,39px);line-height:1.1;letter-spacing:-.04em;margin:9px 0}.hero p{color:#d5e2f7;max-width:660px;margin:0}.status{display:inline-flex;align-items:center;gap:7px;border:1px solid #ffffff35;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:850;white-space:nowrap}.dot{width:7px;height:7px;border-radius:50%;background:#75e0b4}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:18px}.metric,.panel,.quick{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 6px 20px #07152f05}.metric{padding:19px}.metric .label{font-size:11px;color:var(--muted);font-weight:750}.metric .value{font-size:29px;line-height:1.25;color:var(--navy);font-weight:900;margin-top:5px}.metric .detail{font-size:11px;color:var(--muted);margin-top:4px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:28px 0 13px}.section-head h2{font-size:20px;color:var(--navy);margin:0;letter-spacing:-.025em}.section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.quickgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.quick{padding:20px;display:flex;flex-direction:column;min-height:174px}.icon{width:40px;height:40px;border-radius:12px;background:#eaf1ff;color:var(--blue);display:grid;place-items:center;font-size:19px;font-weight:900}.quick h3{margin:13px 0 5px;font-size:15px;color:var(--navy)}.quick p{font-size:12px;color:var(--muted);margin:0 0 15px;flex:1}.quick a{font-size:12px;font-weight:850}.notice{margin:16px 0 0;padding:14px 16px;border:1px solid #f0d59f;border-radius:13px;background:var(--amberbg);color:var(--amber);font-size:12px}.gate{width:min(650px,calc(100% - 32px));margin:50px auto;padding:clamp(22px,4vw,34px);border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 18px 55px #07152f0d}.gate h1{font-size:25px;line-height:1.2;color:var(--navy);margin:10px 0}.gate p{color:var(--muted);overflow-wrap:anywhere}.gate[hidden],main[hidden]{display:none!important}.gate-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.error{color:var(--red)}footer{padding:18px 0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}@media(max-width:760px){header{min-height:65px}.hero{display:block}.status{margin-top:17px}.grid{grid-template-columns:1fr}.quickgrid{grid-template-columns:1fr}.metric{padding:16px}.wrap{padding-top:20px}.section-head{align-items:start;flex-direction:column}.actions .btn{padding:9px 10px}}@media(min-width:761px) and (max-width:960px){.quickgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style></head>
+<body>
+<div class="top"><div class="topin"><span>KRIM GLOBAL LOGISTICS OS</span><span id="identity">Checking secure partner session…</span></div></div>
+<div class="nav"><header><a class="brand" href="../../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></span></a><div class="actions"><a class="btn" id="onboarding-link" href="../../public/partner/partner-onboarding.html">Business verification</a><a class="btn primary" id="market-link" href="../../public/partner/load-marketplace.html">Load marketplace →</a><button class="btn" id="signout" type="button">Sign out</button></div></header></div>
+<section class="gate" id="gate" role="status" aria-live="polite"><div class="eyebrow">Secure access check</div><h1 id="gate-title">Verifying partner access</h1><p id="gate-message">Checking your authenticated identity, active organization membership and approval status…</p><div class="gate-actions"><a class="btn primary" id="signin-link" href="../../auth/partner-signin.html">Partner sign in</a><a class="btn" href="../../index.html">Return home</a></div></section>
+<main id="workspace" class="wrap" hidden>
+<section class="hero"><div><div class="eyebrow" style="color:#8ce8c4">Partner operations</div><h1 id="welcome">Your freight workspace</h1><p id="orgline">Organization approval verified. Use the workspace shortcuts below to continue your operations.</p></div><span class="status"><span class="dot"></span><span id="approval-label">APPROVED PARTNER</span></span></section>
+<div class="grid">
+<article class="metric"><div class="label">Open load opportunities</div><div class="value" id="loads-count">—</div><div class="detail">Currently open in the partner marketplace</div></article>
+<article class="metric"><div class="label">Your shipment assignments</div><div class="value" id="assignments-count">—</div><div class="detail">Assignments linked to your organization</div></article>
+<article class="metric"><div class="label">Session assurance</div><div class="value" id="assurance-level">—</div><div class="detail" id="assurance-detail">Checking current session</div></article>
+</div>
+<div class="section-head"><div><h2>Partner workspace</h2><p>Use these shortcuts to manage the next step in your freight operations.</p></div></div>
+<div class="quickgrid">
+<article class="quick"><div class="icon">↗</div><h3>Load marketplace</h3><p>Review available freight opportunities and eligible loads.</p><a id="market-shortcut" href="../../public/partner/load-marketplace.html">Open marketplace →</a></article>
+<article class="quick"><div class="icon">✓</div><h3>Business verification</h3><p>Review your onboarding status and complete requested business details.</p><a id="verify-shortcut" href="../../public/partner/partner-onboarding.html">Open verification checklist →</a></article>
+<article class="quick"><div class="icon">⌁</div><h3>Shipment assignments</h3><p>Open the assignment area to review shipment work associated with your organization.</p><a id="assignments-shortcut" href="../../public/partner/load-marketplace.html">View partner loads →</a></article>
+</div>
+<div id="workspace-note" class="notice" hidden></div>
+</main>
+<footer><span>© <span id="year"></span> KRIM Logistics OS</span><span>Partner identity · Organization membership · Business approval</span></footer>
+<script>
+(function(){"use strict";
+const client=window.KRIM_SUPABASE,base=window.KRIM_BASE_PATH||"",gate=document.getElementById("gate"),main=document.getElementById("workspace"),identity=document.getElementById("identity"),gateTitle=document.getElementById("gate-title"),gateMessage=document.getElementById("gate-message"),signout=document.getElementById("signout");
+document.getElementById("year").textContent=new Date().getFullYear();
+function go(path){return base+"/"+String(path).replace(/^\/+/,"")}
+function isPartner(o){const accepted=["partner","carrier","forwarder"];return accepted.includes(String(o.organization_type||"").trim().toLowerCase())||accepted.includes(String(o.organization_type_code||"").trim().toLowerCase())}
+function fail(title,message,showOnboarding){gate.hidden=false;main.hidden=true;gateTitle.textContent=title;gateMessage.textContent=message;identity.textContent="Partner access not verified";if(showOnboarding){const a=document.createElement("a");a.className="btn primary";a.href=go("public/partner/partner-onboarding.html");a.textContent="Continue business verification →";gate.querySelector(".gate-actions").prepend(a)}}
+signout.addEventListener("click",async function(){signout.disabled=true;signout.textContent="Signing out…";try{if(client)await client.auth.signOut()}finally{location.replace(go("index.html"))}});
+async function boot(){try{
+if(!client)throw new Error("Authentication service did not load. Refresh and sign in again.");
+const {data:ud,error:ue}=await client.auth.getUser();if(ue)throw new Error("Your session could not be verified. Sign in again.");if(!ud.user){location.replace(go("auth/partner-signin.html"));return}
+const user=ud.user;
+const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");if(memberError)throw new Error("KRIM could not verify organization membership. Please retry.");
+const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){fail("Partner organization not linked","Your account is signed in, but no active organization membership was found. Return to Partner Sign In to retry setup, or contact KRIM support. Workspace data has not been loaded.",false);return}
+const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,display_name,legal_name").in("id",ids);if(orgError)throw new Error("KRIM could not verify your organization type. Workspace data has not been loaded.");
+const org=(orgs||[]).find(isPartner);if(!org){fail("Partner access denied","This account is not linked to a partner, carrier or forwarder organization. Access was not granted.",false);return}
+if(String(org.status||"").toLowerCase()!=="active"){fail("Organization is not active","Your partner organization is not active. Contact KRIM support to resolve the organization status.",false);return}
+const verification=String(org.partner_verification_status||"").trim().toLowerCase(),lifecycle=String(org.partner_lifecycle_status||"").trim().toLowerCase();
+if(!["verified","approved"].includes(verification)||!["active","verified"].includes(lifecycle)){fail("Business verification is pending","Your account is signed in, but KRIM has not confirmed business approval. Restricted workspace functions remain unavailable until approval.",true);return}
+gate.hidden=true;main.hidden=false;identity.textContent="Signed in: "+(user.email||"verified partner account");document.getElementById("welcome").textContent="Welcome to your freight workspace";document.getElementById("orgline").textContent=(org.display_name||org.legal_name||"Your partner organization")+" · Organization and business approval verified.";document.getElementById("approval-label").textContent="APPROVED PARTNER";
+const [loads,assignments,assurance]=await Promise.all([
+client.from("krim_partner_opportunities").select("id",{count:"exact",head:true}).eq("status","open"),
+client.from("krim_shipment_partner_assignments").select("id",{count:"exact",head:true}).eq("partner_organization_id",org.id),
+client.auth.mfa.getAuthenticatorAssuranceLevel()
+]);
+document.getElementById("loads-count").textContent=loads.error?"—":String(loads.count??0);
+document.getElementById("assignments-count").textContent=assignments.error?"—":String(assignments.count??0);
+const level=!assurance.error&&assurance.data&&assurance.data.currentLevel?assurance.data.currentLevel.toUpperCase():"N/A";document.getElementById("assurance-level").textContent=level;document.getElementById("assurance-detail").textContent=level==="AAL2"?"Multi-factor assurance confirmed":level==="AAL1"?"Password/session authenticated; MFA not confirmed":"Session assurance unavailable";
+const note=document.getElementById("workspace-note");const warnings=[];if(loads.error)warnings.push("Load opportunity count could not be retrieved.");if(assignments.error)warnings.push("Assignment count could not be retrieved.");if(assurance.error)warnings.push("Session assurance could not be retrieved.");if(warnings.length){note.hidden=false;note.textContent=warnings.join(" ")}
+}catch(error){console.error("KRIM partner workspace access check failed",error);fail("We could not verify partner access",error&&error.message?error.message:"Refresh the page and sign in again.",false)}}
+boot();
+})();
+</script></body></html>
