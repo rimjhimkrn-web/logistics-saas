@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Opening Partner Workspace | KRIM</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07111f;color:#f4f7fb;font:16px system-ui,sans-serif;padding:20px}.box{max-width:520px;text-align:center;background:#101e30;border:1px solid #2a3d53;border-radius:20px;padding:28px}p{color:#a9b8ca;line-height:1.5}a{color:#8ed6ff}#status{overflow-wrap:anywhere}</style></head>
+<body><main class="box"><h1>KRIM Partner Access Check</h1><p id="status" role="status" aria-live="polite">Checking your authenticated account and partner access…</p><p><a id="signin" href="partner-signin.html">Return to Partner Sign In</a></p></main>
+<script>
+(async function(){
+ const status=document.getElementById("status"),base=window.krimPath?window.krimPath.bind(window):p=>"/"+String(p).replace(/^\/+/, "");
+ const client=window.KRIM_SUPABASE||window.supabaseClient;
+ function stop(message){status.textContent=message;}
+ try{
+  if(!client)throw new Error("Authentication service did not initialize. Return to sign-in and retry.");
+  const {data:{session},error}=await client.auth.getSession();if(error)throw error;
+  if(!session){window.location.replace(base("auth/partner-signin.html"));return;}
+  const user=session.user,meta=user.user_metadata||{};
+  const type=String(meta.krim_account_type||meta.account_type||meta.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
+  const {data:members,error:memberError}=await client.from("krim_organization_members").select("role,status,organization_id,krim_organizations(organization_type,organization_type_code,legal_name,display_name)").eq("user_id",user.id).eq("status","active");
+  const partnerMembership=Array.isArray(members)&&members.some(m=>{const o=m.krim_organizations||{};return /partner|carrier|transport|forwarder/.test([m.role,o.organization_type,o.organization_type_code,o.legal_name,o.display_name].join(" ").toLowerCase());});
+  const partnerMetadata=["partner","carrier","transport_partner","transport"].includes(type);
+  if(!partnerMetadata&&!partnerMembership)throw new Error(memberError?"Could not verify partner membership. Please sign in again or contact KRIM support.":"This account does not have a recognized partner role. It has not been redirected to the partner workspace.");
+  status.textContent="Access confirmed. Redirecting to Partner Workspace…";
+  window.location.replace(base("app/partner/index.html"));
+ }catch(e){stop(e.message||"Partner access check failed.");}
+})();
+</script></body></html>
