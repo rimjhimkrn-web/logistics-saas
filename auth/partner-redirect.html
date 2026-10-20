@@ -1,30 +1,32 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#07111f"><title>Opening Partner Workspace | KRIM</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(800px 500px at 90% 0,#14504c66,transparent 70%),#07111f;color:#f3f7fb;font:15px/1.5 system-ui,sans-serif}.box{width:min(100%,500px);padding:32px;text-align:center;background:#102137;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 25px 80px #0005}.spinner{width:36px;height:36px;margin:20px auto;border:3px solid #345064;border-top-color:#4ce0a2;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}p{color:#a9bbcf;overflow-wrap:anywhere}a{color:#9ed4ff}#status{font-weight:650}</style></head><body><main class="box"><div style="color:#4ce0a2;font-size:11px;font-weight:800;letter-spacing:.16em">KRIM LOGISTICS OS</div><h1>Opening Partner Workspace</h1><div class="spinner" id="spinner"></div><p id="status" role="status" aria-live="polite">Checking your secure session…</p><p><a id="back" href="partner-signin.html">Return to Partner Sign In</a></p></main>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#07111f"><title>Verifying Partner Access | KRIM</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(800px 500px at 90% 0,#14504c66,transparent 70%),#07111f;color:#f3f7fb;font:15px/1.5 system-ui,sans-serif}.box{width:min(100%,500px);padding:32px;text-align:center;background:#102137;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 25px 80px #0005}.mark{width:44px;height:44px;margin:auto;display:grid;place-items:center;border-radius:14px;background:#4ce0a2;color:#06241d;font-weight:950;font-size:22px}.eyebrow{margin-top:16px;color:#4ce0a2;font-size:11px;font-weight:800;letter-spacing:.16em}h1{font-size:25px}p{color:#a9bbcf;overflow-wrap:anywhere}a{color:#9ed4ff}#status{font-weight:650}</style></head>
+<body><main class="box"><div class="mark">K</div><div class="eyebrow">KRIM LOGISTICS OS</div><h1>Verifying partner access</h1><p id="status" role="status" aria-live="polite">Checking your authenticated session and organization permissions…</p><p><a id="back" href="partner-signin.html">Return to Partner Sign In</a></p></main>
 <script>
-
 (async function(){
- const BASE=location.hostname.endsWith("github.io")&&location.pathname.startsWith("/logistics-saas/")?"/logistics-saas":"";
- const client=window.supabase&&window.supabase.createClient("https://ebltviniygljwwseplph.supabase.co","sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa");
- const status=document.getElementById("status"),spinner=document.getElementById("spinner");
- function fail(message){status.textContent=message;spinner.style.display="none"}
- function norm(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}
- try{
-  if(!client)throw new Error("Authentication service failed to load. Return to sign-in and retry.");
-  const {data,error}=await client.auth.getSession();if(error)throw error;
-  if(!data.session){location.replace(BASE+"/auth/partner-signin.html");return}
-  const user=data.session.user;
-  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");
-  if(memberError)throw new Error("Could not verify active organization membership: "+memberError.message);
-  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
-  if(!ids.length)throw new Error("No active organization membership was found. Contact KRIM support to complete partner setup.");
-  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,display_name,legal_name").in("id",ids);
-  if(orgError)throw new Error("Could not verify partner organization: "+orgError.message);
-  const partnerOrg=(orgs||[]).some(o=>/partner|carrier|transport|forwarder/.test([o.organization_type,o.organization_type_code,o.display_name,o.legal_name].map(norm).join(" ")));
-  const partnerMember=(members||[]).some(m=>/partner|carrier|transport|forwarder/.test(norm(m.role)));
-  if(!partnerOrg&&!partnerMember)throw new Error("Your active organization does not have an authorized transport-partner role.");
-  status.textContent="Partner membership verified. Redirecting…";
-  location.replace(BASE+"/app/partner/index.html?release=20261020-partner-2");
- }catch(e){fail(e.message||"Unable to verify partner access.")}
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient,base=window.KRIM_BASE_PATH||"",status=document.getElementById("status");
+function fail(message){status.textContent=message}
+try{
+ if(!client)throw new Error("Authentication service did not load. Return to sign-in and retry.");
+ const {data:sessionData,error:sessionError}=await client.auth.getSession();if(sessionError)throw sessionError;
+ const session=sessionData.session;if(!session){location.replace(base+"/auth/partner-signin.html");return}
+ const user=session.user;
+ const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",user.id).eq("status","active");
+ if(memberError)throw new Error("KRIM could not verify organization membership. Please retry.");
+ const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(id=>Number.isSafeInteger(id)&&id>0))];
+ if(!ids.length)throw new Error("No active organization membership was found. Finish account setup or contact KRIM support.");
+ const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status").in("id",ids);
+ if(orgError)throw new Error("KRIM could not verify your organization type. Please retry.");
+ const org=(orgs||[]).find(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())||["partner","carrier","forwarder"].includes(String(o.organization_type_code||"").toLowerCase()));
+ if(!org)throw new Error("Your active organization is not registered as a transport partner. Partner access was not granted.");
+ if(String(org.status||"").toLowerCase()!=="active")throw new Error("Your partner organization is not active. Contact KRIM support.");
+ if(!["verified","approved"].includes(String(org.partner_verification_status||"").toLowerCase())){
+  status.textContent="Your account is valid, but business verification is still pending. Opening your onboarding checklist…";
+  location.replace(base+"/public/partner/partner-onboarding.html");return;
+ }
+ status.textContent="Partner membership and business approval verified. Opening your workspace…";
+ location.replace(base+"/app/partner/index.html?release=partner-route-3");
+}catch(error){fail(error&&error.message?error.message:"Unable to verify partner access.")}
 })();
 </script></body></html>
