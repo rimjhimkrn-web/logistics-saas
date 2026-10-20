@@ -159,62 +159,85 @@
                 return;
             }
 
-            // Resolve the signed-in user's workspace. This browser guard improves routing;
-            // Supabase RLS and server-side permissions remain the actual data-security boundary.
+            // Verify the user's active organization membership before rendering customer data.
+            // Separate reads avoid relying on PostgREST nested-relationship metadata.
+            const loginUrl = window.krimPath ? window.krimPath('auth/login.html') : '../../auth/login.html';
             const metadata = session.user?.user_metadata || {};
-            const metadataType = String(metadata.krim_account_type || metadata.account_type || "").toLowerCase();
-            let membershipRows = [];
-            let membershipLookupFailed = false;
-            try {
-                const { data: memberships, error: membershipError } = await supabaseClient
-                    .from('krim_organization_members')
-                    .select('role,status,krim_organizations(organization_type,organization_type_code)')
-                    .eq('user_id', session.user.id)
-                    .eq('status', 'active');
-                if (membershipError) throw membershipError;
-                membershipRows = Array.isArray(memberships) ? memberships : [];
-            } catch (roleLookupError) {
-                membershipLookupFailed = true;
-                console.warn('Workspace membership lookup failed.', roleLookupError);
+            const membershipResult = await supabaseClient
+                .from('krim_organization_members')
+                .select('organization_id,role,status')
+                .eq('user_id', session.user.id)
+                .eq('status', 'active');
+
+            if (membershipResult.error) {
+                console.error('Customer workspace membership check failed:', membershipResult.error);
+                window.location.replace(loginUrl + '?reason=membership_check_failed');
+                return;
             }
 
-            const membershipText = membershipRows.map(m => {
-                const org = m.krim_organizations || {};
-                return [m.role, org.organization_type, org.organization_type_code].join(' ').toLowerCase();
+            const membershipRows = Array.isArray(membershipResult.data) ? membershipResult.data : [];
+            if (!membershipRows.length) {
+                window.location.replace(loginUrl + '?reason=no_active_membership');
+                return;
+            }
+
+            const organizationIds = [...new Set(membershipRows.map(row => row.organization_id).filter(id => id !== null && id !== undefined))];
+            if (!organizationIds.length) {
+                window.location.replace(loginUrl + '?reason=organization_link_missing');
+                return;
+            }
+
+            const organizationResult = await supabaseClient
+                .from('krim_organizations')
+                .select('id,organization_type,organization_type_code')
+                .in('id', organizationIds);
+
+            if (organizationResult.error) {
+                console.error('Customer workspace organization check failed:', organizationResult.error);
+                window.location.replace(loginUrl + '?reason=organization_check_failed');
+                return;
+            }
+
+            const organizationById = new Map((organizationResult.data || []).map(org => [String(org.id), org]));
+            const roleText = membershipRows.map(row => {
+                const org = organizationById.get(String(row.organization_id)) || {};
+                return [row.role, org.organization_type, org.organization_type_code]
+                    .join(' ')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '_');
             }).join(' ');
-            const hasPartnerMembership = /partner|carrier|transport|forwarder/.test(membershipText);
-            const hasEnterpriseMembership = /enterprise/.test(membershipText);
-            const hasCustomerMembership = /customer|shipper|client/.test(membershipText);
 
-            if (metadataType === 'partner' || hasPartnerMembership) {
-                window.location.replace('/logistics-saas/app/partner/index.html');
+            if (/platform_admin|platform_superadmin|superadmin/.test(roleText)) {
+                window.location.replace(loginUrl + '?reason=privileged_access_separate');
                 return;
             }
-            if (hasEnterpriseMembership) {
-                window.location.replace('/logistics-saas/app/enterprise/index.html');
+
+            const hasCustomerAccess = /customer|shipper|client/.test(roleText);
+            const hasPartnerAccess = /partner|carrier|transport|forwarder/.test(roleText);
+            const hasEnterpriseAccess = /enterprise/.test(roleText);
+            const otherRoleRoutes = [
+                [/driver|fleet_driver/, 'driver'],
+                [/warehouse|fulfilment|fulfillment/, 'warehouse'],
+                [/customs|clearance/, 'customs'],
+                [/finance|accountant|settlement/, 'finance'],
+                [/operations|dispatcher|control_tower/, 'operations']
+            ];
+            const otherRole = otherRoleRoutes.find(([pattern]) => pattern.test(roleText));
+
+            if (hasPartnerAccess) {
+                window.location.replace(window.krimPath ? window.krimPath('app/partner/index.html') : '../partner/index.html');
                 return;
             }
-            if (/(driver|warehouse|fulfilment|fulfillment|customs|clearance|finance|accountant|settlement|operations|dispatcher|control_tower)/.test(membershipText)) {
-                const roleRoutes = [
-                    [/driver|fleet_driver/, 'driver'],
-                    [/warehouse|fulfilment|fulfillment/, 'warehouse'],
-                    [/customs|clearance/, 'customs'],
-                    [/finance|accountant|settlement/, 'finance'],
-                    [/operations|dispatcher|control_tower/, 'operations']
-                ];
-                const match = roleRoutes.find(([pattern]) => pattern.test(membershipText));
-                if (match) {
-                    window.location.replace('/logistics-saas/app/' + match[1] + '/index.html');
-                    return;
-                }
+            if (hasEnterpriseAccess) {
+                window.location.replace(window.krimPath ? window.krimPath('app/enterprise/index.html') : '../enterprise/index.html');
+                return;
             }
-
-            // Customer accounts are the only public self-registration path.
-            // If membership lookup failed, allow only an explicitly registered customer
-            // account to continue; never interpret a failed lookup as staff authorization.
-            const isCustomer = metadataType === 'customer' || hasCustomerMembership;
-            if (!isCustomer || (membershipLookupFailed && metadataType !== 'customer')) {
-                window.location.replace('/logistics-saas/auth/login.html?reason=workspace_access_denied');
+            if (otherRole) {
+                window.location.replace(window.krimPath ? window.krimPath('app/' + otherRole[1] + '/index.html') : '../' + otherRole[1] + '/index.html');
+                return;
+            }
+            if (!hasCustomerAccess) {
+                window.location.replace(loginUrl + '?reason=workspace_access_denied');
                 return;
             }
 
