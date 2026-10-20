@@ -37,7 +37,7 @@ function value(obj,key,fallback){const v=obj&&obj[key];return v===null||v===unde
 function addField(grid,label,text){const box=node("div",null,"field");box.append(node("label",label));box.append(node("div",text));grid.append(box)}
 function statusClass(status){return status==="approved"?"pill approved":status==="rejected"?"pill rejected":"pill"}
 async function addDocuments(card,row){
- const meta=row.case_metadata||row.organization_metadata||{};
+ const meta={...(row.organization_metadata||{}),...(row.case_metadata||{})};
  const paths=Array.isArray(meta.document_paths)?meta.document_paths:[];
  const wrap=node("div",null,"docs");
  if(!paths.length){wrap.append(node("span","No document paths recorded.","caseno"));card.append(wrap);return}
@@ -76,7 +76,7 @@ async function renderCase(row){
  titleWrap.append(node("h2",value(row,"legal_name","Unnamed partner")));
  titleWrap.append(node("div",value(row,"case_number","No case reference")+" · Submitted "+displayDate(row.submitted_at),"caseno"));
  head.append(titleWrap);head.append(node("span",value(row,"case_status","unknown"),statusClass(row.case_status)));card.append(head);
- const meta=row.case_metadata||{}, orgMeta=row.organization_metadata||{};
+ const meta={...(row.organization_metadata||{}),...(row.case_metadata||{})};
  const details=node("div",null,"grid");
  addField(details,"Registered country",countryName(meta.country_code));
  addField(details,"Primary operating country",countryName(meta.operating_country_code));
