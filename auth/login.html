@@ -190,8 +190,10 @@
                 if (organizationError) throw organizationError;
                 if (!organizationId) throw new Error("KRIM organization setup did not return an organization reference.");
                 postLoginPath = accountType === "partner"
-                    ? "../public/partner/partner-onboarding.html"
-                    : "../app/customer/index.html";
+                    ? "../app/partner/index.html"
+                    : (accountType === "enterprise"
+                        ? "../app/enterprise/index.html"
+                        : "../app/customer/index.html");
 
                 // Evaluate Multi-Factor Assurance Level (AAL)
                 const { data: aalData, error: aalErr } = await window.KRIM_SUPABASE.auth.mfa.getAuthenticatorAssuranceLevel();
