@@ -46,7 +46,7 @@ BEGIN
   IF NOT private.krim_has_permission(v_user_id, 1::bigint, 'admin.platform') THEN
     RAISE EXCEPTION USING errcode='42501', message='Platform administrator permission required';
   END IF;
-  IF p_case_id IS NULL OR v_decision NOT IN ('approved','rejected') THEN
+  IF p_case_id IS NULL OR v_decision IS NULL OR v_decision NOT IN ('approved','rejected') THEN
     RAISE EXCEPTION USING errcode='22023', message='Choose an existing case and an approved or rejected decision';
   END IF;
   IF v_decision='rejected' AND (v_reason IS NULL OR char_length(v_reason)<5) THEN
