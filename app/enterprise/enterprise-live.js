@@ -84,7 +84,7 @@
     }
   }
   function showSection(id) {
-    if (id === "shipments") { showShipments(); return true; }
+    if (id === "shipments") { var currentHeading = root.querySelector("h1"); if (currentHeading && currentHeading.textContent === "Shipment control tower") return true; showShipments(); return true; }
     var spec = labels[id];
     if (!spec || !root.querySelector(".empty-state")) return false;
     root.replaceChildren(el("span", "eyebrow", "GLOBAL ENTERPRISE OPERATIONS · " + spec[0]), el("h1", "", id === "ai-activity" ? "AI activity" : id === "recommendations" ? "Recommendations & evidence" : id === "approvals" ? "Approval queue" : id === "pause" ? "Emergency pause" : id === "memory" ? "Institutional memory" : id.charAt(0).toUpperCase() + id.slice(1)), el("p", "muted", spec[1]));
