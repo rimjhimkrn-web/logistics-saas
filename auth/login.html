@@ -26,8 +26,10 @@
   let factorId = null, challengeId = null, postLoginPath = "../app/customer/index.html";
   document.getElementById("year").textContent = new Date().getFullYear();
 
-  const requestedRole = String(new URLSearchParams(location.search).get("role") || "")
-    .trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  const loginParams = new URLSearchParams(location.search);
+  const requestedRoleRaw = loginParams.get("role") || loginParams.get("workspace") || loginParams.get("krim_workspace") || loginParams.get("account_type") || loginParams.get("selected_workspace") || "";
+  const requestedRoleKey = String(requestedRoleRaw).trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  const requestedRole = ({ enterprise_admin: "enterprise", enterprise_user: "enterprise", enterprise_workspace: "enterprise", corporate: "enterprise", logistics_partner: "partner", transport_partner: "partner", warehouse_operator: "warehouse", warehouse_workspace: "warehouse", customs_compliance: "customs", finance_workspace: "finance", operations_workspace: "operations", customer_workspace: "customer", driver_workspace: "driver" })[requestedRoleKey] || requestedRoleKey;
   const publicRoles = ["customer", "partner", "driver", "warehouse", "customs", "finance", "operations", "enterprise"];
   document.getElementById("role-note").textContent =
     requestedRole === "customer" ? "Customer / shipper sign-in." :
