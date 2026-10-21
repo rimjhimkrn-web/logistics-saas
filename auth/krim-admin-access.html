@@ -35,12 +35,17 @@
   return input;
  }
  async function enterAdmin(){
+  const {data:sessionData}=await client.auth.getSession();
+  const signedEmail=sessionData.session?.user?.email||"unknown account";
+  show("Verifying privileged access for "+signedEmail+"…","");
   const {data,error}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
   if(error||!data||data.ok!==true){
+   const reason=data?.error||error?.message||"Platform authorization check failed.";
    await client.auth.signOut();
-   throw new Error(data&&data.code==="MFA_REQUIRED"?"Multi-factor authentication is required for platform administration.":"Privileged access denied. This account must have an active KRIM platform administrator role.");
+   if(data?.code==="MFA_REQUIRED")throw new Error("Multi-factor authentication is required for "+signedEmail+". Sign in again and complete the authenticator challenge.");
+   throw new Error("Access denied for "+signedEmail+". "+reason+". Use the email account that has an active KRIM platform administrator role.");
   }
-  show("Identity, MFA and platform role verified. Opening the restricted control plane…","success");
+  show("Identity, MFA and platform role verified for "+signedEmail+". Opening the restricted control plane…","success");
   const parts=location.pathname.split("/").filter(Boolean),base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
   location.replace(base+"/app/platform-admin/index.html");
  }
