@@ -117,7 +117,9 @@ footer{text-align:center;color:#64748b;font-size:12px}
    try {
     const target = new URL(requestedReturn, window.location.href);
     const allowed = /^\/logistics-saas\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname)
-      || /^\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname);
+      || /^\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname)
+      || /^\/logistics-saas\/auth\/(login|partner-signin|driver-signin)\.html$/.test(target.pathname)
+      || /^\/auth\/(login|partner-signin|driver-signin)\.html$/.test(target.pathname);
     if (target.origin === window.location.origin && allowed) destination = target.href;
    } catch (_) {}
    setTimeout(function(){location.replace(destination);},900);
