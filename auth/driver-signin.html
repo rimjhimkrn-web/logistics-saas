@@ -39,10 +39,11 @@ async function verifyDriver(user){
  if(org.error)throw new Error('KRIM could not verify your driver organization. Reference: DRIVER_ORG_CHECK_FAILED.');
  const active=new Set((org.data||[]).filter(o=>String(o.status||'').toLowerCase()==='active').map(o=>String(o.id)));
  if(!drivers.some(m=>active.has(String(m.organization_id))))throw new Error('Your driver organization is not active. Contact KRIM support.');
+ const factors=await client.auth.mfa.listFactors();if(factors.error)throw factors.error;
+ const factor=(factors.data?.totp||[]).find(f=>f.status==='verified');
+ if(!factor){location.replace(path('auth/mfa-enroll.html')+'?returnTo='+encodeURIComponent(path('app/driver/index.html?release=20261021-driver-workspace-v8')));return;}
  const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error)throw assurance.error;
  if(assurance.data?.nextLevel==='aal2'&&assurance.data?.currentLevel!=='aal2'){
-  const factors=await client.auth.mfa.listFactors();if(factors.error)throw factors.error;
-  const factor=(factors.data?.totp||[]).find(f=>f.status==='verified');if(!factor)throw new Error('Your account requires multi-factor authentication, but no verified authenticator is enrolled. Contact your administrator.');
   factorId=factor.id;$('loginStage').classList.add('hidden');$('mfaStage').classList.remove('hidden');$('code').focus();feedback('Additional identity verification is required.');return;
  }
  const s=await client.auth.getSession();if(s.error)throw s.error;if(!s.data.session||s.data.session.user.id!==user.id)throw new Error('The browser session was not saved. Enable cookies/site storage and sign in again.');
