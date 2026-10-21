@@ -109,7 +109,18 @@ footer{text-align:center;color:#64748b;font-size:12px}
    sessionStorage.setItem("KRIM_MFA_FACTOR_ID",factorId);
    show("Authenticator enrolled successfully. MFA is now enabled for this account.",true);
    form.hidden=true;
-   setTimeout(function(){location.replace("mfa.html");},900);
+   // Only honor a same-origin KRIM workspace path from the enrollment handoff.
+   // The login page already checked active membership before sending the user here.
+   const params = new URLSearchParams(window.location.search);
+   const requestedReturn = params.get("returnTo") || "";
+   let destination = "mfa.html";
+   try {
+    const target = new URL(requestedReturn, window.location.href);
+    const allowed = /^\\/logistics-saas\\/app\\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise)\\/index\\.html$/.test(target.pathname)
+      || /^\\/app\\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise)\\/index\\.html$/.test(target.pathname);
+    if (target.origin === window.location.origin && allowed) destination = target.href;
+   } catch (_) {}
+   setTimeout(function(){location.replace(destination);},900);
   }catch(error){
    show(error&&error.message?error.message:"The code could not be verified. Check your phone's time and try again.",false);
    button.disabled=false;button.textContent="Confirm and enable MFA";
