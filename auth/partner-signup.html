@@ -35,7 +35,7 @@ button.disabled=true;button.textContent="Creating secure account…";
 try{const {data,error}=await client.auth.signUp({email,password:pass,options:{data:{full_name:name,company_name:company,krim_account_type:"partner"},emailRedirectTo:new URL("auth-callback.html",location.href).href}});if(error)throw error;if(!data.user)throw new Error("Authentication did not return an account. Please retry.");
 if(!data.session){show("Registration request received. Check your inbox for the KRIM confirmation link. After confirming, return to Partner Sign In. Your organization setup will be retried securely during sign-in if needed.","success");button.textContent="Confirmation email requested";return}
 const {error:provisionError}=await client.rpc("krim_provision_partner_organization",{p_legal_name:company});if(provisionError)throw new Error("Your account was created, but organization setup could not be confirmed. Do not register again. Sign in with this email to retry setup. Reference: "+provisionError.message);
-show("Account and organization setup confirmed. Opening your KRIM Partner Workspace…","success");location.replace((window.KRIM_BASE_PATH||"")+"/app/partner/index.html?release=partner-workspace-v3");
+show("Account created. Next, secure it with your authenticator…","success");location.replace((window.KRIM_BASE_PATH||"")+"/auth/mfa-enroll.html?returnTo="+encodeURIComponent((window.KRIM_BASE_PATH||"")+"/app/partner/index.html"));
 }catch(error){show(friendly(error),"error");button.disabled=false;button.textContent="Create partner account →"}
 });
 })();
