@@ -199,9 +199,16 @@
       const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();
       if (factorsError) throw factorsError;
       const factor = (factors?.totp || []).find(item => item.status === "verified");
-      if (!factor) throw new Error("Multi-factor authentication is required, but no verified authenticator is enrolled. Contact your administrator.");
-      factorId = factor.id;
       postLoginPath = workspaceUrl(accountType);
+      if (!factor) {
+        // A newly signed-in user has no authenticator yet: guide them through enrollment
+        // instead of leaving them stranded on a code-entry screen.
+        const enrollUrl = new URL("mfa-enroll.html", window.location.href);
+        enrollUrl.searchParams.set("returnTo", postLoginPath);
+        window.location.replace(enrollUrl.href);
+        return;
+      }
+      factorId = factor.id;
       document.getElementById("stage-login").classList.add("hidden");
       document.getElementById("stage-mfa").classList.remove("hidden");
       document.getElementById("mfa-code").focus();
