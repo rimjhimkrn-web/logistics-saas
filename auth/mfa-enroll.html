@@ -67,6 +67,13 @@ footer{text-align:center;color:#64748b;font-size:12px}
    if(listResult.error)throw listResult.error;
    const existing=(listResult.data?.totp||[]).find(f=>f.status==="verified");
    if(existing)throw new Error("A verified authenticator is already enrolled. Use MFA verification or account security settings to manage it.");
+   // If a previous enrollment was abandoned before verification, remove only those
+   // unverified factors so the user can safely restart setup instead of getting stuck.
+   const pending=(listResult.data?.totp||[]).filter(f=>f.status==="unverified");
+   for(const pendingFactor of pending){
+    const cleanup=await client.auth.mfa.unenroll({factorId:pendingFactor.id});
+    if(cleanup.error)throw cleanup.error;
+   }
    const result=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Authenticator"});
    if(result.error)throw result.error;
    factorId=result.data.id;
