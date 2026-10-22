@@ -99,10 +99,8 @@ if(!sid||!/^\d+$/.test(sid)){feedback('A valid numeric shipment_id is required. 
 if(!window.supabase||!window.supabase.createClient){feedback('Secure data client could not be loaded. Refresh or try again later.','error');return;}
 const cfg=document.createElement('script');cfg.src=route('config.js');cfg.onload=async()=>{
 try{
-const url=window.SUPABASE_URL||window.supabaseUrl||window.KRIM_SUPABASE_URL;
-const key=window.SUPABASE_ANON_KEY||window.SUPABASE_PUBLISHABLE_KEY||window.supabaseAnonKey||window.KRIM_SUPABASE_ANON_KEY;
-if(!url||!key)throw new Error('KRIM public Supabase configuration is unavailable.');
-client=window.supabase.createClient(url,key);
+client=window.KRIM_SUPABASE||window.supabaseClient||null;
+if(!client)throw new Error('KRIM public Supabase client was not initialized by config.js.');
 const {data:{session},error:sessionError}=await client.auth.getSession();
 if(sessionError||!session){$('session-label').textContent='Sign-in required';feedback('Sign in to KRIM, then reopen this page from your shipment. No quote records were loaded.','error');showEmpty('Secure sign-in required','Customer quotations are available only to an authenticated KRIM customer membership.');return;}
 $('session-label').textContent='Signed in · verifying organization';
