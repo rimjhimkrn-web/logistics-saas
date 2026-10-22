@@ -120,7 +120,9 @@ let session=null,quote=null,shipment=null,assignment=null,canPay=false,paymentBu
 const params=new URLSearchParams(location.search);
 const shipmentParam=params.get("shipment_id");
 const quoteParam=params.get("quote_id");
-const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amount).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const currencyMinorUnitExponent=(currency)=>{const c=String(currency||"").trim().toUpperCase();if(["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(c))return 0;if(["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(c))return 3;if(["CLF","UYW"].includes(c))return 4;return 2;};
+const currencyFactor=(currency)=>10**currencyMinorUnitExponent(currency);
+const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amount).toLocaleString(undefined,{minimumFractionDigits:currencyMinorUnitExponent(currency),maximumFractionDigits:currencyMinorUnitExponent(currency)});
 function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
 function gateway(text,state){byId("gateway-status").textContent="KRIM PAYMENT ORCHESTRATOR · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
 function check(name,ok,text){const icon=byId("check-"+name);icon.textContent=ok?"✓":"!";icon.className="check-icon"+(ok?"":" pending");byId("check-"+name+"-text").textContent=text;}
@@ -169,7 +171,7 @@ async function init(){
  }
  const foreignCurrencyReady=currency!=="INR"&&!!capability&&capability.enabled===true;
  const currencyReady=currency==="INR"||foreignCurrencyReady;
- const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*100)>0;
+ const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*currencyFactor(currency))>0;
  const amountMessage=amountValid?(currency==="INR"?"Positive quote total and current INR checkout confirmed.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
  check("amount",amountValid,amountMessage);
  byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; the existing INR checkout remains active.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
@@ -200,8 +202,8 @@ async function startPayment(){
    if(error)throw new Error(error.message||"Secure order request failed.");
    if(!order||!order.success||!order.razorpay_order_id||!order.key_id||!Number.isFinite(Number(order.amount_paise)))throw new Error((order&&order.error)||"KRIM did not return a valid Razorpay order.");
    if(Number(order.quote_id)!==Number(quote.id)||Number(order.shipment_id)!==Number(shipment.id))throw new Error("The server-selected quote or shipment differs from this review. Checkout has stopped; refresh and review the current quote.");
-   if(String(order.currency||"").toUpperCase()!==String(quote.currency_code||"").toUpperCase()||Number(order.amount_paise)!==Math.round(Number(quote.amount)*100))throw new Error("Server order amount or currency does not match the accepted quote. Checkout has stopped.");
-   byId("checkout-amount").textContent=money(order.currency,Number(order.amount_paise)/100);
+   if(String(order.currency||"").toUpperCase()!==String(quote.currency_code||"").toUpperCase()||Number(order.amount_paise)!==Math.round(Number(quote.amount)*currencyFactor(currency)))throw new Error("Server order amount or currency does not match the accepted quote. Checkout has stopped.");
+   byId("checkout-amount").textContent=money(order.currency,Number(order.amount_paise)/currencyFactor(order.currency));
    byId("payment-order-meta").textContent="Server order: "+order.razorpay_order_id+" · "+(order.reused?"Existing eligible order reused":"New order created by KRIM");
    check("order",true,"Order "+order.razorpay_order_id+" was returned by KRIM's server with the accepted quote amount.");
    const options={
