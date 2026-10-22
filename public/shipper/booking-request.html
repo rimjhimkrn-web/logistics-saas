@@ -70,11 +70,16 @@
               </div>
             </div>
             <div class="divider"></div>
-            <div class="section-label">02 / Cargo profile</div>
+            <div class="section-label">02 / Requested service</div>
+            <div class="field-grid">
+              <div class="field full"><label for="booking-service-tier">Service tier <span class="req">*</span></label><select id="booking-service-tier" required><option value="surface_express">Surface Express — road / surface network</option><option value="air_priority">Air Priority — air service (availability must be confirmed)</option><option value="heavy_haul">Heavy Haul — specialist capacity (availability must be confirmed)</option></select><div class="hint">This selection is passed to the quote workflow. It does not guarantee a mode, carrier, serviceability, transit time, or price; those require backend confirmation.</div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="section-label">03 / Cargo profile</div>
             <div class="field-grid">
               <div class="field full"><label for="booking-goods">Goods description <span class="req">*</span></label><input id="booking-goods" name="goods" type="text" maxlength="500" required autocomplete="off" placeholder="e.g. packaged consumer goods, machinery parts"><div class="hint">Describe the goods accurately. Restricted, dangerous or regulated cargo may require additional compliance review.</div></div>
               <div class="field"><label for="booking-weight">Gross shipment weight (kg) <span class="req">*</span></label><input id="booking-weight" name="weight" type="number" min="0.01" max="100000000" step="0.01" required inputmode="decimal" placeholder="e.g. 1250"><div class="hint">Enter total gross weight in kilograms.</div></div>
-              <div class="field"><label for="booking-reference">Your reference (optional)</label><input id="booking-reference" type="text" maxlength="80" placeholder="PO / internal reference" autocomplete="off"><div class="hint">For your own reference only; not yet stored in the current shipment RPC.</div></div>
+              
             </div>
             <div class="form-footer">
               <div class="secure-note"><span class="secure-icon">✓</span><span>Protected by KRIM sign-in and backend authorization.<br>Submission creates a shipment request—not a paid or dispatched booking.</span></div>
@@ -93,6 +98,7 @@
           </div>
           <div class="summary-row"><span>Goods</span><strong id="goods-preview">Not provided</strong></div>
           <div class="summary-row"><span>Gross weight</span><strong id="weight-preview">— kg</strong></div>
+          <div class="summary-row"><span>Requested service</span><strong id="service-preview">Surface Express</strong></div>
           <div class="summary-row"><span>Customer account</span><strong id="org-preview">Verifying access…</strong></div>
           <div class="summary-row"><span>Request status</span><strong>Draft / awaiting pricing</strong></div>
           <div class="notice"><b>Pricing integrity</b>KRIM will not invent a freight price. A quote requires an approved matching tariff or a supported partner-offer workflow. No payment is taken on this page.</div>
@@ -142,15 +148,21 @@
     $("goods-preview").textContent = $("booking-goods").value.trim() || "Not provided";
     const weight = Number($("booking-weight").value);
     $("weight-preview").textContent = Number.isFinite(weight) && weight > 0 ? new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(weight) + " kg" : "— kg";
+    const tier = $("booking-service-tier");
+    $("service-preview").textContent = tier.options[tier.selectedIndex]?.textContent.split(" — ")[0] || "Surface Express";
     button.disabled = !isReady || submitting;
   }
   async function loadBookingLocations(){
     const originSelect = $("booking-origin"), destinationSelect = $("booking-destination");
-    const {data,error} = await client.from("krim_locations").select("id, location_code, city, state_region").eq("is_active",true).order("city",{ascending:true});
+    const {data,error} = await client.from("krim_locations").select("id, country_id, location_code, city, state_region").eq("is_active",true).order("city",{ascending:true});
     if(error) throw error;
     if(!data || data.length < 2) throw new Error("At least two active locations are required before booking. Please contact KRIM operations.");
+    const {data:countries,error:countryError} = await client.from("krim_countries").select("id, code, name").eq("is_active",true);
+    if(countryError) throw countryError;
+    const countryById = new Map((countries || []).map(country => [String(country.id), country]));
     const options = '<option value="">Select a location</option>' + data.map(location => {
-      const label = [location.location_code,location.city,location.state_region].filter(Boolean).join(" — ");
+      const country = countryById.get(String(location.country_id));
+      const label = [location.location_code,location.city,location.state_region,country ? country.name + (country.code ? " (" + country.code + ")" : "") : null].filter(Boolean).join(" — ");
       return '<option value="' + Number(location.id) + '">' + escapeHtml(label || ("Location " + location.id)) + '</option>';
     }).join("");
     originSelect.innerHTML = options;
@@ -185,6 +197,7 @@
     }
   }
   ["booking-goods","booking-weight"].forEach(id => $(id).addEventListener("input",updatePreview));
+  $("booking-service-tier").addEventListener("change",updatePreview);
   form.addEventListener("submit",async function(event){
     event.preventDefault();
     if(!isReady || submitting || !currentUserOrgId) return;
@@ -218,7 +231,7 @@
       }
       showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
       button.innerHTML = "Shipment created ✓";
-      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId));},1000);
+      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value);},1000);
     }catch(err){
       submitting = false;
       button.disabled = !isReady;
