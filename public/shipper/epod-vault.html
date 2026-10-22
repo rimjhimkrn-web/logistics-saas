@@ -109,8 +109,10 @@ async function loadAll(){
  setStatus("Checking active organization memberships…",false);
  try{
   const members=await safeQuery(db.from("krim_organization_members").select("organization_id, role, status").eq("user_id",session.user.id).eq("status","active"),"Organization access");
-  state.orgIds=[...new Set(members.map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
-  if(!state.orgIds.length){state.shipments=[];state.documents=[];state.shipmentDocs=[];state.pods=[];state.versions=[];state.verifications=[];renderAll();showError("No active organization membership was returned for this account. Ask the organization administrator to provision customer access. No document records are shown.");setStatus("No active organization scope",false);return;}
+  const memberOrgIds=[...new Set(members.map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+  const orgRows=memberOrgIds.length?await safeQuery(db.from("krim_organizations").select("id, organization_type").in("id",memberOrgIds),"Customer organization scope"):[];
+  state.orgIds=orgRows.filter(o=>String(o.organization_type||"").toLowerCase()==="customer").map(o=>Number(o.id)).filter(Number.isSafeInteger);
+  if(!state.orgIds.length){state.shipments=[];state.documents=[];state.shipmentDocs=[];state.pods=[];state.versions=[];state.verifications=[];renderAll();showError("No active customer organization membership was returned for this account. Ask the organization administrator to provision customer access. This workspace does not mix partner, warehouse, finance or platform records into the customer view.");setStatus("No active customer organization scope",false);return;}
   setStatus("Loading authorized shipment and evidence records…",false);
   state.shipments=await safeQuery(db.from("krim_shipments").select("id, shipment_number, customer_organization_id, status, origin_place_label, destination_place_label, requested_transport_mode, created_at, actual_delivery_at").in("customer_organization_id",state.orgIds).order("created_at",{ascending:false}).limit(500),"Shipment records");
   const shipmentIds=state.shipments.map(s=>Number(s.id)).filter(Number.isSafeInteger);
