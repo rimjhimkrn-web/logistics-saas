@@ -85,7 +85,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="amountbox"><div class="amountlabel">Total due for this quotation</div><div id="checkout-amount" class="amountvalue">—</div><div id="amount-caption" class="amountnote">Waiting for quote and assignment validation.</div></div>
 <div class="metalist">
 <div class="metarow"><span>Integrated provider</span><strong>Razorpay</strong></div>
-<div class="metarow"><span>Current checkout currency</span><strong>INR only</strong></div>
+<div class="metarow"><span>Current checkout currency</span><strong>INR active · others gated</strong></div>
 <div class="metarow"><span>Order created by</span><strong>KRIM secure server</strong></div>
 <div class="metarow"><span>Payment completion</span><strong>Server verification required</strong></div>
 </div>
@@ -103,7 +103,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 </div>
 <div class="card">
 <div class="cardhead"><div><h2>Global payment network</h2><p>Built for expansion, enabled only when verified.</p></div></div>
-<div class="providerbanner"><strong>Available in this checkout: Razorpay · INR</strong>International cards, other currencies, wallets, bank transfers and additional providers remain unavailable until account eligibility, verification, refunds and settlement reconciliation are proven.</div>
+<div class="providerbanner"><strong>Available in this checkout: Razorpay · INR</strong>International currencies remain disabled until merchant eligibility, presentment, settlement, FX, refunds and reconciliation are verified. KRIM never treats a currency label as proof of payment availability.</div>
 <div class="sidelinks"><a href="finance/payment-gateways.html">Payment architecture <span>↗</span></a><a href="finance/payment-methods.html">Country & method eligibility <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a></div>
 </div>
 </aside>
@@ -162,9 +162,25 @@ async function init(){
  const quoteValid=quote.status==="accepted"&&Number(quote.amount)>0&&(!expiry||expiry>Date.now());
  check("quote",quoteValid,quoteValid?"Accepted quote QT-"+quote.id+" is currently valid.":"Quote expired or amount is invalid.");
  const currency=String(quote.currency_code||"").toUpperCase();
- const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currency==="INR"&&Math.round(Number(quote.amount)*100)>0;
- check("amount",amountValid,amountValid?"Positive quote total and INR currency confirmed.":"This checkout currently supports positive INR quotes only; currency is not changed automatically.");
- byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; final order amount is checked again on the server.":"This payment route does not currently support "+(currency||"an unspecified currency")+".";
+ let capability=null;
+ if(currency && currency!=="INR"){
+   const capResult=await client.from("krim_payment_capability_registry")
+     .select("country_code,currency_code,provider_code,integration_status,checkout_enabled,merchant_eligibility_verified,presentment_supported,settlement_supported,refunds_supported,fx_supported")
+     .eq("country_code","IN").eq("currency_code",currency).eq("provider_code","razorpay")
+     .eq("integration_status","implemented").eq("checkout_enabled",true).maybeSingle();
+   if(!capResult.error) capability=capResult.data;
+ }
+ const foreignCurrencyReady=currency!=="INR"&&!!capability
+   &&capability.merchant_eligibility_verified===true
+   &&capability.presentment_supported===true
+   &&capability.settlement_supported===true
+   &&capability.refunds_supported===true
+   &&capability.fx_supported===true;
+ const currencyReady=currency==="INR"||foreignCurrencyReady;
+ const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*100)>0;
+ const amountMessage=amountValid?(currency==="INR"?"Positive quote total and current INR checkout confirmed.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
+ check("amount",amountValid,amountMessage);
+ byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; the existing INR checkout remains active.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
  let assignmentOk=false;
  if(quote.partner_quote_id){
    const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
@@ -175,7 +191,7 @@ async function init(){
  const shipmentConfirmed=shipment.status==="confirmed";
  if(!shipmentConfirmed){message("Checkout is locked because this shipment is currently "+(shipment.status||"in an unknown state")+". The shipment must be confirmed and its selected partner assignment accepted before payment.","info");}
  else if(!quoteValid){message("Checkout is locked because the accepted quote is expired or its amount is invalid.","error");}
- else if(!amountValid){message("Checkout is locked. Razorpay for this KRIM flow currently supports INR only, and the quote must have a positive amount.","error");}
+ else if(!amountValid){message("Checkout is locked because this currency is not enabled by KRIM's verified payment capability register, or the quote amount is invalid. KRIM will not silently convert currencies.","error");}
  else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment. No payment order has been created.","info");}
  else {message("Quote, shipment, currency and partner assignment checks passed. Continue when you are ready to open Razorpay.","success");}
  byId("payment-order-meta").textContent="No new payment order has been created yet.";
