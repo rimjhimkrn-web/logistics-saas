@@ -148,7 +148,7 @@
   let originPlace = null;
   let destinationPlace = null;
   const placeSearchTimers = {};
-  function placeLabel(place){return place ? [place.name,place.state,place.country].filter(Boolean).join(", ") : "";}
+  function placeLabel(place){return place ? (place.display_name || [place.name,place.state,place.country].filter(Boolean).join(", ")) : "";}
   function updatePreview(){
     const origin=placeLabel(originPlace), destination=placeLabel(destinationPlace);
     $("origin-preview").innerHTML=origin?escapeHtml(origin)+"<small>Pickup / dispatch location</small>":'<span class="route-placeholder">Origin not selected</span><small>Pickup / dispatch location</small>';
@@ -246,6 +246,10 @@
     const weight = Number($("booking-weight").value);
     if(!originPlace||!destinationPlace){showFeedback("Search globally and select both an origin and destination from the suggested places.","error");return;}
     if(originPlace.latitude===destinationPlace.latitude&&originPlace.longitude===destinationPlace.longitude){showFeedback("Origin and destination must be different places.","error");return;}
+     const routeType=$("booking-route-type").value;
+     const sameCountry=originPlace.country_code===destinationPlace.country_code;
+     if(routeType==="domestic"&&!sameCountry){showFeedback("This route is international. Choose Cross-border / international or select two places in the same country.","error");return;}
+     if(routeType==="cross_border"&&sameCountry){showFeedback("Both selected places are in the same country. Choose Domestic movement or select a destination in another country.","error");return;}
     if(!goods || goods.length > 500){showFeedback("Enter a goods description (up to 500 characters).","error");return;}
     if(!Number.isFinite(weight) || weight <= 0 || weight > 100000000){showFeedback("Enter a valid gross weight greater than zero and within the supported range.","error");return;}
     submitting = true; button.disabled = true; button.innerHTML = "Creating secure shipment request…";
