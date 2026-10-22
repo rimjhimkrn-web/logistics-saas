@@ -1,191 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Enterprise Invoicing & Financial Ledger</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1f33">
+<meta name="description" content="KRIM customer invoice register, payment history and organization-scoped financial records.">
+<title>KRIM Global Logistics OS | Invoices & Financial History</title>
+<link rel="manifest" href="/logistics-saas/manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/logistics-saas/config.js"></script>
+<style>
+:root{color-scheme:light;--navy:#0b1f33;--navy2:#17364f;--blue:#285d82;--ink:#182d3e;--muted:#607384;--line:#cbd6df;--bg:#edf1f5;--white:#fff;--good:#176846;--warn:#83580d;--bad:#9a302a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 Inter,"Segoe UI",Arial,sans-serif}a{color:inherit;text-decoration:none}button,input,select{font:inherit}.topline{background:#071827;color:#c2d0dc;padding:8px clamp(16px,3vw,36px);border-bottom:2px solid #3d8198;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.topline strong{color:#b8d3e2}.header{background:#fff;border-bottom:1px solid #bcc8d3}.headinner{max-width:1440px;margin:auto;padding:14px clamp(16px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:11px}.brandmark{width:38px;height:38px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:900;font-size:19px;border-radius:3px}.brandname{font-weight:850;font-size:12px;letter-spacing:.14em;color:var(--navy)}.branddesc{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}.headlinks{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:3px;padding:9px 12px;font-size:11px;font-weight:750;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.btn.primary{background:#123c5b;border-color:#123c5b;color:#fff}.shell{max-width:1440px;margin:auto;padding:20px clamp(16px,3vw,36px) 36px}.hero{background:var(--navy);border:1px solid #24445f;border-left:4px solid #3d8198;color:#fff;padding:25px 27px;display:flex;justify-content:space-between;align-items:center;gap:20px}.eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:#a8c9d8}.hero h1{font-size:clamp(24px,2.7vw,33px);line-height:1.15;letter-spacing:-.025em;margin:8px 0}.hero p{color:#d1dce5;max-width:760px;margin:0;font-size:12px}.heroaside{min-width:210px;border-left:1px solid #476075;padding-left:20px}.heroaside b{display:block;font-size:17px}.heroaside span{display:block;color:#c4d1dc;font-size:10px;margin-top:4px}.statusline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px;margin:12px 0}.dot{width:8px;height:8px;border-radius:50%;background:#9aa7b3}.dot.good{background:#178458}.notice{border:1px solid #cbd9e5;border-left:3px solid #6b91ac;background:#f5f9fc;color:#34516a;padding:11px 13px;margin:12px 0;font-size:11px}.notice.warning{border-left-color:#b18a38;border-color:#e6d8b7;background:#fbf7ed;color:#73551c}.notice.error{border-left-color:#a64b43;border-color:#e5c4c0;background:#fbf0ef;color:#8a302a}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);background:#fff;margin:14px 0}.metric{padding:15px 17px;border-right:1px solid var(--line);min-width:0}.metric:last-child{border-right:0}.metric label{display:block;color:#536678;font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:800}.metric strong{display:block;font-size:25px;color:var(--navy);margin-top:5px;overflow-wrap:anywhere}.metric small{display:block;font-size:10px;color:var(--muted);margin-top:2px}.panel{background:#fff;border:1px solid var(--line);margin-bottom:13px}.panelhead{padding:16px 18px;border-bottom:1px solid #dfe6ec;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.panelhead h2{font-size:14px;margin:0;color:var(--navy)}.panelhead p{font-size:11px;color:var(--muted);margin:4px 0 0}.panelbody{padding:16px 18px}.tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--line);background:#e4eaf0;margin-bottom:14px}.tab{border:0;border-bottom:3px solid transparent;background:transparent;color:#40596d;padding:13px 17px;font-weight:800;font-size:11px;cursor:pointer}.tab.active{background:#fff;color:var(--navy);border-bottom-color:#3d8198}.view.hide{display:none}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.field{flex:1;min-width:160px;border:1px solid #c8d3de;border-radius:2px;background:#fff;padding:9px 10px;color:var(--ink);outline:none;font-size:12px}.field:focus{border-color:#477b9b;box-shadow:0 0 0 2px #477b9b18}.tablewrap{overflow:auto;border:1px solid #cbd5df}table{width:100%;border-collapse:collapse;min-width:760px}th{background:#e9eef3;color:#4d6274;font-size:9px;letter-spacing:.1em;text-transform:uppercase;text-align:left;padding:11px 12px;border-bottom:1px solid #cbd5df}td{font-size:11px;padding:12px;border-bottom:1px solid #e1e7ed;vertical-align:top}tbody tr:last-child td{border-bottom:0}.primarytext{font-weight:800;color:#102b41}.subtext{font-size:10px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.badge{display:inline-flex;padding:3px 7px;border:1px solid #cbd6df;background:#f2f5f8;color:#516274;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}.badge.good{background:#e9f3ed;border-color:#bfd8c8;color:var(--good)}.badge.warn{background:#f8f1e4;border-color:#e6d5ad;color:var(--warn)}.badge.bad{background:#f8eae8;border-color:#e5c4c0;color:var(--bad)}.empty{padding:26px 16px;text-align:center;color:var(--muted);font-size:11px}.empty b{display:block;color:var(--navy);font-size:12px;margin-bottom:4px}.detailgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.detail{border:1px solid #d4dde5;background:#fbfcfd;padding:12px;min-width:0}.detail label{display:block;color:var(--muted);font-size:9px;letter-spacing:.09em;text-transform:uppercase;font-weight:800}.detail strong{display:block;color:var(--navy);font-size:13px;margin-top:6px;overflow-wrap:anywhere}.foot{border-top:1px solid #c3ced8;background:#e6ebf0;color:var(--muted);padding:15px clamp(16px,3vw,36px);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:10px}.foot strong{color:var(--navy)}.hide{display:none!important}
+@media(max-width:850px){.hero{align-items:flex-start;flex-direction:column}.heroaside{border-left:0;border-top:1px solid #476075;padding:12px 0 0;width:100%}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}.detailgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.headinner{align-items:flex-start;flex-direction:column}.headlinks{width:100%}.headlinks .btn{flex:1}.hero{padding:19px}.hero h1{font-size:25px}.panelhead,.panelbody{padding:13px}.metrics{margin-top:10px}.metric{padding:12px}.metric strong{font-size:21px}.tab{flex:1;padding:12px 6px;font-size:10px}.field{min-width:100%}.detailgrid{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">INVOICING LEDGER: SYNCHRONIZED</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
-    </div>
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Invoicing Ledger</span>
-                </div>
-            </div>
-            
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Workspace
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="space-y-1">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Financial Accounting & Billing</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Invoices & Settlement Ledger</h1>
-                <p class="text-slate-600 text-sm">Review automated billing records, reconcile settled payments, and download institutional tax invoices.</p>
-            </div>
-            <button onclick="loadInvoices()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition border border-slate-300">
-                Refresh Ledger ⟳
-            </button>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-200 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
-                        <th class="py-3 px-4">Invoice ID</th>
-                        <th class="py-3 px-4">Shipment Ref</th>
-                        <th class="py-3 px-4">Billed Amount</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4">Issued Date</th>
-                        <th class="py-3 px-4 text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="invoices-tbody" class="divide-y divide-slate-100 text-sm text-slate-700">
-                    <tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Querying financial accounting ledger...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Invoicing Ledger © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Invoicing Ledger Script -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function initInvoices() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
-            loadInvoices();
-        }
-
-        function escapeInvoiceText(value) {
-            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
-                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
-            });
-        }
-
-        async function loadInvoices() {
-            const tbody = document.getElementById("invoices-tbody");
-            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Loading authorized invoices...</td></tr>';
-            try {
-                const { data, error } = await supabaseClient
-                    .from("krim_invoices")
-                    .select("id, invoice_number, shipment_id, total_amount, paid_amount, outstanding_amount, currency_code, status, issue_date, due_date")
-                    .order("issue_date", { ascending: false });
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No invoice records are available to this account.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = data.map(function(inv) {
-                    const total = Number(inv.total_amount);
-                    const outstanding = Number(inv.outstanding_amount);
-                    const status = String(inv.status || "unknown");
-                    const paid = Number.isFinite(outstanding) && outstanding <= 0;
-                    const statusColor = paid
-                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                        : "text-amber-700 bg-amber-50 border-amber-200";
-                    const issueDate = inv.issue_date ? new Date(inv.issue_date + "T00:00:00").toLocaleDateString() : "—";
-                    const invoiceNo = inv.invoice_number || ("Invoice #" + inv.id);
-                    const currencyCode = String(inv.currency_code || "").trim().toUpperCase();
-                    let amountText = "—";
-                    if (Number.isFinite(total) && /^[A-Z]{3}$/.test(currencyCode)) {
-                        try {
-                            amountText = new Intl.NumberFormat(undefined, {
-                                style: "currency",
-                                currency: currencyCode,
-                                currencyDisplay: "code"
-                            }).format(total);
-                        } catch (_) {
-                            amountText = currencyCode + " " + total.toLocaleString(undefined, {maximumFractionDigits: 4});
-                        }
-                    } else if (Number.isFinite(total)) {
-                        amountText = "Currency not recorded · " + total.toLocaleString(undefined, {maximumFractionDigits: 4});
-                    }
-                    return '<tr class="hover:bg-slate-50/80 transition">' +
-                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(invoiceNo) + '</td>' +
-                        '<td class="py-4 px-4 font-mono text-slate-600">' + (Number.isFinite(Number(inv.shipment_id)) ? "#" + Number(inv.shipment_id) : "—") + '</td>' +
-                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(amountText) + '</td>' +
-                        '<td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ' + statusColor + '">' + escapeInvoiceText(status) + '</span></td>' +
-                        '<td class="py-4 px-4 font-mono text-xs text-slate-500">' + escapeInvoiceText(issueDate) + '</td>' +
-                        '<td class="py-4 px-4 text-right text-xs text-slate-500">' + (paid ? "Settled" : "Payment workflow not yet enabled for invoices") + '</td>' +
-                        '</tr>';
-                }).join("");
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-600 font-mono text-xs">Unable to load invoices: ' + escapeInvoiceText(err.message || "Unknown error") + '</td></tr>';
-            }
-        }
-
-        initInvoices();
-    </script>
+<body>
+<div class="topline"><span><strong>KRIM GLOBAL LOGISTICS OS</strong> / CUSTOMER FINANCIAL CONTROL</span><span id="session-state">SECURE SESSION · CHECKING</span></div>
+<header class="header"><div class="headinner">
+<div class="brand"><div class="brandmark">K</div><div><div class="brandname">KRIM GLOBAL</div><div class="branddesc">Invoices · payments · financial history</div></div></div>
+<div class="headlinks"><a class="btn" href="/logistics-saas/app/customer/index.html">Customer Workspace</a><a class="btn" href="/logistics-saas/public/shipper/active-shipments.html">My Shipments</a><button class="btn primary" id="refresh-btn" type="button">↻ Refresh records</button></div>
+</div></header>
+<main class="shell">
+<section class="hero"><div><div class="eyebrow">Phase 1 · Module 9 · Customer finance</div><h1>Invoices & Financial History</h1><p>Review authorized invoice records, payment history and customer-scoped ledger entries. Amounts retain their recorded currency; KRIM does not combine currencies or infer payment, refund or reconciliation success.</p></div><div class="heroaside"><b id="identity">Secure customer access</b><span>Record visibility follows the signed-in account and database access policies.</span></div></section>
+<div class="statusline"><span class="dot" id="status-dot"></span><span id="status-text" role="status" aria-live="polite">Authenticating session and loading authorized financial records…</span></div>
+<div id="page-notice" class="notice warning">Financial records are read-only in this workspace. A displayed payment status is not independent proof of settlement; refund history and formal reconciliation require their own authoritative records.</div>
+<section class="metrics" aria-label="Financial record summary">
+<div class="metric"><label>Invoice records</label><strong id="m-invoices">—</strong><small>Accessible invoice register</small></div>
+<div class="metric"><label>Payment records</label><strong id="m-payments">—</strong><small>Payments visible to this account</small></div>
+<div class="metric"><label>Ledger records</label><strong id="m-ledger">—</strong><small>Customer-organization ledger entries</small></div>
+<div class="metric"><label>Record review</label><strong id="m-review">—</strong><small>Data availability, not settlement approval</small></div>
+</section>
+<div class="tabs" role="tablist" aria-label="Financial history sections">
+<button class="tab active" data-view="invoices" role="tab" aria-selected="true">Invoices</button>
+<button class="tab" data-view="payments" role="tab" aria-selected="false">Payment History</button>
+<button class="tab" data-view="ledger" role="tab" aria-selected="false">Ledger Records</button>
+<button class="tab" data-view="controls" role="tab" aria-selected="false">Controls & Gaps</button>
+</div>
+<section id="view-invoices" class="view panel">
+<div class="panelhead"><div><h2>Customer invoice register</h2><p>Invoice number, shipment linkage, currency, amount, issue date and due date from authorized records.</p></div><span class="badge">Read only</span></div>
+<div class="panelbody"><div class="filters"><input id="invoice-search" class="field" type="search" placeholder="Search invoice, shipment or status"><select id="invoice-status" class="field" aria-label="Filter invoice status"><option value="">All invoice statuses</option><option value="draft">Draft</option><option value="issued">Issued</option><option value="open">Open</option><option value="partially_paid">Partially paid</option><option value="paid">Paid</option><option value="void">Void</option><option value="overdue">Overdue</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Invoice / Type</th><th>Shipment</th><th>Total</th><th>Paid / Outstanding</th><th>Status</th><th>Issue / Due</th></tr></thead><tbody id="invoice-rows"><tr><td colspan="6" class="empty">Loading invoice records…</td></tr></tbody></table></div></div>
+</section>
+<section id="view-payments" class="view panel hide">
+<div class="panelhead"><div><h2>Payment history</h2><p>Payment rows visible under the current customer-payment access policy.</p></div><span class="badge">Account scoped</span></div>
+<div class="panelbody"><div class="filters"><input id="payment-search" class="field" type="search" placeholder="Search shipment, quote or payment method"><select id="payment-status" class="field" aria-label="Filter payment status"><option value="">All payment statuses</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Payment reference</th><th>Shipment / Quote</th><th>Amount / Currency</th><th>Status</th><th>Method</th><th>Recorded / Paid</th></tr></thead><tbody id="payment-rows"><tr><td colspan="6" class="empty">Loading payment records…</td></tr></tbody></table></div></div>
+</section>
+<section id="view-ledger" class="view panel hide">
+<div class="panelhead"><div><h2>Customer ledger entries</h2><p>Customer-organization scoped entries from the existing revenue ledger.</p></div><span class="badge">RLS protected</span></div>
+<div class="panelbody"><div class="filters"><input id="ledger-search" class="field" type="search" placeholder="Search shipment or ledger status"><select id="ledger-status" class="field" aria-label="Filter ledger status"><option value="">All ledger statuses</option><option value="pending">Pending</option><option value="posted">Posted</option><option value="settled">Settled</option><option value="failed">Failed</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Ledger reference</th><th>Shipment</th><th>Total / Currency</th><th>Platform commission</th><th>Partner payout</th><th>Status / Created</th></tr></thead><tbody id="ledger-rows"><tr><td colspan="6" class="empty">Loading ledger records…</td></tr></tbody></table></div></div>
+</section>
+<section id="view-controls" class="view panel hide">
+<div class="panelhead"><div><h2>Financial controls & known gaps</h2><p>What this customer view can and cannot establish from current records.</p></div><span class="badge warn">Control status</span></div>
+<div class="panelbody"><div class="detailgrid">
+<div class="detail"><label>Currency integrity</label><strong>Keep each currency separate</strong><div class="subtext">No automatic FX conversion or cross-currency total is shown.</div></div>
+<div class="detail"><label>Invoice-to-payment matching</label><strong id="control-match">Not independently verified</strong><div class="subtext">The customer role cannot read the invoice-payment application table under current RLS policy.</div></div>
+<div class="detail"><label>Refund history</label><strong id="control-refunds">No dedicated refund table identified</strong><div class="subtext">A payment status alone is not sufficient evidence of a completed refund.</div></div>
+<div class="detail"><label>Reconciliation</label><strong id="control-recon">Not independently verified</strong><div class="subtext">This page does not execute accounting reconciliation or change financial state.</div></div>
+<div class="detail"><label>Invoice document download</label><strong>Not enabled here</strong><div class="subtext">No verified invoice-file delivery workflow is connected by this read-only page.</div></div>
+<div class="detail"><label>Financial changes</label><strong>Server-controlled</strong><div class="subtext">This page cannot mark payments paid, edit invoice totals, issue refunds or post ledger entries.</div></div>
+</div><div class="notice warning" style="margin-top:14px">Audit finding: the live invoice table currently has no rows, the payment table has four rows, the invoice-payment application table has no rows, and the revenue ledger has one row. These counts are from the audit snapshot and may change. They do not establish that a payment has been reconciled.</div></div>
+</section>
+</main>
+<footer class="foot"><span><strong>KRIM Global Logistics OS</strong> · Customer Financial History</span><span>Read-only records · Organization isolation · Explicit currency</span></footer>
+<script>
+(function(){
+"use strict";
+const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
+const PUBLISHABLE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const db=window.KRIM_SUPABASE||(window.supabase&&window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY));
+const $=id=>document.getElementById(id);
+const state={session:null,invoices:[],payments:[],ledger:[],errors:[]};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
+const date=v=>{if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?"Invalid date":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:v.includes("T")?"short":undefined});};
+const statusClass=v=>{const s=String(v||"").toLowerCase();if(["paid","posted","settled","verified","complete","completed"].includes(s))return "good";if(["failed","rejected","void","cancelled","overdue"].includes(s))return "bad";if(["pending","draft","open","partially_paid","processing","refunded"].includes(s))return "warn";return "";};
+const badge=v=>'<span class="badge '+statusClass(v)+'">'+esc(v||"Not recorded")+'</span>';
+function money(amount,currency){const x=n(amount),c=String(currency||"").trim().toUpperCase();if(x===null)return "Not recorded";if(!/^[A-Z]{3}$/.test(c))return "Currency not recorded · "+x.toLocaleString(undefined,{maximumFractionDigits:4});try{return new Intl.NumberFormat(undefined,{style:"currency",currency:c,currencyDisplay:"code"}).format(x)}catch(_){return c+" "+x.toLocaleString(undefined,{maximumFractionDigits:4})}}
+function setStatus(msg,ok){$("status-text").textContent=msg;$("status-dot").className="dot"+(ok?" good":"");$("session-state").textContent=ok?"AUTHENTICATED · RECORDS LOADED":"AUTHENTICATED · REVIEW REQUIRED"}
+function showError(msg){$("page-notice").textContent=msg;$("page-notice").className="notice error"}
+function switchView(name){document.querySelectorAll(".view").forEach(x=>x.classList.toggle("hide",x.id!=="view-"+name));document.querySelectorAll(".tab").forEach(x=>{const on=x.dataset.view===name;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on))})}
+async function loadInvoices(){const r=await db.from("krim_invoices").select("id,organization_id,customer_organization_id,shipment_id,invoice_number,invoice_type,status,currency_code,issue_date,due_date,subtotal,tax_amount,discount_amount,total_amount,paid_amount,outstanding_amount,notes,created_at,updated_at").order("issue_date",{ascending:false});if(r.error)throw new Error("Invoice register: "+r.error.message);state.invoices=r.data||[]}
+async function loadPayments(){const r=await db.from("payments").select("id,shipment_id,krim_shipment_id,quote_id,amount,status,payment_method,paid_at,created_at,currency_code,razorpay_order_id").order("created_at",{ascending:false});if(r.error)throw new Error("Payment history: "+r.error.message);state.payments=r.data||[]}
+async function loadLedger(){const r=await db.from("revenue_ledger").select("id,shipment_id,total_amount,platform_commission,partner_payout,currency,status,created_at,customer_organization_id").order("created_at",{ascending:false});if(r.error)throw new Error("Customer ledger: "+r.error.message);state.ledger=r.data||[]}
+function renderInvoices(){const q=$("invoice-search").value.trim().toLowerCase(),st=$("invoice-status").value;const rows=state.invoices.filter(x=>(!st||String(x.status||"").toLowerCase()===st)&&(!q||[x.invoice_number,x.shipment_id,x.status,x.invoice_type].some(v=>String(v??"").toLowerCase().includes(q))));$("invoice-rows").innerHTML=rows.length?rows.map(x=>'<tr><td><div class="primarytext">'+esc(x.invoice_number||("Invoice #"+x.id))+'</div><div class="subtext">'+esc(x.invoice_type||"Type not recorded")+' · Record #'+esc(x.id)+'</div></td><td>'+ (x.shipment_id?'#'+esc(x.shipment_id):"Not linked")+'</td><td><div class="primarytext">'+esc(money(x.total_amount,x.currency_code))+'</div><div class="subtext">Subtotal '+esc(money(x.subtotal,x.currency_code))+' · Tax '+esc(money(x.tax_amount,x.currency_code))+'</div></td><td><div>'+esc(money(x.paid_amount,x.currency_code))+'</div><div class="subtext">Outstanding '+esc(money(x.outstanding_amount,x.currency_code))+'</div></td><td>'+badge(x.status)+'</td><td>'+esc(date(x.issue_date))+'<div class="subtext">Due: '+esc(date(x.due_date))+'</div></td></tr>').join(""):'<tr><td colspan="6" class="empty"><b>No matching invoice records</b>Invoices are not fabricated. If none are visible, there may be no invoice rows for this account or database access may limit the result.</td></tr>'}
+function renderPayments(){const q=$("payment-search").value.trim().toLowerCase(),st=$("payment-status").value;const rows=state.payments.filter(x=>(!st||String(x.status||"").toLowerCase()===st)&&(!q||[x.shipment_id,x.krim_shipment_id,x.quote_id,x.payment_method,x.status].some(v=>String(v??"").toLowerCase().includes(q))));$("payment-rows").innerHTML=rows.length?rows.map(x=>'<tr><td><div class="primarytext">Payment #'+esc(x.id)+'</div><div class="subtext">Order: '+esc(x.razorpay_order_id||"Not recorded")+'</div></td><td>'+(x.krim_shipment_id?'KRIM #'+esc(x.krim_shipment_id):x.shipment_id?'Legacy #'+esc(x.shipment_id):"Not linked")+'<div class="subtext">Quote: '+esc(x.quote_id??"Not linked")+'</div></td><td><div class="primarytext">'+esc(money(x.amount,x.currency_code))+'</div></td><td>'+badge(x.status)+'</td><td>'+esc(x.payment_method||"Not recorded")+'</td><td>'+esc(date(x.created_at))+'<div class="subtext">Paid: '+esc(date(x.paid_at))+'</div></td></tr>').join(""):'<tr><td colspan="6" class="empty"><b>No matching payment records</b>Only payment rows permitted by the current database policy are shown.</td></tr>'}
+function renderLedger(){const q=$("ledger-search").value.trim().toLowerCase(),st=$("ledger-status").value;const rows=state.ledger.filter(x=>(!st||String(x.status||"").toLowerCase()===st)&&(!q||[x.shipment_id,x.status].some(v=>String(v??"").toLowerCase().includes(q))));$("ledger-rows").innerHTML=rows.length?rows.map(x=>'<tr><td><div class="primarytext">'+esc(String(x.id).slice(0,12))+'…</div><div class="subtext">Ledger record</div></td><td>'+esc(x.shipment_id||"Not linked")+'</td><td><div class="primarytext">'+esc(money(x.total_amount,x.currency))+'</div></td><td>'+esc(money(x.platform_commission,x.currency))+'</td><td>'+esc(money(x.partner_payout,x.currency))+'</td><td>'+badge(x.status)+'<div class="subtext">'+esc(date(x.created_at))+'</div></td></tr>').join(""):'<tr><td colspan="6" class="empty"><b>No matching ledger records</b>Ledger entries appear only when an authorized customer-organization record exists.</td></tr>'}
+function renderAll(){renderInvoices();renderPayments();renderLedger();$("m-invoices").textContent=state.invoices.length;$("m-payments").textContent=state.payments.length;$("m-ledger").textContent=state.ledger.length;const issues=state.errors.length;$("m-review").textContent=issues?issues+" source issue"+(issues===1?"":"s"):"Loaded";$("identity").textContent=state.session?.user?.email||"Secure customer access";if(issues){setStatus("Some financial sources could not be loaded; review the source errors.",false);showError("One or more financial sources could not be loaded: "+state.errors.join(" · ")+". Other successfully loaded sections remain available.");}else{setStatus("Authorized invoice, payment and customer-ledger queries completed.",true);$("page-notice").className="notice warning";$("page-notice").textContent="Read-only financial view. A payment status is not independent proof of settlement, and this page does not issue refunds or perform accounting reconciliation."}}
+async function loadAll(){if(!db){showError("Supabase client configuration is unavailable. Financial records have not been loaded.");setStatus("Database client unavailable",false);return}const {data,error}=await db.auth.getSession();if(error||!data?.session){window.location.href="/logistics-saas/auth/login.html";return}state.session=data.session;state.errors=[];["invoice-rows","payment-rows","ledger-rows"].forEach((id,i)=>$(id).innerHTML='<tr><td colspan="6" class="empty">Loading authorized records…</td></tr>');const results=await Promise.allSettled([loadInvoices(),loadPayments(),loadLedger()]);results.forEach((r,i)=>{if(r.status==="rejected")state.errors.push(r.reason?.message||["Invoice register","Payment history","Customer ledger"][i]+" unavailable")});renderAll()}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));
+$("refresh-btn").addEventListener("click",loadAll);
+["invoice-search","invoice-status"].forEach(id=>$(id).addEventListener("input",renderInvoices));
+["payment-search","payment-status"].forEach(id=>$(id).addEventListener("input",renderPayments));
+["ledger-search","ledger-status"].forEach(id=>$(id).addEventListener("input",renderLedger));
+loadAll();
+})();
+</script>
 </body>
 </html>
