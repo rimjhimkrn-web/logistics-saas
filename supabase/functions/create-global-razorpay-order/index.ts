@@ -158,6 +158,9 @@ error: "Invalid JSON body",
 const shipmentId = Number(
 body?.krim_shipment_id
 );
+const requestedQuoteId = body?.krim_quote_id == null || body?.krim_quote_id === ""
+  ? null
+  : Number(body.krim_quote_id);
 
 if (
 !Number.isInteger(shipmentId) ||
@@ -290,10 +293,10 @@ error:
 // Accepted quote
 // --------------------------------------------------
 
-const {
-data: quote,
-error: quoteError,
-} = await supabase
+if (requestedQuoteId !== null && (!Number.isInteger(requestedQuoteId) || requestedQuoteId <= 0)) {
+return jsonResponse({ error: "Valid krim_quote_id is required when a quote is specified" }, 400);
+}
+let quoteQuery = supabase
 .from("krim_quotes")
 .select(`
 id,
@@ -307,10 +310,13 @@ status
 `)
 .eq("shipment_id", shipmentId)
 .eq("customer_organization_id", organizationId)
-.eq("status", "accepted")
-.order("id", {
-ascending: false,
-})
+.eq("status", "accepted");
+if (requestedQuoteId !== null) quoteQuery = quoteQuery.eq("id", requestedQuoteId);
+const {
+data: quote,
+error: quoteError,
+} = await quoteQuery
+.order("id", { ascending: false })
 .limit(1)
 .maybeSingle();
 
@@ -434,13 +440,45 @@ String(
 quote.currency_code || ""
 ).toUpperCase();
 
-if (currency !== "INR") {
+// Server-authoritative capability registry. INR retains the existing
+// checkout path. Any other currency requires explicit evidence-backed
+// enablement for merchant eligibility, presentment, settlement, refunds and FX.
+const { data: paymentCapability, error: capabilityError } = await supabase
+.from("krim_payment_capability_registry")
+.select("id,country_code,currency_code,provider_code,integration_status,checkout_enabled,merchant_eligibility_verified,presentment_supported,settlement_supported,refunds_supported,fx_supported")
+.eq("country_code", "IN")
+.eq("currency_code", currency)
+.eq("provider_code", "razorpay")
+.eq("integration_status", "implemented")
+.eq("checkout_enabled", true)
+.maybeSingle();
+
+if (capabilityError || !paymentCapability) {
+console.error("Payment capability gate blocked checkout", capabilityError);
 return jsonResponse(
 {
-error:
-"Current global Razorpay flow supports INR only",
+error: "No KRIM payment capability is enabled for this currency and provider.",
+code: "PAYMENT_CAPABILITY_NOT_ENABLED",
 },
-400
+503
+);
+}
+
+const nonInrCurrencyVerified = currency === "INR" || (
+paymentCapability.merchant_eligibility_verified === true &&
+paymentCapability.presentment_supported === true &&
+paymentCapability.settlement_supported === true &&
+paymentCapability.refunds_supported === true &&
+paymentCapability.fx_supported === true
+);
+
+if (!/^[A-Z]{3}$/.test(currency) || !nonInrCurrencyVerified) {
+return jsonResponse(
+{
+error: "This currency is not enabled for KRIM checkout. International currency support requires verified merchant eligibility, presentment, settlement, refunds and FX.",
+code: "PAYMENT_CURRENCY_NOT_VERIFIED",
+},
+503
 );
 }
 
