@@ -78,3 +78,11 @@ No production schema change, production data mutation, secret change, live payme
 - Confirmed the canonical rate calculator file exists at `public/shipper/rate-calculator.html`; the booking redirect target is not a missing-file defect.
 - Confirmed the booking page calls the idempotent shipment RPC overload that exists in the production function catalog.
 - Still not confirmed: RPC body-level authorization, grants, idempotency uniqueness guarantees, real browser session behavior, new-row correctness, and rate-calculator cross-organization access control.
+
+
+## Step 1 follow-up: booking-to-rate-calculator source trace (2026-10-22)
+- Re-inspected the booking submit handler: it creates/retains a UUID in sessionStorage, disables the submit button while sending, calls `krim_create_global_shipment_idempotent`, requires a returned identifier, and redirects with that identifier as `shipment_id`. This is a useful client-side duplicate-retry safeguard, but server-side uniqueness and authorization are still unverified.
+- Re-inspected the rate calculator: it reads the numeric `shipment_id` query parameter and fetches the corresponding `krim_shipments` row using the Supabase client. This confirms the intended record handoff in source code, but does not prove that RLS prevents a different organization from reading the shipment. Cross-organization denial must be tested.
+- The rate calculator's source has a shipment-fetch error path, but a successful read, rate-card selection and quote creation have not yet been demonstrated in an authenticated browser.
+- No live shipment was submitted and no production data was changed in this follow-up.
+- Step 1 remains IN PROGRESS / NOT APPROVED until an authorized fresh booking and next-page access test are completed with database evidence.
