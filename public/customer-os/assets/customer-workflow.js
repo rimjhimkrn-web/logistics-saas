@@ -1,40 +1,59 @@
-/* KRIM Customer OS workflow bridge — shared by the rebuilt customer/shipper pages.
-   Navigation is global; identity checks use the existing Supabase client. Data changes remain server/RLS controlled. */
+/* KRIM Customer OS shared workflow bridge.
+ * Shared navigation + session/membership verification for all Customer OS pages.
+ * Sensitive operations remain on canonical, permission-checked application routes. */
 (function(){
 'use strict';
 const BASE='/logistics-saas/';
 const route=p=>(location.hostname.endsWith('github.io')?BASE:'/')+p.replace(/^\//,'');
-const links=[
- ['Customer Home','app/customer/index.html'],
- ['Create Shipment','public/shipments/shipment-create.html'],
- ['Quotes & Pricing','public/customer/quote-request.html'],
- ['Shipment Board','public/customer/shipment-list.html'],
- ['Live Tracking','public/visibility/live-tracking-map.html'],
- ['Documents','public/documents/document-list.html'],
- ['Payments','public/finance/payment-checkout.html'],
- ['Claims & Support','public/support/ticket-desk.html'],
- ['All Customer Pages','public/customer-os/index.html']
+const routes={
+ home:'app/customer/index.html',
+ book:'public/shipments/shipment-create.html',
+ quotes:'public/customer/quote-request.html',
+ quoteBoard:'public/customer/quote-comparison.html',
+ shipments:'public/customer/shipment-list.html',
+ tracking:'public/visibility/live-tracking-map.html',
+ documents:'public/documents/document-list.html',
+ payments:'public/finance/payment-checkout.html',
+ invoices:'public/finance/customer-invoices.html',
+ claims:'public/support/shipment-claims.html',
+ support:'public/support/ticket-desk.html',
+ addresses:'public/customer/address-book.html',
+ profile:'public/customer/company-profile.html',
+ hub:'public/customer-os/index.html'
+};
+const navItems=[['Home','home'],['Book shipment','book'],['Quotes','quotes'],['Shipments','shipments'],['Tracking','tracking'],['Documents','documents'],['Payments','payments'],['Support','support'],['All services','hub']];
+const contextActions=[
+ {re:/shipment-create|booking-request|reorder|recurring-shipments/,title:'Continue booking',text:'Use the secured shipment booking form to create a real shipment record.',key:'book'},
+ {re:/quote|pricing|rate-calculator|surcharge|currency-conversion|tax-estimation/,title:'Continue to live quotes',text:'Submit a real quote request or review quote records from the canonical KRIM workflow.',key:'quotes'},
+ {re:/shipment-list|active-shipments|shipment-details|shipment-timeline|dispatch|pickup|milestone|route-planning|tracking|vessel|rail|air-cargo|road-tracking|eta|geofence|container-condition|temperature|deviation|delay-prediction/,title:'Open shipment operations',text:'View shipments or open live visibility tools in the canonical workflow.',key:'shipments'},
+ {re:/invoice|payment|refund|settlement|treasury|cash-flow|transaction|credit-note|accounts-payable|accounts-receivable/,title:'Continue to billing',text:'Open the secured billing and payment workflow; never treat a pending payment as completed.',key:'payments'},
+ {re:/claim|dispute|ticket|support|complaint|compensation|escalation/,title:'Continue to support',text:'Open the support/claims workflow to raise or review an issue.',key:'support'},
+ {re:/document|certificate|licence|license|consignment|signature|epod|pod-/,title:'Open document records',text:'Use the document workflow to view or submit supported shipment evidence.',key:'documents'},
+ {re:/address|location|company-profile|team-members|onboarding|verification|cargo-profile|shipping-preference|saved-route/,title:'Manage customer setup',text:'Return to your customer workspace and organization setup tools.',key:'home'}
 ];
-function status(message,kind){
- let box=document.getElementById('krim-workflow-status');
- if(!box){box=document.createElement('div');box.id='krim-workflow-status';(document.querySelector('main')||document.body).prepend(box)}
- box.textContent=message;
- box.style.cssText='margin:12px auto;max-width:1100px;padding:10px 14px;border-radius:10px;background:'+(kind==='ok'?'#e8f8f0':kind==='error'?'#fff0ef':'#eaf2ff')+';color:'+(kind==='ok'?'#086548':kind==='error'?'#a12820':'#173b72')+';font:12px/1.5 system-ui';
-}
-function addNavigation(){
+function status(message,kind){let box=document.getElementById('krim-workflow-status');if(!box){box=document.createElement('div');box.id='krim-workflow-status';(document.querySelector('main')||document.body).prepend(box)}box.textContent=message;box.style.cssText='margin:12px auto;max-width:1100px;padding:10px 14px;border-radius:10px;background:'+(kind==='ok'?'#e8f8f0':kind==='error'?'#fff0ef':'#eaf2ff')+';color:'+(kind==='ok'?'#086548':kind==='error'?'#a12820':'#173b72')+';font:12px/1.5 system-ui'};
+function navigation(){
  if(document.getElementById('krim-global-customer-nav'))return;
  const nav=document.createElement('nav');nav.id='krim-global-customer-nav';nav.setAttribute('aria-label','KRIM customer workflow');
  nav.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px max(16px,calc((100% - 1100px)/2));background:#fff;border-bottom:1px solid #dfe7f2;font:12px system-ui';
- nav.innerHTML=links.map(([label,target])=>'<a style="padding:8px 11px;border-radius:8px;background:#f0f5ff;color:#174ea6;text-decoration:none;font-weight:750" href="'+route(target)+'">'+label+'</a>').join('');
+ nav.innerHTML=navItems.map(([label,key])=>'<a style="padding:8px 11px;border-radius:8px;background:#f0f5ff;color:#174ea6;text-decoration:none;font-weight:750" href="'+route(routes[key])+'">'+label+'</a>').join('');
  const header=document.querySelector('header');if(header)header.insertAdjacentElement('afterend',nav);else document.body.prepend(nav);
 }
-async function verify(){
- addNavigation();
+function workflowPanel(){
+ if(document.getElementById('krim-next-step'))return;
+ const slug=location.pathname.split('/').pop().replace(/\.html$/,'');
+ const found=contextActions.find(x=>x.re.test(slug));const action=found||{title:'Continue customer journey',text:'Use the shared customer workspace to continue to bookings, quotes, shipment visibility, documents, billing and support.',key:'home'};
+ const box=document.createElement('section');box.id='krim-next-step';box.style.cssText='max-width:1100px;margin:14px auto;padding:16px;border:1px solid #dbe5f2;border-radius:14px;background:linear-gradient(120deg,#fff,#f0f6ff);font:13px/1.5 system-ui;color:#172943';
+ box.innerHTML='<strong style="font-size:15px">'+action.title+'</strong><p style="margin:6px 0 12px;color:#5b6c83">'+action.text+'</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a style="padding:9px 12px;border-radius:9px;background:#1769ff;color:white;text-decoration:none;font-weight:800" href="'+route(routes[action.key])+'">Continue →</a><a style="padding:9px 12px;border:1px solid #cfdaeb;border-radius:9px;background:white;color:#174ea6;text-decoration:none;font-weight:800" href="'+route(routes.hub)+'">Browse all customer pages</a></div>';
+ const main=document.querySelector('main');if(main)main.appendChild(box);else document.body.appendChild(box);
+}
+async function init(){
+ navigation();workflowPanel();
  const client=window.KRIM_SUPABASE||window.supabaseClient;
- if(!client){status('KRIM navigation is available. This page did not load a Supabase client, so account-specific records/actions are not enabled here.','error');return}
+ if(!client){status('Navigation is connected. This page did not load the Supabase client, so protected records and actions are not enabled here.','error');return}
  try{
   const {data,error}=await client.auth.getSession();if(error)throw error;
-  if(!data||!data.session){status('Public workflow page. Sign in to use account-specific records and protected actions.');return}
+  if(!data||!data.session){status('Public workflow view. Sign in to access account-specific records and protected actions.');return}
   const user=data.session.user;
   const result=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',user.id).eq('status','active');
   if(result.error)throw result.error;
@@ -43,8 +62,8 @@ async function verify(){
   window.KRIM_CUSTOMER_WORKFLOW={userId:user.id,email:user.email,organizationIds:ids,memberships:result.data,client};
   const badge=document.createElement('span');badge.textContent='Verified session · '+(user.email||'KRIM account');badge.style.cssText='padding:8px;color:#087e5b;font:700 12px system-ui';
   const nav=document.getElementById('krim-global-customer-nav');if(nav)nav.appendChild(badge);
-  status('Signed in and active organization membership verified. Records and transactions are still restricted by database permissions; this page will not claim a save unless the backend confirms it.','ok');
+  status('Signed in and active organization membership verified. This navigation opens canonical workflow routes; each data change must still be confirmed by its backend response and database permissions.','ok');
  }catch(e){status('Could not verify account access with KRIM. Refresh or sign in again. Details: '+(e&&e.message?e.message:'access check failed'),'error')}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',verify);else verify();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
