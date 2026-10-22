@@ -164,18 +164,10 @@ async function init(){
  const currency=String(quote.currency_code||"").toUpperCase();
  let capability=null;
  if(currency && currency!=="INR"){
-   const capResult=await client.from("krim_payment_capability_registry")
-     .select("country_code,currency_code,provider_code,integration_status,checkout_enabled,merchant_eligibility_verified,presentment_supported,settlement_supported,refunds_supported,fx_supported")
-     .eq("country_code","IN").eq("currency_code",currency).eq("provider_code","razorpay")
-     .eq("integration_status","implemented").eq("checkout_enabled",true).maybeSingle();
-   if(!capResult.error) capability=capResult.data;
+   const capResult=await client.functions.invoke("krim-payment-capability-status",{body:{currency_code:currency}});
+   if(!capResult.error && capResult.data && capResult.data.success===true) capability=capResult.data;
  }
- const foreignCurrencyReady=currency!=="INR"&&!!capability
-   &&capability.merchant_eligibility_verified===true
-   &&capability.presentment_supported===true
-   &&capability.settlement_supported===true
-   &&capability.refunds_supported===true
-   &&capability.fx_supported===true;
+ const foreignCurrencyReady=currency!=="INR"&&!!capability&&capability.enabled===true;
  const currencyReady=currency==="INR"||foreignCurrencyReady;
  const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*100)>0;
  const amountMessage=amountValid?(currency==="INR"?"Positive quote total and current INR checkout confirmed.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
