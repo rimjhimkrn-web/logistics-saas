@@ -1,5 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function currencyMinorUnitExponent(currency: string): number {
+  const code = String(currency || "").trim().toUpperCase();
+  if (["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(code)) return 0;
+  if (["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(code)) return 3;
+  if (["CLF","UYW"].includes(code)) return 4;
+  return 2;
+}
+
+
 const corsHeaders = {
 "Access-Control-Allow-Origin": "*",
 "Access-Control-Allow-Headers":
@@ -477,7 +486,7 @@ if (!legacyAlreadyPaid) {
   return jsonResponse({ error: "The accepted customer quote has expired." }, 409);
   }
   
-  if (Math.round(Number(acceptedQuote.amount) * 100) !== Number(paymentOrder.amount_paise)
+  if (Math.round(Number(acceptedQuote.amount) * (10 ** currencyMinorUnitExponent(String(acceptedQuote.currency_code || "").toUpperCase()))) !== Number(paymentOrder.amount_paise)
       || String(acceptedQuote.currency_code || "").toUpperCase() !== String(paymentOrder.currency || "").toUpperCase()) {
   return jsonResponse({ error: "Payment order amount or currency does not match the accepted customer quote." }, 400);
   }
@@ -795,7 +804,7 @@ transaction_type:
 amount:
 Number(
 paymentOrder.amount_paise
-) / 100,
+) / (10 ** currencyMinorUnitExponent(localCurrency)),
 
 currency_code:
 localCurrency,
