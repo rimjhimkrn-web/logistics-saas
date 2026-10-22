@@ -91,7 +91,8 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
+                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 space-y-2 text-xs"><div class="flex justify-between gap-4"><span class="text-slate-500">Requested transport mode</span><strong id="calc-transport-mode" class="text-slate-800 text-right">Not specified</strong></div><p class="text-slate-500 leading-relaxed">This is the customer’s saved preference. Route feasibility, customs requirements, partner capacity and mode-specific pricing must be confirmed; this display does not certify service availability.</p></div>
+            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
                     <div class="flex justify-between">
                         <span class="text-slate-500">Pricing status:</span>
                         <span id="preview-amount" class="text-amber-700 font-bold text-sm">Awaiting approved rate card</span>
@@ -142,6 +143,9 @@
             const params = new URLSearchParams(window.location.search);
             const shipmentId = params.get('shipment_id');
             const requestedTier = params.get('service_tier');
+            const requestedMode = params.get('transport_mode');
+            const modeLabels = {road:"Road freight",rail:"Rail freight",ocean:"Ocean / sea freight",air:"Air freight",multimodal:"Multimodal",warehouse_transfer:"Warehouse / distribution transfer",specialist:"Specialist / project cargo"};
+            document.getElementById("calc-transport-mode").textContent = modeLabels[requestedMode] || "See saved shipment preference";
             const tierSelect = document.getElementById('calc-service-tier');
             if (requestedTier && Array.from(tierSelect.options).some(option => option.value === requestedTier)) {
                 tierSelect.value = requestedTier;
