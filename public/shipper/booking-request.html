@@ -136,6 +136,26 @@
   let currentUserOrgId = null;
   let isReady = false;
   let submitting = false;
+  const BOOKING_REQUEST_STORAGE_KEY = "krim_global_booking_request_id";
+  function newBookingRequestId(){
+    if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      const bytes = new Uint8Array(16); window.crypto.getRandomValues(bytes); bytes[6]=(bytes[6]&15)|64; bytes[8]=(bytes[8]&63)|128;
+      const hex=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      return hex.slice(0,8)+"-"+hex.slice(8,12)+"-"+hex.slice(12,16)+"-"+hex.slice(16,20)+"-"+hex.slice(20);
+    }
+    throw new Error("Secure booking reference generation is unavailable in this browser.");
+  }
+  function getBookingRequestId(){
+    let id=null;
+    try { id=window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {}
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||"")) {
+      id=newBookingRequestId();
+      try { window.sessionStorage.setItem(BOOKING_REQUEST_STORAGE_KEY,id); } catch (_) {}
+    }
+    return id;
+  }
+  function clearBookingRequestId(){ try { window.sessionStorage.removeItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {} }
   const $ = id => document.getElementById(id);
   const form = $("form-booking"), button = $("btn-submit-booking"), feedback = $("booking-feedback");
   function showFeedback(message, type){
@@ -255,14 +275,16 @@
     submitting = true; button.disabled = true; button.innerHTML = "Creating secure shipment request…";
     showFeedback("Submitting to the KRIM shipment core. Please keep this page open and do not submit again.", "info");
     try{
-      const {data,error} = await client.rpc("krim_create_global_shipment_from_places",{
+      const bookingRequestId = getBookingRequestId();
+      const {data,error} = await client.rpc("krim_create_global_shipment_idempotent",{
         p_customer_organization_id: currentUserOrgId,
         p_origin_place: originPlace,
         p_destination_place: destinationPlace,
         p_goods_description: goods,
         p_total_weight_kg: weight,
         p_transport_mode: $("booking-transport-mode").value,
-         p_route_type: $("booking-route-type").value
+        p_route_type: $("booking-route-type").value,
+        p_booking_request_id: bookingRequestId
       });
       if(error) throw error;
       let shipmentId = null;
@@ -274,6 +296,7 @@
         showFeedback("KRIM returned a response but no shipment reference. To prevent a duplicate, this form is locked for now. Check My Shipments or contact support before trying again.", "error");
         return;
       }
+      clearBookingRequestId();
       showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
       button.innerHTML = "Shipment created ✓";
       window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value)+"&route_type="+encodeURIComponent($("booking-route-type").value);},1000);
