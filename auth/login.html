@@ -31,6 +31,16 @@
   const requestedRoleKey = String(requestedRoleRaw).trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   const requestedRole = ({ enterprise_admin: "enterprise", enterprise_user: "enterprise", enterprise_workspace: "enterprise", corporate: "enterprise", logistics_partner: "partner", transport_partner: "partner", warehouse_operator: "warehouse", warehouse_workspace: "warehouse", customs_compliance: "customs", finance_workspace: "finance", operations_workspace: "operations", customer_workspace: "customer", driver_workspace: "driver" })[requestedRoleKey] || requestedRoleKey;
   const publicRoles = ["customer", "partner", "driver", "warehouse", "customs", "finance", "operations", "enterprise"];
+  const requestedNextRaw = loginParams.get("next") || "";
+  function destinationAfterLogin(accountType) {
+    if (accountType === "customer" && requestedNextRaw) {
+      try {
+        const target = new URL(requestedNextRaw, window.location.origin);
+        if (target.origin === window.location.origin && target.pathname === "/logistics-saas/public/shipper/booking-request.html") return target.href;
+      } catch (_) {}
+    }
+    return workspaceUrl(accountType);
+  }
   document.getElementById("role-note").textContent =
     requestedRole === "customer" ? "Customer / shipper sign-in." :
     requestedRole === "partner" ? "Logistics partner sign-in." :
@@ -198,7 +208,7 @@
     const { data: factors, error: factorsError } = await client.auth.mfa.listFactors();
     if (factorsError) throw factorsError;
     const factor = (factors?.totp || []).find(item => item.status === "verified");
-    postLoginPath = workspaceUrl(accountType);
+    postLoginPath = destinationAfterLogin(accountType);
     if (!factor) {
       const enrollUrl = new URL("mfa-enroll.html", window.location.href);
       enrollUrl.searchParams.set("returnTo", postLoginPath);
@@ -222,7 +232,7 @@
       throw new Error("Your credentials were accepted, but the browser session was not saved. Enable site storage for GitHub Pages and try again.");
     }
 
-    postLoginPath = workspaceUrl(accountType);
+    postLoginPath = destinationAfterLogin(accountType);
     say(loginFeedback, "Sign-in verified. Opening your authorized workspace…", "success");
     window.location.replace(postLoginPath);
   }
