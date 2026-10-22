@@ -1,5 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function currencyMinorUnitExponent(currency: string): number {
+  const code = String(currency || "").trim().toUpperCase();
+  if (["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(code)) return 0;
+  if (["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(code)) return 3;
+  if (["CLF","UYW"].includes(code)) return 4;
+  return 2;
+}
+
+
 const corsHeaders = {
 "Access-Control-Allow-Origin": "*",
 "Access-Control-Allow-Headers":
@@ -482,8 +491,15 @@ code: "PAYMENT_CURRENCY_NOT_VERIFIED",
 );
 }
 
-const amountPaise =
-Math.round(amount * 100);
+const minorUnitFactor = 10 ** currencyMinorUnitExponent(currency);
+const rawMinorUnits = amount * minorUnitFactor;
+const amountPaise = Math.round(rawMinorUnits);
+if (Math.abs(rawMinorUnits - amountPaise) > 1e-7) {
+return jsonResponse(
+{ error: "Quote amount exceeds the supported minor-unit precision for " + currency + ".", code: "CURRENCY_PRECISION_INVALID" },
+400
+);
+}
 
 if (amountPaise <= 0) {
 return jsonResponse(
