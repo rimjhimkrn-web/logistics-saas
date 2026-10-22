@@ -1,193 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Electronic Proof of Delivery (ePOD) Vault</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/logistics-saas/config.js"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<meta name="description" content="KRIM global shipment documents, compliance records and proof-of-delivery evidence workspace.">
+<title>KRIM Global Logistics OS | Documents & Delivery Evidence</title>
+<link rel="manifest" href="/logistics-saas/manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/logistics-saas/config.js"></script>
+<style>
+:root{color-scheme:light;--navy:#10243a;--navy2:#193650;--blue:#2463eb;--teal:#087e8b;--ink:#172b3e;--muted:#62758a;--line:#dbe4ec;--panel:#fff;--bg:#f3f6f9;--good:#087443;--warn:#9a5b00;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a{touch-action:manipulation}a{color:inherit;text-decoration:none}.topline{background:var(--navy);color:#d7e4f0;padding:8px clamp(16px,3vw,36px);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;letter-spacing:.08em;text-transform:uppercase}.topline strong{color:#9dd9e1}.layout{min-height:100vh}.header{background:#fff;border-bottom:1px solid var(--line)}.headinner{max-width:1440px;margin:auto;padding:18px clamp(16px,3vw,36px);display:flex;justify-content:space-between;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:42px;height:42px;border-radius:10px;background:linear-gradient(145deg,#173d5b,#10243a);display:grid;place-items:center;color:#fff;font-weight:900;font-size:21px;box-shadow:0 6px 16px #10243a20}.brandname{font-weight:850;letter-spacing:.09em;font-size:13px;color:var(--navy)}.branddesc{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}.headlinks{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px 13px;font-weight:700;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn.primary{background:var(--navy);color:white;border-color:var(--navy)}.btn:hover{filter:brightness(.97)}.shell{max-width:1440px;margin:auto;padding:26px clamp(16px,3vw,36px) 44px}.eyebrow{color:var(--teal);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:850}.hero{background:linear-gradient(115deg,#10243a 0%,#173d5b 63%,#175b68 100%);border-radius:18px;padding:clamp(22px,3vw,36px);color:white;display:flex;justify-content:space-between;gap:24px;align-items:flex-end;box-shadow:0 16px 36px #10243a18}.hero h1{font-size:clamp(26px,3vw,38px);line-height:1.12;letter-spacing:-.03em;margin:8px 0 12px}.hero p{max-width:720px;color:#d7e6f0;margin:0}.hero .eyebrow{color:#9dd9e1}.heroaside{min-width:190px;border-left:1px solid #ffffff35;padding-left:22px}.heroaside b{display:block;font-size:28px;line-height:1.1}.heroaside span{display:block;color:#d7e6f0;font-size:11px;margin-top:7px}.statusline{margin:16px 0 22px;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#8797a7;display:inline-block}.dot.good{background:#0b9a62}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}.metric,.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:0 4px 16px #142b3d06}.metric{padding:17px}.metric label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:750}.metric strong{display:block;font-size:27px;margin-top:8px;letter-spacing:-.04em;color:var(--navy)}.metric small{color:var(--muted);font-size:11px}.workgrid{display:grid;grid-template-columns:245px minmax(0,1fr);gap:16px}.side{padding:12px;align-self:start;position:sticky;top:12px}.side h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:7px 10px}.navbtn{display:flex;width:100%;align-items:center;gap:10px;text-align:left;padding:12px 10px;border:0;border-radius:8px;background:transparent;color:#45596c;font-weight:700;font-size:12px;cursor:pointer}.navbtn.active{background:#eaf1fb;color:#163d6b}.navicon{width:26px;height:26px;display:grid;place-items:center;background:#edf2f6;border-radius:7px;font-size:13px}.navbtn.active .navicon{background:#d6e6ff}.sidefoot{border-top:1px solid var(--line);margin-top:12px;padding:14px 10px 6px;font-size:11px;color:var(--muted)}.maincol{min-width:0}.card{padding:20px;margin-bottom:14px}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}.sectionhead h2{font-size:17px;margin:0;color:var(--navy)}.sectionhead p{font-size:12px;color:var(--muted);margin:4px 0 0}.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.field{min-width:150px;flex:1;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 11px;color:var(--ink);outline:none}.field:focus{border-color:#5383dc;box-shadow:0 0 0 3px #2463eb12}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;min-width:680px}th{background:#f6f8fa;color:#607387;text-transform:uppercase;letter-spacing:.07em;font-size:10px;text-align:left;padding:12px;border-bottom:1px solid var(--line)}td{padding:13px 12px;border-bottom:1px solid #e9eef3;font-size:12px;vertical-align:top}tr:last-child td{border-bottom:0}.primarytext{font-weight:800;color:#1b3349}.subtext{color:var(--muted);font-size:11px;margin-top:3px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;border:1px solid #d9e2ea;background:#f4f7fa;color:#516274;white-space:nowrap}.badge.good{color:var(--good);background:#eaf8f0;border-color:#bce8cd}.badge.warn{color:var(--warn);background:#fff6e5;border-color:#f4d89b}.badge.bad{color:var(--bad);background:#fff0ee;border-color:#f2c4bf}.badge.blue{color:#214fa5;background:#edf4ff;border-color:#cddfff}.empty{padding:32px 18px;text-align:center;color:var(--muted);font-size:12px}.empty strong{display:block;color:var(--navy);font-size:14px;margin-bottom:5px}.notice{border:1px solid #cbdcf1;background:#f1f7ff;color:#23486d;padding:13px 15px;border-radius:9px;font-size:12px;margin-bottom:14px}.notice.warning{border-color:#f1d8a2;background:#fff8e9;color:#78500d}.notice.error{border-color:#f0c2bd;background:#fff2f0;color:#8c2b23}.hide{display:none!important}.recordgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.record{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff;min-width:0}.record h3{font-size:13px;color:var(--navy);margin:0 0 7px}.record p{margin:4px 0;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.record .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.subtle{font-size:11px;color:var(--muted)}.audititem{border-left:2px solid #cbd9e7;margin-left:7px;padding:0 0 17px 17px;position:relative}.audititem:before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:#3567a5;border:2px solid white;box-shadow:0 0 0 1px #aabed3}.audititem:last-child{padding-bottom:0}.audititem b{display:block;font-size:12px;color:var(--navy)}.audititem small{display:block;color:var(--muted);margin-top:3px;font-size:11px}.footer{border-top:1px solid var(--line);padding:20px clamp(16px,3vw,36px);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.footer strong{color:var(--navy)}.loading{color:var(--muted);font-size:12px;padding:22px;text-align:center}
+@media(max-width:900px){.workgrid{grid-template-columns:1fr}.side{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.side h2,.sidefoot{grid-column:1/-1}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{align-items:flex-start;flex-direction:column}.heroaside{border-left:0;border-top:1px solid #ffffff35;padding:14px 0 0;min-width:0;width:100%}.heroaside b{font-size:24px}}@media(max-width:560px){.headinner{align-items:flex-start;flex-direction:column}.headlinks{width:100%}.headlinks .btn{flex:1}.metrics{gap:8px}.metric{padding:13px}.metric strong{font-size:23px}.card{padding:14px}.side{grid-template-columns:1fr 1fr}.navbtn{padding:10px 7px}.recordgrid{grid-template-columns:1fr}.sectionhead{flex-direction:column}.field{min-width:100%}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-sky-300 font-bold">DELIVERY EVIDENCE · RECORDED STATUS ONLY</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
-    </div>
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">ePOD Audit Vault</span>
-                </div>
-            </div>
-            
-            <a href="/logistics-saas/public/shipper/active-shipments.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Active Fleet
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-6">
-            
-            <div class="space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Consignment Lifecycle Closure</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Electronic Proof of Delivery</h1>
-                <p class="text-slate-600 text-sm">Verify digital recipient handover signatures, timestamp logs, and audit trail credentials for completed consignments.</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Shipment Reference ID</label>
-                    <input type="text" id="epod-shipment-id" placeholder="e.g., 1" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
-                </div>
-                <div class="flex items-end">
-                    <button onclick="fetchEPODRecord()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                        Fetch ePOD Audit Record →
-                    </button>
-                </div>
-            </div>
-
-            <div id="epod-result-container" class="space-y-6 pt-4">
-                <!-- Dynamically Rendered ePOD Audit Details -->
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS ePOD Vault © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- ePOD Vault Script -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function initEPOD() {
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            if (error || !session) {
-                const next = encodeURIComponent(window.location.pathname + window.location.search);
-                window.location.href = "/logistics-saas/auth/login.html?next=" + next;
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = "Authenticated session · access governed by database policies";
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipmentId = urlParams.get('shipment_id');
-            if (shipmentId) {
-                document.getElementById('epod-shipment-id').value = shipmentId;
-                await fetchEPODRecord();
-            }
-        }
-
-        function escapeEPODText(value) {
-            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
-                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
-            });
-        }
-
-        async function fetchEPODRecord() {
-            const id = document.getElementById("epod-shipment-id").value.trim();
-            const container = document.getElementById("epod-result-container");
-            if (!/^\d+$/.test(id)) {
-                container.textContent = "Enter a valid shipment reference ID.";
-                return;
-            }
-
-            container.textContent = "Looking for a real proof-of-delivery record...";
-            try {
-                const { data, error } = await supabaseClient
-                    .from("krim_pod_records")
-                    .select("id, shipment_id, pod_type, status, delivered_at, received_by_name, received_by_role, verified_at, evidence_metadata, created_at, rejection_reason")
-                    .eq("shipment_id", Number(id))
-                    .order("created_at", { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
-
-                if (error) throw error;
-                if (!data) {
-                    container.innerHTML = '<div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">No proof-of-delivery record exists for shipment #' + escapeEPODText(id) + '. This page will not invent a delivery confirmation or certificate.</div>';
-                    return;
-                }
-
-                const verified = Boolean(data.verified_at) || String(data.status || "").toLowerCase() === "verified";
-                const evidence = data.evidence_metadata && typeof data.evidence_metadata === "object" ? data.evidence_metadata : {};
-                const hash = evidence.sha256 || evidence.content_sha256 || evidence.file_hash || "Not recorded";
-                const deliveredAt = data.delivered_at ? new Date(data.delivered_at).toUTCString() : "Not recorded";
-                const badge = verified
-                    ? '<span class="px-3 py-1 rounded-full border font-semibold text-emerald-700 bg-emerald-50 border-emerald-200 uppercase">Verified POD</span>'
-                    : '<span class="px-3 py-1 rounded-full border font-semibold text-amber-700 bg-amber-50 border-amber-200 uppercase">Verification pending</span>';
-
-                container.innerHTML =
-                    '<div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-6 font-mono text-xs">' +
-                    '<div class="flex justify-between items-center border-b border-slate-200 pb-4"><div><span class="text-slate-500 block uppercase">Consignment Reference</span><span class="text-slate-900 font-bold text-sm">#' + Number(data.shipment_id) + '</span></div>' + badge + '</div>' +
-                    '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">POD Record</span><p class="font-bold text-slate-900">#' + Number(data.id) + '</p></div>' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">POD Type</span><p class="font-bold text-slate-900">' + escapeEPODText(data.pod_type || "Not recorded") + '</p></div>' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">Recipient</span><p class="font-bold text-slate-900">' + escapeEPODText(data.received_by_name || "Not recorded") + '</p></div>' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">Recipient Role</span><p class="font-bold text-slate-900">' + escapeEPODText(data.received_by_role || "Not recorded") + '</p></div>' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">Delivery Timestamp</span><p class="font-bold text-slate-900">' + escapeEPODText(deliveredAt) + '</p></div>' +
-                    '<div><span class="text-slate-500 text-[11px] uppercase font-mono block">Verification Timestamp</span><p class="font-bold text-slate-900">' + escapeEPODText(data.verified_at ? new Date(data.verified_at).toUTCString() : "Not verified") + '</p></div>' +
-                    '</div>' +
-                    '<div class="p-4 bg-white rounded-xl border border-slate-200"><span class="text-slate-600 block mb-2">Evidence SHA-256 / file hash</span><span class="text-sky-700 font-bold break-all">' + escapeEPODText(hash) + '</span>' +
-                    (data.rejection_reason ? '<p class="mt-3 text-red-700">Review note: ' + escapeEPODText(data.rejection_reason) + '</p>' : '') +
-                    '</div><a href="/logistics-saas/public/shipper/active-shipments.html" class="inline-block bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs uppercase tracking-wider transition">Back to Fleet</a></div>';
-            } catch (err) {
-                container.textContent = "Unable to load proof-of-delivery record: " + (err.message || "Unknown error");
-            }
-        }
-
-        initEPOD();
-    </script>
+<body>
+<div class="layout">
+<div class="topline"><span><strong>KRIM GLOBAL LOGISTICS OS</strong> &nbsp; / &nbsp; Documents & Delivery Evidence</span><span id="session-state">SECURE SESSION · CHECKING</span></div>
+<header class="header"><div class="headinner">
+<div class="brand"><div class="brandmark">K</div><div><div class="brandname">KRIM GLOBAL</div><div class="branddesc">Document control · custody · ePOD</div></div></div>
+<div class="headlinks"><a class="btn" href="/logistics-saas/app/customer/index.html">Customer Workspace</a><a class="btn" href="/logistics-saas/public/shipper/active-shipments.html">My Shipments</a><button class="btn primary" id="refresh-btn" type="button">↻ Refresh records</button></div>
+</div></header>
+<main class="shell">
+<section class="hero">
+<div><div class="eyebrow">Module 08 · Controlled evidence lifecycle</div><h1>Documents & Delivery Evidence</h1><p>A single customer view of shipment documents, verification status, version history and electronic proof of delivery—across supported domestic, cross-border and multimodal journeys.</p></div>
+<div class="heroaside"><b id="hero-org">Secure customer access</b><span>Real database records only. Private files are never exposed through a public link.</span></div>
+</section>
+<div class="statusline"><span id="status-dot" class="dot"></span><span id="status-text" role="status" aria-live="polite">Authenticating your session and checking organization access…</span></div>
+<div id="global-notice" class="notice">Geographic coverage does not imply document acceptance or customs clearance. Requirements depend on the shipment, jurisdictions and applicable trade rules.</div>
+<section class="metrics" aria-label="Document summary">
+<div class="metric"><label>Shipment documents</label><strong id="metric-docs">—</strong><small>Linked records in your permitted scope</small></div>
+<div class="metric"><label>Verification pending</label><strong id="metric-pending">—</strong><small>Not yet marked verified</small></div>
+<div class="metric"><label>Verified delivery evidence</label><strong id="metric-pod">—</strong><small>ePOD records marked verified</small></div>
+<div class="metric"><label>Expired / rejected</label><strong id="metric-risk">—</strong><small>Requires review where applicable</small></div>
+</section>
+<div class="workgrid">
+<aside class="card side" aria-label="Document workspace navigation">
+<h2>Evidence workspace</h2>
+<button class="navbtn active" data-view="overview"><span class="navicon">▦</span>Overview</button>
+<button class="navbtn" data-view="documents"><span class="navicon">▤</span>Shipment documents</button>
+<button class="navbtn" data-view="pod"><span class="navicon">✓</span>Delivery evidence</button>
+<button class="navbtn" data-view="audit"><span class="navicon">◷</span>Version & audit trail</button>
+<div class="sidefoot">Access is governed by the signed-in user, active organization membership and Supabase Row Level Security.</div>
+</aside>
+<div class="maincol">
+<div id="access-notice" class="notice warning hide"></div>
+<section id="view-overview" class="view">
+<div class="card">
+<div class="sectionhead"><div><h2>Evidence control centre</h2><p>Shipment-linked records visible to your active customer organization memberships.</p></div><span class="badge blue">Live records</span></div>
+<div class="recordgrid" id="overview-cards"><div class="loading">Loading your authorized records…</div></div>
+</div>
+<div class="card"><div class="sectionhead"><div><h2>Operational safeguards</h2><p>Global document handling without false clearance or delivery claims.</p></div></div>
+<div class="recordgrid">
+<div class="record"><h3>Jurisdiction-aware documents</h3><p>Store document type, issuing country, issue/expiry dates and verification status when the authoritative record contains them.</p></div>
+<div class="record"><h3>Version integrity</h3><p>Where version records exist, show recorded file hash, MIME type, size, uploader and change reason. A hash is not proof of issuer authenticity by itself.</p></div>
+<div class="record"><h3>Custody and ePOD</h3><p>Show recorded recipient, delivery timestamp, shipment leg and verifier. Missing evidence remains missing; no delivery is inferred from shipment status alone.</p></div>
+<div class="record"><h3>Protected files</h3><p>Private storage remains private. Upload and download actions are withheld until the relevant storage policy and authorization workflow can be verified safely.</p></div>
+</div></div>
+</section>
+<section id="view-documents" class="view hide">
+<div class="card"><div class="sectionhead"><div><h2>Shipment document register</h2><p>Filter real document records by shipment, type or current status.</p></div><span class="badge">RLS protected</span></div>
+<div class="filters"><input id="doc-search" class="field" type="search" placeholder="Search shipment, document type, issuer…"><select id="doc-status" class="field" aria-label="Filter document status"><option value="">All statuses</option><option>required</option><option>uploaded</option><option>active</option><option>verified</option><option>rejected</option><option>expired</option><option>pending</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Shipment / document</th><th>Document identity</th><th>Issue / expiry</th><th>Verification</th><th>Record status</th></tr></thead><tbody id="documents-body"><tr><td colspan="5" class="empty">Loading document records…</td></tr></tbody></table></div>
+</div>
+<div class="notice warning">Document upload is not enabled in this customer view yet. The current database policies expose read access for authorized records, but a complete global upload path must also validate shipment ownership, storage object paths, file limits, malware/content checks and metadata creation before it is safe to activate.</div>
+</section>
+<section id="view-pod" class="view hide">
+<div class="card"><div class="sectionhead"><div><h2>Electronic proof of delivery</h2><p>Recorded delivery handover evidence; verification is distinct from submission.</p></div><span class="badge blue">ePOD register</span></div>
+<div class="filters"><input id="pod-search" class="field" type="search" placeholder="Search shipment, recipient or evidence type…"><select id="pod-status" class="field" aria-label="Filter delivery evidence status"><option value="">All statuses</option><option>submitted</option><option>pending</option><option>verified</option><option>rejected</option></select></div>
+<div id="pod-list" class="recordgrid"><div class="loading">Loading authorized delivery evidence…</div></div>
+</div>
+<div class="notice">A submitted ePOD is not automatically verified. The page shows only recorded values and does not generate a signature, recipient identity, delivery timestamp or proof certificate.</div>
+</section>
+<section id="view-audit" class="view hide">
+<div class="card"><div class="sectionhead"><div><h2>Document versions & audit trail</h2><p>Recorded versions and verification decisions associated with accessible document records.</p></div><span class="badge">Read-only view</span></div>
+<div id="audit-list"><div class="loading">Loading version and verification history…</div></div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<footer class="footer"><span><strong>KRIM Global Logistics OS</strong> · Documents & Delivery Evidence</span><span>Customer access · Private evidence · Audit-conscious records</span></footer>
+</div>
+<script>
+(function(){
+"use strict";
+const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
+const PUBLISHABLE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const db=window.KRIM_SUPABASE || (window.supabase && window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY));
+const $=id=>document.getElementById(id);
+const state={session:null,orgIds:[],shipments:[],documents:[],shipmentDocs:[],pods:[],versions:[],verifications:[],loadError:null};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate=v=>{if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?"Invalid timestamp":d.toISOString().replace("T"," ").replace(".000Z"," UTC").replace("Z"," UTC");};
+const stateClass=v=>{const s=String(v||"").toLowerCase();if(["verified","approved","complete","completed","active"].includes(s))return "good";if(["rejected","expired","failed","revoked"].includes(s))return "bad";if(["pending","submitted","required","uploaded","unverified","review"].includes(s))return "warn";return "";};
+const badge=v=>'<span class="badge '+stateClass(v)+'">'+esc(v||"Not recorded")+'</span>';
+function setStatus(message,good){$("status-text").textContent=message;$("status-dot").className="dot"+(good?" good":"");}
+function showError(message){$("access-notice").textContent=message;$("access-notice").classList.remove("hide");}
+function hideError(){$("access-notice").classList.add("hide");}
+function switchView(name){document.querySelectorAll(".view").forEach(v=>v.classList.add("hide"));const target=$("view-"+name);if(target)target.classList.remove("hide");document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.view===name));}
+async function safeQuery(promise,label){const r=await promise;if(r.error)throw new Error(label+": "+r.error.message);return r.data||[];}
+async function loadAll(){
+ if(!db){showError("Supabase client configuration was not available. No records have been loaded.");setStatus("Configuration error",false);return;}
+ hideError();setStatus("Checking authenticated session…",false);$("session-state").textContent="SECURE SESSION · CHECKING";
+ const {data:{session},error:sessionError}=await db.auth.getSession();
+ if(sessionError||!session){const next=encodeURIComponent(location.pathname+location.search);location.href="/logistics-saas/auth/login.html?next="+next;return;}
+ state.session=session;$("session-state").textContent="AUTHENTICATED · POLICY CONTROLLED";
+ setStatus("Checking active organization memberships…",false);
+ try{
+  const members=await safeQuery(db.from("krim_organization_members").select("organization_id, role, status").eq("user_id",session.user.id).eq("status","active"),"Organization access");
+  state.orgIds=[...new Set(members.map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+  if(!state.orgIds.length){state.shipments=[];state.documents=[];state.shipmentDocs=[];state.pods=[];state.versions=[];state.verifications=[];renderAll();showError("No active organization membership was returned for this account. Ask the organization administrator to provision customer access. No document records are shown.");setStatus("No active organization scope",false);return;}
+  setStatus("Loading authorized shipment and evidence records…",false);
+  state.shipments=await safeQuery(db.from("krim_shipments").select("id, shipment_number, customer_organization_id, status, origin_place_label, destination_place_label, requested_transport_mode, created_at, actual_delivery_at").in("customer_organization_id",state.orgIds).order("created_at",{ascending:false}).limit(500),"Shipment records");
+  const shipmentIds=state.shipments.map(s=>Number(s.id)).filter(Number.isSafeInteger);
+  state.documents=await safeQuery(db.from("krim_document_records").select("id, organization_id, shipment_id, document_type, document_number, issuer_name, issuing_country_id, status, verification_status, issued_at, expires_at, verified_at, storage_reference, created_at, updated_at, verification_notes, verified_source").in("organization_id",state.orgIds).order("updated_at",{ascending:false}).limit(500),"Document records");
+  state.shipmentDocs=shipmentIds.length?await safeQuery(db.from("krim_shipment_documents").select("id, shipment_id, document_id, document_type, status, issued_country_id, expires_at, verified_at, created_at, updated_at").in("shipment_id",shipmentIds).order("created_at",{ascending:false}).limit(500),"Shipment document links"):[];
+  state.pods=shipmentIds.length?await safeQuery(db.from("krim_pod_records").select("id, assignment_id, shipment_id, shipment_leg_id, partner_organization_id, document_record_id, pod_type, status, delivered_at, received_by_name, received_by_role, signature_reference, evidence_metadata, submitted_at, verified_at, verified_by, rejection_reason, created_at, updated_at").in("shipment_id",shipmentIds).order("created_at",{ascending:false}).limit(500),"Proof-of-delivery records"):[];
+  const docIds=state.documents.map(d=>Number(d.id)).filter(Number.isSafeInteger);
+  state.versions=docIds.length?await safeQuery(db.from("krim_document_versions").select("id, document_record_id, version_number, storage_reference, content_hash, mime_type, file_size, uploaded_by, uploaded_at, status, change_reason, metadata").in("document_record_id",docIds).order("uploaded_at",{ascending:false}).limit(1000),"Document versions"):[];
+  state.verifications=docIds.length?await safeQuery(db.from("krim_document_verifications").select("id, document_record_id, version_id, verification_type, status, verified_by, verified_at, provider_name, reference_hash, findings, rejection_reason, created_at").in("document_record_id",docIds).order("created_at",{ascending:false}).limit(1000),"Document verification history"):[];
+  state.loadError=null;renderAll();setStatus("Records refreshed · visible records remain subject to database policies",true);
+  $("hero-org").textContent=state.orgIds.length+" active organization"+(state.orgIds.length===1?"":"s");
+ }catch(e){state.loadError=e.message;showError("Some records could not be loaded: "+e.message+". Access has not been bypassed; review the table policies and membership scope before enabling write actions.");setStatus("Data access needs review",false);renderAll();}
+}
+function shipmentMap(){return new Map(state.shipments.map(s=>[Number(s.id),s]));}
+function renderAll(){
+ const sm=shipmentMap(),docs=state.documents,pods=state.pods;
+ $("metric-docs").textContent=String(docs.length+state.shipmentDocs.length);
+ $("metric-pending").textContent=String(docs.filter(d=>!["verified","approved"].includes(String(d.verification_status||"").toLowerCase())).length+state.shipmentDocs.filter(d=>!d.verified_at).length);
+ $("metric-pod").textContent=String(pods.filter(p=>p.verified_at||String(p.status).toLowerCase()==="verified").length);
+ const now=Date.now();$("metric-risk").textContent=String(docs.filter(d=>String(d.status||"").toLowerCase()==="rejected"||String(d.verification_status||"").toLowerCase()==="rejected"||(d.expires_at&&new Date(d.expires_at).getTime()<now)).length+pods.filter(p=>String(p.status||"").toLowerCase()==="rejected").length);
+ const cards=[
+  ["Customer shipments",state.shipments.length,"Shipment records visible in your organization scope."],
+  ["Document records",docs.length+state.shipmentDocs.length,"Organization documents plus shipment-linked document requirements."],
+  ["Delivery evidence",pods.length,"ePOD records returned by the protected data API."],
+  ["Version / review history",state.versions.length+" / "+state.verifications.length,"Recorded file versions and verification decisions."]
+ ];
+ $("overview-cards").innerHTML=cards.map(c=>'<article class="record"><h3>'+esc(c[0])+'</h3><div class="row"><strong style="font-size:25px;color:#10243a">'+esc(c[1])+'</strong><span class="badge blue">Live</span></div><p>'+esc(c[2])+'</p></article>').join("");
+ renderDocuments();renderPods();renderAudit();
+}
+function renderDocuments(){
+ const body=$("documents-body");const search=$("doc-search").value.trim().toLowerCase();const filter=$("doc-status").value.toLowerCase();const sm=shipmentMap();
+ const records=[];
+ state.documents.forEach(d=>{const s=sm.get(Number(d.shipment_id));records.push({id:d.id,shipment:d.shipment_id,type:d.document_type,number:d.document_number,issuer:d.issuer_name,issued:d.issued_at,expires:d.expires_at,verification:d.verification_status,status:d.status,source:"Document record",shipmentNumber:s?.shipment_number,notes:d.verification_notes});});
+ state.shipmentDocs.forEach(d=>{const s=sm.get(Number(d.shipment_id));records.push({id:d.id,shipment:d.shipment_id,type:d.document_type,status:d.status,verification:d.verified_at?"verified":"pending",expires:d.expires_at,issued:null,source:"Shipment document link",shipmentNumber:s?.shipment_number});});
+ const list=records.filter(d=>(!filter||[d.status,d.verification].some(v=>String(v||"").toLowerCase()===filter))&&(!search||[d.shipment,d.shipmentNumber,d.type,d.number,d.issuer,d.status,d.verification,d.source].some(v=>String(v||"").toLowerCase().includes(search))));
+ if(!list.length){body.innerHTML='<tr><td colspan="5" class="empty"><strong>No matching document records</strong>No records are displayed when none are returned for your authorized shipments. This is not evidence of customs clearance or document completeness.</td></tr>';return;}
+ body.innerHTML=list.map(d=>'<tr><td><div class="primarytext">#'+esc(d.shipmentNumber||d.shipment||"—")+'</div><div class="subtext">'+esc(d.source)+' · record #'+esc(d.id)+'</div></td><td><div class="primarytext">'+esc(d.type||"Unclassified document")+'</div><div class="subtext">'+esc(d.number||"No document number")+(d.issuer?" · "+esc(d.issuer):"")+'</div></td><td><div>'+esc(fmtDate(d.issued))+'</div><div class="subtext">Expiry: '+esc(fmtDate(d.expires))+'</div></td><td>'+badge(d.verification||"unverified")+(d.notes?'<div class="subtext">'+esc(d.notes)+'</div>':"")+'</td><td>'+badge(d.status||"not recorded")+'</td></tr>').join("");
+}
+function renderPods(){
+ const box=$("pod-list"),search=$("pod-search").value.trim().toLowerCase(),filter=$("pod-status").value.toLowerCase(),sm=shipmentMap();
+ const list=state.pods.filter(p=>(!filter||String(p.status||"").toLowerCase()===filter)&&(!search||[p.shipment_id,sm.get(Number(p.shipment_id))?.shipment_number,p.pod_type,p.status,p.received_by_name,p.received_by_role,p.rejection_reason].some(v=>String(v||"").toLowerCase().includes(search))));
+ if(!list.length){box.innerHTML='<div class="empty" style="grid-column:1/-1"><strong>No delivery evidence records found</strong>No ePOD records were returned for the authorized shipment scope. Delivery must not be inferred from this empty result.</div>';return;}
+ box.innerHTML=list.map(p=>{const s=sm.get(Number(p.shipment_id)),meta=p.evidence_metadata&&typeof p.evidence_metadata==="object"?p.evidence_metadata:{},hash=meta.sha256||meta.content_sha256||meta.file_hash;const verified=Boolean(p.verified_at)||String(p.status||"").toLowerCase()==="verified";return '<article class="record"><div class="row"><h3>Shipment '+esc(s?.shipment_number||("#"+p.shipment_id))+'</h3>'+badge(verified?"verified":p.status||"submitted")+'</div><p>Evidence type: <strong>'+esc(p.pod_type||"Not recorded")+'</strong></p><p>Recipient: '+esc(p.received_by_name||"Not recorded")+(p.received_by_role?" · "+esc(p.received_by_role):"")+'</p><p>Delivered: '+esc(fmtDate(p.delivered_at))+'</p><p>Submitted: '+esc(fmtDate(p.submitted_at))+'</p><p>Verified: '+esc(fmtDate(p.verified_at))+'</p><p>Shipment leg: '+esc(p.shipment_leg_id??"Not linked")+' · Assignment: '+esc(p.assignment_id??"Not linked")+'</p>'+(hash?'<p>Evidence hash: <code>'+esc(hash)+'</code></p>':"")+(p.rejection_reason?'<div class="notice error">'+esc(p.rejection_reason)+'</div>':"")+'<p class="subtle">POD record #'+esc(p.id)+' · linked document record '+esc(p.document_record_id??"not linked")+'</p></article>';}).join("");
+}
+function renderAudit(){
+ const box=$("audit-list"),items=[];
+ state.versions.forEach(v=>items.push({date:v.uploaded_at,title:"Document version "+v.version_number+" · record #"+v.document_record_id,detail:[v.mime_type||"MIME not recorded",v.file_size!=null?Number(v.file_size).toLocaleString()+" bytes":"Size not recorded",v.content_hash?"Hash: "+v.content_hash:"Hash not recorded",v.change_reason||""].filter(Boolean).join(" · "),status:v.status||"active"}));
+ state.verifications.forEach(v=>items.push({date:v.verified_at||v.created_at,title:(v.verification_type||"Document")+" verification · record #"+v.document_record_id,detail:[v.provider_name||"Provider not recorded",v.reference_hash?"Reference: "+v.reference_hash:"",v.rejection_reason||""].filter(Boolean).join(" · "),status:v.status||"pending"}));
+ state.pods.forEach(p=>items.push({date:p.verified_at||p.submitted_at||p.created_at,title:"ePOD "+(p.status||"submitted")+" · shipment #"+p.shipment_id,detail:[p.pod_type||"Delivery evidence",p.received_by_name||"Recipient not recorded",p.rejection_reason||""].filter(Boolean).join(" · "),status:p.status||"submitted"}));
+ items.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+ if(!items.length){box.innerHTML='<div class="empty"><strong>No version or verification events found</strong>Audit history is empty for the records currently accessible to this account.</div>';return;}
+ box.innerHTML=items.slice(0,150).map(i=>'<div class="audititem"><div class="row"><b>'+esc(i.title)+'</b>'+badge(i.status)+'</div><small>'+esc(fmtDate(i.date))+'</small><small>'+esc(i.detail||"No additional evidence metadata recorded")+'</small></div>').join("");
+}
+document.querySelectorAll(".navbtn").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));
+["doc-search","doc-status"].forEach(id=>$(id).addEventListener(id.endsWith("search")?"input":"change",renderDocuments));
+["pod-search","pod-status"].forEach(id=>$(id).addEventListener(id.endsWith("search")?"input":"change",renderPods));
+$("refresh-btn").addEventListener("click",loadAll);
+loadAll();
+})();
+</script>
 </body>
 </html>
