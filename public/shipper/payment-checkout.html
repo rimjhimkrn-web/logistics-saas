@@ -80,9 +80,12 @@ const expiryOk=!quote.valid_until||new Date(quote.valid_until).getTime()>Date.no
 const quoteOk=quote.status==="accepted"&&Number(quote.amount)>0&&expiryOk;
 const currency=String(quote.currency_code||"").toUpperCase();
  let foreignCurrencyReady=false;
+ let currencyBlockers=[];
  if(currency&&currency!=="INR"){
-   const capabilityResult=await client.functions.invoke("krim-payment-capability-status",{body:{currency_code:currency}});
+   const capabilityResult=await client.functions.invoke("krim-payment-capability-status",{body:{country_code:"IN",currency_code:currency,provider_code:"razorpay"}});
    foreignCurrencyReady=!capabilityResult.error&&capabilityResult.data&&capabilityResult.data.success===true&&capabilityResult.data.enabled===true;
+   if(!capabilityResult.error&&capabilityResult.data) currencyBlockers=Array.isArray(capabilityResult.data.blockers)?capabilityResult.data.blockers:[];
+   if(capabilityResult.error) currencyBlockers=["KRIM could not verify this currency capability right now."];
  }
  const currencyOk=Number(quote.amount)>0&&(currency==="INR"||foreignCurrencyReady);
 const shipmentOk=shipment.status==="confirmed";
@@ -95,7 +98,8 @@ check("auth",true,"Signed in; quote and shipment are scoped to an active custome
 check("quote",quoteOk,quoteOk?"Quote is accepted, positive-value and not expired.":"Quote must be accepted, positive-value and unexpired.");
 check("assignment",assignmentOk,assignmentOk?"Matching partner assignment is accepted.":"Matching partner assignment must be accepted before checkout.");
 check("shipment",shipmentOk,shipmentOk?"Shipment is confirmed.":"Shipment must be confirmed; current status is "+(shipment.status||"unknown")+".");
-check("currency",currencyOk,currencyOk?(currency==="INR"?"Current INR checkout path is configured.":"This currency passed KRIM's server-side capability check."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; no automatic conversion occurs."));
+const currencyBlockerMessage=currencyBlockers.length?" Blockers: "+currencyBlockers.join(" "):"";
+ check("currency",currencyOk,currencyOk?(currency==="INR"?"Current INR checkout path is configured; live merchant and settlement readiness still require verification.":"This currency passed KRIM's server-side capability check."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; no automatic conversion occurs."+currencyBlockerMessage));
 $("quote-status").textContent=quoteOk?"Accepted":"Blocked";$("quote-status").className="pill "+(quoteOk?"good":"bad");
 const canContinue=quoteOk&&currencyOk&&shipmentOk&&assignmentOk;
 setReady(canContinue);
