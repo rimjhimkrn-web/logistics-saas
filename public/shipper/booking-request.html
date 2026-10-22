@@ -46,8 +46,8 @@
       <div class="hero-content">
         <div class="eyebrow"><i></i> Global shipment intake · Customer workspace</div>
         <h1>Move freight with clarity.<br>Start with a shipment request.</h1>
-        <p>Enter your origin, destination and cargo basics. KRIM records the request against your authorized organization, then routes it into the pricing and partner-availability workflow. Availability, serviceability and price are confirmed by the operating system—not guessed by this form.</p>
-        <div class="hero-meta"><span class="hero-tag">🌐 Multi-market architecture</span><span class="hero-tag">🔐 Organization-scoped access</span><span class="hero-tag">↗ Connected to live shipment core</span></div>
+        <p>Search origins and destinations worldwide, choose your preferred transport mode, and enter cargo basics. KRIM records your route preference against the shipment and sends the request into pricing and partner-availability workflows. A selected mode is a request—not a guarantee of carrier coverage or serviceability.</p>
+        <div class="hero-meta"><span class="hero-tag">🌐 Worldwide place search</span><span class="hero-tag">🚚 Road · Rail · Ocean · Air</span><span class="hero-tag">🔐 Organization-scoped access</span></div>
       </div>
     </section>
     <div class="progress" aria-label="Booking progress">
@@ -66,11 +66,15 @@
               <div class="field full">
                 <label for="booking-origin">Origin location / dispatch hub <span class="req">*</span></label>
                 <div class="global-route-grid"><div class="global-place"><label class="sr-only" for="origin-search">Search origin worldwide</label><input id="origin-search" type="search" autocomplete="off" required placeholder="Search city, airport, port or address worldwide"><div id="origin-results" class="place-results" role="listbox" aria-label="Origin search results" hidden></div><input id="booking-origin" type="hidden"></div><div class="route-arrow" aria-hidden="true">→</div><div class="global-place"><label class="sr-only" for="destination-search">Search destination worldwide</label><input id="destination-search" type="search" autocomplete="off" required placeholder="Search destination worldwide"><div id="destination-results" class="place-results" role="listbox" aria-label="Destination search results" hidden></div><input id="booking-destination" type="hidden"></div></div>
-                <div class="hint">Search and select a real place from the global map directory. Place search uses OpenStreetMap data via Photon. New locations are added to KRIM’s directory when a shipment request is submitted; serviceability and pricing still require confirmation.</div>
+                <div class="hint">Search globally for cities, towns, airports, seaports, terminals and addresses. Search results are geographic places, not proof of a working freight lane. KRIM stores newly selected places when a shipment is submitted; actual serviceability and pricing require separate confirmation.</div>
               </div>
             </div>
             <div class="divider"></div>
-            <div class="section-label">02 / Requested service</div>
+            <div class="section-label">02 / Route & transport preference</div>
+            <div class="field-grid">
+              <div class="field full"><label for="booking-transport-mode">Preferred transport mode <span class="req">*</span></label><select id="booking-transport-mode" required><option value="multimodal">Multimodal — combine modes where feasible</option><option value="road">Road freight / trucking</option><option value="rail">Rail freight</option><option value="ocean">Ocean / sea freight</option><option value="air">Air freight</option><option value="warehouse_transfer">Warehouse / distribution transfer</option><option value="specialist">Specialist / heavy or project cargo</option></select><div class="hint">Your preference is saved on the shipment record. KRIM must still confirm geographic feasibility, customs or trade requirements, available partners, capacity and pricing before accepting a booking.</div></div>
+            </div>
+            <div class="section-label">03 / Requested service
             <div class="field-grid">
               <div class="field full"><label for="booking-service-tier">Service tier <span class="req">*</span></label><select id="booking-service-tier" required><option value="surface_express">Surface Express — road / surface network</option><option value="air_priority">Air Priority — air service (availability must be confirmed)</option><option value="heavy_haul">Heavy Haul — specialist capacity (availability must be confirmed)</option></select><div class="hint">This selection is passed to the quote workflow. It does not guarantee a mode, carrier, serviceability, transit time, or price; those require backend confirmation.</div></div>
             </div>
@@ -98,7 +102,8 @@
           </div>
           <div class="summary-row"><span>Goods</span><strong id="goods-preview">Not provided</strong></div>
           <div class="summary-row"><span>Gross weight</span><strong id="weight-preview">— kg</strong></div>
-          <div class="summary-row"><span>Requested service</span><strong id="service-preview">Surface Express</strong></div>
+          <div class="summary-row"><span>Transport preference</span><strong id="mode-preview">Multimodal</strong></div>
+          <div class="summary-row"><span>Requested service tier</span><strong id="service-preview">Surface Express</strong></div>
           <div class="summary-row"><span>Customer account</span><strong id="org-preview">Verifying access…</strong></div>
           <div class="summary-row"><span>Request status</span><strong>Draft / awaiting pricing</strong></div>
           <div class="notice"><b>Pricing integrity</b>KRIM will not invent a freight price. A quote requires an approved matching tariff or a supported partner-offer workflow. No payment is taken on this page.</div>
@@ -149,6 +154,8 @@
     $("weight-preview").textContent=Number.isFinite(weight)&&weight>0?new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(weight)+" kg":"— kg";
     const tier=$("booking-service-tier");
     $("service-preview").textContent=tier.options[tier.selectedIndex]?.textContent.split(" — ")[0]||"Surface Express";
+    const mode=$("booking-transport-mode");
+    $("mode-preview").textContent=mode.options[mode.selectedIndex]?.textContent.split(" — ")[0]||"Multimodal";
     button.disabled=!isReady||submitting;
   }
   function normalizePlace(feature){
@@ -220,6 +227,7 @@
   }
   ["booking-goods","booking-weight"].forEach(id => $(id).addEventListener("input",updatePreview));
   $("booking-service-tier").addEventListener("change",updatePreview);
+  $("booking-transport-mode").addEventListener("change",updatePreview);
   form.addEventListener("submit",async function(event){
     event.preventDefault();
     if(!isReady || submitting || !currentUserOrgId) return;
@@ -237,7 +245,8 @@
         p_origin_place: originPlace,
         p_destination_place: destinationPlace,
         p_goods_description: goods,
-        p_total_weight_kg: weight
+        p_total_weight_kg: weight,
+        p_transport_mode: $("booking-transport-mode").value
       });
       if(error) throw error;
       let shipmentId = null;
@@ -251,7 +260,7 @@
       }
       showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
       button.innerHTML = "Shipment created ✓";
-      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value);},1000);
+      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value);},1000);
     }catch(err){
       submitting = false;
       button.disabled = !isReady;
