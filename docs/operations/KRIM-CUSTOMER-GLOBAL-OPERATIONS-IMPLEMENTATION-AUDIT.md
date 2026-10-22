@@ -32,9 +32,9 @@ This is an implementation audit, not an authenticated browser end-to-end test. N
 ### P0 — Establish one coherent quote-to-booking state machine
 
 Current source contracts do not align cleanly:
-1. Tariff-generated quotes appear to have no `partner_quote_id`.
-2. Both checkout UI and the order-creation Edge Function require a partner quote and an accepted partner assignment.
-3. Quote acceptance calls a shipment transition to `confirmed`, while checkout separately requires the partner assignment to be accepted.
+1. Tariff-generated quotes appear to have no `partner_quote_id`, but checkout UI, order creation and payment verification require one. The tariff-card route therefore appears unable to complete checkout without a missing/explicit partner-linking step.
+2. The customer award function creates a partner assignment in `offered` status and a customer quote already in `accepted` status. The partner must subsequently accept the assignment before payment. Confirm that the customer-facing action really represents acceptance of the final price and that this sequencing is consistently displayed.
+3. Shipment status is transitioned to `confirmed` when the partner offer is awarded, before the partner assignment becomes `accepted`. Validate the intended meaning of `confirmed` and its downstream effects against the status-transition table, dispatch logic and customer messaging.
 
 Before changing production, trace the partner quote award function(s), assignment creation/acceptance functions, quote row linkage, and transition rules. Then define and test the exact lifecycle, for example:
 - shipment request created (not confirmed);
