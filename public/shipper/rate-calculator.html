@@ -155,7 +155,7 @@ a:not(.btn){text-decoration-color:#38bdf870}
   if($("calc-shipment-id").value.trim())try{await fetchShipment($("calc-shipment-id").value.trim());}catch(e){showFeedback("Shipment could not be loaded: "+(e.message||"Check the ID and account access."),"error");}
  }
  async function fetchShipment(id){
-  if(!/^\\d+$/.test(String(id)))throw new Error("Enter a valid numeric KRIM shipment ID.");
+  if(!/^\d+$/.test(String(id)))throw new Error("Enter a valid numeric KRIM shipment ID.");
   setLoadStatus("Verifying access…",false);
   const {data:sessionData,error:sessionError}=await client.auth.getSession();
   if(sessionError||!sessionData||!sessionData.session)throw new Error("Please sign in to your KRIM customer account.");
