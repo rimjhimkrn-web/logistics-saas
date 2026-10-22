@@ -1,97 +1,27 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Quote Request</title>
-    <meta name="description" content="Submit freight parameters, origin-destination corridors, and carrier requirements for automated spot bidding in KRIM OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#026f9e', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1f3a">
+<title>Request Freight Pricing | KRIM Logistics</title>
+<meta name="description" content="Start a secure KRIM shipment request and continue to quote review when verified pricing is available.">
+<style>
+:root{--navy:#0b1f3a;--blue:#1769e0;--teal:#0f766e;--ink:#182941;--muted:#64748b;--line:#dce5f0;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{text-decoration:none;color:inherit}.top{background:var(--navy);color:#dbeafe;padding:10px 5vw;font-size:11px;letter-spacing:.1em}.shell{width:min(1080px,calc(100% - 32px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 0}.brand{font-weight:950;color:var(--navy);letter-spacing:.05em}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.16em}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:12px 16px;font-size:12px;font-weight:850;border:1px solid var(--line);background:#fff}.primary{background:linear-gradient(110deg,var(--blue),var(--teal));border-color:transparent;color:white}.hero{margin:28px 0;background:linear-gradient(115deg,#0b1f3a,#174b70 70%,#0f766e);color:white;border-radius:24px;padding:clamp(24px,5vw,54px);box-shadow:0 18px 45px #0b1f3a18}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#99f6e4}.hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.04em;margin:13px 0}.hero p{max-width:700px;color:#d7e7f4}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}.card{background:white;border:1px solid var(--line);border-radius:17px;padding:20px}.num{font-weight:950;color:var(--teal);font-size:12px}.card h2{font-size:16px;margin:9px 0}.card p{font-size:12px;color:var(--muted);margin:0}.notice{background:#fff8e8;border:1px solid #f4dfaa;color:#76551b;border-radius:13px;padding:14px;font-size:12px;margin:18px 0}footer{padding:24px 0;color:var(--muted);font-size:11px;border-top:1px solid var(--line);margin-top:30px}@media(max-width:650px){.steps{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.nav .actions{display:flex;gap:8px;flex-wrap:wrap}}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-800 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Quote Request</span>
-                </div>
-            </div>
-            <a href="/public/customer/cargo-profiles.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Back to Cargo Profiles</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest">Spot Market & Bidding</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Request Freight Quote</h1>
-            <p class="text-slate-400 text-xs font-mono">Specify lane parameters, pickup dates, and vehicle requirements to trigger carrier spot bidding.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <form onsubmit="handleQuoteSubmit(event)" class="space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Origin Hub / Warehouse</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                            <option>WH-01: Mumbai Central Fulfillment Hub</option>
-                            <option>WH-DEL-01: North Zone DC - Delhi NCR</option>
-                            <option>WH-BLR-02: South Zone DC - Bengaluru</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Destination Corridor</label>
-                        <input type="text" required placeholder="Pune Industrial Zone, MH" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Vehicle Type Required</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                            <option>32 Ft Multi-Axle Truck (24 Tonne)</option>
-                            <option>20 Ft Container Truck (14 Tonne)</option>
-                            <option>LCF Reefer Truck (Temperature Controlled)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Target Pickup Date</label>
-                        <input type="date" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 cursor-pointer">
-                    Broadcast Quote Request to Carrier Network →
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function handleQuoteSubmit(e) {
-            e.preventDefault();
-            alert('Quote request broadcasted successfully to active carrier nodes.');
-            window.location.href = '/public/customer/quote-comparison.html';
-        }
-    </script>
-</body>
-</html>
+<body>
+<div class="top">KRIM LOGISTICS · COMMERCIAL WORKFLOW</div>
+<header class="shell nav"><a class="brand" href="../../index.html">KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></a><div class="actions"><a class="btn" href="../../app/customer/index.html">Customer workspace</a> <a class="btn" href="../../auth/login.html?role=customer">Sign in</a></div></header>
+<main class="shell">
+<section class="hero"><div class="eyebrow">Freight pricing · secure workflow</div><h1>Request pricing with a shipment record behind it.</h1><p>KRIM uses a consistent shipment intake workflow so route, cargo, organization permissions and quote activity can be tied to the same operational record. We do not claim a quote has been broadcast or invent a price before the backend confirms it.</p><a class="btn primary" href="shipment-create.html">Start secure shipment request →</a></section>
+<section class="steps" aria-label="Quote workflow">
+<article class="card"><span class="num">01 · SHIPMENT</span><h2>Submit route and cargo</h2><p>Enter origin, destination, cargo details and transport requirements in the authenticated booking workflow.</p></article>
+<article class="card"><span class="num">02 · PRICING</span><h2>Check eligible pricing</h2><p>Pricing must come from an approved rate card or a valid partner quote. Availability depends on configured rates and partner responses.</p></article>
+<article class="card"><span class="num">03 · DECISION</span><h2>Review before accepting</h2><p>Only accept a quote after the platform displays its actual price, currency, validity and terms.</p></article>
+</section>
+<div class="notice"><strong>Operational status:</strong> This page guides you to the canonical booking workflow. It does not itself create a quote or notify carriers. Quote creation and partner responses must be confirmed by the secured backend.</div>
+<div class="actions"><a class="btn primary" href="shipment-create.html">Continue to booking</a> <a class="btn" href="quote-comparison.html">Open quote comparison</a> <a class="btn" href="shipment-list.html">View my shipments</a></div>
+</main>
+<footer class="shell">© 2026 KRIM Logistics · Customer pricing workflow</footer>
+</body></html>
