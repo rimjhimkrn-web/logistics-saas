@@ -91,7 +91,7 @@
                     </div>
                 </div>
 
-                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 space-y-2 text-xs"><div class="flex justify-between gap-4"><span class="text-slate-500">Requested transport mode</span><strong id="calc-transport-mode" class="text-slate-800 text-right">Not specified</strong></div><p class="text-slate-500 leading-relaxed">This is the customer’s saved preference. Route feasibility, customs requirements, partner capacity and mode-specific pricing must be confirmed; this display does not certify service availability.</p></div>
+                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 space-y-2 text-xs"><div class="flex justify-between gap-4"><span class="text-slate-500">Saved transport preference</span><strong id="calc-transport-mode" class="text-slate-800 text-right">Loading shipment…</strong></div><div class="grid sm:grid-cols-2 gap-3 pt-2"><div><span class="block text-slate-500 mb-1">Selected origin</span><strong id="calc-origin-place" class="block text-slate-800 font-sans">Loading…</strong></div><div><span class="block text-slate-500 mb-1">Selected destination</span><strong id="calc-destination-place" class="block text-slate-800 font-sans">Loading…</strong></div></div><p class="text-slate-500 leading-relaxed">The saved mode and selected places are customer preferences, not a confirmed route. Feasibility, customs, carrier capacity, serviceability, transit time and mode-specific pricing must be confirmed before a booking is accepted.</p></div>
             <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
                     <div class="flex justify-between">
                         <span class="text-slate-500">Pricing status:</span>
@@ -143,9 +143,7 @@
             const params = new URLSearchParams(window.location.search);
             const shipmentId = params.get('shipment_id');
             const requestedTier = params.get('service_tier');
-            const requestedMode = params.get('transport_mode');
-            const modeLabels = {road:"Road freight",rail:"Rail freight",ocean:"Ocean / sea freight",air:"Air freight",multimodal:"Multimodal",warehouse_transfer:"Warehouse / distribution transfer",specialist:"Specialist / project cargo"};
-            document.getElementById("calc-transport-mode").textContent = modeLabels[requestedMode] || "See saved shipment preference";
+
             const tierSelect = document.getElementById('calc-service-tier');
             if (requestedTier && Array.from(tierSelect.options).some(option => option.value === requestedTier)) {
                 tierSelect.value = requestedTier;
@@ -165,7 +163,7 @@
         async function fetchShipmentWeight(id) {
             const { data, error } = await supabaseClient
                 .from("krim_shipments")
-                .select("id, customer_organization_id, total_weight_kg, status")
+                .select("id, customer_organization_id, total_weight_kg, status, requested_transport_mode, origin_place_label, destination_place_label, origin_place_type, destination_place_type")
                 .eq("id", id)
                 .single();
             if (error) {
@@ -177,6 +175,10 @@
                 throw new Error("Shipment record was not returned for this account.");
             }
             loadedShipmentData = data;
+            const modeLabels = {road:"Road freight",rail:"Rail freight",ocean:"Ocean / sea freight",air:"Air freight",multimodal:"Multimodal",warehouse_transfer:"Warehouse / distribution transfer",specialist:"Specialist / project cargo"};
+            document.getElementById("calc-transport-mode").textContent = modeLabels[data.requested_transport_mode] || "No saved preference";
+            document.getElementById("calc-origin-place").textContent = data.origin_place_label || "Saved location on shipment";
+            document.getElementById("calc-destination-place").textContent = data.destination_place_label || "Saved location on shipment";
             calculateRate();
             return data;
         }
