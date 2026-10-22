@@ -240,10 +240,26 @@
         return;
       }
       $("session-identity-node").textContent = session.user.email || "Authenticated customer";
-      const {data:membership,error:membershipError} = await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active").limit(1).maybeSingle();
+      const {data:memberships,error:membershipError} = await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",session.user.id).eq("status","active");
       if(membershipError) throw membershipError;
-      if(!membership || !membership.organization_id) throw new Error("Your account is not linked to an active KRIM organization. Ask your organization administrator to provision access.");
-      currentUserOrgId = membership.organization_id;
+      const activeMemberships=Array.isArray(memberships)?memberships:[];
+      const orgIds=[...new Set(activeMemberships.map(m=>m.organization_id).filter(Boolean))];
+      if(!orgIds.length) throw new Error("Your account is not linked to an active KRIM organization. Ask your organization administrator to provision customer access.");
+      const {data:organizations,error:organizationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code").in("id",orgIds);
+      if(organizationError) throw organizationError;
+      const orgById=new Map((organizations||[]).map(org=>[String(org.id),org]));
+      function roleKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
+      function isCustomerMembership(m){
+        const role=roleKey(m.role);
+        if(/customer|shipper|client/.test(role)) return true;
+        if(/platform_admin|superadmin|partner|carrier|driver|warehouse|customs|finance|operations|enterprise|dispatcher/.test(role)) return false;
+        const org=orgById.get(String(m.organization_id));
+        return /customer|shipper|client/.test(roleKey(org&&(org.organization_type||org.organization_type_code)));
+      }
+      const customerMemberships=activeMemberships.filter(isCustomerMembership);
+      if(!customerMemberships.length) throw new Error("No active customer organization membership was found for this account. Sign in to the Customer Workspace or ask your organization administrator to provision customer access.");
+      if(customerMemberships.length>1) throw new Error("This account has multiple active customer organizations. Ask your organization administrator to set the intended booking organization before creating a shipment.");
+      currentUserOrgId=customerMemberships[0].organization_id;
       $("org-preview").textContent = "Active organization verified";
       loadBookingLocations();
       isReady = true;
