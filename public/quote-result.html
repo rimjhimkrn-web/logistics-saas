@@ -1,382 +1,210 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Secure Checkout & Razorpay Settlement</title>
-    <link rel="manifest" href="../manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../config.js"></script>
-    <!-- Razorpay Checkout SDK -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-
-<!-- KRIM INTERNATIONAL CHECKOUT VISUALS -->
-<style>
-body{background:#f2f6fb!important;font-family:Inter,system-ui,sans-serif!important}
-body>div:first-of-type{background:#071a2d!important;color:#dbeafe!important}
-header{background:#07182a!important;border-color:#17334d!important}
-header .text-slate-900,header .text-slate-700{color:#fff!important}
-header .text-sky-600{color:#7dd3fc!important}
-header a{color:#fff!important;border-color:#31516c!important}
-main>div{border-radius:26px!important;border-color:#dce7f1!important;box-shadow:0 24px 70px rgba(7,30,55,.10)!important}
-main h1{font-size:clamp(28px,4vw,40px)!important;letter-spacing:-.03em!important}
-#btn-pay-now{background:#078df4!important;border-radius:14px!important;min-height:54px!important;box-shadow:0 12px 26px rgba(7,141,244,.18)!important}
-#btn-pay-now:hover{background:#0676d1!important}
-#btn-cashfree{border-radius:14px!important;min-height:50px!important}
-footer{background:#071a2d!important;color:#cbd5e1!important;border-color:#17334d!important}
-footer a:hover{color:#7dd3fc!important}
-@media(max-width:640px){main{padding:26px 16px!important}main>div{padding:24px!important;border-radius:20px!important}}
-</style>
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<meta name="description" content="Secure KRIM Logistics checkout. Review the accepted shipment quote and pay through a server-created Razorpay order.">
+<title>KRIM Logistics | Secure Checkout</title>
+<link rel="manifest" href="../manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<style>
+:root{--navy:#10243a;--navy2:#183d5b;--blue:#1769aa;--cyan:#e6f5fc;--ink:#1c3044;--muted:#64788b;--line:#dce6ef;--paper:#fff;--bg:#f3f7fb;--green:#13795b;--amber:#925700;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 8% 0%,#e7f3fc 0,transparent 31%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+.topline{background:#0b1c2d;color:#c5d3df;padding:9px max(18px,calc((100% - 1180px)/2));display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fbbf24;margin-right:8px}
+header{background:#ffffffed;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;backdrop-filter:blur(14px)}.nav{max-width:1180px;margin:auto;min-height:76px;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#1769aa,#10243a);display:grid;place-items:center;color:#fff;font-weight:950;font-size:20px}.brand-name{font-size:13px;letter-spacing:.13em;font-weight:950;color:var(--navy)}.brand-sub{font-size:9px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;font-weight:850;margin-top:4px}.nav-link,.btn{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 15px;font-size:11px;font-weight:850;display:inline-flex;align-items:center;justify-content:center;gap:8px}.nav-link:hover,.btn-secondary:hover{background:#f0f6fb;border-color:#b8cfe0}.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}.btn-primary:hover{background:#1a4263}.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn-danger{color:var(--red);border-color:#f0c8c5}
+main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 95% 0%,#287fa6 0,transparent 36%),linear-gradient(120deg,#0c2034,#163e5e 72%,#1769aa);color:#fff;border-radius:26px;padding:32px;box-shadow:0 20px 55px #10243a20}.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;position:relative;z-index:1}.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.18em;font-weight:950;color:#82e3f1}.hero h1{font-size:clamp(29px,4vw,43px);letter-spacing:-.045em;line-height:1.05;margin:12px 0;color:#fff}.hero p{font-size:13px;line-height:1.8;color:#d7e6f2;max-width:720px;margin:0}.secure-chip{border:1px solid #ffffff3c;background:#ffffff0d;border-radius:17px;padding:17px 19px;min-width:165px}.secure-chip strong{display:block;font-size:12px}.secure-chip span{display:block;color:#c8dce9;font-size:10px;margin-top:6px}
+.journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 22px}.journey-step{background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px;display:flex;gap:10px;align-items:center}.journey-step.active{background:#f0f8fe;border-color:#9cc9e9}.step-no{flex:0 0 32px;height:32px;border-radius:10px;background:#e7f2fc;color:var(--blue);display:grid;place-items:center;font-size:11px;font-weight:950}.journey-step strong{display:block;font-size:10px;color:var(--navy)}.journey-step small{display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr);gap:16px;align-items:start}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:23px;box-shadow:0 10px 30px #10243a08}.card+.card{margin-top:15px}.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:19px}.card h2{font-size:16px;color:var(--navy);margin:0;letter-spacing:-.02em}.card-head p{font-size:11px;line-height:1.7;color:var(--muted);margin:6px 0 0}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:7px 10px;background:#edf5fb;color:#315c7b;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}.pill.good{background:#e8f7ef;color:var(--green)}.pill.warn{background:#fff4df;color:var(--amber)}.pill.bad{background:#fff0ef;color:var(--red)}
+.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.detail{background:#f7fafc;border:1px solid #e8eef4;border-radius:13px;padding:13px;min-width:0}.detail label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:var(--muted);margin-bottom:7px}.detail strong{display:block;font-size:12px;line-height:1.55;color:var(--navy);overflow-wrap:anywhere}.detail small{display:block;color:var(--muted);font-size:10px;margin-top:5px;line-height:1.5}
+.amount-box{background:linear-gradient(145deg,#f0f8fd,#f9fbfd);border:1px solid #cfe3f2;border-radius:18px;padding:20px}.amount-label{font-size:9px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#59758b}.amount-value{font-size:clamp(29px,4vw,38px);letter-spacing:-.04em;font-weight:950;color:var(--navy);margin:9px 0 4px;overflow-wrap:anywhere}.amount-note{font-size:10px;color:var(--muted);line-height:1.7}.check-list{display:grid;gap:11px;margin-top:17px}.check-row{display:flex;gap:10px;align-items:flex-start;font-size:11px;line-height:1.65;color:#496075}.check-icon{width:21px;height:21px;flex:0 0 21px;border-radius:7px;background:#eaf6ef;color:var(--green);display:grid;place-items:center;font-weight:950}.check-icon.pending{background:#fff4df;color:var(--amber)}.notice{padding:14px 15px;border-radius:13px;border:1px solid #d8e8f4;background:#f2f8fc;color:#31556f;font-size:11px;line-height:1.75}.notice.error{border-color:#f0c8c5;background:#fff4f3;color:#9c2923}.notice.success{border-color:#b9e6cb;background:#effaf3;color:#17643f}.notice strong{display:block;margin-bottom:4px}.primary-action{width:100%;min-height:54px;border:0;border-radius:14px;background:linear-gradient(100deg,#087de0,#1769aa);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;box-shadow:0 12px 25px #1769aa24}.primary-action:hover:not(:disabled){filter:brightness(.96);transform:translateY(-1px)}.action-note{text-align:center;font-size:9px;line-height:1.7;color:var(--muted);margin:10px 4px 0}.feedback{margin-top:13px}.meta-list{display:grid;gap:0}.meta-row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #edf1f5;font-size:10px}.meta-row:last-child{border-bottom:0}.meta-row span{color:var(--muted)}.meta-row strong{text-align:right;color:var(--navy);overflow-wrap:anywhere}.footnote{font-size:10px;color:var(--muted);line-height:1.8;margin-top:14px}footer{background:#0b1c2d;color:#bdcbd8;padding:23px 24px;font-size:10px}footer>div{max-width:1180px;margin:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}footer a{color:#e4f2fc}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.hero-grid{grid-template-columns:1fr}.secure-chip{max-width:250px}.journey{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.nav{padding:12px 16px}.nav-link{padding:10px;font-size:10px}main{padding:20px 14px 34px}.hero{padding:24px 20px;border-radius:20px}.card{padding:18px;border-radius:17px}.journey{gap:7px}.journey-step{padding:10px;align-items:flex-start}.journey-step small{font-size:8px}.details{grid-template-columns:1fr 1fr}.detail{padding:11px}.amount-box{padding:17px}.topline{padding:9px 14px}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="payment-gateway-status" class="text-amber-300 font-bold">PAYMENT GATEWAY: VERIFICATION PENDING</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
-    </div>
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Secure Settlement</span>
-                </div>
-            </div>
-            
-            <a href="shipper/spot-approvals.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Spot Approvals
-            </a>
-        </div>
-    </header>
-
-    <!-- Checkout Main Content -->
-    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
-            
-            <div class="space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Financial Ledger Verification</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Settlement Checkout</h1>
-                <p class="text-slate-600 text-sm">Review your authoritative tariff quotation and execute secure payment verification via Razorpay Edge Functions.</p>
-            </div>
-
-            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4 font-mono text-xs">
-                <div class="flex justify-between border-b border-slate-200 pb-3">
-                    <span class="text-slate-500">Shipment ID:</span>
-                    <span id="checkout-shipment-id" class="text-slate-900 font-bold">--</span>
-                </div>
-                <div class="flex justify-between border-b border-slate-200 pb-3">
-                    <span class="text-slate-500">Quoted Tariff Amount:</span>
-                    <span id="checkout-amount" class="text-sky-600 font-bold text-sm">Loading authoritative quote…</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Edge Verification Status:</span>
-                    <span class="text-amber-700 font-bold">SERVER VERIFICATION PENDING</span>
-                </div>
-            </div>
-
-            <button  id="btn-pay-now" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                Authorize & Pay via Razorpay Secure →
-            </button>
-
-            <button id="btn-cashfree" class="w-full mt-3 bg-emerald-700 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider" disabled>Test with Cashfree Sandbox →</button>
-            <div id="checkout-feedback" class="text-xs"></div>
-
-        </div>
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Settlement Gateway © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="../app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Secure Checkout: server-created Razorpay order + server-side verification -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-        let activeQuoteRecord = null;
-        let currentSession = null;
-
-        function setGatewayStatus(label, state = "pending") {
-            const node = document.getElementById("payment-gateway-status");
-            if (!node) return;
-            node.textContent = "PAYMENT GATEWAY: " + label;
-            node.className = "font-bold " + (state === "verified" ? "text-emerald-400" : state === "error" ? "text-red-300" : "text-amber-300");
-        }
-
-        function showCheckoutMessage(message, type = "error") {
-            const feedback = document.getElementById("checkout-feedback");
-            feedback.textContent = message;
-            feedback.className = type === "success"
-                ? "text-sm font-semibold text-emerald-700"
-                : type === "info"
-                    ? "text-sm font-semibold text-sky-700"
-                    : "text-sm font-semibold text-red-700";
-        }
-
-        async function initCheckout() {
-            const button = document.getElementById("btn-pay-now");
-            button.disabled = true;
-            const shipmentId = new URLSearchParams(window.location.search).get("shipment_id");
-
-            if (!shipmentId || !/^\d+$/.test(shipmentId)) {
-                showCheckoutMessage("A valid shipment reference is required.");
-                return;
-            }
-
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-            if (sessionError || !session) {
-                window.location.href = "../auth/login.html";
-                return;
-            }
-            currentSession = session;
-            document.getElementById("session-identity-node").textContent = "Node: " + session.user.email;
-
-            const { data: quote, error } = await supabaseClient
-                .from("krim_quotes")
-                .select("id, shipment_id, amount, currency_code, status, valid_until, partner_quote_id")
-                .eq("shipment_id", Number(shipmentId))
-                .eq("status", "accepted")
-                // Match the server's deterministic quote selection order.
-                .order("id", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (error || !quote) {
-                showCheckoutMessage("No authorized quotation was found for this shipment.");
-                return;
-            }
-
-            activeQuoteRecord = quote;
-            document.getElementById("checkout-shipment-id").textContent = "#" + quote.shipment_id;
-            document.getElementById("checkout-amount").textContent =
-                (quote.currency_code || "INR") + " " + Number(quote.amount).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
-
-            if (!quote.partner_quote_id) {
-                showCheckoutMessage(
-                    "Checkout is locked until a verified partner quotation has been awarded and linked to this shipment. Partner selection and assignment acceptance must finish first.",
-                    "info"
-                );
-                return;
-            }
-
-            // Mirror the server-side checkout guard so customers are not offered
-            // payment until the awarded partner has accepted the shipment assignment.
-            const { data: assignment, error: assignmentError } = await supabaseClient
-                .from("krim_shipment_partner_assignments")
-                .select("id, status")
-                .eq("shipment_id", Number(shipmentId))
-                .eq("partner_quote_id", quote.partner_quote_id)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (assignmentError || !assignment || assignment.status !== "accepted") {
-                showCheckoutMessage(
-                    "Checkout is locked until the selected partner accepts the shipment assignment. No payment order has been created.",
-                    "info"
-                );
-                return;
-            }
-
-            if (quote.status !== "accepted") {
-                showCheckoutMessage(
-                    quote.status === "sent"
-                        ? "This quote needs to be accepted first. Open Spot Approvals to review it."
-                        : "Checkout is unavailable until the quote is accepted. Current quote status: " + quote.status,
-                    "info"
-                );
-                return;
-            }
-            if (quote.valid_until && new Date(quote.valid_until).getTime() <= Date.now()) {
-                showCheckoutMessage("This quote has expired. Request a refreshed quote.");
-                return;
-            }
-
-            button.disabled = false;
-            document.getElementById("btn-cashfree").disabled = false;
-            const cashfreeReturnOrder = new URLSearchParams(location.search).get("cashfree_order_id");
-            if (cashfreeReturnOrder) {
-                button.disabled = true;
-                document.getElementById("btn-cashfree").disabled = true;
-                showCheckoutMessage("Verifying Cashfree payment with KRIM's server...", "info");
-                try {
-                    const result = await supabaseClient.functions.invoke("verify-global-cashfree-payment", { body: { order_id: cashfreeReturnOrder } });
-                    if (result.error) throw result.error;
-                    if (result.data && result.data.verified) {
-                        setGatewayStatus("SERVER-VERIFIED", "verified");
-                        showCheckoutMessage("Cashfree payment verified by KRIM server.", "success");
-                    }
-                    else showCheckoutMessage((result.data && (result.data.message || result.data.error)) || "Payment not confirmed yet. Check status before retrying.", "info");
-                } catch (err) {
-                    setGatewayStatus("VERIFICATION UNAVAILABLE", "error");
-                    showCheckoutMessage("Payment verification unavailable: " + (err.message || "Unknown error"));
-                } finally {
-                    button.disabled = false;
-                    document.getElementById("btn-cashfree").disabled = false;
-                }
-            } else {
-                showCheckoutMessage("Accepted quote loaded. Payment amount and order will be verified by KRIM's server.", "info");
-            }
-        }
-
-        async function startRazorpayCheckout() {
-            const button = document.getElementById("btn-pay-now");
-            if (!activeQuoteRecord || !currentSession) {
-                showCheckoutMessage("A valid signed-in session and accepted quote are required.");
-                return;
-            }
-
-            button.disabled = true;
-            showCheckoutMessage("Creating a secure payment order on KRIM's server...", "info");
-
-            try {
-                const { data: order, error: orderError } = await supabaseClient.functions.invoke(
-                    "create-global-razorpay-order",
-                    { body: { krim_shipment_id: Number(activeQuoteRecord.shipment_id) } }
-                );
-                if (orderError) throw orderError;
-                if (!order?.success || !order.razorpay_order_id || !order.key_id || !Number.isFinite(Number(order.amount_paise))) {
-                    throw new Error(order?.error || "The server did not return a valid Razorpay order.");
-                }
-                // Never open checkout if the server selected a different quote
-                // from the one shown to the customer.
-                if (Number(order.quote_id) !== Number(activeQuoteRecord.id)) {
-                    throw new Error("The accepted quote changed. Refresh checkout and review the current quotation before paying.");
-                }
-                document.getElementById("checkout-amount").textContent =
-                    (order.currency || "INR") + " " + (Number(order.amount_paise) / 100).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2});
-
-                const options = {
-                    key: order.key_id,
-                    order_id: order.razorpay_order_id,
-                    amount: Number(order.amount_paise),
-                    currency: order.currency || "INR",
-                    name: "KRIM Logistics OS",
-                    description: "Shipment " + (order.shipment_number || activeQuoteRecord.shipment_id),
-                    handler: async function (response) {
-                        showCheckoutMessage("Verifying payment with Razorpay and KRIM's server...", "info");
-                        try {
-                            if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
-                                throw new Error("Razorpay returned an incomplete payment response.");
-                            }
-                            if (response.razorpay_order_id !== order.razorpay_order_id) {
-                                throw new Error("Payment order reference mismatch. Do not retry until payment status is checked.");
-                            }
-                            const { data: verification, error: verifyError } = await supabaseClient.functions.invoke(
-                                "verify-razorpay-payment",
-                                { body: {
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature
-                                } }
-                            );
-                            if (verifyError) throw verifyError;
-                            if (!verification?.success || !verification?.verified) {
-                                setGatewayStatus("VERIFICATION NOT CONFIRMED", "error");
-                                throw new Error(verification?.error || "Server could not confirm the payment.");
-                            }
-                            setGatewayStatus("SERVER-VERIFIED", "verified");
-                            showCheckoutMessage("Payment verified successfully. Redirecting to your shipments...", "success");
-                            setTimeout(() => {
-                                window.location.href = "shipper/active-shipments.html";
-                            }, 1400);
-                        } catch (err) {
-                            setGatewayStatus("VERIFICATION FAILED", "error");
-                            showCheckoutMessage("Payment verification failed: " + (err.message || "Unknown error") + ". Do not retry until payment status is checked.");
-                            button.disabled = false;
-                        }
-                    },
-                    modal: {
-                        ondismiss: function () {
-                            button.disabled = false;
-                            setGatewayStatus("CHECKOUT CLOSED — NOT VERIFIED", "pending");
-                            showCheckoutMessage("Checkout was closed. No payment success has been recorded.", "info");
-                        }
-                    },
-                    theme: { color: "#0284c7" }
-                };
-
-                const checkout = new Razorpay(options);
-                checkout.on("payment.failed", function (response) {
-                    button.disabled = false;
-                    setGatewayStatus("PAYMENT FAILED — VERIFY STATUS", "error");
-                    showCheckoutMessage(response.error?.description || "Payment failed. Please verify payment status before retrying.");
-                });
-                checkout.open();
-            } catch (err) {
-                button.disabled = false;
-                showCheckoutMessage("Unable to start secure checkout: " + (err.message || "Unknown error"));
-            }
-        }
-
-        document.getElementById("btn-pay-now").addEventListener("click", startRazorpayCheckout);
-        document.getElementById("btn-cashfree").addEventListener("click", startCashfreeCheckout);
-        async function startCashfreeCheckout() {
-            const button = document.getElementById("btn-cashfree");
-            if (!activeQuoteRecord || !currentSession) { showCheckoutMessage("Sign in and load an accepted quote first."); return; }
-            button.disabled = true;
-            try {
-                showCheckoutMessage("Creating Cashfree sandbox order on KRIM's server...", "info");
-                const result = await supabaseClient.functions.invoke("create-global-cashfree-order", {
-                    body: { krim_shipment_id: Number(activeQuoteRecord.shipment_id) }
-                });
-                if (result.error) throw result.error;
-                const order = result.data;
-                if (!order || !order.success || !order.payment_session_id || !order.order_id || order.sandbox !== true)
-                    throw new Error((order && order.error) || "Cashfree sandbox order was not returned.");
-                if (Number(order.quote_id) !== Number(activeQuoteRecord.id)) throw new Error("Quote changed; refresh checkout.");
-                const cashfree = await window.Cashfree({ mode: "sandbox" });
-                await cashfree.checkout({ paymentSessionId: order.payment_session_id, redirectTarget: "_self" });
-            } catch (err) {
-                showCheckoutMessage("Cashfree sandbox error: " + (err.message || "Unknown error"));
-                button.disabled = false;
-            }
-        }
-        initCheckout();
-    </script>
+<body>
+<div class="topline"><span><i class="status-dot" id="gateway-dot"></i><span id="gateway-status">PAYMENT GATEWAY · CHECKING SESSION</span></span><span id="session-label">SECURE CUSTOMER CHECKOUT</span></div>
+<header><div class="nav">
+<a class="brand" href="../index.html" aria-label="KRIM Logistics home"><span class="brand-mark">K</span><span><span class="brand-name">KRIM LOGISTICS</span><span class="brand-sub">Global logistics operating system</span></span></a>
+<a class="nav-link" id="back-quotes" href="shipper/spot-approvals.html">← Quote review</a>
+</div></header>
+<main>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">Customer journey · Step 06</div><h1>Secure shipment checkout</h1><p>Review the accepted quote and linked partner assignment before proceeding to Razorpay. KRIM creates the payment order on its server and verifies the result with the payment provider before recording success.</p></div><div class="secure-chip"><strong>◈ Secure payment flow</strong><span>Server-priced · Quote-bound · Signature verified</span></div></div></section>
+<div class="journey" aria-label="Customer shipment journey">
+<div class="journey-step"><span class="step-no">01</span><span><strong>Book shipment</strong><small>Shipment request</small></span></div>
+<div class="journey-step"><span class="step-no">02</span><span><strong>Get quote</strong><small>Rate and availability</small></span></div>
+<div class="journey-step"><span class="step-no">03</span><span><strong>Review quote</strong><small>Customer acceptance</small></span></div>
+<div class="journey-step active"><span class="step-no">06</span><span><strong>Secure checkout</strong><small>Payment verification</small></span></div>
+</div>
+<div class="layout">
+<section>
+<div class="card">
+<div class="card-head"><div><h2>Accepted quote & shipment</h2><p>Details are loaded from your authenticated KRIM records. Amounts are never entered or edited in this checkout.</p></div><span id="quote-status" class="pill warn">Loading</span></div>
+<div class="details">
+<div class="detail"><label>Shipment reference</label><strong id="shipment-ref">Checking shipment…</strong><small id="shipment-number">Retrieving reference</small></div>
+<div class="detail"><label>Accepted quote</label><strong id="quote-ref">—</strong><small id="quote-validity">Valid-through status pending</small></div>
+<div class="detail"><label>Origin</label><strong id="origin-label">—</strong><small>Recorded shipment origin</small></div>
+<div class="detail"><label>Destination</label><strong id="destination-label">—</strong><small>Recorded shipment destination</small></div>
+<div class="detail"><label>Transport mode</label><strong id="transport-mode">—</strong><small id="route-type">Route type unavailable</small></div>
+<div class="detail"><label>Partner assignment</label><strong id="assignment-status">Checking assignment…</strong><small id="partner-reference">Selected offer linkage</small></div>
+</div>
+<div id="checkout-feedback" class="feedback" role="status" aria-live="polite"></div>
+</div>
+<div class="card">
+<div class="card-head"><div><h2>Payment safeguards</h2><p>All checks must pass before Razorpay opens.</p></div><span class="pill">Server enforced</span></div>
+<div class="check-list">
+<div class="check-row"><span class="check-icon" id="check-session">✓</span><span><strong>Authenticated customer session</strong><br><span id="check-session-text">Checking your sign-in…</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-quote">…</span><span><strong>Accepted and unexpired quote</strong><br><span id="check-quote-text">Loading quote from KRIM…</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-assignment">…</span><span><strong>Partner assignment accepted</strong><br><span id="check-assignment-text">Checking shipment linkage…</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-amount">…</span><span><strong>Amount and currency validation</strong><br><span id="check-amount-text">Awaiting authoritative quote</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-order">…</span><span><strong>Server-created payment order</strong><br><span id="check-order-text">Created only after you continue</span></span></div>
+</div>
+</div>
+</section>
+<aside>
+<div class="card">
+<div class="card-head"><div><h2>Payment summary</h2><p>Final amount is returned by KRIM's server before checkout.</p></div><span class="pill">INR flow</span></div>
+<div class="amount-box"><div class="amount-label">Accepted quote total</div><div id="checkout-amount" class="amount-value">—</div><div id="amount-caption" class="amount-note">Waiting for the accepted quote and assignment checks.</div></div>
+<div class="meta-list" style="margin-top:13px">
+<div class="meta-row"><span>Payment provider</span><strong>Razorpay</strong></div>
+<div class="meta-row"><span>Currency support</span><strong>INR only for this flow</strong></div>
+<div class="meta-row"><span>Order creation</span><strong>KRIM secure server</strong></div>
+<div class="meta-row"><span>Success condition</span><strong>Provider + signature verified</strong></div>
+</div>
+<button id="btn-pay-now" class="primary-action" style="margin-top:19px" disabled>Continue to secure payment →</button>
+<p class="action-note">Do not refresh or pay again while a payment is processing. If the provider opens but the result is unclear, check the payment status before retrying.</p>
+<div id="payment-order-meta" class="footnote" aria-live="polite"></div>
+</div>
+<div class="card">
+<div class="card-head"><div><h2>Before you pay</h2><p>Know what this checkout will and will not do.</p></div></div>
+<div class="notice"><strong>Quote-linked checkout</strong>The payment amount, currency, quote ID, shipment ID, customer organization and partner offer are checked by the backend. Browser values are not treated as payment authority.</div>
+<div class="footnote">A successful provider window alone does not mean payment is complete. KRIM must verify the Razorpay signature and provider payment details, then save the payment record.</div>
+</div>
+</aside>
+</div>
+</main>
+<footer><div><span>KRIM Logistics · Secure settlement workflow</span><span><a href="shipper/spot-approvals.html">Quote review</a> &nbsp;·&nbsp; <a href="../app/customer/index.html">Customer workspace</a></span></div></footer>
+<script>
+(function(){
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const byId=(id)=>document.getElementById(id);
+let session=null,quote=null,shipment=null,assignment=null,canPay=false,paymentBusy=false;
+const params=new URLSearchParams(location.search);
+const shipmentParam=params.get("shipment_id");
+const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amount).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
+function gateway(text,state){byId("gateway-status").textContent="PAYMENT GATEWAY · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
+function check(name,ok,text){const icon=byId("check-"+name);icon.textContent=ok?"✓":"!";icon.className="check-icon"+(ok?"":" pending");byId("check-"+name+"-text").textContent=text;}
+function setPayReady(ok){canPay=ok;byId("btn-pay-now").disabled=!ok||paymentBusy;}
+function fmtDate(value){if(!value)return "No expiry recorded";const d=new Date(value);return Number.isNaN(d.getTime())?"Validity unavailable":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});}
+function login(next){location.href=window.krimPath?window.krimPath("auth/login.html")+"?next="+encodeURIComponent(next):"../auth/login.html?next="+encodeURIComponent(next);}
+async function init(){
+ const path=location.pathname+location.search;
+ byId("back-quotes").href=(window.krimPath?window.krimPath("public/shipper/spot-approvals.html"):"shipper/spot-approvals.html");
+ if(!client){gateway("CONFIGURATION ERROR","bad");message("KRIM's secure client did not initialize. Refresh once; if this persists, contact support.","error");return;}
+ if(!shipmentParam||!/^\d+$/.test(shipmentParam)){gateway("SHIPMENT REFERENCE REQUIRED","bad");message("Open checkout from the accepted quote and include a valid shipment_id. No payment order has been created.","error");return;}
+ const auth=await client.auth.getSession();
+ session=auth.data&&auth.data.session;
+ if(auth.error||!session){check("session",false,"Sign-in required.");login(path);return;}
+ byId("session-label").textContent="SIGNED IN · "+(session.user.email||"Customer account");
+ check("session",true,"Signed in as "+(session.user.email||"authenticated customer")+".");
+ const sid=Number(shipmentParam);
+ const quoteResult=await client.from("krim_quotes").select("id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at").eq("shipment_id",sid).eq("status","accepted").order("id",{ascending:false}).limit(1).maybeSingle();
+ if(quoteResult.error||!quoteResult.data){gateway("QUOTE NOT AVAILABLE","bad");check("quote",false,"No accepted quote is visible for this shipment.");message("No accepted quote was found for this shipment in your account. Review your quotations or ask your organization administrator to check access.","error");return;}
+ quote=quoteResult.data;
+ const shipmentResult=await client.from("krim_shipments").select("id,shipment_number,status,customer_organization_id,origin_place_label,destination_place_label,requested_transport_mode,requested_route_type,goods_description,total_weight_kg").eq("id",sid).maybeSingle();
+ if(shipmentResult.error||!shipmentResult.data){gateway("SHIPMENT NOT AVAILABLE","bad");message("The linked shipment could not be loaded for your account. No payment order has been created.","error");return;}
+ shipment=shipmentResult.data;
+ if(Number(quote.shipment_id)!==Number(shipment.id)||String(quote.customer_organization_id)!==String(shipment.customer_organization_id)){gateway("RECORD LINKAGE CHECK FAILED","bad");message("The quote and shipment organization linkage did not match. Checkout is blocked for your protection.","error");return;}
+ byId("shipment-ref").textContent="#"+shipment.id;
+ byId("shipment-number").textContent=shipment.shipment_number||"KRIM shipment record";
+ byId("quote-ref").textContent="QT-"+quote.id;
+ byId("quote-validity").textContent="Valid through "+fmtDate(quote.valid_until);
+ byId("origin-label").textContent=shipment.origin_place_label||"Origin not recorded";
+ byId("destination-label").textContent=shipment.destination_place_label||"Destination not recorded";
+ byId("transport-mode").textContent=shipment.requested_transport_mode||"Not recorded";
+ byId("route-type").textContent=shipment.requested_route_type||"Route details on shipment record";
+ byId("checkout-amount").textContent=money(quote.currency_code,quote.amount);
+ byId("quote-status").textContent=quote.status.toUpperCase();
+ byId("quote-status").className="pill good";
+ const expiry=quote.valid_until?new Date(quote.valid_until).getTime():null;
+ const quoteValid=quote.status==="accepted"&&Number(quote.amount)>0&&(!expiry||expiry>Date.now());
+ check("quote",quoteValid,quoteValid?"Accepted quote QT-"+quote.id+" is currently valid.":"Quote expired or amount is invalid.");
+ const currency=String(quote.currency_code||"").toUpperCase();
+ const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currency==="INR"&&Math.round(Number(quote.amount)*100)>0;
+ check("amount",amountValid,amountValid?"Positive quote total and INR currency confirmed.":"This checkout currently supports positive INR quotes only; currency is not changed automatically.");
+ byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; final order amount is checked again on the server.":"This payment route does not currently support "+(currency||"an unspecified currency")+".";
+ let assignmentOk=false;
+ if(quote.partner_quote_id){
+   const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   if(!a.error&&a.data){assignment=a.data;assignmentOk=assignment.status==="accepted";byId("assignment-status").textContent=String(assignment.status||"unknown").replace(/_/g," ").toUpperCase();byId("partner-reference").textContent="Assignment "+(assignment.assignment_number||("#"+assignment.id))+" · offer #"+assignment.partner_quote_id;}
+   else {byId("assignment-status").textContent="Not accepted";byId("partner-reference").textContent="No matching assignment was found.";}
+ }else{byId("assignment-status").textContent="Not linked";byId("partner-reference").textContent="A selected partner offer is required.";}
+ check("assignment",assignmentOk,assignmentOk?"The linked partner assignment is accepted.":"Partner offer must be awarded and the selected partner must accept before payment.");
+ const shipmentConfirmed=shipment.status==="confirmed";
+ if(!shipmentConfirmed){message("Checkout is locked because this shipment is currently "+(shipment.status||"in an unknown state")+". The shipment must be confirmed and its selected partner assignment accepted before payment.","info");}
+ else if(!quoteValid){message("Checkout is locked because the accepted quote is expired or its amount is invalid.","error");}
+ else if(!amountValid){message("Checkout is locked. Razorpay for this KRIM flow currently supports INR only, and the quote must have a positive amount.","error");}
+ else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment. No payment order has been created.","info");}
+ else {message("Quote, shipment, currency and partner assignment checks passed. Continue when you are ready to open Razorpay.","success");}
+ byId("payment-order-meta").textContent="No new payment order has been created yet.";
+ gateway(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"PRE-CHECKS PASSED":"AWAITING ELIGIBILITY",quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"good":"wait");
+ setPayReady(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed);
+}
+async function startPayment(){
+ if(!canPay||paymentBusy||!quote||!session||!shipment)return;
+ paymentBusy=true;setPayReady(false);byId("btn-pay-now").textContent="Creating secure payment order…";
+ check("order",false,"Requesting a server-created order bound to this accepted quote.");
+ message("KRIM is validating the accepted quote, organization, shipment, partner offer and assignment before creating the payment order.","info");
+ try{
+   const {data:order,error}=await client.functions.invoke("create-global-razorpay-order",{body:{krim_shipment_id:Number(shipment.id)}});
+   if(error)throw new Error(error.message||"Secure order request failed.");
+   if(!order||!order.success||!order.razorpay_order_id||!order.key_id||!Number.isFinite(Number(order.amount_paise)))throw new Error((order&&order.error)||"KRIM did not return a valid Razorpay order.");
+   if(Number(order.quote_id)!==Number(quote.id)||Number(order.shipment_id)!==Number(shipment.id))throw new Error("The server-selected quote or shipment differs from this review. Checkout has stopped; refresh and review the current quote.");
+   if(String(order.currency||"").toUpperCase()!==String(quote.currency_code||"").toUpperCase()||Number(order.amount_paise)!==Math.round(Number(quote.amount)*100))throw new Error("Server order amount or currency does not match the accepted quote. Checkout has stopped.");
+   byId("checkout-amount").textContent=money(order.currency,Number(order.amount_paise)/100);
+   byId("payment-order-meta").textContent="Server order: "+order.razorpay_order_id+" · "+(order.reused?"Existing eligible order reused":"New order created by KRIM");
+   check("order",true,"Order "+order.razorpay_order_id+" was returned by KRIM's server with the accepted quote amount.");
+   const options={
+     key:order.key_id,order_id:order.razorpay_order_id,amount:Number(order.amount_paise),currency:String(order.currency||"INR"),
+     name:"KRIM Logistics",description:"Shipment "+(order.shipment_number||shipment.shipment_number||shipment.id),
+     image:location.origin+(window.krimPath?window.krimPath("assets/krim-logo.png"):"/assets/krim-logo.png"),
+     prefill:{email:session.user.email||""},notes:{krim_shipment_id:String(shipment.id),krim_quote_id:String(quote.id)},
+     theme:{color:"#1769aa"},
+     modal:{ondismiss:function(){paymentBusy=false;byId("btn-pay-now").textContent="Continue to secure payment →";setPayReady(canPay);message("Razorpay checkout was closed before a confirmed result. If you completed a payment, check its status before trying again.","info");}},
+     handler:async function(response){
+       paymentBusy=true;byId("btn-pay-now").textContent="Verifying payment…";byId("btn-pay-now").disabled=true;
+       gateway("VERIFYING WITH PROVIDER","wait");message("Razorpay returned a response. KRIM is verifying its signature and payment details before recording success.","info");
+       try{
+         if(!response.razorpay_payment_id||response.razorpay_order_id!==order.razorpay_order_id||!response.razorpay_signature)throw new Error("Razorpay response is incomplete or the order reference does not match.");
+         const verified=await client.functions.invoke("verify-razorpay-payment",{body:{razorpay_payment_id:response.razorpay_payment_id,razorpay_order_id:response.razorpay_order_id,razorpay_signature:response.razorpay_signature}});
+         if(verified.error)throw new Error(verified.error.message||"Payment verification request failed.");
+         const result=verified.data;
+         if(!result||result.success!==true||result.verified!==true||result.status!=="paid")throw new Error((result&&result.error)||"KRIM has not confirmed this payment as paid. Check payment status before retrying.");
+         gateway("SERVER VERIFIED","good");byId("quote-status").textContent="PAYMENT VERIFIED";byId("quote-status").className="pill good";
+         message("Payment verified successfully by KRIM. Reference "+result.razorpay_payment_id+".","success");
+         byId("payment-order-meta").textContent="Payment reference: "+result.razorpay_payment_id+" · Verified at "+fmtDate(result.paid_at);
+         byId("btn-pay-now").textContent="Payment verified ✓";check("order",true,"Provider signature verified and KRIM financial record updated.");
+       }catch(e){gateway("VERIFICATION NEEDS REVIEW","bad");message((e&&e.message?e.message:"Verification could not be completed")+" Do not pay again until the payment status has been checked.","error");byId("btn-pay-now").textContent="Check payment status before retrying";byId("btn-pay-now").disabled=true;}
+       finally{paymentBusy=false;}
+     }
+   };
+   const checkout=new Razorpay(options);
+   checkout.on("payment.failed",function(response){paymentBusy=false;gateway("PAYMENT NOT CONFIRMED","bad");message("Razorpay did not confirm this payment. "+((response&&response.error&&response.error.description)||"Review the provider message and payment status before retrying."),"error");byId("btn-pay-now").textContent="Retry after checking payment status";setPayReady(canPay);});
+   checkout.open();
+ }catch(e){
+   paymentBusy=false;gateway("ORDER NOT CREATED","bad");check("order",false,"No valid server-created order was returned.");
+   message((e&&e.message?e.message:"KRIM could not create a payment order")+" No payment window was opened.","error");
+   byId("btn-pay-now").textContent="Try secure checkout again";setPayReady(canPay);
+ }
+}
+byId("btn-pay-now").addEventListener("click",startPayment);
+init().catch(function(e){gateway("CHECKOUT ERROR","bad");message("Checkout could not initialize: "+(e&&e.message?e.message:"Unexpected error")+". No payment order was created.","error");});
+})();
+</script>
 </body>
 </html>
