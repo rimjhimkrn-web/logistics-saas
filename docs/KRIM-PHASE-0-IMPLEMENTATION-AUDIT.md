@@ -86,3 +86,22 @@ No production schema change, production data mutation, secret change, live payme
 - The rate calculator's source has a shipment-fetch error path, but a successful read, rate-card selection and quote creation have not yet been demonstrated in an authenticated browser.
 - No live shipment was submitted and no production data was changed in this follow-up.
 - Step 1 remains IN PROGRESS / NOT APPROVED until an authorized fresh booking and next-page access test are completed with database evidence.
+
+
+## Step 1 security review — RPC body and grants (2026-10-22)
+### Confirmed positives
+- `krim_create_global_shipment_idempotent` is SECURITY DEFINER and explicitly checks `auth.uid()`, active organization access, `shipment.create` permission, and active organization status before creating or returning a shipment.
+- It takes a transaction-scoped advisory lock keyed by organization + booking request UUID, then checks for an existing shipment with that key. When the same key is reused with different shipment details, it raises an error instead of silently returning a mismatched shipment.
+- The function pins `search_path` to `public, private, pg_temp`.
+- EXECUTE is granted to `authenticated`, `postgres`, and `service_role`; the user-facing function's own identity/organization/permission checks are therefore especially important and are present in the inspected definition.
+- The delegated `krim_create_global_shipment_from_places` validates authenticated identity, organization access and shipment.create permission through its delegated creation path, validates required cargo and weight, validates country code/name and coordinate ranges, and rejects identical coordinates.
+
+### Findings requiring resolution or proof
+- The idempotency function's lookup is keyed by organization + request UUID and uses an advisory lock. The audit has not yet confirmed a matching unique database constraint/index; inspect indexes and prove concurrent duplicate behavior before calling it fully verified.
+- The place-creation function inserts countries and, on a country-code conflict, sets `is_active=true`. This can reactivate a previously inactive country when a customer books a place there. Treat this as a potential market-governance defect: verify intended semantics and fix in a reviewed migration if inactive-country controls are meant to block unsupported markets.
+- The place-creation function may create a `krim_locations` row when no matching active city/region exists. Verify that this is an intentional customer-requested location workflow, that concurrent creation cannot cause inconsistent duplicate locations, and that creating a location does not implicitly activate a market that has not passed KRIM's launch controls.
+- Function catalog inspection found authenticated EXECUTE for the SECURITY DEFINER function. This is not automatically unsafe given its checks, but all reachable helper functions and the underlying create RPC must be reviewed as a chain, including search_path and grants.
+- Rate calculator reads `krim_shipments` by numeric ID through the Supabase client. Source shows it relies on database access policies for isolation; actual cross-organization denial has not yet been tested with two authenticated organizations.
+
+### Current decision
+Step 1 remains IN PROGRESS / NOT APPROVED. The function-body review is partially positive, but browser E2E, selected-place persistence, RLS isolation, idempotency/concurrency, and inactive-market behavior remain unverified. No production data was changed in this audit.
