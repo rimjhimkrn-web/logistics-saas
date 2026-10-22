@@ -1,280 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics OS — Dynamic Tariff Calculator & Quote Registry</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="KRIM Global Logistics quote workspace for route-aware, server-calculated freight quotes and partner bid requests.">
+<title>KRIM Logistics | Global Quote & Tariff Workspace</title>
+<link rel="manifest" href="/logistics-saas/manifest.json">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale:'#eef6fc'}}}}};
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+:root{color-scheme:light}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.eyebrow{letter-spacing:.14em}.panel{border:1px solid #dce5ee;border-radius:20px;background:#fff;box-shadow:0 8px 28px rgba(16,36,58,.045)}.field{width:100%;border:1px solid #cbd5e1;border-radius:12px;background:#fff;padding:12px 14px;color:#10243a;outline:none}.field:focus{border-color:#1769aa;box-shadow:0 0 0 3px rgba(23,105,170,.12)}.step-number{display:flex;height:34px;width:34px;align-items:center;justify-content:center;border-radius:11px;background:#eaf3fb;color:#1769aa;font-weight:800}.status-dot{height:8px;width:8px;border-radius:50%;display:inline-block;background:#e4a11b}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">PRICING: APPROVED RATE CARD REQUIRED</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+<div class="bg-[#10243a] px-4 py-2 text-xs text-white sm:px-6">
+ <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
+  <div class="flex items-center gap-2"><span class="status-dot"></span><span class="font-semibold tracking-wide">GLOBAL QUOTE WORKSPACE</span><span class="hidden text-slate-300 sm:inline">· Pricing is confirmed only by approved server-side tariffs</span></div>
+  <span id="session-identity-node" class="text-sky-200">Checking secure session…</span>
+ </div>
+</div>
+<header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+ <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+  <a href="/logistics-saas/" class="flex min-w-0 items-center gap-3" aria-label="KRIM Logistics home">
+   <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#10243a] text-lg font-black text-white">K</span>
+   <span><span class="block text-sm font-black tracking-[.16em] text-[#10243a]">KRIM LOGISTICS</span><span class="block text-xs text-slate-500">Global Logistics Operating System</span></span>
+  </a>
+  <nav class="flex flex-wrap items-center justify-end gap-2 text-sm">
+   <a class="rounded-xl border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50" href="/logistics-saas/public/shipper/booking-request.html">New shipment</a>
+   <a class="rounded-xl bg-[#10243a] px-3 py-2 font-semibold text-white hover:bg-[#193a5a]" href="/logistics-saas/public/shipper/spot-approvals.html">Quote & bid status</a>
+  </nav>
+ </div>
+</header>
+<main class="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">
+ <section class="mb-7 overflow-hidden rounded-[26px] bg-[#10243a] text-white">
+  <div class="grid gap-8 px-6 py-8 sm:px-9 sm:py-10 lg:grid-cols-[1.5fr_.8fr] lg:items-center">
+   <div>
+    <p class="eyebrow mb-3 text-xs font-bold uppercase text-sky-300">Customer workspace / commercial stage 02</p>
+    <h1 class="max-w-3xl text-3xl font-black leading-tight sm:text-4xl">Global quote & tariff workspace</h1>
+    <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">Request a quote against a saved shipment. KRIM checks approved pricing on the server; when a matching tariff is unavailable, the workflow can request partner bids instead of fabricating a price.</p>
+    <div class="mt-6 flex flex-wrap gap-3"><a href="/logistics-saas/public/shipper/booking-request.html" class="rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#10243a] hover:bg-sky-50">← Back to route booking</a><a href="/logistics-saas/public/shipper/spot-approvals.html" class="rounded-xl border border-white/30 px-4 py-3 text-sm font-bold text-white hover:bg-white/10">Open quote & bid status →</a></div>
+   </div>
+   <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
+    <p class="eyebrow text-xs font-bold uppercase text-sky-200">Pricing integrity</p>
+    <div class="mt-4 space-y-4 text-sm">
+     <div class="flex gap-3"><span class="mt-0.5 text-sky-300">01</span><div><strong class="block">Route-aware</strong><span class="text-slate-300">Uses the saved shipment's route and transport preference.</span></div></div>
+     <div class="flex gap-3"><span class="mt-0.5 text-sky-300">02</span><div><strong class="block">Server-authoritative</strong><span class="text-slate-300">No browser-calculated or invented customer price.</span></div></div>
+     <div class="flex gap-3"><span class="mt-0.5 text-sky-300">03</span><div><strong class="block">Partner fallback</strong><span class="text-slate-300">A bid request is a request—not a guaranteed carrier offer.</span></div></div>
     </div>
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Rate Calculator</span>
-                </div>
-            </div>
-            
-            <a href="/logistics-saas/public/shipper/active-shipments.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Active Fleet
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Calculator Content -->
-    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full">
-        <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 space-y-8">
-            
-            <div class="space-y-2">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Authoritative Pricing Core</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Calculate Service Tariff</h1>
-                <p class="text-slate-600 text-sm">Select a service tier and request an authoritative quote. No commercial price is shown until an approved active rate card is configured.</p>
-            </div>
-
-            <form id="form-calculator" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Shipment Reference ID</label>
-                        <input type="text" id="calc-shipment-id" required placeholder="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Service Tier</label>
-                        <select id="calc-service-tier" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
-                            <option value="surface_express">Surface Express (approved rate required)</option>
-                            <option value="air_priority">Air Priority (approved rate required)</option>
-                            <option value="heavy_haul">Heavy Haul (approved rate required)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 space-y-2 text-xs"><div class="flex justify-between gap-4"><span class="text-slate-500">Saved route arrangement</span><strong id="calc-route-type" class="text-slate-800 text-right">Loading shipment…</strong></div><div class="flex justify-between gap-4"><span class="text-slate-500">Saved transport preference</span><strong id="calc-transport-mode" class="text-slate-800 text-right">Loading shipment…</strong></div><div class="grid sm:grid-cols-2 gap-3 pt-2"><div><span class="block text-slate-500 mb-1">Selected origin</span><strong id="calc-origin-place" class="block text-slate-800 font-sans">Loading…</strong></div><div><span class="block text-slate-500 mb-1">Selected destination</span><strong id="calc-destination-place" class="block text-slate-800 font-sans">Loading…</strong></div></div><p class="text-slate-500 leading-relaxed">The saved mode and selected places are customer preferences, not a confirmed route. Feasibility, customs, carrier capacity, serviceability, transit time and mode-specific pricing must be confirmed before a booking is accepted.</p></div>
-            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 font-mono text-xs">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Pricing status:</span>
-                        <span id="preview-amount" class="text-amber-700 font-bold text-sm">Awaiting approved rate card</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Currency after pricing approval:</span>
-                        <span class="text-sky-600 font-bold">INR</span>
-                    </div>
-                </div>
-
-                <button type="submit" id="btn-commit-quote" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
-                    Request Authoritative Quote →
-                </button>
-            </form>
-
-            <div id="calculator-feedback" class="text-xs"></div>
-
-        </div>
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Tariff Engine © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-                <a href="/logistics-saas/public/shipper/spot-approvals.html" class="hover:text-slate-800 transition">Spot Approvals</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Calculator Logic Script -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-        let loadedShipmentData = null;
-
-        async function initCalculator() {
-            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-            if (sessionError || !session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').textContent = "Node: " + session.user.email;
-
-            const params = new URLSearchParams(window.location.search);
-            const shipmentId = params.get('shipment_id');
-            const requestedTier = params.get('service_tier');
-
-            const tierSelect = document.getElementById('calc-service-tier');
-            if (requestedTier && Array.from(tierSelect.options).some(option => option.value === requestedTier)) {
-                tierSelect.value = requestedTier;
-            }
-            if (shipmentId) {
-                document.getElementById('calc-shipment-id').value = shipmentId;
-                try {
-                    await fetchShipmentWeight(shipmentId);
-                } catch (err) {
-                    document.getElementById('calculator-feedback').textContent =
-                        "Shipment could not be loaded: " + (err.message || "Unknown error");
-                    document.getElementById('calculator-feedback').className = "text-sm font-semibold text-red-700";
-                }
-            }
-        }
-
-        async function fetchShipmentWeight(id) {
-            const { data, error } = await supabaseClient
-                .from("krim_shipments")
-                .select("id, customer_organization_id, total_weight_kg, status, requested_transport_mode, requested_route_type, origin_place_label, destination_place_label, origin_place_type, destination_place_type")
-                .eq("id", id)
-                .single();
-            if (error) {
-                loadedShipmentData = null;
-                throw error;
-            }
-            if (!data) {
-                loadedShipmentData = null;
-                throw new Error("Shipment record was not returned for this account.");
-            }
-            loadedShipmentData = data;
-            const modeLabels = {road:"Road freight",rail:"Rail freight",ocean:"Ocean / sea freight",air:"Air freight",multimodal:"Multimodal",warehouse_transfer:"Warehouse / distribution transfer",specialist:"Specialist / project cargo"};
-            const routeTypeLabels = {door_to_door:"Door-to-door",airport_to_airport:"Airport-to-airport",port_to_port:"Seaport-to-seaport",terminal_to_terminal:"Terminal-to-terminal",warehouse_to_warehouse:"Warehouse-to-warehouse",domestic:"Domestic",cross_border:"Cross-border / international",first_last_mile:"First-mile / last-mile",multimodal_end_to_end:"End-to-end multimodal"};
-            document.getElementById("calc-transport-mode").textContent = modeLabels[data.requested_transport_mode] || "No saved preference";
-            document.getElementById("calc-route-type").textContent = routeTypeLabels[data.requested_route_type] || "No saved preference";
-            document.getElementById("calc-origin-place").textContent = data.origin_place_label || "Saved location on shipment";
-            document.getElementById("calc-destination-place").textContent = data.destination_place_label || "Saved location on shipment";
-            calculateRate();
-            return data;
-        }
-
-        function calculateRate() {
-            const preview = document.getElementById("preview-amount");
-            if (!loadedShipmentData || !Number(loadedShipmentData.total_weight_kg)) {
-                preview.textContent = "Load an authorized shipment first";
-                return null;
-            }
-            preview.textContent = "No approved active rate card configured";
-            return null;
-        }
-
-        document.getElementById('calc-service-tier').addEventListener('change', calculateRate);
-        document.getElementById('calc-shipment-id').addEventListener('blur', async function() {
-            const id = this.value.trim();
-            if (!id) return;
-            try {
-                await fetchShipmentWeight(id);
-            } catch (err) {
-                document.getElementById('calculator-feedback').textContent =
-                    "Shipment could not be loaded: " + (err.message || "Unknown error");
-                document.getElementById('calculator-feedback').className = "text-sm font-semibold text-red-700";
-            }
-        });
-
-        document.getElementById('form-calculator').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-commit-quote');
-            const feedback = document.getElementById('calculator-feedback');
-            btn.disabled = true;
-            btn.innerText = "Requesting Server-Calculated Quote...";
-            feedback.textContent = "";
-
-            try {
-                const shipmentId = document.getElementById('calc-shipment-id').value.trim();
-                const tier = document.getElementById('calc-service-tier').value;
-                if (!/^\d+$/.test(shipmentId)) throw new Error("Enter a valid shipment ID.");
-                if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
-                    await fetchShipmentWeight(shipmentId);
-                }
-                if (!loadedShipmentData || String(loadedShipmentData.id) !== shipmentId) {
-                    throw new Error("Shipment could not be loaded. Check the ID and your organization access.");
-                }
-
-                const { data, error } = await supabaseClient.rpc('krim_create_tariff_quote', {
-                    p_shipment_id: Number(shipmentId),
-                    p_service_tier: tier,
-                    p_valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                });
-
-                if (error) {
-                    const message = String(error.message || "");
-                    // Hybrid pricing: if no approved tariff matches, request carrier bids instead
-                    // of inventing a price or blocking the customer workflow.
-                    if (/no approved active global rate card matches|tariff quote unavailable/i.test(message)) {
-                        const { data: opportunity, error: opportunityError } = await supabaseClient.rpc(
-                            "krim_create_partner_opportunity",
-                            {
-                                p_shipment_id: Number(shipmentId),
-                                p_response_deadline: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
-                                p_service_tier: tier
-                            }
-                        );
-                        if (opportunityError) throw opportunityError;
-                        if (!opportunity || !opportunity.id) {
-                            throw new Error("The server did not confirm the partner-bid request.");
-                        }
-                        feedback.textContent = "No approved tariff matches this route. Your request was sent to the partner network; no customer price has been invented. Open Spot Approvals to monitor partner bids.";
-                        feedback.className = "text-sm font-semibold text-emerald-700";
-                        setTimeout(() => {
-                            window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
-                        }, 1200);
-                        return;
-                    }
-                    throw error;
-                }
-                if (!data || !data.id) throw new Error("The server did not return a quotation reference.");
-
-                feedback.textContent = "Server-calculated quote created. Open Spot Approvals to review and accept it.";
-                feedback.className = "text-sm font-semibold text-emerald-700";
-                setTimeout(() => {
-                    window.location.href = "/logistics-saas/public/shipper/spot-approvals.html";
-                }, 1000);
-            } catch (err) {
-                feedback.textContent = "Quote creation failed: " + (err.message || "Unknown error");
-                feedback.className = "text-sm font-semibold text-red-700";
-                btn.disabled = false;
-                btn.innerText = "Request Quote & Review →";
-            }
-        });
-
-        initCalculator();
-    </script>
+   </div>
+  </div>
+ </section>
+ <div class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,.8fr)]">
+  <section class="panel p-5 sm:p-7">
+   <div class="mb-6 flex items-start gap-3"><span class="step-number shrink-0">02</span><div><p class="eyebrow text-xs font-bold uppercase text-sky-700">Quote request</p><h2 class="mt-1 text-xl font-extrabold text-[#10243a] sm:text-2xl">Find the shipment and request pricing</h2><p class="mt-2 text-sm leading-6 text-slate-500">Use a shipment reference from your KRIM account. Access to the shipment is enforced by Supabase policies and server functions.</p></div></div>
+   <form id="form-calculator" class="space-y-5">
+    <div class="grid gap-5 sm:grid-cols-2">
+     <div><label for="calc-shipment-id" class="mb-2 block text-sm font-bold text-slate-700">Shipment reference ID <span class="text-rose-600">*</span></label><input id="calc-shipment-id" class="field" type="text" inputmode="numeric" autocomplete="off" required placeholder="Enter your shipment ID"><p class="mt-2 text-xs text-slate-500">This is the KRIM database shipment ID, not a tracking number.</p></div>
+     <div><label for="calc-service-tier" class="mb-2 block text-sm font-bold text-slate-700">Requested service tier <span class="text-rose-600">*</span></label><select id="calc-service-tier" class="field" required><option value="surface_express">Surface Express</option><option value="air_priority">Air Priority</option><option value="heavy_haul">Heavy Haul</option></select><p class="mt-2 text-xs text-slate-500">Final availability depends on approved tariffs and partner capability.</p></div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+     <div class="mb-4 flex flex-wrap items-center justify-between gap-2"><h3 class="font-extrabold text-[#10243a]">Saved route context</h3><span id="shipment-load-status" class="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600">Shipment not loaded</span></div>
+     <div class="grid gap-4 sm:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="eyebrow text-[10px] font-bold uppercase text-slate-500">Origin</p><p id="calc-origin-place" class="mt-2 break-words font-bold text-[#10243a]">Load a shipment to view origin</p><p id="calc-origin-type" class="mt-1 text-xs text-slate-500">Place type not loaded</p></div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4"><p class="eyebrow text-[10px] font-bold uppercase text-slate-500">Destination</p><p id="calc-destination-place" class="mt-2 break-words font-bold text-[#10243a]">Load a shipment to view destination</p><p id="calc-destination-type" class="mt-1 text-xs text-slate-500">Place type not loaded</p></div>
+     </div>
+     <div class="mt-4 grid gap-3 sm:grid-cols-2"><div class="rounded-xl bg-white px-4 py-3"><p class="text-xs text-slate-500">Route arrangement</p><p id="calc-route-type" class="mt-1 font-bold text-slate-800">Not loaded</p></div><div class="rounded-xl bg-white px-4 py-3"><p class="text-xs text-slate-500">Transport preference</p><p id="calc-transport-mode" class="mt-1 font-bold text-slate-800">Not loaded</p></div></div>
+     <div class="mt-4 flex flex-wrap items-center justify-between gap-3"><div><p class="text-xs text-slate-500">Shipment weight</p><p id="calc-weight" class="mt-1 font-bold text-slate-800">Not loaded</p></div><button id="btn-load-shipment" type="button" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-[#10243a] hover:bg-slate-100">Load shipment details</button></div>
+    </div>
+    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4"><p class="text-sm font-bold text-amber-900">No price until an approved tariff matches</p><p id="preview-amount" class="mt-1 text-sm leading-6 text-amber-800">Enter and load an authorized shipment to check the pricing workflow. KRIM will not invent a price if no active rate card applies.</p></div>
+    <button type="submit" id="btn-commit-quote" class="w-full rounded-xl bg-[#1769aa] px-5 py-4 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#125589] disabled:cursor-not-allowed disabled:opacity-60">Request authoritative quote →</button>
+   </form>
+   <div id="calculator-feedback" role="status" aria-live="polite" class="mt-4 rounded-xl text-sm"></div>
+  </section>
+  <aside class="space-y-6">
+   <section class="panel p-5 sm:p-6"><p class="eyebrow text-xs font-bold uppercase text-sky-700">How it works</p><h2 class="mt-2 text-lg font-extrabold text-[#10243a]">From shipment to commercial offer</h2><ol class="mt-5 space-y-5"><li class="flex gap-3"><span class="step-number shrink-0">1</span><div><p class="font-bold text-slate-800">Load shipment</p><p class="mt-1 text-sm leading-5 text-slate-500">KRIM checks whether your signed-in account can read the selected shipment.</p></div></li><li class="flex gap-3"><span class="step-number shrink-0">2</span><div><p class="font-bold text-slate-800">Check approved tariff</p><p class="mt-1 text-sm leading-5 text-slate-500">The database determines whether an approved rate card matches the service tier and transport mode.</p></div></li><li class="flex gap-3"><span class="step-number shrink-0">3</span><div><p class="font-bold text-slate-800">Review quote or partner bids</p><p class="mt-1 text-sm leading-5 text-slate-500">Follow the quote status page for a server-generated quote or a partner bid request.</p></div></li></ol></section>
+   <section class="panel p-5 sm:p-6"><p class="eyebrow text-xs font-bold uppercase text-sky-700">Global route scope</p><h2 class="mt-2 text-lg font-extrabold text-[#10243a]">Route preference is not service confirmation</h2><p class="mt-3 text-sm leading-6 text-slate-500">KRIM can store domestic and cross-border route preferences across supported transport modes. Real serviceability still depends on an available verified partner, capacity, customs requirements, tariff coverage, and operating approvals.</p><div class="mt-4 flex flex-wrap gap-2"><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Road</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Rail</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Ocean</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Air</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Multimodal</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Warehouse transfer</span><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold">Specialist cargo</span></div></section>
+   <section class="rounded-2xl border border-slate-200 bg-white p-5"><h2 class="font-extrabold text-[#10243a]">Next actions</h2><div class="mt-4 grid gap-3"><a href="/logistics-saas/public/shipper/spot-approvals.html" class="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm font-bold text-slate-700 hover:bg-slate-50"><span>Quote & partner bid status</span><span>→</span></a><a href="/logistics-saas/public/shipper/booking-request.html" class="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm font-bold text-slate-700 hover:bg-slate-50"><span>Create another shipment</span><span>→</span></a><a href="/logistics-saas/app/customer/index.html" class="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm font-bold text-slate-700 hover:bg-slate-50"><span>Customer workspace</span><span>→</span></a></div></section>
+  </aside>
+ </div>
+ <p class="mt-7 text-center text-xs leading-5 text-slate-500">KRIM Logistics · Global Logistics Operating System · Route preferences and quote requests do not guarantee carrier availability, a final price, or transit time.</p>
+</main>
+<footer class="border-t border-slate-200 bg-white"><div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6"><span>© 2026 KRIM Logistics. Global logistics workflow.</span><span>Secure customer access · Server-side quote authority</span></div></footer>
+<script>
+(function(){
+ const SUPABASE_PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
+ const SUPABASE_ANON_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+ const client=window.KRIM_SUPABASE||window.supabase.createClient(SUPABASE_PROJECT_URL,SUPABASE_ANON_KEY);
+ let loadedShipmentData=null;
+ const $=id=>document.getElementById(id);
+ const modeLabels={road:"Road freight",rail:"Rail freight",ocean:"Ocean / sea freight",air:"Air freight",multimodal:"Multimodal",warehouse_transfer:"Warehouse / distribution transfer",specialist:"Specialist / project cargo"};
+ const routeLabels={door_to_door:"Door-to-door",airport_to_airport:"Airport-to-airport",port_to_port:"Seaport-to-seaport",terminal_to_terminal:"Terminal-to-terminal",warehouse_to_warehouse:"Warehouse-to-warehouse",domestic:"Domestic",cross_border:"Cross-border / international",first_last_mile:"First-mile / last-mile",multimodal_end_to_end:"End-to-end multimodal"};
+ function showFeedback(message,kind){$("calculator-feedback").textContent=message;$("calculator-feedback").className="mt-4 rounded-xl border p-4 text-sm "+(kind==="error"?"border-rose-200 bg-rose-50 text-rose-800":kind==="success"?"border-emerald-200 bg-emerald-50 text-emerald-800":"border-slate-200 bg-slate-50 text-slate-700");}
+ function setLoadStatus(text,good){$("shipment-load-status").textContent=text;$("shipment-load-status").className="rounded-full px-3 py-1 text-xs font-bold "+(good?"bg-emerald-100 text-emerald-800":"bg-slate-200 text-slate-600");}
+ async function init(){
+  const {data:{session},error}=await client.auth.getSession();
+  if(error||!session){window.location.href="/logistics-saas/auth/login.html";return;}
+  $("session-identity-node").textContent="Signed in: "+(session.user.email||"authenticated user");
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("shipment_id"))$("calc-shipment-id").value=params.get("shipment_id");
+  if(params.get("service_tier")&&Array.from($("calc-service-tier").options).some(o=>o.value===params.get("service_tier")))$("calc-service-tier").value=params.get("service_tier");
+  if($("calc-shipment-id").value.trim())try{await fetchShipment($("calc-shipment-id").value.trim());}catch(e){showFeedback("Shipment could not be loaded: "+(e.message||"Check the ID and account access."),"error");}
+ }
+ async function fetchShipment(id){
+  if(!/^\d+$/.test(String(id)))throw new Error("Enter a valid numeric KRIM shipment ID.");
+  setLoadStatus("Loading…",false);
+  const {data,error}=await client.from("krim_shipments").select("id,customer_organization_id,total_weight_kg,status,requested_transport_mode,requested_route_type,origin_place_label,destination_place_label,origin_place_type,destination_place_type").eq("id",id).single();
+  if(error){loadedShipmentData=null;setLoadStatus("Not loaded",false);throw error;}
+  if(!data){loadedShipmentData=null;setLoadStatus("Not found",false);throw new Error("No shipment record was returned for this account.");}
+  loadedShipmentData=data;
+  $("calc-transport-mode").textContent=modeLabels[data.requested_transport_mode]||"No saved preference";
+  $("calc-route-type").textContent=routeLabels[data.requested_route_type]||"No saved preference";
+  $("calc-origin-place").textContent=data.origin_place_label||"Saved location on shipment";
+  $("calc-destination-place").textContent=data.destination_place_label||"Saved location on shipment";
+  $("calc-origin-type").textContent=data.origin_place_type||"Place type not recorded";
+  $("calc-destination-type").textContent=data.destination_place_type||"Place type not recorded";
+  $("calc-weight").textContent=data.total_weight_kg==null?"Not recorded":Number(data.total_weight_kg).toLocaleString()+" kg";
+  setLoadStatus("Shipment loaded",true);
+  $("preview-amount").textContent="No approved price has been shown yet. Submit to check the server's active tariff and partner-bid workflow.";
+  return data;
+ }
+ $("btn-load-shipment").addEventListener("click",async()=>{try{await fetchShipment($("calc-shipment-id").value.trim());showFeedback("Shipment details loaded. Review the route and service tier before requesting a quote.","success");}catch(e){showFeedback("Shipment could not be loaded: "+(e.message||"Unknown error"),"error");}});
+ $("calc-shipment-id").addEventListener("blur",async function(){const id=this.value.trim();if(!id)return;try{await fetchShipment(id);}catch(e){setLoadStatus("Not loaded",false);showFeedback("Shipment could not be loaded: "+(e.message||"Unknown error"),"error");}});
+ $("form-calculator").addEventListener("submit",async function(e){
+  e.preventDefault();const btn=$("btn-commit-quote");btn.disabled=true;btn.textContent="Checking server-side pricing…";
+  try{
+   const shipmentId=$("calc-shipment-id").value.trim();const tier=$("calc-service-tier").value;
+   if(!/^\d+$/.test(shipmentId))throw new Error("Enter a valid shipment ID.");
+   if(!loadedShipmentData||String(loadedShipmentData.id)!==shipmentId)await fetchShipment(shipmentId);
+   if(!loadedShipmentData||String(loadedShipmentData.id)!==shipmentId)throw new Error("Shipment could not be loaded. Check its ID and your organization access.");
+   const {data,error}=await client.rpc("krim_create_tariff_quote",{p_shipment_id:Number(shipmentId),p_service_tier:tier,p_valid_until:new Date(Date.now()+7*24*60*60*1000).toISOString()});
+   if(error){
+    const message=String(error.message||"");
+    if(/no approved active global rate card matches|tariff quote unavailable/i.test(message)){
+     const {data:opportunity,error:opportunityError}=await client.rpc("krim_create_partner_opportunity",{p_shipment_id:Number(shipmentId),p_response_deadline:new Date(Date.now()+72*60*60*1000).toISOString(),p_service_tier:tier});
+     if(opportunityError)throw opportunityError;
+     if(!opportunity||!opportunity.id)throw new Error("The server did not confirm a partner-bid request.");
+     showFeedback("No approved tariff matches this shipment. A partner-bid request was created; no customer price has been invented. Opening quote & bid status…","success");
+     setTimeout(()=>window.location.href="/logistics-saas/public/shipper/spot-approvals.html",1200);return;
+    }
+    throw error;
+   }
+   if(!data||!data.id)throw new Error("The server did not return a quotation reference.");
+   showFeedback("A server-calculated quote was created. Opening quote & bid status…","success");
+   setTimeout(()=>window.location.href="/logistics-saas/public/shipper/spot-approvals.html",1000);
+  }catch(err){showFeedback("Quote request failed: "+(err.message||"Unknown error"),"error");btn.disabled=false;btn.textContent="Request authoritative quote →";}
+ });
+ init();
+})();
+</script>
 </body>
 </html>
