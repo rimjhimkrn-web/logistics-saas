@@ -70,16 +70,19 @@
               </div>
             </div>
             <div class="divider"></div>
-            <div class="section-label">02 / Route & transport preference</div>
+            <div class="section-label">02 / Route type</div>
+            <div class="field-grid"><div class="field full"><label for="booking-route-type">Route arrangement <span class="req">*</span></label><select id="booking-route-type" required><option value="door_to_door">Door-to-door pickup and delivery</option><option value="airport_to_airport">Airport-to-airport</option><option value="port_to_port">Seaport-to-seaport</option><option value="terminal_to_terminal">Terminal / rail hub to terminal / rail hub</option><option value="warehouse_to_warehouse">Warehouse-to-warehouse</option><option value="domestic">Domestic movement within one country</option><option value="cross_border">Cross-border / international movement</option><option value="first_last_mile">First-mile / last-mile connection</option><option value="multimodal_end_to_end">End-to-end multimodal logistics</option></select><div class="hint">Choose the route arrangement that best describes the request. KRIM records it as a preference; actual route legs and handoffs must be confirmed.</div></div></div>
+            <div class="divider"></div>
+            <div class="section-label">03 / Transport preference</div>
             <div class="field-grid">
               <div class="field full"><label for="booking-transport-mode">Preferred transport mode <span class="req">*</span></label><select id="booking-transport-mode" required><option value="multimodal">Multimodal — combine modes where feasible</option><option value="road">Road freight / trucking</option><option value="rail">Rail freight</option><option value="ocean">Ocean / sea freight</option><option value="air">Air freight</option><option value="warehouse_transfer">Warehouse / distribution transfer</option><option value="specialist">Specialist / heavy or project cargo</option></select><div class="hint">Your preference is saved on the shipment record. KRIM must still confirm geographic feasibility, customs or trade requirements, available partners, capacity and pricing before accepting a booking.</div></div>
             </div>
-            <div class="section-label">03 / Requested service
+            <div class="section-label">04 / Service tier</div>
             <div class="field-grid">
               <div class="field full"><label for="booking-service-tier">Service tier <span class="req">*</span></label><select id="booking-service-tier" required><option value="surface_express">Surface Express — road / surface network</option><option value="air_priority">Air Priority — air service (availability must be confirmed)</option><option value="heavy_haul">Heavy Haul — specialist capacity (availability must be confirmed)</option></select><div class="hint">This selection is passed to the quote workflow. It does not guarantee a mode, carrier, serviceability, transit time, or price; those require backend confirmation.</div></div>
             </div>
             <div class="divider"></div>
-            <div class="section-label">03 / Cargo profile</div>
+            <div class="section-label">05 / Cargo profile</div>
             <div class="field-grid">
               <div class="field full"><label for="booking-goods">Goods description <span class="req">*</span></label><input id="booking-goods" name="goods" type="text" maxlength="500" required autocomplete="off" placeholder="e.g. packaged consumer goods, machinery parts"><div class="hint">Describe the goods accurately. Restricted, dangerous or regulated cargo may require additional compliance review.</div></div>
               <div class="field"><label for="booking-weight">Gross shipment weight (kg) <span class="req">*</span></label><input id="booking-weight" name="weight" type="number" min="0.01" max="100000000" step="0.01" required inputmode="decimal" placeholder="e.g. 1250"><div class="hint">Enter total gross weight in kilograms.</div></div>
@@ -102,6 +105,7 @@
           </div>
           <div class="summary-row"><span>Goods</span><strong id="goods-preview">Not provided</strong></div>
           <div class="summary-row"><span>Gross weight</span><strong id="weight-preview">— kg</strong></div>
+          <div class="summary-row"><span>Route arrangement</span><strong id="route-type-preview">Door-to-door</strong></div>
           <div class="summary-row"><span>Transport preference</span><strong id="mode-preview">Multimodal</strong></div>
           <div class="summary-row"><span>Requested service tier</span><strong id="service-preview">Surface Express</strong></div>
           <div class="summary-row"><span>Customer account</span><strong id="org-preview">Verifying access…</strong></div>
@@ -156,6 +160,8 @@
     $("service-preview").textContent=tier.options[tier.selectedIndex]?.textContent.split(" — ")[0]||"Surface Express";
     const mode=$("booking-transport-mode");
     $("mode-preview").textContent=mode.options[mode.selectedIndex]?.textContent.split(" — ")[0]||"Multimodal";
+    const routeType=$("booking-route-type");
+    $("route-type-preview").textContent=routeType.options[routeType.selectedIndex]?.textContent.split(" — ")[0]||"Door-to-door";
     button.disabled=!isReady||submitting;
   }
   function normalizePlace(feature){
@@ -232,6 +238,7 @@
   ["booking-goods","booking-weight"].forEach(id => $(id).addEventListener("input",updatePreview));
   $("booking-service-tier").addEventListener("change",updatePreview);
   $("booking-transport-mode").addEventListener("change",updatePreview);
+  $("booking-route-type").addEventListener("change",updatePreview);
   form.addEventListener("submit",async function(event){
     event.preventDefault();
     if(!isReady || submitting || !currentUserOrgId) return;
@@ -250,7 +257,8 @@
         p_destination_place: destinationPlace,
         p_goods_description: goods,
         p_total_weight_kg: weight,
-        p_transport_mode: $("booking-transport-mode").value
+        p_transport_mode: $("booking-transport-mode").value,
+         p_route_type: $("booking-route-type").value
       });
       if(error) throw error;
       let shipmentId = null;
@@ -264,7 +272,7 @@
       }
       showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
       button.innerHTML = "Shipment created ✓";
-      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value);},1000);
+      window.setTimeout(()=>{window.location.href="/logistics-saas/public/shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value)+"&route_type="+encodeURIComponent($("booking-route-type").value);},1000);
     }catch(err){
       submitting = false;
       button.disabled = !isReady;
