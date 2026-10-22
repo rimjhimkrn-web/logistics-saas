@@ -26,8 +26,8 @@
 <div id="detail-feedback" class="feedback">Waiting for secure record verification.</div>
 </div></div>
 <aside>
-<div class="panel"><div class="head"><div><h2>Amount due</h2><p>Source: exact accepted KRIM quotation.</p></div><span class="pill">No conversion</span></div><div class="body"><div class="total"><small>Verified quote amount</small><strong id="amount">—</strong><p id="amount-note">No amount is displayed until the accepted quote is loaded.</p></div><div class="summary"><div class="row"><span>Payment provider</span><b>Razorpay</b></div><div class="row"><span>Live checkout currency</span><b>INR (current provider flow)</b></div><div class="row"><span>Global currency framework</span><b>Capability-gated · not yet live</b></div><div class="row"><span>Payment order</span><b>Not created yet</b></div><div class="row"><span>Payment status</span><b>Not paid / not checked</b></div></div><div class="actions"><button id="continue-button" class="btn primary" disabled>Continue to secure checkout →</button><a id="retry-link" class="btn" href="">Refresh verification ↻</a></div><p class="fineprint">The existing secure checkout creates the order on KRIM's server and verifies the Razorpay response server-side. Do not retry if a payment result is uncertain; check status first.</p><div id="action-feedback" class="feedback">Checkout is locked until verification completes.</div></div></div>
-<div class="panel" style="margin-top:14px"><div class="head"><div><h2>Global payment safeguards</h2><p>Server-enforced payment capability registry. Order creation is blocked unless the country, currency and provider are explicitly enabled in the backend registry. The current Razorpay implementation remains INR-only.</p></div></div><div class="body"><div class="checks">
+<div class="panel"><div class="head"><div><h2>Amount due</h2><p>Source: exact accepted KRIM quotation.</p></div><span class="pill">No conversion</span></div><div class="body"><div class="total"><small>Verified quote amount</small><strong id="amount">—</strong><p id="amount-note">No amount is displayed until the accepted quote is loaded.</p></div><div class="summary"><div class="row"><span>Payment provider</span><b>Razorpay</b></div><div class="row"><span>Live checkout currency</span><b>INR active · others gated</b></div><div class="row"><span>Global currency framework</span><b>Capability-gated · not yet live</b></div><div class="row"><span>Payment order</span><b>Not created yet</b></div><div class="row"><span>Payment status</span><b>Not paid / not checked</b></div></div><div class="actions"><button id="continue-button" class="btn primary" disabled>Continue to secure checkout →</button><a id="retry-link" class="btn" href="">Refresh verification ↻</a></div><p class="fineprint">The existing secure checkout creates the order on KRIM's server and verifies the Razorpay response server-side. Do not retry if a payment result is uncertain; check status first.</p><div id="action-feedback" class="feedback">Checkout is locked until verification completes.</div></div></div>
+<div class="panel" style="margin-top:14px"><div class="head"><div><h2>Global payment safeguards</h2><p>Server-enforced payment capability registry. Order creation is blocked unless the country, currency and provider are explicitly enabled in the backend registry. INR is the current checkout path; international currencies remain disabled until their capabilities are verified.</p></div></div><div class="body"><div class="checks">
 <div class="check"><span id="check-auth" class="icon">…</span><span><strong>Organization access</strong><span id="text-auth">Checking sign-in and membership.</span></span></div>
 <div class="check"><span id="check-quote" class="icon">…</span><span><strong>Accepted and unexpired quote</strong><span id="text-quote">Checking quote status and validity.</span></span></div>
 <div class="check"><span id="check-assignment" class="icon">…</span><span><strong>Partner acceptance</strong><span id="text-assignment">Checking matching shipment assignment.</span></span></div>
@@ -77,7 +77,13 @@ if(sr.error)throw sr.error;if(!sr.data||String(sr.data.customer_organization_id)
 $("origin").textContent=shipment.origin_place_label||"Origin not recorded";$("destination").textContent=shipment.destination_place_label||"Destination not recorded";$("shipment-ref").textContent=shipment.shipment_number||("#"+shipment.id);$("quote-ref").textContent="QT-"+quote.id;$("transport").textContent=shipment.requested_transport_mode||"Not specified";$("shipment-status").textContent=String(shipment.status||"unknown").replace(/_/g," ");$("quote-validity").textContent=date(quote.valid_until);$("amount").textContent=money(quote.amount,quote.currency_code);
 const expiryOk=!quote.valid_until||new Date(quote.valid_until).getTime()>Date.now();
 const quoteOk=quote.status==="accepted"&&Number(quote.amount)>0&&expiryOk;
-const currencyOk=String(quote.currency_code||"").toUpperCase()==="INR"&&Number(quote.amount)>0;
+const currency=String(quote.currency_code||"").toUpperCase();
+ let foreignCurrencyReady=false;
+ if(currency&&currency!=="INR"){
+   const capabilityResult=await client.functions.invoke("krim-payment-capability-status",{body:{currency_code:currency}});
+   foreignCurrencyReady=!capabilityResult.error&&capabilityResult.data&&capabilityResult.data.success===true&&capabilityResult.data.enabled===true;
+ }
+ const currencyOk=Number(quote.amount)>0&&(currency==="INR"||foreignCurrencyReady);
 const shipmentOk=shipment.status==="confirmed";
 let assignmentOk=false;
 if(quote.partner_quote_id){
@@ -88,7 +94,7 @@ check("auth",true,"Signed in; quote and shipment are scoped to an active custome
 check("quote",quoteOk,quoteOk?"Quote is accepted, positive-value and not expired.":"Quote must be accepted, positive-value and unexpired.");
 check("assignment",assignmentOk,assignmentOk?"Matching partner assignment is accepted.":"Matching partner assignment must be accepted before checkout.");
 check("shipment",shipmentOk,shipmentOk?"Shipment is confirmed.":"Shipment must be confirmed; current status is "+(shipment.status||"unknown")+".");
-check("currency",currencyOk,currencyOk?"INR supported for this Razorpay checkout.":"Current checkout supports INR only; no automatic currency conversion.");
+check("currency",currencyOk,currencyOk?(currency==="INR"?"Current INR checkout path is configured.":"This currency passed KRIM's server-side capability check."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; no automatic conversion occurs."));
 $("quote-status").textContent=quoteOk?"Accepted":"Blocked";$("quote-status").className="pill "+(quoteOk?"good":"bad");
 const canContinue=quoteOk&&currencyOk&&shipmentOk&&assignmentOk;
 setReady(canContinue);
