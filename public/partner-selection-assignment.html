@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#312e81">
+<meta name="description" content="Compare eligible KRIM logistics partner offers and award a quote through the authorized server workflow.">
+<title>KRIM Logistics | Partner Selection & Assignment</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<style>
+:root{color-scheme:light;--ink:#17233b;--muted:#66758c;--line:#e0e5ef;--paper:#fff;--bg:#f5f6fb;--indigo:#4338ca;--violet:#7c3aed;--teal:#0f9f85;--amber:#f59e0b;--rose:#e34f6f}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 8% 0%,#e9e7ff 0,transparent 32%),radial-gradient(ellipse at 96% 30%,#dffaf3 0,transparent 28%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}a{color:inherit;text-decoration:none}button,input{font:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:3px}button:disabled{opacity:.55;cursor:not-allowed}.shell{width:min(1200px,calc(100% - 36px));margin:auto}
+.topline{background:#171b38;color:#d7d9f5;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:10px 0}.topinner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.live{color:#86efac}.nav{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 0}.brand{display:flex;align-items:center;gap:11px;font-weight:950;letter-spacing:.12em;font-size:12px}.mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#fff;font-size:20px;background:linear-gradient(135deg,var(--indigo),var(--violet) 58%,var(--rose));box-shadow:0 8px 18px #4338ca2b}.subbrand{display:block;color:#7c3aed;font-size:9px;letter-spacing:.16em;margin-top:4px}.navlinks{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:42px;padding:10px 15px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:850;font-size:11px;cursor:pointer}.btn.primary{color:white;border-color:transparent;background:linear-gradient(110deg,var(--indigo),var(--violet))}.btn.accent{color:#fff;border:0;background:linear-gradient(110deg,var(--rose),var(--amber))}.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 18px #312e8118}
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:clamp(24px,4vw,42px);background:radial-gradient(ellipse at 90% 0%,#a78bfa 0,transparent 32%),radial-gradient(ellipse at 12% 100%,#0f9f85 0,transparent 30%),linear-gradient(120deg,#171b38,#312e81 58%,#6d28d9);color:#fff;box-shadow:0 22px 55px #312e811f}.eyebrow{color:#fde68a;text-transform:uppercase;letter-spacing:.18em;font-size:10px;font-weight:950}.hero h1{font-size:clamp(30px,4.5vw,48px);line-height:1.06;letter-spacing:-.045em;margin:13px 0}.hero p{max-width:760px;font-size:13px;line-height:1.8;color:#e3e5ff;margin:0}.trust-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.trust-pills span{font-size:10px;font-weight:800;border:1px solid #ffffff42;background:#ffffff12;border-radius:999px;padding:8px 11px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 22px}.step{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}.step b{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#ede9fe;color:var(--indigo);font-size:11px;flex-shrink:0}.step.active{border-color:#a5b4fc;background:linear-gradient(120deg,#f5f3ff,#f0fdfa)}.step strong{display:block;font-size:10px}.step small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.banner{display:none;border-radius:13px;padding:13px 15px;margin:14px 0;font-size:12px;line-height:1.65;border:1px solid}.banner.show{display:block}.banner.good{background:#ecfdf5;color:#086b56;border-color:#99f6d5}.banner.bad{background:#fff1f2;color:#9f1239;border-color:#fecdd3}.banner.info{background:#eef2ff;color:#3730a3;border-color:#c7d2fe}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 12px 30px #25245a08}.panelhead{padding:20px;border-bottom:1px solid #eef0f6;display:flex;justify-content:space-between;align-items:start;gap:10px}.panelhead h2{font-size:16px;margin:0;font-weight:950;letter-spacing:-.02em}.panelhead p{font-size:11px;line-height:1.65;color:var(--muted);margin:6px 0 0}.panelbody{padding:18px}.shipmentbox{background:linear-gradient(135deg,#f5f3ff,#effcf8);border:1px solid #e3e5fa;border-radius:15px;padding:15px;margin-bottom:14px}.label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:950;color:var(--muted)}.shipmentref{font-size:18px;font-weight:950;margin-top:5px;overflow-wrap:anywhere}.route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:13px}.route strong{display:block;font-size:11px;margin-top:5px;overflow-wrap:anywhere}.arrow{color:var(--violet);font-size:20px;font-weight:950}.quotes{display:grid;gap:11px}.offer{border:1px solid var(--line);border-radius:16px;padding:16px;transition:.18s}.offer:hover{border-color:#a5b4fc;box-shadow:0 9px 24px #4338ca10}.offer.selected{border-color:var(--indigo);box-shadow:inset 3px 0 var(--indigo);background:#fafaff}.offerhead{display:flex;justify-content:space-between;gap:12px;align-items:start}.offerid{font-weight:950;font-size:12px;overflow-wrap:anywhere}.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;background:#fef3c7;color:#92400e}.price{font-size:25px;font-weight:950;letter-spacing:-.04em;margin:13px 0 2px}.money-note{font-size:10px;color:var(--muted)}.offerfacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.fact{padding:10px;border-radius:11px;background:#f8fafc;border:1px solid #eef0f6;min-width:0}.fact small{display:block;color:var(--muted);font-size:9px}.fact strong{display:block;font-size:10px;margin-top:5px;overflow-wrap:anywhere}.offerfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.empty{padding:27px;text-align:center;border:1px dashed #cfd5e7;border-radius:15px;color:var(--muted);font-size:11px;line-height:1.8;background:#fafbff}.empty strong{display:block;color:var(--ink);font-size:13px;margin-bottom:6px}.sidecard{padding:18px}.sidecard h3{font-size:13px;margin:0 0 12px}.checkline{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #eef0f6;font-size:10px;line-height:1.6}.checkline:last-child{border-bottom:0}.check{width:23px;height:23px;display:grid;place-items:center;flex-shrink:0;border-radius:8px;background:#ccfbf1;color:#0f766e;font-weight:950}.warning{margin-top:14px;border-radius:13px;background:#fff7ed;border:1px solid #fed7aa;padding:13px;color:#9a3412;font-size:10px;line-height:1.7}.actions{display:grid;gap:9px;margin-top:14px}.actions .btn{width:100%;min-height:46px}.muted{font-size:10px;color:var(--muted);line-height:1.7}footer{margin-top:35px;background:#171b38;color:#d7d9f5;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.shell{width:calc(100% - 24px)}.nav{align-items:flex-start}.navlinks .btn{padding:9px;font-size:9px}.brand{font-size:10px}.mark{width:36px;height:36px}.hero{border-radius:20px}.steps{gap:7px}.step{padding:9px}.step strong{font-size:9px}.panelhead,.panelbody{padding:14px}.route{grid-template-columns:1fr auto 1fr}.price{font-size:22px}.offer{padding:13px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="topline"><div class="shell topinner"><span>KRIM NETWORK · COMMERCIAL MATCHING</span><span class="live">● AUTHORIZED WORKFLOW · LIVE RECORDS ONLY</span></div></div>
+<header><div class="shell nav"><a class="brand" href="../index.html"><span class="mark">K</span><span>KRIM LOGISTICS<span class="subbrand">Global logistics operating system</span></span></a><div class="navlinks"><a class="btn" href="quote.html">Quote request</a><a class="btn" href="app/customer/index.html">Customer workspace ↗</a></div></div></header>
+<main class="shell">
+<section class="hero"><div class="eyebrow">Customer journey · Step 05 of 09</div><h1>Choose the right partner.<br>Move with confidence.</h1><p>Review eligible partner offers for your shipment. KRIM shows only records returned by the authenticated platform; an award is submitted to the server, where organization access, quote eligibility, shipment linkage and pricing rules are checked again.</p><div class="trust-pills"><span>✓ Organization-scoped access</span><span>✓ Server-authorized award</span><span>✓ No invented provider ratings</span><span>✓ Quote validity checked</span></div></section>
+<div class="steps" aria-label="Booking journey"><div class="step"><b>01</b><span><strong>Shipment request</strong><small>Authorized request</small></span></div><div class="step"><b>03</b><span><strong>Quote review</strong><small>Commercial terms</small></span></div><div class="step active"><b>05</b><span><strong>Partner selection</strong><small>Offer & assignment</small></span></div><div class="step"><b>06</b><span><strong>Secure checkout</strong><small>After assignment acceptance</small></span></div></div>
+<div id="banner" class="banner" role="status" aria-live="polite"></div>
+<div class="layout">
+<section class="panel"><div class="panelhead"><div><h2>Eligible partner offers</h2><p>Open this page from a shipment workflow with a valid <code>shipment_id</code>. Offers are filtered to that shipment and must still be eligible.</p></div><button id="refresh" class="btn" type="button">↻ Refresh</button></div><div class="panelbody"><div id="shipmentbox" class="shipmentbox" hidden><div class="label">Selected shipment</div><div id="shipmentref" class="shipmentref">—</div><div class="route"><div><span class="label">Origin</span><strong id="origin">Not recorded</strong></div><span class="arrow">→</span><div><span class="label">Destination</span><strong id="destination">Not recorded</strong></div></div><p id="shipmeta" class="muted"></p></div><div id="offers" class="quotes"><div class="empty"><strong>Checking secure access…</strong>KRIM is validating your session and shipment reference.</div></div></div></section>
+<aside class="panel"><div class="panelhead"><div><h2>Award & assignment status</h2><p>Selection does not guarantee pickup. The assigned partner must accept the assignment before checkout can continue.</p></div></div><div class="sidecard"><div class="checkline"><span class="check">1</span><span><strong>Review the offer</strong><br>Check the currency, total amount, validity and available notes.</span></div><div class="checkline"><span class="check">2</span><span><strong>Submit award securely</strong><br>The server rechecks permissions, eligibility and duplicate awards.</span></div><div class="checkline"><span class="check">3</span><span><strong>Wait for partner acceptance</strong><br>Checkout is enabled only after an accepted assignment is confirmed.</span></div><div id="assignmentstate" class="warning">No partner has been selected yet. Load a shipment to view available offers.</div><div class="actions"><button id="checkout" class="btn accent" type="button" disabled>Continue to secure checkout →</button><button id="check-assignment" class="btn" type="button" disabled>Refresh assignment status</button></div><p class="muted" style="margin-top:12px">KRIM does not fabricate capacity, delivery estimates, insurance, certifications or star ratings. Only fields recorded by the platform are shown.</p></div></aside>
+</div>
+</main>
+<footer><div class="shell foot"><span>KRIM Logistics · Partner selection & assignment</span><span>Protected by authenticated Supabase access · <a href="../index.html">Home</a></span></div></footer>
+<script>
+(function(){
+  const client=window.KRIM_SUPABASE||window.supabaseClient;
+  const $=id=>document.getElementById(id);
+  const params=new URLSearchParams(location.search);
+  const shipmentId=params.get("shipment_id");
+  let user=null,shipment=null,offers=[],selected=null,customerQuoteId=null,selectedPartnerQuoteId=null;
+  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const date=v=>{if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?"Not recorded":new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(d)};
+  const money=(amount,currency)=>{const n=Number(amount);if(!Number.isFinite(n))return "Amount unavailable";try{return new Intl.NumberFormat(undefined,{style:"currency",currency:currency||"INR",maximumFractionDigits:2}).format(n)}catch(_){return (currency||"Currency")+" "+n.toLocaleString()}};
+  function banner(title,message,kind="info"){const b=$("banner");b.className="banner show "+kind;b.innerHTML="<strong>"+esc(title)+"</strong><br>"+esc(message)}
+  function clearBanner(){$("banner").className="banner";$("banner").textContent=""}
+  function login(){location.href="../auth/login.html?next="+encodeURIComponent(location.pathname+location.search)}
+  async function init(){
+    if(!client){$("offers").innerHTML='<div class="empty"><strong>Secure connection unavailable</strong>Supabase configuration did not initialize. No partner offers were loaded.</div>';banner("Connection unavailable","Refresh the page after platform configuration is restored.","bad");return}
+    const {data,error}=await client.auth.getSession();
+    if(error||!data.session){login();return} user=data.session.user;
+    if(!shipmentId||!/^\d+$/.test(shipmentId)){ $("offers").innerHTML='<div class="empty"><strong>Shipment reference required</strong>Open this step from the authorized shipment flow with its shipment_id. No shipment has been selected.</div>';banner("Shipment reference required","This page will not guess a shipment or show cross-organization offers.","bad");return}
+    await load();
+  }
+  async function load(){
+    clearBanner();$("refresh").disabled=true;$("refresh").textContent="Loading…";
+    try{
+      const sr=await client.from("krim_shipments").select("id,shipment_number,customer_organization_id,status,origin_place_label,destination_place_label,goods_description,total_weight_kg,requested_transport_mode").eq("id",Number(shipmentId)).maybeSingle();
+      if(sr.error)throw sr.error;if(!sr.data)throw new Error("No shipment was returned for this account. Confirm the shipment belongs to your active organization.");
+      shipment=sr.data;
+      $("shipmentbox").hidden=false;$("shipmentref").textContent=shipment.shipment_number||("Shipment #"+shipment.id);
+      $("origin").textContent=shipment.origin_place_label||"Origin not recorded";$("destination").textContent=shipment.destination_place_label||"Destination not recorded";
+      $("shipmeta").textContent=[shipment.goods_description,shipment.requested_transport_mode,shipment.total_weight_kg!=null?Number(shipment.total_weight_kg).toLocaleString()+" kg":null].filter(Boolean).join(" · ")||"Shipment details are limited to recorded fields.";
+      const qr=await client.from("krim_partner_quotes").select("id,opportunity_id,shipment_id,partner_organization_id,quote_number,amount,currency_code,valid_until,status,notes,submitted_at").eq("shipment_id",Number(shipmentId)).in("status",["submitted","under_review","shortlisted"]).order("amount",{ascending:true});
+      if(qr.error)throw qr.error;
+      offers=(qr.data||[]).filter(q=>Number(q.amount)>0&&(!q.valid_until||new Date(q.valid_until).getTime()>Date.now()));
+      renderOffers();
+      if(!offers.length)banner("No eligible offers returned","There are no currently eligible partner offers visible for this shipment. This is not a failure in the interface; the network may need valid partner responses.","info");
+      else banner("Shipment and offers loaded","Showing "+offers.length+" eligible offer(s) returned by KRIM. The server will revalidate any award.","good");
+      if(customerQuoteId)await refreshAssignment();
+    }catch(e){$("offers").innerHTML='<div class="empty"><strong>Offers could not be loaded</strong>'+esc(e.message||"The secure query failed. No offer was assumed.")+'</div>';banner("Secure query failed",e.message||"The platform could not load authorized offers.","bad")}
+    finally{$("refresh").disabled=false;$("refresh").textContent="↻ Refresh"}
+  }
+  function renderOffers(){
+    if(!offers.length){$("offers").innerHTML='<div class="empty"><strong>No eligible partner offers yet</strong>KRIM will not invent partner names, rates, capacity or ratings. Return when a verified partner has submitted an eligible quote.</div>';return}
+    $("offers").innerHTML=offers.map(q=>'<article class="offer '+(selected&&selected.id===q.id?'selected':'')+'"><div class="offerhead"><div><div class="offerid">'+esc(q.quote_number||("Offer #"+q.id))+'</div><div class="muted">Provider reference #'+esc(q.partner_organization_id)+' · submitted '+esc(date(q.submitted_at))+'</div></div><span class="badge">'+esc(String(q.status||"available").replace(/_/g," "))+'</span></div><div class="price">'+esc(money(q.amount,q.currency_code))+'</div><div class="money-note">Quoted total · '+esc(q.currency_code||"Currency not recorded")+'</div><div class="offerfacts"><div class="fact"><small>Offer valid until</small><strong>'+esc(date(q.valid_until))+'</strong></div><div class="fact"><small>Partner quote reference</small><strong>'+esc(q.id)+'</strong></div></div>'+(q.notes?'<p class="muted">'+esc(q.notes)+'</p>':'')+'<div class="offerfoot"><span class="muted">Provider details shown only where recorded</span><button class="btn primary" type="button" data-select="'+esc(q.id)+'">'+(selected&&selected.id===q.id?"Selected ✓":"Review & select offer →")+'</button></div></article>').join("");
+    $("offers").querySelectorAll("[data-select]").forEach(btn=>btn.addEventListener("click",()=>{selected=offers.find(q=>String(q.id)===btn.dataset.select)||null;renderOffers();if(selected)award(selected)}));
+  }
+  async function award(q){
+    if(!q||!shipment)return;
+    if(!confirm("Submit this partner quote for award? KRIM will recheck access, shipment state, quote eligibility and price on the server.")){selected=null;renderOffers();return}
+    $("offers").querySelectorAll("button").forEach(b=>b.disabled=true);
+    banner("Submitting award","The secure server is validating the selected offer.","info");
+    try{
+      const validUntil=new Date(Date.now()+7*24*60*60*1000).toISOString();
+      const {data,error}=await client.rpc("krim_award_partner_quote_for_checkout",{p_partner_quote_id:Number(q.id),p_valid_until:validUntil});
+      if(error)throw error;
+      customerQuoteId=Number(data?.id);selectedPartnerQuoteId=Number(q.id);
+      if(!customerQuoteId)throw new Error("The server did not return a customer quote ID. Do not proceed to checkout.");
+      $("assignmentstate").textContent="Award submitted for "+(q.quote_number||("offer #"+q.id))+". Checking whether the partner has accepted the assignment.";
+      $("check-assignment").disabled=false;
+      banner("Offer awarded by server","KRIM returned customer quote #"+customerQuoteId+". Checkout remains locked until the linked partner assignment is confirmed accepted.","good");
+      await refreshAssignment();
+    }catch(e){banner("Award not completed",e.message||"The server rejected the award. No successful assignment is being reported.","bad");$("assignmentstate").textContent=e.message||"Award rejected. Select an eligible offer or contact your organization administrator."}
+    finally{$("offers").querySelectorAll("button").forEach(b=>b.disabled=false)}
+  }
+  async function refreshAssignment(){
+    if(!shipment||!selectedPartnerQuoteId)return;
+    $("check-assignment").disabled=true;$("check-assignment").textContent="Checking…";
+    try{
+      const r=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,assignment_number,accepted_at").eq("shipment_id",Number(shipment.id)).eq("partner_quote_id",selectedPartnerQuoteId).order("created_at",{ascending:false}).limit(1).maybeSingle();
+      if(r.error)throw r.error;
+      if(r.data&&r.data.status==="accepted"){
+        $("assignmentstate").textContent="Partner assignment accepted · "+(r.data.assignment_number||("assignment #"+r.data.id))+". Secure checkout is available.";
+        $("checkout").disabled=false;banner("Partner accepted the assignment","The linked assignment is recorded as accepted. Continue to checkout to revalidate the quote and booking requirements.","good");
+      }else{
+        $("checkout").disabled=true;$("assignmentstate").textContent=r.data?"Assignment status: "+String(r.data.status||"pending").replace(/_/g," ")+". Waiting for partner acceptance.":"Award submitted; no matching assignment record is currently visible.";
+        banner("Waiting for partner acceptance","Checkout stays locked until KRIM records an accepted assignment. Refresh this status after the partner responds.","info");
+      }
+    }catch(e){$("checkout").disabled=true;$("assignmentstate").textContent="Assignment status could not be verified. Checkout remains locked.";banner("Assignment verification unavailable",e.message||"The server could not verify the assignment.","bad")}
+    finally{$("check-assignment").disabled=false;$("check-assignment").textContent="Refresh assignment status"}
+  }
+  $("refresh").addEventListener("click",load);$("check-assignment").addEventListener("click",refreshAssignment);
+  $("checkout").addEventListener("click",()=>{if(!customerQuoteId||!shipment||$("checkout").disabled)return;location.href="quote-result.html?shipment_id="+encodeURIComponent(shipment.id)+"&quote_id="+encodeURIComponent(customerQuoteId)});
+  init();
+})();
+</script>
+</body></html>
