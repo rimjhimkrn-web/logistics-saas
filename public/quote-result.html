@@ -116,7 +116,7 @@ async function init(){
  check("session",true,"Signed in as "+(session.user.email||"authenticated customer")+".");
  const sid=Number(shipmentParam);
  let quoteQuery=client.from("krim_quotes").select("id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at").eq("shipment_id",sid).eq("status","accepted");
- if(quoteParam&&/^\\d+$/.test(quoteParam)) quoteQuery=quoteQuery.eq("id",Number(quoteParam));
+ if(quoteParam&&/^\d+$/.test(quoteParam)) quoteQuery=quoteQuery.eq("id",Number(quoteParam));
  const quoteResult=await quoteQuery.order("id",{ascending:false}).limit(1).maybeSingle();
  if(quoteResult.error||!quoteResult.data){gateway("QUOTE NOT AVAILABLE","bad");check("quote",false,"No accepted quote is visible for this shipment.");message("No accepted quote was found for this shipment in your account. Review your quotations or ask your organization administrator to check access.","error");return;}
  quote=quoteResult.data;
