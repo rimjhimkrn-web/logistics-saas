@@ -51,7 +51,8 @@ $("retry-link").href=location.pathname+location.search;
 let client=null,shipment=null,quote=null,assignment=null,ready=false;
 const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const date=v=>{if(!v)return"Not specified";const d=new Date(v);return Number.isNaN(d.getTime())?"Not specified":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});};
-const money=(a,c)=>{try{return new Intl.NumberFormat(undefined,{style:"currency",currency:String(c||"").toUpperCase(),maximumFractionDigits:2}).format(Number(a));}catch(_){return Number(a).toLocaleString()+" "+String(c||"currency unavailable");}};
+const currencyMinorUnitExponent=(c)=>{const x=String(c||"").trim().toUpperCase();if(["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(x))return 0;if(["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(x))return 3;if(["CLF","UYW"].includes(x))return 4;return 2;};
+const money=(a,c)=>{try{const digits=currencyMinorUnitExponent(c);return new Intl.NumberFormat(undefined,{style:"currency",currency:String(c||"").toUpperCase(),minimumFractionDigits:digits,maximumFractionDigits:digits}).format(Number(a));}catch(_){return Number(a).toLocaleString()+" "+String(c||"currency unavailable");}};
 function feedback(id,msg,type){$(id).className="feedback"+(type?" "+type:"");$(id).textContent=msg;}
 function check(k,ok,msg){$("check-"+k).textContent=ok?"✓":"!";$("check-"+k).className="icon"+(ok?" good":" bad");$("text-"+k).textContent=msg;}
 function setReady(ok){ready=ok;$("continue-button").disabled=!ok;}
