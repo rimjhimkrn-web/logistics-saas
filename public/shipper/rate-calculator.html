@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#10243a">
 <meta name="description" content="KRIM Global Logistics quote workspace for route-aware, server-calculated freight quotes and partner bid requests.">
-<title>KRIM Logistics | Global Quote & Tariff Workspace</title>
+<title>KRIM Logistics | Global Freight Commercial Workspace</title>
 <link rel="manifest" href="/logistics-saas/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,6 +15,24 @@ tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale
 </script>
 <style>
 :root{color-scheme:light}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.eyebrow{letter-spacing:.14em}.panel{border:1px solid #dce5ee;border-radius:20px;background:#fff;box-shadow:0 8px 28px rgba(16,36,58,.045)}.field{width:100%;border:1px solid #cbd5e1;border-radius:12px;background:#fff;padding:12px 14px;color:#10243a;outline:none}.field:focus{border-color:#1769aa;box-shadow:0 0 0 3px rgba(23,105,170,.12)}.step-number{display:flex;height:34px;width:34px;align-items:center;justify-content:center;border-radius:11px;background:#eaf3fb;color:#1769aa;font-weight:800}.status-dot{height:8px;width:8px;border-radius:50%;display:inline-block;background:#e4a11b}
+
+/* KRIM global commercial workspace visual system */
+:root{--krim-navy:#10243a;--krim-blue:#1769aa;--krim-line:#dfe8f0}
+body{background:radial-gradient(ellipse at 5% 0%,#eaf4fc 0,transparent 31%),#f4f7fb;color:#172b40}
+header.sticky{box-shadow:0 5px 24px rgba(16,36,58,.045)}
+.panel{border-radius:22px;border-color:var(--krim-line);box-shadow:0 18px 44px rgba(16,36,58,.065)}
+main>section:first-child{position:relative;background:radial-gradient(ellipse at 90% 0%,#2379a6 0,transparent 34%),linear-gradient(120deg,#0d2034,#173e60 68%,#1769aa)!important;box-shadow:0 22px 55px rgba(16,36,58,.16)}
+main>section:first-child:after{content:"";position:absolute;right:-52px;bottom:-115px;width:320px;height:320px;border:1px solid #ffffff25;border-radius:50%;box-shadow:0 0 0 34px #ffffff08,0 0 0 70px #ffffff06;pointer-events:none}
+main>section:first-child>div{position:relative;z-index:1}
+main>section:first-child h1{letter-spacing:-.045em;line-height:1.08}
+.step-number{box-shadow:inset 0 0 0 1px #d7e8f7}
+.field{min-height:46px;border-color:#d3dfe9;border-radius:11px}
+button,a{transition:background-color .16s,border-color .16s,transform .16s}
+button:not(:disabled):active,a:active{transform:translateY(1px)}
+#btn-commit-quote{min-height:52px;letter-spacing:.01em;box-shadow:0 8px 18px #1769aa22}
+#calculator-feedback{line-height:1.7;overflow-wrap:anywhere}
+#shipment-load-status{white-space:nowrap}
+@media(max-width:640px){main>section:first-child{border-radius:20px}main>section:first-child:after{width:180px;height:180px;right:-75px;bottom:-85px}.panel{border-radius:17px}}
 </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800">
@@ -41,8 +59,8 @@ tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale
   <div class="grid gap-8 px-6 py-8 sm:px-9 sm:py-10 lg:grid-cols-[1.5fr_.8fr] lg:items-center">
    <div>
     <p class="eyebrow mb-3 text-xs font-bold uppercase text-sky-300">Customer workspace / commercial stage 02</p>
-    <h1 class="max-w-3xl text-3xl font-black leading-tight sm:text-4xl">Global quote & tariff workspace</h1>
-    <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">Request a quote against a saved shipment. KRIM checks approved pricing on the server; when a matching tariff is unavailable, the workflow can request partner bids instead of fabricating a price.</p>
+    <h1 class="max-w-3xl text-3xl font-black leading-tight sm:text-4xl">Global freight quotes.<br>Clear routes. Trusted pricing.</h1>
+    <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">Bring a saved shipment into one clear commercial workflow. KRIM checks approved tariff coverage first; if no matching tariff is available, the system can request partner bids instead of inventing a price. A request is not a confirmed carrier booking.</p>
     <div class="mt-6 flex flex-wrap gap-3"><a href="/logistics-saas/public/shipper/booking-request.html" class="rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#10243a] hover:bg-sky-50">← Back to route booking</a><a href="/logistics-saas/public/shipper/spot-approvals.html" class="rounded-xl border border-white/30 px-4 py-3 text-sm font-bold text-white hover:bg-white/10">Open quote & bid status →</a></div>
    </div>
    <div class="rounded-2xl border border-white/15 bg-white/5 p-5">
@@ -55,9 +73,9 @@ tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale
    </div>
   </div>
  </section>
- <div class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,.8fr)]">
+ <div class="mb-5 grid grid-cols-3 gap-2" aria-label="Customer journey"><div class="rounded-2xl border border-slate-200 bg-white p-3"><span class="text-xs font-black text-sky-700">01</span><p class="mt-1 text-xs font-bold text-[#10243a]">Shipment</p><p class="mt-1 text-[10px] text-slate-500">Route & cargo</p></div><div class="rounded-2xl border border-sky-200 bg-sky-50 p-3 ring-1 ring-sky-100"><span class="text-xs font-black text-sky-700">02</span><p class="mt-1 text-xs font-bold text-[#10243a]">Quote & tariff</p><p class="mt-1 text-[10px] text-slate-500">Current stage</p></div><div class="rounded-2xl border border-slate-200 bg-white p-3"><span class="text-xs font-black text-sky-700">03</span><p class="mt-1 text-xs font-bold text-[#10243a]">Review offer</p><p class="mt-1 text-[10px] text-slate-500">Quote & bid status</p></div></div><div class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(300px,.8fr)]">
   <section class="panel p-5 sm:p-7">
-   <div class="mb-6 flex items-start gap-3"><span class="step-number shrink-0">02</span><div><p class="eyebrow text-xs font-bold uppercase text-sky-700">Quote request</p><h2 class="mt-1 text-xl font-extrabold text-[#10243a] sm:text-2xl">Find the shipment and request pricing</h2><p class="mt-2 text-sm leading-6 text-slate-500">Use a shipment reference from your KRIM account. Access to the shipment is enforced by Supabase policies and server functions.</p></div></div>
+   <div class="mb-6 flex items-start gap-3"><span class="step-number shrink-0">02</span><div><p class="eyebrow text-xs font-bold uppercase text-sky-700">Commercial operations · Stage 02</p><h2 class="mt-1 text-xl font-extrabold text-[#10243a] sm:text-2xl">Request a freight quote</h2><p class="mt-2 text-sm leading-6 text-slate-500">Use a shipment reference from your KRIM account. Access to the shipment is enforced by Supabase policies and server functions.</p></div></div>
    <form id="form-calculator" class="space-y-5">
     <div class="grid gap-5 sm:grid-cols-2">
      <div><label for="calc-shipment-id" class="mb-2 block text-sm font-bold text-slate-700">Shipment reference ID <span class="text-rose-600">*</span></label><input id="calc-shipment-id" class="field" type="text" inputmode="numeric" autocomplete="off" required placeholder="Enter your shipment ID"><p class="mt-2 text-xs text-slate-500">This is the KRIM database shipment ID, not a tracking number.</p></div>
