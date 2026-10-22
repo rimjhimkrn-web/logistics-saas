@@ -1,94 +1,22 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Payment Methods & Treasury Gateway Management</title>
-    <meta name="description" content="Manage tokenized bank accounts, credit card gateways, and SEPA/SWIFT direct debit methods inside KRIM OS Financial Suite.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_4 -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<title>KRIM Logistics | Payment Methods & Market Eligibility</title>
+<meta name="description" content="Current Razorpay payment path and payment-method eligibility policy for KRIM Logistics customers.">
 <script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<style>
+:root{--n:#10243a;--n2:#183d5b;--b:#1769aa;--ink:#1c3044;--mut:#65798b;--line:#dce6ef;--bg:#f3f7fb;--green:#13795b;--amber:#925700}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 8% 0%,#e7f3fc,transparent 34%),var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}.top{background:#0b1c2d;color:#d5e1eb;padding:10px max(18px,calc((100% - 1080px)/2));font-size:10px;letter-spacing:.12em;text-transform:uppercase}.nav{background:#fff;border-bottom:1px solid var(--line);padding:18px max(18px,calc((100% - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-weight:950;letter-spacing:.12em;color:var(--n);font-size:13px}.brand small{display:block;font-size:9px;color:var(--b);margin-top:5px;letter-spacing:.15em}.link{border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:11px;font-weight:850}.wrap{max-width:1080px;margin:auto;padding:28px 20px 46px}.hero{border-radius:25px;padding:30px;background:radial-gradient(ellipse at 95% 0%,#287fa6,transparent 38%),linear-gradient(120deg,#0c2034,#163e5e 72%,#1769aa);color:#fff}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:#82e3f1}.hero h1{font-size:clamp(28px,4vw,40px);line-height:1.08;letter-spacing:-.04em;margin:12px 0;color:#fff}.hero p{max-width:730px;color:#d7e6f2;line-height:1.8;font-size:13px;margin:0}.list{display:grid;gap:12px;margin-top:16px}.row{background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}.row h2{font-size:14px;margin:0;color:var(--n)}.row p{font-size:11px;line-height:1.75;color:var(--mut);margin:7px 0 0}.tag{border-radius:99px;padding:8px 10px;background:#e8f7ef;color:var(--green);font-size:9px;font-weight:950;text-transform:uppercase;white-space:nowrap}.tag.pending{background:#fff4df;color:var(--amber)}.note{margin-top:15px;background:#f2f8fc;border:1px solid #d8e8f4;color:#31556f;border-radius:16px;padding:17px;font-size:11px;line-height:1.8}.primary{display:inline-flex;margin-top:16px;padding:13px 16px;border-radius:12px;background:var(--n);color:#fff;font-size:11px;font-weight:900}footer{padding:22px;text-align:center;color:var(--mut);font-size:10px}@media(max-width:600px){.hero{padding:23px 20px}.row{grid-template-columns:1fr}.tag{justify-self:start}}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-blue-400 font-semibold uppercase">Payment Methods</span>
-                </div>
-            </div>
-            <a href="/public/finance/payment-checkout.html" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition font-mono font-semibold">Next: Payment Checkout →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-5xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2 text-center">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Financial Suite • Module 2 of 37</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Payment Methods & Gateway Configuration</h1>
-            <p class="text-slate-400 text-xs font-mono">Manage connected bank accounts, SEPA direct debits, SWIFT routing profiles, and corporate credit cards.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-700">
-                <span class="text-white font-semibold">Active Vault Payment Channels</span>
-                <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl transition font-semibold">+ Add Payment Method</button>
-            </div>
-
-            <div class="space-y-4">
-                <!-- Payment Method Item 1 -->
-                <div class="p-5 bg-slate-900 rounded-2xl border border-slate-700 flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-bold">IBAN</div>
-                        <div>
-                            <span class="text-white font-bold block">ABN AMRO — Corporate Main Settlement</span>
-                            <span class="text-slate-400 text-[10px]">NL91 ABNA 0419 8842 10 • EUR Account</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">Primary Default</span>
-                    </div>
-                </div>
-
-                <!-- Payment Method Item 2 -->
-                <div class="p-5 bg-slate-900 rounded-2xl border border-slate-700 flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">SEPA</div>
-                        <div>
-                            <span class="text-white font-bold block">SEPA B2B Direct Debit Mandate</span>
-                            <span class="text-slate-400 text-[10px]">Creditor ID: NL89ZZZ343434 • Automated Collection</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">Active</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-4">
-                <a href="/public/finance/payment-checkout.html" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25">
-                    Proceed to Payment Checkout →
-                </a>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Financial Treasury OS © 2026. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+<body><div class="top">KRIM FINANCE CORE · PAYMENT METHODS · MARKET ELIGIBILITY</div>
+<header class="nav"><a class="brand" href="../../index.html">KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></a><a class="link" href="payment-gateways.html">Gateway control →</a></header>
+<main class="wrap"><section class="hero"><div class="eyebrow">Payment policy · Market-aware design</div><h1>Payment methods customers can trust.</h1><p>KRIM presents only methods that are actually enabled for the transaction. Availability depends on Razorpay merchant approval, country, currency, customer payment instrument and provider configuration.</p></section>
+<section class="list">
+<article class="row"><div><h2>UPI and Indian payment instruments</h2><p>Potentially available for eligible INR transactions when enabled on KRIM's Razorpay account. The checkout must use provider-returned options; KRIM does not promise a specific method until verified.</p></div><span class="tag pending">Eligibility check required</span></article>
+<article class="row"><div><h2>Indian debit and credit cards</h2><p>May be offered when enabled by the merchant account and supported for the transaction. Payment completion is confirmed server-side, not from the browser's success screen alone.</p></div><span class="tag pending">Account dependent</span></article>
+<article class="row"><div><h2>International cards and currencies</h2><p>International acceptance is subject to provider approval, supported countries, account settings, currency and settlement rules. The current KRIM checkout is INR-only until broader currency handling is implemented and tested.</p></div><span class="tag pending">Not yet verified</span></article>
+<article class="row"><div><h2>International bank transfer and local wallets</h2><p>Future market-specific options require a validated collection and reconciliation workflow. They are not represented as connected checkout methods today.</p></div><span class="tag pending">Future capability</span></article>
+</section><div class="note"><strong>Single payment safety rule:</strong> if a payment result is unclear, KRIM must reconcile the original order before allowing a retry. It must never automatically charge a customer through another provider because the first provider appears to have failed.</div><a class="primary" href="../quote-result.html">Open secure customer checkout →</a></main><footer>KRIM Logistics · One canonical payment lifecycle · No assumed global coverage.</footer></body></html>
