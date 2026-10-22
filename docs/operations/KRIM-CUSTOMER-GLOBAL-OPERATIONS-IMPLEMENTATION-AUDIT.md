@@ -87,3 +87,18 @@ The source contains meaningful building blocks, but the customer workflow cannot
 ## Next action
 
 Trace the full partner quote → award → customer quote → assignment → partner acceptance functions and the shipment transition rules. Resolve the P0 lifecycle mismatch in a reviewable branch/migration plan first; do not make production DDL or live payment changes during this audit step.
+
+
+## Additional function-chain finding (2026-10-22)
+
+Read-only catalog inspection of `krim_award_partner_quote_for_checkout` shows that it:
+- creates an assignment by calling `krim_award_partner_quote`;
+- immediately inserts the customer-facing `krim_quotes` row with status `accepted`;
+- writes a quote version whose status is also `accepted`;
+- records payment terms as “payment after partner assignment acceptance”.
+
+The function body excerpt inspected does not establish that the customer explicitly accepted the price before the quote is stored as accepted. The checkout UI and Edge Functions then require that assignment status is already `accepted`. The exact assignment status created by `krim_award_partner_quote`, and the intended customer acceptance action, must be traced before this lifecycle can be approved. This is a more specific workflow-contract issue than a page-level defect: the data model and action semantics may be conflating “partner offer awarded / customer quote presented” with “customer quote accepted.”
+
+The award function also permits a shipment in `quoted` or `confirmed` status and blocks a new award for a confirmed shipment unless a prior assignment was rejected. Verify these transitions against the authoritative shipment state machine and test retry/re-award paths.
+
+No production rows or schema were changed during this inspection.
