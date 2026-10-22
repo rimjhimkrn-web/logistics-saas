@@ -1,167 +1,103 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#071a2d">
-<title>Available Freight Loads | KRIM Logistics</title>
-<meta name="description" content="Review live KRIM freight opportunities and submit bids when your partner organization is eligible.">
-<script>(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);window.KRIM_BASE_PATH=b}());</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../config.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102b46">
+<title>Global Freight Exchange | KRIM Logistics</title>
+<meta name="description" content="Authenticated KRIM partner freight opportunity and tendering workspace.">
+<script>(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);window.KRIM_BASE_PATH=b;}());</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
 <style>
-:root{color-scheme:dark;--krim-navy:#071a2d;--krim-sky:#38bdf8}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.focus-ring:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
-.exchange-hero{background:linear-gradient(105deg,rgba(4,18,34,.98),rgba(4,18,34,.88) 58%,rgba(4,18,34,.62)),url("https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1800&q=80") center/cover}
-.load-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.load-card:hover{transform:translateY(-2px);border-color:#38bdf8;box-shadow:0 14px 28px rgba(2,8,23,.22)}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#34d399;display:inline-block;flex-shrink:0}
-.status-dot.warn{background:#fbbf24}
+:root{--navy:#102b46;--navy2:#183d5e;--blue:#2474d2;--cyan:#12a6c7;--green:#14856a;--amber:#b66a12;--red:#bd3444;--ink:#172b3d;--muted:#617488;--line:#dce5ee;--surface:#f3f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--surface);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button,a,input,select{outline-offset:3px}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #55b6f0}
+.shell{width:min(1480px,100%);margin:auto;padding:0 24px}.topbar{background:#102b46;color:white;border-bottom:3px solid #25a9d0}.toprow{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.04em}.brandmark{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#49c7ec,#2d66ca);font-size:20px}.brand small{display:block;color:#9ddbf0;font-size:10px;letter-spacing:.24em}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{padding:9px 12px;border-radius:9px;color:#e5eef7;font-size:13px;font-weight:750}.nav a:hover,.nav a.active{background:#244b6c;color:white}.top-actions{display:flex;gap:8px;align-items:center}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid #cbd7e2;background:white;color:var(--navy);border-radius:10px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer}.btn:hover{filter:brightness(.97)}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.dark{background:var(--navy);border-color:var(--navy);color:white}.btn:disabled{opacity:.55;cursor:wait}.mobile-menu{display:none}
+.hero{background:linear-gradient(110deg,rgba(12,38,63,.98),rgba(17,65,98,.91) 57%,rgba(15,96,125,.83)),url("https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1800&q=80") center/cover;color:white}.hero-inner{padding:36px 0 32px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.19em;text-transform:uppercase;color:#75d6f1}.hero h1{font-size:clamp(30px,4vw,48px);letter-spacing:-.04em;line-height:1.08;margin:10px 0 12px}.hero p{max-width:780px;color:#d6e4f0;margin:0}.hero-actions{display:flex;gap:10px;flex-wrap:wrap}.hero .btn{border-color:#ffffff55}.hero .btn.ghost{background:#ffffff12;color:white}
+.page{padding:24px 0 52px}.notice{display:flex;gap:12px;align-items:flex-start;background:white;border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin-bottom:18px;box-shadow:0 2px 7px #102b4607}.notice-icon{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:10px;background:#e7f4fb;color:#1765a0;font-weight:900}.notice p{margin:0;color:var(--muted);font-size:13px}.notice strong{color:var(--ink)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}.metric{background:white;border:1px solid var(--line);border-radius:14px;padding:17px 18px;box-shadow:0 3px 10px #102b4605}.metric-head{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.metric-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#e8f3ff;color:#226ac4;font-size:17px}.metric:nth-child(2) .metric-icon{background:#e3f7f2;color:#12856c}.metric:nth-child(3) .metric-icon{background:#fff2df;color:#b66a12}.metric:nth-child(4) .metric-icon{background:#f0eaff;color:#7952bf}.metric-value{font-size:29px;font-weight:900;letter-spacing:-.04em;margin-top:8px;color:var(--navy)}.metric-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.layout{display:grid;grid-template-columns:255px minmax(0,1fr);gap:18px;align-items:start}.panel{background:white;border:1px solid var(--line);border-radius:15px;box-shadow:0 3px 10px #102b4605;overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h2{margin:0;font-size:17px;letter-spacing:-.02em}.panel-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.filter-body{padding:18px}.field{display:grid;gap:7px;margin-bottom:15px}.field label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#52687c}.field input,.field select{width:100%;min-width:0;border:1px solid #cad7e3;border-radius:9px;background:white;color:var(--ink);padding:11px 12px}.field input::placeholder{color:#92a1b0}.filter-note{background:#f1f7fc;border:1px solid #dbeaf5;border-radius:10px;padding:12px;font-size:12px;line-height:1.55;color:#52687c}.filter-note strong{display:block;color:var(--navy);margin-bottom:3px}
+.list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line);background:#fbfdff}.results-count{font-size:12px;color:var(--muted)}.results-count strong{color:var(--navy)}.sort-select{border:1px solid #cad7e3;border-radius:9px;padding:9px 10px;background:white;color:var(--ink);font-size:12px}.opps{display:grid;gap:13px;padding:16px}.opp{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:white;transition:border-color .15s,box-shadow .15s}.opp:hover{border-color:#8cb9e8;box-shadow:0 6px 18px #102b4610}.opp-top{padding:17px 18px 13px;display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.opp-ref{font-size:11px;font-weight:900;letter-spacing:.1em;color:#2474d2;text-transform:uppercase}.opp h3{font-size:18px;line-height:1.3;margin:6px 0 0;color:var(--navy);overflow-wrap:anywhere}.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#e3f7f0;color:#11785f;font-size:10px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}.pill.warn{background:#fff2dc;color:#9b5a0b}.pill.neutral{background:#eaf0f6;color:#4d6378}.route{margin:0 18px 14px;display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);gap:10px;align-items:center;padding:14px;background:#f4f8fc;border-radius:11px}.route-label{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#778a9d}.route-place{font-weight:850;font-size:14px;color:var(--ink);margin-top:4px;overflow-wrap:anywhere}.route-arrow{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#dceefe;color:#176bc3;font-size:18px}.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 18px 15px}.fact{border:1px solid #e5ebf1;border-radius:9px;padding:10px 11px;min-width:0}.fact small{display:block;color:#7b8b9b;text-transform:uppercase;font-size:9px;letter-spacing:.1em;font-weight:900}.fact strong{display:block;font-size:12px;color:#334b60;margin-top:4px;overflow-wrap:anywhere}.opp-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;background:#fbfdff;border-top:1px solid #e7edf3}.deadline{font-size:11px;color:var(--muted)}.deadline strong{display:block;color:#334b60;font-size:12px}.empty{padding:42px 22px;text-align:center}.empty-icon{margin:0 auto 14px;display:grid;place-items:center;width:56px;height:56px;border-radius:16px;background:#eaf4fc;color:#2675c9;font-size:26px}.empty h3{margin:0;font-size:19px;color:var(--navy)}.empty p{max-width:520px;margin:8px auto 18px;color:var(--muted);font-size:13px}.statusline{padding:13px 16px;background:#f6f9fc;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.statusline.error{background:#fff0f1;color:#9d2734}.statusline.success{background:#eaf8f2;color:#126a52}
+.bottom-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}.info-card{background:white;border:1px solid var(--line);border-radius:13px;padding:17px}.info-card span{display:block;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#2878b9}.info-card h3{margin:7px 0 5px;font-size:15px;color:var(--navy)}.info-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+footer{background:#102b46;color:#c3d1df;padding:22px 0;font-size:11px}.footrow{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.footrow strong{color:white}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.filter-body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.field{margin:0}.filter-note{grid-column:1/-1}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-inner{grid-template-columns:1fr}.hero-actions{justify-content:flex-start}}
+@media(max-width:680px){.shell{padding:0 14px}.toprow{padding:13px 0;min-height:unset;flex-wrap:wrap}.nav{order:3;width:100%;display:none;grid-template-columns:repeat(2,minmax(0,1fr))}.nav.open{display:grid}.nav a{background:#193b59}.top-actions{margin-left:auto}.mobile-menu{display:inline-flex}.top-actions .signin{display:none}.hero-inner{padding:28px 0}.hero h1{font-size:33px}.metrics{gap:9px}.metric{padding:13px}.metric-value{font-size:25px}.metric-head{font-size:9px}.filter-body{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.facts .fact:last-child{grid-column:1/-1}.opp-top{padding:14px}.route{margin:0 14px 12px;padding:12px;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:5px}.route-arrow{width:27px;height:27px}.route-place{font-size:12px}.opp-bottom{padding:12px 14px;align-items:flex-start;flex-direction:column}.opp-bottom .btn{width:100%}.list-toolbar{padding:12px}.opps{padding:10px}.bottom-grid{grid-template-columns:1fr}.page{padding-top:15px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
-<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">Skip to main content</a>
-<header class="sticky top-0 z-40 border-b border-white/10 bg-[#07182a]/95 text-white backdrop-blur">
- <div class="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-  <a href="../index.html" aria-label="KRIM Logistics home" class="focus-ring flex items-center gap-3 rounded-lg">
-   <span class="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-sky-300 to-blue-700 text-xl font-black">↗</span>
-   <span><span class="block text-xl font-black tracking-tight">KRIM</span><span class="-mt-1 block text-[10px] font-bold uppercase tracking-[.28em] text-sky-200">LOGISTICS</span></span>
-  </a>
-  <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-200 md:flex" aria-label="Main navigation">
-   <a href="../solutions.html" class="focus-ring rounded hover:text-sky-300">Solutions</a>
-   <a href="../global-coverage.html" class="focus-ring rounded hover:text-sky-300">Global Network</a>
-   <a data-krim-route="bids" href="quote-history.html" class="focus-ring rounded hover:text-sky-300">My Bids</a>
-  </nav>
-  <div class="flex items-center gap-2 sm:gap-3">
-   <a href="../../auth/login.html" class="focus-ring rounded-xl border border-white/50 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/10 sm:px-5">Secure Sign In</a>
-   <button id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-navigation" class="focus-ring rounded-xl border border-white/40 px-3 py-2.5 text-sm font-bold text-white md:hidden">Menu ☰</button>
-  </div>
- </div>
- <nav id="mobile-navigation" aria-label="Mobile navigation" hidden class="border-t border-white/10 bg-[#07182a] px-5 py-3 text-sm font-semibold text-white md:hidden">
-  <div class="mx-auto flex max-w-7xl flex-col gap-1">
-   <a href="../index.html" class="rounded-lg px-3 py-3 hover:bg-white/10">KRIM Home</a>
-   <a href="../solutions.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Solutions</a>
-   <a href="../global-coverage.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Global Network</a>
-   <a href="available-loads.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Available Loads</a>
-   <a data-krim-route="bids" href="quote-history.html" class="rounded-lg px-3 py-3 hover:bg-white/10">My Bids</a>
-   <a href="submit-quote.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Submit a Bid</a>
-   <a href="../../auth/partner-signup.html" class="rounded-lg px-3 py-3 hover:bg-white/10">Partner Registration</a>
-  </div>
- </nav>
-</header>
-<main id="main">
- <section class="exchange-hero text-white">
-  <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
-   <p class="text-xs font-extrabold uppercase tracking-[.24em] text-sky-300 sm:text-sm">Partner workspace · Freight exchange</p>
-   <h1 class="mt-4 max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">Find your next load.<br><span class="text-sky-300">Grow with KRIM.</span></h1>
-   <p class="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">Review open freight opportunities, check route and cargo requirements, and submit a competitive bid when your partner organization is approved. Only live backend records are shown.</p>
-   <div class="mt-8 flex flex-wrap gap-3">
-    <a href="#opportunities" class="focus-ring rounded-xl bg-sky-500 px-5 py-3 text-sm font-extrabold text-white hover:bg-sky-400">Explore opportunities ↓</a>
-    <a data-krim-route="bids" href="quote-history.html" class="focus-ring rounded-xl border border-white/40 px-5 py-3 text-sm font-bold text-white hover:bg-white/10">View my bids</a>
-   </div>
-  </div>
- </section>
- <section class="mx-auto max-w-7xl px-5 py-9 sm:px-8 sm:py-12">
-  <div class="grid gap-4 sm:grid-cols-3">
-   <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-extrabold uppercase tracking-widest text-sky-700">Network access</p><h2 class="mt-2 text-lg font-extrabold">Verified partners</h2><p class="mt-2 text-sm leading-6 text-slate-600">Bidding is available only to eligible, active partner organizations.</p></article>
-   <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-extrabold uppercase tracking-widest text-sky-700">Live opportunity data</p><h2 class="mt-2 text-lg font-extrabold">No demo loads</h2><p class="mt-2 text-sm leading-6 text-slate-600">Routes and deadlines are read from KRIM backend records.</p></article>
-   <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-extrabold uppercase tracking-widest text-sky-700">Partner workflow</p><h2 class="mt-2 text-lg font-extrabold">Quote → review</h2><p class="mt-2 text-sm leading-6 text-slate-600">A submitted bid is an offer—not a shipment award or payment guarantee.</p></article>
-  </div>
-  <section id="opportunities" class="mt-12 scroll-mt-24">
-   <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-    <div><p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Partner exchange</p><h2 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Available freight opportunities</h2><p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Open opportunities only. Expired or unlinked records are not presented as bid-ready loads.</p></div>
-    <button id="refresh-loads" type="button" class="focus-ring rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 shadow-sm hover:border-sky-400">↻ Refresh opportunities</button>
-   </div>
-   <div class="mt-5 flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-    <span id="status-dot" class="status-dot warn mt-1.5"></span><p id="status" role="status" aria-live="polite" class="text-sm leading-6 text-slate-600">Connecting securely to the KRIM network…</p>
-   </div>
-   <div id="loads" class="mt-5 grid gap-5 lg:grid-cols-2">
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="h-3 w-28 animate-pulse rounded bg-slate-200"></div><div class="mt-4 h-5 w-3/4 animate-pulse rounded bg-slate-200"></div><div class="mt-3 h-3 w-1/2 animate-pulse rounded bg-slate-100"></div></div>
-   </div>
-  </section>
- </section>
+<body>
+<header class="topbar"><div class="shell toprow">
+<a class="brand" href="../index.html" aria-label="KRIM Logistics home"><span class="brandmark">↗</span><span>KRIM <small>GLOBAL LOGISTICS OS</small></span></a>
+<nav class="nav" id="main-nav" aria-label="Partner navigation"><a href="../index.html">Workspace Home</a><a class="active" href="available-loads.html" aria-current="page">Freight Exchange</a><a href="submit-quote.html">Submit a Quote</a><a href="quote-history.html">My Bids</a></nav>
+<div class="top-actions"><a class="btn signin" href="../../auth/login.html">Secure sign-in</a><button class="btn mobile-menu" id="menu-toggle" type="button" aria-expanded="false">☰ Menu</button></div>
+</div></header>
+<section class="hero"><div class="shell hero-inner"><div><div class="eyebrow">Module 05 · Global opportunity exchange</div><h1>Freight opportunities.<br>Commercial decisions, connected.</h1><p>Discover live tenders, review operational requirements, and prepare competitive offers. KRIM keeps opportunity discovery, quotation submission, award and shipment assignment as separate controlled steps.</p></div><div class="hero-actions"><a class="btn primary" href="#opportunity-register">Explore opportunities ↓</a><a class="btn ghost" href="quote-history.html">View my bids ↗</a></div></div></section>
+<main class="shell page">
+<div class="notice"><div class="notice-icon">i</div><p><strong>Live network records only.</strong> This register reads KRIM backend records; it does not create sample freight or promise an award. Your organization’s verification and backend permissions control what you can see and whether you can submit an offer.</p></div>
+<section class="metrics" aria-label="Opportunity overview">
+<article class="metric"><div class="metric-head">Open tenders <span class="metric-icon">▤</span></div><div class="metric-value" id="metric-open">—</div><div class="metric-sub">Unexpired open records visible to this session</div></article>
+<article class="metric"><div class="metric-head">Bid eligible <span class="metric-icon">✓</span></div><div class="metric-value" id="metric-eligible">—</div><div class="metric-sub">Opportunities your current workspace can submit against</div></article>
+<article class="metric"><div class="metric-head">Closing soon <span class="metric-icon">◷</span></div><div class="metric-value" id="metric-closing">—</div><div class="metric-sub">Deadline within the next 24 hours</div></article>
+<article class="metric"><div class="metric-head">My active bids <span class="metric-icon">⇧</span></div><div class="metric-value" id="metric-bids">—</div><div class="metric-sub">Submitted offers in your organization</div></article>
+</section>
+<div class="layout" id="opportunity-register">
+<aside class="panel"><div class="panel-head"><div><h2>Refine opportunities</h2><p>Search the live tender register</p></div></div><div class="filter-body">
+<div class="field"><label for="search">Keyword / reference</label><input id="search" type="search" placeholder="Lane, cargo, opportunity ID…"></div>
+<div class="field"><label for="mode">Transport mode</label><select id="mode"><option value="">All available modes</option><option value="road">Road</option><option value="rail">Rail</option><option value="ocean">Ocean</option><option value="sea">Sea freight</option><option value="air">Air</option><option value="multimodal">Multimodal</option><option value="warehouse">Warehousing</option></select></div>
+<div class="field"><label for="deadline">Deadline</label><select id="deadline"><option value="">Any open deadline</option><option value="24">Closing within 24 hours</option><option value="72">Closing within 72 hours</option><option value="nodate">No deadline supplied</option></select></div>
+<div class="filter-note"><strong>Eligibility is not just a filter</strong>Coverage and capabilities are shown as matching information only where KRIM provides sufficient data. The secure quotation function remains responsible for authoritative eligibility validation.</div>
+<button class="btn" id="clear-filters" type="button">Clear filters</button>
+</div></aside>
+<section class="panel"><div class="panel-head"><div><h2>Opportunity register</h2><p>Global freight procurement · Live backend feed</p></div><button class="btn" id="refresh" type="button">↻ Refresh</button></div>
+<div class="list-toolbar"><div class="results-count" id="result-count" aria-live="polite">Connecting securely to KRIM…</div><select id="sort" class="sort-select" aria-label="Sort opportunities"><option value="deadline">Sort: Deadline soonest</option><option value="newest">Sort: Recently requested</option><option value="route">Sort: Route A–Z</option></select></div>
+<div class="opps" id="opps"><div class="empty"><div class="empty-icon">⌁</div><h3>Connecting to the global exchange</h3><p>Verifying your session, partner organization and available freight records.</p></div></div>
+<div class="statusline" id="status" role="status" aria-live="polite">Establishing secure connection…</div>
+</section></div>
+<section class="bottom-grid" aria-label="Tendering controls">
+<article class="info-card"><span>01 · Review</span><h3>Check requirements before pricing</h3><p>Confirm the lane, cargo description, available weight, response deadline and any requirements included in the opportunity record.</p></article>
+<article class="info-card"><span>02 · Submit</span><h3>Offer is not an award</h3><p>A submitted quotation is a commercial offer. Customer acceptance and the authorized award/assignment workflow are separate events.</p></article>
+<article class="info-card"><span>03 · Govern</span><h3>Secure, organization-scoped access</h3><p>Only records returned by your authenticated session and Supabase access policies are displayed. Never share credentials or bypass eligibility restrictions.</p></article>
+</section>
 </main>
-<footer class="border-t border-slate-200 bg-white"><div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8"><span><strong class="text-slate-800">KRIM Logistics</strong><br>Global logistics operating system</span><span>Opportunity access is controlled by organization membership, verification and backend policies.</span></div></footer>
+<footer><div class="shell footrow"><span><strong>KRIM Logistics</strong> · Global Logistics Operating System</span><span>Opportunities & Tendering · Module 05 · Live data only</span><span><a href="quote-history.html">My bids</a>　·　<a href="submit-quote.html">Submit a quote</a></span></div></footer>
 <script>
-(async function(){
-const client=window.KRIM_SUPABASE||window.supabaseClient,status=document.getElementById("status"),dot=document.getElementById("status-dot"),loads=document.getElementById("loads"),refresh=document.getElementById("refresh-loads");
-const menuButton=document.getElementById("mobile-menu-toggle"),mobileNav=document.getElementById("mobile-navigation");
-if(menuButton&&mobileNav){menuButton.addEventListener("click",()=>{const open=menuButton.getAttribute("aria-expanded")!=="true";menuButton.setAttribute("aria-expanded",String(open));mobileNav.hidden=!open;menuButton.textContent=open?"Close ✕":"Menu ☰";});}
-refresh.addEventListener("click",()=>{refresh.disabled=true;refresh.textContent="Refreshing…";location.reload();});
-function msg(t,bad=false){status.textContent=t;dot.className="status-dot"+(bad?" warn":"")}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function showAccess(reason){loads.innerHTML='<section class="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-8 lg:col-span-2"><div class="flex items-start gap-4"><span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-amber-100 text-2xl">🔐</span><div><p class="text-xs font-extrabold uppercase tracking-[.18em] text-amber-800">Partner access</p><h3 class="mt-2 text-xl font-black text-slate-900">Partner organization setup required</h3><p class="mt-3 max-w-2xl text-sm leading-6 text-slate-700">'+esc(reason)+' If you already registered, your organization or membership may still need activation. Do not create a duplicate account.</p><div class="mt-5 flex flex-wrap gap-3"><a class="rounded-xl bg-sky-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-sky-500" href="../../auth/partner-signup.html">Partner registration ↗</a><a data-krim-route="bids" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800" href="quote-history.html">My submitted bids</a></div></div></div></section>'}
-try{
- if(!client)throw new Error("Supabase configuration did not load. Please refresh or contact platform support.");
- const {data:{session},error:authError}=await client.auth.getSession();if(authError)throw authError;
- if(!session){location.href="../../auth/login.html";return}
- const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");
- if(memberError)throw memberError;
- const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
- if(!ids.length){msg("No active organization membership was found for this signed-in account.",true);showAccess("Your account is not currently linked to an active KRIM partner organization.");return}
- const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);
- if(orgError)throw orgError;
- const partners=(orgs||[]).filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active");
- if(!partners.length){msg("Your account is signed in, but no active partner organization is linked.",true);showAccess("A customer account alone cannot access partner freight opportunities.");return}
- const verified=partners.some(o=>["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
- const {data:opps,error:oppError}=await client.from("krim_partner_opportunities").select("id,opportunity_number,status,response_deadline,service_lane,metadata,shipment_id").eq("status","open").order("requested_at",{ascending:false}).limit(100);
- if(oppError)throw oppError;
- const liveOpps=(opps||[]).filter(o=>!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now());
- if(!liveOpps.length){msg("No open opportunities are currently available. Refresh later; no demo inventory is displayed.");loads.innerHTML='<div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center lg:col-span-2"><div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-sky-50 text-2xl">📦</div><h3 class="mt-4 text-lg font-extrabold text-slate-900">No open loads right now</h3><p class="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">There are no unexpired freight opportunities in the connected backend for this view. Check again later—KRIM will not show invented sample loads.</p></div>';return}
- const shipmentIds=[...new Set(liveOpps.map(o=>Number(o.shipment_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
- if(!shipmentIds.length){msg("Open opportunities exist, but none is linked to a valid shipment.",true);loads.innerHTML='<div class="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm leading-6 text-rose-800 lg:col-span-2">The backend has open opportunities without valid shipment links. Bidding is unavailable until those records are corrected.</div>';return}
- const {data:shipments,error:shipmentError}=await client.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id").in("id",shipmentIds);
- if(shipmentError)throw shipmentError;
- const locationIds=[...new Set((shipments||[]).flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];
- const {data:locations,error:locationError}=locationIds.length?await client.from("krim_locations").select("id,city,state_region,location_code").in("id",locationIds):{data:[],error:null};
- if(locationError)throw locationError;
- const locMap=new Map((locations||[]).map(l=>[Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(", ")]));
- const shipMap=new Map((shipments||[]).map(s=>[Number(s.id),s]));
- const valid=liveOpps.filter(o=>shipMap.has(Number(o.shipment_id)));
- if(!valid.length){msg("No open opportunities have readable shipment details.",true);loads.innerHTML='<div class="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900 lg:col-span-2">Opportunity records exist, but their linked shipment details are unavailable under current backend access policies. No bid-ready loads are shown.</div>';return}
- loads.innerHTML=valid.map(o=>{const s=shipMap.get(Number(o.shipment_id)),origin=locMap.get(Number(s.origin_location_id))||"Origin pending",dest=locMap.get(Number(s.destination_location_id))||"Destination pending",canBid=verified;
- return '<article class="load-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><div class="flex items-start justify-between gap-3"><div><p class="text-xs font-extrabold uppercase tracking-[.16em] text-sky-700">'+esc(o.opportunity_number||("Opportunity #"+o.id))+'</p><span class="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800"><span class="status-dot"></span>Open opportunity</span></div><span class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">KRIM network</span></div><div class="my-5 rounded-xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-widest text-slate-500">Freight route</p><h3 class="mt-2 break-words text-xl font-black leading-snug text-slate-900">'+esc(origin)+' <span class="text-sky-600">→</span> '+esc(dest)+'</h3></div><div class="grid gap-3 sm:grid-cols-2"><div class="rounded-xl border border-slate-100 p-3"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Cargo</p><p class="mt-1 text-sm font-bold text-slate-800">'+esc(s.goods_description||"Details not provided")+'</p></div><div class="rounded-xl border border-slate-100 p-3"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Weight</p><p class="mt-1 text-sm font-bold text-slate-800">'+esc(s.total_weight_kg??"Not provided")+' kg</p></div></div><div class="mt-4 space-y-2 text-xs leading-5 text-slate-500"><p>Shipment: <strong class="text-slate-700">'+esc(s.shipment_number||("#"+o.shipment_id))+'</strong></p><p>Response deadline: <strong class="text-slate-700">'+esc(o.response_deadline?new Date(o.response_deadline).toLocaleString():"Not provided")+'</strong></p></div><div class="mt-5 border-t border-slate-100 pt-4">'+(canBid?'<a class="focus-ring inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-emerald-500" href="submit-quote.html?opportunity_id='+encodeURIComponent(o.id)+'">Review and submit bid ↗</a>':'<div class="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-bold text-amber-800">Partner verification required before bidding</div>')+'</div></article>'
- }).join("");
- msg(verified?"Loaded "+valid.length+" live opportunity record(s).":"Loaded "+valid.length+" live opportunity record(s); bidding is locked until partner verification and compliance are approved.",!verified);
-}catch(e){const reason=e.message||"Could not load freight opportunities.";msg(reason,true);loads.innerHTML='<section class="rounded-2xl border border-rose-200 bg-rose-50 p-6 sm:p-8 lg:col-span-2"><p class="text-xs font-extrabold uppercase tracking-[.18em] text-rose-700">Connection / access notice</p><h3 class="mt-2 text-xl font-black text-slate-900">We could not load the freight exchange</h3><p class="mt-3 text-sm leading-6 text-slate-700">'+esc(reason)+'</p><p class="mt-2 text-sm leading-6 text-slate-600">No sample loads are substituted. Try refreshing; if the issue continues, the backend query, access policy, or organization membership needs investigation.</p><button type="button" onclick="location.reload()" class="mt-5 rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">Try again</button></section>'}
+(function(){
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const $=id=>document.getElementById(id);
+const state={opps:[],shipments:new Map(),locations:new Map(),orgs:[],partnerIds:[],verified:false,quotes:[],loading:false};
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function date(v){if(!v)return "Not specified";const d=new Date(v);return Number.isNaN(d.getTime())?"Not specified":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});}
+function place(id){const l=state.locations.get(Number(id));return l?[l.city,l.state_region,l.country_name,l.location_code].filter(Boolean).join(", "):"Location details pending";}
+function setStatus(text,type){$("status").textContent=text;$("status").className="statusline"+(type?" "+type:"");}
+function setMetric(id,val){$(id).textContent=String(val);}
+function deadlineHours(o){if(!o.response_deadline)return null;return (new Date(o.response_deadline).getTime()-Date.now())/3600000;}
+function openNow(o){return String(o.status||"").toLowerCase()==="open"&&(!o.response_deadline||new Date(o.response_deadline).getTime()>Date.now())&&!o.cancelled_at&&!o.awarded_at&&!o.awarded_partner_organization_id;}
+function shipment(o){return state.shipments.get(Number(o.shipment_id));}
+function route(o){const s=shipment(o);return s?[place(s.origin_location_id)+" "+place(s.destination_location_id)]:String(o.service_lane||"");}
+function modeOf(o){const s=shipment(o);return String((s&&s.requested_transport_mode)||o.metadata?.transport_mode||o.metadata?.mode||"").toLowerCase();}
+function renderMetrics(){const open=state.opps.filter(openNow);setMetric("metric-open",open.length);setMetric("metric-eligible",state.verified?open.length:0);setMetric("metric-closing",open.filter(o=>{const h=deadlineHours(o);return h!==null&&h<=24;}).length);setMetric("metric-bids",state.quotes.filter(q=>["submitted","under_review","pending","shortlisted"].includes(String(q.status||"").toLowerCase())).length);}
+function matches(o){const q=$("search").value.trim().toLowerCase(),mode=$("mode").value,deadline=$("deadline").value,s=shipment(o),text=[o.opportunity_number,o.service_lane,o.partner_name,s&&s.shipment_number,s&&s.goods_description,s&&s.requested_transport_mode,route(o)].filter(Boolean).join(" ").toLowerCase();if(q&&!text.includes(q))return false;if(mode&&!modeOf(o).includes(mode))return false;const h=deadlineHours(o);if(deadline==="nodate"&&o.response_deadline)return false;if(deadline==="24"&&(h===null||h>24))return false;if(deadline==="72"&&(h===null||h>72))return false;return true;}
+function render(){const sort=$("sort").value;let rows=state.opps.filter(openNow).filter(matches);rows.sort((a,b)=>{if(sort==="newest")return new Date(b.requested_at||b.created_at||0)-new Date(a.requested_at||a.created_at||0);if(sort==="route")return route(a).localeCompare(route(b));const ah=deadlineHours(a),bh=deadlineHours(b);if(ah===null)return bh===null?0:1;if(bh===null)return -1;return ah-bh;});$("result-count").innerHTML="<strong>"+rows.length+"</strong> matching opportunity record(s) · <strong>"+state.opps.filter(openNow).length+"</strong> open in this feed";
+if(!rows.length){$("opps").innerHTML='<div class="empty"><div class="empty-icon">⌕</div><h3>No matching open opportunities</h3><p>'+(state.opps.some(openNow)?"Try removing one or more filters.":"There are no unexpired open opportunities in the records visible to this account. No placeholder freight has been created.")+'</p><button class="btn" type="button" id="empty-clear">Clear filters</button></div>';const b=$("empty-clear");if(b)b.addEventListener("click",clearFilters);return;}
+$("opps").innerHTML=rows.map(o=>{const s=shipment(o),origin=s?place(s.origin_location_id):String(o.service_lane||"Origin details pending"),dest=s?place(s.destination_location_id):"Destination details pending",h=deadlineHours(o),deadline=o.response_deadline?date(o.response_deadline):"No deadline supplied",mode=s&&s.requested_transport_mode?s.requested_transport_mode:(o.metadata?.transport_mode||o.metadata?.mode||"Not specified"),goods=s&&s.goods_description?s.goods_description:(o.metadata?.cargo_type||o.metadata?.goods_description||"Cargo details not supplied"),weight=s&&s.total_weight_kg!=null?Number(s.total_weight_kg).toLocaleString()+" kg":"Not supplied",canBid=state.verified;
+return '<article class="opp"><div class="opp-top"><div><div class="opp-ref">'+esc(o.opportunity_number||("Opportunity #"+o.id))+'</div><h3>'+esc(o.service_lane||"Global freight movement")+'</h3></div><span class="pill '+(h!==null&&h<=24?"warn":"")+'">'+(h!==null&&h<=24?"Closing soon":"Open tender")+'</span></div><div class="route"><div><div class="route-label">Origin</div><div class="route-place">'+esc(origin)+'</div></div><div class="route-arrow" aria-hidden="true">→</div><div><div class="route-label">Destination</div><div class="route-place">'+esc(dest)+'</div></div></div><div class="facts"><div class="fact"><small>Cargo / commodity</small><strong>'+esc(goods)+'</strong></div><div class="fact"><small>Transport mode</small><strong>'+esc(mode)+'</strong></div><div class="fact"><small>Gross weight</small><strong>'+esc(weight)+'</strong></div></div><div class="opp-bottom"><div class="deadline">Response deadline<strong>'+esc(deadline)+'</strong><span>Requested '+esc(date(o.requested_at||o.created_at))+'</span></div>'+(canBid?'<a class="btn primary" href="submit-quote.html?opportunity_id='+encodeURIComponent(o.id)+'">Review & submit quote ↗</a>':'<span class="pill warn">Verification required to bid</span>')+'</div></article>';}).join("");}
+function clearFilters(){$("search").value="";$("mode").value="";$("deadline").value="";render();}
+async function load(){if(state.loading)return;state.loading=true;$("refresh").disabled=true;$("refresh").textContent="Loading…";setStatus("Verifying session and loading live opportunity records…");try{
+if(!client)throw new Error("Supabase configuration did not load. Check the shared config.js deployment.");
+const {data:sd,error:ae}=await client.auth.getSession();if(ae)throw ae;const session=sd&&sd.session;if(!session){const next=encodeURIComponent(location.pathname+location.search);$("opps").innerHTML='<div class="empty"><div class="empty-icon">🔐</div><h3>Sign in to access tendering</h3><p>Freight opportunities are available only to authenticated partner users.</p><a class="btn primary" href="../../auth/login.html?next='+next+'">Secure sign in →</a></div>';setStatus("Sign-in required.");$("result-count").textContent="Authentication required";return;}
+const {data:members,error:me}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");if(me)throw me;const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){$("opps").innerHTML='<div class="empty"><div class="empty-icon">🏢</div><h3>Partner organization setup required</h3><p>This account has no active organization membership. If you already registered, ask support to review the existing organization rather than creating a duplicate account.</p><a class="btn primary" href="../../auth/partner-signup.html">Partner registration →</a></div>';setStatus("No active organization membership found.","error");$("result-count").textContent="Partner membership required";return;}
+const {data:orgs,error:oe}=await client.from("krim_organizations").select("id,organization_type,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status").in("id",ids);if(oe)throw oe;state.orgs=(orgs||[]);state.partnerIds=state.orgs.filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active").map(o=>Number(o.id));if(!state.partnerIds.length){$("opps").innerHTML='<div class="empty"><div class="empty-icon">🛡</div><h3>Active partner organization required</h3><p>Your signed-in account is not linked to an active partner, carrier or forwarder organization.</p><a class="btn primary" href="../../auth/partner-signup.html">Partner onboarding →</a></div>';setStatus("Partner access is not active.","error");$("result-count").textContent="Partner access required";return;}
+state.verified=state.orgs.some(o=>state.partnerIds.includes(Number(o.id))&&["verified","approved"].includes(String(o.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(o.partner_compliance_status||"").toLowerCase())&&["active","verified"].includes(String(o.partner_lifecycle_status||"").toLowerCase()));
+const {data:opps,error:oe2}=await client.from("krim_partner_opportunities").select("id,shipment_id,opportunity_number,status,requested_at,response_deadline,awarded_partner_organization_id,awarded_at,cancelled_at,metadata,created_at,service_lane,partner_name").eq("status","open").order("requested_at",{ascending:false}).limit(200);if(oe2)throw oe2;state.opps=opps||[];
+const shipmentIds=[...new Set(state.opps.map(o=>Number(o.shipment_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(shipmentIds.length){const {data:ss,error:se}=await client.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id,requested_transport_mode").in("id",shipmentIds);if(se)throw se;(ss||[]).forEach(s=>state.shipments.set(Number(s.id),s));}
+const locIds=[...new Set([...state.shipments.values()].flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(n=>Number.isSafeInteger(n)&&n>0))];if(locIds.length){const {data:ls,error:le}=await client.from("krim_locations").select("id,city,state_region,location_code,country_id").in("id",locIds);if(le)throw le;const countryIds=[...new Set((ls||[]).map(l=>Number(l.country_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];let countries=new Map();if(countryIds.length){const {data:cs,error:ce}=await client.from("krim_countries").select("id,name,iso2_code").in("id",countryIds);if(!ce)(cs||[]).forEach(c=>countries.set(Number(c.id),c.name||c.iso2_code||""));}(ls||[]).forEach(l=>state.locations.set(Number(l.id),{...l,country_name:countries.get(Number(l.country_id))||""}));}
+const {data:quotes,error:qe}=await client.from("krim_partner_quotes").select("id,opportunity_id,status,partner_organization_id").in("partner_organization_id",state.partnerIds).limit(500);if(qe)throw qe;state.quotes=quotes||[];
+renderMetrics();render();setStatus(state.verified?"Live opportunity register loaded. Quote submission remains subject to authoritative server-side eligibility checks.":"Live opportunity register loaded in read-only mode. Complete partner verification and compliance before submitting quotes.","success");if(!state.opps.length)setStatus("Connection established; no open opportunity records are currently available. No demo records were substituted.");}
+catch(e){const reason=e&&e.message?e.message:"Unknown backend error";$("opps").innerHTML='<div class="empty"><div class="empty-icon">!</div><h3>Opportunity register unavailable</h3><p>'+esc(reason)+'</p><p>No sample loads were substituted. This may be a session, schema, or row-level security issue.</p><button class="btn primary" id="retry" type="button">Try again</button></div>';const retry=$("retry");if(retry)retry.addEventListener("click",load);$("result-count").textContent="Unable to load live records";setStatus("Could not load the opportunity register: "+reason,"error");}
+finally{state.loading=false;$("refresh").disabled=false;$("refresh").textContent="↻ Refresh";}}
+$("refresh").addEventListener("click",load);["search","mode","deadline","sort"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));$("clear-filters").addEventListener("click",clearFilters);$("menu-toggle").addEventListener("click",()=>{const n=$("main-nav"),open=!n.classList.contains("open");n.classList.toggle("open",open);$("menu-toggle").setAttribute("aria-expanded",String(open));});load();
 })();
 </script>
-
 <script>
-/* Make both My Bids entry points navigate to the canonical My Bids page. */
-(function(){
-  var base = window.KRIM_BASE_PATH || (location.pathname.indexOf("/logistics-saas/")===0 ? "/logistics-saas/" : "/");
-  var bidsUrl = base + "public/partner/quote-history.html";
-  function isBidsLink(a){
-    if(!a) return false;
-    var route = (a.getAttribute("data-krim-route") || "").toLowerCase();
-    var label = (a.textContent || "").replace(/\s+/g," ").trim().toLowerCase();
-    var href = (a.getAttribute("href") || "").split("?")[0];
-    return route === "bids" || label === "my bids" || label === "view my bids" ||
-      label === "my submitted bids" || href === "quote-history.html" ||
-      href.endsWith("/quote-history.html");
-  }
-  function connectBidsLinks(){
-    document.querySelectorAll("a").forEach(function(a){
-      if(isBidsLink(a)){
-        a.setAttribute("href",bidsUrl);
-        a.setAttribute("data-krim-route","bids");
-      }
-    });
-  }
-  connectBidsLinks();
-  document.addEventListener("click",function(e){
-    var a=e.target.closest("a");
-    if(!a || !isBidsLink(a)) return;
-    e.preventDefault();
-    location.assign(bidsUrl);
-  });
-  var observer = new MutationObserver(connectBidsLinks);
-  observer.observe(document.body,{childList:true,subtree:true});
-})();
-</body>
-</html>
+(function(){var base=window.KRIM_BASE_PATH||(location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/");var routes={"../index.html":"public/index.html","available-loads.html":"public/partner/available-loads.html","quote-history.html":"public/partner/quote-history.html","submit-quote.html":"public/partner/submit-quote.html","../../auth/login.html":"auth/login.html","../../auth/partner-signup.html":"auth/partner-signup.html"};document.querySelectorAll("a[href]").forEach(function(a){var raw=a.getAttribute("href");if(!raw||raw.charAt(0)==="#"||/^(https?:|mailto:|tel:|javascript:)/i.test(raw))return;var path=raw.split("?")[0].replace(/^\.\//,"");if(routes[path])a.href=base+routes[path]+(raw.indexOf("?")>=0?raw.slice(raw.indexOf("?")):"");});})();
+</script>
+</body></html>
