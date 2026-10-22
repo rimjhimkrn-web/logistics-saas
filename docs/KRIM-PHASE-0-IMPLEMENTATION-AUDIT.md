@@ -64,3 +64,17 @@ Reason: source and RPC existence are confirmed, but no authenticated fresh booki
 
 ## Change policy
 No production schema change, production data mutation, secret change, live payment or broad page rewrite is approved by this audit. Fixes should be isolated, reviewed, tested in a safe environment and backed by evidence.
+
+
+## Security and performance advisor snapshot (2026-10-22)
+- Supabase security advisor returned a warning category `authenticated_security_definer_function_executable` with 27 findings. The findings include shipment creation RPCs, quote acceptance, partner quote award, driver assignment and admin rate-card / verification functions.
+- This warning is not by itself proof of an exploitable vulnerability: some SECURITY DEFINER RPCs are intentional. However, every listed function must be inspected for explicit `auth.uid()` checks, organization/resource authorization, safe `search_path`, and appropriate execute grants before production launch.
+- Do not bulk-revoke EXECUTE or switch all functions to SECURITY INVOKER; that could break intended workflows. Review and remediate one function family at a time with role tests.
+- Performance advisor returned 9 unindexed foreign-key findings, including driver assignment/evidence relationships and private payment-transaction relationships. These should be reviewed for query plans and added indexes where justified.
+- Performance advisor also returned 641 unused-index findings. Do not delete indexes based solely on this snapshot: the project may have recently created indexes or low-volume features. Review workload, query plans, write overhead and production usage before removing any index.
+- These advisor results are a release-readiness concern and should be tracked. They are not authorization to make broad production DDL changes without review and verification.
+
+## Audit pass continuation
+- Confirmed the canonical rate calculator file exists at `public/shipper/rate-calculator.html`; the booking redirect target is not a missing-file defect.
+- Confirmed the booking page calls the idempotent shipment RPC overload that exists in the production function catalog.
+- Still not confirmed: RPC body-level authorization, grants, idempotency uniqueness guarantees, real browser session behavior, new-row correctness, and rate-calculator cross-organization access control.
