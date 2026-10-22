@@ -148,12 +148,16 @@
   }
   function getBookingRequestId(){
     let id=null;
-    try { id=window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {}
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||"")) {
+    try {
+      id=window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY);
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||"")) return id;
       id=newBookingRequestId();
-      try { window.sessionStorage.setItem(BOOKING_REQUEST_STORAGE_KEY,id); } catch (_) {}
+      window.sessionStorage.setItem(BOOKING_REQUEST_STORAGE_KEY,id);
+      if(window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY)!==id) throw new Error("Request reference could not be saved");
+      return id;
+    } catch (_) {
+      throw new Error("KRIM could not securely save this booking's retry reference in browser session storage. Enable browser storage and reload; no shipment request was sent.");
     }
-    return id;
   }
   function clearBookingRequestId(){ try { window.sessionStorage.removeItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {} }
   const $ = id => document.getElementById(id);
@@ -245,16 +249,17 @@
       const activeMemberships=Array.isArray(memberships)?memberships:[];
       const orgIds=[...new Set(activeMemberships.map(m=>m.organization_id).filter(Boolean))];
       if(!orgIds.length) throw new Error("Your account is not linked to an active KRIM organization. Ask your organization administrator to provision customer access.");
-      const {data:organizations,error:organizationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code").in("id",orgIds);
+      const {data:organizations,error:organizationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",orgIds);
       if(organizationError) throw organizationError;
       const orgById=new Map((organizations||[]).map(org=>[String(org.id),org]));
       function roleKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
       function isCustomerMembership(m){
+        const org=orgById.get(String(m.organization_id));
+        if(!org || String(org.status||"").toLowerCase()!=="active") return false;
         const role=roleKey(m.role);
         if(/customer|shipper|client/.test(role)) return true;
         if(/platform_admin|superadmin|partner|carrier|driver|warehouse|customs|finance|operations|enterprise|dispatcher/.test(role)) return false;
-        const org=orgById.get(String(m.organization_id));
-        return /customer|shipper|client/.test(roleKey(org&&(org.organization_type||org.organization_type_code)));
+        return /customer|shipper|client/.test(roleKey(org.organization_type||org.organization_type_code));
       }
       const customerMemberships=activeMemberships.filter(isCustomerMembership);
       if(!customerMemberships.length) throw new Error("No active customer organization membership was found for this account. Sign in to the Customer Workspace or ask your organization administrator to provision customer access.");
