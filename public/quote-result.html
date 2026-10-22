@@ -193,6 +193,10 @@ async function startPayment(){
          message("Payment verified successfully by KRIM. Reference "+result.razorpay_payment_id+".","success");
          byId("payment-order-meta").textContent="Payment reference: "+result.razorpay_payment_id+" · Verified at "+fmtDate(result.paid_at);
          byId("btn-pay-now").textContent="Payment verified ✓";check("order",true,"Provider signature verified and KRIM financial record updated.");
+         const verificationBase=window.krimPath?window.krimPath("public/payment-verification.html"):"payment-verification.html";
+         const verificationUrl=verificationBase+"?payment_order_id="+encodeURIComponent(result.payment_order_id)+"&shipment_id="+encodeURIComponent(result.krim_shipment_id)+"&quote_id="+encodeURIComponent(quote.id);
+         message("KRIM verified this payment. Opening the independent server-status receipt…","success");
+         setTimeout(function(){location.href=verificationUrl;},1200);
        }catch(e){gateway("VERIFICATION NEEDS REVIEW","bad");message((e&&e.message?e.message:"Verification could not be completed")+" Do not pay again until the payment status has been checked.","error");byId("btn-pay-now").textContent="Check payment status before retrying";byId("btn-pay-now").disabled=true;}
        finally{paymentBusy=false;}
      }
