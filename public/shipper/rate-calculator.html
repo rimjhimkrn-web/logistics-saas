@@ -139,7 +139,13 @@
             }
             document.getElementById('session-identity-node').textContent = "Node: " + session.user.email;
 
-            const shipmentId = new URLSearchParams(window.location.search).get('shipment_id');
+            const params = new URLSearchParams(window.location.search);
+            const shipmentId = params.get('shipment_id');
+            const requestedTier = params.get('service_tier');
+            const tierSelect = document.getElementById('calc-service-tier');
+            if (requestedTier && Array.from(tierSelect.options).some(option => option.value === requestedTier)) {
+                tierSelect.value = requestedTier;
+            }
             if (shipmentId) {
                 document.getElementById('calc-shipment-id').value = shipmentId;
                 try {
