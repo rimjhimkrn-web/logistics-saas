@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale:'#eef6fc'}}}}};
-(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";window.KRIM_BASE_PATH=b.endsWith("/")?b.slice(0,-1):b;var m=document.querySelector('link[rel="manifest"]');if(m)m.href=b+"manifest.json";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
 </script>
 <style>
 :root{color-scheme:light}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.eyebrow{letter-spacing:.14em}.panel{border:1px solid #dce5ee;border-radius:20px;background:#fff;box-shadow:0 8px 28px rgba(16,36,58,.045)}.field{width:100%;border:1px solid #cbd5e1;border-radius:12px;background:#fff;padding:12px 14px;color:#10243a;outline:none}.field:focus{border-color:#1769aa;box-shadow:0 0 0 3px rgba(23,105,170,.12)}.step-number{display:flex;height:34px;width:34px;align-items:center;justify-content:center;border-radius:11px;background:#eaf3fb;color:#1769aa;font-weight:800}.status-dot{height:8px;width:8px;border-radius:50%;display:inline-block;background:#e4a11b}
@@ -130,7 +130,7 @@ a:not(.btn){text-decoration-color:#38bdf870}
  function setLoadStatus(text,good){$("shipment-load-status").textContent=text;$("shipment-load-status").className="rounded-full px-3 py-1 text-xs font-bold "+(good?"bg-emerald-100 text-emerald-800":"bg-slate-200 text-slate-600");}
  async function init(){
   const {data:{session},error}=await client.auth.getSession();
-  if(error||!session){window.location.href="/logistics-saas/auth/login.html";return;}
+  if(error||!session){window.location.href=window.KRIM_BASE_PATH+"/auth/login.html";return;}
   $("session-identity-node").textContent="Signed in: "+(session.user.email||"authenticated user");
   const params=new URLSearchParams(window.location.search);
   if(params.get("shipment_id"))$("calc-shipment-id").value=params.get("shipment_id");
@@ -172,17 +172,18 @@ a:not(.btn){text-decoration-color:#38bdf870}
      if(opportunityError)throw opportunityError;
      if(!opportunity||!opportunity.id)throw new Error("The server did not confirm a partner-bid request.");
      showFeedback("No approved tariff matches this shipment. A partner-bid request was created; no customer price has been invented. Opening quote & bid status…","success");
-     setTimeout(()=>window.location.href="/logistics-saas/public/shipper/spot-approvals.html",1200);return;
+     setTimeout(()=>window.location.href=window.KRIM_BASE_PATH+"/public/shipper/spot-approvals.html",1200);return;
     }
     throw error;
    }
    if(!data||!data.id)throw new Error("The server did not return a quotation reference.");
    showFeedback("A server-calculated quote was created. Opening quote & bid status…","success");
-   setTimeout(()=>window.location.href="/logistics-saas/public/shipper/spot-approvals.html",1000);
+   setTimeout(()=>window.location.href=window.KRIM_BASE_PATH+"/public/shipper/spot-approvals.html",1000);
   }catch(err){showFeedback("Quote request failed: "+(err.message||"Unknown error"),"error");btn.disabled=false;btn.textContent="Request authoritative quote →";}
  });
  init();
 })();
 </script>
+<script id="krim-base-path-link-fix">(function(){var base=window.KRIM_BASE_PATH||"";document.querySelectorAll('a[href^="/logistics-saas/"]').forEach(function(a){a.href=base+a.getAttribute("href").slice("/logistics-saas".length);});})();</script>
 </body>
 </html>
