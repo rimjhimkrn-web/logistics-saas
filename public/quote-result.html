@@ -97,7 +97,7 @@ const params=new URLSearchParams(location.search);
 const shipmentParam=params.get("shipment_id");
 const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amount).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
-function gateway(text,state){byId("gateway-status").textContent="PAYMENT GATEWAY · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
+function gateway(text,state){byId("gateway-status").textContent="KRIM PAYMENT ORCHESTRATOR · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
 function check(name,ok,text){const icon=byId("check-"+name);icon.textContent=ok?"✓":"!";icon.className="check-icon"+(ok?"":" pending");byId("check-"+name+"-text").textContent=text;}
 function setPayReady(ok){canPay=ok;byId("btn-pay-now").disabled=!ok||paymentBusy;}
 function fmtDate(value){if(!value)return "No expiry recorded";const d=new Date(value);return Number.isNaN(d.getTime())?"Validity unavailable":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});}
