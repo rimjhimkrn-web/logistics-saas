@@ -1,294 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM Logistics | Global Quote & Partner Bid Control</title>
-    <link rel="manifest" href="/logistics-saas/manifest.json">
-    <meta name="theme-color" content="#10243a">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Supabase Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-<style id="krim-global-bid-theme">:root{--kn:#10243a;--kb:#1769aa;--kl:#dfe8f0;--km:#66788b}*{box-sizing:border-box}body{background:radial-gradient(ellipse at 7% 0%,#eaf4fc 0,transparent 29%),#f4f7fb!important;color:#172b40;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif!important}body>div:first-child{background:var(--kn)!important}header{background:#ffffffed!important;border-bottom:1px solid var(--kl)!important;box-shadow:0 5px 24px #10243a0a;backdrop-filter:blur(12px)}header>div{min-height:76px!important}header .bg-gradient-to-br{background:var(--kn)!important;border-radius:13px!important}header .text-base{font-size:12px!important;letter-spacing:.15em}header .text-sky-600{font-size:10px;letter-spacing:.13em}.krim-nav{display:flex;gap:7px;flex-wrap:wrap}.krim-nav a{padding:10px 12px;border:1px solid var(--kl);border-radius:10px;font-size:11px;font-weight:850;background:white;color:var(--kn)}.krim-nav .krim-nav-active{background:var(--kn);border-color:var(--kn);color:white}main{padding-top:28px!important;padding-bottom:32px!important;display:block!important}.krim-hero{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 90% 0%,#2479a6 0,transparent 34%),linear-gradient(120deg,#0d2034,#173e60 68%,#1769aa)!important;border:0!important;border-radius:25px!important;color:white!important;box-shadow:0 22px 50px #10243a20!important;margin-bottom:18px}.krim-hero:after{content:"";position:absolute;z-index:-1;right:-70px;bottom:-170px;width:370px;height:370px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 35px #ffffff07,0 0 0 75px #ffffff06;pointer-events:none}.krim-hero h1{font-size:clamp(28px,4vw,43px)!important;line-height:1.08;letter-spacing:-.04em;color:white!important;margin:11px 0}.krim-hero p{max-width:700px;color:#d9e8f3!important;line-height:1.8;font-size:13px!important}.krim-hero .text-sky-600{color:#80e1f1!important;font-size:10px!important;letter-spacing:.16em}.krim-hero-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.krim-btn{border-radius:11px;padding:12px 15px;font-size:11px;font-weight:900;border:1px solid transparent;cursor:pointer}.krim-btn-light{background:white;color:var(--kn)}.krim-btn-blue{background:var(--kb);color:white;border-color:#ffffff26}.krim-journey{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 18px}.krim-step{display:flex;align-items:center;gap:11px;background:white;border:1px solid var(--kl);border-radius:14px;padding:13px 15px}.krim-step-active{background:#f1f8fe;border-color:#a8d1ef;box-shadow:0 0 0 2px #1769aa0b}.krim-step>b{display:grid;place-items:center;width:32px;height:32px;flex-shrink:0;border-radius:10px;background:#e8f3fc;color:var(--kb);font-size:11px}.krim-step strong,.krim-step small{display:block}.krim-step strong{font-size:11px;color:var(--kn)}.krim-step small{font-size:9px;color:var(--km);margin-top:4px}.krim-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:0 0 26px}.krim-info{display:flex;gap:10px;padding:16px;background:white;border:1px solid var(--kl);border-radius:15px;box-shadow:0 8px 24px #10243a06}.krim-info-icon{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:9px;background:#e8f3fc;color:var(--kb);font-size:10px;font-weight:950}.krim-info strong{display:block;font-size:11px;color:var(--kn)}.krim-info p{font-size:10px;line-height:1.6;color:var(--km);margin:5px 0 0}.krim-table-card{background:white!important;border:1px solid var(--kl)!important;border-radius:18px!important;padding:8px 18px 16px!important;box-shadow:0 15px 40px #10243a08!important}table{min-width:690px}th{font-size:9px!important;letter-spacing:.12em!important;color:#7a8b9b!important;padding-top:17px!important;padding-bottom:13px!important}td{font-size:11px!important;line-height:1.65}tbody tr:hover{background:#f7fafc!important}.krim-bids-section{margin-top:25px}.krim-section-heading{display:flex;align-items:end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin:25px 0 13px}.krim-section-heading h2{font-size:22px;letter-spacing:-.035em;color:var(--kn);font-weight:900;margin:5px 0}.krim-section-heading p{font-size:11px;color:var(--km);line-height:1.65;margin:0}.krim-kicker{font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-weight:950;color:var(--kb)}footer{margin-top:16px!important;background:white!important;border-top:1px solid var(--kl)!important;font-family:Inter,system-ui,sans-serif!important}footer p,footer a{font-size:10px!important;color:#718194!important}button,a{transition:background-color .15s,border-color .15s,transform .15s}button:not(:disabled):active,a:active{transform:translateY(1px)}button:disabled{opacity:.55;cursor:not-allowed}@media(max-width:800px){.krim-info-grid{grid-template-columns:1fr}.krim-hero{align-items:flex-start!important}}@media(max-width:580px){header>div{padding:0 14px!important;min-height:68px!important}.krim-nav{max-width:210px;justify-content:flex-end}.krim-nav a{font-size:9px;padding:8px}.krim-hero{padding:22px!important;border-radius:19px!important}.krim-hero h1{font-size:29px!important}.krim-hero p{font-size:11px!important}.krim-hero-actions .krim-btn{width:100%}.krim-journey{gap:5px}.krim-step{padding:9px 6px;gap:6px;align-items:flex-start}.krim-step>b{width:24px;height:24px;border-radius:7px;font-size:9px}.krim-step strong{font-size:9px}.krim-step small{font-size:8px;line-height:1.4}.krim-table-card{padding:4px 10px 10px!important}main{padding-left:12px!important;padding-right:12px!important}body>div:first-child{padding-left:12px!important;padding-right:12px!important}footer>div{padding-left:14px!important;padding-right:14px!important}}</style></head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Telemetry Status Bar -->
-    <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
-        <span class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">GLOBAL QUOTE & PARTNER BID CONTROL</span>
-        </span>
-        <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
-    </div>
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Spot Approvals</span>
-                </div>
-            </div>
-            
-            <a href="/logistics-saas/app/customer/index.html" class="text-xs font-mono text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition border border-slate-300">
-                ← Workspace
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        <div class="krim-hero bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="space-y-1">
-                <span class="text-xs font-semibold uppercase tracking-widest text-sky-600">Customer journey · commercial stage 03</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Global quote & partner bid control</h1>
-                <p class="text-slate-600 text-sm">Review server-issued freight quotes and genuine partner offers, compare commercial terms, and award a partner only when the details meet your shipment needs. Payment stays locked until required acceptance steps are complete.</p>
-            </div>
-            <button onclick="loadSpotApprovals(); loadPartnerBids()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-bold transition border border-slate-300">
-                Refresh Approvals ⟳
-            </button>
-        </div>
-
-        <section class="krim-journey" aria-label="Customer journey"><div class="krim-step"><b>01</b><span><strong>Shipment</strong><small>Route & cargo</small></span></div><div class="krim-step"><b>02</b><span><strong>Quote & tariff</strong><small>Request pricing</small></span></div><div class="krim-step krim-step-active"><b>03</b><span><strong>Review offers</strong><small>Current stage</small></span></div></section><section class="krim-info-grid"><div class="krim-info"><span class="krim-info-icon">01</span><div><strong>Customer quotations</strong><p>Review KRIM tariff quotes and their current status, validity and next action.</p></div></div><div class="krim-info"><span class="krim-info-icon">02</span><div><strong>Live partner offers</strong><p>Compare submitted offers tied to open shipment opportunities. No sample bids are displayed.</p></div></div><div class="krim-info"><span class="krim-info-icon">03</span><div><strong>Payment protection</strong><p>Awarding a bid is not payment. Checkout remains gated until required assignment acceptance.</p></div></div></section><div class="krim-table-card bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-200 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
-                        <th class="py-3 px-4">Quote ID</th>
-                        <th class="py-3 px-4">Shipment Ref</th>
-                        <th class="py-3 px-4">Amount</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4">Valid Until</th>
-                        <th class="py-3 px-4 text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="spot-approvals-tbody" class="divide-y divide-slate-100 text-sm text-slate-700">
-                    <tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Querying financial ledger quotes...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-<!-- Live partner bid review -->
-        <section class="krim-bids-section"><div class="krim-section-heading"><div><span class="krim-kicker">02 / Partner marketplace</span><h2>Live partner bids</h2><p>Review actual offers returned by the authorized database workflow.</p></div></div><section class="krim-table-card bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-200/50 overflow-x-auto">
-            <div class="mb-5">
-                <h2 class="text-xl font-extrabold text-slate-900">Live partner bids</h2>
-                <p class="text-slate-600 text-sm mt-1">Review actual verified-partner offers for your open shipments. Awarding an offer creates an assignment request; checkout remains locked until the partner accepts.</p>
-            </div>
-            <div id="partner-bids-status" role="status" aria-live="polite" class="mb-4 text-sm text-slate-500">Loading partner bids…</div>
-            <table class="w-full text-left border-collapse">
-                <thead><tr class="border-b border-slate-200 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
-                    <th class="py-3 px-3">Opportunity</th><th class="py-3 px-3">Partner offer</th><th class="py-3 px-3">Amount</th><th class="py-3 px-3">Valid until</th><th class="py-3 px-3 text-right">Action</th>
-                </tr></thead>
-                <tbody id="partner-bids-tbody" class="divide-y divide-slate-100 text-sm text-slate-700"><tr><td colspan="5" class="py-6 text-center text-slate-500">Loading…</td></tr></tbody>
-            </table>
-        </section>
-
-            <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Spot Governance © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="/logistics-saas/public/shipper/active-shipments.html" class="hover:text-slate-800 transition">Active Fleet</a>
-                <a href="/logistics-saas/app/customer/index.html" class="hover:text-slate-800 transition">Workspace</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Spot Approvals Script -->
-    <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-        
-        const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function initSpotApprovals() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
-            loadSpotApprovals();
-        }
-
-        function escapeQuoteText(value) {
-            return String(value ?? "").replace(/[&<>"']/g, function(ch) {
-                return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch];
-            });
-        }
-
-        async function acceptGlobalQuote(quoteId) {
-            if (!Number.isInteger(Number(quoteId)) || Number(quoteId) <= 0) return;
-            const confirmed = window.confirm("Accept this quotation? This confirms the quote and shipment status.");
-            if (!confirmed) return;
-            try {
-                const { data, error } = await supabaseClient.rpc("krim_accept_global_quote", {
-                    p_quote_id: Number(quoteId)
-                });
-                if (error) throw error;
-                if (!data) throw new Error("The server did not confirm quote acceptance.");
-                window.alert("Quote accepted. You can now proceed to secure checkout.");
-                await loadSpotApprovals();
-            } catch (err) {
-                window.alert("Quote could not be accepted: " + (err.message || "Unknown error"));
-            }
-        }
-
-        async function loadSpotApprovals() {
-            const tbody = document.getElementById("spot-approvals-tbody");
-            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">Loading authorized quotations...</td></tr>';
-            try {
-                const { data, error } = await supabaseClient
-                    .from("krim_quotes")
-                    .select("id, shipment_id, amount, currency_code, status, valid_until, created_at, partner_quote_id")
-                    .order("created_at", { ascending: false });
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No quotation records are available to this account.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = data.map(function(q) {
-                    const id = Number(q.id);
-                    const shipmentId = Number(q.shipment_id);
-                    const status = String(q.status || "unknown");
-                    const statusColor = status === "accepted"
-                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                        : status === "sent"
-                            ? "text-sky-700 bg-sky-50 border-sky-200"
-                            : "text-amber-700 bg-amber-50 border-amber-200";
-                    let action = '<span class="text-xs text-slate-500">Not actionable</span>';
-                    if (status === "sent" && Number.isInteger(id) && id > 0) {
-                        action = '<button type="button" onclick="acceptGlobalQuote(' + id + ')" class="bg-slate-900 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Accept Quote</button>';
-                    } else if (status === "accepted" && Number.isInteger(shipmentId) && shipmentId > 0 && Number(q.partner_quote_id) > 0) {
-                        action = '<a href="/logistics-saas/public/quote-result.html?shipment_id=' + shipmentId + '" class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Secure Checkout →</a>';
-                    } else if (status === "accepted" && !Number(q.partner_quote_id)) {
-                        action = '<span class="text-xs text-amber-700">Waiting for verified partner award and assignment acceptance</span>';
-                    } else if (status === "pending" || status === "draft" || status === "quoted") {
-                        action = '<span class="text-xs text-amber-700">Needs quote review / reissue</span>';
-                    }
-                    const validUntil = q.valid_until ? new Date(q.valid_until).toLocaleString() : "—";
-                    const amount = Number(q.amount);
-                    const displayAmount = Number.isFinite(amount) ? amount.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2}) : "—";
-                    return '<tr class="hover:bg-slate-50/80 transition">' +
-                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">#' + id + '</td>' +
-                        '<td class="py-4 px-4 font-mono text-slate-600">#' + shipmentId + '</td>' +
-                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeQuoteText(q.currency_code || "INR") + ' ' + displayAmount + '</td>' +
-                        '<td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ' + statusColor + '">' + escapeQuoteText(status) + '</span></td>' +
-                        '<td class="py-4 px-4 font-mono text-xs text-slate-500">' + escapeQuoteText(validUntil) + '</td>' +
-                        '<td class="py-4 px-4 text-right">' + action + '</td></tr>';
-                }).join("");
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-600 font-mono text-xs">Unable to load quotations: ' + escapeQuoteText(err.message || "Unknown error") + '</td></tr>';
-            }
-        }
-
-
-        async function loadPartnerBids() {
-            const statusNode = document.getElementById("partner-bids-status");
-            const tbody = document.getElementById("partner-bids-tbody");
-            const esc = escapeQuoteText;
-            tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Loading live partner bids…</td></tr>';
-            try {
-                const { data: opportunities, error: opportunityError } = await supabaseClient
-                    .from("krim_partner_opportunities")
-                    .select("id, opportunity_number, shipment_id, status, response_deadline")
-                    .eq("status", "open")
-                    .order("requested_at", { ascending: false })
-                    .limit(100);
-                if (opportunityError) throw opportunityError;
-                const live = (opportunities || []).filter(o => !o.response_deadline || new Date(o.response_deadline).getTime() > Date.now());
-                if (!live.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">No open partner opportunities are available to this organization.</td></tr>';
-                    statusNode.textContent = "No open opportunities to review.";
-                    return;
-                }
-                const ids = live.map(o => Number(o.id)).filter(Number.isSafeInteger);
-                const { data: quotes, error: quoteError } = await supabaseClient
-                    .from("krim_partner_quotes")
-                    .select("id, opportunity_id, quote_number, partner_organization_id, amount, currency_code, status, valid_until, notes")
-                    .in("opportunity_id", ids)
-                    .in("status", ["submitted", "under_review", "shortlisted"])
-                    .order("created_at", { ascending: false });
-                if (quoteError) throw quoteError;
-                const oppMap = new Map(live.map(o => [Number(o.id), o]));
-                const bids = (quotes || []).filter(q => {
-                    const o = oppMap.get(Number(q.opportunity_id));
-                    return o && (!q.valid_until || new Date(q.valid_until).getTime() > Date.now());
-                });
-                if (!bids.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-slate-500">Open opportunities exist, but no eligible partner bids have been submitted yet.</td></tr>';
-                    statusNode.textContent = "Waiting for real partner bids; no sample offers are shown.";
-                    return;
-                }
-                tbody.innerHTML = bids.map(q => {
-                    const o = oppMap.get(Number(q.opportunity_id));
-                    const amount = Number(q.amount);
-                    const amountText = Number.isFinite(amount) ? esc(q.currency_code || "INR") + " " + amount.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2}) : "—";
-                    const expiry = q.valid_until ? new Date(q.valid_until).toLocaleString() : "Not specified";
-                    return '<tr><td class="py-4 px-3"><span class="font-bold">#' + esc(o.opportunity_number || o.id) + '</span><div class="text-xs text-slate-500 mt-1">Shipment #' + esc(o.shipment_id) + '</div></td>' +
-                        '<td class="py-4 px-3"><span class="font-mono">' + esc(q.quote_number || ("Bid #" + q.id)) + '</span><div class="text-xs text-slate-500 mt-1">Partner org #' + esc(q.partner_organization_id) + '</div><div class="text-xs text-slate-500 mt-1 whitespace-pre-wrap">' + esc(q.notes || "No operational notes supplied") + '</div></td>' +
-                        '<td class="py-4 px-3 font-mono font-bold">' + amountText + '</td><td class="py-4 px-3 text-xs">' + esc(expiry) + '</td>' +
-                        '<td class="py-4 px-3 text-right"><button type="button" data-award-partner-quote="' + Number(q.id) + '" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs font-semibold">Award & request acceptance</button></td></tr>';
-                }).join("");
-                statusNode.textContent = "Showing " + bids.length + " live eligible partner bid(s). Award only after reviewing commercial terms and partner details.";
-                tbody.querySelectorAll("[data-award-partner-quote]").forEach(button => {
-                    button.addEventListener("click", async () => {
-                        const quoteId = Number(button.getAttribute("data-award-partner-quote"));
-                        if (!Number.isSafeInteger(quoteId) || quoteId <= 0) return;
-                        if (!window.confirm("Award this partner bid? KRIM will create an assignment offer and accepted customer quote. No payment is taken until the partner accepts and checkout is verified.")) return;
-                        button.disabled = true;
-                        button.textContent = "Awarding…";
-                        try {
-                            const { data, error } = await supabaseClient.rpc("krim_award_partner_quote_for_checkout", { p_partner_quote_id: quoteId });
-                            if (error) throw error;
-                            if (!data || !data.id) throw new Error("Backend did not confirm the award. Refresh before retrying.");
-                            window.alert("Partner bid awarded. Assignment request created. Payment remains locked until the partner accepts.");
-                            await Promise.all([loadSpotApprovals(), loadPartnerBids()]);
-                        } catch (err) {
-                            window.alert("Could not award bid: " + (err.message || "Unknown error") + ". Refresh the page to check the current status before retrying.");
-                            button.disabled = false;
-                            button.textContent = "Award & request acceptance";
-                        }
-                    });
-                });
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-red-600">Unable to load live partner bids: ' + esc(err.message || "Unknown error") + '</td></tr>';
-                statusNode.textContent = "Partner bid review is unavailable; no action has been taken.";
-            }
-        }
-
-        initSpotApprovals();
-        loadPartnerBids();
-    </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10243a">
+<meta name="description" content="KRIM customer quote review: inspect authorized freight quotations, commercial terms and acceptance eligibility.">
+<title>KRIM Logistics | Customer Quote Review</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/logistics-saas/config.js"></script>
+<script>
+(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
+</script>
+<style>
+:root{--navy:#10243a;--navy2:#183d5b;--blue:#1769aa;--cyan:#dff4fb;--ink:#1c3044;--muted:#65788b;--line:#dce6ef;--paper:#fff;--bg:#f3f7fb;--green:#13795b;--amber:#9a5a00;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 8% 0%,#e7f3fc 0,transparent 30%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}button,input,select{font:inherit}button,a{transition:all .16s ease}button:disabled{opacity:.55;cursor:not-allowed}
+.topline{background:#0b1c2d;color:#b8c8d8;padding:9px max(18px,calc((100% - 1240px)/2));display:flex;gap:12px;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.09em;text-transform:uppercase}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2dd4a1;margin-right:8px;box-shadow:0 0 0 4px #2dd4a11c}
+header{background:#ffffffed;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;backdrop-filter:blur(14px)}.nav{max-width:1240px;margin:auto;min-height:76px;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#1769aa,#10243a);display:grid;place-items:center;color:white;font-weight:950;font-size:20px;box-shadow:0 7px 16px #10243a22}.brand-name{font-size:13px;letter-spacing:.13em;font-weight:950;color:var(--navy)}.brand-sub{font-size:9px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;font-weight:850;margin-top:4px}.nav-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.nav-link,.btn{border:1px solid var(--line);border-radius:11px;background:#fff;padding:11px 14px;font-size:11px;font-weight:850;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}.nav-link:hover,.btn-secondary:hover{background:#f0f6fb;border-color:#b8cfe0}.btn-primary{background:var(--navy);border-color:var(--navy);color:white}.btn-primary:hover{background:#1a4263}.btn-blue{background:var(--blue);border-color:var(--blue);color:white}.btn-blue:hover{background:#12588f}.btn-danger{border-color:#f0c8c5;color:var(--red);background:#fff}
+main{max-width:1240px;margin:auto;padding:30px 24px 48px;width:100%}.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 95% 0%,#287fa6 0,transparent 35%),linear-gradient(120deg,#0c2034,#163e5e 72%,#1769aa);color:#fff;border-radius:26px;padding:32px;box-shadow:0 20px 55px #10243a20}.hero:after{content:"";position:absolute;width:300px;height:300px;right:-110px;bottom:-180px;border:1px solid #ffffff28;border-radius:50%;box-shadow:0 0 0 32px #ffffff09,0 0 0 68px #ffffff07;pointer-events:none}.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;position:relative;z-index:1}.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.18em;font-weight:950;color:#82e3f1}.hero h1{font-size:clamp(29px,4vw,45px);letter-spacing:-.045em;line-height:1.05;margin:12px 0 13px;color:white}.hero p{font-size:13px;line-height:1.8;color:#d7e6f2;max-width:740px;margin:0}.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.hero .btn-light{background:white;color:var(--navy);border-color:white}.hero .btn-outline{background:#ffffff0b;color:white;border-color:#ffffff4c}
+.journey{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.journey-step{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;gap:11px;align-items:center}.journey-step.active{background:#f0f8fe;border-color:#9cc9e9;box-shadow:0 0 0 2px #1769aa0b}.step-no{flex:0 0 34px;height:34px;border-radius:10px;background:#e7f2fc;color:var(--blue);display:grid;place-items:center;font-size:11px;font-weight:950}.journey-step strong{display:block;font-size:11px;color:var(--navy)}.journey-step small{display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 28px}.stat{background:white;border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;gap:12px;align-items:center}.stat-icon{width:35px;height:35px;border-radius:11px;background:#e9f4fd;color:var(--blue);display:grid;place-items:center;font-size:14px;font-weight:950}.stat label{display:block;color:var(--muted);font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}.stat strong{display:block;font-size:23px;color:var(--navy);letter-spacing:-.04em;margin-top:4px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:28px 0 13px}.section-head h2{font-size:22px;letter-spacing:-.035em;color:var(--navy);margin:5px 0 4px;font-weight:950}.section-head p{font-size:11px;color:var(--muted);margin:0;line-height:1.65}.kicker{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--blue);font-weight:950}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:15px;align-items:start}.panel{background:var(--paper);border:1px solid var(--line);border-radius:19px;box-shadow:0 12px 35px #10243a08;overflow:hidden}.panel-head{padding:19px 20px 15px;border-bottom:1px solid #e9eff5;display:flex;justify-content:space-between;align-items:start;gap:12px}.panel-head h3{margin:0;font-size:14px;color:var(--navy);font-weight:950}.panel-head p{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.6}.panel-body{padding:18px 20px}
+.filters{display:grid;grid-template-columns:minmax(0,1fr) 145px;gap:9px;margin-bottom:13px}.field{width:100%;border:1px solid #d3e0eb;border-radius:10px;padding:11px 12px;background:white;color:var(--ink);outline:none;font-size:11px}.field:focus{border-color:#6aa6d5;box-shadow:0 0 0 3px #1769aa12}.quote-list{display:grid;gap:8px}.quote-item{width:100%;text-align:left;border:1px solid var(--line);background:white;border-radius:13px;padding:13px;cursor:pointer;color:var(--ink)}.quote-item:hover{border-color:#9cc6e4;background:#f9fcff}.quote-item.selected{border-color:#3c8cc5;background:#f0f8fe;box-shadow:inset 3px 0 var(--blue)}.quote-item-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.quote-ref{font-weight:950;color:var(--navy);font-size:12px}.quote-sub{font-size:10px;color:var(--muted);margin-top:6px}.quote-item-bottom{display:flex;justify-content:space-between;gap:8px;align-items:end;margin-top:11px}.quote-money{font-weight:950;color:var(--navy);font-size:15px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 8px;border:1px solid;font-size:9px;letter-spacing:.05em;font-weight:950;text-transform:uppercase;white-space:nowrap}.pill-sent{background:#eaf5ff;color:#155e91;border-color:#c3e2f7}.pill-accepted{background:#e8f8f0;color:#116344;border-color:#b7e7d0}.pill-expired,.pill-rejected{background:#fff0ef;color:#a02b23;border-color:#f1c6c2}.pill-pending,.pill-draft,.pill-quoted{background:#fff7e8;color:#925800;border-color:#f1d7a7}.pill-default{background:#f1f5f9;color:#475569;border-color:#dce4eb}
+.detail-top{padding:22px;background:linear-gradient(135deg,#f8fbfe,#edf5fc);border-bottom:1px solid var(--line)}.detail-id{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.detail-id h3{font-size:17px;color:var(--navy);margin:0;font-weight:950}.detail-money{font-size:clamp(26px,4vw,35px);letter-spacing:-.05em;color:var(--navy);font-weight:950;margin:18px 0 4px;overflow-wrap:anywhere}.detail-caption{font-size:10px;color:var(--muted)}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:18px 20px}.detail-cell{padding:13px;border:1px solid #e3ebf2;border-radius:12px;background:#fff;min-width:0}.detail-cell label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:900;display:block}.detail-cell strong{font-size:12px;color:var(--navy);display:block;margin-top:7px;overflow-wrap:anywhere}.detail-notice{margin:0 20px 16px;padding:13px 14px;border-radius:12px;background:#f0f7fd;border:1px solid #d1e6f7;color:#345a78;font-size:10px;line-height:1.7}.detail-actions{padding:0 20px 20px;display:grid;gap:9px}.detail-actions .btn{width:100%;min-height:45px}.tiny-note{font-size:9px;color:var(--muted);line-height:1.7}.empty{padding:27px 15px;text-align:center;color:var(--muted);font-size:11px;line-height:1.8;border:1px dashed #d1dfeb;border-radius:13px;background:#f9fbfd}.empty strong{display:block;color:var(--navy);font-size:12px;margin-bottom:5px}.status-line{font-size:10px;line-height:1.7;color:var(--muted);margin-bottom:12px}.status-line.error{color:var(--red)}.status-line.success{color:var(--green)}.status-line.info{color:#1769aa}.footnote{margin-top:17px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 17px;font-size:10px;line-height:1.8;color:var(--muted)}footer{background:#fff;border-top:1px solid var(--line);padding:24px;text-align:center;color:#6e8091;font-size:10px}.footer-inner{max-width:1240px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.footer-links{display:flex;gap:17px;flex-wrap:wrap}.footer-links a:hover{color:var(--blue)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.hero-grid{grid-template-columns:1fr}.hero-side{display:none}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:20px}}@media(max-width:560px){.topline{padding:8px 13px;font-size:8px}.nav{padding:10px 13px;min-height:67px}.brand-mark{width:36px;height:36px}.brand-name{font-size:11px}.brand-sub{font-size:8px}.nav-links .nav-link{padding:9px;font-size:9px}main{padding:17px 12px 30px}.hero{padding:23px 20px;border-radius:20px}.hero h1{font-size:30px}.hero p{font-size:11px}.hero-actions .btn{width:100%}.journey{gap:5px}.journey-step{padding:9px 7px;gap:6px;align-items:flex-start}.step-no{flex-basis:24px;height:24px;font-size:9px;border-radius:7px}.journey-step strong{font-size:9px}.journey-step small{font-size:8px}.stats{grid-template-columns:1fr}.stat{padding:12px}.stat strong{font-size:18px}.panel-head,.panel-body{padding-left:14px;padding-right:14px}.filters{grid-template-columns:1fr}.detail-grid{padding:14px;gap:7px}.detail-cell{padding:10px}.detail-actions{padding:0 14px 15px}.detail-notice{margin:0 14px 14px}.footer-inner{justify-content:center}.footer-links{justify-content:center}}
+</style>
+</head>
+<body>
+<div class="topline"><span><i class="live-dot"></i>KRIM GLOBAL COMMERCE · CUSTOMER QUOTE REVIEW</span><span id="session-label">Checking secure session…</span></div>
+<header><nav class="nav" aria-label="Main navigation"><a class="brand" href="/logistics-saas/app/customer/index.html"><span class="brand-mark">K</span><span><span class="brand-name">KRIM LOGISTICS OS</span><span class="brand-sub">Global quote governance</span></span></a><div class="nav-links"><a class="nav-link" href="/logistics-saas/public/shipper/booking-request.html">Shipment booking</a><a class="nav-link" href="/logistics-saas/public/shipper/rate-calculator.html">Quote & tariff</a><a class="nav-link" href="/logistics-saas/app/customer/index.html">Workspace ↗</a></div></nav></header>
+<main>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">Customer journey · stage 03 / commercial review</div><h1>Customer Quote Review</h1><p>Review the exact KRIM quotation connected to your shipment. Verify the amount, currency, validity and current status before accepting. Acceptance is authorized by KRIM’s server against your organization permissions and shipment state.</p><div class="hero-actions"><button id="refresh-button" class="btn btn-light" type="button">↻ Refresh quotes</button><a class="btn btn-outline" href="/logistics-saas/public/shipper/rate-calculator.html">Request pricing ↗</a></div></div><div class="hero-side" aria-hidden="true" style="width:130px;height:130px;border:1px solid #ffffff30;border-radius:28px;display:grid;place-items:center;background:#ffffff0b;font-size:58px;color:#bce9f8">≋</div></div></section>
+<section class="journey" aria-label="Shipment workflow"><div class="journey-step"><span class="step-no">01</span><span><strong>Shipment request</strong><small>Route and cargo submitted</small></span></div><div class="journey-step"><span class="step-no">02</span><span><strong>Quote generation</strong><small>Server-authoritative pricing</small></span></div><div class="journey-step active"><span class="step-no">03</span><span><strong>Customer quote review</strong><small>Verify and accept if eligible</small></span></div></section>
+<section class="stats" aria-label="Quote overview"><div class="stat"><span class="stat-icon">Q</span><div><label>Visible quotations</label><strong id="stat-total">—</strong></div></div><div class="stat"><span class="stat-icon">✓</span><div><label>Accepted</label><strong id="stat-accepted">—</strong></div></div><div class="stat"><span class="stat-icon">◷</span><div><label>Awaiting review</label><strong id="stat-review">—</strong></div></div></section>
+<div class="section-head"><div><div class="kicker">Commercial decision desk</div><h2>Your quotations</h2><p>Only quote records returned to your authenticated account are displayed. No sample prices or partner offers are fabricated.</p></div><div class="tiny-note" id="scope-note">Loading account-scoped quote records…</div></div>
+<div class="layout">
+<section class="panel"><div class="panel-head"><div><h3>Quote register</h3><p>Select a quotation to inspect its commercial details.</p></div><span class="pill pill-default" id="register-count">Loading</span></div><div class="panel-body"><div id="load-status" class="status-line info" role="status" aria-live="polite">Authenticating and loading authorized quotes…</div><div class="filters"><input class="field" id="quote-search" type="search" placeholder="Search quote or shipment ID" aria-label="Search quote or shipment ID"><select class="field" id="status-filter" aria-label="Filter quote status"><option value="all">All statuses</option><option value="sent">Awaiting review</option><option value="accepted">Accepted</option><option value="expired">Expired</option><option value="rejected">Rejected</option><option value="draft">Draft</option><option value="quoted">Quoted</option></select></div><div id="quote-list" class="quote-list"><div class="empty"><strong>Loading quote register</strong>Waiting for your authenticated quote records.</div></div></div></section>
+<section class="panel" aria-labelledby="detail-heading"><div class="panel-head"><div><h3 id="detail-heading">Quotation detail</h3><p>Review the selected record before taking action.</p></div><span class="pill pill-default" id="detail-state">No selection</span></div><div id="quote-detail"><div class="empty" style="margin:18px"><strong>Select a quotation</strong>Choose a record from the quote register to view its amount, validity and available next step.</div></div></section>
+</div>
+<div class="footnote"><strong style="color:var(--navy)">Acceptance & payment safety.</strong> Accepting a quotation is a commercial action and may confirm the shipment. The server verifies organization access, the <code>shipment.update</code> permission, quote status, expiry and shipment status. Quote acceptance does not itself prove partner acceptance or payment. Secure checkout remains unavailable until the required partner assignment is accepted.</div>
+</main>
+<footer><div class="footer-inner"><span>KRIM Logistics OS · Customer Quote Review · 2026</span><span class="footer-links"><a href="/logistics-saas/public/shipper/active-shipments.html">Shipment status</a><a href="/logistics-saas/public/shipper/spot-approvals.html">Quote review</a><a href="/logistics-saas/app/customer/index.html">Customer workspace</a></span></div></footer>
+<script>
+(function(){
+"use strict";
+const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
+const ANON_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const client=window.KRIM_SUPABASE||(window.supabase&&window.supabase.createClient(PROJECT_URL,ANON_KEY));
+const $=id=>document.getElementById(id);
+let session=null, quotes=[], selectedId=null, busy=false;
+const params=new URLSearchParams(location.search);
+const requestedQuoteId=params.get("quote_id");
+const requestedShipmentId=params.get("shipment_id");
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function dateText(v){if(!v)return "Not specified";const d=new Date(v);return Number.isNaN(d.getTime())?"Not specified":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"});}
+function isExpired(q){return !!q.valid_until&&new Date(q.valid_until).getTime()<=Date.now();}
+function money(q){const n=Number(q.amount);if(!Number.isFinite(n))return "Amount unavailable";const c=String(q.currency_code||"INR");try{return new Intl.NumberFormat(undefined,{style:"currency",currency:c,maximumFractionDigits:2}).format(n);}catch(_){return c+" "+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}}
+function stateClass(q){const s=isExpired(q)&&q.status==="sent"?"expired":String(q.status||"unknown").toLowerCase();return ["sent","accepted","expired","rejected","pending","draft","quoted"].includes(s)?"pill-"+s:"pill-default";}
+function visibleStatus(q){return isExpired(q)&&q.status==="sent"?"expired":String(q.status||"unknown").toLowerCase();}
+function statusLabel(q){return visibleStatus(q).replace(/_/g," ");}
+function say(message,type){const n=$("load-status");n.textContent=message;n.className="status-line "+(type||"info");}
+function setCounts(list){$("stat-total").textContent=String(list.length);$("stat-accepted").textContent=String(list.filter(q=>q.status==="accepted").length);$("stat-review").textContent=String(list.filter(q=>q.status==="sent"&&!isExpired(q)).length);$("register-count").textContent=list.length+" record"+(list.length===1?"":"s");}
+function filteredQuotes(){const query=$("quote-search").value.trim().toLowerCase();const status=$("status-filter").value;return quotes.filter(q=>{const st=visibleStatus(q);const matchStatus=status==="all"||st===status;const matchText=!query||String(q.id).includes(query)||String(q.shipment_id).includes(query)||String(q.quote_number||"").toLowerCase().includes(query);return matchStatus&&matchText;});}
+function renderList(){
+const list=filteredQuotes();setCounts(quotes);
+if(!list.length){$("quote-list").innerHTML='<div class="empty"><strong>No matching quotations</strong>Try another filter, refresh the register, or request pricing from the tariff workspace. No placeholder quote has been created.</div>';return;}
+$("quote-list").innerHTML=list.map(q=>{const selected=Number(q.id)===Number(selectedId);return '<button type="button" class="quote-item'+(selected?' selected':'')+'" data-quote-id="'+Number(q.id)+'" aria-pressed="'+selected+'"><div class="quote-item-top"><span class="quote-ref">Quote #'+esc(q.id)+'</span><span class="pill '+stateClass(q)+'">'+esc(statusLabel(q))+'</span></div><div class="quote-sub">Shipment #'+esc(q.shipment_id)+' · Created '+esc(dateText(q.created_at))+'</div><div class="quote-item-bottom"><span class="quote-money">'+esc(money(q))+'</span><span class="tiny-note">Valid to '+esc(dateText(q.valid_until))+'</span></div></button>';}).join("");
+$("quote-list").querySelectorAll("[data-quote-id]").forEach(b=>b.addEventListener("click",()=>selectQuote(Number(b.dataset.quoteId),true)));
+}
+function detailHtml(q){
+const expired=isExpired(q),status=visibleStatus(q),canAccept=q.status==="sent"&&!expired;
+let notice="",action="";
+if(canAccept){notice="This quote is marked as sent and has not expired. KRIM’s server will re-check your organization access, update permission and shipment status before accepting it.";action='<button id="accept-button" class="btn btn-primary" type="button">✓ Review & accept quotation</button><div class="tiny-note">Your confirmation will call the protected krim_accept_global_quote server function. If the shipment or quote is no longer eligible, the server will reject the action.</div>';}
+else if(q.status==="accepted"&&q.partner_quote_id){notice="This quotation is accepted and linked to a partner offer. Checkout still independently checks partner assignment acceptance and the server-created payment order.";action='<a class="btn btn-blue" href="/logistics-saas/public/quote-result.html?shipment_id='+encodeURIComponent(q.shipment_id)+'">Continue to secure checkout ↗</a><div class="tiny-note">Payment will only proceed if the checkout page confirms all server-side requirements.</div>';}
+else if(q.status==="accepted"){notice="This quotation is accepted. The partner offer or accepted assignment is not linked on this quote record, so payment is not shown as ready. Continue monitoring the shipment and partner workflow.";action='<a class="btn btn-secondary" href="/logistics-saas/public/shipper/active-shipments.html">View shipment status ↗</a>';}
+else if(expired||q.status==="expired"){notice="This quotation has expired and cannot be accepted. Request a fresh server-issued quote before making a commercial commitment.";action='<a class="btn btn-secondary" href="/logistics-saas/public/shipper/rate-calculator.html">Return to quote & tariff ↗</a>';}
+else{notice="This quote is not currently eligible for customer acceptance. Its current server status is shown above. Do not treat a draft or pending record as a binding offer.";action='<a class="btn btn-secondary" href="/logistics-saas/public/shipper/rate-calculator.html">Open quote & tariff workspace ↗</a>';}
+return '<div class="detail-top"><div class="detail-id"><h3>Quote #'+esc(q.id)+'</h3><span class="pill '+stateClass(q)+'">'+esc(statusLabel(q))+'</span></div><div class="detail-money">'+esc(money(q))+'</div><div class="detail-caption">Server-returned quote amount · no local price calculation</div></div><div class="detail-grid"><div class="detail-cell"><label>Shipment reference</label><strong>#'+esc(q.shipment_id)+'</strong></div><div class="detail-cell"><label>Currency</label><strong>'+esc(q.currency_code||"INR")+'</strong></div><div class="detail-cell"><label>Quote created</label><strong>'+esc(dateText(q.created_at))+'</strong></div><div class="detail-cell"><label>Offer validity</label><strong>'+esc(dateText(q.valid_until))+'</strong></div><div class="detail-cell"><label>Partner quote linked</label><strong>'+(q.partner_quote_id?'Yes · #'+esc(q.partner_quote_id):'Not linked')+'</strong></div><div class="detail-cell"><label>Current eligibility</label><strong>'+esc(canAccept?'Acceptance available to request':(q.status==="accepted"?"Accepted · verify partner step":(expired?"Expired":"Review required")) )+'</strong></div></div><div class="detail-notice">'+esc(notice)+'</div><div class="detail-actions">'+action+'</div>';
+}
+function selectQuote(id,updateUrl){
+const q=quotes.find(x=>Number(x.id)===Number(id));if(!q)return;
+selectedId=Number(q.id);$("detail-state").textContent=statusLabel(q);$("detail-state").className="pill "+stateClass(q);$("quote-detail").innerHTML=detailHtml(q);renderList();
+if(updateUrl){const u=new URL(location.href);u.searchParams.set("quote_id",String(q.id));u.searchParams.set("shipment_id",String(q.shipment_id));history.replaceState({}, "",u.pathname+u.search);}
+const btn=$("accept-button");if(btn)btn.addEventListener("click",()=>acceptQuote(q));
+}
+async function acceptQuote(q){
+if(busy)return;
+if(!session){say("Your session is no longer active. Sign in again before accepting a quote.","error");return;}
+if(q.status!=="sent"||isExpired(q)){say("This quote is no longer eligible. Refresh to load its latest status.","error");return;}
+const ok=window.confirm("Accept quote #"+q.id+" for shipment #"+q.shipment_id+" at "+money(q)+"? KRIM will validate your organization permission and shipment status. This may confirm the shipment.");
+if(!ok)return;
+busy=true;const b=$("accept-button");if(b){b.disabled=true;b.textContent="Submitting acceptance…";}
+say("Sending acceptance request to KRIM’s protected database function…","info");
+try{
+const {data,error}=await client.rpc("krim_accept_global_quote",{p_quote_id:Number(q.id)});
+if(error)throw error;
+const returned=Array.isArray(data)?data[0]:data;
+if(!returned||Number(returned.id)!==Number(q.id)||String(returned.status)!=="accepted")throw new Error("The server did not return a confirmed accepted quote. Refresh to verify the current state before retrying.");
+say("Quote #"+q.id+" accepted by KRIM’s server. Review the updated status and follow the next operational step.","success");
+await loadQuotes(false);
+}catch(e){say("Acceptance was not confirmed: "+(e&&e.message?e.message:"Unexpected server response")+". Refresh the quote register before retrying.","error");if(b){b.disabled=false;b.textContent="✓ Review & accept quotation";}}
+finally{busy=false;}
+}
+async function loadQuotes(showLoading=true){
+if(!client){say("Supabase client could not be initialized. Check the shared configuration and network, then refresh.","error");return;}
+if(showLoading)say("Loading quote records available to your signed-in account…","info");
+$("refresh-button").disabled=true;
+try{
+const {data,error}=await client.from("krim_quotes").select("id,shipment_id,amount,currency_code,status,valid_until,created_at,partner_quote_id").order("created_at",{ascending:false}).limit(200);
+if(error)throw error;
+quotes=(data||[]);
+if(requestedQuoteId&&/^\d+$/.test(requestedQuoteId))quotes=quotes.filter(q=>Number(q.id)===Number(requestedQuoteId));
+else if(requestedShipmentId&&/^\d+$/.test(requestedShipmentId))quotes=quotes.filter(q=>Number(q.shipment_id)===Number(requestedShipmentId));
+if(requestedQuoteId&&!quotes.length)say("That quote is not available to this account, or it does not exist. The page will not bypass organization access controls.","error");
+else if(requestedShipmentId&&!quotes.length)say("No quote for shipment #"+requestedShipmentId+" is available to this account. Check the shipment reference or request pricing again.","info");
+else say(quotes.length+" authorized quote record(s) loaded. Quote visibility is controlled by Supabase access policies.","success");
+$("scope-note").textContent=requestedQuoteId?"Focused on quote #"+requestedQuoteId:requestedShipmentId?"Focused on shipment #"+requestedShipmentId:"Authenticated account scope";
+setCounts(quotes);renderList();
+let target=null;
+if(requestedQuoteId)target=quotes.find(q=>Number(q.id)===Number(requestedQuoteId));
+if(!target&&requestedShipmentId)target=quotes.find(q=>Number(q.shipment_id)===Number(requestedShipmentId)&&q.status==="sent")||quotes.find(q=>Number(q.shipment_id)===Number(requestedShipmentId));
+if(!target&&selectedId)target=quotes.find(q=>Number(q.id)===Number(selectedId));
+if(!target&&quotes.length===1)target=quotes[0];
+if(target)selectQuote(Number(target.id),false);
+else if(!quotes.length)$("quote-detail").innerHTML='<div class="empty" style="margin:18px"><strong>No quote to review</strong>There is no visible quote for this reference. Request pricing or choose a shipment that has a quote. No quote was created by this page.</div>';
+else if(!quotes.some(q=>Number(q.id)===Number(selectedId)))$("quote-detail").innerHTML='<div class="empty" style="margin:18px"><strong>Select a quotation</strong>Choose a record from the register. If you arrived from a specific shipment, use its reference in the page link to focus the review.</div>';
+}catch(e){quotes=[];setCounts([]);$("quote-list").innerHTML='<div class="empty"><strong>Quote register unavailable</strong>'+esc(e&&e.message?e.message:"Unable to load authorized quote records")+'</div>';$("quote-detail").innerHTML='<div class="empty" style="margin:18px"><strong>Unable to review quote</strong>Refresh the page or sign in again. No action has been taken.</div>';say("Could not load quote records: "+(e&&e.message?e.message:"Unknown error"),"error");}
+finally{$("refresh-button").disabled=false;}
+}
+async function init(){
+if(!client){say("Supabase client could not be initialized. Please refresh after checking connectivity.","error");return;}
+try{const {data,error}=await client.auth.getSession();if(error)throw error;session=data&&data.session;if(!session){const next=encodeURIComponent(location.pathname+location.search);location.href="/logistics-saas/auth/login.html?next="+next;return;}
+$("session-label").textContent="Signed in · "+(session.user.email||"authorized user");await loadQuotes(true);
+}catch(e){say("Session verification failed: "+(e&&e.message?e.message:"Unknown error"),"error");}
+}
+$("refresh-button").addEventListener("click",()=>loadQuotes(true));
+$("quote-search").addEventListener("input",renderList);
+$("status-filter").addEventListener("change",renderList);
+init();
+})();
+</script>
 </body>
 </html>
