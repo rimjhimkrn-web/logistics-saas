@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#10243a">
 <meta name="description" content="Secure KRIM Logistics checkout. Review the accepted shipment quote and pay through a server-created Razorpay order.">
-<title>KRIM Logistics | Secure Checkout</title>
+<title>KRIM Logistics | Global Payment Checkout</title>
 <link rel="manifest" href="../manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
@@ -26,13 +26,13 @@ main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 </style>
 </head>
 <body>
-<div class="topline"><span><i class="status-dot" id="gateway-dot"></i><span id="gateway-status">PAYMENT GATEWAY · CHECKING SESSION</span></span><span id="session-label">SECURE CUSTOMER CHECKOUT</span></div>
+<div class="topline"><span><i class="status-dot" id="gateway-dot"></i><span id="gateway-status">KRIM PAYMENT ORCHESTRATOR · CHECKING SESSION</span></span><span id="session-label">SECURE CUSTOMER CHECKOUT</span></div>
 <header><div class="nav">
 <a class="brand" href="../index.html" aria-label="KRIM Logistics home"><span class="brand-mark">K</span><span><span class="brand-name">KRIM LOGISTICS</span><span class="brand-sub">Global logistics operating system</span></span></a>
 <a class="nav-link" id="back-quotes" href="shipper/spot-approvals.html">← Quote review</a>
 </div></header>
 <main>
-<section class="hero"><div class="hero-grid"><div><div class="eyebrow">Customer journey · Step 06</div><h1>Secure shipment checkout</h1><p>Review the accepted quote and linked partner assignment before proceeding to Razorpay. KRIM creates the payment order on its server and verifies the result with the payment provider before recording success.</p></div><div class="secure-chip"><strong>◈ Secure payment flow</strong><span>Server-priced · Quote-bound · Signature verified</span></div></div></section>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">Customer journey · Step 06 · Global payment core</div><h1>Global payment checkout</h1><p>KRIM uses one quote-bound payment experience. Razorpay is the only enabled checkout provider today; regional payment adapters remain inactive until merchant eligibility, compliance, settlement and reconciliation are verified. Your amount comes from the accepted KRIM quote—not the browser.</p></div><div class="secure-chip"><strong>◈ KRIM Payment Orchestrator</strong><span>One payment record · Razorpay active · Future adapters gated</span></div></div></section>
 <div class="journey" aria-label="Customer shipment journey">
 <div class="journey-step"><span class="step-no">01</span><span><strong>Book shipment</strong><small>Shipment request</small></span></div>
 <div class="journey-step"><span class="step-no">02</span><span><strong>Get quote</strong><small>Rate and availability</small></span></div>
@@ -66,13 +66,13 @@ main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 </section>
 <aside>
 <div class="card">
-<div class="card-head"><div><h2>Payment summary</h2><p>Final amount is returned by KRIM's server before checkout.</p></div><span class="pill">INR flow</span></div>
+<div class="card-head"><div><h2>Payment summary</h2><p>Final amount is returned by KRIM's server before checkout.</p></div><span class="pill">Razorpay · INR</span></div>
 <div class="amount-box"><div class="amount-label">Accepted quote total</div><div id="checkout-amount" class="amount-value">—</div><div id="amount-caption" class="amount-note">Waiting for the accepted quote and assignment checks.</div></div>
 <div class="meta-list" style="margin-top:13px">
-<div class="meta-row"><span>Payment provider</span><strong>Razorpay</strong></div>
-<div class="meta-row"><span>Currency support</span><strong>INR only for this flow</strong></div>
+<div class="meta-row"><span>Enabled provider</span><strong>Razorpay only</strong></div>
+<div class="meta-row"><span>Current checkout currency</span><strong>INR only</strong></div>
 <div class="meta-row"><span>Order creation</span><strong>KRIM secure server</strong></div>
-<div class="meta-row"><span>Success condition</span><strong>Provider + signature verified</strong></div>
+<div class="meta-row"><span>Success condition</span><strong>Provider status + signature + ledger</strong></div>
 </div>
 <button id="btn-pay-now" class="primary-action" style="margin-top:19px" disabled>Continue to secure payment →</button>
 <p class="action-note">Do not refresh or pay again while a payment is processing. If the provider opens but the result is unclear, check the payment status before retrying.</p>
@@ -81,7 +81,7 @@ main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 <div class="card">
 <div class="card-head"><div><h2>Before you pay</h2><p>Know what this checkout will and will not do.</p></div></div>
 <div class="notice"><strong>Quote-linked checkout</strong>The payment amount, currency, quote ID, shipment ID, customer organization and partner offer are checked by the backend. Browser values are not treated as payment authority.</div>
-<div class="footnote">A successful provider window alone does not mean payment is complete. KRIM must verify the Razorpay signature and provider payment details, then save the payment record.</div>
+<div class="footnote">A successful provider window alone does not mean payment is complete. KRIM must verify the Razorpay signature, order, captured amount, currency and shipment linkage, then save the financial transaction. International payment methods are subject to Razorpay account approval and market availability; no global coverage is assumed.</div>
 </div>
 </aside>
 </div>
