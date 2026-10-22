@@ -163,7 +163,11 @@
     const countryCode=String(p.countrycode||p.country_code||"").toUpperCase();
     const city=p.city||p.town||p.village||p.municipality||p.county||p.name||"";
     if(!city||!p.country||!/^[A-Z]{2}$/.test(countryCode)||coords.length<2)return null;
-    return {name:String(city).slice(0,160),city:String(city).slice(0,160),state:String(p.state||p.region||"").slice(0,160),country:String(p.country).slice(0,160),country_code:countryCode,latitude:Number(coords[1]),longitude:Number(coords[0]),display_name:String(p.name||city).slice(0,200)};
+    const state=String(p.state||p.region||"").slice(0,160), country=String(p.country).slice(0,160);
+    const featureName=String(p.name||"").trim();
+    const label=[featureName&&featureName.toLowerCase()!==String(city).toLowerCase()?featureName:"",String(city),state,country].filter(Boolean).filter((v,i,a)=>a.findIndex(x=>x.toLowerCase()===v.toLowerCase())===i).join(", ");
+    const rawType=String(p.osm_value||p.type||"place").toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||"place";
+    return {name:String(city).slice(0,160),city:String(city).slice(0,160),state,country,country_code:countryCode,latitude:Number(coords[1]),longitude:Number(coords[0]),display_name:label.slice(0,240),place_type:rawType};
   }
   function drawPlaceResults(kind,features,query){
     const box=$(kind+"-results");box.replaceChildren();
@@ -171,7 +175,7 @@
     if(!valid.length){const empty=document.createElement("div");empty.className="place-empty";empty.textContent=query?"No matching place found. Try a city, airport, port, or a more specific search.":"Type at least 3 characters to search globally.";box.appendChild(empty);box.hidden=false;return;}
     valid.forEach(place=>{
       const item=document.createElement("button");item.type="button";item.className="place-result";item.setAttribute("role","option");
-      item.innerHTML=escapeHtml(place.name)+'<small>'+escapeHtml([place.state,place.country,place.country_code].filter(Boolean).join(" · "))+'</small>';
+      item.innerHTML=escapeHtml(place.display_name)+'<small>'+escapeHtml([place.place_type,place.country_code].filter(Boolean).join(" · "))+'</small>';
       item.addEventListener("click",()=>{
         if(kind==="origin"){originPlace=place;$("booking-origin").value=place.name;$("origin-search").value=placeLabel(place);}
         else{destinationPlace=place;$("booking-destination").value=place.name;$("destination-search").value=placeLabel(place);}
