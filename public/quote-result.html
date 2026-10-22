@@ -29,7 +29,7 @@ main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 <div class="topline"><span><i class="status-dot" id="gateway-dot"></i><span id="gateway-status">KRIM PAYMENT ORCHESTRATOR · CHECKING SESSION</span></span><span id="session-label">SECURE CUSTOMER CHECKOUT</span></div>
 <header><div class="nav">
 <a class="brand" href="../index.html" aria-label="KRIM Logistics home"><span class="brand-mark">K</span><span><span class="brand-name">KRIM LOGISTICS</span><span class="brand-sub">Global logistics operating system</span></span></a>
-<a class="nav-link" id="back-quotes" href="shipper/spot-approvals.html">← Quote review</a>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="nav-link" id="back-quotes" href="shipper/spot-approvals.html">← Quote review</a><a class="nav-link" href="finance/payment-methods.html">Market eligibility</a></div>
 </div></header>
 <main>
 <section class="hero"><div class="hero-grid"><div><div class="eyebrow">Customer journey · Step 06 · Global payment core</div><h1>Global payment checkout</h1><p>KRIM uses one quote-bound payment experience. Razorpay is the only enabled checkout provider today; regional payment adapters remain inactive until merchant eligibility, compliance, settlement and reconciliation are verified. Your amount comes from the accepted KRIM quote—not the browser.</p></div><div class="secure-chip"><strong>◈ KRIM Payment Orchestrator</strong><span>One payment record · Razorpay active · Future adapters gated</span></div></div></section>
@@ -83,6 +83,7 @@ main{max-width:1180px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 <div class="notice"><strong>Quote-linked checkout</strong>The payment amount, currency, quote ID, shipment ID, customer organization and partner offer are checked by the backend. Browser values are not treated as payment authority.</div>
 <div class="footnote">A successful provider window alone does not mean payment is complete. KRIM must verify the Razorpay signature, order, captured amount, currency and shipment linkage, then save the financial transaction. International payment methods are subject to Razorpay account approval and market availability; no global coverage is assumed.</div>
 </div>
+<div class="card"><div class="card-head"><div><h2>Global payment architecture</h2><p>One KRIM payment lifecycle across providers and markets.</p></div><span class="pill">Provider-neutral foundation</span></div><div class="notice"><strong>Enabled now: Razorpay · INR checkout</strong>Other providers, currencies, international cards, local wallets and bank-transfer collection remain unavailable until merchant eligibility, provider-specific verification, settlement, refund and reconciliation controls have been validated. No automatic provider fallback is permitted.</div><div class="meta-list"><div class="meta-row"><span>Current order source</span><strong>KRIM server</strong></div><div class="meta-row"><span>Canonical transaction record</span><strong>KRIM Finance Core</strong></div><div class="meta-row"><span>Unknown payment result</span><strong>Reconcile before retry</strong></div></div><a class="btn btn-secondary" style="margin-top:15px;width:100%" href="finance/payment-gateways.html">View provider roadmap →</a><a class="btn btn-secondary" style="margin-top:8px;width:100%" href="finance/payment-methods.html">View country & method eligibility →</a></div>
 </aside>
 </div>
 </main>
@@ -95,6 +96,7 @@ const byId=(id)=>document.getElementById(id);
 let session=null,quote=null,shipment=null,assignment=null,canPay=false,paymentBusy=false;
 const params=new URLSearchParams(location.search);
 const shipmentParam=params.get("shipment_id");
+const quoteParam=params.get("quote_id");
 const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amount).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
 function gateway(text,state){byId("gateway-status").textContent="KRIM PAYMENT ORCHESTRATOR · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
@@ -113,7 +115,9 @@ async function init(){
  byId("session-label").textContent="SIGNED IN · "+(session.user.email||"Customer account");
  check("session",true,"Signed in as "+(session.user.email||"authenticated customer")+".");
  const sid=Number(shipmentParam);
- const quoteResult=await client.from("krim_quotes").select("id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at").eq("shipment_id",sid).eq("status","accepted").order("id",{ascending:false}).limit(1).maybeSingle();
+ let quoteQuery=client.from("krim_quotes").select("id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at").eq("shipment_id",sid).eq("status","accepted");
+ if(quoteParam&&/^\\d+$/.test(quoteParam)) quoteQuery=quoteQuery.eq("id",Number(quoteParam));
+ const quoteResult=await quoteQuery.order("id",{ascending:false}).limit(1).maybeSingle();
  if(quoteResult.error||!quoteResult.data){gateway("QUOTE NOT AVAILABLE","bad");check("quote",false,"No accepted quote is visible for this shipment.");message("No accepted quote was found for this shipment in your account. Review your quotations or ask your organization administrator to check access.","error");return;}
  quote=quoteResult.data;
  const shipmentResult=await client.from("krim_shipments").select("id,shipment_number,status,customer_organization_id,origin_place_label,destination_place_label,requested_transport_mode,requested_route_type,goods_description,total_weight_kg").eq("id",sid).maybeSingle();
