@@ -78,7 +78,7 @@ $('accept-selected').disabled=true;$('checkout-link').href='#';$('checkout-link'
 if(!selected){actionFeedback('Select a quotation to review its acceptance and checkout readiness.','info');return;}
 if(selected.status==='accepted'){
 const ok=await checkCheckoutReadiness(selected);
-if(ok){$('checkout-link').href=route('public/quote-result.html')+'?shipment_id='+encodeURIComponent(shipment.id)+'&quote_id='+encodeURIComponent(selected.id);$('checkout-link').removeAttribute('aria-disabled');$('checkout-link').style.opacity='1';actionFeedback('This quote is already accepted and the linked partner assignment is accepted. You can review secure checkout.','success');}
+if(ok){$('checkout-link').href=route('public/shipper/payment-checkout.html')+'?shipment_id='+encodeURIComponent(shipment.id)+'&quote_id='+encodeURIComponent(selected.id);$('checkout-link').removeAttribute('aria-disabled');$('checkout-link').style.opacity='1';actionFeedback('This quote is already accepted and the linked partner assignment is accepted. You can review secure checkout.','success');}
 else actionFeedback('This quote is already accepted, but the shipment or partner assignment is not ready for checkout. Contact KRIM operations rather than paying against an incomplete assignment.','error');
 return;
 }
