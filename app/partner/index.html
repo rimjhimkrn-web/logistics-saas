@@ -22,6 +22,7 @@
 <div class="section-head"><div><h2>Partner workspace</h2><p>Use these shortcuts to manage the next step in your freight operations.</p></div></div>
 <div class="quickgrid">
 <article class="quick"><div class="icon">↗</div><h3>Load marketplace</h3><p>Review available freight opportunities and eligible loads.</p><a id="market-shortcut" href="../../public/partner/load-marketplace.html">Open marketplace →</a></article>
+<article class="quick" id="quote-submission-card" hidden><div class="icon">₹</div><h3>Partner quote submission</h3><p>Review eligible real freight opportunities and submit a server-validated commercial offer.</p><a id="quote-shortcut" href="../../public/partner/submit-quote.html">Prepare a freight offer →</a></article>
 <article class="quick"><div class="icon">✓</div><h3>Partner onboarding</h3><p>Choose Development / Test, Individual Partner, or Registered Business verification. Live commercial tools require approval.</p><a id="verify-shortcut" href="../../public/partner/partner-onboarding.html">Choose partner pathway →</a></article>
 <article class="quick"><div class="icon">⌁</div><h3>Shipment assignments</h3><p>Open the assignment area to review shipment work associated with your organization.</p><a id="assignments-shortcut" href="../../public/partner/load-marketplace.html">View partner loads →</a></article>
 </div>
@@ -53,12 +54,12 @@ const {data:ud,error:ue}=await client.auth.getUser();if(ue)throw new Error("Your
 const user=ud.user;
 const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");if(memberError)throw new Error("KRIM could not verify organization membership. Please retry.");
 const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){fail("Partner organization not linked","Your account is signed in, but no active organization membership was found. Return to Partner Sign In to retry setup, or contact KRIM support. Workspace data has not been loaded.",false);return}
-const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,display_name,legal_name,partner_account_mode").in("id",ids);if(orgError)throw new Error("KRIM could not verify your organization type. Workspace data has not been loaded.");
+const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status,partner_lifecycle_status,partner_compliance_status,display_name,legal_name,partner_account_mode").in("id",ids);if(orgError)throw new Error("KRIM could not verify your organization type. Workspace data has not been loaded.");
 const org=(orgs||[]).find(isPartner);if(!org){fail("Partner access denied","This account is not linked to a partner, carrier or forwarder organization. Access was not granted.",false);return}
 if(String(org.status||"").toLowerCase()!=="active"){fail("Organization is not active","Your partner organization is not active. Contact KRIM support to resolve the organization status.",false);return}
 const verification=String(org.partner_verification_status||"").trim().toLowerCase(),lifecycle=String(org.partner_lifecycle_status||"").trim().toLowerCase();
 const accountMode=String(org.partner_account_mode||"registered_business").trim().toLowerCase();
-const approved=["verified","approved"].includes(verification)&&["active","verified"].includes(lifecycle);
+const approved=["verified","approved"].includes(verification)&&["active","verified"].includes(lifecycle);const compliance=String(org.partner_compliance_status||"").trim().toLowerCase();const quoteEligible=approved&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(compliance);document.getElementById("quote-submission-card").hidden=!quoteEligible;
 gate.hidden=true;main.hidden=false;identity.textContent="Signed in: "+(user.email||"verified partner account");
 document.getElementById("development-demo").hidden=accountMode!=="development_test";
 document.getElementById("welcome").textContent=approved?"Welcome to your freight workspace":accountMode==="development_test"?"Welcome to your test workspace":"Welcome to your partner workspace";
