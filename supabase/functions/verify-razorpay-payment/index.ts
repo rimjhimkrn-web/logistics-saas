@@ -266,6 +266,7 @@ paid_at
 "razorpay_order_id",
 razorpayOrderId
 )
+.eq("payment_provider", "razorpay")
 .maybeSingle();
 
 if (paymentOrderError) {
