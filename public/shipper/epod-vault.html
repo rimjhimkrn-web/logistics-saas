@@ -42,7 +42,7 @@
     <div class="w-full bg-slate-900 text-slate-400 text-[11px] py-1.5 px-6 flex justify-between items-center font-mono">
         <span class="flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-emerald-400 font-bold">EPOD AUDIT VAULT: SECURE</span>
+            <span class="text-sky-300 font-bold">DELIVERY EVIDENCE · RECORDED STATUS ONLY</span>
         </span>
         <span id="session-identity-node" class="text-sky-400">Authenticating session...</span>
     </div>
@@ -114,19 +114,20 @@
         const supabaseClient = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
         async function initEPOD() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                const next = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = "/logistics-saas/auth/login.html?next=" + next;
+                return;
+            }
+            document.getElementById('session-identity-node').innerText = "Authenticated session · access governed by database policies";
+
             const urlParams = new URLSearchParams(window.location.search);
             const shipmentId = urlParams.get('shipment_id');
             if (shipmentId) {
                 document.getElementById('epod-shipment-id').value = shipmentId;
-                fetchEPODRecord();
+                await fetchEPODRecord();
             }
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/logistics-saas/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = `Node: ${session.user.email}`;
         }
 
         function escapeEPODText(value) {
