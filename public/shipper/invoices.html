@@ -156,13 +156,25 @@
                         : "text-amber-700 bg-amber-50 border-amber-200";
                     const issueDate = inv.issue_date ? new Date(inv.issue_date + "T00:00:00").toLocaleDateString() : "—";
                     const invoiceNo = inv.invoice_number || ("Invoice #" + inv.id);
-                    const amountText = Number.isFinite(total)
-                        ? total.toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2})
-                        : "—";
+                    const currencyCode = String(inv.currency_code || "").trim().toUpperCase();
+                    let amountText = "—";
+                    if (Number.isFinite(total) && /^[A-Z]{3}$/.test(currencyCode)) {
+                        try {
+                            amountText = new Intl.NumberFormat(undefined, {
+                                style: "currency",
+                                currency: currencyCode,
+                                currencyDisplay: "code"
+                            }).format(total);
+                        } catch (_) {
+                            amountText = currencyCode + " " + total.toLocaleString(undefined, {maximumFractionDigits: 4});
+                        }
+                    } else if (Number.isFinite(total)) {
+                        amountText = "Currency not recorded · " + total.toLocaleString(undefined, {maximumFractionDigits: 4});
+                    }
                     return '<tr class="hover:bg-slate-50/80 transition">' +
                         '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(invoiceNo) + '</td>' +
                         '<td class="py-4 px-4 font-mono text-slate-600">' + (Number.isFinite(Number(inv.shipment_id)) ? "#" + Number(inv.shipment_id) : "—") + '</td>' +
-                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(inv.currency_code || "INR") + ' ' + amountText + '</td>' +
+                        '<td class="py-4 px-4 font-mono font-bold text-slate-900">' + escapeInvoiceText(amountText) + '</td>' +
                         '<td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ' + statusColor + '">' + escapeInvoiceText(status) + '</span></td>' +
                         '<td class="py-4 px-4 font-mono text-xs text-slate-500">' + escapeInvoiceText(issueDate) + '</td>' +
                         '<td class="py-4 px-4 text-right text-xs text-slate-500">' + (paid ? "Settled" : "Payment workflow not yet enabled for invoices") + '</td>' +
