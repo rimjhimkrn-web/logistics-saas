@@ -39,7 +39,7 @@ There are 92 HTML basename groups containing multiple paths. These are **not** a
 **Severity:** High  
 **Evidence:** `public/testing/e2e-test-runner.html` contains hard-coded claims including “100% Passing Rate”, “ALL SUITES GREEN”, invented test totals/results and a button whose click handler displays a success alert rather than running tests.  
 **Impact:** The page can mislead operators into believing tests were executed when no test execution is performed by that button.  
-**Disposition:** Do not treat this page as test evidence. Replace its claims with truthful “not executed / evidence unavailable” states or connect it to a real runner after reviewing whether this public page should exist at all.
+**Disposition:** The false success claims and fake success alert were removed in commit `49169e3d9dbcb500b21b653a0c2031a4ffaba123`. The page now says the runner is not connected and results are not measured; the run button is disabled. A regression guard was added to `scripts/krim-production-smoke.mjs` in commit `f3243c5f0d81d0eebf9d099a7251d6999f04efec`. The smoke workflow is running for that change. Remaining: decide whether this test dashboard should be private/unpublished and connect a real browser runner before reporting E2E pass rates.
 
 ### AUDIT-002 — Global Operations pages lack visible Supabase integration
 **Severity:** High  
@@ -70,6 +70,13 @@ There are 92 HTML basename groups containing multiple paths. These are **not** a
 **Disposition:** Review each page for simulated results, public exposure of operational controls, actual execution behavior, and whether it belongs in the public deployment. Do not assume “testing” pages are private because of their folder name.
 
 ## 4. Automated checks and deployment evidence
+
+### Audit remediation progress (2026-10-24)
+- Removed fabricated E2E success metrics and fake success alert from `public/testing/e2e-test-runner.html`.
+- Added a smoke-test regression guard that fails if fabricated success claims return.
+- Commit `49169e3d9dbcb500b21b653a0c2031a4ffaba123` smoke run passed: `https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40009354065`.
+- Regression-guard smoke run for `f3243c5f0d81d0eebf9d099a7251d6999f04efec` was queued at the time of this report update; confirm the result before calling this remediation fully verified.
+
 
 Latest GitHub Actions runs on the audited baseline commit:
 - Production smoke checks: success.
