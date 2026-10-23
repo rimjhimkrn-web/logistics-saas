@@ -32,6 +32,15 @@ const contextActions=[
  {re:/address|location|company-profile|team-members|onboarding|verification|cargo-profile|shipping-preference|saved-route/,title:'Manage customer setup',text:'Return to your customer workspace and organization setup tools.',key:'home'}
 ];
 function status(message,kind){let box=document.getElementById('krim-workflow-status');if(!box){box=document.createElement('div');box.id='krim-workflow-status';(document.querySelector('main')||document.body).prepend(box)}box.textContent=message;box.style.cssText='margin:12px auto;max-width:1100px;padding:10px 14px;border-radius:10px;background:'+(kind==='ok'?'#e8f8f0':kind==='error'?'#fff0ef':'#eaf2ff')+';color:'+(kind==='ok'?'#086548':kind==='error'?'#a12820':'#173b72')+';font:12px/1.5 system-ui'};
+function applyDesignSystem(){
+ const slug=location.pathname.split('/').pop().replace(/\.html$/,'').toLowerCase();
+ const module=/invoice|payment|refund|settlement|credit-note|finance/.test(slug)?'finance':/quote|pricing|rate-calculator|contract-rate/.test(slug)?'commercial':/pod|delivery|tracking|shipment|booking|recurring|reorder|return/.test(slug)?'operations':/claim|dispute|support|ticket/.test(slug)?'service':/profile|address|team|onboarding|verification|location|preference/.test(slug)?'account':'core';
+ document.documentElement.dataset.krimModule=module;
+ if(document.body)document.body.dataset.krimModule=module;
+ if(!document.getElementById('krim-customer-design-system')){
+  const link=document.createElement('link');link.id='krim-customer-design-system';link.rel='stylesheet';link.href=route('public/customer-os/assets/customer-os-design.css');document.head.appendChild(link);
+ }
+}
 function navigation(){
  if(document.getElementById('krim-global-customer-nav'))return;
  const nav=document.createElement('nav');nav.id='krim-global-customer-nav';nav.setAttribute('aria-label','KRIM customer workflow');
@@ -48,7 +57,7 @@ function workflowPanel(){
  const main=document.querySelector('main');if(main)main.appendChild(box);else document.body.appendChild(box);
 }
 async function init(){
- navigation();workflowPanel();
+ applyDesignSystem();navigation();workflowPanel();
  const client=window.KRIM_SUPABASE||window.supabaseClient;
  if(!client){status('Navigation is connected. This page did not load the Supabase client, so protected records and actions are not enabled here.','error');return}
  try{
