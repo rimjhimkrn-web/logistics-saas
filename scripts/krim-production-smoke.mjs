@@ -5,6 +5,8 @@ import { join, dirname, resolve as pathResolve } from "node:path";
 
 const required = [
   "public/quote-result.html",
+  "public/payment-verification.html",
+  "public/finance/payment-result.html",
   "public/shipper/spot-approvals.html",
   "public/partner/accepted-loads.html",
   "public/partner/dispatch-assignment.html",
@@ -139,6 +141,42 @@ if (existsSync(quoteComparison)) {
   if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC.");
   if (!/valid_until|valid until/i.test(html)) failures.push("Quote comparison must expose quote validity.");
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
+}
+
+ // Phase 5 booking and payment: only server-verified payment can be shown as paid.
+const paymentReadiness = existsSync("public/shipper/payment-checkout.html") ? readFileSync("public/shipper/payment-checkout.html", "utf8") : "";
+const secureCheckout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
+const paymentVerification = existsSync("public/payment-verification.html") ? readFileSync("public/payment-verification.html", "utf8") : "";
+const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
+for (const [file, html] of [
+  ["public/shipper/payment-checkout.html", paymentReadiness],
+  ["public/quote-result.html", secureCheckout],
+  ["public/payment-verification.html", paymentVerification],
+]) {
+  if (!html.includes("krim-global-interface.css")) failures.push(`Phase 5 page is missing the shared global stylesheet: ${file}`);
+  if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
+}
+if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
+if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
+if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
+if (!/result\\.success\\s*!==\\s*true[\\s\\S]*?result\\.verified\\s*!==\\s*true[\\s\\S]*?result\\.status\\s*!==\\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
+if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
+if (/Payment Executed Successfully|€14,250\\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
+if (!/location\\.replace/.test(legacyPaymentResult) || !/payment-verification\\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
+const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
+const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
+for (const [label, source, pattern] of [
+  ["order endpoint authenticates the bearer session", orderFn, /auth\\.getUser\\(token\\)/],
+  ["order endpoint derives the amount from the accepted quote", orderFn, /Number\\(quote\\.amount\\)/],
+  ["order endpoint checks accepted partner assignment", orderFn, /assignment\\.status\\s*!==\\s*["']accepted["']/],
+  ["order endpoint enforces verified payment capability", orderFn, /krim_payment_capability_registry[\\s\\S]*?checkout_enabled/],
+  ["verification checks HMAC signature", verifyFn, /generateHmacSha256[\\s\\S]*?razorpaySignature/],
+  ["verification independently fetches provider payment", verifyFn, /api\\.razorpay\\.com\\/v1\\/payments/],
+  ["verification requires captured status", verifyFn, /razorpayStatus\\s*!==\\s*["']captured["']/],
+  ["verification checks amount and currency", verifyFn, /Payment amount mismatch[\\s\\S]*?Payment currency mismatch/],
+  ["verification creates an idempotent financial transaction", verifyFn, /krim_financial_transactions[\\s\\S]*?provider_reference/],
+]) {
+  if (!pattern.test(source)) failures.push(`Phase 5 payment safety check missing: ${label}`);
 }
 for (const file of required) {
   if (!existsSync(file)) failures.push(`Missing required production file: ${file}`);
