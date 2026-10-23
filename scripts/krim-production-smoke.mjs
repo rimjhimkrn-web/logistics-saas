@@ -66,6 +66,36 @@ const required = [
 
 const failures = [];
 
+ // Global interface conformance across Phases 2–5: one shared stylesheet is loaded last,
+ // so page-local styles cannot silently replace the approved design tokens and components.
+ const phaseTwoToFiveInterfacePages = [
+   "app/customer/index.html",
+   "public/shipper/booking-request.html",
+   "public/shipper/coverage-review.html",
+   "public/shipper/rate-calculator.html",
+   "public/shipper/active-shipments.html",
+   "public/customer/shipment-create.html",
+   "public/customer-os/customer-services/shipment-list.html",
+   "public/shipper/spot-approvals.html",
+   "public/shipper/quote-comparison.html",
+   "public/customer/quote-request.html",
+   "public/shipper/payment-checkout.html",
+   "public/quote-result.html",
+   "public/payment-verification.html",
+   "public/finance/payment-result.html",
+   "public/shipment-confirmation.html",
+   "public/customer-os/customer-services/payment-history.html",
+ ];
+ for (const file of phaseTwoToFiveInterfacePages) {
+   if (!existsSync(file)) { failures.push(`Missing global-interface page: ${file}`); continue; }
+   const html = readFileSync(file, "utf8");
+   const head = html.slice(0, html.toLowerCase().lastIndexOf("</head>"));
+   const stylesheetCount = (head.match(/core\\/krim-global-interface\\.css/g) || []).length;
+   if (stylesheetCount !== 1) failures.push(`Page must include the shared global stylesheet exactly once: ${file}`);
+   if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) failures.push(`Page is missing the shared KRIM global shell: ${file}`);
+   if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push(`Global stylesheet must load after page-local styles: ${file}`);
+ }
+
 // Phase 2 customer-facing pages must share the approved global design layer.
 const phase2InterfacePages = [
   "app/customer/index.html",
@@ -513,7 +543,7 @@ for (const [label, source, pattern] of [
 if (!phaseTwoCoverage.includes("../../core/krim-global-interface.css")) failures.push("Phase 2 coverage review is missing the shared KRIM interface stylesheet.");
 
 const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
-for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ".krim-global-shell input", ".krim-global-shell button", ":focus-visible"]) {
+for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ":where(input,select,textarea)", ":where(button,.btn", ":focus-visible"]) {
   if (!globalInterfaceCss.includes(token)) failures.push("Missing global interface design token/component: " + token);
 }
 
