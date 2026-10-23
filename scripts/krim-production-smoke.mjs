@@ -18,6 +18,7 @@ const required = [
   "supabase/functions/verify-razorpay-payment/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
   "public/customer-os/customer-services/invoices.html",
+  "public/customer-os/customer-services/support.html",
   "public/shipper/quote-comparison.html",
   "public/customer/quote-request.html",
   "public/shipper/payment-checkout.html",
@@ -235,6 +236,7 @@ const booking = existsSync("public/shipments/shipment-create.html") ? readFileSy
 const customerShipmentList = existsSync("public/customer-os/customer-services/shipment-list.html") ? readFileSync("public/customer-os/customer-services/shipment-list.html", "utf8") : "";
 const customerQuoteRequest = existsSync("public/customer/quote-request.html") ? readFileSync("public/customer/quote-request.html", "utf8") : "";
 const customerInvoices = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
+const customerSupport = existsSync("public/customer-os/customer-services/support.html") ? readFileSync("public/customer-os/customer-services/support.html", "utf8") : "";
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
@@ -253,6 +255,9 @@ for (const [label, source, pattern] of [
   ["Customer quote request scopes records to active customer organizations", customerQuoteRequest, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
   ["Customer invoice register reads saved invoice records", customerInvoices, /from\(['"]krim_invoices['"]\)/],
   ["Customer invoice register filters by the organization protected by invoice RLS", customerInvoices, /from\(['"]krim_invoices['"]\)[\s\S]*?\.in\(['"]organization_id['"],customerIds\)/],
+  ["Customer support page creates saved support tickets", customerSupport, /from\(['"]support_tickets['"]\)\.insert\(payload\)/],
+  ["Customer support tickets bind to the signed-in user and active organization", customerSupport, /user_id:session\.user\.id[\s\S]*?krim_organization_id:Number\(org\.id\)[\s\S]*?krim_shipment_id:shipmentId/],
+  ["Customer support verifies active organization membership before ticket creation", customerSupport, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?organization_type/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
