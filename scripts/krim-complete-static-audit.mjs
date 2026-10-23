@@ -55,9 +55,9 @@ for (const file of htmlFiles) {
     }
   }
   const localScriptSources = [];
-  const scriptRe = /<script\\b([^>]*)>/gi;
+  const scriptRe = /<script\b([^>]*)>/gi;
   for (const sm of html.matchAll(scriptRe)) {
-    const srcMatch = sm[1].match(/\\bsrc\\s*=\\s*["']([^"']+)["']/i);
+    const srcMatch = sm[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
     if (!srcMatch) continue;
     const rawSrc = srcMatch[1].trim();
     if (!rawSrc || schemeRe.test(rawSrc)) continue;
@@ -69,13 +69,13 @@ for (const file of htmlFiles) {
       candidates.push(normalize(join(dirname(file), cleanSrc)));
     }
     const resolvedScript = candidates.find(candidate => fileSet.has(candidate));
-    if (resolvedScript && /\\.m?js$|\\.ts$|\\.tsx$|\\.jsx$/i.test(resolvedScript)) {
+    if (resolvedScript && /\.(?:m?js|ts|tsx|jsx)$/i.test(resolvedScript)) {
       localScriptSources.push(resolvedScript);
     }
   }
-  const backendSignalRe = /createClient|supabase\\.from\\(|\\.rpc\\(|functions\\.invoke\\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|fetch\\s*\\(/i;
+  const backendSignalRe = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|fetch\s*\(/i;
   const linkedScriptSignals = [...new Set(localScriptSources)].filter(scriptPath => backendSignalRe.test(readFileSync(scriptPath, "utf8")));
-  const directSupabaseSignal = /createClient|supabase\\.from\\(|\\.rpc\\(|functions\\.invoke\\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient/i.test(html);
+  const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient/i.test(html);
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
   const operational = /(?:dashboard|workspace|shipment|booking|quote|payment|invoice|tracking|warehouse|customs|finance|operations|partner|enterprise|driver|global-operations)/i.test(file);
   const placeholder = /placeholder|coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase/i.test(html);
