@@ -1,2 +1,93 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><title>Support | KRIM Customer OS</title><style>body{margin:0;background:#f4f7fc;color:#172943;font:14px/1.6 system-ui}header{background:#07152f;color:#dbeafe;padding:12px 5vw;font-size:11px;letter-spacing:.1em}main{max-width:1000px;margin:28px auto;padding:0 16px}.hero{border-radius:20px;padding:clamp(24px,5vw,42px);background:linear-gradient(115deg,#07152f,#1769ff 68%,#0b9898);color:#fff}.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.1}.hero p{color:#d9e8fa}.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}.card{background:white;border:1px solid #dfe7f2;border-radius:16px;padding:20px;margin-top:15px}.row{border:1px solid #e7edf5;border-radius:10px;padding:12px;margin:8px 0}a{color:#1769ff;text-decoration:none;font-weight:750}.muted{color:#64748b;font-size:12px}@media(max-width:650px){.layout{grid-template-columns:1fr}}</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script><script src="../assets/customer-workflow.js" defer></script><link rel="stylesheet" href="../assets/customer-os-global.css">
-</head><body><header>KRIM GLOBAL LOGISTICS OS · CUSTOMER OPERATIONS</header><main><section class="hero"><small>CUSTOMER ACCOUNT & SERVICES · WORKFLOW</small><h1>Support</h1><p>Dedicated customer workflow page within KRIM’s shared global freight lifecycle. Preserve shipment, quote, finance and support context across workspaces.</p></section><div class="layout"><section class="card"><h2>Workflow controls</h2><div class="row">01 · Verify sign-in and active organization.</div><div class="row">02 · Use the canonical shipment, quote, invoice or case record.</div><div class="row">03 · Confirm the server saved changes before reporting success.</div><p><a href="../../../app/customer/index.html">Customer Workspace →</a></p></section><aside class="card"><h2>Connected destinations</h2><p><a href="../../../public/shipments/shipment-create.html">Shipment booking</a></p><p><a href="../../../public/customer/quote-request.html">Quote request</a></p><p><a href="../../../public/shipper/payment-checkout.html">Payment checkout</a></p><p><a href="../../../public/support/ticket-desk.html">Support desk</a></p><p><a href="../index.html">All 178 rebuilt pages</a></p><p class="muted">UI/navigation rebuilt. Live data writes, payment verification, uploads and record-level authorization require backend integration and tests.</p></aside></div></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1f3a">
+<meta name="description" content="Create and track customer support tickets linked to your KRIM organization and shipment.">
+<title>Customer Support Desk | KRIM Logistics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script>
+<link rel="stylesheet" href="../assets/customer-os-global.css">
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#182943;background:#f4f7fc;--navy:#0b1f3a;--blue:#1769e8;--teal:#0c8b8b;--line:#dfe7f2;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#182943}.top{background:#0b1f3a;color:#dce9fa;padding:12px 5vw;font-size:10px;letter-spacing:.15em;font-weight:850}.shell{width:min(1180px,calc(100% - 30px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 0}.brand{font-weight:950;color:#0b1f3a;letter-spacing:.04em}.brand small{display:block;color:#64748b;font-size:9px;letter-spacing:.14em;margin-top:4px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border:1px solid #d7e1ef;border-radius:10px;background:#fff;color:#174ea6;font-size:12px;font-weight:850;text-decoration:none;min-height:40px}.btn.primary{background:#1769e8;border-color:#1769e8;color:#fff}.hero{border-radius:22px;padding:clamp(24px,5vw,40px);background:linear-gradient(115deg,#0b1f3a,#164879 68%,#0c8b8b);color:#fff;box-shadow:0 18px 45px #0b1f3a18}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.17em;color:#9af0e5}.hero h1{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:12px 0}.hero p{max-width:780px;color:#dce9fa;line-height:1.75;font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:16px 0}.panel{background:#fff;border:1px solid #dfe7f2;border-radius:16px;padding:20px;min-width:0}.panel h2{margin:0 0 12px;color:#0b1f3a;font-size:18px}.field{display:grid;gap:6px;margin:13px 0}.field label{font-size:11px;font-weight:850;color:#334862}.field input,.field select,.field textarea{width:100%;border:1px solid #cbd7e6;border-radius:10px;padding:11px 12px;font:inherit;background:#fff}.field textarea{min-height:130px;resize:vertical}.hint{color:#64748b;font-size:11px;line-height:1.65}.message{padding:12px 14px;border-radius:11px;background:#eef5ff;border:1px solid #d6e5fa;color:#1c477e;font-size:12px;line-height:1.65;margin:14px 0}.message.error{background:#fff0ef;border-color:#f2c8c4;color:#9b2721}.message.ok{background:#e8f8f1;border-color:#bce9d8;color:#116b50}.tickets{display:grid;gap:10px}.ticket{background:#fff;border:1px solid #dfe7f2;border-radius:13px;padding:14px}.ticket h3{margin:0;color:#0b1f3a;font-size:14px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0;color:#64748b;font-size:11px}.pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:#eef4ff;color:#174ea6;font-size:10px;font-weight:900}.pill.open{background:#fff5df;color:#8a5a00}.pill.resolved,.pill.closed{background:#e5f8f2;color:#08775d}.empty{padding:22px;text-align:center;border:1px dashed #bdcde1;background:#fff;border-radius:14px}.empty h3{margin:0 0 8px;color:#0b1f3a}.empty p{color:#64748b;font-size:12px;line-height:1.7}.footer{border-top:1px solid #dfe7f2;margin-top:28px;padding:20px 0 30px;color:#64748b;font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.nav .actions{width:100%}.nav .btn{flex:1}}
+</style>
+</head>
+<body>
+<div class="top">KRIM GLOBAL LOGISTICS OS · CUSTOMER SUPPORT & SERVICE QUALITY</div>
+<main class="shell">
+<header class="nav"><div class="brand">KRIM LOGISTICS <small>SUPPORT DESK · TRACKABLE CUSTOMER CASES</small></div><div class="actions"><a class="btn" href="../index.html">Customer OS</a><a class="btn" href="shipment-list.html">My shipments</a><a class="btn" href="claims.html">Claims</a></div></header>
+<section class="hero"><div class="eyebrow">CUSTOMER CARE · LIVE SUPPORT TICKETS</div><h1>One support case, one accountable record.</h1><p>Create a support ticket tied to your active KRIM organization and, where relevant, a shipment. The ticket is shown as submitted only after the database confirms the insert. Existing tickets shown below are limited to the signed-in user.</p></section>
+<div id="notice" class="message" role="status" aria-live="polite">Verifying secure access…</div>
+<div class="layout">
+<section class="panel"><h2>Create a support ticket</h2><p class="hint">Please do not include passwords, payment card data, or other secrets. Choose a shipment only when the case is related to that shipment.</p>
+<form id="ticket-form">
+<div class="field"><label for="organization">Customer organization</label><select id="organization" required disabled><option value="">Loading organizations…</option></select></div>
+<div class="field"><label for="category">Issue category</label><select id="category" required><option value="general">General inquiry</option><option value="shipment">Shipment request</option><option value="payment">Payment / invoice</option><option value="delivery">Delivery / proof of delivery</option><option value="partner">Logistics partner</option><option value="technical">Website / technical issue</option><option value="other">Other</option></select></div>
+<div class="field"><label for="shipment">Related shipment (optional)</label><select id="shipment" disabled><option value="">No shipment selected</option></select></div>
+<div class="field"><label for="subject">Subject</label><input id="subject" name="subject" maxlength="180" required placeholder="Briefly describe the issue"></div>
+<div class="field"><label for="message-body">Details</label><textarea id="message-body" name="message" maxlength="6000" required placeholder="What happened, when did it happen, and what outcome do you need?"></textarea></div>
+<button id="submit-ticket" class="btn primary" type="submit" disabled>Submit support ticket →</button>
+</form>
+</section>
+<section class="panel"><h2>Your recent tickets</h2><p class="hint">Ticket status comes from the saved KRIM support record. A submitted ticket is not the same as a resolved case.</p><div id="tickets" class="tickets"><div class="empty"><h3>Loading tickets…</h3><p>No sample records are shown.</p></div></div></section>
+</div>
+<footer class="footer"><span>© 2026 KRIM Logistics · Customer Support</span><span>Authenticated · User-owned tickets · Organization-scoped shipment linking</span></footer>
+</main>
+<script>
+(async function(){
+'use strict';
+const client=window.KRIM_SUPABASE||window.supabaseClient,$=id=>document.getElementById(id);
+let session=null,organizations=[],shipments=[];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function say(t,k){$('notice').textContent=t;$('notice').className='message'+(k?' '+k:'')}
+function date(v){if(!v)return 'Date unavailable';const d=new Date(v);return Number.isNaN(d.getTime())?'Date unavailable':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
+function selectedOrg(){return organizations.find(o=>String(o.id)===$('organization').value)||null}
+async function loadShipments(){
+ const org=selectedOrg();const select=$('shipment');select.replaceChildren(new Option('No shipment selected',''));
+ if(!org){select.disabled=true;return}
+ const {data,error}=await client.from('krim_shipments').select('id,shipment_number,origin_place_label,destination_place_label,status').eq('customer_organization_id',Number(org.id)).order('created_at',{ascending:false}).limit(100);
+ if(error)throw error;shipments=data||[];
+ for(const s of shipments){const label=(s.shipment_number||('Shipment #'+s.id))+' · '+(s.origin_place_label||'Origin pending')+' → '+(s.destination_place_label||'Destination pending');select.add(new Option(label,String(s.id)))}
+ select.disabled=false;
+}
+async function loadTickets(){
+ const ids=organizations.map(o=>Number(o.id)).filter(Number.isSafeInteger);
+ if(!ids.length){$('tickets').innerHTML='<div class="empty"><h3>No customer organization</h3><p>Join or activate a customer organization before creating a support ticket.</p></div>';return}
+ const {data,error}=await client.from('support_tickets').select('id,ticket_number,category,subject,status,priority,created_at,updated_at,krim_organization_id,krim_shipment_id').eq('user_id',session.user.id).in('krim_organization_id',ids).order('created_at',{ascending:false}).limit(30);
+ if(error)throw error;
+ const rows=data||[],root=$('tickets');root.replaceChildren();
+ if(!rows.length){root.innerHTML='<div class="empty"><h3>No support tickets yet</h3><p>When you submit a case, it will appear here after the server confirms it.</p></div>';return}
+ for(const t of rows){const el=document.createElement('article');el.className='ticket';const st=String(t.status||'open').toLowerCase();el.innerHTML='<h3>'+esc(t.ticket_number||('Ticket #'+t.id))+' · '+esc(t.subject)+'</h3><div class="meta"><span class="pill '+esc(st)+'">'+esc(st.replace(/_/g,' '))+'</span><span class="pill">'+esc(t.category||'general')+'</span><span>Created '+esc(date(t.created_at))+'</span></div><div class="hint">Priority: '+esc(t.priority||'normal')+(t.krim_shipment_id?' · Shipment #'+esc(t.krim_shipment_id):'')+'</div>';root.appendChild(el)}
+}
+try{
+ if(!client)throw new Error('KRIM backend configuration did not load. Refresh the page.');
+ const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
+ if(!auth?.session){location.href='../../../auth/login.html?next='+encodeURIComponent(location.pathname+location.search);return}
+ session=auth.session;
+ const {data:members,error:memberError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',session.user.id).eq('status','active');if(memberError)throw memberError;
+ const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error('No active KRIM organization membership was found.');
+ const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,name,organization_type,status').in('id',ids).eq('status','active');if(orgError)throw orgError;
+ organizations=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase()));
+ if(!organizations.length)throw new Error('This account has no active customer, shipper or enterprise organization.');
+ const orgSelect=$('organization');orgSelect.replaceChildren();for(const o of organizations)orgSelect.add(new Option(o.name||('Organization #'+o.id),String(o.id)));orgSelect.disabled=false;
+ await loadShipments();await loadTickets();$('submit-ticket').disabled=false;
+ say('Secure session verified. '+organizations.length+' active customer organization(s) available.','ok');
+ orgSelect.addEventListener('change',async()=>{try{await loadShipments()}catch(e){say(e?.message||'Unable to load shipments.','error')}});
+ $('ticket-form').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('submit-ticket'),org=selectedOrg(),subject=$('subject').value.trim(),message=$('message-body').value.trim(),category=$('category').value,shipmentId=$('shipment').value?Number($('shipment').value):null;
+  if(!org||!subject||!message){say('Choose an organization and provide a subject and details.','error');return}
+  if(shipmentId&&!shipments.some(s=>Number(s.id)===shipmentId)){say('The selected shipment is not in the current organization. Refresh and select it again.','error');return}
+  button.disabled=true;button.textContent='Submitting securely…';
+  try{
+   const payload={user_id:session.user.id,krim_organization_id:Number(org.id),krim_shipment_id:shipmentId,category,subject,message};
+   const {data,error}=await client.from('support_tickets').insert(payload).select('id,ticket_number,status').single();
+   if(error)throw error;
+   $('ticket-form').reset();$('organization').value=String(org.id);await loadShipments();await loadTickets();
+   say('Ticket '+(data.ticket_number||('#'+data.id))+' saved successfully with status '+(data.status||'open')+'. Keep the ticket reference for follow-up.','ok');
+  }catch(e){console.error(e);say(e?.message||'The support ticket was not confirmed as saved. Check your ticket list before retrying.','error')}
+  finally{button.disabled=false;button.textContent='Submit support ticket →'}
+ });
+}catch(e){console.error(e);say(e?.message||'Secure support access could not be verified.','error');$('tickets').innerHTML='<div class="empty"><h3>Support records unavailable</h3><p>'+esc(e?.message||'No ticket records were loaded.')+'</p><a class="btn primary" href="../../../auth/login.html">Sign in →</a></div>'}
+})();
+</script>
+</body></html>
