@@ -626,28 +626,28 @@ for (const [file, source] of [
 ]) {
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
   if (!source.includes("krim-global-interface.css")) failures.push("Phase 8 page is missing the shared KRIM interface stylesheet: " + file);
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push("Phase 8 page is missing the KRIM global shell: " + file);
-  if ((head.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push("Phase 8 page must load exactly one shared global stylesheet: " + file);
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 8 page is missing the KRIM global shell: " + file);
+  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 8 page must load exactly one shared global stylesheet: " + file);
 }
 for (const [label, source, pattern] of [
-  ["canonical pickup lookup uses the server-authorized shipment tracking RPC", phaseEightPickup, /rpc\\(["']krim_get_shipment_tracking["']/],
-  ["pickup event writes use the server-validated operational milestone RPC", phaseEightPickup, /rpc\\(["']krim_record_operational_milestone["']/],
-  ["pickup form does not claim success before the server accepts the event", phaseEightPickup, /Milestone not recorded[\\s\\S]*?server rejected the milestone/],
+  ["canonical pickup lookup uses the server-authorized shipment tracking RPC", phaseEightPickup, /rpc\(["']krim_get_shipment_tracking["']/],
+  ["pickup event writes use the server-validated operational milestone RPC", phaseEightPickup, /rpc\(["']krim_record_operational_milestone["']/],
+  ["pickup form does not claim success before the server accepts the event", phaseEightPickup, /Milestone not recorded[\s\S]*?server rejected the milestone/],
   ["pickup retry response distinguishes safely ignored duplicate events", phaseEightPickup, /Duplicate retry safely ignored/],
   ["pickup UI explains that custody, collection and delivery are separate states", phaseEightPickup, /scheduled pickup, physical collection, custody handover and delivery are distinct states/],
-  ["customer shipment register opens canonical pickup workflow with shipment reference", phaseEightList, /pickup-tracking\\.html\\?shipment=[\\s\\S]*?s\\.shipment_number/],
-  ["shipment details offers the canonical pickup and custody workflow", phaseEightOps, /Pickup & custody[\\s\\S]*?public\\/pickup-tracking\\.html[\\s\\S]*?shipment-tracking/],
-  ["customer hub links to the canonical pickup route", phaseEightHub, /href=["']\\.\\.\\/pickup-tracking\\.html["']/],
-  ["customer workflow navigation exposes pickup and custody", phaseEightNav, /pickup:'public\\/pickup-tracking\\.html'[\\s\\S]*?Pickup & custody/],
-  ["driver pickup module authenticates a session and active driver membership", phaseEightDriver, /auth\\.getSession\\([\\s\\S]*?krim_organization_members[\\s\\S]*?No active driver membership/],
-  ["driver pickup module reads real assignments without inserting demo trips", phaseEightDriver, /from\\('krim_driver_assignments'\\)[\\s\\S]*?No demo trips are inserted/],
+  ["customer shipment register opens canonical pickup workflow with shipment reference", phaseEightList, /pickup-tracking\.html\?shipment=[\s\S]*?s\.shipment_number/],
+  ["shipment details offers the canonical pickup and custody workflow", phaseEightOps, /Pickup & custody[\s\S]*?public\/pickup-tracking\.html[\s\S]*?url\.includes\('pickup-tracking'\)/],
+  ["customer hub links to the canonical pickup route", phaseEightHub, /href=["']\.\.\/pickup-tracking\.html["']/],
+  ["customer workflow navigation exposes pickup and custody", phaseEightNav, /pickup:'public\/pickup-tracking\.html'[\s\S]*?Pickup & custody/],
+  ["driver pickup module authenticates a session and active driver membership", phaseEightDriver, /auth\.getSession\([\s\S]*?krim_organization_members[\s\S]*?No active driver membership/],
+  ["driver pickup module reads real assignments without inserting demo trips", phaseEightDriver, /from\('krim_driver_assignments'\)[\s\S]*?No demo trips are inserted/],
 ]) {
   if (!pattern.test(source)) failures.push("Phase 8 pickup/custody check missing: " + label);
 }
 for (const [file, target] of [
-  ["public/shipments/pickup.html", /location\\.replace\\(['"]\\.\\.\\/pickup-tracking\\.html/],
-  ["public/partner/pickup-confirmation.html", /location\\.replace\\(['"]\\.\\.\\/pickup-tracking\\.html/],
-  ["public/driver/pickup-checklist.html", /location\\.replace\\(['"]\\.\\.\\/app\\/driver\\/module-05-pickup-collection\\.html/],
+  ["public/shipments/pickup.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
+  ["public/partner/pickup-confirmation.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
+  ["public/driver/pickup-checklist.html", /location\.replace\(['"]\.\.\/\.\.\/app\/driver\/module-05-pickup-collection\.html/],
 ]) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   if (!target.test(source)) failures.push("Phase 8 compatibility route does not redirect to the canonical secured workflow: " + file);
