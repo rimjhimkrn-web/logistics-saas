@@ -74,7 +74,7 @@ function setReady(){submit.disabled=!ready||submitting;}
 function setDateMinimum(){const today=new Date();const local=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);$("date").min=local;}
 function prefill(){
  const p=new URLSearchParams(location.search);
- for(const key of ["origin","destination","mode","weight","date"])if(p.has(key)&&$(key))$(key).value=p.get(key).slice(0,240);
+ for(const key of ["origin","destination","mode","weight","date"])if(p.has(key)&&$(key))$(key).value=(key==="mode"?p.get(key).toUpperCase():p.get(key)).slice(0,240);
  if(p.has("route_type"))$("route-type").value=p.get("route_type");
 }
 async function init(){
