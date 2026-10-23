@@ -101,7 +101,7 @@ const allHtmlFiles = listHtmlFiles(".").filter((p) =>
   p === "index.html" || p === "public/index.html" || p === "public/global-workflows.html" ||
   p.startsWith("public/customer-os/") || p.startsWith("public/customer/") ||
   p.startsWith("public/shipper/") || p.startsWith("public/shipments/") ||
-  p.startsWith("public/quotes/") || p.startsWith("public/finance/")
+  p.startsWith("public/quotes/") || p.startsWith("public/finance/") || p === "public/admin/customer-ecosystem-os.html"
 );
 let checkedAllSiteLinks = 0;
 for (const file of allHtmlFiles) {
