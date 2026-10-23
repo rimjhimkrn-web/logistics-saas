@@ -377,10 +377,10 @@ const phaseTwoBooking = existsSync("public/shipper/booking-request.html") ? read
 const phaseTwoCoverage = existsSync("public/shipper/coverage-review.html") ? readFileSync("public/shipper/coverage-review.html", "utf8") : "";
 const phaseTwoMigration = existsSync("supabase/migrations/20261023110000_enable_authenticated_customer_coverage_requests.sql") ? readFileSync("supabase/migrations/20261023110000_enable_authenticated_customer_coverage_requests.sql", "utf8") : "";
 for (const [label, source, pattern] of [
-  ["shipment intake links to the canonical coverage-review page", phaseTwoBooking, /coverage-review\.html[\s\S]*?coverage-review-link/],
+  ["shipment intake links to the canonical coverage-review page", phaseTwoBooking, /id=["']coverage-review-link["'] href=["']coverage-review\.html["']/],
   ["coverage review preserves exact origin and destination as customer-entered text", phaseTwoCoverage, /Origin \(customer-entered\)[\s\S]*?Destination \(customer-entered\)/],
   ["coverage review uses the existing customer service-request RPC", phaseTwoCoverage, /rpc\(["']krim_submit_customer_service_request["'][\s\S]*?p_request_type:\s*["']general["']/],
-  ["coverage review requires a verified identity and active customer workspace", phaseTwoCoverage, /krim_customer_identity_links[\s\S]*?identity_status["']\)\.eq\(["']verified["'][\s\S]*?krim_customer_workspace_profiles[\s\S]*?workspace_status/],
+  ["coverage review requires a verified identity and active customer workspace", phaseTwoCoverage, /krim_customer_identity_links[\s\S]*?eq\(["']identity_status["'],["']verified["']\)[\s\S]*?krim_customer_workspace_profiles[\s\S]*?workspace_status/],
   ["coverage review does not claim that route coverage is confirmed", phaseTwoCoverage, /Coverage status: not verified[\s\S]*?route coverage, pricing and service availability remain unverified/],
   ["coverage RPC migration grants execution only to authenticated customers and excludes anon", phaseTwoMigration, /REVOKE ALL ON FUNCTION[\s\S]*?FROM anon[\s\S]*?GRANT EXECUTE ON FUNCTION[\s\S]*?TO authenticated/],
   ["general coverage inquiries do not count as quote or shipment acquisition events", phaseTwoMigration, /IF v_request_type='quote'[\s\S]*?quote_requested[\s\S]*?ELSIF v_request_type='shipment'[\s\S]*?shipment_requested/],
