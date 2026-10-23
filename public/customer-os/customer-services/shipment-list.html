@@ -1,1 +1,84 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><title>Shipment List | KRIM Customer OS</title><style>body{margin:0;background:#f4f7fc;color:#172943;font:14px/1.6 system-ui}header{background:#07152f;color:#dbeafe;padding:12px 5vw;font-size:11px;letter-spacing:.1em}main{max-width:1000px;margin:28px auto;padding:0 16px}.hero{border-radius:20px;padding:clamp(24px,5vw,42px);background:linear-gradient(115deg,#07152f,#1769ff 68%,#0b9898);color:#fff}.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.1}.hero p{color:#d9e8fa}.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}.card{background:white;border:1px solid #dfe7f2;border-radius:16px;padding:20px;margin-top:15px}.row{border:1px solid #e7edf5;border-radius:10px;padding:12px;margin:8px 0}a{color:#1769ff;text-decoration:none;font-weight:750}.muted{color:#64748b;font-size:12px}@media(max-width:650px){.layout{grid-template-columns:1fr}}</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script><script src="../assets/customer-workflow.js" defer></script></head><body><header>KRIM GLOBAL LOGISTICS OS · CUSTOMER OPERATIONS</header><main><section class="hero"><small>CUSTOMER ACCOUNT & SERVICES · WORKFLOW</small><h1>Shipment List</h1><p>Dedicated customer workflow page within KRIM’s shared global freight lifecycle. Preserve shipment, quote, finance and support context across workspaces.</p></section><div class="layout"><section class="card"><h2>Workflow controls</h2><div class="row">01 · Verify sign-in and active organization.</div><div class="row">02 · Use the canonical shipment, quote, invoice or case record.</div><div class="row">03 · Confirm the server saved changes before reporting success.</div><p><a href="../../../app/customer/index.html">Customer Workspace →</a></p></section><aside class="card"><h2>Connected destinations</h2><p><a href="../../../public/shipments/shipment-create.html">Shipment booking</a></p><p><a href="../../../public/customer/quote-request.html">Quote request</a></p><p><a href="../../../public/finance/payment-checkout.html">Payment checkout</a></p><p><a href="../../../public/support/ticket-desk.html">Support desk</a></p><p><a href="../index.html">All 178 rebuilt pages</a></p><p class="muted">UI/navigation rebuilt. Live data writes, payment verification, uploads and record-level authorization require backend integration and tests.</p></aside></div></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07152f">
+<title>Shipment Control Tower | KRIM Customer OS</title>
+<meta name="description" content="Secure, organization-scoped live shipment register for KRIM Logistics customers.">
+<style>
+:root{--navy:#07152f;--blue:#1769ff;--teal:#0b9898;--ink:#172943;--muted:#64748b;--line:#dfe7f2;--bg:#f4f7fc;--green:#087e5b;--amber:#a16207}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#e4efff,transparent 35%),var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,sans-serif}
+header{background:var(--navy);color:#dbeafe;padding:14px max(16px,calc((100% - 1180px)/2));font-size:11px;letter-spacing:.12em;font-weight:800}
+main{max-width:1180px;margin:28px auto;padding:0 16px}.hero{border-radius:22px;padding:clamp(24px,5vw,42px);background:linear-gradient(115deg,#07152f,#1769ff 68%,#0b9898);color:#fff;box-shadow:0 18px 45px #07152f18}
+.eyebrow{font-size:10px;letter-spacing:.16em;font-weight:900;color:#cce4ff}.hero h1{font-size:clamp(29px,4vw,44px);line-height:1.1;letter-spacing:-.035em;margin:12px 0}.hero p{color:#d9e8fa;max-width:760px;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:850;text-decoration:none;border:1px solid #d3deed;background:#fff;color:#174ea6}.btn.primary{background:#fff;color:#0b3272;border-color:#fff}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 5px 18px #10243a06}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:750}.stat strong{display:block;font-size:25px;line-height:1.2;margin-top:8px;color:var(--navy)}.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:18px 0}.toolbar input,.toolbar select{min-height:42px;border:1px solid #cfdbea;border-radius:10px;background:#fff;padding:9px 12px;color:var(--ink);font:inherit}.toolbar input{flex:1;min-width:200px}.section-title{font-size:17px;font-weight:900;margin:0}.muted{color:var(--muted);font-size:12px}.shipments{display:grid;gap:12px}.shipment{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 5px 18px #10243a06}.shipment-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.ref{font-size:10px;letter-spacing:.12em;color:#1769aa;font-weight:900}.shipment h2{font-size:17px;margin:6px 0;color:var(--navy)}.route{font-size:14px;font-weight:800;overflow-wrap:anywhere}.meta{display:flex;gap:8px 18px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:9px}.badge{display:inline-flex;align-items:center;border-radius:999px;background:#e9f4ff;color:#174ea6;padding:6px 10px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.badge.good{background:#e6f7ef;color:#087e5b}.badge.warn{background:#fff4dd;color:#8a5b00}.card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.empty{padding:28px;text-align:center;background:#fff;border:1px dashed #cbd7e7;border-radius:15px}.empty h2{margin:0 0 6px}.notice{padding:12px 14px;border-radius:10px;background:#eaf2ff;color:#173b72;font-size:12px;margin:14px 0}.notice.error{background:#fff0ef;color:#a12820}.notice.success{background:#e8f8f0;color:#086548}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{border-radius:17px}.stat strong{font-size:22px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../../config.js"></script>
+<script src="../assets/customer-workflow.js" defer></script>
+</head>
+<body>
+<header>KRIM GLOBAL LOGISTICS OS · CUSTOMER CONTROL TOWER</header>
+<main>
+<section class="hero">
+<div class="eyebrow">CUSTOMER OPERATIONS / LIVE RECORDS</div>
+<h1>Shipment Control Tower</h1>
+<p>Track the shipment requests associated with your active customer organization. This register reads real KRIM records; it does not display sample shipments or treat a request as a confirmed carrier booking.</p>
+<div class="actions"><a class="btn primary" href="../../../shipments/shipment-create.html">＋ Create shipment</a><a class="btn" href="../quotes-pricing/quote-list.html">Review quotations</a><a class="btn" href="../../visibility/live-tracking-map.html">Live visibility</a><a class="btn" href="../../../support/ticket-desk.html">Support desk</a></div>
+</section>
+<section class="stats" aria-label="Shipment summary">
+<div class="stat"><span>Total shipments loaded</span><strong id="count-total">—</strong></div>
+<div class="stat"><span>Active / in progress</span><strong id="count-active">—</strong></div>
+<div class="stat"><span>Delivered</span><strong id="count-delivered">—</strong></div>
+<div class="stat"><span>Needs attention</span><strong id="count-attention">—</strong></div>
+</section>
+<div id="status" class="notice" role="status" aria-live="polite">Connecting to your secure KRIM session…</div>
+<section class="panel">
+<div class="toolbar"><div><h2 class="section-title">Shipment register</h2><div class="muted">Organization-scoped records · latest 100 shipments</div></div><input id="search" type="search" placeholder="Search reference, route or cargo…" aria-label="Search shipments"><select id="filter-status" aria-label="Filter by shipment status"><option value="">All statuses</option><option value="active">Active / in progress</option><option value="delivered">Delivered</option><option value="attention">Needs attention</option></select></div>
+<div id="shipments" class="shipments"></div>
+</section>
+<p class="muted" style="margin:18px 2px">A shipment request is not a confirmed carrier booking. Quote, partner assignment, payment, delivery evidence and settlement status must be confirmed by their respective KRIM workflows.</p>
+</main>
+<script>
+(async function(){
+'use strict';
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const statusBox=document.getElementById('status'),container=document.getElementById('shipments'),search=document.getElementById('search'),filter=document.getElementById('filter-status');
+let records=[];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function message(t,kind){statusBox.textContent=t;statusBox.className='notice'+(kind?' '+kind:'')}
+function group(s){const v=String(s||'').toLowerCase().replace(/[ -]+/g,'_');if(/deliver|completed|closed/.test(v))return 'delivered';if(/exception|hold|failed|cancel|dispute|attention/.test(v))return 'attention';return 'active'}
+function routeOf(id){return '../customer-services/shipment-details.html?shipment_id='+encodeURIComponent(id)}
+function render(){
+ const q=search.value.trim().toLowerCase(),f=filter.value;
+ const list=records.filter(s=>{const g=group(s.status),hay=[s.shipment_number,s.goods_description,s.origin_label,s.destination_label,s.status].join(' ').toLowerCase();return (!q||hay.includes(q))&&(!f||g===f)});
+ if(!list.length){container.innerHTML='<div class="empty"><h2>No matching shipments</h2><p class="muted">Change your search or status filter. Create a shipment if your organization has not submitted one yet.</p><a class="btn primary" href="../../../shipments/shipment-create.html">Create shipment →</a></div>';return}
+ container.innerHTML=list.map(s=>{const g=group(s.status),badge=g==='delivered'?'good':g==='attention'?'warn':'',label=String(s.status||'request received').replace(/[_-]+/g,' ');return '<article class="shipment"><div class="shipment-top"><div><div class="ref">'+esc(s.shipment_number||('KRIM-SHP-'+s.id))+'</div><h2>'+esc(s.origin_label||'Origin pending')+' → '+esc(s.destination_label||'Destination pending')+'</h2><div class="route">'+esc(s.goods_description||'Cargo details not provided')+'</div><div class="meta"><span>Weight: '+esc(s.total_weight_kg??'—')+' kg</span><span>Created: '+esc(s.created_at?new Date(s.created_at).toLocaleString():'—')+'</span>'+(s.estimated_delivery_at?'<span>Estimated delivery: '+esc(new Date(s.estimated_delivery_at).toLocaleDateString())+'</span>':'')+'</div></div><span class="badge '+badge+'">'+esc(label)+'</span></div><div class="card-actions"><a class="btn" href="'+routeOf(s.id)+'">Shipment record →</a><a class="btn" href="../../visibility/live-tracking-map.html?shipment_id='+encodeURIComponent(s.id)+'">Tracking / visibility</a><a class="btn" href="../quotes-pricing/quote-list.html?shipment_id='+encodeURIComponent(s.id)+'">Quotes</a></div></article>'}).join('');
+}
+search.addEventListener('input',render);filter.addEventListener('change',render);
+try{
+ if(!client)throw new Error('KRIM backend configuration did not load. Refresh the page.');
+ const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
+ if(!auth||!auth.session){location.href='../../../auth/login.html?next='+encodeURIComponent(location.pathname+location.search);return}
+ const user=auth.session.user;
+ const {data:members,error:memberError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',user.id).eq('status','active');if(memberError)throw memberError;
+ const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+ if(!ids.length)throw new Error('No active KRIM organization membership was found for this account.');
+ const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active');if(orgError)throw orgError;
+ const customerIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));
+ if(!customerIds.length)throw new Error('This account has no active customer, shipper or enterprise organization. Open the correct workspace or contact support.');
+ const {data:rows,error:shipmentError}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,origin_location_id,destination_location_id,goods_description,total_weight_kg,status,created_at,estimated_delivery_at').in('customer_organization_id',customerIds).order('created_at',{ascending:false}).limit(100);if(shipmentError)throw shipmentError;
+ const locationIds=[...new Set((rows||[]).flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];
+ const {data:locs,error:locError}=locationIds.length?await client.from('krim_locations').select('id,city,state_region,location_code').in('id',locationIds):{data:[],error:null};if(locError)throw locError;
+ const locMap=new Map((locs||[]).map(l=>[Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(', ')]));
+ records=(rows||[]).map(s=>({...s,origin_label:locMap.get(Number(s.origin_location_id))||'',destination_label:locMap.get(Number(s.destination_location_id))||''}));
+ document.getElementById('count-total').textContent=records.length;
+ document.getElementById('count-active').textContent=records.filter(s=>group(s.status)==='active').length;
+ document.getElementById('count-delivered').textContent=records.filter(s=>group(s.status)==='delivered').length;
+ document.getElementById('count-attention').textContent=records.filter(s=>group(s.status)==='attention').length;
+ render();message('Secure session verified. Loaded '+records.length+' shipment record(s) for your active customer organization.','success');
+}catch(e){message(e&&e.message?e.message:'Unable to load shipment records. Please refresh or contact support.','error');container.innerHTML='<div class="empty"><h2>Shipment register unavailable</h2><p class="muted">No sample data is shown. Fix the session, organization membership or backend access and refresh.</p><a class="btn primary" href="../../../app/customer/index.html">Return to Customer Workspace</a></div>';['count-total','count-active','count-delivered','count-attention'].forEach(id=>document.getElementById(id).textContent='—')}
+})();
+</script>
+</body></html>
