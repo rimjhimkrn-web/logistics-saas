@@ -37,7 +37,7 @@ The user approved one canonical page for each route group and permanent deletion
 
 ## Customer OS 404 and access separation follow-up — 2026-10-23
 
-- Current repository inventory: **801 HTML files overall**, **58 HTML files in `public/customer-os/`**, consisting of **56 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
+- Current repository inventory: **798 HTML files overall**, **55 HTML files in `public/customer-os/`**, consisting of **53 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
 - Fixed stale shared-navigation targets in `public/customer-os/assets/customer-workflow.js`: quote comparison now points to `public/shipper/quote-comparison.html`, shipment list to `public/customer-os/customer-services/shipment-list.html`, and payment checkout to `public/shipper/payment-checkout.html`. The stale links were inserted dynamically by JavaScript and were not caught by a scan of literal HTML links.
 - Replaced the public all-pages catalogue with a guided customer portal. Its public flow is shipment creation → quote request → quote comparison → checkout → shipment register → tracking/delivery evidence → invoices/claims/support.
 - Added `public/admin/customer-ecosystem-os.html`, a no-index inventory using the existing privileged-session guard, for founder/admin audit and rebuild planning. It is not linked from the public customer portal.
@@ -59,12 +59,23 @@ The counts above are file/route inventory counts, not the number of end-to-end p
   - Removed `public/customer-os/customer-services/quote-acceptance.html`; canonical quote acceptance remains under `public/customer-os/quotes-pricing/quote-acceptance.html`.
   - Removed `public/customer-os/customer-services/quote-details.html`; canonical quote details remains under `public/customer-os/quotes-pricing/quote-details.html`.
   - Removed `public/customer-os/shipper-services/shipment-details.html`; canonical shipment details remains under `public/customer-os/customer-services/shipment-details.html`.
-- Updated the privileged `global-admin-control` Edge Function inventory to omit the three deleted routes. Its inventory now contains **56 unique feature routes**, rather than showing deleted paths.
+- Updated the privileged `global-admin-control` Edge Function inventory to omit the three deleted routes. Its inventory now contains **53 unique feature routes**, rather than showing deleted paths.
 - Extended `scripts/krim-production-smoke.mjs` so CI fails when an exact duplicate Customer OS HTML page reappears, when a Customer OS page omits the shared stylesheet, or when the shared stylesheet is missing.
-- Latest repository inventory from GitHub tree: **801 HTML files overall**, **58 Customer OS HTML files** (56 feature routes + portal index + integration manifest), and **zero exact duplicate HTML blobs within Customer OS**.
+- Latest repository inventory from GitHub tree: **798 HTML files overall**, **55 Customer OS HTML files** (53 feature routes + portal index + integration manifest), and **zero exact duplicate HTML blobs within Customer OS**.
 - Smoke check for the cleanup commit `fe9fd4526b6c43eca2dd6fdff1f0a227845b4455` passed: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39940143840
 - The new deduplication/style-coverage smoke test is running on commit `76cde0634ddc2c30f1b30d14a1e610d16ffe1ebf`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39940270945
 
 ### Important functional boundary
 
 The shared stylesheet standardizes presentation; it does **not** convert navigation-only screens into working transactions. Several remaining pages (for example invoice and claims screens) still explicitly describe themselves as workflow/navigation shells. The next rebuild batches must connect each business action to its proper authenticated Supabase operation, confirm the saved result, and keep organization-level RLS and role checks intact. Until then, the number of fully end-to-end verified Customer OS pages remains **not yet established**.
+
+
+### Additional semantic duplicate consolidation
+
+The first review also found three pages that were not byte-identical but were generic navigation-only shells duplicating a stronger canonical workflow. These were removed from the repository and from the privileged inventory:
+
+- `public/customer-os/shipper-services/active-shipments.html` → canonical live shipment register: `public/customer-os/customer-services/shipment-list.html`.
+- `public/customer-os/shipper-services/invoices.html` → canonical invoice route: `public/customer-os/customer-services/invoices.html`.
+- `public/customer-os/shipper-services/support-claims.html` → canonical claims route: `public/customer-os/customer-services/claims.html`; general support remains a separate function at `public/customer-os/customer-services/support.html`.
+
+The privileged `global-admin-control` Edge Function inventory was updated to remove these three routes and remains JWT-protected. It now advertises 53 unique Customer OS feature routes. Local link validation in CI is being used to catch any surviving references to removed paths.
