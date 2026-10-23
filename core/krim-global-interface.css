@@ -1,6 +1,5 @@
-/* KRIM Global Interface System — Phase 1 adoption
-   Shared institutional UI layer for customer entry and identity pages.
-   Interaction behavior remains owned by each page; this file standardizes presentation. */
+/* KRIM Global Interface System — shared visual contract for all customer ecosystem phases.
+   One design system; page-specific workflow logic and layout are preserved. */
 :root {
   color-scheme: light;
   --krim-global-navy: #07152f;
@@ -14,106 +13,75 @@
   --krim-global-page: #f3f7fc;
   --krim-global-card: #ffffff;
   --krim-global-success: #087e5b;
+  --krim-global-warning: #946000;
   --krim-global-danger: #b42318;
   --krim-global-radius: 16px;
   --krim-global-shadow: 0 18px 50px rgba(7, 21, 47, .09);
 }
+.krim-global-shell, .krim-global-shell * { box-sizing: border-box; }
 body.krim-global-shell {
   background: radial-gradient(ellipse at 85% 0, #dcecff 0, transparent 38%), var(--krim-global-page) !important;
   color: var(--krim-global-ink) !important;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   line-height: 1.55;
 }
-.krim-global-shell header {
-  color: var(--krim-global-navy) !important;
-  background: rgba(255,255,255,.97) !important;
-  border-bottom: 1px solid var(--krim-global-line) !important;
-  letter-spacing: normal;
+.krim-global-shell :where(h1,h2,h3,h4) { color: var(--krim-global-navy); letter-spacing: -.025em; }
+.krim-global-shell :where(p,small,footer,.muted,.subtle) { overflow-wrap: anywhere; }
+.krim-global-shell :where(.topline,.topbar,.top,.strip,[class*="top-line"]) {
+  background: var(--krim-global-navy) !important; color: #e7f0ff !important; border-color: #24436b !important;
 }
-.krim-global-shell .nav {
-  background: var(--krim-global-card) !important;
-  border-bottom: 1px solid var(--krim-global-line) !important;
+.krim-global-shell :where(.topline,.topbar,.top,.strip) a { color: #fff !important; }
+.krim-global-shell :where(header,.header,.nav,[role="banner"]) {
+  color: var(--krim-global-navy) !important; background: rgba(255,255,255,.97) !important;
+  border-color: var(--krim-global-line) !important; box-shadow: 0 4px 18px rgba(7,21,47,.035);
 }
-.krim-global-shell .brand,
-.krim-global-shell .brand small {
-  color: var(--krim-global-navy);
+.krim-global-shell :where(.brand,.brand small,.brand b,.brand strong,.brand-mark,.logo) { color: var(--krim-global-navy); }
+.krim-global-shell :where(.mark,.badge,.brand-mark) {
+  background: linear-gradient(135deg, var(--krim-global-blue), var(--krim-global-violet) 68%, var(--krim-global-cyan)) !important; color: #fff !important;
 }
-.krim-global-shell .mark,
-.krim-global-shell .badge {
-  background: linear-gradient(135deg, var(--krim-global-blue), var(--krim-global-violet) 68%, var(--krim-global-cyan)) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 24px rgba(23, 105, 255, .18);
+.krim-global-shell :where(.hero,.hero-card,.intro,.welcome,.page-hero) { border-color: var(--krim-global-line) !important; }
+.krim-global-shell :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.detail,.empty,.notice-card) {
+  border-color: var(--krim-global-line) !important; border-radius: var(--krim-global-radius) !important;
 }
-body.krim-global-shell:not(.krim-public-home) main:not(.layout):not(.wrap) {
-  background: var(--krim-global-card) !important;
-  border: 1px solid var(--krim-global-line) !important;
-  border-radius: 22px !important;
-  box-shadow: var(--krim-global-shadow) !important;
+.krim-global-shell :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell) { box-shadow: 0 8px 26px rgba(7,21,47,.045); }
+.krim-global-shell :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.empty) { background-color: var(--krim-global-card); }
+.krim-global-shell main:not(.layout):not(.wrap):not(.shell) { border: 1px solid var(--krim-global-line); border-radius: 22px; box-shadow: var(--krim-global-shadow); }
+.krim-global-shell :where(a:not(.btn):not(.brand)) { color: var(--krim-global-blue); text-underline-offset: 3px; }
+.krim-global-shell :where(input,select,textarea) {
+  color: var(--krim-global-ink) !important; background: #fff !important; border: 1px solid #cbd8e8 !important;
+  border-radius: 11px !important; font: inherit;
 }
-.krim-global-shell h1,
-.krim-global-shell h2,
-.krim-global-shell h3 {
-  color: var(--krim-global-navy);
-  letter-spacing: -.025em;
+.krim-global-shell :where(input,textarea)::placeholder { color: #8291a7; }
+.krim-global-shell :where(input,select,textarea):focus {
+  border-color: var(--krim-global-blue) !important; box-shadow: 0 0 0 3px rgba(23,105,255,.15) !important; outline: none !important;
 }
-.krim-global-shell p,
-.krim-global-shell footer {
-  color: var(--krim-global-muted);
+.krim-global-shell :where(button,.btn,[role="button"],input[type="submit"]) {
+  border-radius: 11px; font-family: inherit; transition: background-color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease;
 }
-.krim-global-shell a:not(.brand):not(.btn) {
-  color: var(--krim-global-blue);
-  text-underline-offset: 3px;
+.krim-global-shell :where(button:not(.secondary):not(.ghost):not(.outline):not(.danger),.btn:not(.secondary):not(.ghost):not(.outline):not(.danger),input[type="submit"]) {
+  background: linear-gradient(105deg, var(--krim-global-blue), var(--krim-global-violet)) !important; color: #fff !important;
+  border-color: transparent !important; font-weight: 800; box-shadow: 0 8px 22px rgba(23,105,255,.16);
 }
-.krim-global-shell input,
-.krim-global-shell select,
-.krim-global-shell textarea {
-  color: var(--krim-global-ink) !important;
-  background: #fff !important;
-  border: 1px solid #cbd8e8 !important;
-  border-radius: 11px !important;
-  font: inherit;
+.krim-global-shell :where(.btn.secondary,.btn.ghost,.btn.outline,button.secondary,button.ghost) {
+  background: #fff !important; color: var(--krim-global-navy) !important; border: 1px solid #cbd8e8 !important; box-shadow: none !important;
 }
-.krim-global-shell input::placeholder,
-.krim-global-shell textarea::placeholder { color: #8291a7; }
-.krim-global-shell input:focus,
-.krim-global-shell select:focus,
-.krim-global-shell textarea:focus {
-  border-color: var(--krim-global-blue) !important;
-  box-shadow: 0 0 0 3px rgba(23,105,255,.15) !important;
-  outline: none !important;
-}
-.krim-global-shell button,
-.krim-global-shell button[type="submit"],
-.krim-global-shell .submit {
-  border-radius: 11px;
-  background: linear-gradient(105deg, var(--krim-global-blue), var(--krim-global-violet)) !important;
-  color: #fff !important;
-  font-family: inherit;
-  font-weight: 800;
-  box-shadow: 0 8px 22px rgba(23,105,255,.18);
-}
-.krim-global-shell button:disabled { opacity: .58; cursor: wait; box-shadow: none; }
-.krim-global-shell :focus-visible {
-  outline: 3px solid var(--krim-global-cyan) !important;
-  outline-offset: 3px;
-}
-.krim-global-shell #feedback,
-.krim-global-shell .feedback {
-  overflow-wrap: anywhere;
-  border-radius: 11px;
-}
-.krim-global-shell .feedback.error { color: var(--krim-global-danger); }
-.krim-global-shell .feedback.success { color: var(--krim-global-success); }
-.krim-global-shell footer {
-  font-size: 12px;
-}
+.krim-global-shell :where(button:disabled,input:disabled,select:disabled) { opacity: .58; cursor: not-allowed; box-shadow: none; }
+.krim-global-shell :focus-visible { outline: 3px solid var(--krim-global-cyan) !important; outline-offset: 3px; }
+.krim-global-shell :where(table) { border-color: var(--krim-global-line); }
+.krim-global-shell :where(th) { color: var(--krim-global-navy); background: #f3f7fc; }
+.krim-global-shell :where(td,th) { border-color: var(--krim-global-line); }
+.krim-global-shell :where(.feedback,#feedback,.alert,.notice) { overflow-wrap: anywhere; border-radius: 11px; }
+.krim-global-shell :where(.feedback.error,.error) { color: var(--krim-global-danger); }
+.krim-global-shell :where(.feedback.success,.success) { color: var(--krim-global-success); }
+.krim-global-shell footer { font-size: 12px; }
 @media (max-width: 640px) {
-  body.krim-global-shell main:not(.layout):not(.wrap) {
-    width: calc(100% - 28px);
-    padding: 25px 19px;
-    margin-top: 24px;
-    margin-bottom: 24px;
+  body.krim-global-shell main:not(.layout):not(.wrap):not(.shell) {
+    width: calc(100% - 28px); padding: 25px 19px; margin-top: 24px; margin-bottom: 24px;
   }
-  .krim-global-shell header { gap: 12px; }
-  .krim-global-shell .brand small { letter-spacing: .08em; }
+  .krim-global-shell :where(header,.header,.nav) { gap: 12px; }
+  .krim-global-shell :where(.brand small) { letter-spacing: .08em; }
+  .krim-global-shell :where(button,.btn,[role="button"]) { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .krim-global-shell *, .krim-global-shell *::before, .krim-global-shell *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
