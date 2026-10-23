@@ -699,7 +699,7 @@ for (const file of phaseNineInterfaceFiles) {
   if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push("Phase 9 global stylesheet must follow inline page styles: " + file);
 }
 const phaseNineOperationsEntry = existsSync("public/operations/index.html") ? readFileSync("public/operations/index.html", "utf8") : "";
-if (!phaseNineOperationsEntry.includes('"core/krim-global-interface.css"')) failures.push("Phase 9 shared operations workbench must load the global stylesheet after its local styles.");
+if (!phaseNineOperationsEntry.includes('href="../../core/krim-global-interface.css"')) failures.push("Phase 9 shared operations workbench must declare the shared stylesheet.");
 if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(phaseNineOperationsEntry)) failures.push("Phase 9 shared operations workbench is missing the KRIM global shell.");
 for (const [file, target, forbiddenSample] of [
   ["public/shipments/transport-legs.html", /location\.replace\(["']\.\.\/\.\.\/app\/operations\/index\.html/, "SHP-2026-OCT-9901"],
