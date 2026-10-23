@@ -68,6 +68,7 @@ const phase2InterfacePages = [
   "public/shipper/coverage-review.html",
   "public/shipper/rate-calculator.html",
   "public/shipper/active-shipments.html",
+  "public/shipper/rate-calculator.html",
 ];
 for (const file of phase2InterfacePages) {
   if (!existsSync(file)) {
@@ -81,6 +82,27 @@ for (const file of phase2InterfacePages) {
   if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(html)) {
     failures.push(`Phase 2 page is missing the shared global shell class: ${file}`);
   }
+}
+// Phase 3 shipment creation: one canonical form, idempotent backend contract and safe legacy alias.
+const canonicalShipmentForm = "public/shipper/booking-request.html";
+const legacyShipmentAlias = "public/customer/shipment-create.html";
+const customerWorkspace = "app/customer/index.html";
+if (existsSync(canonicalShipmentForm)) {
+  const html = readFileSync(canonicalShipmentForm, "utf8");
+  if (!html.includes("krim_create_global_shipment_idempotent")) failures.push("Canonical shipment form must use the idempotent shipment-creation RPC.");
+  if (!html.includes("getBookingRequestId")) failures.push("Canonical shipment form is missing its stable booking-request identifier.");
+  if (!/submitting\s*=\s*true/.test(html)) failures.push("Canonical shipment form is missing duplicate-submit protection.");
+  if (!html.includes("rate-calculator.html?shipment_id=")) failures.push("Canonical shipment form must continue to the quote/rate workflow with its real shipment reference.");
+}
+if (existsSync(legacyShipmentAlias)) {
+  const html = readFileSync(legacyShipmentAlias, "utf8");
+  if (!html.includes("../shipper/booking-request.html")) failures.push("Legacy shipment URL must forward to the canonical shipment form.");
+  if (!html.includes("krim-global-interface.css")) failures.push("Legacy shipment alias must use the shared global interface.");
+}
+if (existsSync(customerWorkspace)) {
+  const html = readFileSync(customerWorkspace, "utf8");
+  if (html.includes("../../public/customer/shipment-create.html")) failures.push("Customer workspace still points to the legacy shipment form instead of the canonical route.");
+  if (!html.includes("../../public/shipper/booking-request.html")) failures.push("Customer workspace must expose the canonical global shipment form.");
 }
 for (const file of required) {
   if (!existsSync(file)) failures.push(`Missing required production file: ${file}`);
