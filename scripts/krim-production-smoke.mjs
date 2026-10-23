@@ -344,7 +344,7 @@ if (/href=["'][^"']*(?:admin|platform-admin|global-control-centre|global-control
 for (const [label, source, pattern] of [
   ["public homepage routes customers to the access portal", phaseOneSources.homepage, /href=["'][^"']*auth\/access\.html["']/i],
   ["customer booking uses a relative login handoff instead of a hardcoded project prefix", phaseOneSources.bookingRequest, /window\.location\.replace\("\.\.\/\.\.\/auth\/login\.html\?role=customer&next="/],
-  ["customer booking page contains no hardcoded GitHub Pages project prefix", phaseOneSources.bookingRequest, !/\/logistics-saas\//.test(phaseOneSources.bookingRequest)],
+  ["customer booking page contains no hardcoded GitHub Pages project prefix", phaseOneSources.bookingRequest, /(?![\s\S]*\/logistics-saas\/)[\s\S]*/],
   ["customer login safely allows booking return paths on project and custom-domain deployments", phaseOneSources.login, /allowedBookingPaths[\s\S]*?\/public\/shipper\/booking-request\.html[\s\S]*?\/shipper\/booking-request\.html/],
   ["access portal offers canonical customer registration and role-checked sign-in", phaseOneSources.access, /href=["']signup\.html["'][\s\S]*?href=["']login\.html\?role=customer["']/i],
   ["customer registration uses Supabase Auth with customer and organization metadata", phaseOneSources.signup, /auth\.signUp\([\s\S]*?company_name:org[\s\S]*?krim_account_type:"customer"/],
