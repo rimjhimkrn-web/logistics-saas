@@ -18,6 +18,8 @@ Customers must be able to find a practical origin and destination, including rur
 
 ## Implemented in this phase
 
+6. **Shared global interface applied to the Phase 2 journey** — added `core/krim-global-interface.css` and the `krim-global-shell` body class to the customer workspace, global shipment request, coverage review, rate/service workflow and active-shipment list. The Phase 1 identity pages remain unchanged. The production smoke script now fails if any of these Phase 2 pages loses the shared stylesheet or shell class.
+
 1. **Canonical shipment intake updated** — `public/shipper/booking-request.html` now offers a direct path to coverage review and passes selected origin, destination, route type, preferred mode and weight as prefill values.
 2. **Coverage-review page added** — `public/shipper/coverage-review.html` allows a signed-in customer to enter exact origin/destination text, including a locality missing from geographic search; choose a route arrangement and transport preference; optionally enter weight/date; and explain the review request.
 3. **Backend authorization corrected** — migration `supabase/migrations/20261023110000_enable_authenticated_customer_coverage_requests.sql` updates the existing service-request RPC to:
@@ -64,6 +66,12 @@ Run while signed into a verified, active customer account:
 - [ ] A failed request shows an error and does not claim success.
 - [ ] Mobile layout, keyboard focus, links, empty search, geocoder outage and refresh/back navigation work on the deployed site.
 - [ ] Existing shipment creation and rate/quote workflow remain intact.
+
+## Interface consistency follow-up — 2026-10-23
+
+The customer workspace and all four Phase 2 shipment/coverage pages now load the same approved global design stylesheet. Their page-specific operational components remain page-owned, while global typography, focus states, form controls, link treatment and shared shell conventions come from the same design layer. This is a controlled five-page migration, not a claim that every HTML file in the repository has already been migrated.
+
+The deployment must finish and its published page URLs must be checked after the latest commit. A file existing in GitHub source does not by itself prove the live URL is published.
 
 ## Current exit-gate decision
 
