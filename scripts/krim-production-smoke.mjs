@@ -336,15 +336,15 @@ const phaseOneSources = Object.fromEntries([
 ].map(([key, file]) => [key, existsSync(file) ? readFileSync(file, "utf8") : ""]));
 
 for (const [label, source, pattern] of [
-  ["public homepage routes customers to the access portal without exposing a privileged admin link", phaseOneSources.homepage, /href=["'][^"']*auth\/access\.html["']/i],
+  ["public homepage routes customers to the access portal", phaseOneSources.homepage, /href=["'][^"']*auth\/access\.html["']/i],
   ["access portal offers canonical customer registration and role-checked sign-in", phaseOneSources.access, /href=["']signup\.html["'][\s\S]*?href=["']login\.html\?role=customer["']/i],
   ["customer registration uses Supabase Auth with customer and organization metadata", phaseOneSources.signup, /auth\.signUp\([\s\S]*?company_name:org[\s\S]*?krim_account_type:"customer"/],
   ["customer registration sends email-confirmation users through the auth callback", phaseOneSources.signup, /emailRedirectTo:new URL\("auth-callback\.html",location\.href\)\.href/],
   ["customer registration provisions its organization when an authenticated signup session is returned", phaseOneSources.signup, /rpc\("krim_provision_customer_organization"[\s\S]*?mfa-enroll\.html/],
-  ["sign-in validates active organization membership before role routing", phaseOneSources.login, /from\("krim_organization_members"\)[\s\S]*?eq\("status","active"\)[\s\S]*?workspacePaths/],
+  ["sign-in validates active organization membership before role routing", phaseOneSources.login, /from\("krim_organization_members"\)[\s\S]*?eq\(\s*"status"\s*,\s*"active"\s*\)[\s\S]*?workspacePaths/],
   ["public sign-in rejects platform administrator accounts", phaseOneSources.login, /Platform administration uses a separate privileged sign-in/],
   ["sign-in routes users through MFA enrollment or challenge", phaseOneSources.login, /auth\.mfa\.listFactors\(\)[\s\S]*?mfa-enroll\.html[\s\S]*?auth\.mfa\.getAuthenticatorAssuranceLevel/],
-  ["password recovery uses Supabase reset email and the canonical reset page", phaseOneSources.forgot, /resetPasswordForEmail\([\s\S]*?auth\/reset-password\.html/],
+  ["password recovery uses Supabase reset email and the canonical reset page", phaseOneSources.forgot, /auth\/reset-password\.html[\s\S]*?resetPasswordForEmail\(/],
   ["password reset validates recovery session and revokes sessions after successful update", phaseOneSources.reset, /recoverySession[\s\S]*?auth\.updateUser\(\{password:pwd\}\)[\s\S]*?signOut\(\{scope:"global"\}\)/],
   ["email callback exchanges the confirmation code and provisions customer organization", phaseOneSources.callback, /exchangeCodeForSession\(code\)[\s\S]*?krim_provision_customer_organization/],
   ["MFA enrollment requires a session and verifies a one-time challenge", phaseOneSources.mfaEnroll, /auth\.getSession\(\)[\s\S]*?auth\.mfa\.enroll\([\s\S]*?auth\.mfa\.challenge\([\s\S]*?auth\.mfa\.verify\(/],
