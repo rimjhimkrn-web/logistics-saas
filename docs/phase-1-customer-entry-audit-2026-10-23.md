@@ -2,7 +2,7 @@
 **Audit date:** 2026-10-23  
 **Scope:** Public entry → customer registration → email confirmation → sign-in → organization membership → MFA → customer workspace → recovery/logout  
 **Repository:** `rimjhimkrn-web/logistics-saas`  
-**Status:** **AUDIT IN PROGRESS — source checks pass; deployed end-to-end journey is not yet certified.**
+**Status:** **BLOCKED — repository checks pass; live end-to-end acceptance evidence is still required.**
 
 ## Executive result
 
@@ -14,7 +14,7 @@ The Phase 1 source audit found one confirmed deployment-base defect in the custo
 - Audited **17 entry/access/workspace pages** and **158 literal local links**. The follow-up scan found **zero unresolved literal local links** across those pages.
 - Reviewed the homepage, public access portal, customer signup, sign-in, email callback/verification, MFA enrollment, password recovery/reset, logout, customer workspace and canonical booking request.
 - Added Phase 1 authentication and route assertions to `scripts/krim-production-smoke.mjs`, including public/privileged access separation, active membership checks, MFA routing, email callback/provisioning, password recovery, global logout, custom-domain booking return paths and consistent password minimum.
-- GitHub Actions production smoke test passed on commit `f2fefc59f10dc9f178b4f53d4b2011556d02c9a2`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39966310080
+- GitHub Actions production smoke test passed on commit `894a8716741198070d4d37f622044675c2f57b1f`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39967243066
 
 ## Corrections made
 
@@ -29,6 +29,14 @@ The Phase 1 source audit found one confirmed deployment-base defect in the custo
 **Finding:** Customer signup required 10 characters while the reset form required 12.
 
 **Correction:** Customer signup now requires at least 12 characters in both password fields and in client-side validation, aligned with the reset form. The Supabase Auth server-side password policy still needs configuration verification; a browser form alone is not a security boundary.
+
+## Global interface standardization
+
+- Approved and recorded the canonical interface standard in `docs/KRIM_GLOBAL_INTERFACE_STANDARD.md` and the product decision record in `docs/decisions/2026-10-23-global-interface-standard.md`.
+- Added `core/krim-global-interface.css` with shared navy/blue/cyan tokens, consistent surfaces and cards, form controls, action buttons, focus visibility, status feedback and mobile spacing.
+- Applied the shared interface layer to the nine Phase 1 identity pages: access portal, signup, sign-in, forgot password, reset password, auth callback, MFA enrollment, email verification and logout.
+- Added smoke-test guards so these pages cannot silently lose the shared shell or stylesheet.
+- This is the first controlled adoption batch, not a claim that all 1,122 repository paths have already been visually migrated. The same standard is mandatory for every subsequent page/workspace batch.
 
 ## Source-level route and access observations
 
@@ -63,8 +71,8 @@ Phase 1 **must remain open** until the following are tested against the deployed
 
 ## Exit decision
 
-**Phase 1 status: AUDIT IN PROGRESS.**  
-**Repository/static checks:** PASS.  
+**Phase 1 status: BLOCKED — live acceptance tests outstanding.**  
+**Repository/static checks:** PASS (including the global-interface regression gates).  
 **Deployed browser end-to-end tests:** NOT YET PERFORMED.  
 **Live Supabase provisioning/MFA/recovery evidence:** NOT YET CAPTURED.  
 Do not mark Phase 1 VERIFIED until all required live tests pass and their evidence is recorded.
