@@ -155,3 +155,21 @@ The following legacy routes were changed to lightweight compatibility redirects.
 The smoke test originally failed after the rate-calculator alias was introduced because it incorrectly required every route under Customer OS to contain its own UI stylesheet. The test was updated to allow canonical compatibility redirects while continuing to validate their local links. The latest production smoke workflow for commit `ee455cbec4bdeb6ddfa5bf1d08b555968ccd6019` passed: [run 40013968382](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40013968382). The Pages deployment for that commit was still running when this section was recorded.
 
 **Cleanup is not complete.** This is a first safe consolidation batch, not approval to delete every similarly named page. The remaining basename groups require semantic review: pages can legitimately share names across different roles (customer, partner, finance, operations, enterprise). Legacy route references, workspace access boundaries and live backend behavior must be checked before any further redirects or deletion. Full broken-link triage, deployed HTTP checks, live transaction tests and production certification remain open.
+
+
+### Additional canonical-route consolidations in the same cleanup batch
+
+| Legacy route | Canonical destination | Evidence-based reason |
+|---|---|---|
+| `public/quotes/quote-details.html` | `public/customer-os/quotes-pricing/quote-details.html` | Old quote details used static sample values; canonical route reads the selected quote through the shared quote operations workflow |
+| `public/customer/invoices.html` | `public/customer-os/customer-services/invoices.html` | Legacy page had no direct backend access; canonical page uses the customer invoice workflow |
+| `public/customer/payment-history.html` | `public/customer-os/customer-services/payment-history.html` | Canonical page uses backend records; the redirect makes no claim that payment was captured or settled |
+| `public/customer/address-book.html` | `public/customer-os/customer-services/address-book.html` | Consolidates disconnected customer address UI into the canonical customer workspace |
+| `public/customer/returns.html` | `public/customer-os/customer-services/returns.html` | Consolidates the customer returns route into the backend-aware customer workflow |
+| `public/customer/support.html` | `public/customer-os/customer-services/support.html` | Consolidates legacy support UI into the canonical support desk |
+| `public/customer/tracking-map.html` | `public/customer-os/customer-services/tracking-map.html` | Consolidates tracking route; the canonical page distinguishes recorded events from live GPS telemetry |
+| `public/customer/company-profile.html` | `public/customer-os/customer-services/company-profile.html` | Consolidates the legacy company profile into the organization-aware customer workflow |
+
+All redirect aliases retain query strings and URL fragments and include a manual fallback link. These changes reduce competing interfaces but do not prove that the canonical destinations pass every live backend workflow.
+
+**Current cleanup checkpoint:** 14 legacy route files have been converted to redirects across the Partner and Customer/Quote areas. The latest complete smoke result available at this checkpoint passed at commit `218afec6d0e71383ec70c6ce6795bff945bf66d7`; the newest company-profile cleanup commit `52f8c0414bb411db0ce431273d8d96bab0f3b4f9` has new workflow runs queued. Confirm the latest commit's smoke and Pages deployment before treating this batch as deployed.
