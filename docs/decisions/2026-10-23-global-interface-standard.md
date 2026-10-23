@@ -1,0 +1,12 @@
+# Decision Record — KRIM Global Interface Standard
+- **Decision date:** 2026-10-23
+- **Decision:** All KRIM pages and workspaces must follow one institutional global interface system.
+- **Requested by:** Product owner
+- **Reason:** Avoid disconnected, inconsistent, low-standard page designs while preserving role-specific operational workflows.
+- **Approved direction:** Shared navigation patterns, design tokens, typography, cards, tables, controls, status semantics, focus/accessibility, responsive behavior, and trustworthy feedback. Workspace accent colors may differ only within the shared system.
+- **Canonical specification:** `docs/KRIM_GLOBAL_INTERFACE_STANDARD.md`
+- **Initial implementation:** `core/krim-global-interface.css`, applied to customer entry/access, signup, sign-in, email verification/callback, MFA enrollment, password recovery/reset, and logout.
+- **Compatibility rule:** The design layer must not change authentication, role routing, payment, shipment, or database behavior. Each page retains its own operational logic and must pass route/security/interaction checks.
+- **Migration order:** Customer entry/authentication first; then customer shipment/quote/booking; partner/driver; warehouse/customs; finance/operations; enterprise/admin; remaining pages and legacy routes.
+- **Verification requirement:** A stylesheet link or matching screenshot is not sufficient. Each batch requires static route checks, responsive/keyboard review, interaction tests, and role/security regression tests.
+- **Permanent lock interpretation:** The interface standard is the default for all new work. Security, accessibility, compliance, and verified defect fixes remain permitted; any visual exception must be documented with a reason.
