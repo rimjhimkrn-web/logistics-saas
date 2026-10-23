@@ -603,7 +603,7 @@ for (const [label, source, pattern] of [
   ["tracking reads persisted shipment tracking events", phaseSevenOperations, /from\(['"]krim_tracking_events['"]\)[\s\S]*?eq\(['"]shipment_id['"],shipment.id\)/],
   ["tracking explicitly distinguishes recorded events from live GPS", phaseSevenOperations, /recorded-event visibility, not live GPS/i],
   ["tracking flags potentially stale events without claiming a delivery SLA", phaseSevenOperations, /trackingFreshness[\s\S]*?over 24 hours old[\s\S]*?not a delivery SLA/],
-  ["timestamps use the saved user time-zone preference", phaseSevenOperations, /customer_localization[\s\S]*?timezone[\s\S]*?timeZone:userTimezone/],
+  ["timestamps use the saved user time-zone preference", phaseSevenOperations, /timeZone:userTimezone[\s\S]*?customer_localization[\s\S]*?timezone/],
   ["customer notification preferences are saved per user", phaseSevenPreferences, /shipping_preferences[\s\S]*?notifications:getChecks\('notify'\)[\s\S]*?krim_user_app_preferences[\s\S]*?upsert\(/],
   ["notification settings state that preferences do not guarantee delivery", phaseSevenPreferences, /Actual message delivery still depends on verified contact details, consent, provider configuration and notification service status/i],
   ["tracking and timeline link to the canonical notification preference page", phaseSevenTracking + phaseSevenTimeline, /shipping-preferences\.html/],
