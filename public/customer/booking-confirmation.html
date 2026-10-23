@@ -1,55 +1,35 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#07152f">
-<title>Booking Status | KRIM Global Logistics</title>
-<meta name="description" content="Check the status of your KRIM shipment request and continue to your customer workspace.">
-<style>
-:root{color-scheme:light;--navy:#07152f;--blue:#1769ff;--teal:#0f9f9a;--ink:#172943;--muted:#65758c;--line:#dfe7f2;--bg:#f4f7fc}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:inherit;text-decoration:none}.top{background:var(--navy);color:#d9e8ff;padding:12px max(20px,calc((100% - 1040px)/2));font-size:11px;letter-spacing:.12em;font-weight:800}
-.wrap{width:min(1040px,calc(100% - 32px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:22px 0}.brand{font-weight:950;color:var(--navy);letter-spacing:.04em}.brand b{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--teal));color:white;margin-right:8px}
-.navlinks{display:flex;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:11px;padding:11px 15px;font-size:13px;font-weight:800;border:1px solid var(--line);background:white}.primary{background:var(--blue);color:white;border-color:var(--blue)}
-.hero{margin:24px 0 20px;padding:clamp(24px,5vw,48px);border-radius:24px;background:linear-gradient(120deg,#07152f,#123d79 68%,#087e8b);color:white;box-shadow:0 18px 50px #07152f18}
-.kicker{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#79e4df;font-weight:900}.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-.04em;margin:12px 0}.hero p{max-width:680px;color:#d7e5f8;margin:0}
-.ref{margin-top:22px;padding:14px 16px;border:1px solid #ffffff40;border-radius:13px;background:#ffffff0d;display:flex;gap:10px;flex-wrap:wrap;align-items:center}.ref strong{overflow-wrap:anywhere}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}.card{padding:20px;border:1px solid var(--line);background:white;border-radius:17px}.num{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--teal)}.card h2{font-size:17px;margin:8px 0}.card p{font-size:13px;color:var(--muted);margin:0}
-.notice{padding:16px 18px;border-radius:13px;border:1px solid #f2d69a;background:#fff8e8;color:#755015;font-size:13px}
-footer{margin-top:32px;border-top:1px solid var(--line);padding:20px 0 30px;color:var(--muted);font-size:12px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.hero{margin-top:12px}}
-</style>
-
-<!-- KRIM_CUSTOMER_FLOW_NAV -->
-<link rel="stylesheet" href="/logistics-saas/core/krim-customer-workflow.css">
-<script defer src="/logistics-saas/core/krim-customer-workflow.js"></script>
-</head>
-<body>
-<div class="top">KRIM LOGISTICS · CUSTOMER OPERATIONS</div>
-<main class="wrap">
-<header class="nav"><a class="brand" href="../../app/customer/index.html"><b>K</b> KRIM CUSTOMER WORKSPACE</a><nav class="navlinks" aria-label="Customer navigation"><a class="btn" href="../../app/customer/index.html">Workspace</a><a class="btn" href="../tracking.html">Track shipment</a></nav></header>
-<section class="hero">
-<div class="kicker">Shipment request status</div>
-<h1>Keep your shipment moving.</h1>
-<p>This page is a safe status checkpoint. A booking is confirmed only when KRIM's server has saved the request and the resulting record can be retrieved. Payment, carrier assignment and dispatch are separate states and must not be assumed.</p>
-<div class="ref"><span>Reference supplied in link:</span><strong id="reference">Not provided</strong></div>
-</section>
-<section class="grid" aria-label="Next steps">
-<article class="card"><div class="num">01 · VERIFY</div><h2>Check your shipment list</h2><p>Open your workspace and confirm that the shipment appears in your account before treating it as booked.</p><p style="margin-top:15px"><a class="btn primary" href="../customer-os/customer-services/shipment-list.html">View shipments →</a></p></article>
-<article class="card"><div class="num">02 · PAYMENT</div><h2>Check payment separately</h2><p>Do not treat this page as proof of payment. Use the official payment result or transaction record for confirmation.</p><p style="margin-top:15px"><a class="btn" href="../finance/payment-history.html">Payment history →</a></p></article>
-<article class="card"><div class="num">03 · SUPPORT</div><h2>Need help?</h2><p>If your request is missing or its status is unclear, open support from your customer workspace.</p><p style="margin-top:15px"><a class="btn" href="support.html">Customer support →</a></p></article>
-</section>
-<div class="notice"><strong>Important:</strong> This page does not create a shipment, confirm a payment, reserve a carrier or claim that dispatch has occurred. Those states must be verified against the live KRIM records.</div>
-<footer>KRIM Global Logistics OS · Customer booking status · <a href="../../app/customer/index.html">Return to workspace</a></footer>
-</main>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="Continue to the canonical KRIM shipment request status page.">
+<title>Continue to Shipment Request Status | KRIM Logistics</title>
+<link rel="canonical" href="../customer-os/customer-services/booking-confirmation.html">
+<meta http-equiv="refresh" content="0;url=../customer-os/customer-services/booking-confirmation.html">
 <script>
-(function(){
- const params=new URLSearchParams(location.search);
- const candidate=params.get("shipment_id")||params.get("shipment")||params.get("reference")||params.get("id");
- const el=document.getElementById("reference");
- if(candidate){el.textContent=candidate.slice(0,120);}
- try{const saved=sessionStorage.getItem("krim_last_shipment_reference");if(!candidate&&saved)el.textContent=saved.slice(0,120);}catch(_){}
+(function () {
+  var target = new URL("../customer-os/customer-services/booking-confirmation.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  window.location.replace(target.href);
 })();
 </script>
+</head>
+<body>
+<main>
+<h1>Shipment Request Status has moved</h1>
+<p>Use KRIM's canonical status page to verify the shipment request against your active customer organization. Opening this page does not confirm payment or carrier booking.</p>
+<p><a href="../customer-os/customer-services/booking-confirmation.html" id="canonical-link">Continue to Shipment Request Status</a></p>
+<script>
+(function () {
+  var target = new URL("../customer-os/customer-services/booking-confirmation.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  document.getElementById("canonical-link").href = target.href;
+})();
+</script>
+</main>
 </body>
 </html>
