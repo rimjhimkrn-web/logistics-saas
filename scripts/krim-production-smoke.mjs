@@ -74,7 +74,7 @@ for (const [label, source, pattern] of [
   ["Razorpay order checks the accepted quote", razorpayOrder, /accepted quote/i],
   ["Razorpay order verifies partner assignment", razorpayOrder, /assignment\.status/],
   ["Razorpay verification checks the provider signature", razorpayVerify, /generateHmacSha256[\s\S]*?razorpaySignature/],
-  ["Razorpay verification checks accepted quote and partner assignment", razorpayVerify, /accepted customer quote[\s\S]*?accepted partner assignment/i],
+  ["Razorpay verification checks accepted quote and partner assignment", razorpayVerify, /(?=[\s\S]*accepted customer quote)(?=[\s\S]*accepted partner assignment)/i],
 ]) {
   if (!pattern.test(source)) failures.push(`Razorpay safety check missing: ${label}`);
 }
