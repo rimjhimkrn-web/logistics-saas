@@ -110,3 +110,13 @@ This confirms source and policy alignment, not a completed live ticket submissio
 - Smoke checks were extended to syntax-check the claims page and assert that the query uses `krim_claims` plus the RLS-aligned organization filter. Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941623740
 
 The support, claims, invoice and quote pages now use real tables and organization/user-scoped access patterns in source. This is progress toward the full ecosystem, not a certification that every route or every live account's RLS path has passed an end-to-end browser test.
+
+
+## Customer payment history workflow — batch 4
+
+- Rebuilt `public/customer-os/customer-services/payment-history.html` as a read-only transaction register using `payments`, filtered by `customer_id = auth.session.user.id` to match the current payment table SELECT policy.
+- The page masks transaction references, distinguishes saved paid/succeeded/failed/refunded/pending states, and explicitly does **not** invent a currency because the legacy `payments` table has no currency-code column.
+- The page does not retry, create, or verify payments. The actual payment result remains authoritative only when the server-side Razorpay verification flow confirms it.
+- Updated smoke checks to verify the payment table and user-ID filter. Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941623740 (prior successful run before payment-history assertions); latest assertions are queued/running from the newest commit.
+
+This page is source-wired to the current RLS boundary. Live data visibility and transaction reconciliation still need a signed-in browser test.
