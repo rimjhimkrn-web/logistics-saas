@@ -79,3 +79,14 @@ The first review also found three pages that were not byte-identical but were ge
 - `public/customer-os/shipper-services/support-claims.html` → canonical claims route: `public/customer-os/customer-services/claims.html`; general support remains a separate function at `public/customer-os/customer-services/support.html`.
 
 The privileged `global-admin-control` Edge Function inventory was updated to remove these three routes and remains JWT-protected. It now advertises 53 unique Customer OS feature routes. Local link validation in CI is being used to catch any surviving references to removed paths.
+
+
+## Functional workflow rebuild — batch 1
+
+- Rebuilt `public/customer/quote-request.html` from a static explainer into a live, read-only quote-request register. It verifies the Supabase session, resolves active customer/shipper/enterprise memberships, reads only shipments within those organizations, loads saved quote records for those shipment IDs, and links each shipment to canonical quote comparison. It does not accept arbitrary customer-entered prices or fabricate quote offers.
+- Rebuilt `public/customer-os/customer-services/invoices.html` into a live, read-only invoice register. It resolves active customer organization membership, reads `krim_invoices` records scoped to the customer's organization, shows saved status and due dates, and groups outstanding balances by currency rather than adding unlike currencies together. It does not claim to process invoice payments.
+- Expanded `scripts/krim-production-smoke.mjs` to require the invoice page and verify that quote request and invoice pages use the intended real Supabase tables and organization-scoping logic.
+- Source-level smoke check before the new assertions passed on commit `0c222d9875cc72086bee5cdc122c5412159f77ec`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941090433
+- The new smoke assertions are running on commit `321ad0a81fe4b614e52a9b4410615516a3fd8d38`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941167410
+
+These two pages are now wired to read authorized real records in source. Actual production data visibility still depends on the current RLS policies and must be confirmed by a signed-in browser test. This does not certify all 53 remaining feature routes as operational.
