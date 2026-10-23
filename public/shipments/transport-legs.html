@@ -1,98 +1,27 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Transport Legs & Segment Management</title>
-    <meta name="description" content="Manage individual transport legs, modal transitions, and carrier segments inside KRIM OS Shipment Core.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07152f">
+<meta name="robots" content="noindex,follow">
+<title>Transport Legs — KRIM Operations Workspace</title>
+<meta name="description" content="Compatibility redirect to the canonical authenticated KRIM operational workspace.">
+<link rel="stylesheet" href="../../core/krim-global-interface.css">
+<meta http-equiv="refresh" content="0;url=../../app/operations/index.html">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-blue-400 font-semibold uppercase">Transport Legs</span>
-                </div>
-            </div>
-            <a href="/logistics-saas/public/shipments/carrier-assignment.html" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition font-mono font-semibold">Next: Carrier Assignment →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2 text-center">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Shipment Core Module • Step 8 of 23</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Transport Legs & Segments</h1>
-            <p class="text-slate-400 text-xs font-mono">Configure pre-carriage, main ocean/air leg, and on-carriage delivery segments for SHP-2026-OCT-9901.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <form onsubmit="handleLegsSubmit(event)" class="space-y-5">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Leg Sequence</label>
-                        <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
-                            <option value="pre_carriage">Pre-Carriage (Truck Drayage to POL)</option>
-                            <option value="main_carriage">Main Carriage (Ocean / Air Transit)</option>
-                            <option value="on_carriage">On-Carriage (Final Mile Delivery)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Segment Carrier / Provider</label>
-                        <input type="text" required value="Maersk Line (Ocean Main Leg)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Segment Departure</label>
-                        <input type="text" required value="USNYC Seaport Berth 4" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Segment Arrival</label>
-                        <input type="text" required value="NLRTM Deepwater Terminal" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-slate-400 uppercase tracking-wider">Segment Operational Notes</label>
-                    <textarea rows="3" required placeholder="Container loaded and sealed under customs supervision. Scheduled departure confirmed for 2026-10-18." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition"></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25 cursor-pointer">
-                    Save Transport Leg & Proceed →
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Shipment OS © 2026. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function handleLegsSubmit(e) {
-            e.preventDefault();
-            alert('Transport leg saved successfully! Proceeding to Carrier Assignment.');
-            window.location.href = '/public/shipments/carrier-assignment.html';
-        }
-    </script>
+<body class="krim-global-shell">
+<main style="max-width:760px;margin:10vh auto;padding:24px">
+  <p style="font-weight:800;letter-spacing:.12em;color:#1769ff">KRIM LOGISTICS · GLOBAL OPERATIONS</p>
+  <h1>Transport-leg management</h1>
+  <p>This legacy transport-legs screen used a fixed sample shipment and is not the authoritative source for live transport legs. Continue to the authenticated Operations workspace; leg-level write capability must be verified before use.</p>
+  <p><a href="../../app/operations/index.html">Continue to the authorized workspace →</a></p>
+</main>
+<script>
+(function () {
+  "use strict";
+  window.location.replace("../../app/operations/index.html" + window.location.search + window.location.hash);
+}());
+</script>
 </body>
 </html>
