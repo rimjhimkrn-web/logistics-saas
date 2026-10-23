@@ -91,4 +91,4 @@ const lines = [
 "- A passing source-level smoke check does not verify login, RLS, payments, partner payouts or live operational transactions."
 ];
 writeFileSync("audit-output/krim-complete-audit.md",lines.join("\n"));
-console.log(JSON.stringify({output:"audit-output/",totals:report.totals},null,2));
+console.log(JSON.stringify({output:"audit-output/",totals:report.totals,duplicateGroups,linkIssues:linkIssues.slice(0,100),integrationCandidates:integrationCandidates.slice(0,60),placeholderPages:placeholderPages.slice(0,60)},null,2));
