@@ -1,7 +1,7 @@
-import { readFileSync, existsSync, writeFileSync, unlinkSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, unlinkSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, dirname, resolve as pathResolve } from "node:path";
 
 const required = [
   "public/quote-result.html",
@@ -55,6 +55,40 @@ for (const file of required.filter((p) => p.endsWith(".html") && existsSync(p)))
     if (result.status !== 0) {
       failures.push(`Inline JavaScript syntax error in ${file}:\n${result.stderr || result.stdout}`);
     }
+  }
+}
+
+
+function listHtmlFiles(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const file = join(dir, entry.name);
+    return entry.isDirectory() ? listHtmlFiles(file) : entry.isFile() && entry.name.toLowerCase().endsWith(".html") ? [file] : [];
+  });
+}
+
+const customerOsPages = listHtmlFiles("public/customer-os");
+let checkedCustomerOsLinks = 0;
+for (const file of customerOsPages) {
+  const html = readFileSync(file, "utf8");
+  for (const match of html.matchAll(/(?:href|src|action)=["']([^"'#]+)["']/gi)) {
+    const raw = match[1].trim();
+    if (!raw || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
+    const clean = raw.split(/[?#]/)[0];
+    if (!clean) continue;
+    let target;
+    if (clean.startsWith("/logistics-saas/")) {
+      target = clean.slice("/logistics-saas/".length);
+    } else if (clean.startsWith("/")) {
+      failures.push(`Customer OS route omits GitHub Pages project prefix in ${file}: ${raw}`);
+      continue;
+    } else {
+      target = pathResolve(dirname(file), clean);
+    }
+    if (!target) target = "index.html";
+    if (target.endsWith("/")) target += "index.html";
+    checkedCustomerOsLinks++;
+    if (!existsSync(target)) failures.push(`Broken Customer OS local link in ${file}: ${raw} -> ${target}`);
   }
 }
 
@@ -146,7 +180,7 @@ for (const [label, source, pattern] of [
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
 
-console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked.`);
+console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages and ${checkedCustomerOsLinks} local links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
   process.exit(1);
