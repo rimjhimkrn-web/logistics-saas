@@ -671,16 +671,16 @@ for (const file of phaseNineRolePages) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
   if (!source.includes("krim-global-interface.css")) failures.push("Phase 9 role/workflow page is missing the shared KRIM interface stylesheet: " + file);
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push("Phase 9 role/workflow page is missing the KRIM global shell: " + file);
-  if ((head.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push("Phase 9 role/workflow page must load exactly one shared global stylesheet: " + file);
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 9 role/workflow page is missing the KRIM global shell: " + file);
+  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 9 role/workflow page must load exactly one shared global stylesheet: " + file);
 }
 const phaseNineOperationsEntry = existsSync("public/operations/index.html") ? readFileSync("public/operations/index.html", "utf8") : "";
 if (!phaseNineOperationsEntry.includes('"core/krim-global-interface.css"')) failures.push("Phase 9 shared operations workbench must load the global stylesheet after its local styles.");
-if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(phaseNineOperationsEntry)) failures.push("Phase 9 shared operations workbench is missing the KRIM global shell.");
+if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(phaseNineOperationsEntry)) failures.push("Phase 9 shared operations workbench is missing the KRIM global shell.");
 for (const [file, target, forbiddenSample] of [
-  ["public/shipments/transport-legs.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/operations\\/index\\.html/, "SHP-2026-OCT-9901"],
-  ["public/shipments/shipment-documents.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/customs\\/index\\.html/, "SHP-2026-OCT-9901"],
-  ["public/shipments/shipment-exceptions.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/operations\\/index\\.html/, "SHP-2026-OCT-9901"],
+  ["public/shipments/transport-legs.html", /location\.replace\(["']\.\.\/\.\.\/app\/operations\/index\.html/, "SHP-2026-OCT-9901"],
+  ["public/shipments/shipment-documents.html", /location\.replace\(["']\.\.\/\.\.\/app\/customs\/index\.html/, "SHP-2026-OCT-9901"],
+  ["public/shipments/shipment-exceptions.html", /location\.replace\(["']\.\.\/\.\.\/app\/operations\/index\.html/, "SHP-2026-OCT-9901"],
 ]) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   if (!target.test(source)) failures.push("Phase 9 legacy workflow does not redirect to the canonical role workspace: " + file);
@@ -688,9 +688,9 @@ for (const [file, target, forbiddenSample] of [
 }
 const phaseNineDirectory = existsSync("public/global-workflows.html") ? readFileSync("public/global-workflows.html", "utf8") : "";
 for (const [label, pattern] of [
-  ["transport-leg directory entry routes to Operations", /href=["']\\.\\.\\/app\\/operations\\/index\\.html["'][^>]*data-search=["'][^"']*transport legs/],
-  ["document directory entry routes to Customs", /href=["']\\.\\.\\/app\\/customs\\/index\\.html["'][^>]*data-search=["'][^"']*shipment documents/],
-  ["exception directory entry routes to Operations", /href=["']\\.\\.\\/app\\/operations\\/index\\.html["'][^>]*data-search=["'][^"']*shipment exceptions/],
+  ["transport-leg directory entry routes to Operations", /href=["']\.\.\/app\/operations\/index\.html["'][^>]*data-search=["'][^"']*transport legs/],
+  ["document directory entry routes to Customs", /href=["']\.\.\/app\/customs\/index\.html["'][^>]*data-search=["'][^"']*shipment documents/],
+  ["exception directory entry routes to Operations", /href=["']\.\.\/app\/operations\/index\.html["'][^>]*data-search=["'][^"']*shipment exceptions/],
 ]) {
   if (!pattern.test(phaseNineDirectory)) failures.push("Phase 9 workflow directory routing check missing: " + label);
 }
