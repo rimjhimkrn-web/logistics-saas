@@ -50,7 +50,7 @@ try{
  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error('No active KRIM organization membership was found.');
  const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active');if(orgError)throw orgError;
  const customerIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));if(!customerIds.length)throw new Error('This account has no active customer, shipper or enterprise organization.');
- const {data:rows,error:invoiceError}=await client.from('krim_invoices').select('id,organization_id,customer_organization_id,shipment_id,invoice_number,invoice_type,status,currency_code,issue_date,due_date,total_amount,paid_amount,outstanding_amount,created_at').in('customer_organization_id',customerIds).order('created_at',{ascending:false}).limit(100);if(invoiceError)throw invoiceError;
+ const {data:rows,error:invoiceError}=await client.from('krim_invoices').select('id,organization_id,customer_organization_id,shipment_id,invoice_number,invoice_type,status,currency_code,issue_date,due_date,total_amount,paid_amount,outstanding_amount,created_at').in('organization_id',customerIds).order('created_at',{ascending:false}).limit(100);if(invoiceError)throw invoiceError;
  invoices=rows||[];
  $('metric-total').textContent=invoices.length;$('metric-open').textContent=invoices.filter(i=>status(i)!=='paid').length;
  const totals={};for(const i of invoices){const c=String(i.currency_code||'UNK').toUpperCase();totals[c]=(totals[c]||0)+Math.max(0,Number(i.outstanding_amount||0))}
