@@ -90,3 +90,13 @@ The privileged `global-admin-control` Edge Function inventory was updated to rem
 - The new smoke assertions are running on commit `321ad0a81fe4b614e52a9b4410615516a3fd8d38`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941167410
 
 These two pages are now wired to read authorized real records in source. Actual production data visibility still depends on the current RLS policies and must be confirmed by a signed-in browser test. This does not certify all 53 remaining feature routes as operational.
+
+
+## Customer support ticket workflow — batch 2
+
+- Rebuilt `public/customer-os/customer-services/support.html` with an authenticated support-ticket form and recent-ticket list backed by `support_tickets`.
+- The form uses the signed-in user ID and an active customer/shipper/enterprise organization, and allows a related shipment only from that organization. It uses the existing table's allowed category values and displays success only after Supabase returns a saved ticket record.
+- Inspected the live database policies: `support_tickets` INSERT is restricted to the signed-in user and validates organization/shipment association; SELECT is restricted to tickets owned by that user. The page does not bypass those policies.
+- Updated the production smoke test to syntax-check the support page and verify the expected user/organization binding before ticket creation. Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941503883
+
+This confirms source and policy alignment, not a completed live ticket submission test. A real signed-in browser test is still needed to prove the user's account can submit and then reload its ticket.
