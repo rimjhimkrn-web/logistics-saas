@@ -37,7 +37,7 @@ The user approved one canonical page for each route group and permanent deletion
 
 ## Customer OS 404 and access separation follow-up — 2026-10-23
 
-- Current repository inventory: **804 HTML files overall**, **61 HTML files in `public/customer-os/`**, consisting of **59 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
+- Current repository inventory: **801 HTML files overall**, **58 HTML files in `public/customer-os/`**, consisting of **56 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
 - Fixed stale shared-navigation targets in `public/customer-os/assets/customer-workflow.js`: quote comparison now points to `public/shipper/quote-comparison.html`, shipment list to `public/customer-os/customer-services/shipment-list.html`, and payment checkout to `public/shipper/payment-checkout.html`. The stale links were inserted dynamically by JavaScript and were not caught by a scan of literal HTML links.
 - Replaced the public all-pages catalogue with a guided customer portal. Its public flow is shipment creation → quote request → quote comparison → checkout → shipment register → tracking/delivery evidence → invoices/claims/support.
 - Added `public/admin/customer-ecosystem-os.html`, a no-index inventory using the existing privileged-session guard, for founder/admin audit and rebuild planning. It is not linked from the public customer portal.
@@ -50,3 +50,21 @@ GitHub Pages serves static HTML and source files publicly. A client-side guard c
 ### Verified inventory versus live functionality
 
 The counts above are file/route inventory counts, not the number of end-to-end proven operational workflows. Automated smoke checks cover source-level conditions and local route references. The exact count of pages whose complete live workflow works—including authentication, shipment creation, approved quotes, payment verification, partner assignment, delivery evidence, invoice handling and settlement—remains **unverified until tested against the live browser and backend**.
+
+
+## Systematic Customer OS rebuild — current implementation status
+
+- Added the shared mobile-first UI stylesheet at `public/customer-os/assets/customer-os-global.css` and linked it from every remaining Customer OS HTML page. This creates consistent design tokens, responsive tables/forms, focus states and common card/button styling while leaving each page's business logic separate.
+- Found and removed three byte-for-byte duplicate Customer OS route files:
+  - Removed `public/customer-os/customer-services/quote-acceptance.html`; canonical quote acceptance remains under `public/customer-os/quotes-pricing/quote-acceptance.html`.
+  - Removed `public/customer-os/customer-services/quote-details.html`; canonical quote details remains under `public/customer-os/quotes-pricing/quote-details.html`.
+  - Removed `public/customer-os/shipper-services/shipment-details.html`; canonical shipment details remains under `public/customer-os/customer-services/shipment-details.html`.
+- Updated the privileged `global-admin-control` Edge Function inventory to omit the three deleted routes. Its inventory now contains **56 unique feature routes**, rather than showing deleted paths.
+- Extended `scripts/krim-production-smoke.mjs` so CI fails when an exact duplicate Customer OS HTML page reappears, when a Customer OS page omits the shared stylesheet, or when the shared stylesheet is missing.
+- Latest repository inventory from GitHub tree: **801 HTML files overall**, **58 Customer OS HTML files** (56 feature routes + portal index + integration manifest), and **zero exact duplicate HTML blobs within Customer OS**.
+- Smoke check for the cleanup commit `fe9fd4526b6c43eca2dd6fdff1f0a227845b4455` passed: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39940143840
+- The new deduplication/style-coverage smoke test is running on commit `76cde0634ddc2c30f1b30d14a1e610d16ffe1ebf`: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39940270945
+
+### Important functional boundary
+
+The shared stylesheet standardizes presentation; it does **not** convert navigation-only screens into working transactions. Several remaining pages (for example invoice and claims screens) still explicitly describe themselves as workflow/navigation shells. The next rebuild batches must connect each business action to its proper authenticated Supabase operation, confirm the saved result, and keep organization-level RLS and role checks intact. Until then, the number of fully end-to-end verified Customer OS pages remains **not yet established**.
