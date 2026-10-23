@@ -173,7 +173,7 @@ body{background:radial-gradient(ellipse at 85% 0%,#e0f2fe 0,transparent 34%),#f4
 <a class="nav" href="../public/operations/operations-reports.html">▤ Operations Reports</a>
 
 <div class="st">Commercial</div>
-<a class="nav" href="../domains/quotes.html">◇ Quotes <span>›</span></a>
+<a class="nav" href="/logistics-saas/public/customer-os/quotes-pricing/quote-list.html">◇ Quotes <span>›</span></a>
 <a class="nav" href="../domains/finance.html">$ Finance <span>›</span></a>
 <a class="nav" href="../domains/claims.html">⚖ Claims <span>›</span></a>
 
@@ -391,7 +391,7 @@ body{background:radial-gradient(ellipse at 85% 0%,#e0f2fe 0,transparent 34%),#f4
 
 <a class="domain" href="../domains/shipments.html"><small>OPS</small><b>Shipments</b><span>Lifecycle</span></a>
 <a class="domain" href="../domains/tracking.html"><small>VIS</small><b>Tracking</b><span>Visibility</span></a>
-<a class="domain" href="../domains/quotes.html"><small>COM</small><b>Quotes</b><span>Commercial</span></a>
+<a class="domain" href="/logistics-saas/public/customer-os/quotes-pricing/quote-list.html"><small>COM</small><b>Quotes</b><span>Commercial</span></a>
 <a class="domain" href="../domains/network.html"><small>NET</small><b>Network</b><span>Connectivity</span></a>
 <a class="domain" href="../domains/partners.html"><small>PRT</small><b>Partners</b><span>Ecosystem</span></a>
 <a class="domain" href="../domains/capacity.html"><small>CAP</small><b>Capacity</b><span>Resources</span></a>
@@ -436,16 +436,16 @@ body{background:radial-gradient(ellipse at 85% 0%,#e0f2fe 0,transparent 34%),#f4
 <div>
 <b>Governance</b>
 <a href="../domains/compliance.html">Compliance</a>
-<a href="../trust/privacy.html">Privacy</a>
-<a href="../trust/terms.html">Terms</a>
-<a href="../trust/acceptable-use.html">Acceptable Use</a>
+<a href="/logistics-saas/public/legal/privacy.html">Privacy</a>
+<a href="/logistics-saas/public/legal/terms.html">Terms</a>
+<a href="/logistics-saas/public/legal/acceptable-use.html">Acceptable Use</a>
 </div>
 
 <div>
 <b>Platform</b>
 <a href="../domains/integrations.html">Integrations</a>
 <a href="../domains/ai.html">KRIM AI</a>
-<a href="../trust/cookies.html">Cookies</a>
+<a href="/logistics-saas/public/legal/privacy.html#cookies">Cookies</a>
 <a href="mailto:support@krimlogistics.com">Support</a>
 </div>
 
@@ -524,13 +524,13 @@ openModal("My profile",'<p class="modal-note">Your account identity from the cur
 const saved=localStorage.getItem("krim.operations.displayName");if(saved)$("profileDisplayName").value=saved;
 $("saveDisplayName").onclick=()=>{const name=$("profileDisplayName").value.trim();if(!name){toast("Enter a display name first.");return;}localStorage.setItem("krim.operations.displayName",name);$("email").textContent=name;$("avatar").textContent=name.charAt(0).toUpperCase();toast("Display name saved on this device.");closeModal();};
 }else if(action==="security"){
-openModal("Account security",'<p class="modal-note">Security controls are handled by KRIM authentication pages. You may need to sign in again.</p><a class="modal-link" href="../auth/mfa-enroll.html">🛡 Set up multi-factor authentication (MFA) →</a><a class="modal-link" href="../auth/password-recovery.html">🔑 Recover or reset password →</a><p class="modal-note">Never share your password or one-time verification codes with anyone.</p>');
+openModal("Account security",'<p class="modal-note">Security controls are handled by KRIM authentication pages. You may need to sign in again.</p><a class="modal-link" href="../auth/mfa-enroll.html">🛡 Set up multi-factor authentication (MFA) →</a><a class="modal-link" href="/logistics-saas/auth/forgot-password.html">🔑 Recover or reset password →</a><p class="modal-note">Never share your password or one-time verification codes with anyone.</p>');
 }else if(action==="language"){
 const current=localStorage.getItem("krim.language")||"en";
 openModal("Language preferences",'<p class="modal-note">Choose your preferred interface language. Your choice is saved in this browser. English and Hindi labels are supported on this workspace; other languages are preferences only for now.</p><label class="field-label" for="languageChoice">Language</label><select id="languageChoice">'+Object.entries(supportedLanguages).map(([k,v])=>'<option value="'+k+'" '+(k===current?'selected':'')+'>'+v+'</option>').join("")+'</select><div class="modal-actions"><button type="button" class="btn primary" id="saveLanguage">Save language</button></div>');
 $("saveLanguage").onclick=()=>{const lang=$("languageChoice").value;localStorage.setItem("krim.language",lang);document.documentElement.lang=lang;applyLanguage(lang);closeModal();toast("Language preference saved.");};
 }else if(action==="support"){
-openModal("Help & Support",'<p class="modal-note">Contact KRIM support or open the relevant help destination. Do not include passwords, payment credentials or verification codes in support messages.</p><a class="modal-link" href="mailto:support@krimlogistics.com?subject=KRIM%20Operations%20Workspace%20Support">✉ Email support@krimlogistics.com →</a><a class="modal-link" href="../trust/terms.html">Terms of service →</a><a class="modal-link" href="../trust/privacy.html">Privacy information →</a><p class="modal-note">Email opens your device&#39;s configured mail app. Delivery and response times are not guaranteed by this page.</p>');
+openModal("Help & Support",'<p class="modal-note">Contact KRIM support or open the relevant help destination. Do not include passwords, payment credentials or verification codes in support messages.</p><a class="modal-link" href="mailto:support@krimlogistics.com?subject=KRIM%20Operations%20Workspace%20Support">✉ Email support@krimlogistics.com →</a><a class="modal-link" href="/logistics-saas/public/legal/terms.html">Terms of service →</a><a class="modal-link" href="/logistics-saas/public/legal/privacy.html">Privacy information →</a><p class="modal-note">Email opens your device&#39;s configured mail app. Delivery and response times are not guaranteed by this page.</p>');
 }
 }));
 function applyLanguage(lang){
@@ -550,7 +550,7 @@ const networkBtn=document.querySelector(".actions .btn:not(.primary)");if(networ
 const refresh=$("refreshData");if(refresh)refresh.textContent=t.refresh;
 }
 $("notificationsBtn").addEventListener("click",()=>openModal("Notifications",'<p class="modal-note">This workspace does not yet have a verified notifications feed connected. No unread alerts are being invented.</p><a class="modal-link" href="../domains/exceptions.html">Review operational exceptions →</a><a class="modal-link" href="../domains/shipments.html">Review shipments →</a>'));
-$("helpBtn").addEventListener("click",()=>{menu.classList.remove("open");openModal("Help & Support",'<p class="modal-note">Need assistance with the operations workspace?</p><a class="modal-link" href="mailto:support@krimlogistics.com?subject=KRIM%20Operations%20Workspace%20Help">✉ Contact KRIM support →</a><a class="modal-link" href="../trust/privacy.html">Privacy information →</a><a class="modal-link" href="../trust/terms.html">Terms of service →</a>');});
+$("helpBtn").addEventListener("click",()=>{menu.classList.remove("open");openModal("Help & Support",'<p class="modal-note">Need assistance with the operations workspace?</p><a class="modal-link" href="mailto:support@krimlogistics.com?subject=KRIM%20Operations%20Workspace%20Help">✉ Contact KRIM support →</a><a class="modal-link" href="/logistics-saas/public/legal/privacy.html">Privacy information →</a><a class="modal-link" href="/logistics-saas/public/legal/terms.html">Terms of service →</a>');});
 applyLanguage(localStorage.getItem("krim.language")||"en");
 
 document.addEventListener("click",e=>{
