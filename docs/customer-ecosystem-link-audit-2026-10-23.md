@@ -100,3 +100,13 @@ These two pages are now wired to read authorized real records in source. Actual 
 - Updated the production smoke test to syntax-check the support page and verify the expected user/organization binding before ticket creation. Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941503883
 
 This confirms source and policy alignment, not a completed live ticket submission test. A real signed-in browser test is still needed to prove the user's account can submit and then reload its ticket.
+
+
+## Customer claims workflow — batch 3
+
+- Rebuilt `public/customer-os/customer-services/claims.html` as a read-only claims register backed by `krim_claims`. It shows saved claim number, type, status, shipment link, claimed/approved amounts, decision notes and settlement status; it does not fabricate claim status or let the customer self-approve compensation.
+- The page scopes the query by active customer/shipper/enterprise organization IDs using `organization_id`, matching the current `krim_claims` SELECT policy that calls `private.krim_has_organization_access(auth.uid(), organization_id)`.
+- Starting a new claim remains routed through support until a dedicated claim-creation backend action and evidence requirements are verified. The page does not bypass the existing read-only claim policy.
+- Smoke checks were extended to syntax-check the claims page and assert that the query uses `krim_claims` plus the RLS-aligned organization filter. Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39941623740
+
+The support, claims, invoice and quote pages now use real tables and organization/user-scoped access patterns in source. This is progress toward the full ecosystem, not a certification that every route or every live account's RLS path has passed an end-to-end browser test.
