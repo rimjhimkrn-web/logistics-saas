@@ -37,7 +37,7 @@ The user approved one canonical page for each route group and permanent deletion
 
 ## Customer OS 404 and access separation follow-up — 2026-10-23
 
-- Current repository inventory: **803 HTML files overall**, **61 HTML files in `public/customer-os/`**, consisting of **59 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
+- Current repository inventory: **804 HTML files overall**, **61 HTML files in `public/customer-os/`**, consisting of **59 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
 - Fixed stale shared-navigation targets in `public/customer-os/assets/customer-workflow.js`: quote comparison now points to `public/shipper/quote-comparison.html`, shipment list to `public/customer-os/customer-services/shipment-list.html`, and payment checkout to `public/shipper/payment-checkout.html`. The stale links were inserted dynamically by JavaScript and were not caught by a scan of literal HTML links.
 - Replaced the public all-pages catalogue with a guided customer portal. Its public flow is shipment creation → quote request → quote comparison → checkout → shipment register → tracking/delivery evidence → invoices/claims/support.
 - Added `public/admin/customer-ecosystem-os.html`, a no-index inventory using the existing privileged-session guard, for founder/admin audit and rebuild planning. It is not linked from the public customer portal.
