@@ -9,6 +9,7 @@ const required = [
   "public/partner/accepted-loads.html",
   "public/partner/dispatch-assignment.html",
   "config.js",
+  "core/krim-global-interface.css",
   "auth/access.html",
   "auth/signup.html",
   "auth/login.html",
@@ -334,6 +335,7 @@ const phaseOneSources = Object.fromEntries([
   ["mfaEnroll", "auth/mfa-enroll.html"],
   ["logout", "auth/logout.html"],
   ["verifyEmail", "auth/verify-email.html"],
+  ["logout", "auth/logout.html"],
   ["bookingRequest", "public/shipper/booking-request.html"],
 ].map(([key, file]) => [key, existsSync(file) ? readFileSync(file, "utf8") : ""]));
 
