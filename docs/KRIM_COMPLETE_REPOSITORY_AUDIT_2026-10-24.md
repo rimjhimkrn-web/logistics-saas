@@ -213,3 +213,8 @@ The repository-wide static audit and critical workflow smoke checks passed on th
 The static link parser was also corrected so `data-action` UI controls are not incorrectly counted as URLs. This removed four false-positive route findings. The final scan reported zero unresolved local/root references.
 
 **Cleanup exit decision:** The repository passes the current source-level duplicate-content and link-reference checks, and the critical smoke workflow passed. This is sufficient to begin the next controlled end-to-end testing phase once the latest GitHub Pages deployment completes. It is **not** production launch certification: backend authorization, actual persistence, payment verification/reconciliation, partner payouts, real operational execution, accessibility, and global country/compliance coverage still need evidence from live tests. The current static signals also indicate that many pages need functional verification before being considered production-ready.
+
+
+### Deployment note
+
+The source-level smoke/audit gate passed, but the GitHub Pages workflow for the audit commit was cancelled during the rapid cleanup commit sequence. A fresh Pages deployment confirmation is required before treating the latest redirects and navigation fixes as live on the public site. No further cleanup edits are planned in this batch; the next activity is deployment confirmation followed by controlled end-to-end testing.
