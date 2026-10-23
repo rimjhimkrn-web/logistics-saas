@@ -173,3 +173,15 @@ The smoke test originally failed after the rate-calculator alias was introduced 
 All redirect aliases retain query strings and URL fragments and include a manual fallback link. These changes reduce competing interfaces but do not prove that the canonical destinations pass every live backend workflow.
 
 **Current cleanup checkpoint:** 14 legacy route files have been converted to redirects across the Partner and Customer/Quote areas. The latest complete smoke result available at this checkpoint passed at commit `218afec6d0e71383ec70c6ce6795bff945bf66d7`; the newest company-profile cleanup commit `52f8c0414bb411db0ce431273d8d96bab0f3b4f9` has new workflow runs queued. Confirm the latest commit's smoke and Pages deployment before treating this batch as deployed.
+
+
+### Further cleanup — quote acceptance and customer profile aliases
+
+| Legacy route | Canonical destination | Reason |
+|---|---|---|
+| `public/customer/quote-acceptance.html` | `public/customer-os/quotes-pricing/quote-acceptance.html` | Use the backend workflow that calls server-side `krim_accept_global_quote` and confirms the exact accepted quote |
+| `public/quotes/quote-acceptance.html` | `public/customer-os/quotes-pricing/quote-acceptance.html` | Retires the disconnected quote-acceptance interface |
+| `public/customer/shipping-preferences.html` | `public/customer-os/customer-services/shipping-preferences.html` | Consolidates the customer preference route into the organization-aware workflow |
+| `public/customer/cargo-profiles.html` | `public/customer-os/customer-services/cargo-profiles.html` | Consolidates legacy cargo profile UI into the backend-aware customer workflow |
+
+**Cleanup count:** 18 legacy route files now redirect to canonical destinations across the Partner, Customer, and Quotes areas. The redirects preserve query strings and fragments; they are compatibility routes, not duplicate user interfaces. This is still a partial semantic cleanup: role-specific pages such as Enterprise carrier ratings, warehouse/DC location management, ePOD operations and finance ledgers are retained when their purpose or access boundary may differ. The final audit must classify the remaining candidates and fix confirmed broken links before the system can be declared ready for end-to-end testing.
