@@ -97,6 +97,7 @@
             </div>
           </form>
           <div id="booking-feedback" class="feedback" role="status" aria-live="polite"></div>
+          <div class="journey-banner" style="margin-top:14px"><span><b>Can't find your exact village, locality or route?</b> Keep the original location and ask KRIM to review coverage.</span><a class="btn btn-secondary" id="coverage-review-link" href="coverage-review.html">Request coverage review →</a></div>
         </div>
       </section>
       <aside>
@@ -188,6 +189,8 @@
     $("mode-preview").textContent=mode.options[mode.selectedIndex]?.textContent.split(" — ")[0]||"Multimodal";
     const routeType=$("booking-route-type");
     $("route-type-preview").textContent=routeType.options[routeType.selectedIndex]?.textContent.split(" — ")[0]||"Door-to-door";
+    const coverageLink=$("coverage-review-link");
+    if(coverageLink){const params=new URLSearchParams();if(origin)params.set("origin",origin);if(destination)params.set("destination",destination);params.set("route_type",routeType.value);params.set("mode",mode.value.toUpperCase());if(Number.isFinite(weight)&&weight>0)params.set("weight",String(weight));coverageLink.href="coverage-review.html"+(params.toString()?"?"+params.toString():"");}
     button.disabled=!isReady||submitting;
   }
   function normalizePlace(feature){
