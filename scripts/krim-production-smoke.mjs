@@ -52,6 +52,8 @@ const required = [
   "public/partner/accepted-loads.html",
   "public/shipper/booking-request.html",
   "public/shipper/active-shipments.html",
+  "public/shipper/spot-approvals.html",
+  "public/shipper/quote-comparison.html",
   "control/partner-verification.html",
   "supabase/migrations/20261020074510_global_partner_onboarding_location_hardening.sql",
   "supabase/migrations/20261020074900_partner_verification_admin_review_workflow.sql",
@@ -68,7 +70,8 @@ const phase2InterfacePages = [
   "public/shipper/coverage-review.html",
   "public/shipper/rate-calculator.html",
   "public/shipper/active-shipments.html",
-  "public/shipper/rate-calculator.html",
+  "public/shipper/spot-approvals.html",
+  "public/shipper/quote-comparison.html",
 ];
 for (const file of phase2InterfacePages) {
   if (!existsSync(file)) {
@@ -103,6 +106,39 @@ if (existsSync(customerWorkspace)) {
   const html = readFileSync(customerWorkspace, "utf8");
   if (html.includes("../../public/customer/shipment-create.html")) failures.push("Customer workspace still points to the legacy shipment form instead of the canonical route.");
   if (!html.includes("../../public/shipper/booking-request.html")) failures.push("Customer workspace must expose the canonical global shipment form.");
+}
+
+// Phase 4 pricing and quote governance: enforce canonical pages and server-authoritative commercial decisions.
+const quoteDesk = "public/shipper/rate-calculator.html";
+const quoteReview = "public/shipper/spot-approvals.html";
+const quoteComparison = "public/shipper/quote-comparison.html";
+for (const file of [quoteDesk, quoteReview, quoteComparison]) {
+  if (!existsSync(file)) {
+    failures.push(`Missing Phase 4 canonical quote workflow page: ${file}`);
+    continue;
+  }
+  const html = readFileSync(file, "utf8");
+  if (!html.includes("krim-global-interface.css")) failures.push(`Phase 4 page is missing the shared global stylesheet: ${file}`);
+  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) failures.push(`Phase 4 page is missing the shared global shell class: ${file}`);
+}
+if (existsSync(quoteDesk)) {
+  const html = readFileSync(quoteDesk, "utf8");
+  if (!html.includes('rpc("krim_create_tariff_quote"')) failures.push("Quote desk must request pricing from the server-side tariff RPC.");
+  if (!html.includes('rpc("krim_create_partner_opportunity"')) failures.push("Quote desk must use the controlled partner-bid fallback when no tariff matches.");
+  if (!/No approved price has been shown|No approved tariff matches|no customer price has been invented/i.test(html)) failures.push("Quote desk must clearly avoid displaying invented prices.");
+  if (!html.includes("public/shipper/spot-approvals.html")) failures.push("Quote desk must route to the canonical quote and bid status page.");
+}
+if (existsSync(quoteReview)) {
+  const html = readFileSync(quoteReview, "utf8");
+  if (!html.includes('rpc("krim_accept_global_quote"')) failures.push("Quote review must use the server-side quote acceptance RPC.");
+  if (!html.includes("valid_until")) failures.push("Quote review must inspect quote validity before acceptance.");
+  if (!html.includes("public/shipper/rate-calculator.html")) failures.push("Quote review must link back to the canonical quote desk.");
+}
+if (existsSync(quoteComparison)) {
+  const html = readFileSync(quoteComparison, "utf8");
+  if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC.");
+  if (!/valid_until|valid until/i.test(html)) failures.push("Quote comparison must expose quote validity.");
+  if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
 for (const file of required) {
   if (!existsSync(file)) failures.push(`Missing required production file: ${file}`);
