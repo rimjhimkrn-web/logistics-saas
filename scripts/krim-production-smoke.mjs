@@ -278,7 +278,14 @@ for (const file of customerOsPages) {
   const previous = exactPageOwners.get(html);
   if (previous) failures.push(`Duplicate Customer OS page content: ${previous} and ${file}`);
   else exactPageOwners.set(html, file);
-  if (!html.includes("customer-os-global.css")) {
+  // Legacy compatibility aliases intentionally redirect to a canonical page and
+  // therefore do not need their own workspace stylesheet. They still participate in
+  // route/link checks below so stale targets are caught.
+  const isCompatibilityRedirect =
+    /<link[^>]+rel=["']canonical["']/i.test(html) &&
+    (/<meta[^>]+http-equiv=["']refresh["']/i.test(html) ||
+      /location\.replace\(/i.test(html));
+  if (!isCompatibilityRedirect && !html.includes("customer-os-global.css")) {
     failures.push(`Customer OS page is missing the shared UI stylesheet: ${file}`);
   }
 }
