@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   smoke-check:
@@ -21,16 +21,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Normalize legacy GitHub Pages links once
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          node scripts/normalize-github-pages-links.mjs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.html'
-          if ! git diff --cached --quiet; then
-            git commit -m "Fix GitHub Pages project-prefix and canonical route links"
-            git push
-          fi
       - name: Validate critical KRIM workflows
         run: node scripts/krim-production-smoke.mjs
