@@ -1,5 +1,5 @@
 # KRIM Global Interface Standard
-**Version:** 1.0  
+**Version:** 1.1  
 **Approved:** 2026-10-23  
 **Scope:** All public pages, customer/partner/driver/warehouse/customs/finance/operations/enterprise workspaces, platform administration, and shared identity flows.
 
@@ -51,3 +51,16 @@ KRIM is one global logistics operating system, not a collection of unrelated web
 - **Batch 7:** remaining public pages, secondary workflows, error/empty states, and legacy-route retirement.
 
 Each batch must pass the shared visual, route, security, responsive and interaction checks before being marked compliant.
+
+
+## 7. Enforcement for customer ecosystem Phases 2–5
+
+As of 2026-10-23, the shared stylesheet `core/krim-global-interface.css` is the final static stylesheet in the document head for each in-scope Phase 2–5 page. The `krim-global-shell` body class is required. This ordering ensures the global layer can normalize page-local styling for shared typography, header/navigation surfaces, form controls, buttons, cards, focus states, and responsive touch targets without replacing each page's workflow logic.
+
+The automated production smoke check now checks all 16 canonical/legacy customer journey pages across Phases 2–5 for:
+- exactly one shared global stylesheet reference in the document head;
+- the shared `krim-global-shell` class;
+- the global stylesheet loading after inline page styles;
+- existing route, workflow, payment-safety and link integrity guards.
+
+This source-level check does not replace browser-based mobile/desktop visual acceptance or authenticated workflow testing. The pages retain their operational layouts and module-specific content, but the shared visual language must remain consistent. Legacy routes are retained only as safe redirects; they are not duplicate workflow implementations.
