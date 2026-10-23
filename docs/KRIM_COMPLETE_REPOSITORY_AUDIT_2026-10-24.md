@@ -137,3 +137,21 @@ The existing production smoke script separately checked 191 HTML pages and 1,420
 4. Run real browser and authenticated Supabase tests separately. This static workflow does not prove RLS isolation, live payment capture, partner payouts, or every page's runtime behavior.
 
 **Status:** full-repository static scan is now implemented and automated. The issue triage and live runtime verification remain open; do not describe the entire system as fully audited or production-certified yet.
+
+
+## 7. Canonical-route cleanup progress — 2026-10-24
+
+The following legacy routes were changed to lightweight compatibility redirects. They preserve query parameters and URL fragments, provide a fallback link when JavaScript is unavailable, and do not claim that a business transaction succeeded:
+
+| Legacy route | Canonical destination | Reason |
+|---|---|---|
+| `app/partner/integrations-automation.html` | `public/partner/integrations-automation.html` | Exact duplicate page content consolidated |
+| `app/partner/security-audit.html` | `public/partner/security-audit.html` | Exact duplicate page content consolidated |
+| `public/customer/shipment-details.html` | `public/customer-os/customer-services/shipment-details.html` | Legacy page had no backend or organization-scoped access checks |
+| `public/customer/booking-confirmation.html` | `public/customer-os/customer-services/booking-confirmation.html` | Use status page that checks the shipment request in the active customer organization |
+| `public/customer-os/shipper-services/rate-calculator.html` | `public/shipper/rate-calculator.html` | Replace disconnected workflow placeholder with the canonical shipper pricing flow |
+| `public/quotes/quote-list.html` | `public/customer-os/quotes-pricing/quote-list.html` | Replace static quote list with the organization-scoped quote register |
+
+The smoke test originally failed after the rate-calculator alias was introduced because it incorrectly required every route under Customer OS to contain its own UI stylesheet. The test was updated to allow canonical compatibility redirects while continuing to validate their local links. The latest production smoke workflow for commit `ee455cbec4bdeb6ddfa5bf1d08b555968ccd6019` passed: [run 40013968382](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40013968382). The Pages deployment for that commit was still running when this section was recorded.
+
+**Cleanup is not complete.** This is a first safe consolidation batch, not approval to delete every similarly named page. The remaining basename groups require semantic review: pages can legitimately share names across different roles (customer, partner, finance, operations, enterprise). Legacy route references, workspace access boundaries and live backend behavior must be checked before any further redirects or deletion. Full broken-link triage, deployed HTTP checks, live transaction tests and production certification remain open.
