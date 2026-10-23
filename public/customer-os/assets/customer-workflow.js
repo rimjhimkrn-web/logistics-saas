@@ -7,7 +7,7 @@ const BASE='/logistics-saas/';
 const route=p=>(location.hostname.endsWith('github.io')?BASE:'/')+p.replace(/^\//,'');
 const routes={
  home:'app/customer/index.html',
- book:'public/shipper/booking-request.html,
+ book:'public/shipper/booking-request.html',
  quotes:'public/customer/quote-request.html',
  quoteBoard:'public/shipper/quote-comparison.html',
  shipments:'public/customer-os/customer-services/shipment-list.html',
