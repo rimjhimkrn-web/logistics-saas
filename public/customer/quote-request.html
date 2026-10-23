@@ -1,28 +1,118 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1f3a">
-<title>Request Freight Pricing | KRIM Logistics</title>
-<meta name="description" content="Start a secure KRIM shipment request and continue to quote review when verified pricing is available.">
-<style>
-:root{--navy:#0b1f3a;--blue:#1769e0;--teal:#0f766e;--ink:#182941;--muted:#64748b;--line:#dce5f0;--bg:#f4f7fb}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{text-decoration:none;color:inherit}.top{background:var(--navy);color:#dbeafe;padding:10px 5vw;font-size:11px;letter-spacing:.1em}.shell{width:min(1080px,calc(100% - 32px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 0}.brand{font-weight:950;color:var(--navy);letter-spacing:.05em}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.16em}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:12px 16px;font-size:12px;font-weight:850;border:1px solid var(--line);background:#fff}.primary{background:linear-gradient(110deg,var(--blue),var(--teal));border-color:transparent;color:white}.hero{margin:28px 0;background:linear-gradient(115deg,#0b1f3a,#174b70 70%,#0f766e);color:white;border-radius:24px;padding:clamp(24px,5vw,54px);box-shadow:0 18px 45px #0b1f3a18}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#99f6e4}.hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.04em;margin:13px 0}.hero p{max-width:700px;color:#d7e7f4}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}.card{background:white;border:1px solid var(--line);border-radius:17px;padding:20px}.num{font-weight:950;color:var(--teal);font-size:12px}.card h2{font-size:16px;margin:9px 0}.card p{font-size:12px;color:var(--muted);margin:0}.notice{background:#fff8e8;border:1px solid #f4dfaa;color:#76551b;border-radius:13px;padding:14px;font-size:12px;margin:18px 0}footer{padding:24px 0;color:var(--muted);font-size:11px;border-top:1px solid var(--line);margin-top:30px}@media(max-width:650px){.steps{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}.nav .actions{display:flex;gap:8px;flex-wrap:wrap}}
-</style>
+<meta name="description" content="View freight quote requests and partner offers linked to your authorized KRIM shipments.">
+<title>Quote Requests & Offers | KRIM Logistics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../config.js"></script>
 <link rel="stylesheet" href="../customer-os/assets/customer-os-global.css">
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#182943;background:#f4f7fc;--navy:#0b1f3a;--blue:#1769e8;--teal:#0c8b8b;--line:#dfe7f2;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#182943}.top{background:#0b1f3a;color:#dce9fa;padding:12px 5vw;font-size:10px;letter-spacing:.15em;font-weight:850}.shell{width:min(1180px,calc(100% - 28px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 0}.brand{font-weight:950;color:#0b1f3a;letter-spacing:.04em}.brand small{display:block;font-size:9px;color:#64748b;letter-spacing:.14em;margin-top:4px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #d7e1ef;border-radius:10px;padding:10px 13px;background:#fff;color:#174ea6;font-size:12px;font-weight:850;text-decoration:none;min-height:40px}.btn.primary{background:#1769e8;border-color:#1769e8;color:#fff}.hero{border-radius:22px;background:linear-gradient(115deg,#0b1f3a,#164879 68%,#0c8b8b);color:#fff;padding:clamp(24px,5vw,42px);box-shadow:0 18px 45px #0b1f3a18}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.17em;color:#9af0e5}.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:-.035em;margin:12px 0}.hero p{max-width:780px;color:#dce9fa;line-height:1.75;font-size:13px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}.stat,.panel{background:#fff;border:1px solid #dfe7f2;border-radius:15px;padding:17px;min-width:0}.stat small{display:block;color:#64748b;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}.stat strong{display:block;font-size:27px;color:#0b1f3a;margin-top:8px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin:25px 0 12px}.section-head h2{margin:0;font-size:20px;color:#0b1f3a}.section-head p{margin:5px 0 0;color:#64748b;font-size:12px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.toolbar input,.toolbar select{border:1px solid #d1ddeb;border-radius:10px;padding:11px 12px;background:#fff;min-width:180px;font:inherit}.toolbar input{flex:1}.list{display:grid;gap:12px}.shipment{background:#fff;border:1px solid #dfe7f2;border-radius:16px;padding:17px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(180px,.7fr);gap:16px}.shipment h3{margin:0;color:#0b1f3a;font-size:16px}.route{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;color:#344862;font-size:12px;font-weight:750}.arrow{color:#0c8b8b;font-weight:950}.meta{display:flex;gap:8px;flex-wrap:wrap;color:#64748b;font-size:11px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#eef4ff;color:#174ea6;font-size:10px;font-weight:900}.pill.ready{background:#e5f8f2;color:#08775d}.pill.pending{background:#fff5df;color:#8a5a00}.offers{border-left:1px solid #e7edf5;padding-left:16px;display:flex;flex-direction:column;justify-content:center;gap:8px}.offer-count{font-size:25px;font-weight:950;color:#0b1f3a}.offer-caption{font-size:11px;color:#64748b}.empty{padding:26px;text-align:center;border:1px dashed #bdcde1;background:#fff;border-radius:15px}.empty h3{margin:0 0 8px;color:#0b1f3a}.empty p{color:#64748b;font-size:12px;line-height:1.7}.notice{padding:12px 14px;border-radius:11px;background:#eef5ff;border:1px solid #d6e5fa;color:#1c477e;font-size:12px;line-height:1.65;margin:14px 0}.notice.error{background:#fff0ef;border-color:#f2c8c4;color:#9b2721}.notice.ok{background:#e8f8f1;border-color:#bce9d8;color:#116b50}.footer{border-top:1px solid #dfe7f2;margin-top:28px;padding:20px 0 30px;color:#64748b;font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:700px){.stats{grid-template-columns:1fr}.shipment{grid-template-columns:1fr}.offers{border-left:0;border-top:1px solid #e7edf5;padding:14px 0 0}.nav{align-items:flex-start}.actions{width:100%}.actions .btn{flex:1}}
+</style>
 </head>
 <body>
-<div class="top">KRIM LOGISTICS · COMMERCIAL WORKFLOW</div>
-<header class="shell nav"><a class="brand" href="../../index.html">KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></a><div class="actions"><a class="btn" href="../../app/customer/index.html">Customer workspace</a> <a class="btn" href="../../auth/login.html?role=customer">Sign in</a></div></header>
+<div class="top">KRIM GLOBAL LOGISTICS OS · CUSTOMER QUOTES & PRICING</div>
 <main class="shell">
-<section class="hero"><div class="eyebrow">Freight pricing · secure workflow</div><h1>Request pricing with a shipment record behind it.</h1><p>KRIM uses a consistent shipment intake workflow so route, cargo, organization permissions and quote activity can be tied to the same operational record. We do not claim a quote has been broadcast or invent a price before the backend confirms it.</p><a class="btn primary" href="shipment-create.html">Start secure shipment request →</a></section>
-<section class="steps" aria-label="Quote workflow">
-<article class="card"><span class="num">01 · SHIPMENT</span><h2>Submit route and cargo</h2><p>Enter origin, destination, cargo details and transport requirements in the authenticated booking workflow.</p></article>
-<article class="card"><span class="num">02 · PRICING</span><h2>Check eligible pricing</h2><p>Pricing must come from an approved rate card or a valid partner quote. Availability depends on configured rates and partner responses.</p></article>
-<article class="card"><span class="num">03 · DECISION</span><h2>Review before accepting</h2><p>Only accept a quote after the platform displays its actual price, currency, validity and terms.</p></article>
+<header class="nav">
+  <div class="brand">KRIM LOGISTICS <small>GLOBAL FREIGHT · ONE CONNECTED CUSTOMER JOURNEY</small></div>
+  <div class="actions">
+    <a class="btn" href="../customer-os/index.html">Customer OS</a>
+    <a class="btn" href="../customer-os/customer-services/shipment-list.html">My shipments</a>
+    <a class="btn primary" href="../shipments/shipment-create.html">＋ Create shipment</a>
+  </div>
+</header>
+<section class="hero">
+  <div class="eyebrow">QUOTE REQUESTS · LIVE CUSTOMER RECORDS</div>
+  <h1>See every shipment request and its partner offers.</h1>
+  <p>Quote requests are tied to your shipment and authorized customer organization. Create a shipment to start the freight request; eligible partner offers appear here when the backend records them. KRIM never invents prices or displays sample quotes.</p>
+  <div class="actions">
+    <a class="btn primary" href="../shipments/shipment-create.html">Create a shipment request →</a>
+    <a class="btn" href="../shipper/quote-comparison.html">Open quote comparison</a>
+  </div>
 </section>
-<div class="notice"><strong>Operational status:</strong> This page guides you to the canonical booking workflow. It does not itself create a quote or notify carriers. Quote creation and partner responses must be confirmed by the secured backend.</div>
-<div class="actions"><a class="btn primary" href="shipment-create.html">Continue to booking</a> <a class="btn" href="../shipper/quote-comparison.html">Open quote comparison</a> <a class="btn" href="../customer-os/customer-services/shipment-list.html">View my shipments</a></div>
+<div id="notice" class="notice" role="status" aria-live="polite">Checking your secure KRIM session…</div>
+<section class="stats" aria-label="Quote request metrics">
+  <div class="stat"><small>Shipments in scope</small><strong id="metric-shipments">—</strong></div>
+  <div class="stat"><small>Shipments with offers</small><strong id="metric-offers">—</strong></div>
+  <div class="stat"><small>Live quote offers</small><strong id="metric-quotes">—</strong></div>
+</section>
+<section>
+  <div class="section-head"><div><h2>Your shipment quote requests</h2><p>Only shipments belonging to your active customer, shipper or enterprise organization are shown.</p></div></div>
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Search shipment number, origin or destination" aria-label="Search shipments">
+    <select id="status-filter" aria-label="Filter by shipment status"><option value="all">All shipment statuses</option><option value="pending">Waiting for offers</option><option value="offers">Has offers</option></select>
+  </div>
+  <div id="shipment-list" class="list"><div class="empty"><h3>Loading authorized shipments…</h3><p>No demo data is used.</p></div></div>
+</section>
+<div class="notice">Price and availability are confirmed only by a saved partner quote and the appropriate KRIM workflow. Quote creation, acceptance and payment must be confirmed by their respective backend response.</div>
+<footer class="footer"><span>© 2026 KRIM Logistics · Customer Quotes</span><span>Global-ready · Organization-scoped · No sample records</span></footer>
 </main>
-<footer class="shell">© 2026 KRIM Logistics · Customer pricing workflow</footer>
+<script>
+(async function(){
+'use strict';
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const $=id=>document.getElementById(id);
+const notice=$('notice'),list=$('shipment-list');
+let shipments=[],quotes=[];
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function say(message,kind){notice.textContent=message;notice.className='notice'+(kind?' '+kind:'')}
+function date(v){if(!v)return 'Date not available';const d=new Date(v);return Number.isNaN(d.getTime())?'Date not available':d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
+function activeQuotes(s){return quotes.filter(q=>Number(q.shipment_id)===Number(s.id)&&['draft','sent','accepted','pending','approved'].includes(String(q.status||'').toLowerCase())&&(!q.valid_until||new Date(q.valid_until)>new Date()))}
+function render(){
+ const q=$('search').value.trim().toLowerCase(),filter=$('status-filter').value;
+ const rows=shipments.filter(s=>{
+  const offers=activeQuotes(s).length;
+  const text=[s.shipment_number,s.origin_place_label,s.destination_place_label,s.requested_transport_mode,s.status].join(' ').toLowerCase();
+  return (!q||text.includes(q))&&(filter==='all'||(filter==='offers'&&offers>0)||(filter==='pending'&&offers===0));
+ });
+ list.replaceChildren();
+ if(!rows.length){const box=document.createElement('div');box.className='empty';box.innerHTML='<h3>No matching shipment requests</h3><p>'+(shipments.length?'Try another search or status filter.':'Create a shipment to start a quote request. Partner offers will appear when recorded by KRIM.')+'</p><a class="btn primary" href="../shipments/shipment-create.html">Create shipment →</a>';list.appendChild(box);return;}
+ for(const s of rows){
+  const offers=activeQuotes(s),id=Number(s.id),comp='../shipper/quote-comparison.html?shipment_id='+encodeURIComponent(id);
+  const card=document.createElement('article');card.className='shipment';
+  card.innerHTML='<div><h3>'+esc(s.shipment_number||('Shipment #'+id))+'</h3><div class="route"><span>'+esc(s.origin_place_label||'Origin to be confirmed')+'</span><span class="arrow">→</span><span>'+esc(s.destination_place_label||'Destination to be confirmed')+'</span></div><div class="meta"><span>'+esc(s.requested_transport_mode||'Transport mode pending')+'</span><span>Created '+esc(date(s.created_at))+'</span><span>Status: '+esc(s.status||'pending')+'</span></div></div><div class="offers"><div class="offer-count">'+offers.length+'</div><div class="offer-caption">'+(offers.length===1?'eligible quote offer': 'eligible quote offers')+'</div><div><span class="pill '+(offers.length?'ready':'pending')+'">'+(offers.length?'Offers available':'Awaiting partner offers')+'</span></div><div class="actions"><a class="btn primary" href="'+comp+'">'+(offers.length?'Compare offers':'Check offers')+' →</a><a class="btn" href="../customer-os/customer-services/shipment-details.html?shipment_id='+encodeURIComponent(id)+'">Shipment details</a></div></div>';
+  list.appendChild(card);
+ }
+}
+$('search').addEventListener('input',render);$('status-filter').addEventListener('change',render);
+try{
+ if(!client)throw new Error('KRIM backend configuration did not load. Refresh the page and try again.');
+ const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
+ if(!auth?.session){location.href='../../auth/login.html?next='+encodeURIComponent(location.pathname+location.search);return;}
+ const user=auth.session.user;
+ const {data:members,error:memberError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',user.id).eq('status','active');
+ if(memberError)throw memberError;
+ const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];
+ if(!ids.length)throw new Error('No active KRIM organization membership was found for this account.');
+ const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active');
+ if(orgError)throw orgError;
+ const customerIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));
+ if(!customerIds.length)throw new Error('This account has no active customer, shipper or enterprise organization.');
+ const {data:shipRows,error:shipError}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,status,origin_place_label,destination_place_label,requested_transport_mode,created_at').in('customer_organization_id',customerIds).order('created_at',{ascending:false}).limit(100);
+ if(shipError)throw shipError;
+ shipments=shipRows||[];
+ const shipmentIds=shipments.map(s=>Number(s.id)).filter(Number.isSafeInteger);
+ if(shipmentIds.length){
+  const {data:quoteRows,error:quoteError}=await client.from('krim_quotes').select('id,shipment_id,customer_organization_id,amount,currency_code,valid_until,status,created_at').in('customer_organization_id',customerIds).in('shipment_id',shipmentIds).order('created_at',{ascending:false}).limit(300);
+  if(quoteError)throw quoteError;
+  quotes=quoteRows||[];
+ }
+ $('metric-shipments').textContent=shipments.length;
+ $('metric-offers').textContent=shipments.filter(s=>activeQuotes(s).length>0).length;
+ $('metric-quotes').textContent=quotes.filter(q=>['draft','sent','accepted','pending','approved'].includes(String(q.status||'').toLowerCase())&&(!q.valid_until||new Date(q.valid_until)>new Date())).length;
+ const selected=new URLSearchParams(location.search).get('shipment_id');
+ if(selected){const target=shipments.find(s=>String(s.id)===selected);if(target)$('search').value=target.shipment_number||'';}
+ render();
+ say('Secure session and active organization membership verified. Loaded '+shipments.length+' shipment request(s) and '+quotes.length+' saved quote record(s).','ok');
+}catch(e){
+ console.error(e);shipments=[];quotes=[];['metric-shipments','metric-offers','metric-quotes'].forEach(id=>$(id).textContent='—');
+ list.innerHTML='<div class="empty"><h3>Quote requests unavailable</h3><p>'+esc(e?.message||'KRIM could not load your authorized records.')+' No sample records or prices are displayed. Sign in again or contact KRIM support.</p><a class="btn primary" href="../../auth/login.html">Sign in →</a></div>';
+ say(e?.message||'Unable to load quote requests.','error');
+}
+})();
+</script>
 </body></html>
