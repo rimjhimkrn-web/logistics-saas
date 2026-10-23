@@ -366,6 +366,16 @@ for (const [label, source, pattern] of [
   if (!pattern.test(source)) failures.push(`Phase 1 customer-entry check missing: ${label}`);
 }
 
+const phaseOneVisualPages = ["auth/access.html","auth/signup.html","auth/login.html","auth/forgot-password.html","auth/reset-password.html","auth/auth-callback.html","auth/mfa-enroll.html","auth/verify-email.html","auth/logout.html"];
+for (const file of phaseOneVisualPages) {
+  const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!source.includes("krim-global-shell") || !source.includes("../core/krim-global-interface.css")) failures.push("Missing KRIM global interface on " + file);
+}
+const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
+for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ".krim-global-shell input", ".krim-global-shell button", ":focus-visible"]) {
+  if (!globalInterfaceCss.includes(token)) failures.push("Missing global interface design token/component: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
