@@ -73,6 +73,21 @@ const required = [
 
 const failures = [];
 
+// Audit guard: the public E2E dashboard must never claim tests passed unless a real
+// runner and recorded execution evidence are connected. A display-only page must say NOT RUN.
+const e2eDashboardPath = "public/testing/e2e-test-runner.html";
+if (existsSync(e2eDashboardPath)) {
+  const dashboard = readFileSync(e2eDashboardPath, "utf8");
+  if (/100% Passing Rate|ALL SUITES GREEN|Executing full E2E test suite[\\s\\S]*?All tests passed successfully|Zero Downtime Failover/i.test(dashboard)) {
+    failures.push("E2E dashboard contains fabricated/unverified test-success claims.");
+  }
+  if (!/NOT RUN|Runner Not Connected/i.test(dashboard)) {
+    failures.push("E2E dashboard must disclose that no live runner is connected and no tests were executed.");
+  }
+} else {
+  failures.push("Public E2E dashboard is missing; audit its replacement before removing this guard.");
+}
+
  // Global interface conformance across Phases 2–5: one shared stylesheet is loaded last,
  // so page-local styles cannot silently replace the approved design tokens and components.
  const phaseTwoToFiveInterfacePages = [
