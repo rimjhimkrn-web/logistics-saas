@@ -3,19 +3,19 @@
 const client=window.KRIM_SUPABASE||window.supabaseClient,$=id=>document.getElementById(id);
 const view=document.body.dataset.shipmentView||'details';
 const params=new URLSearchParams(location.search),shipmentId=Number(params.get('shipment_id'));
-let orgIds=[],shipment=null;let userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';let timezoneSource='device default';
+let orgIds=[],shipment=null,currentUserId=null;let userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';let timezoneSource='device default';
 function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function date(v){if(!v)return 'Not recorded';const d=new Date(v);if(Number.isNaN(d.getTime()))return 'Not recorded';try{return d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short',timeZone:userTimezone})+' ('+userTimezone+')'}catch{return d.toLocaleString()+' (device time zone)'}}
-async function loadUserPreferences(){try{const {data,error}=await client.from('krim_user_app_preferences').select('preferences').eq('user_id',window.KRIM_CUSTOMER_WORKFLOW?.userId||'').maybeSingle();if(error)return;const saved=data?.preferences?.customer_localization?.timezone;if(saved){try{new Intl.DateTimeFormat('en',{timeZone:saved}).format();userTimezone=saved;timezoneSource='saved account preference'}catch{}}}catch{}} 
+async function loadUserPreferences(){try{const {data,error}=await client.from('krim_user_app_preferences').select('preferences').eq('user_id',currentUserId||'').maybeSingle();if(error)return;const saved=data?.preferences?.customer_localization?.timezone;if(saved){try{new Intl.DateTimeFormat('en',{timeZone:saved}).format();userTimezone=saved;timezoneSource='saved account preference'}catch{}}}catch{}} 
 function trackingFreshness(v){if(!v)return 'No verified tracking event recorded; current location is unavailable.';const t=new Date(v).getTime();if(!Number.isFinite(t))return 'Event timestamp is invalid; freshness cannot be assessed.';const age=Date.now()-t;if(age>24*60*60*1000)return 'Latest recorded event is over 24 hours old; the current position may be stale. This is a freshness warning, not a delivery SLA.';if(age< -5*60*1000)return 'Recorded event time is in the future; freshness requires review.';return 'Latest recorded event is within 24 hours. This is recorded-event visibility, not live GPS.'}
 function field(label,value){const b=node('div','field');b.append(node('div','label',label),node('div','value',value||'Not recorded'));$('fields').appendChild(b)}
 function place(label){return label||'Location not recorded'}
 async function access(){
  if(!client)throw new Error('KRIM configuration did not load. Refresh and retry.');
  const {data:auth,error:ae}=await client.auth.getSession();if(ae)throw ae;
- if(!auth?.session){location.replace(path('auth/login.html')+'?role=customer&next='+encodeURIComponent(location.pathname+location.search));return false}
+ if(!auth?.session){location.replace(path('auth/login.html')+'?role=customer&next='+encodeURIComponent(location.pathname+location.search));return false}currentUserId=auth.session.user.id;
  const {data:members,error:me}=await client.from('krim_organization_members').select('organization_id').eq('user_id',auth.session.user.id).eq('status','active');if(me)throw me;
  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error('No active KRIM organization membership was found.');
  const {data:orgs,error:oe}=await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active');if(oe)throw oe;
