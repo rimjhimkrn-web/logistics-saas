@@ -2,59 +2,34 @@
 Date: 2026-10-23
 Repository: `rimjhimkrn-web/logistics-saas`
 
-## Scope and results
-- Repository tree contains 1,135 tracked files.
-- Customer OS contains 67 HTML pages.
-- Customer OS directory page contains 180 `href` references (179 unique HTML destinations) and 183 total `href`/`src`/`action` references.
-- Checked all 67 Customer OS HTML pages' local `href`, `src`, and `action` targets against repository paths in batches. No missing relative target files were found in that scan.
-- This is a source-tree path audit, not a browser-based test of every live route, external CDN, authentication state, or every button's business operation. Do not treat it as proof that all workflows are production-complete.
+## Approved canonical routes
 
-## Changes committed
-1. `public/customer-os/customer-services/shipment-list.html`
-   - Replaced the static workflow placeholder with an organization-scoped shipment register backed by Supabase.
-   - Reads the signed-in user's active organization memberships, filters to active customer/shipper/enterprise organizations, queries `krim_shipments`, and displays real records only (no sample data).
-   - Added shipment counts, search, status filter, and links to shipment details, tracking, quotes, booking, and support.
-   - Schema checked against the connected Supabase project: shipment fields and location fields used by the page exist.
-   - RLS inspection confirmed the `krim_shipments` SELECT policy checks active organization access, with a separate policy for assigned partners.
-2. `public/customer/shipment-list.html`
-   - Converted the legacy page into a redirect to the canonical Customer OS Shipment Control Tower.
-   - Preserves query parameters and hash fragments.
-3. `public/quotes/quote-request.html`
-   - Fixed the quote-list navigation from a root-absolute path (which drops the GitHub Pages project prefix) to a relative path.
-4. `public/shipments/shipment-list.html`
-   - Already redirects to the canonical Customer OS Shipment List; retained as a compatibility route.
+The user approved one canonical page for each route group and permanent deletion of all listed alternatives. These deletions are committed on `main`.
 
-## Duplicate / overlapping route names found
-These are overlapping page names and workflows, not necessarily byte-identical copies. Do not delete them blindly because existing pages may link to them.
+| Workflow | Canonical page retained | Duplicate pages permanently deleted |
+|---|---|---|
+| Shipment List | `public/customer-os/customer-services/shipment-list.html` | `public/customer/shipment-list.html`; `public/shipments/shipment-list.html` |
+| Quote Comparison | `public/shipper/quote-comparison.html` | `public/customer-os/customer-services/quote-comparison.html`; `public/customer-os/quotes-pricing/quote-comparison.html`; `public/customer-os/shipper-services/quote-comparison.html`; `public/customer/quote-comparison.html`; `public/quotes/quote-comparison.html` |
+| Quote Request | `public/customer/quote-request.html` | `public/customer-os/customer-services/quote-request.html`; `public/customer-os/quotes-pricing/quote-request.html`; `public/quotes/quote-request.html` |
+| Payment Checkout | `public/shipper/payment-checkout.html` | `public/customer-os/shipper-services/payment-checkout.html`; `public/finance/payment-checkout.html` |
 
-### Shipment List — consolidated
-- Canonical: `public/customer-os/customer-services/shipment-list.html`
-- Legacy alias now redirects: `public/customer/shipment-list.html`
-- Existing compatibility redirect: `public/shipments/shipment-list.html`
+## Preserved functionality and link repairs
 
-### Quote Comparison — needs a later canonicalization pass
-- `public/customer-os/customer-services/quote-comparison.html`
-- `public/customer-os/quotes-pricing/quote-comparison.html`
-- `public/customer-os/shipper-services/quote-comparison.html`
-- `public/customer/quote-comparison.html`
-- `public/quotes/quote-comparison.html`
-- `public/shipper/quote-comparison.html`
+- The canonical Customer OS Shipment List remains an organization-scoped Supabase shipment register. It reads real `krim_shipments` records, scopes results by active customer/shipper/enterprise organization memberships, and provides search, status filtering and shipment navigation.
+- Repaired the Customer OS directory links and Customer OS workflow links to point to the retained quote-comparison, quote-request, shipment-list and payment-checkout routes.
+- Repaired legacy Customer, Quotes and Shipments navigation links that pointed to the deleted routes.
+- Updated the production smoke test to require the approved canonical routes instead of deleted aliases.
+- The homepage and customer signup/sign-in entry flow were not intentionally changed by this cleanup.
 
-### Quote Request — overlapping pages
-- `public/customer-os/customer-services/quote-request.html`
-- `public/customer-os/quotes-pricing/quote-request.html`
-- `public/customer/quote-request.html`
-- `public/quotes/quote-request.html`
+## Automated verification
 
-### Payment Checkout — different stages currently share the same name
-- `public/customer-os/shipper-services/payment-checkout.html`
-- `public/finance/payment-checkout.html`
-- `public/shipper/payment-checkout.html`
+- GitHub Actions production smoke check passed on commit `03de29d7bae7d17bdbac7ccd166256fc7cf86b5d`.
+- The check includes required production path checks, inline JavaScript syntax checks, and local-link/path-prefix validation for the Customer OS HTML pages.
+- Run: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/39905090515
+- This automated source-level check is not a browser-based end-to-end test of authentication, shipment creation, live quote acceptance, payment settlement, partner assignment, delivery evidence, or refunds.
 
-The checkout pages should not all be merged into one file without preserving their distinct stages: customer entry, eligibility/readiness, provider order creation, and server-side payment verification.
+## Remaining verification gates
 
-## Remaining closure gates
-- Perform a live browser test of homepage → signup/sign-in → customer workspace → shipment creation → partner opportunity → quote → acceptance → booking/payment verification → assignment → delivery proof → settlement.
-- Verify live GitHub Pages deployment and redirect behavior; repository reads are not a substitute for browser testing.
-- Review and consolidate the overlapping quote-comparison, quote-request, and payment-checkout routes without breaking inbound links or query parameters.
-- Do not delete other duplicate-looking pages until incoming references and unique workflow behavior have been checked.
+- Confirm the latest GitHub Pages deployment completes successfully before treating these changes as live.
+- Browser-test the customer lifecycle end-to-end: homepage → signup/sign-in → Customer Workspace → shipment creation → partner opportunity → quote → acceptance → payment verification → assignment → delivery proof → settlement.
+- A passing local-link smoke test does not by itself prove every transactional action works in production.
