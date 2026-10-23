@@ -69,6 +69,22 @@ function listHtmlFiles(dir) {
 }
 
 const customerOsPages = listHtmlFiles("public/customer-os");
+
+// Keep the Customer OS single-source-of-truth: exact duplicate HTML files are failures,
+// and every route must use the shared responsive design layer.
+const exactPageOwners = new Map();
+for (const file of customerOsPages) {
+  const html = readFileSync(file, "utf8");
+  const previous = exactPageOwners.get(html);
+  if (previous) failures.push(`Duplicate Customer OS page content: ${previous} and ${file}`);
+  else exactPageOwners.set(html, file);
+  if (!html.includes("customer-os-global.css")) {
+    failures.push(`Customer OS page is missing the shared UI stylesheet: ${file}`);
+  }
+}
+const sharedCustomerCss = "public/customer-os/assets/customer-os-global.css";
+if (!existsSync(sharedCustomerCss)) failures.push("Shared Customer OS design stylesheet is missing.");
+
 let checkedCustomerOsLinks = 0;
 for (const file of customerOsPages) {
   const html = readFileSync(file, "utf8");
