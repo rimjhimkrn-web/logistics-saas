@@ -612,6 +612,48 @@ for (const [label, source, pattern] of [
   if (!pattern.test(source)) failures.push("Phase 7 tracking/notification check missing: " + label);
 }
 
+// Phase 8 — pickup and custody: canonical secured milestone route, honest lifecycle,
+// global interface, customer entry points, driver access, and retirement of fake-success forms.
+const phaseEightPickup = existsSync("public/pickup-tracking.html") ? readFileSync("public/pickup-tracking.html", "utf8") : "";
+const phaseEightList = existsSync("public/customer-os/customer-services/shipment-list.html") ? readFileSync("public/customer-os/customer-services/shipment-list.html", "utf8") : "";
+const phaseEightOps = existsSync("public/customer-os/assets/shipment-operations.js") ? readFileSync("public/customer-os/assets/shipment-operations.js", "utf8") : "";
+const phaseEightHub = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
+const phaseEightNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
+const phaseEightDriver = existsSync("app/driver/module-05-pickup-collection.html") ? readFileSync("app/driver/module-05-pickup-collection.html", "utf8") : "";
+for (const [file, source] of [
+  ["public/pickup-tracking.html", phaseEightPickup],
+  ["app/driver/module-05-pickup-collection.html", phaseEightDriver],
+]) {
+  const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
+  if (!source.includes("krim-global-interface.css")) failures.push("Phase 8 page is missing the shared KRIM interface stylesheet: " + file);
+  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push("Phase 8 page is missing the KRIM global shell: " + file);
+  if ((head.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push("Phase 8 page must load exactly one shared global stylesheet: " + file);
+}
+for (const [label, source, pattern] of [
+  ["canonical pickup lookup uses the server-authorized shipment tracking RPC", phaseEightPickup, /rpc\\(["']krim_get_shipment_tracking["']/],
+  ["pickup event writes use the server-validated operational milestone RPC", phaseEightPickup, /rpc\\(["']krim_record_operational_milestone["']/],
+  ["pickup form does not claim success before the server accepts the event", phaseEightPickup, /Milestone not recorded[\\s\\S]*?server rejected the milestone/],
+  ["pickup retry response distinguishes safely ignored duplicate events", phaseEightPickup, /Duplicate retry safely ignored/],
+  ["pickup UI explains that custody, collection and delivery are separate states", phaseEightPickup, /scheduled pickup, physical collection, custody handover and delivery are distinct states/],
+  ["customer shipment register opens canonical pickup workflow with shipment reference", phaseEightList, /pickup-tracking\\.html\\?shipment=[\\s\\S]*?s\\.shipment_number/],
+  ["shipment details offers the canonical pickup and custody workflow", phaseEightOps, /Pickup & custody[\\s\\S]*?public\\/pickup-tracking\\.html[\\s\\S]*?shipment-tracking/],
+  ["customer hub links to the canonical pickup route", phaseEightHub, /href=["']\\.\\.\\/pickup-tracking\\.html["']/],
+  ["customer workflow navigation exposes pickup and custody", phaseEightNav, /pickup:'public\\/pickup-tracking\\.html'[\\s\\S]*?Pickup & custody/],
+  ["driver pickup module authenticates a session and active driver membership", phaseEightDriver, /auth\\.getSession\\([\\s\\S]*?krim_organization_members[\\s\\S]*?No active driver membership/],
+  ["driver pickup module reads real assignments without inserting demo trips", phaseEightDriver, /from\\('krim_driver_assignments'\\)[\\s\\S]*?No demo trips are inserted/],
+]) {
+  if (!pattern.test(source)) failures.push("Phase 8 pickup/custody check missing: " + label);
+}
+for (const [file, target] of [
+  ["public/shipments/pickup.html", /location\\.replace\\(['"]\\.\\.\\/pickup-tracking\\.html/],
+  ["public/partner/pickup-confirmation.html", /location\\.replace\\(['"]\\.\\.\\/pickup-tracking\\.html/],
+  ["public/driver/pickup-checklist.html", /location\\.replace\\(['"]\\.\\.\\/app\\/driver\\/module-05-pickup-collection\\.html/],
+]) {
+  const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!target.test(source)) failures.push("Phase 8 compatibility route does not redirect to the canonical secured workflow: " + file);
+  if (/Pickup record saved successfully|Pickup verified and weight bridge slip authenticated|Pickup checklist verified successfully/.test(source)) failures.push("Phase 8 legacy route still contains a fake pickup-success message: " + file);
+}
+
 const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
 for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ":where(input,select,textarea)", ":where(button,.btn", ":focus-visible"]) {
   if (!globalInterfaceCss.includes(token)) failures.push("Missing global interface design token/component: " + token);
