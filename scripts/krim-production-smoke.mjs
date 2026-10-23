@@ -6,6 +6,7 @@ import { join, dirname, resolve as pathResolve } from "node:path";
 const required = [
   "public/quote-result.html",
   "public/payment-verification.html",
+  "public/shipment-confirmation.html",
   "public/finance/payment-result.html",
   "public/shipper/spot-approvals.html",
   "public/partner/accepted-loads.html",
@@ -152,6 +153,7 @@ for (const [file, html] of [
   ["public/shipper/payment-checkout.html", paymentReadiness],
   ["public/quote-result.html", secureCheckout],
   ["public/payment-verification.html", paymentVerification],
+  ["public/shipment-confirmation.html", existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : ""],
 ]) {
   if (!html.includes("krim-global-interface.css")) failures.push(`Phase 5 page is missing the shared global stylesheet: ${file}`);
   if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
@@ -161,6 +163,9 @@ if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonic
 if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
 if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
+const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
+if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\\.verified===true&&pay\\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Shipment confirmation must require authenticated server-verified payment before confirming booking.");
+if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
