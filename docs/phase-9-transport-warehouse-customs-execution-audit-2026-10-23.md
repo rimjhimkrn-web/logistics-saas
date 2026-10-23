@@ -57,5 +57,18 @@ This work does **not** certify a complete multi-leg execution transaction. The e
 9. Confirm legacy links redirect to the correct role workspace and never show the old sample shipment reference or a fabricated success message.
 10. Test the shared interface at mobile and desktop widths and run the production smoke workflow.
 
+## Global interface conformance correction — 2026-10-23
+
+A broader Phase 9 page-by-page interface sweep found that several public transport pages still used only the older unified-page stylesheet, while many warehouse and operations module pages did not load the canonical shared stylesheet. This did not meet the one-global-standard requirement.
+
+The following source-level corrections have now been committed:
+- Added the shared `core/krim-global-interface.css` as the final stylesheet and the `krim-global-shell` body class to the four public mode pages: `public/road-rail.html`, `public/ocean.html`, `public/air.html`, and `public/warehousing.html`.
+- Re-enforced the final shared stylesheet order on the partner, warehouse, customs, operations and global workflow entry pages.
+- Applied the same shared stylesheet and shell to all 32 pages under `public/warehouse/` and all 26 pages under `public/operations/`.
+- Kept workflow logic and backend operations unchanged; these edits are interface-conformance changes only.
+- Extended `scripts/krim-production-smoke.mjs` to check Phase 9 page coverage, exactly one shared stylesheet, the global shell, correct relative stylesheet paths, and stylesheet ordering.
+
+Automated source checks still do not constitute browser-based visual acceptance. The next verification must confirm deployment success, no missing CSS requests/404s, and representative mobile/desktop pages across transport, warehouse, customs, partner and operations. Operational acceptance and cross-role authorization tests remain open.
+
 ## Exit decision
 **Phase 9 is not formally closed.** The global interface and route-safety changes are committed, but the deployed multi-role operational acceptance and backend evidence checks remain open. Source-level smoke checks are necessary but cannot prove the end-to-end business workflow.
