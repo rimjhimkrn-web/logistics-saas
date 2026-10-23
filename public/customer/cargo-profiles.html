@@ -1,110 +1,35 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Customer Cargo Profiles</title>
-    <meta name="description" content="Manage hazardous material classifications, pallet dimensions, and weight thresholds in KRIM OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#026f9e', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-
-<!-- KRIM_CUSTOMER_FLOW_NAV -->
-<link rel="stylesheet" href="/logistics-saas/core/krim-customer-workflow.css">
-<script defer src="/logistics-saas/core/krim-customer-workflow.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="Use the canonical customer cargo profile workflow for organization-scoped cargo records.">
+<title>Continue to Cargo Profiles | KRIM Logistics</title>
+<link rel="canonical" href="../customer-os/customer-services/cargo-profiles.html">
+<meta http-equiv="refresh" content="0;url=../customer-os/customer-services/cargo-profiles.html">
+<script>
+(function () {
+  var target = new URL("../customer-os/customer-services/cargo-profiles.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  window.location.replace(target.href);
+})();
+</script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-800 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Cargo Profiles</span>
-                </div>
-            </div>
-            <a href="/logistics-saas/public/customer/locations.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Back to Locations</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-widest">Freight Classification</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Cargo Profiles & Specs</h1>
-            <p class="text-slate-400 text-xs font-mono">Define standard commodity types, weight tolerances, and hazmat compliance flags.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-slate-700">
-                    <div class="space-y-1">
-                        <span class="font-bold text-white text-sm">Industrial Machinery & Heavy Pallets</span>
-                        <span class="block text-slate-400 text-[11px]">Max Payload: 24,000 kg • Class: Non-Haz Industrial</span>
-                    </div>
-                    <span class="px-3 py-1 bg-sky-500/15 text-sky-400 font-bold rounded-lg border border-sky-500/30">Standard Profile</span>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-slate-700">
-                    <div class="space-y-1">
-                        <span class="font-bold text-white text-sm">Temperature-Controlled Pharmaceuticals (Cold Chain)</span>
-                        <span class="block text-slate-400 text-[11px]">Strict Range: +2°C to +8°C • Real-time IoT Telemetry Required</span>
-                    </div>
-                    <span class="px-3 py-1 bg-emerald-500/15 text-emerald-400 font-bold rounded-lg border border-emerald-500/30">Cold Chain</span>
-                </div>
-            </div>
-
-            <button onclick="handleCargoProceed()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 cursor-pointer">
-                Proceed to Quote Request →
-            </button>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function handleCargoProceed() {
-            window.location.href = 'shipment-create.html';
-        }
-    </script>
-<style id="krim-workflow-nav-style">
-.krim-workflow-nav{margin:24px auto;padding:18px;max-width:1200px;border:1px solid #dbe5f2;border-radius:18px;background:linear-gradient(135deg,#f8fbff,#eef5ff);color:#10213d;font:14px/1.5 system-ui,sans-serif}
-.krim-workflow-nav .kwn-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.krim-workflow-nav strong{font-size:15px}.krim-workflow-nav small{color:#536783}
-.krim-workflow-nav .kwn-links{display:flex;gap:8px;flex-wrap:wrap}
-.krim-workflow-nav a{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid #cbd8ea;border-radius:10px;background:#fff;color:#173e78;text-decoration:none;font-weight:650}
-.krim-workflow-nav a:hover{background:#e2edff;border-color:#8db4f2}
-@media(max-width:600px){.krim-workflow-nav{margin:16px 10px;padding:14px}.krim-workflow-nav a{flex:1 1 42%;justify-content:center}}
-</style>
-<section class="krim-workflow-nav" aria-label="KRIM customer workflow navigation">
- <div class="kwn-head"><strong>KRIM Global Logistics · Customer Workflow</strong><small>Navigate the connected customer journey</small></div>
- <div class="kwn-links">
-  <a href="index.html">Customer Home</a>
-  <a href="shipment-create.html">Book Shipment</a>
-  <a href="quote-request.html">Request Quote</a>
-  <a href="address-book.html">Addresses</a>
-  <a href="cargo-profiles.html">Cargo Profiles</a>
-  <a href="recurring-shipments.html">Recurring Shipments</a>
-  <a href="../app/document-vault.html">Document Vault</a>
-  <a href="claims.html">Claims</a>
-  <a href="support.html">Support</a>
-  <a href="company-profile.html">Company Profile</a>
-  <a href="workflow-hub.html">All Customer Services</a>
- </div>
-</section>
+<body>
+<main>
+<h1>Cargo Profiles has moved</h1>
+<p>Use the canonical customer cargo profile workflow for organization-scoped cargo records. The legacy page is no longer maintained as a separate interface.</p>
+<p><a href="../customer-os/customer-services/cargo-profiles.html" id="canonical-link">Continue to Cargo Profiles</a></p>
+<script>
+(function () {
+  var target = new URL("../customer-os/customer-services/cargo-profiles.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  document.getElementById("canonical-link").href = target.href;
+})();
+</script>
+</main>
 </body>
 </html>
