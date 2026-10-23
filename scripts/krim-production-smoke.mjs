@@ -159,22 +159,22 @@ for (const [file, html] of [
 if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
 if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
 if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
-if (!/result\\.success\\s*!==\\s*true[\\s\\S]*?result\\.verified\\s*!==\\s*true[\\s\\S]*?result\\.status\\s*!==\\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
+if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
-if (/Payment Executed Successfully|€14,250\\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
-if (!/location\\.replace/.test(legacyPaymentResult) || !/payment-verification\\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
+if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
+if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
-  ["order endpoint authenticates the bearer session", orderFn, /auth\\.getUser\\(token\\)/],
-  ["order endpoint derives the amount from the accepted quote", orderFn, /Number\\(quote\\.amount\\)/],
-  ["order endpoint checks accepted partner assignment", orderFn, /assignment\\.status\\s*!==\\s*["']accepted["']/],
-  ["order endpoint enforces verified payment capability", orderFn, /krim_payment_capability_registry[\\s\\S]*?checkout_enabled/],
-  ["verification checks HMAC signature", verifyFn, /generateHmacSha256[\\s\\S]*?razorpaySignature/],
-  ["verification independently fetches provider payment", verifyFn, /api\\.razorpay\\.com\\/v1\\/payments/],
-  ["verification requires captured status", verifyFn, /razorpayStatus\\s*!==\\s*["']captured["']/],
-  ["verification checks amount and currency", verifyFn, /Payment amount mismatch[\\s\\S]*?Payment currency mismatch/],
-  ["verification creates an idempotent financial transaction", verifyFn, /krim_financial_transactions[\\s\\S]*?provider_reference/],
+  ["order endpoint authenticates the bearer session", orderFn, /auth\.getUser\(token\)/],
+  ["order endpoint derives the amount from the accepted quote", orderFn, /Number\(quote\.amount\)/],
+  ["order endpoint checks accepted partner assignment", orderFn, /assignment\.status\s*!==\s*["']accepted["']/],
+  ["order endpoint enforces verified payment capability", orderFn, /krim_payment_capability_registry[\s\S]*?checkout_enabled/],
+  ["verification checks HMAC signature", verifyFn, /generateHmacSha256[\s\S]*?razorpaySignature/],
+  ["verification independently fetches provider payment", verifyFn, /api\.razorpay\.com\/v1\/payments/],
+  ["verification requires captured status", verifyFn, /razorpayStatus\s*!==\s*["']captured["']/],
+  ["verification checks amount and currency", verifyFn, /Payment amount mismatch[\s\S]*?Payment currency mismatch/],
+  ["verification creates an idempotent financial transaction", verifyFn, /krim_financial_transactions[\s\S]*?provider_reference/],
 ]) {
   if (!pattern.test(source)) failures.push(`Phase 5 payment safety check missing: ${label}`);
 }
