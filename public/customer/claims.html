@@ -1,123 +1,35 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Claims & Cargo Insurance Management</title>
-    <meta name="description" content="File freight claims, report damages, and manage insurance underwriters inside KRIM OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#026f9e', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-
-<!-- KRIM_CUSTOMER_FLOW_NAV -->
-<link rel="stylesheet" href="/logistics-saas/core/krim-customer-workflow.css">
-<script defer src="/logistics-saas/core/krim-customer-workflow.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="Continue to the canonical KRIM customer claims workflow.">
+<title>Continue to Customer Claims | KRIM Logistics</title>
+<link rel="canonical" href="../customer-os/customer-services/claims.html">
+<meta http-equiv="refresh" content="0;url=../customer-os/customer-services/claims.html">
+<script>
+(function () {
+  var target = new URL("../customer-os/customer-services/claims.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  window.location.replace(target.href);
+})();
+</script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-rose-400 font-semibold uppercase">Claims & Underwriting</span>
-                </div>
-            </div>
-            <a href="/logistics-saas/public/customer/payment-history.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Payment History →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-widest">Cargo Insurance & Discrepancies</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Claims Management</h1>
-            <p class="text-slate-400 text-xs font-mono">Lodge cargo damage claims, request insurance arbitration, and track payout statuses.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <form onsubmit="handleClaimSubmit(event)" class="space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Shipment Reference</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 transition">
-                            <option>#SHP-2026-8841 (TransGlobal Fleet)</option>
-                            <option>#SHP-2026-8790 (Apex Express)</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Claim Type</label>
-                        <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 transition">
-                            <option>Partial Cargo Damage / Leakage</option>
-                            <option>Total Loss / Accident Claim</option>
-                            <option>Missing Pallet / Shortage</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-slate-400 uppercase tracking-wider">Claim Amount Requested</label>
-                    <input type="text" required placeholder="₹12,500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 transition">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-slate-400 uppercase tracking-wider">Incident Details & Evidence</label>
-                    <textarea rows="4" required placeholder="Describe the damage or discrepancy. Reference bolt seal failure or photographic evidence..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white focus:outline-none focus:border-rose-500 transition resize-none"></textarea>
-                </div>
-
-                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-rose-600/25 cursor-pointer">
-                    File Claim with Underwriter →
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function handleClaimSubmit(e) {
-            e.preventDefault();
-            window.location.href = '../support/create-ticket.html?category=claim';
-        }
-    </script>
-<style id="krim-workflow-nav-style">
-.krim-workflow-nav{margin:24px auto;padding:18px;max-width:1200px;border:1px solid #dbe5f2;border-radius:18px;background:linear-gradient(135deg,#f8fbff,#eef5ff);color:#10213d;font:14px/1.5 system-ui,sans-serif}
-.krim-workflow-nav .kwn-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.krim-workflow-nav strong{font-size:15px}.krim-workflow-nav small{color:#536783}
-.krim-workflow-nav .kwn-links{display:flex;gap:8px;flex-wrap:wrap}
-.krim-workflow-nav a{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid #cbd8ea;border-radius:10px;background:#fff;color:#173e78;text-decoration:none;font-weight:650}
-.krim-workflow-nav a:hover{background:#e2edff;border-color:#8db4f2}
-@media(max-width:600px){.krim-workflow-nav{margin:16px 10px;padding:14px}.krim-workflow-nav a{flex:1 1 42%;justify-content:center}}
-</style>
-<section class="krim-workflow-nav" aria-label="KRIM customer workflow navigation">
- <div class="kwn-head"><strong>KRIM Global Logistics · Customer Workflow</strong><small>Navigate the connected customer journey</small></div>
- <div class="kwn-links">
-  <a href="index.html">Customer Home</a>
-  <a href="shipment-create.html">Book Shipment</a>
-  <a href="quote-request.html">Request Quote</a>
-  <a href="address-book.html">Addresses</a>
-  <a href="cargo-profiles.html">Cargo Profiles</a>
-  <a href="recurring-shipments.html">Recurring Shipments</a>
-  <a href="../app/document-vault.html">Document Vault</a>
-  <a href="claims.html">Claims</a>
-  <a href="support.html">Support</a>
-  <a href="company-profile.html">Company Profile</a>
-  <a href="workflow-hub.html">All Customer Services</a>
- </div>
-</section>
+<body>
+<main>
+<h1>Customer Claims has moved</h1>
+<p>The legacy page displayed a simulated success state; the canonical claims register reads authorized claim records and does not fabricate claims. This redirect does not claim a database write or operational completion.</p>
+<p><a href="../customer-os/customer-services/claims.html" id="canonical-link">Continue to Customer Claims</a></p>
+<script>
+(function () {
+  var target = new URL("../customer-os/customer-services/claims.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  document.getElementById("canonical-link").href = target.href;
+})();
+</script>
+</main>
 </body>
 </html>
