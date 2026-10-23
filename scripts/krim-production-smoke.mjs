@@ -580,6 +580,38 @@ for (const file of ["public/customer-os/customer-services/shipment-details.html"
 const phaseSixCustomerNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
 if (!/book:'public\/shipper\/booking-request\.html'/.test(phaseSixCustomerNav)) failures.push("Customer OS navigation must use the canonical shipment-request page.");
 
+// Phase 7 — recorded tracking/timeline, explicit freshness, saved time-zone display,
+// persisted customer notification preferences, and shared global interface.
+const phaseSevenTracking = existsSync("public/customer-os/customer-services/tracking-map.html") ? readFileSync("public/customer-os/customer-services/tracking-map.html", "utf8") : "";
+const phaseSevenTimeline = existsSync("public/customer-os/customer-services/shipment-timeline.html") ? readFileSync("public/customer-os/customer-services/shipment-timeline.html", "utf8") : "";
+const phaseSevenOperations = existsSync("public/customer-os/assets/shipment-operations.js") ? readFileSync("public/customer-os/assets/shipment-operations.js", "utf8") : "";
+const phaseSevenPreferences = existsSync("public/customer-os/customer-services/shipping-preferences.html") ? readFileSync("public/customer-os/customer-services/shipping-preferences.html", "utf8") : "";
+const phaseSevenHub = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
+for (const [file, source] of [
+  ["public/customer-os/customer-services/tracking-map.html", phaseSevenTracking],
+  ["public/customer-os/customer-services/shipment-timeline.html", phaseSevenTimeline],
+  ["public/customer-os/customer-services/shipping-preferences.html", phaseSevenPreferences],
+  ["public/customer-os/index.html", phaseSevenHub],
+]) {
+  const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
+  if (!source.includes("krim-global-interface.css")) failures.push("Phase 7 page is missing the shared KRIM interface stylesheet: " + file);
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 7 page is missing the shared KRIM global shell: " + file);
+  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 7 page must load exactly one shared global stylesheet: " + file);
+}
+for (const [label, source, pattern] of [
+  ["timeline reads persisted shipment status, tracking and milestone events", phaseSevenOperations, /krim_shipment_status_history[\s\S]*?krim_tracking_events[\s\S]*?krim_shipment_milestones/],
+  ["tracking reads persisted shipment tracking events", phaseSevenOperations, /from\(['"]krim_tracking_events['"]\)[\s\S]*?eq\(['"]shipment_id['"],shipment.id\)/],
+  ["tracking explicitly distinguishes recorded events from live GPS", phaseSevenOperations, /recorded-event visibility, not live GPS/i],
+  ["tracking flags potentially stale events without claiming a delivery SLA", phaseSevenOperations, /trackingFreshness[\s\S]*?over 24 hours old[\s\S]*?not a delivery SLA/],
+  ["timestamps use the saved user time-zone preference", phaseSevenOperations, /customer_localization[\s\S]*?timezone[\s\S]*?timeZone:userTimezone/],
+  ["customer notification preferences are saved per user", phaseSevenPreferences, /shipping_preferences[\s\S]*?notifications:getChecks\('notify'\)[\s\S]*?krim_user_app_preferences[\s\S]*?upsert\(/],
+  ["notification settings state that preferences do not guarantee delivery", phaseSevenPreferences, /Actual message delivery still depends on verified contact details, consent, provider configuration and notification service status/i],
+  ["tracking and timeline link to the canonical notification preference page", phaseSevenTracking + phaseSevenTimeline, /shipping-preferences\.html/],
+  ["customer hub links to the saved notification preferences", phaseSevenHub, /customer-services\/shipping-preferences\.html/],
+]) {
+  if (!pattern.test(source)) failures.push("Phase 7 tracking/notification check missing: " + label);
+}
+
 const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
 for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ":where(input,select,textarea)", ":where(button,.btn", ":focus-visible"]) {
   if (!globalInterfaceCss.includes(token)) failures.push("Missing global interface design token/component: " + token);
