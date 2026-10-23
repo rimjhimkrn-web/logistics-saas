@@ -570,7 +570,7 @@ for (const [label, source, pattern] of [
   ["dashboard implements search, status filtering, sorting and pagination", phaseSixDashboard, /search.addEventListener[\s\S]*?filter.addEventListener[\s\S]*?sort-order[\s\S]*?page-prev[\s\S]*?page-next/],
   ["dashboard actions route to canonical shipment details, visibility and quote list", phaseSixDashboard, /customer-services\/shipment-details\.html[\s\S]*?visibility\/live-tracking-map\.html[\s\S]*?quotes-pricing\/quote-list\.html/],
   ["dashboard creates shipments only through the canonical request page", phaseSixDashboard, /public\/shipper\/booking-request\.html/],
-  ["legacy active shipments route redirects to canonical dashboard and preserves query/hash", phaseSixLegacy, /location\.replace[\s\S]*?customer-os\/customer-services\/shipment-list\.html[\s\S]*?target\.search=location\.search[\s\S]*?target\.hash=location\.hash/],
+  ["legacy active shipments route redirects to canonical dashboard and preserves query/hash", phaseSixLegacy, /customer-os\/customer-services\/shipment-list\.html[\s\S]*?target\.search=location\.search[\s\S]*?target\.hash=location\.hash[\s\S]*?location\.replace/],
 ]) {
   if (!pattern.test(source)) failures.push("Phase 6 dashboard check missing: " + label);
 }
