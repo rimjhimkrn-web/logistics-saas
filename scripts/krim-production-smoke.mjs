@@ -167,6 +167,20 @@ for (const deletedRoute of ["public/customer/quote-comparison.html", "public/cus
   if (customerWorkflow.includes(deletedRoute)) failures.push(`Shared Customer OS navigation still references deleted route: ${deletedRoute}`);
 }
 
+for (const [label, route] of [
+  ["customer invoices", "public/customer-os/customer-services/invoices.html"],
+  ["customer claims", "public/customer-os/customer-services/claims.html"],
+  ["customer address book", "public/customer-os/customer-services/address-book.html"],
+  ["customer company profile", "public/customer-os/customer-services/company-profile.html"],
+]) {
+  if (!existsSync(route)) failures.push(`Canonical Customer OS route missing: ${label} -> ${route}`);
+  if (!customerWorkflow.includes(route)) failures.push(`Shared Customer OS navigation does not use canonical route for ${label}: ${route}`);
+}
+for (const duplicateAlias of ["public/customer-os/customer-services/shipment-create.html"]) {
+  if (existsSync(duplicateAlias)) failures.push(`Duplicate Customer OS route alias should be removed: ${duplicateAlias}`);
+  if (customerWorkflow.includes(duplicateAlias)) failures.push(`Shared Customer OS navigation references duplicate route alias: ${duplicateAlias}`);
+}
+
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 for (const [label, pattern] of [
   ["server-created Razorpay order", /create-global-razorpay-order/],
