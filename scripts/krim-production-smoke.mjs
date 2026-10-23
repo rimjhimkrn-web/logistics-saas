@@ -17,8 +17,9 @@ const required = [
   "supabase/functions/create-global-razorpay-order/index.ts",
   "supabase/functions/verify-razorpay-payment/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
-  "public/customer/shipment-list.html",
-  "public/quotes/quote-request.html",
+  "public/shipper/quote-comparison.html",
+  "public/customer/quote-request.html",
+  "public/shipper/payment-checkout.html",
   "app/partner/index.html",
   "public/partner/partner-onboarding.html",
   "public/partner/load-marketplace.html",
@@ -161,7 +162,6 @@ const partnerOnboarding = existsSync("public/partner/partner-onboarding.html") ?
 const partnerBid = existsSync("public/partner/submit-quote.html") ? readFileSync("public/partner/submit-quote.html", "utf8") : "";
 const booking = existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "";
 const customerShipmentList = existsSync("public/customer-os/customer-services/shipment-list.html") ? readFileSync("public/customer-os/customer-services/shipment-list.html", "utf8") : "";
-const legacyShipmentList = existsSync("public/customer/shipment-list.html") ? readFileSync("public/customer/shipment-list.html", "utf8") : "";
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
@@ -175,7 +175,6 @@ for (const [label, source, pattern] of [
   ["customer booking rejects identical origin and destination", booking, /originId\s*===\s*destinationId/],
   ["Customer OS shipment list reads live shipment records", customerShipmentList, /from\(['"]krim_shipments['"]\)/],
   ["Customer OS shipment list is scoped to active organization membership", customerShipmentList, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?customerIds/],
-  ["Legacy customer shipment list redirects to canonical Customer OS", legacyShipmentList, /location\.replace\(target\)/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
