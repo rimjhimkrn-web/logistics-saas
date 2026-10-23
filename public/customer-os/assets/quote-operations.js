@@ -43,9 +43,10 @@ async function loadDetail(){
  const accepted=String(q.status||'').toLowerCase()==='accepted',expired=q.valid_until&&new Date(q.valid_until).getTime()<=Date.now();
  $('accept-button').classList.toggle('hidden',view!=='acceptance');$('compare-link').href=path('public/shipper/quote-comparison.html')+'?shipment_id='+encodeURIComponent(q.shipment_id||'');$('detail-link').href=path('public/customer-os/quotes-pricing/quote-details.html')+'?quote_id='+encodeURIComponent(q.id);
  if(view==='acceptance'){
-  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0;
+  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment;
   button.textContent=accepted?'Quote already accepted':expired?'Quote expired':'Accept quote securely';
-  if(accepted)say('This quote is already marked accepted by the database. Booking, partner assignment and payment remain separate checks.');
+  if(!shipment)say('The linked shipment could not be verified inside your organization. Quote acceptance is blocked.','error');
+  else if(accepted)say('This quote is already marked accepted by the database. Booking, partner assignment and payment remain separate checks.');
   else if(expired)say('This quote has expired. KRIM will not attempt to accept an expired quote.','warn');
   else say('Review the amount, currency and validity before acceptance. KRIM revalidates eligibility on the server.','')
  }else say('Quote and shipment records are scoped to your active customer organization. This view does not imply booking or payment completion.')
