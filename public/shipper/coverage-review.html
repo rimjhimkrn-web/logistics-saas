@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1f3a">
+<meta name="description" content="Request a KRIM Logistics review for a location or freight route that is not yet confirmed as serviceable.">
+<title>Global Coverage Review | KRIM Logistics</title>
+<link rel="stylesheet" href="../../core/krim-global-interface.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0b1f3a;--blue:#1769e0;--cyan:#0ea5c6;--ink:#17283f;--muted:#64748b;--line:#dce5f0;--paper:#f4f7fb;--green:#12805c;--amber:#9a610b;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px "DM Sans",system-ui,sans-serif}a{color:inherit;text-decoration:none}.topline{height:5px;background:linear-gradient(90deg,var(--navy),var(--blue),var(--cyan))}.topbar{height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);gap:12px}.brand{display:flex;align-items:center;gap:11px}.mark{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,var(--blue),var(--navy));color:white;font:800 22px Manrope}.brand b{display:block;color:var(--navy);font:800 15px Manrope;letter-spacing:.06em}.brand small{display:block;margin-top:3px;color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.nav{display:flex;gap:10px;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);font-weight:700;font-size:12px;cursor:pointer;background:#fff;color:var(--navy)}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn:disabled{opacity:.55;cursor:not-allowed}.wrap{max-width:1120px;margin:0 auto;padding:28px 18px 48px}.crumb{font-size:12px;color:#74849a;margin-bottom:16px}.hero{background:linear-gradient(115deg,#0b1f3a,#123b6b 62%,#1769e0);border-radius:20px;padding:clamp(24px,5vw,42px);color:#fff;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:270px;height:270px;border:1px solid #ffffff25;border-radius:50%;right:-80px;top:-130px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff06}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#b8d9ff;font-weight:800}.hero h1{font:800 clamp(27px,4vw,40px)/1.14 Manrope;margin:13px 0}.hero p{max-width:720px;color:#dceaff;line-height:1.7;margin:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{padding:8px 10px;border:1px solid #ffffff30;border-radius:9px;background:#ffffff0d;font-size:11px}.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:18px;align-items:start;margin-top:20px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 34px #17375b0b;overflow:hidden}.cardhead{padding:20px 22px;border-bottom:1px solid #edf1f6}.cardhead h2{font:800 17px Manrope;color:var(--navy);margin:0}.cardhead p{font-size:12px;line-height:1.6;color:#74849a;margin:7px 0 0}.body{padding:22px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{min-width:0}.field.full{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:700;color:#30435b;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;min-height:45px;border:1px solid #d8e2ee;background:#fbfdff;border-radius:10px;padding:12px;color:#17283f;font:inherit}.field textarea{min-height:112px;resize:vertical;line-height:1.55}.field input:focus,.field select:focus,.field textarea:focus{outline:3px solid #1769e019;border-color:#6ca3f5}.hint{font-size:10px;line-height:1.55;color:#8492a6;margin-top:6px}.footer-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid #edf1f6;padding-top:18px;margin-top:20px}.privacy{max-width:380px;color:#77869a;font-size:10px;line-height:1.55}.feedback{display:none;padding:14px;border-radius:11px;margin-top:15px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.feedback.show{display:block}.feedback.info{background:#eff6ff;border:1px solid #d5e6ff;color:#2459a8}.feedback.error{background:#fff1f0;border:1px solid #ffd3cf;color:var(--red)}.feedback.success{background:#edf9f4;border:1px solid #c6eadb;color:#116a4e}.aside{padding:20px}.aside h3{font:800 14px Manrope;color:var(--navy);margin:0 0 13px}.status{padding:13px;border-radius:12px;background:#fff8eb;border:1px solid #f2dfb7;color:#85570f;font-size:11px;line-height:1.65}.status b{display:block;margin-bottom:5px}.step{display:flex;gap:10px;margin-top:15px}.num{width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:9px;background:#eaf3ff;color:var(--blue);font-weight:800}.step b{display:block;font-size:11px;color:#30435b}.step small{display:block;color:#8492a6;font-size:10px;line-height:1.55;margin-top:4px}.bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#8996a8;font-size:10px;margin-top:22px}.bottom a:hover{color:var(--blue)}@media(max-width:760px){.topbar{height:64px;padding:0 13px}.brand b{font-size:12px}.brand small{font-size:8px}.mark{width:35px;height:35px}.nav .btn{padding:9px;font-size:10px}.grid{grid-template-columns:1fr}.body,.cardhead{padding:17px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.footer-actions{align-items:stretch;flex-direction:column-reverse}.footer-actions .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header class="topbar">
+<a class="brand" href="../../app/customer/index.html" aria-label="KRIM Customer Workspace"><span class="mark">K</span><span><b>KRIM LOGISTICS</b><small>Global Logistics Operating System</small></span></a>
+<nav class="nav" aria-label="Customer navigation"><a class="btn" href="booking-request.html">← Shipment request</a><a class="btn" href="../../app/customer/index.html">Workspace</a></nav>
+</header>
+<main class="wrap">
+<div class="crumb"><a href="../../app/customer/index.html">Customer Workspace</a> / <a href="booking-request.html">Shipment request</a> / Global coverage review</div>
+<section class="hero">
+<div class="eyebrow">Global network · Coverage review</div>
+<h1>Tell us where your freight needs to go.</h1>
+<p>Can't find a village, remote locality, postcode, airport, port, or route—or the route's operational coverage is not confirmed? Submit a review request with the exact locations. This creates an inquiry, not a service or booking promise.</p>
+<div class="chips"><span class="chip">🌍 Keep the exact locality</span><span class="chip">🔎 Human / operational review may be required</span><span class="chip">🛡️ Signed-in customer access</span></div>
+</section>
+<div class="grid">
+<section class="card">
+<div class="cardhead"><h2>Request a location & route review</h2><p>Use the name customers and local operators actually use. Do not replace a village or remote address with a nearby city.</p></div>
+<div class="body">
+<form id="coverage-form" novalidate>
+<div class="fields">
+<div class="field"><label for="origin">Origin / pickup locality *</label><input id="origin" name="origin" maxlength="240" required autocomplete="street-address" placeholder="Village, town, address, terminal or postcode"><div class="hint">Include state/region and country to reduce ambiguity.</div></div>
+<div class="field"><label for="destination">Destination / delivery locality *</label><input id="destination" name="destination" maxlength="240" required autocomplete="street-address" placeholder="Village, town, address, terminal or postcode"><div class="hint">Keep the requested destination exact.</div></div>
+<div class="field"><label for="route-type">Route arrangement</label><select id="route-type"><option value="door_to_door">Door-to-door</option><option value="domestic">Domestic movement</option><option value="cross_border">Cross-border / international</option><option value="airport_to_airport">Airport-to-airport</option><option value="port_to_port">Seaport-to-seaport</option><option value="terminal_to_terminal">Terminal-to-terminal</option><option value="warehouse_to_warehouse">Warehouse-to-warehouse</option><option value="first_last_mile">First-mile / last-mile</option><option value="multimodal_end_to_end">End-to-end multimodal</option></select></div>
+<div class="field"><label for="mode">Preferred transport mode</label><select id="mode"><option value="MULTIMODAL">Multimodal</option><option value="ROAD">Road</option><option value="RAIL">Rail</option><option value="OCEAN">Ocean / sea</option><option value="AIR">Air</option><option value="WAREHOUSE_TRANSFER">Warehouse / distribution transfer</option><option value="SPECIALIST">Specialist / project cargo</option></select></div>
+<div class="field"><label for="weight">Estimated cargo weight (kg, optional)</label><input id="weight" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" placeholder="Optional"></div>
+<div class="field"><label for="date">Requested service date (optional)</label><input id="date" type="date"><div class="hint">This is a requested date, not a confirmed collection date.</div></div>
+<div class="field full"><label for="reason">What should KRIM review? *</label><textarea id="reason" maxlength="1000" required placeholder="E.g. the locality is not listed, rural pickup access, last-mile handoff, international route, or a place-search problem. Do not include passwords or payment details."></textarea><div class="hint">Up to 1,000 characters. Do not include unnecessary personal or sensitive information.</div></div>
+</div>
+<div class="footer-actions"><div class="privacy">Your signed-in customer identity is used by the backend to associate this request with your customer profile. The page does not claim serviceability or create a shipment.</div><button class="btn primary" id="submit-coverage" type="submit" disabled>Submit coverage review →</button></div>
+</form>
+<div id="coverage-feedback" class="feedback" role="status" aria-live="polite"></div>
+</div>
+</section>
+<aside class="card aside">
+<h3>What the review means</h3>
+<div class="status"><b>Important: coverage is not yet confirmed</b>A place found by geographic search does not prove that KRIM has an active market, approved carrier, route, capacity, tariff, customs eligibility, or delivery commitment.</div>
+<div class="step"><span class="num">1</span><div><b>Request recorded</b><small>A reference is shown only after the backend confirms successful submission.</small></div></div>
+<div class="step"><span class="num">2</span><div><b>Route and locality review</b><small>Operational coverage, partner service areas, cargo requirements and restrictions still need verification.</small></div></div>
+<div class="step"><span class="num">3</span><div><b>Next steps</b><small>A submitted request is not a quote, confirmed booking, dispatch, or guaranteed response time.</small></div></div>
+<div class="status" style="margin-top:18px;background:#eff6ff;border-color:#d5e6ff;color:#2459a8"><b>Having trouble?</b>If submission fails, no success is assumed. Keep the error message and contact KRIM support; do not repeatedly submit if you are unsure whether the request was recorded.</div>
+</aside>
+</div>
+<div class="bottom"><span>© 2026 KRIM Logistics · Global Logistics Operating System</span><span><a href="active-shipments.html">My shipments</a> · <a href="../../terms.html">Terms</a></span></div>
+</main>
+<script>
+(function(){
+"use strict";
+const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
+const PUBLISHABLE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const client=window.KRIM_SUPABASE||window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);
+const form=$("coverage-form"),submit=$("submit-coverage"),feedback=$("coverage-feedback");
+let ready=false,submitting=false;
+function show(message,type){feedback.textContent=message;feedback.className="feedback show "+(type||"info");}
+function setReady(){submit.disabled=!ready||submitting;}
+function setDateMinimum(){const today=new Date();const local=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);$("date").min=local;}
+function prefill(){
+ const p=new URLSearchParams(location.search);
+ for(const key of ["origin","destination","mode","weight","date"])if(p.has(key)&&$(key))$(key).value=p.get(key).slice(0,240);
+ if(p.has("route_type"))$("route-type").value=p.get("route_type");
+}
+async function init(){
+ try{
+  const {data,error}=await client.auth.getSession();if(error)throw error;
+  if(!data||!data.session){
+   const next=encodeURIComponent(location.pathname+location.search);
+   location.replace("../../auth/login.html?role=customer&next="+next);return;
+  }
+  const user=data.session.user;
+  const {data:links,error:linkError}=await client.from("krim_customer_identity_links").select("customer_profile_id,identity_status").eq("user_id",user.id).eq("identity_status","verified").limit(2);
+  if(linkError)throw linkError;
+  if(!Array.isArray(links)||links.length!==1)throw new Error("An active verified customer identity could not be confirmed. Open the Customer Workspace or ask support to review your account.");
+  const {data:profiles,error:profileError}=await client.from("krim_customer_workspace_profiles").select("workspace_status,account_status").eq("customer_profile_id",links[0].customer_profile_id).limit(1);
+  if(profileError)throw profileError;
+  if(!Array.isArray(profiles)||profiles.length!==1||profiles[0].workspace_status!=="active"||profiles[0].account_status!=="active")throw new Error("Your customer workspace is not active. Please contact support before submitting.");
+  ready=true;setReady();show("Signed-in customer identity and active workspace verified. Enter the exact route details to continue.","info");
+ }catch(err){show("Coverage review is not ready: "+(err&&err.message?err.message:"Unknown error"),"error");submit.disabled=true;}
+}
+form.addEventListener("submit",async event=>{
+ event.preventDefault();if(!ready||submitting)return;
+ const origin=$("origin").value.trim(),destination=$("destination").value.trim(),reason=$("reason").value.trim();
+ const weightRaw=$("weight").value,weight=weightRaw===""?null:Number(weightRaw),date=$("date").value||null;
+ if(origin.length<2||destination.length<2){show("Enter both the origin and destination as exact localities.","error");return;}
+ if(origin.toLowerCase()===destination.toLowerCase()){show("Origin and destination must be different.","error");return;}
+ if(!reason){show("Briefly explain what needs to be reviewed.","error");return;}
+ if(weight!==null&&(!Number.isFinite(weight)||weight<=0||weight>100000000)){show("Enter a valid positive weight, or leave it blank.","error");return;}
+ if(date&&date<$("date").min){show("Requested service date cannot be in the past.","error");return;}
+ const notes=[
+  "Customer location / serviceability review.",
+  "Origin (customer-entered): "+origin,
+  "Destination (customer-entered): "+destination,
+  "Route arrangement: "+$("route-type").value,
+  "Reason for review: "+reason,
+  "Coverage status: not verified by this inquiry."
+ ].join("\n");
+ if(notes.length>2000){show("The route and review details are too long. Shorten the reason and try again.","error");return;}
+ submitting=true;setReady();submit.textContent="Submitting securely…";
+ show("Sending the request to KRIM's customer service workflow. Please keep this page open.","info");
+ try{
+  const {data,error}=await client.rpc("krim_submit_customer_service_request",{
+   p_request_type:"general",
+   p_origin_location_id:null,
+   p_destination_location_id:null,
+   p_transport_mode_code:$("mode").value,
+   p_cargo_weight:weight,
+   p_cargo_weight_unit:weight===null?null:"kg",
+   p_requested_service_date:date,
+   p_notes:notes
+  });
+  if(error)throw error;
+  const result=Array.isArray(data)?data[0]:data;
+  if(!result||result.status!=="submitted"||!result.request_reference)throw new Error("The backend did not return a confirmed request reference. Check with support before retrying.");
+  form.hidden=true;
+  show("Coverage review request submitted. Reference: "+result.request_reference+". This confirms receipt only; route coverage, pricing and service availability remain unverified.","success");
+ }catch(err){
+  show("Coverage review was not confirmed: "+(err&&err.message?err.message:"Unknown error")+". If the connection timed out, contact support before submitting again.","error");
+  submitting=false;submit.textContent="Submit coverage review →";setReady();
+ }
+});
+prefill();setDateMinimum();init();
+})();
+</script>
+</body>
+</html>
