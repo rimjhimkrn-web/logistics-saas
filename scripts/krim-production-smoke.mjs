@@ -20,6 +20,7 @@ const required = [
   "public/customer-os/customer-services/invoices.html",
   "public/customer-os/customer-services/support.html",
   "public/customer-os/customer-services/claims.html",
+  "public/customer-os/customer-services/payment-history.html",
   "public/shipper/quote-comparison.html",
   "public/customer/quote-request.html",
   "public/shipper/payment-checkout.html",
@@ -239,6 +240,7 @@ const customerQuoteRequest = existsSync("public/customer/quote-request.html") ? 
 const customerInvoices = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
 const customerSupport = existsSync("public/customer-os/customer-services/support.html") ? readFileSync("public/customer-os/customer-services/support.html", "utf8") : "";
 const customerClaims = existsSync("public/customer-os/customer-services/claims.html") ? readFileSync("public/customer-os/customer-services/claims.html", "utf8") : "";
+const customerPaymentHistory = existsSync("public/customer-os/customer-services/payment-history.html") ? readFileSync("public/customer-os/customer-services/payment-history.html", "utf8") : "";
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
@@ -262,6 +264,8 @@ for (const [label, source, pattern] of [
   ["Customer support verifies active organization membership before ticket creation", customerSupport, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?organization_type/],
   ["Customer claims page reads saved claim records", customerClaims, /from\(['"]krim_claims['"]\)/],
   ["Customer claims page filters by the organization protected by claims RLS", customerClaims, /from\(['"]krim_claims['"]\)[\s\S]*?\.in\(['"]organization_id['"],customerIds\)/],
+  ["Customer payment history reads saved payment records", customerPaymentHistory, /from\(['"]payments['"]\)/],
+  ["Customer payment history filters by the signed-in user protected by payment RLS", customerPaymentHistory, /from\(['"]payments['"]\)[\s\S]*?\.eq\(['"]customer_id['"],auth\.session\.user\.id\)/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
