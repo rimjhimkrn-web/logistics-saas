@@ -78,7 +78,7 @@ for (const file of phase2InterfacePages) {
   if (!html.includes("krim-global-interface.css")) {
     failures.push(`Phase 2 page is missing the shared global stylesheet: ${file}`);
   }
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) {
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(html)) {
     failures.push(`Phase 2 page is missing the shared global shell class: ${file}`);
   }
 }
