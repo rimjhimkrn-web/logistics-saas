@@ -132,6 +132,21 @@ for (const file of allHtmlFiles) {
   }
 }
 
+// Check shared Customer OS JavaScript navigation (these routes are injected at runtime).
+const customerWorkflow = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
+for (const [label, route] of [
+  ["quote comparison", "public/shipper/quote-comparison.html"],
+  ["shipment register", "public/customer-os/customer-services/shipment-list.html"],
+  ["payment checkout", "public/shipper/payment-checkout.html"],
+  ["quote request", "public/customer/quote-request.html"],
+]) {
+  if (!existsSync(route)) failures.push(`Customer workflow target missing: ${label} -> ${route}`);
+  if (!customerWorkflow.includes(route)) failures.push(`Shared Customer OS navigation is missing canonical route for ${label}: ${route}`);
+}
+for (const deletedRoute of ["public/customer/quote-comparison.html", "public/customer/shipment-list.html", "public/finance/payment-checkout.html"]) {
+  if (customerWorkflow.includes(deletedRoute)) failures.push(`Shared Customer OS navigation still references deleted route: ${deletedRoute}`);
+}
+
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 for (const [label, pattern] of [
   ["server-created Razorpay order", /create-global-razorpay-order/],
