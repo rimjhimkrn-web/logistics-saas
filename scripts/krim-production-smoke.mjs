@@ -557,28 +557,28 @@ for (const [file, source] of [
   ["public/customer-os/customer-services/shipment-timeline.html", existsSync("public/customer-os/customer-services/shipment-timeline.html") ? readFileSync("public/customer-os/customer-services/shipment-timeline.html", "utf8") : ""],
   ["public/customer-os/customer-services/tracking-map.html", existsSync("public/customer-os/customer-services/tracking-map.html") ? readFileSync("public/customer-os/customer-services/tracking-map.html", "utf8") : ""],
 ]) {
-  if (!source.includes("krim-global-interface.css")) failures.push(`Phase 6 page is missing the shared KRIM interface stylesheet: ${file}`);
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push(`Phase 6 page is missing the shared KRIM global shell: ${file}`);
+  if (!source.includes("krim-global-interface.css")) failures.push("Phase 6 page is missing the shared KRIM interface stylesheet: " + file);
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 6 page is missing the shared KRIM global shell: " + file);
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  if ((head.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push(`Phase 6 page must load exactly one global stylesheet: ${file}`);
-  if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push(`Phase 6 global stylesheet must load after page-local styles: ${file}`);
+  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 6 page must load exactly one global stylesheet: " + file);
+  if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push("Phase 6 global stylesheet must load after page-local styles: " + file);
 }
 for (const [label, source, pattern] of [
-  ["dashboard authenticates and checks active organization membership", phaseSixDashboard, /auth\\.getSession\\([\\s\\S]*?krim_organization_members[\\s\\S]*?eq\\('status','active'\\)/],
-  ["dashboard limits records to active customer, shipper or enterprise organizations", phaseSixDashboard, /krim_organizations[\\s\\S]*?eq\\('status','active'\\)[\\s\\S]*?customerIds[\\s\\S]*?customer_organization_id/],
-  ["dashboard uses live shipment records and no demo dataset", phaseSixDashboard, /from\\('krim_shipments'\\)[\\s\\S]*?customer_organization_id[\\s\\S]*?order\\('created_at'[\\s\\S]*?limit\\(100\\)/],
-  ["dashboard implements search, status filtering, sorting and pagination", phaseSixDashboard, /search.addEventListener[\\s\\S]*?filter.addEventListener[\\s\\S]*?sort-order[\\s\\S]*?page-prev[\\s\\S]*?page-next/],
-  ["dashboard actions route to canonical shipment details, visibility and quote list", phaseSixDashboard, /customer-services\\/shipment-details\\.html[\\s\\S]*?visibility\\/live-tracking-map\\.html[\\s\\S]*?quotes-pricing\\/quote-list\\.html/],
-  ["dashboard creates shipments only through the canonical request page", phaseSixDashboard, /public\\/shipper\\/booking-request\\.html/],
-  ["legacy active shipments route redirects to canonical dashboard and preserves query/hash", phaseSixLegacy, /location\\.replace[\\s\\S]*?customer-os\\/customer-services\\/shipment-list\\.html[\\s\\S]*?target\\.search=location\\.search[\\s\\S]*?target\\.hash=location\\.hash/],
+  ["dashboard authenticates and checks active organization membership", phaseSixDashboard, /auth\.getSession\([\s\S]*?krim_organization_members[\s\S]*?eq\('status','active'\)/],
+  ["dashboard limits records to active customer, shipper or enterprise organizations", phaseSixDashboard, /krim_organizations[\s\S]*?eq\('status','active'\)[\s\S]*?customerIds[\s\S]*?customer_organization_id/],
+  ["dashboard uses live shipment records and no demo dataset", phaseSixDashboard, /from\('krim_shipments'\)[\s\S]*?customer_organization_id[\s\S]*?order\('created_at'[\s\S]*?limit\(100\)/],
+  ["dashboard implements search, status filtering, sorting and pagination", phaseSixDashboard, /search.addEventListener[\s\S]*?filter.addEventListener[\s\S]*?sort-order[\s\S]*?page-prev[\s\S]*?page-next/],
+  ["dashboard actions route to canonical shipment details, visibility and quote list", phaseSixDashboard, /customer-services\/shipment-details\.html[\s\S]*?visibility\/live-tracking-map\.html[\s\S]*?quotes-pricing\/quote-list\.html/],
+  ["dashboard creates shipments only through the canonical request page", phaseSixDashboard, /public\/shipper\/booking-request\.html/],
+  ["legacy active shipments route redirects to canonical dashboard and preserves query/hash", phaseSixLegacy, /location\.replace[\s\S]*?customer-os\/customer-services\/shipment-list\.html[\s\S]*?target\.search=location\.search[\s\S]*?target\.hash=location\.hash/],
 ]) {
-  if (!pattern.test(source)) failures.push(`Phase 6 dashboard check missing: ${label}`);
+  if (!pattern.test(source)) failures.push("Phase 6 dashboard check missing: " + label);
 }
 for (const file of ["public/customer-os/customer-services/shipment-details.html","public/customer-os/customer-services/shipment-timeline.html","public/customer-os/customer-services/tracking-map.html"]) {
-  if (!existsSync(file)) failures.push(`Missing Phase 6 customer shipment workflow page: ${file}`);
+  if (!existsSync(file)) failures.push("Missing Phase 6 customer shipment workflow page: " + file);
 }
 const phaseSixCustomerNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
-if (!/book:'public\\/shipper\\/booking-request\\.html'/.test(phaseSixCustomerNav)) failures.push("Customer OS navigation must use the canonical shipment-request page.");
+if (!/book:'public\/shipper\/booking-request\.html'/.test(phaseSixCustomerNav)) failures.push("Customer OS navigation must use the canonical shipment-request page.");
 
 const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
 for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ":where(input,select,textarea)", ":where(button,.btn", ":focus-visible"]) {
