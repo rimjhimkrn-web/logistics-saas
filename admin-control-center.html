@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#0b1d3a">
+<title>Global Control Centre | KRIM Logistics</title>
+<meta name="description" content="Restricted KRIM Logistics platform administration and global operations control centre.">
+<script>
+(function(){
+  var p=location.pathname.split("/").filter(Boolean);
+  var base=location.hostname.endsWith("github.io")?"/"+(p[0]||"logistics-saas"):"";
+  var css=document.createElement("link");css.rel="stylesheet";css.href=base+"/core/krim-unified-page.css";document.head.appendChild(css);
+  var guard=document.createElement("script");guard.src=base+"/auth/krim-admin-guard.js";
+  guard.onerror=function(){location.replace(base+"/auth/krim-admin-access.html?reason=guard-unavailable")};
+  document.head.appendChild(guard);
+})();
+</script>
+<style>
+:root{--navy:#0b1d3a;--navy2:#10294d;--blue:#2563eb;--cyan:#0891b2;--violet:#7c3aed;--green:#059669;--amber:#d97706;--red:#dc2626;--ink:#14233d;--muted:#64748b;--line:#e2e8f0;--paper:#f4f7fb;--card:#fff}
+*{box-sizing:border-box}html{visibility:hidden}html.krim-admin-authorized{visibility:visible}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button,input{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}.shell{min-height:100vh}.topbar{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:20}.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.04em;color:var(--navy)}.brandmark{height:40px;width:40px;border-radius:13px;background:linear-gradient(135deg,#2563eb,#7c3aed 62%,#06b6d4);display:grid;place-items:center;color:white;font-size:19px;box-shadow:0 7px 18px #2563eb30}.brand small{display:block;color:#7a8aa4;font-size:9px;letter-spacing:.16em;font-weight:800}.top-actions{display:flex;gap:10px;align-items:center}.secure-pill{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:99px;padding:7px 10px;font-size:11px;font-weight:800}.btn{border:1px solid var(--line);background:white;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:750;color:#334155}.btn:hover{background:#f8fafc}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.primary:hover{background:#1d4ed8}.btn.danger{border-color:#fecaca;color:#b91c1c;background:#fff}.layout{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:calc(100vh - 70px)}.sidebar{background:var(--navy);color:#dbe7fa;padding:22px 14px;display:flex;flex-direction:column;gap:5px}.side-label{font-size:9px;font-weight:900;letter-spacing:.16em;color:#7890b6;padding:18px 12px 7px}.navitem{width:100%;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;border:1px solid transparent;color:#c7d5eb;border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:650}.navitem .ico{width:21px;text-align:center;font-size:16px}.navitem:hover{background:#ffffff0c;color:#fff}.navitem.active{background:linear-gradient(90deg,#2563eb45,#2563eb13);border-color:#5084ed55;color:#fff}.side-foot{margin-top:auto;border-top:1px solid #ffffff18;padding:17px 12px;color:#91a5c5;font-size:11px}.main{padding:28px clamp(16px,3vw,36px) 40px;min-width:0;max-width:1600px;width:100%;margin:0 auto}.crumb{font-size:11px;color:#7c8ba2;font-weight:750;letter-spacing:.08em;text-transform:uppercase}.heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:9px 0 22px}.heading h1{font-size:clamp(27px,3vw,36px);line-height:1.12;letter-spacing:-.04em;margin:0;color:var(--navy)}.heading p{margin:9px 0 0;color:var(--muted);max-width:700px}.heading-actions{display:flex;gap:8px;flex-wrap:wrap}.banner{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(115deg,#eaf2ff,#f4f0ff 60%,#e8fbff);border:1px solid #dbe6ff;border-radius:15px;padding:17px 19px;margin-bottom:20px}.banner-icon{height:38px;width:38px;display:grid;place-items:center;border-radius:12px;background:#fff;color:#2563eb;font-size:19px;flex-shrink:0}.banner strong{display:block;color:#13294b;font-size:13px}.banner p{margin:4px 0 0;color:#5c6e8a;font-size:12px}.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:19px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:0 2px 7px #10294d05;min-width:0}.stat{padding:17px 18px;position:relative;overflow:hidden}.stat:after{content:"";position:absolute;width:72px;height:72px;border-radius:50%;right:-23px;top:-24px;background:var(--tint,#eff6ff)}.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#6b7a91;font-size:11px;font-weight:750}.stat-icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:var(--tint,#eff6ff);color:var(--accent,#2563eb);font-size:15px}.stat-value{font-size:27px;letter-spacing:-.04em;font-weight:850;color:#13294b;margin:11px 0 4px}.stat-note{font-size:11px;color:#8290a4}.section-grid{grid-template-columns:minmax(0,1.35fr) minmax(270px,.85fr);align-items:start}.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 19px;border-bottom:1px solid #edf1f6}.card-head h2{font-size:14px;margin:0;color:#172b4d}.card-head p{margin:4px 0 0;font-size:11px;color:#8290a4}.card-body{padding:18px 19px}.status{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:5px 8px;font-size:10px;font-weight:850}.status.ok{background:#ecfdf5;color:#047857}.status.info{background:#eff6ff;color:#1d4ed8}.status.warn{background:#fffbeb;color:#b45309}.status.neutral{background:#f1f5f9;color:#475569}.dot{height:6px;width:6px;border-radius:50%;background:currentColor}.module-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.module{display:flex;gap:12px;padding:15px;border:1px solid var(--line);border-radius:13px;background:#fff;transition:transform .15s,border-color .15s,box-shadow .15s;min-height:106px}.module:hover{transform:translateY(-2px);border-color:#bfcef3;box-shadow:0 8px 20px #18396c0b}.module-icon{height:38px;width:38px;display:grid;place-items:center;border-radius:12px;flex-shrink:0;font-size:18px;background:var(--tint,#eff6ff);color:var(--accent,#2563eb)}.module h3{margin:1px 0 5px;font-size:12px;color:#1a2b48}.module p{margin:0;font-size:11px;line-height:1.45;color:#75839a}.module .arrow{font-size:12px;color:#94a3b8;margin-left:auto}.list{display:flex;flex-direction:column}.list-row{display:flex;gap:11px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #eef2f7}.list-row:last-child{border-bottom:0}.list-icon{width:30px;height:30px;border-radius:10px;background:#f1f5f9;display:grid;place-items:center;flex-shrink:0}.list-row strong{display:block;font-size:12px;color:#293b59}.list-row small{display:block;color:#8290a4;font-size:11px;margin-top:3px}.right{margin-left:auto;white-space:nowrap}.notice{font-size:12px;color:#61718a;line-height:1.55;background:#f8fafc;border:1px solid #e8edf4;border-radius:11px;padding:12px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:540px}th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #edf1f6;font-size:11px}th{color:#64748b;font-size:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8fafc}td{color:#40516b}.empty{padding:25px 10px;text-align:center;color:#7c8ba2;font-size:12px}.search{width:min(100%,280px);border:1px solid #dbe3ef;border-radius:10px;padding:9px 11px;outline:none}.search:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}.page{display:none}.page.active{display:block}.footnote{font-size:10px;color:#93a0b3;text-align:center;padding:24px 0 0}.mobile-menu{display:none}.toast{position:fixed;right:18px;bottom:18px;max-width:340px;background:#10294d;color:#fff;padding:13px 16px;border-radius:12px;box-shadow:0 10px 35px #0b1d3a30;z-index:100;display:none;font-size:12px}.toast.show{display:block}.error-note{display:none;margin-bottom:15px;border:1px solid #fecaca;background:#fff1f2;color:#9f1239;border-radius:11px;padding:12px 14px;font-size:12px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.topbar{height:62px;padding:0 14px}.secure-pill{display:none}.layout{display:block}.sidebar{display:none;position:fixed;top:62px;bottom:0;left:0;width:260px;z-index:30;overflow:auto;box-shadow:20px 0 40px #0b1d3a33}.sidebar.open{display:flex}.main{padding:22px 14px 32px}.heading{display:block}.heading-actions{margin-top:15px}.mobile-menu{display:inline-flex}.stats{gap:10px}.stat{padding:14px}.stat-value{font-size:24px}.module-grid{grid-template-columns:1fr}.module{min-height:88px}.brand small{font-size:8px}.brandmark{width:36px;height:36px}.heading h1{font-size:27px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand"><div class="brandmark">K</div><div>KRIM <span style="color:#2563eb">LOGISTICS</span><small>GLOBAL CONTROL CENTRE</small></div></div>
+  <div class="top-actions"><span class="secure-pill">● RESTRICTED PLATFORM ACCESS</span><button class="btn mobile-menu" id="menuToggle" aria-label="Open navigation">☰</button><button class="btn" id="refreshBtn">↻ Refresh</button><button class="btn danger" id="signOutBtn">Sign out</button></div>
+</header>
+<div class="layout">
+<aside class="sidebar" id="sidebar" aria-label="Control centre navigation">
+  <div class="side-label">CONTROL PLANE</div>
+  <button class="navitem active" data-page="overview"><span class="ico">◈</span>Global overview</button>
+  <button class="navitem" data-page="tenants"><span class="ico">▦</span>Organizations & tenants</button>
+  <button class="navitem" data-page="identity"><span class="ico">♙</span>Identity & permissions</button>
+  <button class="navitem" data-page="network"><span class="ico">⇄</span>Partner network</button>
+  <button class="navitem" data-page="shipments"><span class="ico">▤</span>Shipment operations</button>
+  <button class="navitem" data-page="finance"><span class="ico">◉</span>Finance & payments</button>
+  <div class="side-label">PLATFORM GOVERNANCE</div>
+  <button class="navitem" data-page="security"><span class="ico">⬡</span>Security & audit</button>
+  <button class="navitem" data-page="automation"><span class="ico">⟳</span>Automation & AI</button>
+  <button class="navitem" data-page="integrations"><span class="ico">⌘</span>Integrations</button>
+  <button class="navitem" data-page="health"><span class="ico">▥</span>Platform health</button>
+  <button class="navitem" data-page="governance"><span class="ico">⚑</span>Governance & controls</button>
+  <div class="side-foot">KRIM GLOBAL LOGISTICS OS<br><span style="color:#6e84a7">Privileged workspace · v2</span></div>
+</aside>
+<main class="main">
+  <div class="crumb">KRIM PLATFORM / ADMINISTRATION</div>
+  <div class="heading"><div><h1 id="pageTitle">Global Control Centre</h1><p id="pageSubtitle">A privileged command workspace for platform governance, network execution and global service reliability.</p></div><div class="heading-actions"><span class="status neutral" id="dataState"><span class="dot"></span>Connecting to platform</span></div></div>
+  <div id="errorNote" class="error-note" role="status"></div>
+  <div class="banner"><div class="banner-icon">✦</div><div><strong>One global operating system. Clear separation of duties.</strong><p>Use this workspace to monitor platform-level signals and navigate governed control domains. High-impact actions must be authorized and recorded by the backend.</p></div></div>
+
+  <section class="page active" id="page-overview">
+    <div class="grid stats">
+      <article class="card stat" style="--tint:#eaf2ff;--accent:#2563eb"><div class="stat-top">Organizations <span class="stat-icon">▦</span></div><div class="stat-value" id="statOrganizations">—</div><div class="stat-note">Platform-reported overview</div></article>
+      <article class="card stat" style="--tint:#e7fbf4;--accent:#059669"><div class="stat-top">Shipments <span class="stat-icon">⇄</span></div><div class="stat-value" id="statShipments">—</div><div class="stat-note">Current overview response</div></article>
+      <article class="card stat" style="--tint:#fff4df;--accent:#d97706"><div class="stat-top">Open exceptions <span class="stat-icon">⚑</span></div><div class="stat-value" id="statExceptions">—</div><div class="stat-note">Not estimated by this page</div></article>
+      <article class="card stat" style="--tint:#f0eaff;--accent:#7c3aed"><div class="stat-top">Platform signals <span class="stat-icon">⌁</span></div><div class="stat-value" id="statSignals">—</div><div class="stat-note">Loaded only when returned by service</div></article>
+    </div>
+    <div class="grid section-grid">
+      <article class="card"><div class="card-head"><div><h2>Control domains</h2><p>Choose a domain to open its administrative view.</p></div><span class="status info">GLOBAL</span></div><div class="card-body"><div class="grid module-grid">
+        <button class="module" data-open="tenants" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#eaf2ff;--accent:#2563eb">▦</span><span><h3>Tenant governance</h3><p>Organizations, boundaries and platform tenancy.</p></span><span class="arrow">↗</span></button>
+        <button class="module" data-open="identity" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#f0eaff;--accent:#7c3aed">♙</span><span><h3>Identity & access</h3><p>Roles, permissions and privileged access controls.</p></span><span class="arrow">↗</span></button>
+        <button class="module" data-open="network" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#e7fbf4;--accent:#059669">⇄</span><span><h3>Partner network</h3><p>Network coverage, onboarding and partner signals.</p></span><span class="arrow">↗</span></button>
+        <button class="module" data-open="shipments" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#fff4df;--accent:#d97706">▤</span><span><h3>Shipment execution</h3><p>Cross-workspace execution and exception oversight.</p></span><span class="arrow">↗</span></button>
+        <button class="module" data-open="finance" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#e8f8ff;--accent:#0891b2">◉</span><span><h3>Finance & payments</h3><p>Payment integrity, ledger and settlement oversight.</p></span><span class="arrow">↗</span></button>
+        <button class="module" data-open="health" style="text-align:left;cursor:pointer"><span class="module-icon" style="--tint:#ffe9ed;--accent:#e11d48">▥</span><span><h3>Service health</h3><p>Runtime, integration and deployment status.</p></span><span class="arrow">↗</span></button>
+      </div></div></article>
+      <div class="grid">
+        <article class="card"><div class="card-head"><div><h2>Platform connection</h2><p>Live service response</p></div><span class="status neutral" id="connectionBadge">Pending</span></div><div class="card-body"><div class="list">
+          <div class="list-row"><div class="list-icon">🔐</div><div><strong>Privileged gate</strong><small>Access check handled by the KRIM admin guard.</small></div><span class="status ok right">Enforced</span></div>
+          <div class="list-row"><div class="list-icon">☁</div><div><strong>Admin overview service</strong><small id="serviceText">Waiting for a response.</small></div><span class="status neutral right" id="serviceBadge">Waiting</span></div>
+          <div class="list-row"><div class="list-icon">◷</div><div><strong>Last refresh</strong><small id="lastRefresh">Not refreshed yet</small></div></div>
+        </div></div></article>
+        <article class="card"><div class="card-head"><div><h2>Operating principles</h2></div><span class="status info">POLICY</span></div><div class="card-body"><div class="notice">Administrative actions must be role-authorized, organization-aware, auditable and executed by trusted backend services. This interface does not fabricate counts or treat a button click as proof that a change occurred.</div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-tenants"><div class="card"><div class="card-head"><div><h2>Organizations & tenants</h2><p>Platform tenancy and organizational boundaries.</p></div><span class="status warn">Backend action required</span></div><div class="card-body"><div class="notice">Tenant records and changes must come from an authorized backend query. No tenant data is displayed until the platform service explicitly returns it.</div><p><a class="btn primary" href="public/admin/tenant-partitioning.html">Open tenant partitioning ↗</a> <a class="btn" href="public/enterprise/tenant-governance.html">Enterprise tenant governance ↗</a></p></div></div></section>
+  <section class="page" id="page-identity"><div class="card"><div class="card-head"><div><h2>Identity & permissions</h2><p>Privileged roles, role mappings and access governance.</p></div><span class="status info">RESTRICTED</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="public/admin/rbac-matrix.html"><span class="module-icon">♙</span><span><h3>RBAC matrix</h3><p>Review the role and permission model.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/admin/security-desk.html"><span class="module-icon">⬡</span><span><h3>Security desk</h3><p>Security operations and access signals.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="auth/krim-admin-access.html"><span class="module-icon">🔐</span><span><h3>Privileged access</h3><p>Return to the dedicated admin access gateway.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-network"><div class="card"><div class="card-head"><div><h2>Partner network</h2><p>Coverage, capacity and onboarding oversight.</p></div><span class="status neutral">View modules</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="app/partner/index.html"><span class="module-icon">⇄</span><span><h3>Partner workspace</h3><p>Partner operational workspace.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/partner/partner-directory.html"><span class="module-icon">⌖</span><span><h3>Partner directory</h3><p>Partner network listing.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/partner/service-coverage.html"><span class="module-icon">◎</span><span><h3>Service coverage</h3><p>Coverage and service capability.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-shipments"><div class="card"><div class="card-head"><div><h2>Shipment operations</h2><p>Navigate execution workflows without bypassing role controls.</p></div><span class="status info">OPERATIONS</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="app/operations/index.html"><span class="module-icon">▤</span><span><h3>Operations workspace</h3><p>Dispatch and execution oversight.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/operations/control-tower.html"><span class="module-icon">⌁</span><span><h3>Control tower</h3><p>Cross-shipment operational visibility.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="app/customer/index.html"><span class="module-icon">⇢</span><span><h3>Customer workspace</h3><p>Customer booking and shipment experience.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="app/driver/index.html"><span class="module-icon">♧</span><span><h3>Driver workspace</h3><p>Assigned trip and delivery workflows.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="app/warehouse/index.html"><span class="module-icon">▦</span><span><h3>Warehouse workspace</h3><p>Facility and inventory operations.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="app/customs/index.html"><span class="module-icon">⚑</span><span><h3>Customs workspace</h3><p>Trade compliance and declaration workflows.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-finance"><div class="card"><div class="card-head"><div><h2>Finance & payments</h2><p>Financial controls and transaction evidence.</p></div><span class="status warn">No direct write actions</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="app/finance/index.html"><span class="module-icon">◉</span><span><h3>Finance workspace</h3><p>Treasury and finance operations.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/finance/finance-dashboard.html"><span class="module-icon">▥</span><span><h3>Finance dashboard</h3><p>Financial overview and reports.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/billing/financial-ledger-audit.html"><span class="module-icon">▤</span><span><h3>Ledger audit</h3><p>Financial record audit view.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-security"><div class="card"><div class="card-head"><div><h2>Security & audit</h2><p>Review security surfaces and audit evidence.</p></div><span class="status info">AUDITABILITY</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="public/admin/security-desk.html"><span class="module-icon">⬡</span><span><h3>Security desk</h3><p>Security posture and controls.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/admin/siem-audit-logs.html"><span class="module-icon">≋</span><span><h3>SIEM audit logs</h3><p>Audit event exploration.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/admin/rbac-matrix.html"><span class="module-icon">♙</span><span><h3>RBAC matrix</h3><p>Roles and permission mapping.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-automation"><div class="card"><div class="card-head"><div><h2>Automation & AI</h2><p>Automation observability and AI governance.</p></div><span class="status neutral">Backend verification</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="public/ai/assistant.html"><span class="module-icon">✦</span><span><h3>AI assistant</h3><p>AI-assisted workflows.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/ai/ai-audit-history.html"><span class="module-icon">≋</span><span><h3>AI audit history</h3><p>Review available AI activity evidence.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/operations/operations-reports.html"><span class="module-icon">▥</span><span><h3>Operations reports</h3><p>Operational reporting and signals.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-integrations"><div class="card"><div class="card-head"><div><h2>Integrations</h2><p>Connectors and external-system boundaries.</p></div><span class="status neutral">VIEW ONLY</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="public/developer/api-docs.html"><span class="module-icon">⌘</span><span><h3>API documentation</h3><p>Developer integration reference.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/developer/webhooks-management.html"><span class="module-icon">⇄</span><span><h3>Webhooks</h3><p>Event delivery and integration management.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/connectors/erp-adapters.html"><span class="module-icon">▦</span><span><h3>ERP adapters</h3><p>Enterprise integration adapters.</p></span><span class="arrow">↗</span></a>
+  </div></div></div></section>
+  <section class="page" id="page-health"><div class="grid section-grid"><article class="card"><div class="card-head"><div><h2>Platform health</h2><p>Signals supplied by the platform service.</p></div><button class="btn" data-refresh>Refresh signals</button></div><div class="card-body"><div class="list">
+    <div class="list-row"><div class="list-icon">☁</div><div><strong>Admin overview endpoint</strong><small id="healthEndpoint">Not checked</small></div><span id="healthEndpointBadge" class="status neutral right">Pending</span></div>
+    <div class="list-row"><div class="list-icon">🔐</div><div><strong>Privileged access guard</strong><small>Page is hidden until the guard authorizes the session.</small></div><span class="status ok right">Required</span></div>
+    <div class="list-row"><div class="list-icon">◷</div><div><strong>Latest check</strong><small id="healthTime">Not checked</small></div></div>
+  </div></div></article><article class="card"><div class="card-head"><div><h2>Health evidence</h2></div></div><div class="card-body"><div id="healthPayload" class="notice">Waiting for authorized service response. No synthetic uptime or health score is displayed.</div></div></article></div></section>
+  <section class="page" id="page-governance"><div class="card"><div class="card-head"><div><h2>Governance & controls</h2><p>Read-only links to platform policy surfaces.</p></div><span class="status warn">Protected actions</span></div><div class="card-body"><div class="grid module-grid">
+    <a class="module" href="public/admin/tenant-partitioning.html"><span class="module-icon">▦</span><span><h3>Tenant partitioning</h3><p>Organization isolation controls.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/production/security-hardening.html"><span class="module-icon">⬡</span><span><h3>Security hardening</h3><p>Production security requirements.</p></span><span class="arrow">↗</span></a>
+    <a class="module" href="public/production/deployment-manifest.html"><span class="module-icon">⌘</span><span><h3>Deployment manifest</h3><p>Deployment and release evidence.</p></span><span class="arrow">↗</span></a>
+  </div><div class="notice" style="margin-top:16px">Emergency pause, key rotation, tenant suspension and financial controls are intentionally not exposed as client-only actions. They must be wired to explicit, permission-checked backend actions before activation.</div></div></div></section>
+  <div class="footnote">KRIM Logistics · Global Logistics Operating System · Restricted administration workspace</div>
+</main>
+</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const titles={
+ overview:["Global Control Centre","A privileged command workspace for platform governance, network execution and global service reliability."],
+ tenants:["Organizations & tenants","Monitor organizational boundaries and tenant governance."],
+ identity:["Identity & permissions","Review access-control surfaces and privileged identity governance."],
+ network:["Partner network","Navigate partner onboarding, coverage and network operations."],
+ shipments:["Shipment operations","Access shipment execution across customer, transport, driver, warehouse and customs workspaces."],
+ finance:["Finance & payments","Navigate financial oversight surfaces without bypassing payment and ledger controls."],
+ security:["Security & audit","Review security controls, role governance and audit evidence."],
+ automation:["Automation & AI","Explore automation and AI governance surfaces."],
+ integrations:["Integrations","Access API, webhook and enterprise connector surfaces."],
+ health:["Platform health","Inspect service health evidence returned by the authorized platform service."],
+ governance:["Governance & controls","Review platform policy and production governance surfaces."]
+};
+function showToast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),3600)}
+function openPage(key){if(!titles[key])return;document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+key));document.querySelectorAll(".navitem").forEach(n=>n.classList.toggle("active",n.dataset.page===key));$("pageTitle").textContent=titles[key][0];$("pageSubtitle").textContent=titles[key][1];$("sidebar").classList.remove("open");history.replaceState(null,"","#"+key);window.scrollTo({top:0,behavior:"smooth"})}
+document.querySelectorAll(".navitem").forEach(n=>n.addEventListener("click",()=>openPage(n.dataset.page)));
+document.querySelectorAll("[data-open]").forEach(n=>n.addEventListener("click",()=>openPage(n.dataset.open)));
+$("menuToggle").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+document.querySelectorAll("[data-refresh]").forEach(n=>n.addEventListener("click",loadOverview));
+$("refreshBtn").addEventListener("click",loadOverview);
+$("signOutBtn").addEventListener("click",async()=>{
+  try{const c=window.KRIM_SUPABASE||window.supabaseClient;if(!c)throw new Error("Auth client unavailable");const {error}=await c.auth.signOut();if(error)throw error;const p=location.pathname.split("/").filter(Boolean);const base=location.hostname.endsWith("github.io")?"/"+(p[0]||"logistics-saas"):"";location.replace(base+"/auth/krim-admin-access.html?reason=signed-out")}
+  catch(e){showToast("Sign out could not be confirmed. Please use the privileged access page.");console.error(e)}
+});
+function pick(obj,keys){for(const k of keys){if(obj&&obj[k]!==undefined&&obj[k]!==null)return obj[k]}return null}
+function safeNumber(v){if(typeof v==="number"&&Number.isFinite(v))return v.toLocaleString();if(typeof v==="string"&&v.trim()!=="")return v;return "—"}
+function timeNow(){return new Date().toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}
+async function loadOverview(){
+  const badge=$("dataState"),cb=$("connectionBadge"),sb=$("serviceBadge");
+  badge.className="status neutral";badge.innerHTML='<span class="dot"></span>Refreshing';
+  $("errorNote").style.display="none";$("serviceText").textContent="Request in progress.";
+  try{
+    const c=window.KRIM_SUPABASE||window.supabaseClient;
+    if(!c)throw new Error("Supabase client is not available.");
+    const {data:sessionData,error:sessionError}=await c.auth.getSession();
+    if(sessionError||!sessionData.session)throw new Error("Privileged session is missing. Sign in again.");
+    const {data,error}=await c.functions.invoke("global-admin-control",{body:{action:"overview"}});
+    if(error)throw error;
+    if(!data||data.ok!==true)throw new Error("The admin overview service did not confirm a successful response.");
+    const payload=data.data||data.overview||data.metrics||data;
+    const org=pick(payload,["organizations","organization_count","tenants","tenant_count"]);
+    const shipments=pick(payload,["shipments","shipment_count","total_shipments"]);
+    const exceptions=pick(payload,["open_exceptions","exceptions_open","exception_count"]);
+    const signals=pick(payload,["platform_signals","signals_count","signal_count"]);
+    $("statOrganizations").textContent=safeNumber(org);
+    $("statShipments").textContent=safeNumber(shipments);
+    $("statExceptions").textContent=safeNumber(exceptions);
+    $("statSignals").textContent=safeNumber(signals);
+    $("serviceText").textContent="Authorized overview response received.";
+    sb.className="status ok right";sb.textContent="Responding";
+    cb.className="status ok";cb.textContent="Connected";
+    badge.className="status ok";badge.innerHTML='<span class="dot"></span>Service responding';
+    $("healthEndpoint").textContent="Authorized overview action returned ok=true.";
+    $("healthEndpointBadge").className="status ok right";$("healthEndpointBadge").textContent="Responding";
+    $("healthPayload").textContent="Overview response received. Counts are shown only when the backend returns recognized fields; a dash means that metric was not included in the response.";
+    const stamp=timeNow();$("lastRefresh").textContent=stamp;$("healthTime").textContent=stamp;
+  }catch(e){
+    console.error("KRIM admin overview failed",e);
+    badge.className="status warn";badge.innerHTML='<span class="dot"></span>Service unavailable';
+    cb.className="status warn";cb.textContent="Unavailable";
+    sb.className="status warn right";sb.textContent="Unavailable";
+    $("serviceText").textContent="Could not retrieve a verified overview.";
+    $("healthEndpoint").textContent="Request failed or was not authorized.";
+    $("healthEndpointBadge").className="status warn right";$("healthEndpointBadge").textContent="Unavailable";
+    $("healthPayload").textContent="No verified health payload was received. Check the privileged session, Edge Function deployment and server logs.";
+    $("lastRefresh").textContent=timeNow();$("healthTime").textContent=timeNow();
+    $("errorNote").textContent="Live overview is unavailable. The workspace remains in read-only navigation mode; no live values are invented. Details: "+(e&&e.message?e.message:"request failed");
+    $("errorNote").style.display="block";
+    ["statOrganizations","statShipments","statExceptions","statSignals"].forEach(id=>$(id).textContent="—");
+  }
+}
+const initial=location.hash.replace("#","");if(titles[initial])openPage(initial);
+loadOverview();
+})();
+</script>
+</body>
+</html>
