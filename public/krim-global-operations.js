@@ -40,7 +40,7 @@
     if (!filtered.length) { empty(records.length ? "No saved records match this search." : "No records saved for this module yet.", false); return; }
     filtered.forEach(r => {
       const tr = document.createElement("tr"), fs = (r.record_data && r.record_data.fields) || [];
-      fs.forEach((f, i) => cell(tr, f.value, /status/i.test(String(f.label || "")) || (i === fs.length - 1 && /status/i.test(String(f.label || ""))));
+      fs.forEach((f, i) => cell(tr, f.value, /status/i.test(String(f.label || "")) || (i === fs.length - 1 && /status/i.test(String(f.label || "")))));
       cell(tr, r.created_at ? new Date(r.created_at).toLocaleString() : "", false); body.appendChild(tr);
     });
   }
