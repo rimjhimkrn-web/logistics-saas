@@ -130,7 +130,7 @@ if (existsSync(canonicalShipmentForm)) {
   const html = readFileSync(canonicalShipmentForm, "utf8");
   if (!html.includes("krim_create_global_shipment_idempotent")) failures.push("Canonical shipment form must use the idempotent shipment-creation RPC.");
   if (!html.includes("getBookingRequestId")) failures.push("Canonical shipment form is missing its stable booking-request identifier.");
-  if (!/submitting\s*=\s*true/.test(html)) failures.push("Canonical shipment form is missing duplicate-submit protection.");
+  if (!/submitting["shipment details offers the canonical pickup and custody workflow", phaseEightOps, /Pickup & custody[\\s\\S]*?public\\/pickup-tracking\\.html[\\s\\S]*?url\\.includes\\('pickup-tracking'\\)/],*=\s*true/.test(html)) failures.push("Canonical shipment form is missing duplicate-submit protection.");
   if (!html.includes("rate-calculator.html?shipment_id=")) failures.push("Canonical shipment form must continue to the quote/rate workflow with its real shipment reference.");
 }
 if (existsSync(legacyShipmentAlias)) {
