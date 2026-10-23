@@ -15,6 +15,9 @@ Align the partner, warehouse, customs/trade, operations and global workflow-dire
   - `app/operations/index.html`
   - `public/global-workflows.html`
 - Updated `public/operations/index.html` to load the same shared stylesheet after its operations-local styles and use the global shell.
+- Applied the shared global interface after local styles to `public/partner/accepted-loads.html` and `public/partner/dispatch-assignment.html`; both now use `krim-global-shell` while preserving their existing data reads and server RPC actions.
+- Updated the dynamically rendered shared Operations workbench in `public/operations/operations-pages.js` to add the global shell and load `core/krim-global-interface.css` after the local Operations stylesheet.
+- Expanded the production smoke script to assert partner assignment reads, active partner membership, the server-side driver-dispatch RPC, warehouse fail-closed messaging, persisted customs/exception reads, and truthful GPS messaging. These are source regression checks only.
 - Reviewed the global workflow directory and routed the transport-legs entry to the authenticated Operations workspace, shipment-documents entry to the authenticated Customs & Trade workspace, and shipment-exceptions entry to Operations.
 - Converted the three legacy shipment-core screens to compatibility redirects:
   - `public/shipments/transport-legs.html` → `app/operations/index.html`
