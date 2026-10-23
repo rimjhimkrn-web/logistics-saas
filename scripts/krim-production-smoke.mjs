@@ -74,7 +74,7 @@ for (const file of customerOsPages) {
   const html = readFileSync(file, "utf8");
   for (const match of html.matchAll(/(?:href|src|action)=["']([^"'#]+)["']/gi)) {
     const raw = match[1].trim();
-    if (!raw || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
+    if (!raw || raw.includes("<") || /\\s/.test(raw) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
     const clean = raw.split(/[?#]/)[0];
     if (!clean) continue;
     let target;
