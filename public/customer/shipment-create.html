@@ -1,180 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Book a Shipment | KRIM Global Logistics OS</title>
-<meta name="description" content="Create a shipment request through KRIM's authenticated global logistics platform.">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../config.js"></script>
-<style>
-:root{color-scheme:dark}body{background:radial-gradient(ellipse at 15% 0%,#12345a 0,transparent 42%),#07111f;color:#edf5ff}
-.panel{background:rgba(13,27,46,.88);border:1px solid #263d59;box-shadow:0 20px 60px #0003}
-.field{width:100%;background:#081522;border:1px solid #344a63;border-radius:12px;padding:12px 13px;color:#f8fbff;outline:none}
-.field:focus{border-color:#38bdf8;box-shadow:0 0 0 3px #38bdf822}
-.label{display:block;font-size:.86rem;font-weight:650;color:#dbeafe;margin-bottom:8px}
-.muted{color:#9bb0c8}.step{border:1px solid #2b4059;background:#0a1929;border-radius:14px;padding:13px}
-.btn{border-radius:12px;padding:13px 17px;font-weight:750;background:linear-gradient(110deg,#0284c7,#2563eb);color:white}
-.btn:disabled{opacity:.55;cursor:not-allowed}.tag{border:1px solid #34506b;border-radius:999px;padding:5px 10px;font-size:.75rem;color:#bfdbfe}
-</style>
-<style id="krim-journey-theme-shipment-create">
-/* KRIM Journey Accent Theme — 1 New Shipment Booking; colour is decorative, never a shipment/payment status signal. */
-:root{--krim-accent:#4f46e5;--krim-accent-2:#06b6d4;}
-body{background-image:radial-gradient(ellipse at 96% 0%,#4f46e512 0,transparent 32%),radial-gradient(ellipse at 0% 100%,#06b6d40d 0,transparent 30%);}
-body::before{content:"";position:fixed;z-index:9999;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#4f46e5,#06b6d4,#4f46e5);pointer-events:none}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #06b6d4;outline-offset:3px}
-.brandmark,.brand-mark{background:linear-gradient(135deg,#4f46e5,#06b6d4)!important}
-.btn:not(.secondary):not(.ghost):not(.outline),button[type="submit"],input[type="submit"]{--theme-shadow:#4f46e538}
-.btn:not(.secondary):not(.ghost):not(.outline),button[type="submit"],input[type="submit"]{box-shadow:0 8px 22px var(--theme-shadow)}
-a:not(.btn){text-decoration-color:#06b6d470}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-#create-shipment-button{background:linear-gradient(115deg,#4f46e5,#06b6d4)!important;color:#fff!important;border-color:transparent!important}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1f3a">
+<meta name="description" content="Continue to KRIM's canonical global shipment request workflow.">
+<link rel="stylesheet" href="../../core/krim-global-interface.css">
+<title>Continue to Global Shipment Request | KRIM Logistics</title>
+<meta http-equiv="refresh" content="2;url=../shipper/booking-request.html">
 </head>
-<body class="min-h-screen">
-<header class="border-b border-slate-700/70 bg-slate-950/70">
- <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
-  <a href="../../index.html" class="font-black tracking-wide text-lg">K<span class="text-sky-400">R</span>IM <span class="muted font-medium text-sm">Global Logistics OS</span></a>
-  <div class="flex gap-3 items-center"><a href="../customer-os/customer-services/shipment-list.html" class="text-sky-300 text-sm">My shipments</a><a href="../../app/customer/index.html" class="text-sm muted">Workspace</a></div>
- </div>
-</header>
-<main class="max-w-6xl mx-auto px-4 py-8 md:py-12">
- <section class="grid lg:grid-cols-[1fr_auto] gap-6 items-end mb-8">
-  <div><div class="flex flex-wrap gap-2 mb-4"><span class="tag">AUTHENTICATED BOOKING</span><span class="tag">GLOBAL-READY CORE</span></div>
-   <h1 class="text-3xl md:text-5xl font-black leading-tight">Plan your next <span class="text-sky-400">shipment.</span></h1>
-   <p class="muted mt-4 max-w-2xl leading-7">Choose origin and destination by country and city, describe your cargo, and send a shipment request through KRIM's secured server-side workflow.</p>
-  </div>
-  <div class="panel rounded-2xl p-4 min-w-52"><div class="text-xs uppercase tracking-widest muted">Booking status</div><div id="session-state" class="mt-2 font-bold text-sky-300">Checking secure session…</div><div class="text-xs muted mt-2">Your organization permissions are checked by the backend.</div></div>
- </section>
- <section class="grid md:grid-cols-3 gap-3 mb-8">
-  <div class="step"><div class="text-sky-300 text-xs font-bold">01 / ROUTE</div><div class="font-bold mt-2">Choose locations</div><div class="text-sm muted mt-1">Filter by country, then find the city or hub.</div></div>
-  <div class="step"><div class="text-sky-300 text-xs font-bold">02 / CARGO</div><div class="font-bold mt-2">Describe the load</div><div class="text-sm muted mt-1">Accurate cargo and weight help partners assess the request.</div></div>
-  <div class="step"><div class="text-sky-300 text-xs font-bold">03 / REQUEST</div><div class="font-bold mt-2">Create & request bids</div><div class="text-sm muted mt-1">KRIM saves the shipment and requests partner responses.</div></div>
- </section>
- <form id="shipment-form" class="panel rounded-3xl p-5 md:p-8">
-  <div class="flex flex-wrap items-start justify-between gap-3 mb-6"><div><h2 class="text-xl md:text-2xl font-extrabold">Shipment details</h2><p class="muted text-sm mt-1">Fields marked * are required.</p></div><span id="coverage-count" class="tag">Loading live location catalogue…</span></div>
-  <div class="grid lg:grid-cols-2 gap-5">
-   <section class="rounded-2xl border border-slate-700 p-4 md:p-5">
-    <div class="font-bold text-lg mb-1">Origin</div><p class="muted text-sm mb-4">Where should the shipment start?</p>
-    <label class="label" for="origin-country">Country / market *</label><select class="field mb-4" id="origin-country" required><option value="">Loading countries…</option></select>
-    <label class="label" for="origin-search">Find city or hub</label><input class="field mb-3" id="origin-search" type="search" placeholder="Search e.g. Ranchi, Mumbai, Dubai" autocomplete="off">
-    <label class="label" for="origin-id">Available location *</label><select class="field" id="origin-id" required><option value="">Choose a country first</option></select>
-    <p id="origin-meta" class="muted text-xs mt-3">Only active locations configured in the KRIM catalogue can be selected.</p>
-   </section>
-   <section class="rounded-2xl border border-slate-700 p-4 md:p-5">
-    <div class="font-bold text-lg mb-1">Destination</div><p class="muted text-sm mb-4">Where should the shipment arrive?</p>
-    <label class="label" for="destination-country">Country / market *</label><select class="field mb-4" id="destination-country" required><option value="">Loading countries…</option></select>
-    <label class="label" for="destination-search">Find city or hub</label><input class="field mb-3" id="destination-search" type="search" placeholder="Search destination city" autocomplete="off">
-    <label class="label" for="destination-id">Available location *</label><select class="field" id="destination-id" required><option value="">Choose a country first</option></select>
-    <p id="destination-meta" class="muted text-xs mt-3">International routes are selectable only where both endpoints exist in the catalogue.</p>
-   </section>
-  </div>
-  <div class="grid md:grid-cols-2 gap-5 mt-5">
-   <div><label class="label" for="goods-description">Cargo / goods description *</label><input class="field" id="goods-description" required maxlength="500" placeholder="e.g. Industrial machinery parts, packaged food"><p class="muted text-xs mt-2">Be specific about the goods; do not enter passwords or payment details.</p></div>
-   <div><label class="label" for="weight-kg">Total cargo weight (kg) *</label><input class="field" id="weight-kg" type="number" required min="0.01" max="1000000000" step="0.01" placeholder="e.g. 1250"><p class="muted text-xs mt-2">Enter the combined cargo weight in kilograms.</p></div>
-   <div><label class="label" for="transport-mode">Preferred transport mode *</label><select class="field" id="transport-mode" required><option value="surface_express">Road / surface</option><option value="air_priority">Air freight</option><option value="heavy_haul">Heavy haul / oversized road cargo</option></select><p class="muted text-xs mt-2">Mode is passed to the partner opportunity workflow; availability and pricing require partner confirmation.</p></div>
-   <div class="rounded-xl border border-sky-900/70 bg-sky-950/35 p-4"><div class="font-bold text-sky-200">Before you submit</div><ul class="muted text-sm list-disc pl-5 mt-2 space-y-1"><li>Confirm both locations and cargo details.</li><li>This creates a shipment request, not a confirmed carrier booking.</li><li>Rates, customs, transit time and carrier assignment are not guaranteed by this form.</li></ul></div>
-  </div>
-  <div id="catalog-warning" class="hidden mt-5 rounded-xl border border-amber-700/60 bg-amber-950/30 p-4 text-sm text-amber-100"></div>
-  <div id="shipment-feedback" class="mt-5 rounded-xl bg-slate-950/70 border border-slate-700 p-4 text-sm muted" role="status" aria-live="polite">Connecting to KRIM's live catalogue and secure session…</div>
-  <div class="flex flex-col sm:flex-row gap-3 mt-5"><button id="create-shipment-button" class="btn flex-1" type="submit" disabled>Create shipment & request partner bids →</button><a class="text-center rounded-xl border border-slate-600 px-5 py-3 font-semibold" href="../customer-os/customer-services/shipment-list.html">Review my shipments</a></div>
-  <p class="muted text-xs mt-4">Privacy & security: location choices are loaded from KRIM's backend. Shipment creation uses the authenticated session and server-side permission checks.</p>
- </form>
- <section class="mt-7 panel rounded-2xl p-5 flex flex-col md:flex-row gap-4 md:items-center md:justify-between"><div><div class="font-bold">Need a location that is not listed?</div><p class="muted text-sm mt-1 max-w-2xl">KRIM currently lists only configured hubs. Do not select a nearby city as a substitute. Contact KRIM to request a location review before booking.</p></div><a href="../../contact.html" class="text-sky-300 font-bold whitespace-nowrap">Request location coverage ↗</a></section>
+<body class="krim-global-shell">
+<main>
+  <p class="eyebrow">KRIM GLOBAL LOGISTICS OS</p>
+  <h1>We have one secure shipment-request workflow.</h1>
+  <p>This older address now forwards to the canonical Global Shipment Request page. Your shipment is not created by opening this page.</p>
+  <p><a class="btn" href="../shipper/booking-request.html" id="canonical-booking-link">Continue to Global Shipment Request →</a></p>
+  <p><small>If you are not redirected automatically, use the button above. Your current query parameters will be retained where supported.</small></p>
 </main>
-<footer class="border-t border-slate-800 mt-10 py-6 text-center text-xs muted">KRIM Logistics OS © 2026 · Global-ready platform, with network coverage subject to verified locations and partners.</footer>
 <script>
-(function(){
- const client=window.KRIM_SUPABASE||window.supabaseClient;
- const form=document.getElementById('shipment-form'),button=document.getElementById('create-shipment-button'),feedback=document.getElementById('shipment-feedback');
- const sessionState=document.getElementById('session-state'),warning=document.getElementById('catalog-warning');
- let session=null,customerOrganizationId=null,locations=[],countries=[],ready=false;
- function message(text,kind){feedback.textContent=text;feedback.className='mt-5 rounded-xl border p-4 text-sm '+(kind==='success'?'border-emerald-700 bg-emerald-950/40 text-emerald-200':kind==='info'?'border-sky-800 bg-sky-950/35 text-sky-200':'border-rose-800 bg-rose-950/35 text-rose-200');}
- function label(loc){const country=countries.find(c=>Number(c.id)===Number(loc.country_id));return [loc.city,loc.state_region||loc.region,country?country.name:'Country pending',loc.location_code].filter(Boolean).join(' · ');}
- function fillCountries(id){const select=document.getElementById(id);select.replaceChildren(new Option('Select country / market',''));countries.forEach(c=>select.add(new Option(c.name+' ('+c.code+')',String(c.id))));}
- function fillLocations(prefix){const countryId=document.getElementById(prefix+'-country').value,query=document.getElementById(prefix+'-search').value.trim().toLowerCase(),select=document.getElementById(prefix+'-id'),prior=select.value;
-  const list=locations.filter(l=>(!countryId||String(l.country_id)===countryId)&&(!query||label(l).toLowerCase().includes(query)));
-  select.replaceChildren(new Option(list.length?'Select city / hub':'No matching active locations',''));
-  list.forEach(l=>select.add(new Option(label(l),String(l.id))));
-  if(list.some(l=>String(l.id)===prior))select.value=prior;
-  document.getElementById(prefix+'-meta').textContent=list.length+' active location'+(list.length===1?'':'s')+' match your filters.';
- }
- async function initialize(){
-  try{
-   if(!client)throw new Error('KRIM backend configuration did not load. Refresh the page.');
-   const {data:authData,error:authError}=await client.auth.getSession();if(authError)throw authError;session=authData.session;
-   if(!session){location.href='../../auth/login.html';return;}
-   sessionState.textContent='Authenticated session active';
-   const {data:memberships,error:membershipError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',session.user.id).eq('status','active');if(membershipError)throw membershipError;
-   const ids=[...new Set((memberships||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
-   const {data:orgs,error:orgError}=ids.length?await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active'):{data:[],error:null};if(orgError)throw orgError;
-   const customerOrg=(orgs||[]).find(o=>['customer','shipper','enterprise'].includes(String(o.organization_type).toLowerCase()));
-   if(customerOrg)customerOrganizationId=Number(customerOrg.id);
-   else{
-    const type=String(session.user.app_metadata?.krim_account_type||session.user.user_metadata?.krim_account_type||'').toLowerCase();
-    if(['partner','carrier','warehouse','forwarder'].includes(type)||(orgs||[]).some(o=>['partner','carrier','warehouse','forwarder'].includes(String(o.organization_type).toLowerCase())))throw new Error('This is a logistics-partner account. Use the Partner workspace to respond to shipment opportunities.');
-    const meta=session.user.user_metadata||{},legalName=String(meta.company_name||meta.organization_name||meta.full_name||session.user.email?.split('@')[0]||'').trim();
-    const {data:id,error}=await client.rpc('krim_provision_customer_organization',{p_legal_name:legalName.slice(0,200)});if(error)throw new Error('Customer organization setup failed: '+error.message);customerOrganizationId=Number(id);
-   }
-   if(!Number.isSafeInteger(customerOrganizationId)||customerOrganizationId<=0)throw new Error('No valid customer organization was found. Contact support.');
-   const [countryResult,locationResult]=await Promise.all([
-    client.from('krim_countries').select('id,code,name,is_active').eq('is_active',true).order('name'),
-    client.from('krim_locations').select('id,country_id,city,region,state_region,location_code,is_active').eq('is_active',true).order('city')
-   ]);
-   if(countryResult.error)throw countryResult.error;if(locationResult.error)throw locationResult.error;
-   countries=countryResult.data||[];locations=locationResult.data||[];
-   if(!countries.length||locations.length<2)throw new Error('The active global location catalogue is not ready. Contact KRIM support.');
-   fillCountries('origin-country');fillCountries('destination-country');
-   ['origin','destination'].forEach(prefix=>{document.getElementById(prefix+'-country').addEventListener('change',()=>fillLocations(prefix));document.getElementById(prefix+'-search').addEventListener('input',()=>fillLocations(prefix));fillLocations(prefix);});
-   document.getElementById('coverage-count').textContent=locations.length+' active hubs · '+countries.length+' countries';
-   const activeCountryIds=new Set(locations.map(l=>Number(l.country_id)));
-   const missing=countries.filter(c=>!activeCountryIds.has(Number(c.id)));
-   if(locations.length<100||missing.length){warning.classList.remove('hidden');warning.textContent='Coverage transparency: '+locations.length+' active hub records across '+activeCountryIds.size+' countries are currently configured. This is a global-capable booking interface, not worldwide location coverage. '+(missing.length?missing.map(c=>c.name).join(', ')+' currently have no active hub. ':'')+'Only configured locations can be booked; the catalogue must be expanded and partner coverage verified for additional routes.';}
-   ready=true;button.disabled=false;button.textContent='Create shipment & request partner bids →';
-   message('Secure session and live location catalogue loaded. Choose country and city for both endpoints.','info');
-  }catch(err){sessionState.textContent='Setup needs attention';message(err.message||'Could not initialize shipment booking.');button.disabled=true;button.textContent='Booking unavailable until fixed';}
- }
- form.addEventListener('submit',async e=>{
-  e.preventDefault();if(!ready||!session||!customerOrganizationId){message('Secure session or location catalogue is not ready. Refresh and retry.');return;}
-  const originId=Number(document.getElementById('origin-id').value),destinationId=Number(document.getElementById('destination-id').value),description=document.getElementById('goods-description').value.trim(),weight=Number(document.getElementById('weight-kg').value),tier=document.getElementById('transport-mode').value;
-  if(!originId||!destinationId||originId===destinationId){message('Choose two different active locations.');return;}
-  if(!description||description.length>500||!Number.isFinite(weight)||weight<=0){message('Enter cargo details and a valid weight greater than zero.');return;}
-  button.disabled=true;button.textContent='Creating securely…';message('Submitting to the KRIM server-side shipment contract…','info');
-  try{
-   const {data:shipment,error:createError}=await client.rpc('krim_create_global_shipment',{p_customer_organization_id:customerOrganizationId,p_origin_location_id:originId,p_destination_location_id:destinationId,p_goods_description:description,p_total_weight_kg:weight});
-   if(createError)throw createError;const shipmentId=Number(shipment&&shipment.id);if(!Number.isSafeInteger(shipmentId)||shipmentId<=0)throw new Error('Backend did not return a valid shipment reference. Check My shipments before retrying.');
-   const {error:opportunityError}=await client.rpc('krim_create_partner_opportunity',{p_shipment_id:shipmentId,p_response_deadline:new Date(Date.now()+72*60*60*1000).toISOString(),p_service_tier:tier});
-   if(opportunityError){message('Shipment '+(shipment.shipment_number||'#'+shipmentId)+' was saved, but the partner bid request failed: '+opportunityError.message+'. Opening My shipments; do not submit again.');button.textContent='Opening My shipments…';setTimeout(()=>location.href='/logistics-saas/public/customer-os/customer-services/shipment-list.html',3000);return;}
-   message('Shipment '+(shipment.shipment_number||'#'+shipmentId)+' created and partner opportunity submitted. Carrier bids, route availability, final price and assignment still require verification.','success');button.textContent='Shipment created ✓';setTimeout(()=>location.href='/logistics-saas/public/customer-os/customer-services/shipment-list.html',2200);
-  }catch(err){message(err.message||'Shipment creation failed. Check My shipments before retrying.');button.disabled=false;button.textContent='Create shipment & request partner bids →';}
- });
- initialize();
+(function () {
+  var target = new URL("../shipper/booking-request.html", window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  document.getElementById("canonical-booking-link").href = target.href;
+  window.setTimeout(function () { window.location.replace(target.href); }, 1200);
 })();
 </script>
-<style id="krim-workflow-nav-style">
-.krim-workflow-nav{margin:24px auto;padding:18px;max-width:1200px;border:1px solid #dbe5f2;border-radius:18px;background:linear-gradient(135deg,#f8fbff,#eef5ff);color:#10213d;font:14px/1.5 system-ui,sans-serif}
-.krim-workflow-nav .kwn-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.krim-workflow-nav strong{font-size:15px}.krim-workflow-nav small{color:#536783}
-.krim-workflow-nav .kwn-links{display:flex;gap:8px;flex-wrap:wrap}
-.krim-workflow-nav a{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid #cbd8ea;border-radius:10px;background:#fff;color:#173e78;text-decoration:none;font-weight:650}
-.krim-workflow-nav a:hover{background:#e2edff;border-color:#8db4f2}
-@media(max-width:600px){.krim-workflow-nav{margin:16px 10px;padding:14px}.krim-workflow-nav a{flex:1 1 42%;justify-content:center}}
-</style>
-<section class="krim-workflow-nav" aria-label="KRIM customer workflow navigation">
- <div class="kwn-head"><strong>KRIM Global Logistics · Customer Workflow</strong><small>Navigate the connected customer journey</small></div>
- <div class="kwn-links">
-  <a href="index.html">Customer Home</a>
-  <a href="shipment-create.html">Book Shipment</a>
-  <a href="quote-request.html">Request Quote</a>
-  <a href="address-book.html">Addresses</a>
-  <a href="cargo-profiles.html">Cargo Profiles</a>
-  <a href="recurring-shipments.html">Recurring Shipments</a>
-  <a href="../app/document-vault.html">Document Vault</a>
-  <a href="claims.html">Claims</a>
-  <a href="support.html">Support</a>
-  <a href="company-profile.html">Company Profile</a>
-  <a href="workflow-hub.html">All Customer Services</a>
- </div>
-</section>
 </body>
 </html>
