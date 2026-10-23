@@ -9,6 +9,16 @@ const required = [
   "public/partner/accepted-loads.html",
   "public/partner/dispatch-assignment.html",
   "config.js",
+  "auth/access.html",
+  "auth/signup.html",
+  "auth/login.html",
+  "auth/forgot-password.html",
+  "auth/reset-password.html",
+  "auth/auth-callback.html",
+  "auth/mfa-enroll.html",
+  "auth/logout.html",
+  "auth/verify-email.html",
+  "app/customer/index.html",
   "platform/krim-supabase.js",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
@@ -123,9 +133,16 @@ for (const file of customerOsPages) {
 // Repository-wide local-link audit: catch dead links outside the Customer OS as well.
 // GitHub Pages publishes the project at /logistics-saas/, with public/ content also
 // mirrored to the site root by the deployment workflow.
+const phaseOneAuthPages = new Set([
+  "auth/access.html", "auth/signup.html", "auth/login.html",
+  "auth/forgot-password.html", "auth/reset-password.html",
+  "auth/auth-callback.html", "auth/mfa-enroll.html",
+  "auth/logout.html", "auth/verify-email.html",
+  "auth/driver-access.html", "auth/partner-signup.html", "auth/partner-signin.html"
+]);
 const allHtmlFiles = listHtmlFiles(".").filter((p) =>
   p === "index.html" || p === "public/index.html" || p === "public/global-workflows.html" ||
-  p.startsWith("public/customer-os/") || p.startsWith("public/customer/") ||
+  phaseOneAuthPages.has(p) || p.startsWith("public/customer-os/") || p.startsWith("public/customer/") ||
   p.startsWith("public/shipper/") || p.startsWith("public/shipments/") ||
   p.startsWith("public/quotes/") || p.startsWith("public/finance/") || p === "public/admin/customer-ecosystem-os.html"
 );
@@ -301,6 +318,40 @@ for (const [label, source, pattern] of [
   ["Canonical booking reverses locations only when explicitly requested", existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "", /reverse=new URLSearchParams\(location\.search\)\.get\(['"]reverse['"]\)==='1'[\s\S]*?s\.destination_location_id[\s\S]*?s\.origin_location_id/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
+}
+
+// Phase 1 — institutional customer-entry and identity-flow source guards.
+// These assertions catch regressions in repository code; they do not replace deployed browser tests.
+const phaseOneSources = Object.fromEntries([
+  ["homepage", "index.html"],
+  ["access", "auth/access.html"],
+  ["signup", "auth/signup.html"],
+  ["login", "auth/login.html"],
+  ["forgot", "auth/forgot-password.html"],
+  ["reset", "auth/reset-password.html"],
+  ["callback", "auth/auth-callback.html"],
+  ["mfaEnroll", "auth/mfa-enroll.html"],
+  ["logout", "auth/logout.html"],
+  ["verifyEmail", "auth/verify-email.html"],
+].map(([key, file]) => [key, existsSync(file) ? readFileSync(file, "utf8") : ""]));
+
+for (const [label, source, pattern] of [
+  ["public homepage routes customers to the access portal without exposing a privileged admin link", phaseOneSources.homepage, /href=["'][^"']*auth\/access\.html["']/i],
+  ["access portal offers canonical customer registration and role-checked sign-in", phaseOneSources.access, /href=["']signup\.html["'][\s\S]*?href=["']login\.html\?role=customer["']/i],
+  ["customer registration uses Supabase Auth with customer and organization metadata", phaseOneSources.signup, /auth\.signUp\([\s\S]*?company_name:org[\s\S]*?krim_account_type:"customer"/],
+  ["customer registration sends email-confirmation users through the auth callback", phaseOneSources.signup, /emailRedirectTo:new URL\("auth-callback\.html",location\.href\)\.href/],
+  ["customer registration provisions its organization when an authenticated signup session is returned", phaseOneSources.signup, /rpc\("krim_provision_customer_organization"[\s\S]*?mfa-enroll\.html/],
+  ["sign-in validates active organization membership before role routing", phaseOneSources.login, /from\("krim_organization_members"\)[\s\S]*?eq\("status","active"\)[\s\S]*?workspacePaths/],
+  ["public sign-in rejects platform administrator accounts", phaseOneSources.login, /Platform administration uses a separate privileged sign-in/],
+  ["sign-in routes users through MFA enrollment or challenge", phaseOneSources.login, /auth\.mfa\.listFactors\(\)[\s\S]*?mfa-enroll\.html[\s\S]*?auth\.mfa\.getAuthenticatorAssuranceLevel/],
+  ["password recovery uses Supabase reset email and the canonical reset page", phaseOneSources.forgot, /resetPasswordForEmail\([\s\S]*?auth\/reset-password\.html/],
+  ["password reset validates recovery session and revokes sessions after successful update", phaseOneSources.reset, /recoverySession[\s\S]*?auth\.updateUser\(\{password:pwd\}\)[\s\S]*?signOut\(\{scope:"global"\}\)/],
+  ["email callback exchanges the confirmation code and provisions customer organization", phaseOneSources.callback, /exchangeCodeForSession\(code\)[\s\S]*?krim_provision_customer_organization/],
+  ["MFA enrollment requires a session and verifies a one-time challenge", phaseOneSources.mfaEnroll, /auth\.getSession\(\)[\s\S]*?auth\.mfa\.enroll\([\s\S]*?auth\.mfa\.challenge\([\s\S]*?auth\.mfa\.verify\(/],
+  ["logout requests global Supabase sign-out", phaseOneSources.logout, /signOut\(\{\s*scope:\s*['"]global['"]\s*\}\)/],
+  ["email verification supports OTP verification and resend", phaseOneSources.verifyEmail, /verifyOtp\([\s\S]*?auth\.resend\(/],
+]) {
+  if (!pattern.test(source)) failures.push(`Phase 1 customer-entry check missing: ${label}`);
 }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
