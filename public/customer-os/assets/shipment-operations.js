@@ -3,11 +3,13 @@
 const client=window.KRIM_SUPABASE||window.supabaseClient,$=id=>document.getElementById(id);
 const view=document.body.dataset.shipmentView||'details';
 const params=new URLSearchParams(location.search),shipmentId=Number(params.get('shipment_id'));
-let orgIds=[],shipment=null;
+let orgIds=[],shipment=null;let userTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';let timezoneSource='device default';
 function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function node(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
-function date(v){if(!v)return 'Not recorded';const d=new Date(v);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
+function date(v){if(!v)return 'Not recorded';const d=new Date(v);if(Number.isNaN(d.getTime()))return 'Not recorded';try{return d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short',timeZone:userTimezone})+' ('+userTimezone+')'}catch{return d.toLocaleString()+' (device time zone)'}}
+async function loadUserPreferences(){try{const {data,error}=await client.from('krim_user_app_preferences').select('preferences').eq('user_id',window.KRIM_CUSTOMER_WORKFLOW?.userId||'').maybeSingle();if(error)return;const saved=data?.preferences?.customer_localization?.timezone;if(saved){try{new Intl.DateTimeFormat('en',{timeZone:saved}).format();userTimezone=saved;timezoneSource='saved account preference'}catch{}}}catch{}} 
+function trackingFreshness(v){if(!v)return 'No verified tracking event recorded; current location is unavailable.';const t=new Date(v).getTime();if(!Number.isFinite(t))return 'Event timestamp is invalid; freshness cannot be assessed.';const age=Date.now()-t;if(age>24*60*60*1000)return 'Latest recorded event is over 24 hours old; the current position may be stale. This is a freshness warning, not a delivery SLA.';if(age< -5*60*1000)return 'Recorded event time is in the future; freshness requires review.';return 'Latest recorded event is within 24 hours. This is recorded-event visibility, not live GPS.'}
 function field(label,value){const b=node('div','field');b.append(node('div','label',label),node('div','value',value||'Not recorded'));$('fields').appendChild(b)}
 function place(label){return label||'Location not recorded'}
 async function access(){
@@ -48,7 +50,7 @@ function renderEvents(rows,emptyText){
  rows.forEach(e=>{const card=node('article','event');const top=node('div','event-top');top.append(node('strong','',e.title||'Shipment event'),node('span','time',date(e.when)));card.appendChild(top);if(e.location)card.appendChild(node('p','event-meta','Location: '+e.location));if(e.source)card.appendChild(node('p','event-meta','Source: '+e.source));if(e.notes)card.appendChild(node('p','event-meta',e.notes));if(e.coordinates){const a=node('a','map-link','Open recorded coordinates ↗');a.href='https://www.openstreetmap.org/?mlat='+encodeURIComponent(e.coordinates.lat)+'&mlon='+encodeURIComponent(e.coordinates.lng)+'#map=12/'+encodeURIComponent(e.coordinates.lat)+'/'+encodeURIComponent(e.coordinates.lng);a.target='_blank';a.rel='noopener noreferrer';card.appendChild(a)}root.appendChild(card)})
 }
 async function loadTimeline(){
- $('title').textContent='Shipment timeline · '+(shipment.shipment_number||('#'+shipment.id));
+ $('title').textContent='Shipment timeline · '+(shipment.shipment_number||('#'+shipment.id));$('subtitle').textContent='Events are shown newest first in '+userTimezone+' ('+timezoneSource+'). The timeline uses recorded KRIM status, tracking and milestone records.';
  const [historyResult,trackingResult,milestoneResult]=await Promise.all([
   client.from('krim_shipment_status_history').select('previous_status,new_status,change_source,notes,created_at').eq('shipment_id',shipment.id).order('created_at',{ascending:false}).limit(100),
   client.from('krim_tracking_events').select('event_type,event_time,source_type,source_reference,latitude,longitude,location_id,created_at,metadata').eq('shipment_id',shipment.id).order('event_time',{ascending:false}).limit(100),
@@ -68,13 +70,13 @@ async function loadTimeline(){
 }
 async function loadTracking(){
  $('title').textContent='Tracking & visibility · '+(shipment.shipment_number||('#'+shipment.id));
- const {data:events,error}=await client.from('krim_tracking_events').select('event_type,event_time,source_type,source_reference,latitude,longitude,location_id,created_at').eq('shipment_id',shipment.id).order('event_time',{ascending:false}).limit(100);if(error)throw error;
+ const {data:events,error}=await client.from('krim_tracking_events').select('event_type,event_time,source_type,source_reference,latitude,longitude,location_id,created_at').eq('shipment_id',shipment.id).order('event_time',{ascending:false}).limit(100);if(error)throw error;const orderedEvents=[...(events||[])].sort((a,b)=>new Date(b.event_time||b.created_at||0)-new Date(a.event_time||a.created_at||0));
  const ids=[...new Set([Number(shipment.last_known_location_id),...(events||[]).map(e=>Number(e.location_id))].filter(Number.isSafeInteger))];
  const {data:locs,error:le}=ids.length?await client.from('krim_locations').select('id,city,state_region,region,location_code,latitude,longitude').in('id',ids):{data:[],error:null};if(le)throw le;
  const map=new Map((locs||[]).map(l=>[Number(l.id),l]));
  const last=map.get(Number(shipment.last_known_location_id));
- $('fields').replaceChildren();field('Shipment reference',shipment.shipment_number||('#'+shipment.id));field('Shipment status',String(shipment.status||'unknown').replace(/_/g,' '));field('Last recorded location',last?[last.city,last.state_region||last.region,last.location_code].filter(Boolean).join(', '):'No recorded location');field('Latest event',events?.[0]?.event_type?String(events[0].event_type).replace(/_/g,' '):'No tracking events');field('Latest event time',date(events?.[0]?.event_time||events?.[0]?.created_at));field('Verified event count',String((events||[]).length));
- const rows=(events||[]).map(e=>{const loc=map.get(Number(e.location_id));const lat=Number(e.latitude),lng=Number(e.longitude);return{title:String(e.event_type||'tracking update').replace(/_/g,' '),when:e.event_time||e.created_at,source:[e.source_type,e.source_reference].filter(Boolean).join(' · '),location:loc?[loc.city,loc.state_region||loc.region,loc.location_code].filter(Boolean).join(', '):'',coordinates:e.latitude!==null&&e.latitude!==undefined&&e.longitude!==null&&e.longitude!==undefined&&Number.isFinite(lat)&&Number.isFinite(lng)?{lat,lng}:null}});
+ $('fields').replaceChildren();field('Shipment reference',shipment.shipment_number||('#'+shipment.id));field('Shipment status',String(shipment.status||'unknown').replace(/_/g,' '));field('Last recorded location',last?[last.city,last.state_region||last.region,last.location_code].filter(Boolean).join(', '):'No recorded location');field('Latest event',events?.[0]?.event_type?String(events[0].event_type).replace(/_/g,' '):'No tracking events');field('Latest event time',date(events?.[0]?.event_time||events?.[0]?.created_at));field('Verified event count',String((events||[]).length));field('Latest recorded event',date(orderedEvents[0]?.event_time||orderedEvents[0]?.created_at));field('Tracking freshness',trackingFreshness(orderedEvents[0]?.event_time||orderedEvents[0]?.created_at));field('Display time zone',userTimezone+' · '+timezoneSource);
+ const rows=orderedEvents.map(e=>{const loc=map.get(Number(e.location_id));const lat=Number(e.latitude),lng=Number(e.longitude);return{title:String(e.event_type||'tracking update').replace(/_/g,' '),when:e.event_time||e.created_at,source:[e.source_type,e.source_reference].filter(Boolean).join(' · '),location:loc?[loc.city,loc.state_region||loc.region,loc.location_code].filter(Boolean).join(', '):'',coordinates:e.latitude!==null&&e.latitude!==undefined&&e.longitude!==null&&e.longitude!==undefined&&Number.isFinite(lat)&&Number.isFinite(lng)?{lat,lng}:null}});
  renderEvents(rows,'No verified tracking events have been recorded yet. The page does not fabricate GPS data or a live position.');
  say((events||[]).length?'Tracking event records loaded from KRIM. Coordinates are displayed only when stored on an event.':'No tracking events are available for this shipment yet.')
 }
@@ -82,7 +84,7 @@ async function init(){
  $('details-link').href=path('public/customer-os/customer-services/shipment-details.html')+'?shipment_id='+encodeURIComponent(shipmentId||'');
  $('timeline-link').href=path('public/customer-os/customer-services/shipment-timeline.html')+'?shipment_id='+encodeURIComponent(shipmentId||'');
  $('tracking-link').href=path('public/customer-os/customer-services/tracking-map.html')+'?shipment_id='+encodeURIComponent(shipmentId||'');
- if(!await access())return;if(!await loadShipment())return;
+ if(!await access())return;await loadUserPreferences();if(!await loadShipment())return;
  if(view==='details')renderDetails();else if(view==='timeline')await loadTimeline();else await loadTracking()
 }
 init().catch(e=>{console.error(e);$('title').textContent='Unable to load shipment';say((e&&e.message)||'Shipment data could not be loaded. No operational state was assumed.','error')});
