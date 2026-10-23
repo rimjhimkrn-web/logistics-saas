@@ -1,0 +1,119 @@
+/* KRIM Global Interface System — Phase 1 adoption
+   Shared institutional UI layer for customer entry and identity pages.
+   Interaction behavior remains owned by each page; this file standardizes presentation. */
+:root {
+  color-scheme: light;
+  --krim-global-navy: #07152f;
+  --krim-global-navy-2: #123a72;
+  --krim-global-blue: #1769ff;
+  --krim-global-violet: #6247ed;
+  --krim-global-cyan: #36c9d8;
+  --krim-global-ink: #182741;
+  --krim-global-muted: #63738b;
+  --krim-global-line: #dce5f0;
+  --krim-global-page: #f3f7fc;
+  --krim-global-card: #ffffff;
+  --krim-global-success: #087e5b;
+  --krim-global-danger: #b42318;
+  --krim-global-radius: 16px;
+  --krim-global-shadow: 0 18px 50px rgba(7, 21, 47, .09);
+}
+body.krim-global-shell {
+  background: radial-gradient(ellipse at 85% 0, #dcecff 0, transparent 38%), var(--krim-global-page) !important;
+  color: var(--krim-global-ink) !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  line-height: 1.55;
+}
+.krim-global-shell header {
+  color: var(--krim-global-navy) !important;
+  background: rgba(255,255,255,.97) !important;
+  border-bottom: 1px solid var(--krim-global-line) !important;
+  letter-spacing: normal;
+}
+.krim-global-shell .nav {
+  background: var(--krim-global-card) !important;
+  border-bottom: 1px solid var(--krim-global-line) !important;
+}
+.krim-global-shell .brand,
+.krim-global-shell .brand small {
+  color: var(--krim-global-navy);
+}
+.krim-global-shell .mark,
+.krim-global-shell .badge {
+  background: linear-gradient(135deg, var(--krim-global-blue), var(--krim-global-violet) 68%, var(--krim-global-cyan)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(23, 105, 255, .18);
+}
+.krim-global-shell main:not(.layout):not(.wrap) {
+  background: var(--krim-global-card) !important;
+  border: 1px solid var(--krim-global-line) !important;
+  border-radius: 22px !important;
+  box-shadow: var(--krim-global-shadow) !important;
+}
+.krim-global-shell h1,
+.krim-global-shell h2,
+.krim-global-shell h3 {
+  color: var(--krim-global-navy);
+  letter-spacing: -.025em;
+}
+.krim-global-shell p,
+.krim-global-shell footer {
+  color: var(--krim-global-muted);
+}
+.krim-global-shell a:not(.brand):not(.btn) {
+  color: var(--krim-global-blue);
+  text-underline-offset: 3px;
+}
+.krim-global-shell input,
+.krim-global-shell select,
+.krim-global-shell textarea {
+  color: var(--krim-global-ink) !important;
+  background: #fff !important;
+  border: 1px solid #cbd8e8 !important;
+  border-radius: 11px !important;
+  font: inherit;
+}
+.krim-global-shell input::placeholder,
+.krim-global-shell textarea::placeholder { color: #8291a7; }
+.krim-global-shell input:focus,
+.krim-global-shell select:focus,
+.krim-global-shell textarea:focus {
+  border-color: var(--krim-global-blue) !important;
+  box-shadow: 0 0 0 3px rgba(23,105,255,.15) !important;
+  outline: none !important;
+}
+.krim-global-shell button,
+.krim-global-shell button[type="submit"],
+.krim-global-shell .submit {
+  border-radius: 11px;
+  background: linear-gradient(105deg, var(--krim-global-blue), var(--krim-global-violet)) !important;
+  color: #fff !important;
+  font-family: inherit;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(23,105,255,.18);
+}
+.krim-global-shell button:disabled { opacity: .58; cursor: wait; box-shadow: none; }
+.krim-global-shell :focus-visible {
+  outline: 3px solid var(--krim-global-cyan) !important;
+  outline-offset: 3px;
+}
+.krim-global-shell #feedback,
+.krim-global-shell .feedback {
+  overflow-wrap: anywhere;
+  border-radius: 11px;
+}
+.krim-global-shell .feedback.error { color: var(--krim-global-danger); }
+.krim-global-shell .feedback.success { color: var(--krim-global-success); }
+.krim-global-shell footer {
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  body.krim-global-shell main:not(.layout):not(.wrap) {
+    width: calc(100% - 28px);
+    padding: 25px 19px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+  .krim-global-shell header { gap: 12px; }
+  .krim-global-shell .brand small { letter-spacing: .08em; }
+}
