@@ -252,7 +252,7 @@ for (const [label, source, pattern] of [
   ["Customer quote request reads saved quote records", customerQuoteRequest, /from\(['"]krim_quotes['"]\)/],
   ["Customer quote request scopes records to active customer organizations", customerQuoteRequest, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
   ["Customer invoice register reads saved invoice records", customerInvoices, /from\(['"]krim_invoices['"]\)/],
-  ["Customer invoice register scopes records to active customer organizations", customerInvoices, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
+  ["Customer invoice register filters by the organization protected by invoice RLS", customerInvoices, /from\(['"]krim_invoices['"]\)[\s\S]*?\.in\(['"]organization_id['"],customerIds\)/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
