@@ -662,6 +662,8 @@ for (const [file, target] of [
 // and retirement of legacy shipment-core screens that contained fixed sample shipment data.
 const phaseNineRolePages = [
   "app/partner/index.html",
+  "public/partner/accepted-loads.html",
+  "public/partner/dispatch-assignment.html",
   "app/warehouse/index.html",
   "app/customs/index.html",
   "app/operations/index.html",
