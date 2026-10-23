@@ -34,7 +34,14 @@ for (const file of htmlFiles) {
     group.paths.push(file);
   } else hashOwners.set(hash,file);
   let links = 0, bad = 0, absoluteRoot = 0;
-  for (const m of html.matchAll(attrRe)) {
+  // Avoid interpreting HTML-like strings inside JavaScript as real navigation
+  // attributes. Preserve external/local script src attributes so route scanning
+  // still checks linked script files.
+  const htmlForLinkScan = html.replace(/<script\\b([^>]*)>[\\s\\S]*?<\\/script>/gi, (_whole, attrs) => {
+    const src = attrs.match(/\\bsrc\\s*=\\s*(["'])(.*?)\\1/i);
+    return src ? '<script src="' + src[2] + '"></script>' : '<script></script>';
+  });
+  for (const m of htmlForLinkScan.matchAll(attrRe)) {
     const raw = m[1].trim();
     if (!raw || raw.includes("$"+"{") || raw.includes("{{") || raw.includes("<") || schemeRe.test(raw)) continue;
     const clean = raw.split(/[?#]/)[0];
