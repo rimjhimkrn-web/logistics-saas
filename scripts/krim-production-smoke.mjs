@@ -18,6 +18,7 @@ const required = [
   "supabase/functions/verify-razorpay-payment/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
   "public/customer-os/customer-services/recurring-shipments.html",
+  "public/customer-os/customer-services/returns.html",
   "public/shipments/shipment-create.html",
   "public/customer-os/customer-services/invoices.html",
   "public/customer-os/customer-services/support.html",
@@ -285,6 +286,8 @@ for (const [label, source, pattern] of [
   ["Repeat shipment page reads live organization-scoped shipment records", existsSync("public/customer-os/customer-services/recurring-shipments.html") ? readFileSync("public/customer-os/customer-services/recurring-shipments.html", "utf8") : "", /from\(['"]krim_shipments['"]\)[\s\S]*?customer_organization_id/],
   ["Repeat shipment action opens canonical booking with source record ID", existsSync("public/customer-os/customer-services/recurring-shipments.html") ? readFileSync("public/customer-os/customer-services/recurring-shipments.html", "utf8") : "", /shipment-create\.html\?repeat_from=/],
   ["Canonical booking scopes repeat-prefill to the active customer organization", existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "", /applyRepeatTemplate[\s\S]*?eq\(['"]customer_organization_id['"],customerOrganizationId\)/],
+  ["Returns page starts reverse shipment draft through canonical booking", existsSync("public/customer-os/customer-services/returns.html") ? readFileSync("public/customer-os/customer-services/returns.html", "utf8") : "", /shipment-create\.html\?repeat_from=[\s\S]*?reverse=1/],
+  ["Canonical booking reverses locations only when explicitly requested", existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "", /reverse=new URLSearchParams\(location\.search\)\.get\(['"]reverse['"]\)==='1'[\s\S]*?s\.destination_location_id[\s\S]*?s\.origin_location_id/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
