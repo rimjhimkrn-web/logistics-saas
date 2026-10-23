@@ -14,11 +14,11 @@ const routes={
  tracking:'public/visibility/live-tracking-map.html',
  documents:'public/documents/document-list.html',
  payments:'public/shipper/payment-checkout.html',
- invoices:'public/finance/customer-invoices.html',
- claims:'public/support/shipment-claims.html',
+ invoices:'public/customer-os/customer-services/invoices.html',
+ claims:'public/customer-os/customer-services/claims.html',
  support:'public/support/ticket-desk.html',
- addresses:'public/customer/address-book.html',
- profile:'public/customer/company-profile.html',
+ addresses:'public/customer-os/customer-services/address-book.html',
+ profile:'public/customer-os/customer-services/company-profile.html',
  hub:'public/customer-os/index.html'
 };
 const navItems=[['Home','home'],['Book shipment','book'],['Quotes','quotes'],['Shipments','shipments'],['Tracking','tracking'],['Documents','documents'],['Payments','payments'],['Support','support'],['All services','hub']];
