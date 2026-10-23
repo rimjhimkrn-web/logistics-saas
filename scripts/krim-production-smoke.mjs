@@ -90,9 +90,9 @@ const failures = [];
    if (!existsSync(file)) { failures.push(`Missing global-interface page: ${file}`); continue; }
    const html = readFileSync(file, "utf8");
    const head = html.slice(0, html.toLowerCase().lastIndexOf("</head>"));
-   const stylesheetCount = (head.match(/core\\/krim-global-interface\\.css/g) || []).length;
+   const stylesheetCount = (head.match(/krim-global-interface\.css/g) || []).length;
    if (stylesheetCount !== 1) failures.push(`Page must include the shared global stylesheet exactly once: ${file}`);
-   if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) failures.push(`Page is missing the shared KRIM global shell: ${file}`);
+   if (!/<body\b[^>]*class=["\'][^"\']*\bkrim-global-shell\b/i.test(html)) failures.push(`Page is missing the shared KRIM global shell: ${file}`);
    if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push(`Global stylesheet must load after page-local styles: ${file}`);
  }
 
