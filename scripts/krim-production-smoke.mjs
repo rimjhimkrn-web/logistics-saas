@@ -60,6 +60,28 @@ const required = [
 ];
 
 const failures = [];
+
+// Phase 2 customer-facing pages must share the approved global design layer.
+const phase2InterfacePages = [
+  "app/customer/index.html",
+  "public/shipper/booking-request.html",
+  "public/shipper/coverage-review.html",
+  "public/shipper/rate-calculator.html",
+  "public/shipper/active-shipments.html",
+];
+for (const file of phase2InterfacePages) {
+  if (!existsSync(file)) {
+    failures.push(`Missing Phase 2 customer page: ${file}`);
+    continue;
+  }
+  const html = readFileSync(file, "utf8");
+  if (!html.includes("krim-global-interface.css")) {
+    failures.push(`Phase 2 page is missing the shared global stylesheet: ${file}`);
+  }
+  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) {
+    failures.push(`Phase 2 page is missing the shared global shell class: ${file}`);
+  }
+}
 for (const file of required) {
   if (!existsSync(file)) failures.push(`Missing required production file: ${file}`);
 }
