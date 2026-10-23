@@ -33,3 +33,20 @@ The user approved one canonical page for each route group and permanent deletion
 - Confirm the latest GitHub Pages deployment completes successfully before treating these changes as live.
 - Browser-test the customer lifecycle end-to-end: homepage → signup/sign-in → Customer Workspace → shipment creation → partner opportunity → quote → acceptance → payment verification → assignment → delivery proof → settlement.
 - A passing local-link smoke test does not by itself prove every transactional action works in production.
+
+
+## Customer OS 404 and access separation follow-up — 2026-10-23
+
+- Current repository inventory: **803 HTML files overall**, **61 HTML files in `public/customer-os/`**, consisting of **59 feature-route HTML files**, the public journey portal (`index.html`), and `INTEGRATION-MANIFEST.html`.
+- Fixed stale shared-navigation targets in `public/customer-os/assets/customer-workflow.js`: quote comparison now points to `public/shipper/quote-comparison.html`, shipment list to `public/customer-os/customer-services/shipment-list.html`, and payment checkout to `public/shipper/payment-checkout.html`. The stale links were inserted dynamically by JavaScript and were not caught by a scan of literal HTML links.
+- Replaced the public all-pages catalogue with a guided customer portal. Its public flow is shipment creation → quote request → quote comparison → checkout → shipment register → tracking/delivery evidence → invoices/claims/support.
+- Added `public/admin/customer-ecosystem-os.html`, a no-index inventory using the existing privileged-session guard, for founder/admin audit and rebuild planning. It is not linked from the public customer portal.
+- Expanded `scripts/krim-production-smoke.mjs` to verify the canonical routes used by shared Customer OS navigation and fail if the deleted aliases are reintroduced.
+
+### Access-control limitation — do not treat this as a private static site
+
+GitHub Pages serves static HTML and source files publicly. A client-side guard can redirect ordinary visitors away from the rendered directory, but cannot make the underlying HTML source or individual customer routes truly private. The new directory is therefore a guarded administrative interface, **not a confidentiality boundary**. Genuine admin-only confidentiality for the directory itself requires authenticated server-side delivery. Supabase RLS and server-side authorization must protect customer records and transactional actions regardless of whether links are visible.
+
+### Verified inventory versus live functionality
+
+The counts above are file/route inventory counts, not the number of end-to-end proven operational workflows. Automated smoke checks cover source-level conditions and local route references. The exact count of pages whose complete live workflow works—including authentication, shipment creation, approved quotes, payment verification, partner assignment, delivery evidence, invoice handling and settlement—remains **unverified until tested against the live browser and backend**.
