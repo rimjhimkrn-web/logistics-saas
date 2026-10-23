@@ -16,6 +16,8 @@ const required = [
   "app/operations/index.html",
   "public/operations/index.html",
   "config.js",
+  "public/krim-global-operations.js",
+  "supabase/migrations/20261024100000_krim_global_operations_records_backend.sql",
   "core/krim-global-interface.css",
   "auth/access.html",
   "auth/signup.html",
@@ -738,6 +740,27 @@ const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFi
 for (const token of ["--krim-global-navy", "--krim-global-blue", "--krim-global-line", ":where(input,select,textarea)", ":where(button,.btn", ":focus-visible"]) {
   if (!globalInterfaceCss.includes(token)) failures.push("Missing global interface design token/component: " + token);
 }
+
+// Global Operations backend wiring: all 12 registers must use the shared authenticated adapter,
+ // and the adapter must remain syntactically valid JavaScript.
+const globalOperationsModules = [
+  "network-coverage", "trade-lane-management", "trade-document-packs", "landed-cost",
+  "customer-support-cases", "cargo-claims-disputes", "carrier-contracts", "fleet-maintenance",
+  "order-fulfilment", "reverse-logistics", "market-regulatory-config", "business-continuity",
+];
+for (const moduleName of globalOperationsModules) {
+  const file = "public/global-operations/" + moduleName + ".html";
+  const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!source) { failures.push("Global Operations page is missing: " + file); continue; }
+  if (!source.includes('src="../krim-global-operations.js"')) failures.push("Global Operations page is not wired to the shared Supabase adapter: " + file);
+  if (source.includes("Added to this page preview only")) failures.push("Global Operations page still contains local-only preview saving: " + file);
+  const sdk = source.indexOf("supabase-js");
+  const config = source.indexOf("../../config.js");
+  const adapter = source.indexOf("../krim-global-operations.js");
+  if (!(sdk >= 0 && config > sdk && adapter > config)) failures.push("Global Operations scripts must load SDK, config, then adapter: " + file);
+}
+const globalOpsSyntax = spawnSync(process.execPath, ["--check", "public/krim-global-operations.js"], { encoding: "utf8" });
+if (globalOpsSyntax.status !== 0) failures.push("Global Operations Supabase adapter has a JavaScript syntax error: " + (globalOpsSyntax.stderr || globalOpsSyntax.stdout || "unknown error"));
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
