@@ -3,7 +3,7 @@
 "use strict";
 const base=window.KRIM_BASE||(location.pathname.startsWith("/logistics-saas/")?"/logistics-saas/":"/");
 document.body.classList.add("krim-global-shell");
-if(!document.querySelector('link[data-krim-global-interface="true"]')){
+if(!document.querySelector('link[data-krim-global-interface="true"],link[href*="global-interface.css"]')){
  const globalInterface=document.createElement("link");
  globalInterface.rel="stylesheet";
  globalInterface.href=base+"core/krim-global-interface.css";
