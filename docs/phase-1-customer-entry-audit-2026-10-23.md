@@ -76,3 +76,12 @@ Phase 1 **must remain open** until the following are tested against the deployed
 **Deployed browser end-to-end tests:** NOT YET PERFORMED.  
 **Live Supabase provisioning/MFA/recovery evidence:** NOT YET CAPTURED.  
 Do not mark Phase 1 VERIFIED until all required live tests pass and their evidence is recorded.
+
+## Supabase security evidence checked
+
+- Production Supabase project status reports `ACTIVE_HEALTHY`.
+- RLS is enabled on the inspected organization/auth-related public tables, including `krim_organization_members`, `krim_organizations`, `krim_auth_sessions` and `krim_audit_events`.
+- Read-only privilege inspection found `anon` cannot execute the inspected customer-provisioning, shipment-creation, quote-acceptance and administrator-rate-card RPCs. The inspected SECURITY DEFINER implementations check the authenticated user and relevant organization/permission before acting. Supabase still reports 27 signed-in-executable SECURITY DEFINER functions for broader review; this is a cross-cutting security review item, not proof by itself that every function is vulnerable.
+- Supabase Auth's leaked-password protection is reported disabled. Current Supabase documentation states leaked-password protection is available on Pro and above. Do not claim this protection is enabled on the current Free plan; keep it as a documented plan-level security limitation.
+- The browser-side 12-character minimum is implemented, but the server-side Auth password minimum could not be independently read from the available project inspection. Verify it in Auth settings before declaring password-policy acceptance complete.
+
