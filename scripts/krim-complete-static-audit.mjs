@@ -14,7 +14,7 @@ const files = walk(".").map(p => normalize(p).replace(/^\.\//, ""));
 const htmlFiles = files.filter(p => p.toLowerCase().endsWith(".html"));
 const fileSet = new Set(files);
 const hashOwners = new Map(), duplicateGroups = [], linkIssues = [], pageRows = [], integrationCandidates = [], placeholderPages = [];
-const attrRe = /(?:href|src|action|data-href|formaction)\s*=\s*["']([^"']+)["']/gi;
+const attrRe = /(?:^|\s)(?:href|src|action|data-href|formaction)\s*=\s*["']([^"']+)["']/gi;
 const schemeRe = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#|mailto:|tel:|javascript:|data:)/i;
 function existsCandidate(c) {
   c = normalize(c).replace(/^\.\//, "").replace(/\/$/, "");
