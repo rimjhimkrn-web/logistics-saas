@@ -11,6 +11,10 @@ const required = [
   "public/shipper/spot-approvals.html",
   "public/partner/accepted-loads.html",
   "public/partner/dispatch-assignment.html",
+  "app/customs/index.html",
+  "app/warehouse/index.html",
+  "app/operations/index.html",
+  "public/operations/index.html",
   "config.js",
   "core/krim-global-interface.css",
   "auth/access.html",
@@ -652,6 +656,43 @@ for (const [file, target] of [
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   if (!target.test(source)) failures.push("Phase 8 compatibility route does not redirect to the canonical secured workflow: " + file);
   if (/Pickup record saved successfully|Pickup verified and weight bridge slip authenticated|Pickup checklist verified successfully/.test(source)) failures.push("Phase 8 legacy route still contains a fake pickup-success message: " + file);
+}
+
+// Phase 9 — cross-workspace execution: shared interface, canonical entry points,
+// and retirement of legacy shipment-core screens that contained fixed sample shipment data.
+const phaseNineRolePages = [
+  "app/partner/index.html",
+  "app/warehouse/index.html",
+  "app/customs/index.html",
+  "app/operations/index.html",
+  "public/global-workflows.html",
+];
+for (const file of phaseNineRolePages) {
+  const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
+  if (!source.includes("krim-global-interface.css")) failures.push("Phase 9 role/workflow page is missing the shared KRIM interface stylesheet: " + file);
+  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push("Phase 9 role/workflow page is missing the KRIM global shell: " + file);
+  if ((head.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push("Phase 9 role/workflow page must load exactly one shared global stylesheet: " + file);
+}
+const phaseNineOperationsEntry = existsSync("public/operations/index.html") ? readFileSync("public/operations/index.html", "utf8") : "";
+if (!phaseNineOperationsEntry.includes('"core/krim-global-interface.css"')) failures.push("Phase 9 shared operations workbench must load the global stylesheet after its local styles.");
+if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(phaseNineOperationsEntry)) failures.push("Phase 9 shared operations workbench is missing the KRIM global shell.");
+for (const [file, target, forbiddenSample] of [
+  ["public/shipments/transport-legs.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/operations\\/index\\.html/, "SHP-2026-OCT-9901"],
+  ["public/shipments/shipment-documents.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/customs\\/index\\.html/, "SHP-2026-OCT-9901"],
+  ["public/shipments/shipment-exceptions.html", /location\\.replace\\(["']\\.\\.\\/\\.\\.\\/app\\/operations\\/index\\.html/, "SHP-2026-OCT-9901"],
+]) {
+  const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!target.test(source)) failures.push("Phase 9 legacy workflow does not redirect to the canonical role workspace: " + file);
+  if (source.includes(forbiddenSample)) failures.push("Phase 9 legacy workflow still contains a fixed sample shipment reference: " + file);
+}
+const phaseNineDirectory = existsSync("public/global-workflows.html") ? readFileSync("public/global-workflows.html", "utf8") : "";
+for (const [label, pattern] of [
+  ["transport-leg directory entry routes to Operations", /href=["']\\.\\.\\/app\\/operations\\/index\\.html["'][^>]*data-search=["'][^"']*transport legs/],
+  ["document directory entry routes to Customs", /href=["']\\.\\.\\/app\\/customs\\/index\\.html["'][^>]*data-search=["'][^"']*shipment documents/],
+  ["exception directory entry routes to Operations", /href=["']\\.\\.\\/app\\/operations\\/index\\.html["'][^>]*data-search=["'][^"']*shipment exceptions/],
+]) {
+  if (!pattern.test(phaseNineDirectory)) failures.push("Phase 9 workflow directory routing check missing: " + label);
 }
 
 const globalInterfaceCss = existsSync("core/krim-global-interface.css") ? readFileSync("core/krim-global-interface.css", "utf8") : "";
