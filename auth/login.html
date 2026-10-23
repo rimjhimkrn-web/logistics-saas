@@ -36,7 +36,8 @@
     if (accountType === "customer" && requestedNextRaw) {
       try {
         const target = new URL(requestedNextRaw, window.location.origin);
-        if (target.origin === window.location.origin && target.pathname === "/logistics-saas/public/shipper/booking-request.html") return target.href;
+        const allowedBookingPaths = ["/logistics-saas/public/shipper/booking-request.html", "/public/shipper/booking-request.html", "/logistics-saas/shipper/booking-request.html", "/shipper/booking-request.html"];
+        if (target.origin === window.location.origin && allowedBookingPaths.includes(target.pathname)) return target.href;
       } catch (_) {}
     }
     return workspaceUrl(accountType);
