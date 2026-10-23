@@ -83,7 +83,7 @@ for (const file of htmlFiles) {
   if (placeholder) placeholderPages.push(file);
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,backendReview:operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
 }
-const report = {generatedAt:new Date().toISOString(),scope:"Static source scan only; not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length},duplicateGroups,linkIssues,placeholderPages,integrationCandidates,pages:pageRows};
+const report = {generatedAt:new Date().toISOString(),scope:"Static source scan only; not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,placeholderPages,integrationCandidates,pages:pageRows};
 mkdirSync("audit-output",{recursive:true});
 writeFileSync("audit-output/krim-complete-audit.json",JSON.stringify(report,null,2));
 const lines = [
@@ -97,6 +97,9 @@ const lines = [
 "- Unresolved local/root link references: "+linkIssues.length,
 "- Pages with placeholder/demo/TODO wording signals: "+placeholderPages.length,
 "- Operational-looking pages without visible Supabase signals in their own HTML: "+integrationCandidates.length,"",
+"- HTML pages with direct backend/client signals: "+report.totals.htmlPagesWithDirectBackendSignals,
+"- HTML pages with backend-related signals in linked local scripts: "+report.totals.htmlPagesWithLinkedScriptBackendSignals,
+"- Operational pages with at least one backend-related signal (requires runtime verification): "+report.totals.operationalPagesWithBackendSignals,"",
 "## Exact duplicate content","",
 ...(duplicateGroups.length ? duplicateGroups.map(g=>"- "+g.paths.join(" ↔ ")) : ["- None detected."]),"",
 "## Unresolved link references (first 300)","",
