@@ -23,3 +23,12 @@ jobs:
           node-version: 22
       - name: Validate critical KRIM workflows
         run: node scripts/krim-production-smoke.mjs
+      - name: Run repository-wide static audit
+        run: node scripts/krim-complete-static-audit.mjs
+      - name: Upload full audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-complete-static-audit
+          path: audit-output/
+          if-no-files-found: error
+          retention-days: 30
