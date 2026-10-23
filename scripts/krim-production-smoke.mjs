@@ -17,6 +17,7 @@ const required = [
   "supabase/functions/create-global-razorpay-order/index.ts",
   "supabase/functions/verify-razorpay-payment/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
+  "public/customer-os/customer-services/invoices.html",
   "public/shipper/quote-comparison.html",
   "public/customer/quote-request.html",
   "public/shipper/payment-checkout.html",
@@ -232,6 +233,8 @@ const partnerOnboarding = existsSync("public/partner/partner-onboarding.html") ?
 const partnerBid = existsSync("public/partner/submit-quote.html") ? readFileSync("public/partner/submit-quote.html", "utf8") : "";
 const booking = existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "";
 const customerShipmentList = existsSync("public/customer-os/customer-services/shipment-list.html") ? readFileSync("public/customer-os/customer-services/shipment-list.html", "utf8") : "";
+const customerQuoteRequest = existsSync("public/customer/quote-request.html") ? readFileSync("public/customer/quote-request.html", "utf8") : "";
+const customerInvoices = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
@@ -245,6 +248,11 @@ for (const [label, source, pattern] of [
   ["customer booking rejects identical origin and destination", booking, /originId\s*===\s*destinationId/],
   ["Customer OS shipment list reads live shipment records", customerShipmentList, /from\(['"]krim_shipments['"]\)/],
   ["Customer OS shipment list is scoped to active organization membership", customerShipmentList, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?customerIds/],
+  ["Customer quote request reads saved shipment records", customerQuoteRequest, /from\(['"]krim_shipments['"]\)/],
+  ["Customer quote request reads saved quote records", customerQuoteRequest, /from\(['"]krim_quotes['"]\)/],
+  ["Customer quote request scopes records to active customer organizations", customerQuoteRequest, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
+  ["Customer invoice register reads saved invoice records", customerInvoices, /from\(['"]krim_invoices['"]\)/],
+  ["Customer invoice register scopes records to active customer organizations", customerInvoices, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
