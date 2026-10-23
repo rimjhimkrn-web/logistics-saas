@@ -14,19 +14,19 @@ function htmlFiles(dir) {
 }
 
 const canonical = new Map([
-  ["/logistics-saas/customer/shipment-list.html", "/logistics-saas/customer-os/customer-services/shipment-list.html"],
-  ["/logistics-saas/shipments/shipment-list.html", "/logistics-saas/customer-os/customer-services/shipment-list.html"],
-  ["/logistics-saas/customer-os/customer-services/quote-comparison.html", "/logistics-saas/shipper/quote-comparison.html"],
-  ["/logistics-saas/customer-os/quotes-pricing/quote-comparison.html", "/logistics-saas/shipper/quote-comparison.html"],
-  ["/logistics-saas/customer-os/shipper-services/quote-comparison.html", "/logistics-saas/shipper/quote-comparison.html"],
-  ["/logistics-saas/customer/quote-comparison.html", "/logistics-saas/shipper/quote-comparison.html"],
-  ["/logistics-saas/quotes/quote-comparison.html", "/logistics-saas/shipper/quote-comparison.html"],
-  ["/logistics-saas/customer-os/customer-services/quote-request.html", "/logistics-saas/customer/quote-request.html"],
-  ["/logistics-saas/customer-os/quotes-pricing/quote-request.html", "/logistics-saas/customer/quote-request.html"],
-  ["/logistics-saas/quotes/quote-request.html", "/logistics-saas/customer/quote-request.html"],
-  ["/logistics-saas/customer-os/shipper-services/payment-checkout.html", "/logistics-saas/shipper/payment-checkout.html"],
-  ["/logistics-saas/finance/payment-checkout.html", "/logistics-saas/shipper/payment-checkout.html"],
-  ["/logistics-saas/src/customer/workspace.html", "/logistics-saas/customer/workspace.html"]
+  ["/logistics-saas/customer/shipment-list.html", "/logistics-saas/public/customer-os/customer-services/shipment-list.html"],
+  ["/logistics-saas/shipments/shipment-list.html", "/logistics-saas/public/customer-os/customer-services/shipment-list.html"],
+  ["/logistics-saas/customer-os/customer-services/quote-comparison.html", "/logistics-saas/public/shipper/quote-comparison.html"],
+  ["/logistics-saas/customer-os/quotes-pricing/quote-comparison.html", "/logistics-saas/public/shipper/quote-comparison.html"],
+  ["/logistics-saas/customer-os/shipper-services/quote-comparison.html", "/logistics-saas/public/shipper/quote-comparison.html"],
+  ["/logistics-saas/customer/quote-comparison.html", "/logistics-saas/public/shipper/quote-comparison.html"],
+  ["/logistics-saas/quotes/quote-comparison.html", "/logistics-saas/public/shipper/quote-comparison.html"],
+  ["/logistics-saas/customer-os/customer-services/quote-request.html", "/logistics-saas/public/customer/quote-request.html"],
+  ["/logistics-saas/customer-os/quotes-pricing/quote-request.html", "/logistics-saas/public/customer/quote-request.html"],
+  ["/logistics-saas/quotes/quote-request.html", "/logistics-saas/public/customer/quote-request.html"],
+  ["/logistics-saas/customer-os/shipper-services/payment-checkout.html", "/logistics-saas/public/shipper/payment-checkout.html"],
+  ["/logistics-saas/finance/payment-checkout.html", "/logistics-saas/public/shipper/payment-checkout.html"],
+  ["/logistics-saas/src/customer/workspace.html", "/logistics-saas/public/customer/workspace.html"]
 ]);
 
 let changedFiles = 0;
@@ -42,15 +42,21 @@ for (const file of htmlFiles(".")) {
     let normalized = path;
 
     // GitHub Pages publishes the public/ directory as the site root.
-    if (normalized.startsWith("/logistics-saas/public/")) {
-      normalized = "/logistics-saas/" + normalized.slice("/logistics-saas/public/".length);
+    if (normalized === "/") {
+      normalized = "/logistics-saas/";
     } else if (normalized.startsWith("/public/")) {
-      normalized = "/logistics-saas/" + normalized.slice("/public/".length);
+      normalized = "/logistics-saas" + normalized;
     } else if (!normalized.startsWith("/logistics-saas/")) {
       // Keep API-style paths untouched; normalize file paths that otherwise escape the project base.
       if (/^\/(?:api|rest|rpc|functions)\//i.test(normalized)) return whole;
       if (/\.[a-z0-9]{1,8}$/i.test(normalized)) normalized = "/logistics-saas" + normalized;
       else return whole;
+    }
+    if (normalized.startsWith("/logistics-saas/") && !normalized.startsWith("/logistics-saas/public/")) {
+      const candidate = normalized.slice("/logistics-saas/".length);
+      if (!existsSync(candidate) && existsSync(join("public", candidate))) {
+        normalized = "/logistics-saas/public/" + candidate;
+      }
     }
     normalized = canonical.get(normalized) || normalized;
     const next = normalized + suffix;
@@ -58,15 +64,25 @@ for (const file of htmlFiles(".")) {
     return `${attr}=${quote}${next}${quote}`;
   });
 
-  // Fix the legacy relative shipment-list link whose duplicate file was intentionally removed.
-  if ((file === "public/customer/shipment-create.html" || file === "public/shipments/shipment-create.html") &&
-      /(?:href|src)=["']shipment-list\.html(?:[?#][^"']*)?["']/i.test(html)) {
-    html = html.replace(/\b(href|src)=(["'])shipment-list\.html((?:[?#][^"']*)?)\2/gi,
-      (_, attr, quote, suffix) => {
-        changedLinks++;
-        return `${attr}=${quote}/logistics-saas/customer-os/customer-services/shipment-list.html${suffix}${quote}`;
-      });
-  }
+  // Route relative links to intentionally removed duplicate customer pages to canonical routes.
+  html = html.replace(/\b(href|src)=(["'])([^"'#]+)\2/gi, (whole, attr, quote, value) => {
+    if (value.startsWith("/") || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value)) return whole;
+    const clean = value.split(/[?#]/)[0];
+    const resolved = resolve(dirname(file), clean);
+    if (existsSync(resolved)) return whole;
+    const name = clean.split("/").pop();
+    const routes = {
+      "shipment-list.html": "/logistics-saas/public/customer-os/customer-services/shipment-list.html",
+      "quote-comparison.html": "/logistics-saas/public/shipper/quote-comparison.html",
+      "quote-request.html": "/logistics-saas/public/customer/quote-request.html",
+      "payment-checkout.html": "/logistics-saas/public/shipper/payment-checkout.html",
+      "partner-onboarding.html": "/logistics-saas/public/partner/partner-onboarding.html",
+      "workspace.html": "/logistics-saas/public/customer/workspace.html"
+    };
+    if (!routes[name]) return whole;
+    changedLinks++;
+    return `${attr}=${quote}${routes[name]}${value.slice(clean.length)}${quote}`;
+  });
 
   if (html !== original) {
     writeFileSync(file, html, "utf8");
