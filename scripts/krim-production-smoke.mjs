@@ -691,10 +691,10 @@ const phaseNineInterfaceFiles = [...new Set([
 for (const file of phaseNineInterfaceFiles) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  const cssCount = (head.match(/core\\/krim-global-interface\\.css/g) || []).length;
+  const cssCount = (head.match(/core\/krim-global-interface\.css/g) || []).length;
   if (cssCount !== 1) failures.push("Phase 9 page must load exactly one shared KRIM stylesheet: " + file);
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(source)) failures.push("Phase 9 page is missing the KRIM global shell: " + file);
-  const expectedHref = /^(?:app\\/|public\\/(?:warehouse|operations|partner|shipments)\\/)/.test(file) ? "../../core/krim-global-interface.css" : "../core/krim-global-interface.css";
+  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 9 page is missing the KRIM global shell: " + file);
+  const expectedHref = /^(?:app\/|public\/(?:warehouse|operations|partner|shipments)\/)/.test(file) ? "../../core/krim-global-interface.css" : "../core/krim-global-interface.css";
   if (!head.includes('href="' + expectedHref + '"')) failures.push("Phase 9 page has an incorrect shared stylesheet path (expected " + expectedHref + "): " + file);
   if (head.lastIndexOf("krim-global-interface.css") < head.lastIndexOf("</style>")) failures.push("Phase 9 global stylesheet must follow inline page styles: " + file);
 }
