@@ -12,6 +12,7 @@ const routes={
  quoteBoard:'public/shipper/quote-comparison.html',
  shipments:'public/customer-os/customer-services/shipment-list.html',
  tracking:'public/visibility/live-tracking-map.html',
+ pickup:'public/pickup-tracking.html',
  documents:'public/documents/document-list.html',
  payments:'public/shipper/payment-checkout.html',
  invoices:'public/customer-os/customer-services/invoices.html',
@@ -21,7 +22,7 @@ const routes={
  profile:'public/customer-os/customer-services/company-profile.html',
  hub:'public/customer-os/index.html'
 };
-const navItems=[['Home','home'],['Book shipment','book'],['Quotes','quotes'],['Shipments','shipments'],['Tracking','tracking'],['Documents','documents'],['Payments','payments'],['Support','support'],['All services','hub']];
+const navItems=[['Home','home'],['Book shipment','book'],['Quotes','quotes'],['Shipments','shipments'],['Tracking','tracking'],['Pickup & custody','pickup'],['Documents','documents'],['Payments','payments'],['Support','support'],['All services','hub']];
 const contextActions=[
  {re:/shipment-create|booking-request|reorder|recurring-shipments/,title:'Continue booking',text:'Use the secured shipment booking form to create a real shipment record.',key:'book'},
  {re:/quote|pricing|rate-calculator|surcharge|currency-conversion|tax-estimation/,title:'Continue to live quotes',text:'Submit a real quote request or review quote records from the canonical KRIM workflow.',key:'quotes'},
