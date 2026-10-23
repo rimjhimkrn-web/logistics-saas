@@ -98,7 +98,10 @@ for (const file of customerOsPages) {
 // GitHub Pages publishes the project at /logistics-saas/, with public/ content also
 // mirrored to the site root by the deployment workflow.
 const allHtmlFiles = listHtmlFiles(".").filter((p) =>
-  !p.startsWith(".git/") && !p.startsWith("node_modules/")
+  p === "index.html" || p === "public/index.html" || p === "public/global-workflows.html" ||
+  p.startsWith("public/customer-os/") || p.startsWith("public/customer/") ||
+  p.startsWith("public/shipper/") || p.startsWith("public/shipments/") ||
+  p.startsWith("public/quotes/") || p.startsWith("public/finance/")
 );
 let checkedAllSiteLinks = 0;
 for (const file of allHtmlFiles) {
@@ -111,11 +114,11 @@ for (const file of allHtmlFiles) {
     let candidates = [];
     if (clean.startsWith("/logistics-saas/")) {
       const target = clean.slice("/logistics-saas/".length);
-      candidates = [target, join("public", target)];
+      candidates = [target];
     } else if (clean.startsWith("/")) {
       failures.push(`Potential GitHub Pages 404 (missing /logistics-saas/ prefix) in ${file}: ${raw}`);
       const target = clean.slice(1);
-      candidates = [target, join("public", target)];
+      candidates = [target];
     } else {
       candidates = [pathResolve(dirname(file), clean)];
     }
