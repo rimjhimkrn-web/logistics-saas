@@ -1,0 +1,56 @@
+/* KRIM Customer Ecosystem UI System v1
+   Shared presentation layer only: page-specific business logic stays in each route.
+   Mobile-first, accessible controls, restrained navy/blue/teal global-logistics palette. */
+:root {
+  --krim-navy: #0b1f3a;
+  --krim-blue: #1769e8;
+  --krim-teal: #0c8b8b;
+  --krim-ink: #182943;
+  --krim-muted: #64748b;
+  --krim-line: #dfe7f2;
+  --krim-surface: #ffffff;
+  --krim-canvas: #f4f7fc;
+  --krim-radius: 16px;
+  --krim-shadow: 0 12px 34px rgba(11,31,58,.07);
+}
+html { scroll-behavior: smooth; }
+body { color: var(--krim-ink); background: var(--krim-canvas); }
+a { text-underline-offset: 3px; }
+button, input, select, textarea { font: inherit; }
+button, [role="button"], input[type="submit"] { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(23,105,232,.35); outline-offset: 2px;
+}
+main { width: min(1180px, calc(100% - 30px)); margin-left: auto; margin-right: auto; }
+header, nav { max-width: 100%; }
+.hero, .panel, .card, .section-card, .workspace-card, .metric-card {
+  border-radius: var(--krim-radius);
+}
+.hero { box-shadow: var(--krim-shadow); }
+.card, .panel, .section-card, .workspace-card, .metric-card, .table-wrap {
+  background: var(--krim-surface); border-color: var(--krim-line);
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+select, textarea {
+  max-width: 100%; border-radius: 10px; border: 1px solid #cbd7e6; padding: 10px 12px;
+}
+button, .btn, .button, input[type="submit"] {
+  border-radius: 10px; min-height: 40px; font-weight: 750;
+}
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; color: #52647d; font-size: 11px; letter-spacing: .04em; }
+td, th { padding: 11px 12px; border-bottom: 1px solid var(--krim-line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+.status, .notice, .alert, .empty-state { border-radius: 12px; }
+img, svg, canvas { max-width: 100%; }
+@media (max-width: 720px) {
+  main { width: min(100% - 22px, 1180px); }
+  .hero { padding: clamp(20px, 5vw, 30px); }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  .toolbar, .actions, .filters { flex-wrap: wrap; }
+  .toolbar > *, .actions > * { max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
