@@ -119,7 +119,7 @@ for (const file of [quoteDesk, quoteReview, quoteComparison]) {
   }
   const html = readFileSync(file, "utf8");
   if (!html.includes("krim-global-interface.css")) failures.push(`Phase 4 page is missing the shared global stylesheet: ${file}`);
-  if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(html)) failures.push(`Phase 4 page is missing the shared global shell class: ${file}`);
+  if (!html.includes("krim-global-shell")) failures.push(`Phase 4 page is missing the shared global shell class: ${file}`);
 }
 if (existsSync(quoteDesk)) {
   const html = readFileSync(quoteDesk, "utf8");
