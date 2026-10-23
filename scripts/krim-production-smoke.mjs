@@ -17,6 +17,8 @@ const required = [
   "supabase/functions/create-global-razorpay-order/index.ts",
   "supabase/functions/verify-razorpay-payment/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
+  "public/customer-os/customer-services/recurring-shipments.html",
+  "public/shipments/shipment-create.html",
   "public/customer-os/customer-services/invoices.html",
   "public/customer-os/customer-services/support.html",
   "public/customer-os/customer-services/claims.html",
@@ -280,6 +282,9 @@ for (const [label, source, pattern] of [
   ["Customer claims page filters by the organization protected by claims RLS", customerClaims, /from\(['"]krim_claims['"]\)[\s\S]*?\.in\(['"]organization_id['"],customerIds\)/],
   ["Customer payment history reads saved payment records", customerPaymentHistory, /from\(['"]payments['"]\)/],
   ["Customer payment history filters by the signed-in user protected by payment RLS", customerPaymentHistory, /from\(['"]payments['"]\)[\s\S]*?\.eq\(['"]customer_id['"],auth\.session\.user\.id\)/],
+  ["Repeat shipment page reads live organization-scoped shipment records", existsSync("public/customer-os/customer-services/recurring-shipments.html") ? readFileSync("public/customer-os/customer-services/recurring-shipments.html", "utf8") : "", /from\(['"]krim_shipments['"]\)[\s\S]*?customer_organization_id/],
+  ["Repeat shipment action opens canonical booking with source record ID", existsSync("public/customer-os/customer-services/recurring-shipments.html") ? readFileSync("public/customer-os/customer-services/recurring-shipments.html", "utf8") : "", /shipment-create\.html\?repeat_from=/],
+  ["Canonical booking scopes repeat-prefill to the active customer organization", existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "", /applyRepeatTemplate[\s\S]*?eq\(['"]customer_organization_id['"],customerOrganizationId\)/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
