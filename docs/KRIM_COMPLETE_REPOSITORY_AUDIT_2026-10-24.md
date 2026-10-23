@@ -111,3 +111,29 @@ The current smoke script performs repository link checks over a selected subset 
 ## Exit criteria
 
 The audit is complete only when the full route inventory is classified, every internal route reference has a disposition, confirmed duplicates have a documented decision, Supabase dependencies and authorization are mapped, deployed link checks have evidence, and live business/security tests are recorded. Until then, status remains **AUDIT IN PROGRESS**.
+
+## 5. Repository-wide automated static scan — completed, findings need triage
+
+**Workflow:** [KRIM production smoke checks + full static audit](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40009710775)  
+**Audit artifact:** [Download full JSON and Markdown scan reports](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40009710775/artifacts/12525986105)  
+**Result:** workflow completed successfully; the audit report artifact was uploaded.
+
+The scanner traversed all 803 HTML pages outside excluded build/dependency folders and reported:
+
+| Finding | Count | Interpretation |
+|---|---:|---|
+| HTML pages scanned | 803 | Static source inventory |
+| Exact duplicate-content groups | 2 | Matches the two previously identified candidate pairs; inspect inbound references before deletion |
+| Unresolved local/root link references | 89 | Candidates for triage; parser limitations and public-root mirroring can create false positives |
+| Pages with placeholder/demo/TODO wording signals | 324 | Keyword-based leads, not proof that a page is nonfunctional |
+| Operational-looking pages without direct Supabase signals in their own HTML | 320 | Inspect linked/shared JavaScript and backend RPC paths before classifying integration gaps |
+
+The existing production smoke script separately checked 191 HTML pages and 1,420 site links, plus 52 Customer OS pages and 451 Customer OS links; it passed. This is a broader but still static check, not a live HTTP crawl of every deployed URL.
+
+### Immediate audit decisions
+1. Do not delete duplicate candidates until their inbound links, role/access boundary and deployed route are reviewed.
+2. Review the 89 link findings by source and canonical target, then fix confirmed defects only.
+3. Triage placeholder/integration candidates in business-critical order: auth → shipment creation → quotes → payment verification → tracking → partner assignment → warehouse/customs/finance/operations.
+4. Run real browser and authenticated Supabase tests separately. This static workflow does not prove RLS isolation, live payment capture, partner payouts, or every page's runtime behavior.
+
+**Status:** full-repository static scan is now implemented and automated. The issue triage and live runtime verification remain open; do not describe the entire system as fully audited or production-certified yet.
