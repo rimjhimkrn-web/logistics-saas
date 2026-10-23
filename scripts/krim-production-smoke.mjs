@@ -93,6 +93,42 @@ for (const file of customerOsPages) {
   }
 }
 
+
+// Repository-wide local-link audit: catch dead links outside the Customer OS as well.
+// GitHub Pages publishes the project at /logistics-saas/, with public/ content also
+// mirrored to the site root by the deployment workflow.
+const allHtmlFiles = listHtmlFiles(".").filter((p) =>
+  !p.startsWith(".git/") && !p.startsWith("node_modules/")
+);
+let checkedAllSiteLinks = 0;
+for (const file of allHtmlFiles) {
+  const html = readFileSync(file, "utf8");
+  for (const match of html.matchAll(/(?:href|src|action)=["']([^"'#]+)["']/gi)) {
+    const raw = match[1].trim();
+    if (!raw || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
+    const clean = raw.split(/[?#]/)[0];
+    if (!clean) continue;
+    let candidates = [];
+    if (clean.startsWith("/logistics-saas/")) {
+      const target = clean.slice("/logistics-saas/".length);
+      candidates = [target, join("public", target)];
+    } else if (clean.startsWith("/")) {
+      failures.push(`Potential GitHub Pages 404 (missing /logistics-saas/ prefix) in ${file}: ${raw}`);
+      const target = clean.slice(1);
+      candidates = [target, join("public", target)];
+    } else {
+      candidates = [pathResolve(dirname(file), clean)];
+    }
+    checkedAllSiteLinks++;
+    const expanded = candidates.flatMap((target) =>
+      target.endsWith("/") ? [join(target, "index.html")] : [target, join(target, "index.html")]
+    );
+    if (!expanded.some((target) => existsSync(target))) {
+      failures.push(`Broken site-local link in ${file}: ${raw} -> ${candidates.join(" or ")}`);
+    }
+  }
+}
+
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 for (const [label, pattern] of [
   ["server-created Razorpay order", /create-global-razorpay-order/],
@@ -179,7 +215,7 @@ for (const [label, source, pattern] of [
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
 
-console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages and ${checkedCustomerOsLinks} local links audited.`);
+console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
   process.exit(1);
