@@ -335,6 +335,10 @@ const phaseOneSources = Object.fromEntries([
   ["verifyEmail", "auth/verify-email.html"],
 ].map(([key, file]) => [key, existsSync(file) ? readFileSync(file, "utf8") : ""]));
 
+if (/href=["'][^"']*(?:admin|platform-admin|global-control-centre|global-control-center)[^"']*["']/i.test(phaseOneSources.homepage) || /href=["'][^"']*(?:admin|platform-admin|global-control-centre|global-control-center)[^"']*["']/i.test(phaseOneSources.access)) {
+  failures.push("Public homepage/access portal must not expose privileged platform-administrator routes.");
+}
+
 for (const [label, source, pattern] of [
   ["public homepage routes customers to the access portal", phaseOneSources.homepage, /href=["'][^"']*auth\/access\.html["']/i],
   ["access portal offers canonical customer registration and role-checked sign-in", phaseOneSources.access, /href=["']signup\.html["'][\s\S]*?href=["']login\.html\?role=customer["']/i],
