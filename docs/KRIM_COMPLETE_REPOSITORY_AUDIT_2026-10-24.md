@@ -218,3 +218,36 @@ The static link parser was also corrected so `data-action` UI controls are not i
 ### Deployment note
 
 The source-level smoke/audit gate passed, but the GitHub Pages workflow for the audit commit was cancelled during the rapid cleanup commit sequence. A fresh Pages deployment confirmation is required before treating the latest redirects and navigation fixes as live on the public site. No further cleanup edits are planned in this batch; the next activity is deployment confirmation followed by controlled end-to-end testing.
+
+
+## Fast cleanup checkpoint — 2026-10-24 (latest source audit)
+
+### Duplicate and route cleanup
+
+- Consolidated **26 additional legacy/navigation-only interfaces** in the Customer, Quote, Shipment and Customer OS shipper-service areas. These now route to a single canonical destination while preserving query parameters and fragments.
+- The additional consolidations include duplicate customer POD capture/download, carrier ratings, recurring shipment, dispute, reorder, reports, saved routes, settlement, shipment timeline, team members, refunds, approval workflows, contract management, credit notes, delivery confirmation, onboarding, analytics, claims, workspace and location pages; legacy customer quote details; legacy pricing explanation; legacy shipment details; and navigation-only spot-approval/ePOD-vault aliases.
+- The canonical target is not treated as a completed transaction merely because a visitor arrives there. Where a target is still a navigation-only shell, it explicitly remains subject to backend implementation and verification.
+- Role-specific routes were retained where the same basename can represent different permissions or responsibilities (for example finance vs. customer billing, driver vs. customer delivery evidence, and enterprise vs. customer analytics).
+
+### Latest automated source audit
+
+On commit `10c17d5c334988f81b68bf50a91a80973d4d3627`, the repository-wide static audit reported:
+
+| Check | Result |
+|---|---:|
+| HTML files scanned | 805 |
+| Exact duplicate-content groups | 0 |
+| Unresolved local/root references detected by the corrected static parser | 0 |
+| Placeholder/demo wording signals | 309 |
+| Operational-looking pages without visible Supabase signals | 309 |
+| HTML pages with direct backend signals | 230 |
+| HTML pages with backend-related signals in linked local scripts | 251 |
+| Operational-looking pages with at least one backend signal | 160 |
+
+The link scanner was corrected to avoid treating HTML-like strings inside inline JavaScript as actual anchor/link attributes. Smoke workflow passed: [run 40016955666](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40016955666). GitHub Pages deployment passed: [run 40016955721](https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40016955721).
+
+**Interpretation:** The duplicate-route and static-link cleanup gate is clear for this source snapshot. The placeholder/backend-signal counts are not a count of proven failures: redirects and navigation shells can trigger these static indicators, and they must be triaged against the actual workflow. They are not evidence that those pages are transaction-ready.
+
+### Testing decision
+
+KRIM can now proceed to **systematic end-to-end testing and verification** using the canonical routes. This does **not** certify global launch readiness or real revenue generation. Live authentication/RLS, shipment persistence, quote acceptance, payment verification, partner assignment, driver evidence, warehouse/customs execution, invoicing, settlements and role isolation must be tested with real backend responses before controlled real-world launch.
