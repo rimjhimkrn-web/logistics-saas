@@ -348,6 +348,7 @@ for (const [label, source, pattern] of [
   ["customer login safely allows booking return paths on project and custom-domain deployments", phaseOneSources.login, /allowedBookingPaths[\s\S]*?\/public\/shipper\/booking-request\.html[\s\S]*?\/shipper\/booking-request\.html/],
   ["access portal offers canonical customer registration and role-checked sign-in", phaseOneSources.access, /href=["']signup\.html["'][\s\S]*?href=["']login\.html\?role=customer["']/i],
   ["customer registration uses Supabase Auth with customer and organization metadata", phaseOneSources.signup, /auth\.signUp\([\s\S]*?company_name:org[\s\S]*?krim_account_type:"customer"/],
+  ["customer signup and password recovery enforce a consistent 12-character minimum", phaseOneSources.signup + phaseOneSources.reset, /minlength="12"[\s\S]*?minlength="12"[\s\S]*?password\.length<12[\s\S]*?minlength="12"/],
   ["customer registration sends email-confirmation users through the auth callback", phaseOneSources.signup, /emailRedirectTo:new URL\("auth-callback\.html",location\.href\)\.href/],
   ["customer registration provisions its organization when an authenticated signup session is returned", phaseOneSources.signup, /rpc\("krim_provision_customer_organization"[\s\S]*?mfa-enroll\.html/],
   ["sign-in validates active organization membership before role routing", phaseOneSources.login, /from\("krim_organization_members"\)[\s\S]*?eq\(\s*"status"\s*,\s*"active"\s*\)[\s\S]*?workspacePaths/],
