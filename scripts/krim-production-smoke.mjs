@@ -14,9 +14,11 @@ const required = [
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
   "supabase/migrations/20261019020919_restrict_privileged_krim_rpc_to_authenticated.sql",
-  "supabase/functions/create-global-cashfree-order/index.ts",
-  "supabase/functions/verify-global-cashfree-payment/index.ts",
-  "supabase/functions/cashfree-payment-webhook/index.ts",
+  "supabase/functions/create-global-razorpay-order/index.ts",
+  "supabase/functions/verify-razorpay-payment/index.ts",
+  "public/customer-os/customer-services/shipment-list.html",
+  "public/customer/shipment-list.html",
+  "public/quotes/quote-request.html",
   "app/partner/index.html",
   "public/partner/partner-onboarding.html",
   "public/partner/load-marketplace.html",
@@ -60,23 +62,21 @@ const checkout = existsSync("public/quote-result.html") ? readFileSync("public/q
 for (const [label, pattern] of [
   ["server-created Razorpay order", /create-global-razorpay-order/],
   ["server-side payment verification", /verify-razorpay-payment/],
-  ["payment verification result guard", /verification\?\.success\s*\|\|\s*!verification\?\.verified/],
+  ["payment verification result guard", /result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/],
 ]) {
   if (!pattern.test(checkout)) failures.push(`Checkout guard missing: ${label}`);
 }
 
-const cashfreeOrder = existsSync("supabase/functions/create-global-cashfree-order/index.ts") ? readFileSync("supabase/functions/create-global-cashfree-order/index.ts", "utf8") : "";
-const cashfreeVerify = existsSync("supabase/functions/verify-global-cashfree-payment/index.ts") ? readFileSync("supabase/functions/verify-global-cashfree-payment/index.ts", "utf8") : "";
-const cashfreeWebhook = existsSync("supabase/functions/cashfree-payment-webhook/index.ts") ? readFileSync("supabase/functions/cashfree-payment-webhook/index.ts", "utf8") : "";
-for (const [label, source, requiredText] of [
-  ["Cashfree order endpoint is sandbox-only", cashfreeOrder, "sandbox.cashfree.com/pg"],
-  ["Cashfree order requires authenticated user", cashfreeOrder, "auth.getUser"],
-  ["Cashfree payment verification checks provider status", cashfreeVerify, "order_status"],
-  ["Cashfree webhook verifies signature", cashfreeWebhook, "x-webhook-signature"],
-  ["Cashfree webhook independently verifies provider status", cashfreeWebhook, "paymentsRes.ok"],
-  ["Cashfree webhook accepts retryable pending orders", cashfreeWebhook, '"pending"'],
+const razorpayOrder = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
+const razorpayVerify = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
+for (const [label, source, pattern] of [
+  ["Razorpay order endpoint requires authenticated user", razorpayOrder, /auth\.getUser\(token\)/],
+  ["Razorpay order checks the accepted quote", razorpayOrder, /accepted quote/i],
+  ["Razorpay order verifies partner assignment", razorpayOrder, /assignment\.status/],
+  ["Razorpay verification checks the provider signature", razorpayVerify, /generateHmacSha256[\s\S]*?razorpaySignature/],
+  ["Razorpay verification checks accepted quote and partner assignment", razorpayVerify, /accepted customer quote[\s\S]*?accepted partner assignment/i],
 ]) {
-  if (!source.includes(requiredText)) failures.push(`Cashfree safety check missing: ${label}`);
+  if (!pattern.test(source)) failures.push(`Razorpay safety check missing: ${label}`);
 }
 
 const pricingMigration = "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql";
@@ -125,7 +125,9 @@ const partnerWorkspace = existsSync("app/partner/index.html") ? readFileSync("ap
 const partnerMarketplace = existsSync("public/partner/load-marketplace.html") ? readFileSync("public/partner/load-marketplace.html", "utf8") : "";
 const partnerOnboarding = existsSync("public/partner/partner-onboarding.html") ? readFileSync("public/partner/partner-onboarding.html", "utf8") : "";
 const partnerBid = existsSync("public/partner/submit-quote.html") ? readFileSync("public/partner/submit-quote.html", "utf8") : "";
-const booking = existsSync("public/shipper/booking-request.html") ? readFileSync("public/shipper/booking-request.html", "utf8") : "";
+const booking = existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "";
+const customerShipmentList = existsSync("public/customer-os/customer-services/shipment-list.html") ? readFileSync("public/customer-os/customer-services/shipment-list.html", "utf8") : "";
+const legacyShipmentList = existsSync("public/customer/shipment-list.html") ? readFileSync("public/customer/shipment-list.html", "utf8") : "";
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
@@ -134,9 +136,12 @@ for (const [label, source, pattern] of [
   ["marketplace submits through the dedicated partner quote RPC", partnerMarketplace, /rpc\(['"]krim_submit_partner_quote['"]/],
   ["onboarding supports the three explicit partner pathways", partnerOnboarding, /development_test[\s\S]*individual_interest[\s\S]*registered_business/i],
   ["onboarding saves account mode through the backend RPC", partnerOnboarding, /rpc\(['"]krim_set_partner_account_mode['"]/],
-  ["partner bid page requires verified eligible organization", partnerBid, /Bidding is locked[\s\S]*verified/i],
+  ["partner bid page requires verified eligible organization", partnerBid, /partner_verification_status[\s\S]*partner_lifecycle_status[\s\S]*partner_compliance_status/i],
   ["customer booking uses the secure shipment creation RPC", booking, /rpc\(['"]krim_create_global_shipment['"]/],
-  ["customer booking rejects identical origin and destination", booking, /origin\s*===\s*destination/],
+  ["customer booking rejects identical origin and destination", booking, /originId\s*===\s*destinationId/],
+  ["Customer OS shipment list reads live shipment records", customerShipmentList, /from\(['"]krim_shipments['"]\)/],
+  ["Customer OS shipment list is scoped to active organization membership", customerShipmentList, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?customerIds/],
+  ["Legacy customer shipment list redirects to canonical Customer OS", legacyShipmentList, /location\.replace\(target\)/],
 ]) {
   if (!pattern.test(source)) failures.push(`Partner/customer lifecycle safety check missing: ${label}`);
 }
