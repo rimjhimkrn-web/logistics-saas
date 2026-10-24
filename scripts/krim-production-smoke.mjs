@@ -75,6 +75,37 @@ const required = [
 
 const failures = [];
 
+// Global Operations registers persist authenticated, user-scoped reference records.
+// Guard against stale copy that incorrectly describes saved records as browser-only,
+// and keep the limits explicit: these registers are not the operational source of truth.
+const globalOperationsRegisterPages = [
+  "public/global-operations/network-coverage.html",
+  "public/global-operations/trade-lane-management.html",
+  "public/global-operations/trade-document-packs.html",
+  "public/global-operations/landed-cost.html",
+  "public/global-operations/customer-support-cases.html",
+  "public/global-operations/cargo-claims-disputes.html",
+  "public/global-operations/carrier-contracts.html",
+  "public/global-operations/fleet-maintenance.html",
+  "public/global-operations/order-fulfilment.html",
+  "public/global-operations/reverse-logistics.html",
+  "public/global-operations/market-regulatory-config.html",
+  "public/global-operations/business-continuity.html",
+];
+for (const file of globalOperationsRegisterPages) {
+  if (!existsSync(file)) { failures.push(`Missing Global Operations register: ${file}`); continue; }
+  const html = readFileSync(file, "utf8");
+  if (html.includes("New entries in this browser are a UI preview, not saved to the KRIM backend.")) {
+    failures.push(`Global Operations page has misleading browser-only persistence copy: ${file}`);
+  }
+  if (!html.includes("Records shown here are user-scoped reference entries saved in KRIM Supabase.")) {
+    failures.push(`Global Operations page must explain user-scoped Supabase persistence and operational limits: ${file}`);
+  }
+  if (!html.includes("../krim-global-operations.js")) {
+    failures.push(`Global Operations page is missing its shared persistence controller: ${file}`);
+  }
+}
+
 // Audit guard: the public E2E dashboard must never claim tests passed unless a real
 // runner and recorded execution evidence are connected. A display-only page must say NOT RUN.
 const e2eDashboardPath = "public/testing/e2e-test-runner.html";
