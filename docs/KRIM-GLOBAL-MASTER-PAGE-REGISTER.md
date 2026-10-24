@@ -988,6 +988,16 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `workspaces/operations-workspace.html`
 - `workspaces/partner-workspace.html`
 
+## Integration work started — 2026-10-24
+
+The canonical route registry is now available in `config.js` as `window.KRIM_ROUTES`, with `window.krimRoute(name, query)` for root-aware URLs. `auth/login.html` uses the registry for the eight standard workspaces while retaining membership and MFA checks.
+
+- Integration status: [KRIM end-to-end integration status](KRIM-END-TO-END-INTEGRATION-STATUS.md)
+- Static local-link audit: `scripts/audit-krim-links.mjs`
+- Automated GitHub Actions audit: `.github/workflows/krim-static-link-audit.yml`
+
+This is the first integration batch only. The registry does not magically connect every existing HTML page, and the automated audit has not yet produced a verified report. Continue page-by-page migration and backend transaction testing; do not delete legacy routes until their dependencies are checked.
+
 ## Required next audit steps
 
 - [ ] Confirm GitHub Pages publishing source and live URL mapping for root files vs `public/`.
