@@ -70,6 +70,8 @@ function inspectHtml(file) {
     let attr;
     while ((attr = attrPattern.exec(tag[0]))) {
       const value = attr[2] ?? attr[3] ?? attr[4] ?? "";
+      // JavaScript-built hrefs appear as fragments such as "'+base+'..."; they are not literal paths.
+      if (value.includes("+") || value.includes("${") || value.includes("`")) continue;
       const target = resolveLocalTarget(file, value);
       if (!target) continue;
       if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
