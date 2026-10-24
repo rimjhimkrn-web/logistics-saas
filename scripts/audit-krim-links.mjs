@@ -39,10 +39,13 @@ function resolveLocalTarget(sourceFile, rawValue) {
   if (!value) return null;
 
   // GitHub Pages serves this repository beneath /logistics-saas/.
+  const rootRelative = value.startsWith("/");
   if (value.startsWith("/logistics-saas/")) value = value.slice("/logistics-saas/".length);
-  else if (value.startsWith("/")) value = value.slice(1);
+  else if (rootRelative) value = value.slice(1);
 
-  let target = path.normalize(value.startsWith("/")
+  // Root-relative URLs resolve from the repository/publishing root, not from
+  // the directory containing the current HTML file.
+  let target = path.normalize(rootRelative
     ? path.join(ROOT, value)
     : path.resolve(path.dirname(sourceFile), value));
 
