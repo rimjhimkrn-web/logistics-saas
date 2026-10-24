@@ -95,6 +95,18 @@ The following frontend/backend connections were confirmed by source inspection o
 | Platform administration | `app/platform-admin/index.html` calls `global-admin-control` | Verify each action's server-side authorization and audit trail |
 | Warehouse | Entry and 12 module pages verify identity/membership, but operational forms explicitly state that they do not save data; warehouse tables were absent | Build reviewed schema, tenant/facility-scoped policies, validated write paths, and audit/event records before enabling live actions |
 
+## Workspace authorization hardening committed
+
+A source audit found that Customs, Finance, Operations, and Enterprise entry pages previously accepted any authenticated session at the UI gate, even though the page's role-specific organization membership had not been verified there. Backend RLS remains the real data boundary, but the UI should also prevent incorrect workspace entry.
+
+Committed fixes now require an active organization of the matching type before opening these workspaces:
+- Customs: active `customs` organization membership.
+- Finance: active `finance` organization membership.
+- Operations: active `operations` organization membership.
+- Enterprise: active `enterprise` organization membership.
+
+The checks fail closed when the membership query errors. These are source-level changes; they still need live tests with authorized and unauthorized test accounts, and they do not replace backend RLS or server-side authorization.
+
 ## Required next steps
 
 1. Run `node scripts/audit-krim-links.mjs` from the repository root and fix broken local references in controlled batches.
