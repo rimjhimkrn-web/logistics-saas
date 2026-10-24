@@ -95,8 +95,15 @@
     <script>
         function handleDispatchSubmit(e) {
             e.preventDefault();
-            alert('Outbound dispatch finalized successfully! Proceeding to Cross-Docking.');
-            window.location.href = '/logistics-saas/public/warehouse/cross-docking.html';
+            let status = document.getElementById('dispatchStatus');
+            if (!status) {
+                status = document.createElement('p');
+                status.id = 'dispatchStatus';
+                status.setAttribute('role', 'status');
+                status.className = 'text-amber-300 text-xs mt-4';
+                e.currentTarget.appendChild(status);
+            }
+            status.textContent = 'Form fields validated in this browser only. No dispatch was finalized because a persisted dispatch workflow is not connected yet.';
         }
     </script>
 </body>
