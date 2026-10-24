@@ -66,7 +66,7 @@ footer{background:#06172a;color:#b5c6d5;padding:30px 0;font-size:11px}footer .wr
 </div><button class="btn primary" id="submit-enquiry" type="submit">Send enquiry securely ↗</button><div class="response" id="form-response" role="status" aria-live="polite"></div><p class="fine">Please do not include passwords, payment-card details or sensitive personal documents. The inquiry service records submissions; automated email replies and a response-time guarantee are not represented as active here.</p>
 </form></div></div></section>
 </main>
-<footer><div class="wrap"><span>© 2026 KRIM Logistics · Global logistics operating platform</span><span><a data-route="index.html" href="../index.html">Home</a> · <a data-route="contact.html" href="contact.html">Contact</a> · <a data-route="privacy.html" href="privacy.html">Privacy</a></span></div></footer>
+<footer><div class="wrap"><span>© 2026 KRIM Logistics · Global logistics operating platform</span><span><a data-route="index.html" href="../index.html">Home</a> · <a data-route="contact.html" href="contact.html">Contact</a> · <a data-route="privacy.html" href="../privacy.html">Privacy</a></span></div></footer>
 <script src="../platform/krim-config.js"></script>
 <script>
 (function(){
@@ -84,7 +84,7 @@ var config=window.KRIM_CONFIG&&window.KRIM_CONFIG.supabase;
 if(!config||!config.url||!config.publishableKey){responseBox.textContent="The enquiry service is not configured. Please try again later.";return;}
 var values=Object.fromEntries(new FormData(form).entries());
 var interest=values.interest;
-var payload={full_name:values.full_name,email:values.email,organization:values.organization,message:"Enquiry type: "+interest+"\n\n"+values.message,website:values.website||""};
+var payload={full_name:values.full_name,email:values.email,organization:values.organization,message:"Source page: krim-global-advertisement.html\nEnquiry type: "+interest+"\n\n"+values.message,website:values.website||""};
 button.disabled=true;button.textContent="Sending enquiry…";responseBox.textContent="Submitting to KRIM's enquiry service…";
 try{
 var res=await fetch(config.url+"/functions/v1/krim-public-contact-inquiry",{method:"POST",headers:{"Content-Type":"application/json","apikey":config.publishableKey},body:JSON.stringify(payload)});
