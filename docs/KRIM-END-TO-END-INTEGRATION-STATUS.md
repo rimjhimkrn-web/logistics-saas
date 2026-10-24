@@ -107,6 +107,26 @@ Committed fixes now require an active organization of the matching type before o
 
 The checks fail closed when the membership query errors. These are source-level changes; they still need live tests with authorized and unauthorized test accounts, and they do not replace backend RLS or server-side authorization.
 
+## Latest backend changes and checks — 2026-10-24
+
+Two additive Supabase migrations were applied and their policy records were verified:
+
+- `20261024072613_add_role_scoped_cross_workspace_read_policies`
+  - Operations users with active `shipment.view` permission can read shipment records and exceptions.
+  - Operations users with active `tracking.view` permission can read tracking events.
+  - Finance users with active `finance.view` permission can read invoices, settlements, payment orders and revenue-ledger rows.
+  - Customs users with active `compliance.view` permission can read customs records.
+- `20261024072632_add_customs_exception_read_policy`
+  - Customs users with active `compliance.view` permission can read exception records.
+
+These policies are **SELECT-only**; they add no cross-workspace insert, update, or delete permissions. Each policy requires an active organization of the matching type plus the relevant role permission. The database confirmed all nine policy records after application.
+
+Manual repository checks also confirmed that all 14 canonical route-registry destinations exist, all nine checked homepage destinations exist, and all 16 checked customer-workspace destinations exist. This is a targeted check, not a complete audit of every local link in the 805 HTML files.
+
+The Supabase advisors were rerun. The security advisor still reports 28 authenticated-callable `SECURITY DEFINER` functions for manual review. The performance advisor reports 9 unindexed foreign keys and 629 unused-index candidates. No functions were revoked and no indexes were deleted: those changes require a function-by-function and index-by-index dependency review.
+
+**Not yet verified:** real authenticated positive/negative tests for each new RLS policy, live browser execution, complete GitHub Actions audit results, payment-provider test transactions, and full end-to-end shipment execution.
+
 ## Required next steps
 
 1. Run `node scripts/audit-krim-links.mjs` from the repository root and fix broken local references in controlled batches.
