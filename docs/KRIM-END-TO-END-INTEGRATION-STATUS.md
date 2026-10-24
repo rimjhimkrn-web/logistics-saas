@@ -143,3 +143,15 @@ The Supabase advisors were rerun. The security advisor still reports 28 authenti
 ## Definition of done
 
 A page is **connected** only when its intended route resolves, its correct authenticated role can open it, its data reads are scoped by backend authorization, permitted writes persist to the expected records, the next workflow step receives the same canonical shipment/quote/payment IDs, and failures are visible without false success.
+
+
+## Additional work completed — 2026-10-24 (warehouse foundation)
+
+- Added an additive warehouse schema in Supabase: `krim_warehouse_facilities`, `krim_warehouse_receipts`, `krim_warehouse_inventory`, and `krim_warehouse_inventory_movements`.
+- Enabled RLS on the four tables. Facility access checks active membership in a warehouse/fulfilment organization; receipt and inventory access checks active organization membership and facility-to-organization consistency. Inventory movements are append-only for authenticated clients (select/insert grants only).
+- Added supporting indexes and documented the schema in `supabase/migrations/20261024080000_krim_warehouse_core_operations.sql`.
+- Connected the facility-onboarding form to Supabase. It verifies the session, active organization membership, and warehouse organization type before attempting an insert; errors are shown instead of displaying fake success.
+- Fixed the customer-workspace link from `public/partner-selection-assignment.html`.
+- Corrected the static audit attribute parser so `data-action="profile/security/language/support"` controls are not incorrectly treated as HTML `action` URLs. The audit workflow now includes an enforcement step for literal broken local references.
+
+**Still unverified:** authenticated positive/negative RLS tests, browser-based facility insert, full warehouse receipt-to-inventory movement workflow, the newest GitHub Actions run, and full end-to-end commercial readiness. Warehouse receipt/inventory/dispatch pages are not yet all connected to the new schema. The audit is a static local-reference check, not proof that every button or external endpoint works.
