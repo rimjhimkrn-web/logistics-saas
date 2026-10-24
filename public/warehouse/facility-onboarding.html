@@ -108,10 +108,10 @@
           const ids=[...new Set((mr.data||[]).map(x=>x.organization_id).filter(Boolean))];if(!ids.length)throw new Error("No active organization membership found.");
           const org=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",ids);if(org.error)throw org.error;
           const wh=(org.data||[]).find(x=>String(x.status||"").toLowerCase()==="active" && /warehouse|fulfilment|fulfillment/i.test(String(x.organization_type||"")+" "+String(x.organization_type_code||"")));if(!wh)throw new Error("No active warehouse organization access. Nothing was saved.");
-          const save=await client.from("krim_warehouse_facilities").insert({organization_id:wh.id,facility_code:fields[0].value.trim(),facility_name:fields[1].value+" — "+fields[0].value.trim(),address_text:fields[2].value.trim(),created_by:uid});if(save.error)throw save.error;
+          const save=await client.from("krim_warehouse_facilities").insert({organization_id:wh.id,facility_code:fields[0].value.trim(),facility_name:fields[1].selectedOptions[0].text+" — "+fields[0].value.trim(),address_text:fields[2].value.trim(),created_by:uid});if(save.error)throw save.error;
           status.textContent="Facility saved to KRIM Supabase successfully.";form.reset();
         } catch(err) {status.textContent="Facility not saved: "+(err.message||"Please retry.");} finally {button.disabled=false;}
       }
-    </script>ipt>
+    </script>
 </body>
 </html>
