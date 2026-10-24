@@ -41,24 +41,12 @@ There are 92 HTML basename groups containing multiple paths. These are **not** a
 **Impact:** The page can mislead operators into believing tests were executed when no test execution is performed by that button.  
 **Disposition:** The false success claims and fake success alert were removed in commit `49169e3d9dbcb500b21b653a0c2031a4ffaba123`. The page now says the runner is not connected and results are not measured; the run button is disabled. A regression guard was added to `scripts/krim-production-smoke.mjs` in commit `f3243c5f0d81d0eebf9d099a7251d6999f04efec`. The smoke workflow is running for that change. Remaining: decide whether this test dashboard should be private/unpublished and connect a real browser runner before reporting E2E pass rates.
 
-### AUDIT-002 — Global Operations pages lack visible Supabase integration
+### AUDIT-002 — Global Operations pages persist generic user-scoped records, not live operational workflows
 **Severity:** High  
-**Evidence:** Source inspection of all 12 pages in `public/global-operations/` found no Supabase client/table/RPC usage or Edge Function invocation in the page source, while placeholder/live-source wording is present.  
-**Affected pages:**
-- `public/global-operations/network-coverage.html`
-- `public/global-operations/trade-lane-management.html`
-- `public/global-operations/trade-document-packs.html`
-- `public/global-operations/landed-cost.html`
-- `public/global-operations/customer-support-cases.html`
-- `public/global-operations/cargo-claims-disputes.html`
-- `public/global-operations/carrier-contracts.html`
-- `public/global-operations/fleet-maintenance.html`
-- `public/global-operations/order-fulfilment.html`
-- `public/global-operations/reverse-logistics.html`
-- `public/global-operations/market-regulatory-config.html`
-- `public/global-operations/business-continuity.html`
+**Evidence:** All 12 pages load `public/krim-global-operations.js`, which reads and inserts rows in `public.krim_global_ops_records`. Migration `supabase/migrations/20261024100000_krim_global_operations_records_backend.sql` applies row-level security scoped to `auth.uid()`; the records are generic JSON fields rather than typed records linked to shipments, organizations, partner contracts, finance, claims, or regulatory source-of-truth tables. The page copy also incorrectly described saved entries as browser-only previews; this was corrected on branch `audit/global-operations-truthful-data-copy` and guarded in the smoke script.
+**Affected pages:** All 12 pages under `public/global-operations/`: network coverage, trade lane management, trade document packs, landed cost, customer support cases, cargo claims/disputes, carrier contracts, fleet maintenance, order fulfilment, reverse logistics, market/regulatory configuration, and business continuity.
 
-**Disposition:** Classify as IMPLEMENTED — UNVERIFIED / integration pending until each page's required records, RPCs, authorization and error states are mapped and tested. Do not count them as live operational modules based on appearance alone.
+**Disposition:** Classify as PERSISTED GENERIC REGISTERS — NOT OPERATIONALLY INTEGRATED. The UI can save reference entries for the signed-in user, but this does not establish verified coverage or team-wide operations. Before launch claims, map each module to typed business data, organization/role authorization, audit history, validation, and workflow-specific integration tests. Do not count these as live operational modules based on appearance or saved reference records alone.
 
 ### AUDIT-003 — Legacy administrator redirect must be preserved pending dependency review
 **Severity:** Medium  
@@ -93,7 +81,7 @@ The current smoke script performs repository link checks over a selected subset 
 | Unique and essential pages | AUDIT IN PROGRESS | Inventory exists; map every route to a business purpose, role, canonical route and dependency. |
 | Duplicate / obsolete pages | PARTIALLY AUDITED | Two exact duplicate groups confirmed; 92 basename groups need semantic/dependency review. |
 | Broken links / 404s | NOT FULLY AUDITED | Existing smoke checks pass, but complete static crawl and deployed HTTP status verification remain outstanding. Do not claim zero 404s. |
-| Supabase integration | PARTIALLY AUDITED | All 12 Global Operations pages have no visible direct integration in their source; classify the remaining route inventory page by page. |
+| Supabase integration | PARTIALLY AUDITED | Global Operations pages persist generic user-scoped reference records through a shared controller; typed operational workflows and organization-level sharing remain unverified. Continue classifying the remaining route inventory page by page. |
 | Ready for functionality testing | PARTIALLY CLASSIFIED | Core auth → shipment → quote → payment routes have source-level smoke checks. Live tests still need test identities, safe fixtures, backend evidence and negative authorization cases. |
 | Production readiness | NOT VERIFIED | End-to-end business, RLS/tenant isolation, payment reconciliation, accessibility, reliability and mobile browser evidence remain required. |
 
