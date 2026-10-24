@@ -1,0 +1,33 @@
+name: KRIM static link audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-local-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Audit local HTML links and assets
+        shell: bash
+        run: |
+          node scripts/audit-krim-links.mjs > krim-link-audit.json || true
+          node -e "const r=require('./krim-link-audit.json'); console.log('Scanned HTML files: '+r.html_files_scanned); console.log('Broken local references: '+r.broken_local_references);" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload full audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-static-link-audit
+          path: krim-link-audit.json
+          if-no-files-found: error
+          retention-days: 14
