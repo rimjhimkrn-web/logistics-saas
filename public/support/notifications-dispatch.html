@@ -58,12 +58,10 @@
       <div>
         <span class="text-[11px] font-bold text-blue-400 uppercase tracking-widest block">SendGrid • Twilio • WhatsApp Cloud API</span>
         <h1 class="text-xl font-extrabold text-white mt-1">Notification Dispatch & Alert Gateway</h1>
-        <p class="text-slate-400 text-[11px] mt-1">Monitor automated communication streams across Email, SMS, and WhatsApp with delivery receipt verification.</p>
+        <p class="text-slate-400 text-[11px] mt-1">This page reports implementation readiness only. Live delivery streams and delivery receipt verification are not connected.</p>
       </div>
 
-      <button onclick="alert('Broadcasting Manual Test Alert to Active Subscribers...')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-blue-500/20 shrink-0">
-        📢 Dispatch Test Alert
-      </button>
+      <span class="px-4 py-2.5 rounded-xl border border-amber-400 bg-amber-50 text-amber-900 font-bold shrink-0">Outbound delivery disabled</span>
     </section>
 
     <!-- NOTIFICATION LOG TABLE -->
@@ -72,37 +70,20 @@
         <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <span>📨</span> Recent Communication Dispatches
         </h2>
-        <span class="text-[10px] text-slate-500">Delivery Success: <strong class="text-emerald-400">99.8% Delivered</strong></span>
+        <span class="text-[10px] text-slate-500">Delivery status: <strong class="text-amber-400">Not verified</strong></span>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left font-mono">
-          <thead>
-            <tr class="border-b border-slate-800 text-slate-500 text-[10px] uppercase">
-              <th class="py-3 px-2">Channel / Protocol</th>
-              <th class="py-3 px-2">Recipient / Destination</th>
-              <th class="py-3 px-2">Event Template</th>
-              <th class="py-3 px-2">Timestamp</th>
-              <th class="py-3 px-2 text-right">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60 text-slate-300">
-            <tr class="hover:bg-slate-900/50 transition-all">
-              <td class="py-3.5 px-2 font-bold text-blue-400">📧 SendGrid Email</td>
-              <td class="py-3.5 px-2 text-white">ops@globalsupplychain.corp</td>
-              <td class="py-3.5 px-2 text-slate-300">shipment.status_updated (MSCU892101)</td>
-              <td class="py-3.5 px-2 text-slate-400">Oct 09, 2026 21:30 UTC</td>
-              <td class="py-3.5 px-2 text-right"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">DELIVERED</span></td>
-            </tr>
-            <tr class="hover:bg-slate-900/50 transition-all">
-              <td class="py-3.5 px-2 font-bold text-emerald-400">💬 WhatsApp Cloud</td>
-              <td class="py-3.5 px-2 text-white">+65 9123 4567</td>
-              <td class="py-3.5 px-2 text-slate-300">customs.hold_alert (ENS-NLRTM-8812)</td>
-              <td class="py-3.5 px-2 text-slate-400">Oct 09, 2026 19:12 UTC</td>
-              <td class="py-3.5 px-2 text-right"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">DELIVERED</span></td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 space-y-3">
+        <h3 class="text-sm font-bold text-white">No verified delivery records available</h3>
+        <p class="text-xs leading-relaxed text-slate-300">The previous sample recipient details and DELIVERED statuses were illustrative, not real provider records, and have been removed. The deployed Resend adapter is readiness-only and explicitly has sending disabled. SMS and WhatsApp delivery are not verified here.</p>
+        <ul class="list-disc pl-5 text-xs leading-6 text-slate-300">
+          <li>Verify sender domain and server-side provider credentials.</li>
+          <li>Approve templates and implement consent/suppression controls.</li>
+          <li>Implement idempotent outbox processing, retries and failure tracking.</li>
+          <li>Record provider message IDs and verify delivery webhooks.</li>
+          <li>Run a controlled test to an authorized mailbox before claiming delivery.</li>
+        </ul>
+        <a href="/logistics-saas/contact.html" class="inline-flex px-3 py-2 rounded-lg bg-blue-500 text-slate-950 font-extrabold">Open contact form →</a>
       </div>
     </section>
 
@@ -112,7 +93,7 @@
   <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between font-mono">
       <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Notifications Core.</p>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Notification readiness status only; live delivery is not verified.</p>
     </div>
   </footer>
 
