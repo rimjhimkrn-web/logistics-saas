@@ -95,23 +95,27 @@
     if (orgTypes.some(v => /customer|shipper|client/.test(v))) return "customer";
     return "";
   }
+  // Canonical destinations come from the shared KRIM route registry in config.js.
+  // The selected workspace remains a preference only; backend membership and MFA
+  // checks below remain authoritative before redirecting.
   const workspacePaths = {
-    customer: "../app/customer/index.html",
-    partner: "../app/partner/index.html",
-    driver: "../app/driver/index.html",
-    warehouse: "../app/warehouse/index.html",
-    customs: "../app/customs/index.html",
-    finance: "../app/finance/index.html",
-    operations: "../app/operations/index.html",
-    enterprise: "../app/enterprise/index.html"
+    customer: window.KRIM_ROUTES?.customer || "app/customer/index.html",
+    partner: window.KRIM_ROUTES?.partner || "app/partner/index.html",
+    driver: window.KRIM_ROUTES?.driver || "app/driver/index.html",
+    warehouse: window.KRIM_ROUTES?.warehouse || "app/warehouse/index.html",
+    customs: window.KRIM_ROUTES?.customs || "app/customs/index.html",
+    finance: window.KRIM_ROUTES?.finance || "app/finance/index.html",
+    operations: window.KRIM_ROUTES?.operations || "app/operations/index.html",
+    enterprise: window.KRIM_ROUTES?.enterprise || "app/enterprise/index.html"
   };
 
-  // Always send a customer account to the dedicated customer workspace.
-  // A release query parameter avoids stale cached workspace HTML on GitHub Pages.
+  // Always send an account to the one canonical workspace route.
+  // Release markers help avoid stale workspace HTML on GitHub Pages.
   function workspaceUrl(accountType) {
-    const relativePath = workspacePaths[accountType];
-    if (!relativePath) throw new Error("No supported workspace is mapped to this account.");
-    const target = new URL(relativePath, window.location.href);
+    const route = workspacePaths[accountType];
+    if (!route) throw new Error("No supported workspace is mapped to this account.");
+    const basePath = window.krimPath ? window.krimPath(route) : "../" + route;
+    const target = new URL(basePath, window.location.origin);
     target.searchParams.set("krim_workspace", accountType);
     const releases = { customer: "20261020-customer-route-2", partner: "20261020-partner-workspace-v3", driver: "20261021-driver-workspace-v4" };
     target.searchParams.set("release", releases[accountType] || "20261021-role-routing-v1");
