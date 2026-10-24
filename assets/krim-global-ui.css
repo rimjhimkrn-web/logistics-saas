@@ -1,0 +1,44 @@
+/* KRIM Global UI System — shared, progressive enhancement layer.
+   Keep page-specific behavior and Supabase integration in each workspace. */
+:root{
+  --krim-navy:#0b1f3a;--krim-navy-2:#12345b;--krim-blue:#2867f6;
+  --krim-cyan:#36c6d8;--krim-ink:#172b46;--krim-muted:#64758b;
+  --krim-line:#dfe7f1;--krim-wash:#f4f7fb;--krim-card:#fff;
+  --krim-radius:18px;--krim-shadow:0 12px 32px rgba(11,31,58,.065);
+}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{color:var(--krim-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit}
+button,a,input,select,textarea{ -webkit-tap-highlight-color:transparent }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid #56b8ff;outline-offset:3px
+}
+button:not(:disabled){touch-action:manipulation}
+button:disabled{cursor:not-allowed;opacity:.62}
+input,select,textarea{
+  max-width:100%;border-color:#d6e1ed;border-radius:10px;
+  color:#172b46;background-color:#fff
+}
+input::placeholder,textarea::placeholder{color:#8492a6}
+input:focus,select:focus,textarea:focus{border-color:#5a91f8;box-shadow:0 0 0 3px #2867f61a}
+table{border-collapse:separate;border-spacing:0}
+th{font-size:10px;letter-spacing:.045em;text-transform:uppercase;color:#64758b}
+td,th{vertical-align:middle}
+a{overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+@media(max-width:760px){
+  html{scroll-padding-top:76px}
+  .wrap{max-width:100%;width:calc(100% - 28px);padding-top:18px}
+  .hero,.welcome{border-radius:18px}
+  .hero h1,.welcome h1{font-size:clamp(27px,7vw,40px);line-height:1.1}
+  .actions,.nav-actions,.header-actions,.headactions{gap:7px}
+  .btn{min-height:42px}
+  table{min-width:620px}
+  .table-wrap,.table-scroll,.table-container{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:420px){
+  .btn{padding:10px 11px;font-size:11px}
+  .brand small{letter-spacing:.09em}
+}
