@@ -1,0 +1,86 @@
+/* KRIM Global Interface System v1
+   Shared visual and accessibility baseline. Keep workflow-specific layout and logic in each workspace.
+*/
+:root{
+  --krim-ink:#10233f;
+  --krim-navy:#0a1b34;
+  --krim-navy-2:#12345b;
+  --krim-blue:#2867f6;
+  --krim-cyan:#47d7e5;
+  --krim-muted:#64748b;
+  --krim-line:#dfe7f1;
+  --krim-paper:#f5f8fc;
+  --krim-surface:#ffffff;
+  --krim-success:#087f65;
+  --krim-warning:#9a5b08;
+  --krim-danger:#b42335;
+  --krim-radius:16px;
+  --krim-shadow:0 12px 34px rgba(7,24,49,.08);
+  --krim-focus:0 0 0 3px rgba(40,103,246,.22);
+}
+body.krim-global-ui{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--krim-ink);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body.krim-global-ui :where(img,svg,video,canvas){max-width:100%}
+body.krim-global-ui :where(button,input,select,textarea){font:inherit}
+body.krim-global-ui :where(button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"]){touch-action:manipulation}
+body.krim-global-ui :where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid var(--krim-cyan);
+  outline-offset:3px;
+}
+body.krim-global-ui :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),select,textarea){
+  max-width:100%;
+  border-radius:10px;
+}
+body.krim-global-ui :where(input,select,textarea):disabled,
+body.krim-global-ui :where(button):disabled{
+  cursor:not-allowed;
+  opacity:.68;
+}
+body.krim-global-ui :where(label){line-height:1.4}
+body.krim-global-ui :where(table){border-collapse:separate;border-spacing:0}
+body.krim-global-ui :where(th){font-weight:800}
+body.krim-global-ui :where(td,th){overflow-wrap:anywhere}
+body.krim-global-ui :where(pre,code){overflow-wrap:anywhere}
+body.krim-global-ui :where(.card,.panel,.metric-card,.stat-card,.workspace-card,.module-card,.section-card,.dashboard-card){
+  border-radius:var(--krim-radius);
+}
+body.krim-global-ui :where(.muted,.helper-text,.form-hint,.hint,.subtext){color:var(--krim-muted)}
+body.krim-global-ui :where(.badge,.status-badge,[class*="status-"]){max-width:100%;overflow-wrap:anywhere}
+body.krim-global-ui :where(.table-wrap,.table-responsive,.table-container,.data-table-wrap){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+body.krim-global-ui :where(.btn,button,.button,[role="button"],input[type="submit"]){min-height:40px}
+body.krim-global-ui :where(.btn-sm,.button-small){min-height:34px}
+body.krim-global-ui :where(.alert,[role="alert"],[aria-live]){overflow-wrap:anywhere}
+body.krim-global-ui :where(main,section,article,aside){min-width:0}
+body.krim-global-ui .krim-page-eyebrow{
+  color:var(--krim-blue);font-size:.72rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase
+}
+body.krim-global-ui .krim-page-intro{color:var(--krim-muted);max-width:72ch}
+body.krim-global-ui .krim-empty-state{
+  padding:clamp(22px,4vw,36px);border:1px dashed var(--krim-line);border-radius:var(--krim-radius);
+  background:var(--krim-paper);text-align:center;color:var(--krim-muted)
+}
+body.krim-global-ui .krim-surface{
+  background:var(--krim-surface);border:1px solid var(--krim-line);border-radius:var(--krim-radius);
+  box-shadow:var(--krim-shadow)
+}
+body.krim-global-ui .krim-skip-link{
+  position:absolute;left:12px;top:-100px;z-index:9999;padding:12px 16px;background:#fff;color:var(--krim-navy);
+  border:2px solid var(--krim-blue);border-radius:10px
+}
+body.krim-global-ui .krim-skip-link:focus{top:12px}
+@media(max-width:760px){
+  body.krim-global-ui :where(.container,.wrap,.page-container,.workspace-container){max-width:100%}
+  body.krim-global-ui :where(input,select,textarea){font-size:16px}
+  body.krim-global-ui :where(table){font-size:.88em}
+  body.krim-global-ui :where(.table-wrap,.table-responsive,.table-container,.data-table-wrap){display:block}
+}
+@media(prefers-reduced-motion:reduce){
+  body.krim-global-ui *,body.krim-global-ui *::before,body.krim-global-ui *::after{
+    scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important
+  }
+}
