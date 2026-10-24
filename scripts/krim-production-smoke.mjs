@@ -75,6 +75,30 @@ const required = [
 
 const failures = [];
 
+// Public contact/support pages must not claim success or show invented ticket data.
+const contactPath = "public/contact.html";
+if (existsSync(contactPath)) {
+  const contact = readFileSync(contactPath, "utf8");
+  if (contact.includes("Inquiry transmitted successfully") || contact.includes("will contact you shortly")) {
+    failures.push("Public contact form contains an unverified success/response claim.");
+  }
+  if (!contact.includes("krim-public-contact-inquiry") || !contact.includes("form.addEventListener('submit'")) {
+    failures.push("Public contact form is not wired to the deployed inquiry endpoint.");
+  }
+}
+const supportPath = "public/support/ticket-desk.html";
+if (existsSync(supportPath)) {
+  const support = readFileSync(supportPath, "utf8");
+  if (support.includes("TKT-2026-9912") || support.includes("Global Supply Chain Corp") || support.includes("Creating New Support Ticket") || support.includes("Opening Ticket Resolution Workspace")) {
+    failures.push("Support desk contains fabricated ticket rows or fake action alerts.");
+  }
+  if (!support.includes("Live ticket register not connected")) {
+    failures.push("Support desk must disclose that the live ticket register is not connected.");
+  }
+}
+
+
+
 // Audit guard: the public E2E dashboard must never claim tests passed unless a real
 // runner and recorded execution evidence are connected. A display-only page must say NOT RUN.
 const e2eDashboardPath = "public/testing/e2e-test-runner.html";
