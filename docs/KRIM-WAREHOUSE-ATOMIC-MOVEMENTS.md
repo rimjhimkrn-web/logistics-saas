@@ -13,6 +13,7 @@ Updated: 2026-10-24
 - Warehouse RLS policies now require active membership in an active warehouse/fulfilment organization for facility, receipt, inventory and movement access. Movement table grants remain SELECT/INSERT only.
 - Inventory Ledger now submits stock changes through the RPC, refreshes live balances, and displays the latest append-only movement history.
 - Direct client INSERT/UPDATE/DELETE privileges on inventory balances and movement audit rows have been revoked. Authenticated clients can read these rows under RLS; stock writes must go through the atomic RPC.
+- Database CHECK constraints reject PostgreSQL numeric NaN values in stock balances and movement deltas; the pre-migration check found zero existing NaN rows.
 
 ## Supported movement types
 
@@ -34,6 +35,7 @@ Receipt and return deltas must be positive; pick and dispatch deltas must be neg
   - Live workflow copy and status: `59a0cd80352f1b401318157ea0ab9e31de3f0810`
   - Movement history table: `a6770778de76de4f0d412432d91c2eccc6142f1c`
   - Restrict direct balance writes migration: `e7645b7d492edaa23e20f0ba4f7b2251b349b7a4`
+  - Reject NaN quantities migration: `7d178867fde76c6f3d4bb9774879c1e29b2fce09`
 
 ## Still required before operational approval
 
