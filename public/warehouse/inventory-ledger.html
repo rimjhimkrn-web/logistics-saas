@@ -20,7 +20,7 @@
 </script><script>
 (async()=>{
  const $=id=>document.getElementById(id),client=window.KRIM_SUPABASE,form=$("prepForm"),facilitySelect=$("movementFacility"),status=$("inventoryLiveStatus"),rows=$("inventoryLiveRows"),formStatus=$("formStatus"),save=$("saveMovement");
- let activeOrgIds=[],sessionUser=null,idempotencyKey=null;
+ let activeOrgIds=[],sessionUser=null,idempotencyKey=null,suppressResetStatus=false;
  const cell=(tr,value,align)=>{const td=document.createElement("td");td.textContent=value==null?"—":String(value);td.style.padding="9px";td.style.borderBottom="1px solid var(--line)";if(align)td.style.textAlign=align;tr.appendChild(td);};
  const say=(title,msg)=>{$("noticeTitle").textContent=title;$("notice").textContent=msg;};
  const safeText=v=>String(v==null?"":v);
@@ -45,7 +45,7 @@
    status.textContent="Loaded "+(items||[]).length+" inventory record(s) from Supabase. This is a live query, not a fabricated sample.";const badge=$("dataBadge");if(badge)badge.textContent="LIVE READ · "+(items||[]).length+" RECORDS";
   }
   await refreshLedger();
-  form.addEventListener("reset",()=>{setTimeout(()=>{if(!idempotencyKey)formStatus.textContent="Form cleared. No stock movement submitted.";},0);});
+  form.addEventListener("reset",()=>{if(idempotencyKey)return;setTimeout(()=>{if(!suppressResetStatus)formStatus.textContent="Form cleared. No stock movement submitted.";},0);});\n  $("clearMovement").addEventListener("click",e=>{if(idempotencyKey){e.preventDefault();formStatus.textContent="A previous request may have reached the database. Retry the same movement first; its idempotency key is retained to prevent double-counting.";}});
   form.addEventListener("submit",async e=>{
    e.preventDefault();if(save.disabled)return;save.disabled=true;formStatus.textContent="Verifying facility and submitting the atomic stock movement…";
    try{
@@ -62,7 +62,7 @@
     if(!result||!result.inventory||!result.movement)throw new Error("The database did not return a confirmed inventory and movement record.");
     formStatus.textContent=(result.replayed?"Existing movement confirmed (safe retry). ":"Stock movement saved. ")+"Movement ID: "+result.movement.id+" · SKU "+result.inventory.sku+" · new balance "+Number(result.inventory.quantity).toLocaleString()+" "+result.inventory.unit_code+".";
     say("Atomic stock movement confirmed","The database returned both the updated stock row and its append-only movement record. Verify the reference and physical count before operational use.");
-    idempotencyKey=null;form.reset();await refreshLedger();
+    idempotencyKey=null;suppressResetStatus=true;form.reset();setTimeout(()=>{suppressResetStatus=false;},0);await refreshLedger();
    }catch(err){formStatus.textContent="Movement not confirmed: "+(err.message||"Retry with the same form values; the idempotency key is retained to protect against duplicate application.");say("Movement requires review","Do not assume stock changed unless the database confirms the movement record.");}
    finally{save.disabled=false;}
   });
