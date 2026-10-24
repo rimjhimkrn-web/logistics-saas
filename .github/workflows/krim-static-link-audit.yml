@@ -31,3 +31,8 @@ jobs:
           path: krim-link-audit.json
           if-no-files-found: error
           retention-days: 14
+      - name: Enforce audit result
+        if: always()
+        shell: bash
+        run: |
+          node -e 'const r=require("./krim-link-audit.json"); if(Number(r.broken_local_references||0)>0){console.error("Broken local references: "+r.broken_local_references);process.exit(1)} console.log("No broken literal local references detected.")'
