@@ -85,10 +85,38 @@ function inspectHtml(file) {
 }
 
 walk(ROOT);
+
+// Verify every destination declared in the canonical route registry exists.
+// This catches route-map drift even when a page is not linked by a static anchor.
+const canonicalRoutes = [];
+const configPath = path.join(ROOT, "config.js");
+if (fs.existsSync(configPath)) {
+  const configText = fs.readFileSync(configPath, "utf8");
+  const registryMatch = configText.match(/window\\.KRIM_ROUTES\\s*=\\s*Object\\.freeze\\(\\s*\\{([\\s\\S]*?)\\n\\}\\s*\\)/);
+  if (!registryMatch) {
+    errors.push({ source: "config.js", target: "window.KRIM_ROUTES", reason: "canonical route registry not found" });
+  } else {
+    const routePattern = /([A-Za-z_$][\\w$]*)\\s*:\\s*["']([^"']+)["']/g;
+    let routeMatch;
+    while ((routeMatch = routePattern.exec(registryMatch[1]))) {
+      const key = routeMatch[1];
+      const routePath = routeMatch[2];
+      canonicalRoutes.push({ key, path: routePath });
+      const target = path.resolve(ROOT, routePath);
+      if (!target.startsWith(ROOT + path.sep) || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
+        errors.push({ source: "config.js", route: key, target: routePath, reason: "canonical route target does not exist" });
+      }
+    }
+  }
+} else {
+  errors.push({ source: "config.js", target: "config.js", reason: "shared configuration file missing" });
+}
+
 console.log(JSON.stringify({
   audit: "KRIM static local-link audit",
   root: ROOT,
   html_files_scanned: htmlCount,
+  canonical_routes_checked: canonicalRoutes.length,
   broken_local_references: errors.length,
   findings: errors
 }, null, 2));
