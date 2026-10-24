@@ -68,6 +68,14 @@ The connected Supabase advisors returned the following findings on 2026-10-24:
 
 These findings should be reviewed alongside the route/link audit. RLS being enabled on a table is necessary but does not by itself prove that its policies, grants, RPCs, or organization isolation are correct.
 
+## Verified workflow gap found during the next audit batch
+
+A read-only schema inspection on 2026-10-24 found **no warehouse-specific operational tables** in the public schema: no `krim_warehouse_facilities`, `krim_warehouse_receipts`, `krim_warehouse_inventory`, or `krim_warehouse_movements` tables. The existing Warehouse Control Centre checks for `krim_warehouse_inventory`, so its schema probe will currently fail. The 12 linked warehouse module pages verify identity/membership and explicitly state that their form validation does not save operational records.
+
+This is a real backend gap, not just a navigation issue. The next warehouse implementation needs a reviewed, additive schema for facilities, receiving, inventory movements, dispatch, and exceptions; RLS scoped to active warehouse organizations; and persisted operational actions with audit evidence. It must not fabricate a receipt or inventory balance. Shipment linkage must be restricted to shipments legitimately routed to the facility, not arbitrary shipment IDs.
+
+The canonical route registry's 14 destinations were individually checked through the GitHub file API and each destination exists in the repository. The static audit was improved to validate the registry destinations and correctly resolve root-relative URLs. The complete repository-wide report still needs to run in GitHub Actions and be inspected.
+
 ## Required next steps
 
 1. Run `node scripts/audit-krim-links.mjs` from the repository root and fix broken local references in controlled batches.
