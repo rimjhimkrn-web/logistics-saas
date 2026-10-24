@@ -804,7 +804,7 @@ if (globalOpsSyntax.status !== 0) failures.push("Global Operations Supabase adap
  if (!globalAdminFunction) failures.push("Version-controlled global-admin-control Edge Function source is missing.");
  if (!globalAdminFunction.includes('rows("krim_shipments","id,shipment_number,status,customer_organization_id,created_at,updated_at")')) failures.push("global-admin-control shipment query must use the canonical organization field.");
  if (!globalAdminFunction.includes('rows("krim_quotes","id,shipment_id,status,customer_organization_id,created_at,updated_at")')) failures.push("global-admin-control quote query must use valid canonical quote columns.");
- if (/rows\("krim_(shipments|quotes)","[^"]*organization_id,/.test(globalAdminFunction)) failures.push("global-admin-control still contains an obsolete organization_id query.");
+ if (/rows\("krim_(shipments|quotes)","[^"]*,organization_id,/.test(globalAdminFunction)) failures.push("global-admin-control still contains an obsolete organization_id query.");
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
