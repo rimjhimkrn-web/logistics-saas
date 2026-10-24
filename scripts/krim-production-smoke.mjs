@@ -806,6 +806,16 @@ if (globalOpsSyntax.status !== 0) failures.push("Global Operations Supabase adap
  if (!globalAdminFunction.includes('rows("krim_quotes","id,shipment_id,status,customer_organization_id,created_at,updated_at")')) failures.push("global-admin-control quote query must use valid canonical quote columns.");
  if (/rows\("krim_(shipments|quotes)","[^"]*,organization_id,/.test(globalAdminFunction)) failures.push("global-admin-control still contains an obsolete organization_id query.");
 
+// Prevent UI-only helpers and static finance mockups from claiming live verification.
+const adminRuntimeTruth = readFileSync("public/admin/admin-runtime.js", "utf8");
+const productionRuntimeTruth = readFileSync("public/production/production-runtime.js", "utf8");
+const treasuryPageTruth = readFileSync("public/finance/treasury-dashboard.html", "utf8");
+const revenuePageTruth = readFileSync("public/finance/revenue-reports.html", "utf8");
+if (adminRuntimeTruth.includes("ISO 27001 / SOC 2 Audit Logger: ONLINE") || adminRuntimeTruth.includes("SHA-256 Cryptographic Seals Active")) failures.push("Admin UI helper must not claim unverified SIEM/compliance/audit-sealing status.");
+if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIED") || productionRuntimeTruth.includes("All 18 Phases Locked")) failures.push("Production UI helper must not claim an unperformed release freeze/hash verification.");
+if (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED")) failures.push("Treasury dashboard must prominently disclose that balances are illustrative and not live-connected.");
+if (!revenuePageTruth.includes("Demonstration data — not actual KRIM revenue") || !revenuePageTruth.includes("live revenue telemetry and accounting reconciliation are not connected")) failures.push("Revenue reports must prominently disclose illustrative, non-live figures.");
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
