@@ -66,7 +66,7 @@ function inspectHtml(file) {
   const tagPattern = /<(?:a|link|script|img|iframe|form|source|video|audio|button)\b[^>]*>/gi;
   let tag;
   while ((tag = tagPattern.exec(text))) {
-    const attrPattern = /\b(href|src|action|formaction|poster)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+    const attrPattern = /(?:^|\s)(href|src|action|formaction|poster)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
     let attr;
     while ((attr = attrPattern.exec(tag[0]))) {
       const value = attr[2] ?? attr[3] ?? attr[4] ?? "";
