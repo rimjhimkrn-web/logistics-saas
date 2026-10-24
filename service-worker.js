@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "krim-shell-v4";
+const CACHE_NAME = "krim-shell-v5";
 const LOCAL_SHELL = [
   "/",
   "/index.html",
