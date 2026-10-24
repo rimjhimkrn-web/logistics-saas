@@ -82,28 +82,29 @@
             <div class="max-w-2xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 shadow-xl shadow-slate-200/50 space-y-6">
                 <div class="space-y-1">
                     <h2 class="text-xl font-bold text-slate-900">Enterprise Inquiry Gateway</h2>
-                    <p class="text-slate-600 text-sm">Fill out your organization details below, and our institutional team will respond within 2 hours.</p>
+                    <p class="text-slate-600 text-sm">Submit your inquiry securely. We will confirm whether it was saved; a response-time commitment is not currently guaranteed.</p>
                 </div>
-                <form onsubmit="handleContactSubmit(event)" class="space-y-6">
+                <form id="krim-contact-form" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Full Name</label>
-                            <input type="text" required placeholder="Alex Vance" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                            <input name="full_name" type="text" minlength="2" maxlength="120" autocomplete="name" required placeholder="Alex Vance" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
                         </div>
                         <div class="space-y-2">
                             <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Corporate Email</label>
-                            <input type="email" required placeholder="alex@enterprise.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                            <input name="email" type="email" maxlength="254" autocomplete="email" required placeholder="alex@enterprise.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Organization / Shipper Name</label>
-                        <input type="text" required placeholder="Global Freight Corp" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
+                        <input name="organization" type="text" minlength="2" maxlength="180" autocomplete="organization" required placeholder="Global Freight Corp" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Message & Operational Requirements</label>
-                        <textarea rows="4" required placeholder="Describe your freight volume, corridors, or custom integration needs..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition"></textarea>
+                        <textarea name="message" rows="4" minlength="10" maxlength="5000" required placeholder="Describe your freight volume, corridors, or custom integration needs..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 transition"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
+                    <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave this field empty<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+                    <button id="krim-contact-submit" type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20 cursor-pointer">
                         Submit Enterprise Inquiry →
                     </button>
                 </form>
@@ -124,14 +125,46 @@
         </div>
     </footer>
 
-    <!-- Contact Script -->
+    <script src="/logistics-saas/platform/krim-config.js"></script>
+    <!-- Contact form submits to the deployed inquiry endpoint and reports actual API results. -->
     <script>
-        function handleContactSubmit(e) {
-            e.preventDefault();
-            const box = document.getElementById('contact-response-box');
-            box.innerHTML = `<span class="text-sky-600 font-bold">Inquiry transmitted successfully. Our enterprise team will contact you shortly.</span>`;
-            e.target.reset();
-        }
+      (function () {
+        const form = document.getElementById('krim-contact-form');
+        const box = document.getElementById('contact-response-box');
+        const button = document.getElementById('krim-contact-submit');
+        if (!form || !box || !button) return;
+        form.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          if (!form.reportValidity()) return;
+          const config = window.KRIM_CONFIG && window.KRIM_CONFIG.supabase;
+          if (!config || !config.url || !config.publishableKey) {
+            box.textContent = 'Contact service configuration is unavailable. Please try again later.';
+            return;
+          }
+          const data = Object.fromEntries(new FormData(form).entries());
+          button.disabled = true;
+          button.textContent = 'Submitting…';
+          box.textContent = 'Submitting your inquiry securely…';
+          try {
+            const response = await fetch(config.url + '/functions/v1/krim-public-contact-inquiry', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'apikey': config.publishableKey },
+              body: JSON.stringify(data)
+            });
+            const result = await response.json().catch(function () { return {}; });
+            if (!response.ok || result.success !== true) {
+              throw new Error(result.error || 'Your inquiry could not be saved. Please try again later.');
+            }
+            box.textContent = result.message || 'Your inquiry has been received.';
+            form.reset();
+          } catch (error) {
+            box.textContent = error && error.message ? error.message : 'Connection error. Please retry.';
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Submit Enterprise Inquiry →';
+          }
+        });
+      }());
     </script>
 </body>
 </html>
