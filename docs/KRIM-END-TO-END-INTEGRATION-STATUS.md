@@ -58,6 +58,16 @@ The route registry is the agreed destination map; it does not automatically chan
 - Customer, partner, driver, customs, finance, operations, enterprise, and platform-admin entry pages contain Supabase-backed session or data access code. This is not equivalent to proving every action works.
 - Warehouse entry explicitly labels several operational actions as awaiting backend connection. Warehouse receiving, inventory, picking/packing, dispatch, and evidence therefore remain a priority for schema/policy/action-level verification.
 
+## Security and performance findings that block a blanket launch claim
+
+The connected Supabase advisors returned the following findings on 2026-10-24:
+
+- **Security warning:** 28 `SECURITY DEFINER` functions in the exposed `public` schema are executable by the `authenticated` role. Some may be intentionally callable if their function bodies perform strict role/tenant checks, but each must be inspected. Do not blindly revoke or change them because that can break critical workflows; do not declare them safe until the authorization checks and grants are reviewed.
+- **Performance information:** 9 foreign-key constraints were reported without covering indexes, including relationships on driver assignments, driver delivery evidence, driver profiles, driver trip events, and private payment transactions.
+- **Performance information:** the advisor reports 629 unused indexes. This is a review queue, not permission to delete indexes: some are for infrequent but critical workflows, and usage history can be incomplete.
+
+These findings should be reviewed alongside the route/link audit. RLS being enabled on a table is necessary but does not by itself prove that its policies, grants, RPCs, or organization isolation are correct.
+
 ## Required next steps
 
 1. Run `node scripts/audit-krim-links.mjs` from the repository root and fix broken local references in controlled batches.
