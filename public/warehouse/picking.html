@@ -85,8 +85,15 @@
     <script>
         function handlePickingSubmit(e) {
             e.preventDefault();
-            alert('Order pick wave dispatched successfully! Proceeding to Order Packing.');
-            window.location.href = '/logistics-saas/public/warehouse/packing.html';
+            let status = document.getElementById('pickingStatus');
+            if (!status) {
+                status = document.createElement('p');
+                status.id = 'pickingStatus';
+                status.setAttribute('role', 'status');
+                status.className = 'text-amber-300 text-xs mt-4';
+                e.currentTarget.appendChild(status);
+            }
+            status.textContent = 'Form fields validated in this browser only. No pick wave was dispatched because a persisted picking workflow is not connected yet.';
         }
     </script>
 </body>
