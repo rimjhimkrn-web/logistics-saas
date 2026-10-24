@@ -11,7 +11,7 @@ Updated: 2026-10-24
 - A transaction-scoped advisory lock serializes updates for the same organization, facility, SKU and lot. Stock cannot be reduced below zero.
 - Idempotency key uniqueness prevents the same request from being applied twice. The UI retains the key after uncertain errors and prevents clearing the form until the same request can be retried.
 - Warehouse RLS policies now require active membership in an active warehouse/fulfilment organization for facility, receipt, inventory and movement access. Movement table grants remain SELECT/INSERT only.
-- Inventory Ledger now submits stock changes through the RPC and refreshes the live inventory list after the database returns both movement and inventory records.
+- Inventory Ledger now submits stock changes through the RPC, refreshes live balances, and displays the latest append-only movement history.
 - Direct client INSERT/UPDATE/DELETE privileges on inventory balances and movement audit rows have been revoked. Authenticated clients can read these rows under RLS; stock writes must go through the atomic RPC.
 
 ## Supported movement types
@@ -32,6 +32,7 @@ Receipt and return deltas must be positive; pick and dispatch deltas must be neg
   - Retry and success-message handling: `716b1f718a559d1e9e925761a869ce87c7572808`
   - Inventory form and handler cleanup: `9b2bf7a9aa5362c34191a269d0033315146fb316`
   - Live workflow copy and status: `59a0cd80352f1b401318157ea0ab9e31de3f0810`
+  - Movement history table: `a6770778de76de4f0d412432d91c2eccc6142f1c`
   - Restrict direct balance writes migration: `e7645b7d492edaa23e20f0ba4f7b2251b349b7a4`
 
 ## Still required before operational approval
@@ -39,6 +40,7 @@ Receipt and return deltas must be positive; pick and dispatch deltas must be neg
 - Run a live authenticated positive movement test using a real authorized warehouse account and facility.
 - Run a negative test proving a non-warehouse account cannot read or write warehouse records.
 - Test insufficient-stock rejection, idempotent retry, concurrency, quality holds and physical count reconciliation.
+- Latest code commit smoke checks, static link audit and Pages deployment are pending; previous checks passed for the preceding code revision.
 - Confirm the latest GitHub static audit, production smoke checks and Pages deployment complete successfully.
 - Picking, packing, dispatch, returns and transfers still need complete end-to-end operational journeys, not just inventory balance changes.
 - No stock data was fabricated and no test movement was inserted as part of this implementation.
