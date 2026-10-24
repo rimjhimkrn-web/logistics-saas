@@ -63,3 +63,32 @@ These are entry points, not a claim that every linked module or workflow is comp
 ## Current limitations
 
 The repository inventory found 805 HTML files outside `node_modules`, with multiple same-basename groups. These counts do not equal 805 unique user-facing routes. A successful static link audit does not establish consistent visual quality, working interactions, tenant isolation, database persistence or launch readiness. This standard is the checklist for the next audited UI implementation batches; it is not a completion certificate.
+
+## Implementation batch 1 — shared baseline
+
+**Shared stylesheet:** `assets/css/krim-global-interface.css`
+
+The shared baseline is now linked from these canonical entry pages:
+- `index.html`
+- `auth/access.html`
+- `auth/login.html`
+- `app/customer/index.html`
+- `app/partner/index.html`
+- `app/driver/index.html`
+- `app/warehouse/index.html`
+- `app/customs/index.html`
+- `app/finance/index.html`
+- `app/operations/index.html`
+- `app/enterprise/index.html`
+- `app/platform-admin/index.html`
+
+The stylesheet establishes common KRIM design tokens, consistent focus visibility, mobile form sizing, overflow safeguards for wide data tables, reduced-motion support, and reusable empty-state/surface utilities. It is deliberately conservative: it does not replace each workspace's navigation or application logic, and it does not claim all subpages have been redesigned. Role-specific layouts and Supabase workflows remain in their existing page files.
+
+### Batch 1 verification status
+- [x] Shared stylesheet created and linked to all twelve canonical entry pages listed above.
+- [ ] Confirm published stylesheet and HTML assets are served by GitHub Pages after deployment.
+- [ ] Run static-link audit and production smoke checks on the exact resulting commit.
+- [ ] Visual review at narrow mobile and desktop widths.
+- [ ] Extend the design-system integration to module pages in audited batches.
+- [ ] Audit and map duplicate routes before any deletion.
+
