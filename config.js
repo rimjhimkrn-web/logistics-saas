@@ -46,3 +46,49 @@ const krimSupabaseClient =
 
 window.KRIM_SUPABASE = krimSupabaseClient;
 window.supabaseClient = krimSupabaseClient;
+/*
+ * Canonical KRIM route registry.
+ * Keep one approved destination for each core workflow; legacy pages should
+ * redirect here rather than creating parallel implementations.
+ */
+window.KRIM_ROUTES = Object.freeze({
+  home: "index.html",
+  access: "auth/access.html",
+  login: "auth/login.html",
+  customer: "app/customer/index.html",
+  partner: "app/partner/index.html",
+  driver: "app/driver/index.html",
+  warehouse: "app/warehouse/index.html",
+  customs: "app/customs/index.html",
+  finance: "app/finance/index.html",
+  operations: "app/operations/index.html",
+  enterprise: "app/enterprise/index.html",
+  platformAdmin: "app/platform-admin/index.html",
+  customerBooking: "public/shipper/booking-request.html",
+  customerQuoteRequest: "public/customer/quote-request.html",
+  quoteResult: "public/quote-result.html",
+  customerShipments: "public/customer-os/customer-services/shipment-list.html",
+  tracking: "public/tracking.html",
+  partnerOnboarding: "public/partner/partner-onboarding.html",
+  partnerMarketplace: "public/partner/load-marketplace.html",
+  driverAssignments: "app/driver/module-01-assignment-inbox.html",
+  warehouseInbound: "public/warehouse/inbound-receiving.html",
+  warehouseInventory: "public/warehouse/inventory-ledger.html",
+  customsQueue: "app/customs/index.html",
+  financeInvoices: "app/finance/invoicing.html",
+  operationsControl: "app/operations/index.html",
+  enterpriseShipments: "app/enterprise/shipments.html",
+  support: "public/support/help-centre.html"
+});
+
+window.krimRoute = function (routeName, query = {}) {
+  const route = window.KRIM_ROUTES[routeName];
+  if (!route) throw new Error("Unknown KRIM route: " + routeName);
+  const url = new URL(window.krimPath(route), window.location.origin);
+  Object.entries(query || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value) !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  return url.href;
+};
