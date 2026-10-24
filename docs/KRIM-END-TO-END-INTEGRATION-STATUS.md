@@ -76,6 +76,25 @@ This is a real backend gap, not just a navigation issue. The next warehouse impl
 
 The canonical route registry's 14 destinations were individually checked through the GitHub file API and each destination exists in the repository. The static audit was improved to validate the registry destinations and correctly resolve root-relative URLs. The complete repository-wide report still needs to run in GitHub Actions and be inspected.
 
+## Core journey source inspection
+
+The following frontend/backend connections were confirmed by source inspection on 2026-10-24. This confirms that calls are present, not that every call has passed a live authenticated end-to-end test.
+
+| Journey step | Current implementation found | Verification still required |
+|---|---|---|
+| Create shipment | `public/shipper/booking-request.html` calls `krim_create_global_shipment_idempotent` | Test role permissions, idempotency, persisted shipment, validation and retry behavior |
+| Customer quote view | `public/customer/quote-request.html` reads `krim_shipments` and `krim_quotes` | Confirm RLS returns only the user's organization records and quotes refresh after partner submission |
+| Accept quote | `public/shipper/spot-approvals.html` calls `krim_accept_global_quote` | Test quote validity, one-time acceptance, status transitions and audit events |
+| Partner marketplace | `public/partner/load-marketplace.html` reads opportunities and calls `krim_submit_partner_quote` | Test approved-partner eligibility, currency/rate validation and duplicate submissions |
+| Checkout | `public/quote-result.html` invokes payment capability/order creation and payment verification functions | Use provider test transactions; verify signature, amount/currency, booking linkage, webhook idempotency and ledger reconciliation |
+| Public tracking | `public/tracking.html` calls the `public-shipment-tracking` Edge Function | Test authorized reference behavior, no data leakage and not-found responses |
+| Driver assignments | `app/driver/module-01-assignment-inbox.html` reads `krim_driver_assignments` scoped to the signed-in user | Test assignment lifecycle and actual milestone/POD persistence |
+| Finance | `app/finance/index.html` reads invoices, settlements, payment orders and revenue ledger | Test organization scoping and reconcile records to provider-confirmed payments and actual payouts |
+| Operations | `app/operations/index.html` reads shipments, exceptions and tracking events | Test cross-workspace event consistency, queue ownership and exception resolution |
+| Enterprise | `app/enterprise/index.html` reads shipment data and falls back to legacy `shipment_requests` if the primary query fails | Decide whether legacy fallback is still required; verify it does not mask schema/RLS errors or mix incompatible records |
+| Platform administration | `app/platform-admin/index.html` calls `global-admin-control` | Verify each action's server-side authorization and audit trail |
+| Warehouse | Entry and 12 module pages verify identity/membership, but operational forms explicitly state that they do not save data; warehouse tables were absent | Build reviewed schema, tenant/facility-scoped policies, validated write paths, and audit/event records before enabling live actions |
+
 ## Required next steps
 
 1. Run `node scripts/audit-krim-links.mjs` from the repository root and fix broken local references in controlled batches.
