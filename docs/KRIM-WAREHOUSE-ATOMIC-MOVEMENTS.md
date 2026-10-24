@@ -12,6 +12,7 @@ Updated: 2026-10-24
 - Idempotency key uniqueness prevents the same request from being applied twice. The UI retains the key after uncertain errors and prevents clearing the form until the same request can be retried.
 - Warehouse RLS policies now require active membership in an active warehouse/fulfilment organization for facility, receipt, inventory and movement access. Movement table grants remain SELECT/INSERT only.
 - Inventory Ledger now submits stock changes through the RPC and refreshes the live inventory list after the database returns both movement and inventory records.
+- Direct client INSERT/UPDATE/DELETE privileges on inventory balances and movement audit rows have been revoked. Authenticated clients can read these rows under RLS; stock writes must go through the atomic RPC.
 
 ## Supported movement types
 
@@ -23,11 +24,15 @@ Receipt and return deltas must be positive; pick and dispatch deltas must be neg
 
 - Migration application returned success.
 - Supabase catalog query confirmed the RPC exists as SECURITY DEFINER with the expected signature.
-- Supabase catalog query confirmed RLS is enabled on all four warehouse tables; facility, receipt and inventory each have one policy, while movement records have separate SELECT and INSERT policies.
+- Supabase catalog query confirmed RLS is enabled on all four warehouse tables; facility, receipt and inventory each have one policy, while movement records have a SELECT policy.
+- Privilege checks confirmed authenticated users have SELECT but not INSERT/UPDATE on inventory, SELECT but not INSERT on movement history, and EXECUTE on the RPC.
 - GitHub commits:
   - Migration: `65b0f964199ee3e9d089ef98d163f7ce959591ef`
   - Inventory movement UI: `ca77744b8e0b8fb170d3029225c1a8cc2d7cecf4`
   - Retry and success-message handling: `716b1f718a559d1e9e925761a869ce87c7572808`
+  - Inventory form and handler cleanup: `9b2bf7a9aa5362c34191a269d0033315146fb316`
+  - Live workflow copy and status: `59a0cd80352f1b401318157ea0ab9e31de3f0810`
+  - Restrict direct balance writes migration: `e7645b7d492edaa23e20f0ba4f7b2251b349b7a4`
 
 ## Still required before operational approval
 
