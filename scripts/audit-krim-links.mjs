@@ -92,11 +92,11 @@ const canonicalRoutes = [];
 const configPath = path.join(ROOT, "config.js");
 if (fs.existsSync(configPath)) {
   const configText = fs.readFileSync(configPath, "utf8");
-  const registryMatch = configText.match(/window\\.KRIM_ROUTES\\s*=\\s*Object\\.freeze\\(\\s*\\{([\\s\\S]*?)\\n\\}\\s*\\)/);
+  const registryMatch = configText.match(/window\.KRIM_ROUTES\s*=\s*Object\.freeze\(\s*\{([\s\S]*?)\n\}\s*\)/);
   if (!registryMatch) {
     errors.push({ source: "config.js", target: "window.KRIM_ROUTES", reason: "canonical route registry not found" });
   } else {
-    const routePattern = /([A-Za-z_$][\\w$]*)\\s*:\\s*["']([^"']+)["']/g;
+    const routePattern = /([A-Za-z_$][\w$]*)\s*:\s*["']([^"']+)["']/g;
     let routeMatch;
     while ((routeMatch = routePattern.exec(registryMatch[1]))) {
       const key = routeMatch[1];
