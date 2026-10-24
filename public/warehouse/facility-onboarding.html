@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM Logistics | Facility Onboarding</title>
     <meta name="description" content="Register and configure new warehouse facilities, storage dimensions, and operating zones inside KRIM Logistics OS.">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -94,11 +94,24 @@
     </footer>
 
     <script>
-        function handleOnboardingSubmit(e) {
-            e.preventDefault();
-            alert('Facility onboarded successfully! Proceeding to Facility Profile.');
-            window.location.href = '/logistics-saas/public/warehouse/facility-profile.html';
-        }
-    </script>
+      async function handleOnboardingSubmit(e) {
+        e.preventDefault();
+        const form=e.currentTarget, fields=form.querySelectorAll("input,select"), client=window.KRIM_SUPABASE;
+        let status=document.getElementById("facilitySaveStatus");
+        if(!status){status=document.createElement("div");status.id="facilitySaveStatus";status.setAttribute("role","status");form.prepend(status);}
+        const button=form.querySelector("button[type=submit]");button.disabled=true;status.textContent="Verifying account and warehouse access…";
+        try {
+          if(!client) throw new Error("Supabase configuration is missing.");
+          const sess=await client.auth.getSession();if(sess.error)throw sess.error;if(!sess.data.session){location.href="../../auth/login.html?role=warehouse";return;}
+          const uid=sess.data.session.user.id;
+          const mr=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",uid).eq("status","active");if(mr.error)throw mr.error;
+          const ids=[...new Set((mr.data||[]).map(x=>x.organization_id).filter(Boolean))];if(!ids.length)throw new Error("No active organization membership found.");
+          const org=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",ids);if(org.error)throw org.error;
+          const wh=(org.data||[]).find(x=>String(x.status||"").toLowerCase()==="active" && /warehouse|fulfilment|fulfillment/i.test(String(x.organization_type||"")+" "+String(x.organization_type_code||"")));if(!wh)throw new Error("No active warehouse organization access. Nothing was saved.");
+          const save=await client.from("krim_warehouse_facilities").insert({organization_id:wh.id,facility_code:fields[0].value.trim(),facility_name:fields[1].value+" — "+fields[0].value.trim(),address_text:fields[2].value.trim(),created_by:uid});if(save.error)throw save.error;
+          status.textContent="Facility saved to KRIM Supabase successfully.";form.reset();
+        } catch(err) {status.textContent="Facility not saved: "+(err.message||"Please retry.");} finally {button.disabled=false;}
+      }
+    </script>ipt>
 </body>
 </html>
