@@ -793,6 +793,19 @@ for (const moduleName of globalOperationsModules) {
 const globalOpsSyntax = spawnSync(process.execPath, ["--check", "public/krim-global-operations.js"], { encoding: "utf8" });
 if (globalOpsSyntax.status !== 0) failures.push("Global Operations Supabase adapter has a JavaScript syntax error: " + (globalOpsSyntax.stderr || globalOpsSyntax.stdout || "unknown error"));
 
+
+ // Platform Admin schema contract: prevent stale column names from reaching the live PostgREST API.
+ const platformAdminPage = existsSync("app/platform-admin/index.html") ? readFileSync("app/platform-admin/index.html", "utf8") : "";
+ const globalAdminFunction = existsSync("supabase/functions/global-admin-control/index.ts") ? readFileSync("supabase/functions/global-admin-control/index.ts", "utf8") : "";
+ if (!platformAdminPage) failures.push("Platform Admin control page is missing.");
+ if (!platformAdminPage.includes('["customer_organization_id","Customer organization ID"]')) failures.push("Platform Admin shipment table must use the canonical customer_organization_id field.");
+ if (!platformAdminPage.includes('"customer_organization_id"')) failures.push("Platform Admin table renderer must recognize the canonical customer_organization_id field.");
+ if (/shipments:\[\["id","ID"\],\["shipment_number","Shipment"\],\["status","Status"\],\["organization_id","Organization ID"\]/.test(platformAdminPage)) failures.push("Platform Admin shipment table still references the obsolete organization_id field.");
+ if (!globalAdminFunction) failures.push("Version-controlled global-admin-control Edge Function source is missing.");
+ if (!globalAdminFunction.includes('rows("krim_shipments","id,shipment_number,status,customer_organization_id,created_at,updated_at")')) failures.push("global-admin-control shipment query must use the canonical organization field.");
+ if (!globalAdminFunction.includes('rows("krim_quotes","id,shipment_id,status,customer_organization_id,created_at,updated_at")')) failures.push("global-admin-control quote query must use valid canonical quote columns.");
+ if (/rows\("krim_(shipments|quotes)","[^"]*organization_id,/.test(globalAdminFunction)) failures.push("global-admin-control still contains an obsolete organization_id query.");
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
