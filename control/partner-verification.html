@@ -40,7 +40,8 @@ async function addDocuments(card,row){
  const meta={...(row.organization_metadata||{}),...(row.case_metadata||{})};
  const paths=Array.isArray(meta.document_paths)?meta.document_paths:[];
  const wrap=node("div",null,"docs");
- if(!paths.length){wrap.append(node("span","No document paths recorded.","caseno"));card.append(wrap);return}
+ if(!paths.length){wrap.append(node("span","No document paths recorded.","caseno"));card.append(wrap);return false}
+ let available=0;
  for(let i=0;i<paths.length;i++){
    const label=i===0?"Business registration document":"Insurance / supporting document";
    const link=node("a","Preparing secure link…","doc");link.href="#";link.setAttribute("aria-disabled","true");
@@ -48,10 +49,11 @@ async function addDocuments(card,row){
    try{
      const result=await client.storage.from("krim-partner-verification").createSignedUrl(paths[i],120);
      if(result.error||!result.data||!result.data.signedUrl)throw result.error||new Error("Could not create a secure document link");
-     link.textContent="↗ "+label;link.href=result.data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.removeAttribute("aria-disabled");
+     link.textContent="↗ "+label;link.href=result.data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.removeAttribute("aria-disabled");available++;
    }catch(_){link.textContent=label+" (unavailable)";link.removeAttribute("href")}
  }
  card.append(wrap);
+ return available===paths.length && paths.length>0;
 }
 async function decide(row,decision,textarea,buttons){
  const reason=textarea.value.trim();
@@ -87,7 +89,8 @@ async function renderCase(row){
  addField(details,"Business website",value(meta,"website"));
  addField(details,"Organization type",value(row,"organization_type"));
  card.append(details);
- await addDocuments(card,row);
+ const documentsVerified=await addDocuments(card,row);
+ if(!documentsVerified)card.append(node("div","Approval is disabled until every submitted verification document is available in private storage.","notice error"));
  if(["open","in_review","pending_information"].includes(row.case_status)){
    const review=node("div",null,"review");
    review.append(node("label","Review notes (required for rejection)"));
@@ -95,6 +98,8 @@ async function renderCase(row){
    const actions=node("div",null,"actions");
    const reject=node("button","Reject & restrict","btn danger");reject.type="button";
    const approve=node("button","Approve partner","btn primary");approve.type="button";
+   approve.disabled=!documentsVerified;
+   approve.title=documentsVerified?"Open and verify the business documents before approval.":"Approval unavailable: required verification documents are missing or inaccessible.";
    actions.append(reject,approve);review.append(actions);card.append(review);
    const buttons=[reject,approve];
    reject.addEventListener("click",()=>decide(row,"rejected",textarea,buttons));
