@@ -219,18 +219,17 @@ error: "Webhook event lookup failed",
 );
 }
 
-if (existingEvent) {
+if (existingEvent?.processed) {
 return jsonResponse({
 success: true,
 duplicate: true,
-processed: existingEvent.processed,
+processed: true,
 });
 }
 
-/*
-* Store the event before processing.
-* This creates an audit trail.
-*/
+// Store new events before processing. If an earlier attempt left this event
+// unprocessed, retry it instead of treating it as a completed duplicate.
+if (!existingEvent) {
 const { error: insertEventError } = await supabaseAdmin
 .from("payment_webhook_events")
 .insert({
@@ -241,32 +240,14 @@ processed: false,
 });
 
 if (insertEventError) {
-/*
-* Another webhook request may have inserted the same event
-* at almost exactly the same time.
-*
-* Because event_id is UNIQUE, treat duplicate insertion
-* as already received.
-*/
-if (insertEventError.code === "23505") {
-return jsonResponse({
-success: true,
-duplicate: true,
-});
+  // A concurrent delivery may have inserted the same event.
+  if (insertEventError.code === "23505") {
+    return jsonResponse({ success: true, duplicate: true, processed: false });
+  }
+
+  console.error("Could not store webhook event:", insertEventError);
+  return jsonResponse({ success: false, error: "Could not store webhook event" }, 500);
 }
-
-console.error(
-"Could not store webhook event:",
-insertEventError,
-);
-
-return jsonResponse(
-{
-success: false,
-error: "Could not store webhook event",
-},
-500,
-);
 }
 
 /*
