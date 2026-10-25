@@ -114,8 +114,8 @@ async function init(){
   const orgId=memberships.find(m=>mapRole(m,byId.get(String(m.organization_id)))==="customer")?.organization_id;
   if(!orgId){el("metric-active-count").textContent="—";el("metric-quote-count").textContent="—";return;}
   const [shipments,quotes]=await Promise.all([
-   client.from("krim_shipments").select("id",{count:"exact",head:true}).eq("organization_id",orgId),
-   client.from("krim_quotes").select("id",{count:"exact",head:true}).eq("organization_id",orgId)
+   client.from("krim_shipments").select("id",{count:"exact",head:true}).eq("customer_organization_id",orgId),
+   client.from("krim_quotes").select("id",{count:"exact",head:true}).eq("customer_organization_id",orgId)
   ]);
   el("metric-active-count").textContent=shipments.error?"—":String(shipments.count??0);
   el("metric-quote-count").textContent=quotes.error?"—":String(quotes.count??0);
