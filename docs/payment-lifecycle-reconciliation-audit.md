@@ -128,8 +128,8 @@ The matching version-controlled SQL migration is still pending. Payment-to-reven
 
 ## Internal payment-table hardening (2026-10-25)
 
-- Applied and version-controlled migration `20261025090000_lock_down_private_payment_registry_rls.sql`: enabled RLS on the private payment provider registry, capability registry, and provider transaction table; revoked direct privileges from PUBLIC/anon/authenticated; retained service_role operations.
-- Applied and version-controlled migration `20261025091000_revoke_anon_payment_finance_reads.sql`: revoked anonymous direct privileges on `public.payment_orders`, `public.krim_financial_transactions`, and `public.krim_partner_payables`.
+- Applied and version-controlled migration `20261025073323_lock_down_private_payment_registry_rls.sql`: enabled RLS on the private payment provider registry, capability registry, and provider transaction table; revoked direct privileges from PUBLIC/anon/authenticated; retained service_role operations.
+- Applied and version-controlled migration `20261025073559_revoke_anon_payment_finance_reads.sql`: revoked anonymous direct privileges on `public.payment_orders`, `public.krim_financial_transactions`, and `public.krim_partner_payables`.
 - Post-change database check confirmed all three public tables have RLS enabled, anonymous SELECT privilege is false, and authenticated SELECT privilege remains true subject to the existing organization-scoped RLS policies.
 - Existing financial/payment rows were not inserted, updated, or deleted by these security changes.
 - GitHub production smoke checks and static link audit passed for commit `e67cfb5a843d3e2622fce1fd6a0881f04559b9e4`. Pages deployment was still running at the time of this audit update.
@@ -138,7 +138,7 @@ The matching version-controlled SQL migration is still pending. Payment-to-reven
 
 ## Performance-advisor remediation (2026-10-25)
 
-- Applied and version-controlled migration `20261025092000_add_missing_fk_indexes_advisor_batch.sql`.
+- Applied and version-controlled migration `20261025073812_add_missing_fk_indexes_advisor_batch.sql`.
 - Added 13 missing foreign-key indexes flagged by the Supabase performance advisor across private payment transactions, driver assignments/profiles/events/evidence, inquiry follow-ups, and warehouse movements/receipts.
 - Queried `pg_indexes` after deployment and confirmed all 13 named indexes exist.
 - Supabase security advisor reports zero `SECURITY DEFINER` functions executable by `anon`; 29 remain executable by `authenticated` and require function-by-function authorization review rather than blanket revocation, because these are used by signed-in workspace flows.
