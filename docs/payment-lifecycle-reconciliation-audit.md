@@ -134,3 +134,12 @@ The matching version-controlled SQL migration is still pending. Payment-to-reven
 - Existing financial/payment rows were not inserted, updated, or deleted by these security changes.
 - GitHub production smoke checks and static link audit passed for commit `e67cfb5a843d3e2622fce1fd6a0881f04559b9e4`. Pages deployment was still running at the time of this audit update.
 - Full payment-to-revenue-to-partner-payable reconciliation is still not certified. Active revenue allocation rules, partner quote/assignment test fixtures, and a successful provider sandbox trace are still required before enabling live payments.
+
+
+## Performance-advisor remediation (2026-10-25)
+
+- Applied and version-controlled migration `20261025092000_add_missing_fk_indexes_advisor_batch.sql`.
+- Added 13 missing foreign-key indexes flagged by the Supabase performance advisor across private payment transactions, driver assignments/profiles/events/evidence, inquiry follow-ups, and warehouse movements/receipts.
+- Queried `pg_indexes` after deployment and confirmed all 13 named indexes exist.
+- Supabase security advisor reports zero `SECURITY DEFINER` functions executable by `anon`; 29 remain executable by `authenticated` and require function-by-function authorization review rather than blanket revocation, because these are used by signed-in workspace flows.
+- Retired Cashfree order, verification, and webhook functions were inspected; each returns HTTP 410 with `PAYMENT_PROVIDER_RETIRED`, so the deployed legacy names do not accept or settle new Cashfree payments.
