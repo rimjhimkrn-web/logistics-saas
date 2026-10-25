@@ -46,3 +46,13 @@ I have not silently changed these flags. Before resolving the conflict, dependen
 ## Honest scope boundary
 
 This was a live schema/data audit plus a small language-catalogue seed. It did not create global carrier coverage, local tax/compliance configurations, FX rates, service pricing, or live payment availability. No market has been represented as fully launch-ready based on catalogue presence alone.
+
+
+## Follow-up verification (2026-10-25)
+
+- Confirmed all six market currency codes and time zones match their country master defaults.
+- Confirmed `market_activation` is active only for India; UAE, Germany, the UK, Singapore, and the US remain inactive. No activation changes were made.
+- The market rows' `status='active'` / `is_active=true` values appear to represent catalogue availability, while `market_activation` is the separate operational gate. The dependent frontend/backend code still needs tracing before any activation-related change.
+- Confirmed `krim_locales` and `krim_country_localization` have zero rows. Country-specific formatting cannot yet be considered configured.
+- The locations catalogue contains 32 active locations across six countries; this is selective coverage, not complete national coverage.
+- Next gate: inspect frontend and backend market-activation checks, then add verified locale/unit-system master data and country localization without enabling non-operational markets.
