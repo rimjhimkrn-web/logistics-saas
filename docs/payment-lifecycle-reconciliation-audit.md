@@ -94,3 +94,17 @@ Read-only source and trigger review confirms the browser verification function d
 The current reconciliation snapshot previously showed no matching canonical paid order in `revenue_ledger` or `partner_payouts` by shipment ID. Therefore, do not infer that customer payment automatically authorizes a real partner payout or that the 10/90 split is fully reconciled from the successful browser verification response alone.
 
 **Required before manual payment testing:** use a controlled sandbox shipment and accepted quote; trace its same payment-order ID/provider order ID/provider payment ID through every downstream record; verify exactly-once behavior under browser verification plus webhook arrival in either order; confirm ledger split and payout eligibility; and test refund/failure/duplicate cases. Do not manufacture or backfill financial records from the old sample rows without a reviewed, deterministic mapping. Keep live credentials and live checkout disabled until evidence is recorded.
+
+
+## Canonical allocation/payable evidence (2026-10-25 follow-up)
+
+Read-only Production queries returned **zero rows** in both `public.krim_revenue_allocations` and `public.krim_partner_payables`. This is a current-state observation, not proof that the application can never create them. It does mean there is no existing row in these two canonical tables to demonstrate the complete chain against.
+
+Inspected database functions further establish that:
+- `public.krim_internal_create_partner_payable(bigint)` requires a delivered shipment, completed assignment, and accepted partner quote, then creates a pending payable from the accepted partner quote amount. It is idempotent on assignment.
+- The alternate `public.krim_internal_create_partner_payable_for_completed_shipment(bigint)` also requires a delivered shipment and completed assignment but does not enforce the same accepted-quote status and organization-match checks. It is a weaker validation path and should not be wired into a production payment flow without harmonizing its guards.
+- Revenue allocations are created by `krim_internal.plan_revenue_allocation` only when an active applicable revenue policy exists. Delivered-revenue recognition requires a delivered shipment and an eligible customer invoice; this is a distinct invoice-based flow, not automatic proof of payment-order reconciliation.
+
+**Current result:** no safe end-to-end production trace is available from existing canonical allocation/payable rows. No financial records or database functions were changed. Do not run payable creation against existing production shipments as an audit shortcut.
+
+**Required implementation/test sequence:** (1) establish a dedicated sandbox shipment with a real accepted customer quote, accepted partner quote, and assignment; (2) ensure the verified payment transaction links to the same canonical shipment/quote/organization; (3) add or verify a deterministic, idempotent orchestration path from verified payment to accounting recognition without conflating customer gross receipts with partner cost; (4) create partner payable only after its independent delivery/completion eligibility checks; (5) test duplicate webhook/browser verification, failure, refund, and retry cases in sandbox; (6) confirm exact ledger entries and balances before production activation.
