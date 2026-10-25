@@ -38,6 +38,7 @@ const required = [
   "supabase/migrations/20261019020919_restrict_privileged_krim_rpc_to_authenticated.sql",
   "supabase/functions/create-global-razorpay-order/index.ts",
   "supabase/functions/verify-razorpay-payment/index.ts",
+  "supabase/functions/process-payment--/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
   "public/customer-os/customer-services/shipment-details.html",
   "public/customer-os/customer-services/shipment-timeline.html",
@@ -74,6 +75,23 @@ const required = [
 ];
 
 const failures = [];
+
+// Retired legacy payment endpoint must remain fail-closed. The canonical checkout
+// uses create-global-razorpay-order + verify-razorpay-payment; this legacy route
+// previously wrote financial records without tying the provider payment to the
+// authenticated user's exact canonical payment order.
+const retiredPaymentPath = "supabase/functions/process-payment--/index.ts";
+if (!existsSync(retiredPaymentPath)) {
+  failures.push("Legacy payment endpoint retirement source is missing.");
+} else {
+  const retiredPaymentSource = readFileSync(retiredPaymentPath, "utf8");
+  if (!retiredPaymentSource.includes("LEGACY_PAYMENT_ENDPOINT_RETIRED") || !retiredPaymentSource.includes("status: 410")) {
+    failures.push("Legacy payment endpoint must return HTTP 410 and an explicit retired marker.");
+  }
+  if (/from\(["']revenue_ledger["']\)|from\(["']krim_shipments["']\)\.update/.test(retiredPaymentSource)) {
+    failures.push("Retired legacy payment endpoint must not write revenue or shipment state.");
+  }
+}
 
 // Public contact/support pages must not claim success or show invented ticket data.
 const contactPath = "public/contact.html";
