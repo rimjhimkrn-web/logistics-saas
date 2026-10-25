@@ -47,3 +47,16 @@ These counts are not proof that the paid payment, revenue ledger, shipment, and 
 ## Operating rule
 
 Do not run live-money tests or tell the founder to begin end-to-end manual testing until the lifecycle trace and automated negative tests are complete. Passing repository smoke/link checks is necessary but not sufficient for global launch readiness.
+## Test-key handling and further linkage checks
+
+The founder confirmed that all payment-related Supabase secrets are currently test credentials. Keep the system in test mode through the manual verification phase; do not switch any payment provider to live credentials until the test matrix and reconciliation gates pass. At the planned live cutover, update each provider's API key/secret and webhook secret as a coordinated provider-specific change. Never paste secrets into chat, source files, GitHub commits, or screenshots. Keep test and live credentials separate, and confirm webhook endpoints are configured for the matching environment.
+
+Further read-only inspection found that the newer private canonical payment transaction table contains 6 records, all linked to a payment_orders row, with 1 paid record. Its provider references and shipment/quote/partner-quote references matched their associated payment_orders rows for all 6 records. The paid order also has a canonical paid transaction with a provider payment reference and verification timestamp.
+
+However, the public payment_orders snapshot has 6 rows with a global shipment ID but 0 rows with krim_quote_id, partner_quote_id, or customer_organization_id populated. These appear to be legacy/test rows from before quote binding became mandatory; this is a hypothesis, not a verified historical explanation. The current order-creation source requires an accepted quote and accepted partner assignment, while the verifier permits a narrow idempotent recovery path for already-paid legacy orders. Do not reuse these old rows as proof of a new checkout path. Investigate whether the test data should be archived or left intact only after a trace by record ID and audit history.
+
+A second join against the newer business tables returned no shipment/quote matches between payment_orders and payments, and no paid-order matches to revenue_ledger or partner_payouts using shipment IDs. This is consistent with the current canonical payment path not yet being proven end-to-end through the legacy finance tables; it is not evidence that money has moved incorrectly. The legacy shipment_financials table contains one row marked customer-paid and partner-paid, but it has not been proven to correspond to the canonical paid order. No production financial rows were changed.
+
+## Additional source regression guards
+
+The repository smoke script now checks that canonical Razorpay creation uses the capability registry, that verification binds the payment to the exact provider order/amount/currency/captured status and accepted partner assignment, and that the webhook validates signature/event headers and matches amount/currency to the canonical order. These are static source checks only; passing them does not prove live provider behavior.
