@@ -38,6 +38,7 @@ const required = [
   "supabase/migrations/20261019020919_restrict_privileged_krim_rpc_to_authenticated.sql",
   "supabase/functions/create-global-razorpay-order/index.ts",
   "supabase/functions/verify-razorpay-payment/index.ts",
+  "docs/global-payment-provider-expansion-plan.md",
   "supabase/functions/process-payment--/index.ts",
   "public/customer-os/customer-services/shipment-list.html",
   "public/customer-os/customer-services/shipment-details.html",
@@ -75,6 +76,23 @@ const required = [
 ];
 
 const failures = [];
+
+// Do not advertise retired Cashfree placeholders as active payment providers.
+// These files are deliberately fail-closed until real adapters and tests replace them.
+for (const retiredProviderPath of [
+  "supabase/functions/create-global-cashfree-order/index.ts",
+  "supabase/functions/verify-global-cashfree-payment/index.ts",
+  "supabase/functions/cashfree-payment-webhook/index.ts",
+]) {
+  if (!existsSync(retiredProviderPath)) {
+    failures.push(`Retired Cashfree endpoint source is missing: ${retiredProviderPath}`);
+    continue;
+  }
+  const retiredProviderSource = readFileSync(retiredProviderPath, "utf8");
+  if (!retiredProviderSource.includes("PAYMENT_PROVIDER_RETIRED") || !retiredProviderSource.includes("status: 410")) {
+    failures.push(`Cashfree endpoint must remain retired until a tested adapter is implemented: ${retiredProviderPath}`);
+  }
+}
 
 // Retired legacy payment endpoint must remain fail-closed. The canonical checkout
 // uses create-global-razorpay-order + verify-razorpay-payment; this legacy route
