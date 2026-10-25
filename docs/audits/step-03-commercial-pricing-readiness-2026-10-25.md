@@ -28,3 +28,15 @@ Step 3 is **blocked / in progress**. No pricing values were invented and no exis
 
 ## Next action
 Establish one real, approved India lane with the business/partner's documented cost and KRIM's approved margin, then create and test its rate card. Until those commercial inputs are supplied/verified, Step 3 cannot honestly be marked complete.
+
+
+## Follow-up production verification (2026-10-25)
+- The draft row's metadata explicitly says `commercially_approved=false`, `customer_quote_eligible=false`, and identifies it as a non-commercial setup template.
+- `public.krim_partner_quotes`: 0 rows; no submitted/accepted positive partner quote exists.
+- `public.krim_partner_opportunities`: 2 rows; neither is awarded to a partner in the current check.
+- The inspected candidate organisations are not commercially verified: KRIM Test Transport Partner has verification/compliance not started; ABC Logistics is marked development-test-only with commercial access disabled and verification/compliance pending.
+- The rate-card create function requires a positive amount and creates cards in draft. The status function validates amount/date window but the business still needs to provide and approve the underlying cost/margin evidence.
+- A separate migration now requires explicit `market_activation` settings for both ends of a tariff quote, aligned with the booking guard: [migration](../../supabase/migrations/20261025193000_enforce_market_activation_for_tariff_quotes.sql).
+
+## Current acceptance state
+**No rate cards or partner records were modified in this follow-up.** Step 3 remains blocked by missing genuine commercial inputs, not by a need to invent a test price.
