@@ -120,13 +120,13 @@ const razorpayCreateSource = existsSync(razorpayCreatePath) ? readFileSync(razor
 const razorpayVerifySource = existsSync(razorpayVerifyPath) ? readFileSync(razorpayVerifyPath, "utf8") : "";
 const razorpayWebhookSource = existsSync(razorpayWebhookPath) ? readFileSync(razorpayWebhookPath, "utf8") : "";
 if (!razorpayCreateSource) failures.push("Canonical Razorpay order-creation source is missing.");
-for (const token of ['"krim_payment_capability_registry"', '"merchant_eligibility_verified"', '"settlement_supported"', '"refunds_supported"', '"fx_supported"', 'payment_provider: "razorpay"']) {
+for (const token of ['krim_payment_capability_registry', 'merchant_eligibility_verified', 'settlement_supported', 'refunds_supported', 'fx_supported', 'payment_provider: "razorpay"']) {
   if (!razorpayCreateSource.includes(token)) failures.push("Razorpay checkout capability/provider guard is missing: " + token);
 }
-for (const token of ['"razorpay_payment_id"', '"razorpay_order_id"', '"razorpay_signature"', 'razorpayPayment.order_id', 'razorpayPayment.amount', 'razorpayPayment.currency', 'razorpayStatus !== "captured"', '"krim_shipment_partner_assignments"', '"partner_quote_id"']) {
+for (const token of ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature', 'razorpayPayment.order_id', 'razorpayPayment.amount', 'razorpayPayment.currency', 'razorpayStatus !== "captured"', 'krim_shipment_partner_assignments', 'partner_quote_id']) {
   if (!razorpayVerifySource.includes(token)) failures.push("Razorpay verification must bind payment to the provider order, amount, currency, captured state and accepted partner quote: " + token);
 }
-for (const token of ['"x-razorpay-signature"', '"x-razorpay-event-id"', '"payment_orders"', '"amount_paise"', '"PAYMENT_ORDER_MISMATCH"', 'webhookPaymentStatus !== "captured"']) {
+for (const token of ['x-razorpay-signature', 'x-razorpay-event-id', 'payment_orders', 'amount_paise', 'PAYMENT_ORDER_MISMATCH', 'webhookPaymentStatus !== "captured"']) {
   if (!razorpayWebhookSource.includes(token)) failures.push("Razorpay webhook verification guard is missing: " + token);
 }
 if (!razorpayWebhookSource.includes('webhookCurrency !== expectedCurrency') || !razorpayWebhookSource.includes('webhookAmount !== expectedAmount')) {
