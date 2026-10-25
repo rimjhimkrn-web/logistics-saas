@@ -60,3 +60,8 @@ A second join against the newer business tables returned no shipment/quote match
 ## Additional source regression guards
 
 The repository smoke script now checks that canonical Razorpay creation uses the capability registry, that verification binds the payment to the exact provider order/amount/currency/captured status and accepted partner assignment, and that the webhook validates signature/event headers and matches amount/currency to the canonical order. These are static source checks only; passing them does not prove live provider behavior.
+## Live-key activation guard deployed
+
+The canonical order-creation Edge Function was updated and deployed as version 12. It now identifies Razorpay test versus live key prefixes and fails closed for an unknown key format. Test credentials may use the India/INR sandbox route. Live credentials are blocked unless the selected provider/currency registry row explicitly confirms merchant eligibility, presentment, settlement, refunds, and FX. The production smoke script now checks for these safeguards.
+
+**Manual-test safety rule:** keep test keys during guided manual testing. Do not replace them with live keys at the start of manual testing, because a manual test could charge real money. Switch to live keys only after sandbox manual testing, automated negative tests, reconciliation, refund/settlement verification, and merchant eligibility approval are complete. At cutover, configure live API keys and live webhook secrets together and perform only an explicitly approved low-value production verification.
