@@ -85,3 +85,12 @@ This is a code correction, not yet a provider-behavior test. Remaining checks in
 The webhook now treats an already-processed event as a duplicate, but permits a previously stored event with `processed=false` to re-enter processing. This addresses a retry dead-end where an earlier failed attempt could otherwise remain permanently unprocessed because later deliveries were immediately returned as duplicates. A concurrent duplicate insert remains safely recognized. The updated Razorpay webhook is deployed as active version 10. Automated static smoke/link checks passed on the preceding webhook retry commit; the newest regression-guard commit is running through CI separately.
 
 This is not yet a full event-concurrency or sandbox transaction test. Provider sandbox testing must verify retry behavior, duplicate delivery, invalid signature, amount/currency mismatch, payment failure, and ledger/payout reconciliation.
+
+
+## Payment verification versus downstream accounting (2026-10-25 follow-up)
+
+Read-only source and trigger review confirms the browser verification function directly updates `payment_orders` to paid and creates/checks a `krim_financial_transactions` row. The Razorpay webhook also updates `payment_orders` after its provider-event checks. The database currently has separate trigger paths on `payment_orders`, `payments`, `partner_payouts`, and `shipment_financials`; the existence of these triggers alone does not prove one canonical transaction is consistently propagated to the revenue ledger and partner payout.
+
+The current reconciliation snapshot previously showed no matching canonical paid order in `revenue_ledger` or `partner_payouts` by shipment ID. Therefore, do not infer that customer payment automatically authorizes a real partner payout or that the 10/90 split is fully reconciled from the successful browser verification response alone.
+
+**Required before manual payment testing:** use a controlled sandbox shipment and accepted quote; trace its same payment-order ID/provider order ID/provider payment ID through every downstream record; verify exactly-once behavior under browser verification plus webhook arrival in either order; confirm ledger split and payout eligibility; and test refund/failure/duplicate cases. Do not manufacture or backfill financial records from the old sample rows without a reviewed, deterministic mapping. Keep live credentials and live checkout disabled until evidence is recorded.
