@@ -143,6 +143,11 @@ if (razorpayWebhookSource.includes("/*\\n// Fail closed unless the signed provid
 if (razorpayWebhookSource.includes('eventType === "order.paid"')) {
   failures.push("Razorpay webhook must not mark a payment paid from order.paid without a validated payment entity.");
 }
+if (!razorpayWebhookSource.includes("if (existingEvent?.processed)") ||
+    !razorpayWebhookSource.includes("if (!existingEvent)")) {
+  failures.push("Razorpay webhook must allow retry of previously stored but unprocessed events.");
+}
+
 
 
 // Public contact/support pages must not claim success or show invented ticket data.
