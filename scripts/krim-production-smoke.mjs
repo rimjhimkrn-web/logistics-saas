@@ -120,7 +120,7 @@ const razorpayCreateSource = existsSync(razorpayCreatePath) ? readFileSync(razor
 const razorpayVerifySource = existsSync(razorpayVerifyPath) ? readFileSync(razorpayVerifyPath, "utf8") : "";
 const razorpayWebhookSource = existsSync(razorpayWebhookPath) ? readFileSync(razorpayWebhookPath, "utf8") : "";
 if (!razorpayCreateSource) failures.push("Canonical Razorpay order-creation source is missing.");
-for (const token of ['krim_payment_capability_registry', 'merchant_eligibility_verified', 'settlement_supported', 'refunds_supported', 'fx_supported', 'payment_provider: "razorpay"']) {
+for (const token of ['krim_payment_capability_registry', 'merchant_eligibility_verified', 'settlement_supported', 'refunds_supported', 'fx_supported', 'payment_provider: "razorpay"', 'rzp_test_', 'rzp_live_', 'PAYMENT_KEY_MODE_UNVERIFIED', 'PAYMENT_LIVE_CAPABILITIES_UNVERIFIED']) {
   if (!razorpayCreateSource.includes(token)) failures.push("Razorpay checkout capability/provider guard is missing: " + token);
 }
 for (const token of ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature', 'razorpayPayment.order_id', 'razorpayPayment.amount', 'razorpayPayment.currency', 'razorpayStatus !== "captured"', 'krim_shipment_partner_assignments', 'partner_quote_id']) {
