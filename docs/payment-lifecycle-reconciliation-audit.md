@@ -71,3 +71,10 @@ The canonical order-creation Edge Function was updated and deployed as version 1
 A read-only inspection of database trigger definitions confirmed that `payment_orders` synchronizes into `private.krim_payment_transactions` through `private.sync_krim_payment_transaction()`. Separate legacy paths exist: updates to `payment_orders` call `sync_financial_after_payment()`; changes to `payments` call `create_financial_after_payment()`; and partner payout updates call separate shipment-financial synchronization triggers. These paths do not, by themselves, establish a single shared payment identity across all tables.
 
 The next reconciliation step is to inspect the bodies and key semantics of `sync_financial_after_payment()`, the payment webhook processor, and payout creation/settlement workers, then design a deterministic cross-table reference strategy. Do not backfill, delete, or mark old financial rows reconciled until each row is tied to verified provider evidence and the canonical order. This inspection was read-only; no payment, ledger, payout, or shipment financial rows were changed.
+
+
+## Razorpay webhook guard correction (2026-10-25)
+
+The deployed webhook source had the amount/currency/captured-state validation unintentionally enclosed in a block comment. The guard is now executable in the source-controlled webhook and the function has been redeployed as version 9 (active). The paid-event path now relies on `payment.captured`, which carries the payment entity needed for exact order/amount/currency/status validation; `order.paid` is no longer used to mark an order paid through this branch.
+
+This is a code correction, not yet a provider-behavior test. Remaining checks include signature-negative tests, duplicate/retry handling, failed-payment mapping, and full order → ledger → payout reconciliation. Keep test credentials and do not enable live payments yet.
