@@ -242,7 +242,15 @@ processed: false,
 if (insertEventError) {
   // A concurrent delivery may have inserted the same event.
   if (insertEventError.code === "23505") {
-    return jsonResponse({ success: true, duplicate: true, processed: false });
+    // Another delivery inserted the event concurrently. It may still be
+    // processing or may fail before finalization. Do not acknowledge it as
+    // successfully handled: return a retryable error so the provider retries.
+    return jsonResponse({
+      success: false,
+      duplicate: true,
+      processed: false,
+      error: "Webhook event is already being processed; retry delivery",
+    }, 409);
   }
 
   console.error("Could not store webhook event:", insertEventError);
