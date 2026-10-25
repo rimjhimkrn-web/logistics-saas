@@ -1,0 +1,7 @@
+-- Add catalogue-only ISO country records. No inferred currencies, phone codes, time zones, or service activation.
+insert into public.krim_countries (code,name,iso3_code,iso2_code,is_active)
+select v.code,v.name,v.iso3,v.code,false
+from (values
+('AD','Andorra','AND'),('AF','Afghanistan','AFG'),('AL','Albania','ALB'),('AR','Argentina','ARG'),('AT','Austria','AUT'),('AU','Australia','AUS'),('BD','Bangladesh','BGD'),('BE','Belgium','BEL'),('BR','Brazil','BRA'),('CA','Canada','CAN'),('CH','Switzerland','CHE'),('CL','Chile','CHL'),('CN','China','CHN'),('CO','Colombia','COL'),('CZ','Czechia','CZE'),('DK','Denmark','DNK'),('EG','Egypt','EGY'),('ES','Spain','ESP'),('FI','Finland','FIN'),('FR','France','FRA'),('GR','Greece','GRC'),('HK','Hong Kong','HKG'),('ID','Indonesia','IDN'),('IE','Ireland','IRL'),('IL','Israel','ISR'),('IT','Italy','ITA'),('JP','Japan','JPN'),('KE','Kenya','KEN'),('KR','Korea, Republic of','KOR'),('LK','Sri Lanka','LKA'),('MY','Malaysia','MYS'),('MX','Mexico','MEX'),('NP','Nepal','NPL'),('NG','Nigeria','NGA'),('NL','Netherlands','NLD'),('NO','Norway','NOR'),('NZ','New Zealand','NZL'),('OM','Oman','OMN'),('PK','Pakistan','PAK'),('PH','Philippines','PHL'),('PL','Poland','POL'),('PT','Portugal','PRT'),('QA','Qatar','QAT'),('SA','Saudi Arabia','SAU'),('SE','Sweden','SWE'),('TH','Thailand','THA'),('TR','Türkiye','TUR'),('TW','Taiwan, Province of China','TWN'),('UA','Ukraine','UKR'),('VN','Viet Nam','VNM'),('ZA','South Africa','ZAF')
+) as v(code,name,iso3)
+where not exists (select 1 from public.krim_countries c where upper(c.code)=v.code);
