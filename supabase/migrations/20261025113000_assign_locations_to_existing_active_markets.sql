@@ -5,7 +5,6 @@ begin;
 create or replace function public.krim_assign_active_market_to_location()
 returns trigger
 language plpgsql
-security definer
 set search_path = public, pg_temp
 as $function$
 declare
@@ -25,12 +24,9 @@ begin
       new.market_id := v_market_id;
     end if;
   end if;
-
   return new;
 end;
 $function$;
-
-revoke all on function public.krim_assign_active_market_to_location() from public, anon, authenticated;
 
 drop trigger if exists trg_krim_locations_assign_active_market on public.krim_locations;
 create trigger trg_krim_locations_assign_active_market
