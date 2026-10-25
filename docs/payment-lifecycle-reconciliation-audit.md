@@ -23,7 +23,7 @@ A production aggregate query returned:
 - `payments`: 4 total; 2 marked paid and 2 pending.
 - `revenue_ledger`: 1 row marked reconciled.
 - `partner_payouts`: 1 row marked paid.
-- A join by Razorpay order ID found no amount/currency mismatches among matched rows, but **did not establish complete lifecycle linkage**.
+- The join by Razorpay order ID produced no matched order/payment rows to compare, so the amount/currency mismatch count is not meaningful yet; **complete lifecycle linkage is unproven**.
 - The initial linkage query reported 6 payment orders without a matching `payments` row, 3 payment rows without a matching `payment_orders` row, and 4 unprocessed webhook-event rows.
 - No paid `payment_orders` row was missing its provider payment ID or `paid_at` timestamp in this snapshot.
 
