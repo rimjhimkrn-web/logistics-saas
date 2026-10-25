@@ -147,6 +147,11 @@ if (!razorpayWebhookSource.includes("if (existingEvent?.processed)") ||
     !razorpayWebhookSource.includes("if (!existingEvent)")) {
   failures.push("Razorpay webhook must allow retry of previously stored but unprocessed events.");
 }
+if (!razorpayWebhookSource.includes('eq("razorpay_order_id", razorpayOrderId)') ||
+    !razorpayWebhookSource.includes('eventType === "payment.failed"')) {
+  failures.push("Razorpay failed-payment handling must resolve the canonical payment order by provider order ID.");
+}
+
 
 
 
