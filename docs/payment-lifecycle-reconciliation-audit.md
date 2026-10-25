@@ -117,3 +117,10 @@ Inspected database functions further establish that:
 - Deployed to Supabase as `verify-razorpay-payment` version 10; JWT verification remains enabled.
 - Added a static regression guard in `scripts/krim-production-smoke.mjs`. This guard is not a substitute for a real provider sandbox test.
 - No payment rows, allocations, partner payables, payout rows, or revenue-ledger rows were inserted or changed during this work.
+
+
+## Internal payment registry RLS lockdown (2026-10-25)
+
+Applied in Supabase Production: RLS enabled on `private.krim_payment_providers`, `private.krim_payment_capabilities`, and `private.krim_payment_transactions`. Direct privileges revoked from `PUBLIC`, `anon`, and `authenticated`; trusted `service_role` retains required operations. A follow-up schema inspection confirmed RLS is enabled on all three tables. No rows were changed.
+
+The matching version-controlled SQL migration is still pending. Payment-to-revenue allocation and partner payable reconciliation remain unverified; no live payments should be enabled until a dedicated sandbox trace passes.
