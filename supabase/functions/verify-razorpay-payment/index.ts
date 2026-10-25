@@ -723,15 +723,35 @@ failure_reason: null,
 updated_at: paidAt,
 })
 .eq("id", paymentOrder.id)
+.eq("status", paymentOrder.status)
 .select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
-.single();
+.maybeSingle();
 
 if (updatePaymentError) {
 console.error("Payment order update failed:", updatePaymentError);
 return jsonResponse({ error: "Payment verified but KRIM payment record could not be updated" }, 500);
 }
 
-updatedPaymentOrder = updatedPaymentOrderData;
+if (!updatedPaymentOrderData) {
+  // A webhook or concurrent verification may have won the status transition.
+  // Never overwrite a different payment ID; accept only the same already-paid payment.
+  const { data: currentOrder, error: currentOrderError } = await supabase
+    .from("payment_orders")
+    .select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
+    .eq("id", paymentOrder.id)
+    .maybeSingle();
+
+  if (currentOrderError || !currentOrder) {
+    console.error("Concurrent payment-order state could not be reconciled:", currentOrderError);
+    return jsonResponse({ error: "Payment verified but payment-order reconciliation is pending" }, 500);
+  }
+  if (currentOrder.status !== "paid" || currentOrder.razorpay_payment_id !== razorpayPaymentId) {
+    return jsonResponse({ error: "Payment order changed concurrently; refusing to overwrite its payment state." }, 409);
+  }
+  updatedPaymentOrder = currentOrder;
+} else {
+  updatedPaymentOrder = updatedPaymentOrderData;
+}
 }
 
 // Global financial transaction
