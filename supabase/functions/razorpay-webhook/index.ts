@@ -271,12 +271,34 @@ null;
 * payment.failed
 */
 if (eventType === "payment.failed") {
-if (razorpayPaymentId) {
+if (!razorpayOrderId || !razorpayPaymentId) {
+return jsonResponse({
+success: false,
+error: "Failed-payment event is missing its payment or order ID",
+}, 400);
+}
 const failureReason =
 paymentEntity?.error_description ||
 paymentEntity?.error_reason ||
 "Payment failed";
 
+// A failed attempt often has a new payment ID that is not yet stored on the
+// KRIM order. Resolve the canonical order by the provider order ID instead.
+// Never downgrade an order already marked paid.
+const { data: failedOrder, error: failedOrderLookupError } = await supabaseAdmin
+.from("payment_orders")
+.select("id, status, razorpay_payment_id")
+.eq("razorpay_order_id", razorpayOrderId)
+.maybeSingle();
+
+if (failedOrderLookupError) {
+console.error("Failed-payment order lookup failed:", failedOrderLookupError);
+return jsonResponse({ success: false, error: "Payment reconciliation failed" }, 500);
+}
+if (!failedOrder) {
+return jsonResponse({ success: false, error: "KRIM payment order not found" }, 404);
+}
+if (failedOrder.status !== "paid") {
 const { error: updateError } = await supabaseAdmin
 .from("payment_orders")
 .update({
@@ -284,22 +306,12 @@ status: "failed",
 razorpay_payment_id: razorpayPaymentId,
 failure_reason: failureReason,
 })
-.eq("razorpay_payment_id", razorpayPaymentId)
+.eq("id", failedOrder.id)
 .neq("status", "paid");
 
 if (updateError) {
-console.error(
-"Failed to update failed payment:",
-updateError,
-);
-
-return jsonResponse(
-{
-success: false,
-error: "Payment reconciliation failed",
-},
-500,
-);
+console.error("Failed to update failed payment:", updateError);
+return jsonResponse({ success: false, error: "Payment reconciliation failed" }, 500);
 }
 }
 }
