@@ -78,3 +78,10 @@ The next reconciliation step is to inspect the bodies and key semantics of `sync
 The deployed webhook source had the amount/currency/captured-state validation unintentionally enclosed in a block comment. The guard is now executable in the source-controlled webhook and the function has been redeployed as version 9 (active). The paid-event path now relies on `payment.captured`, which carries the payment entity needed for exact order/amount/currency/status validation; `order.paid` is no longer used to mark an order paid through this branch.
 
 This is a code correction, not yet a provider-behavior test. Remaining checks include signature-negative tests, duplicate/retry handling, failed-payment mapping, and full order → ledger → payout reconciliation. Keep test credentials and do not enable live payments yet.
+
+
+## Unprocessed webhook retry correction
+
+The webhook now treats an already-processed event as a duplicate, but permits a previously stored event with `processed=false` to re-enter processing. This addresses a retry dead-end where an earlier failed attempt could otherwise remain permanently unprocessed because later deliveries were immediately returned as duplicates. A concurrent duplicate insert remains safely recognized. The updated Razorpay webhook is deployed as active version 10. Automated static smoke/link checks passed on the preceding webhook retry commit; the newest regression-guard commit is running through CI separately.
+
+This is not yet a full event-concurrency or sandbox transaction test. Provider sandbox testing must verify retry behavior, duplicate delivery, invalid signature, amount/currency mismatch, payment failure, and ledger/payout reconciliation.
