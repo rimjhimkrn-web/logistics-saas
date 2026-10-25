@@ -124,3 +124,13 @@ Inspected database functions further establish that:
 Applied in Supabase Production: RLS enabled on `private.krim_payment_providers`, `private.krim_payment_capabilities`, and `private.krim_payment_transactions`. Direct privileges revoked from `PUBLIC`, `anon`, and `authenticated`; trusted `service_role` retains required operations. A follow-up schema inspection confirmed RLS is enabled on all three tables. No rows were changed.
 
 The matching version-controlled SQL migration is still pending. Payment-to-revenue allocation and partner payable reconciliation remain unverified; no live payments should be enabled until a dedicated sandbox trace passes.
+
+
+## Internal payment-table hardening (2026-10-25)
+
+- Applied and version-controlled migration `20261025090000_lock_down_private_payment_registry_rls.sql`: enabled RLS on the private payment provider registry, capability registry, and provider transaction table; revoked direct privileges from PUBLIC/anon/authenticated; retained service_role operations.
+- Applied and version-controlled migration `20261025091000_revoke_anon_payment_finance_reads.sql`: revoked anonymous direct privileges on `public.payment_orders`, `public.krim_financial_transactions`, and `public.krim_partner_payables`.
+- Post-change database check confirmed all three public tables have RLS enabled, anonymous SELECT privilege is false, and authenticated SELECT privilege remains true subject to the existing organization-scoped RLS policies.
+- Existing financial/payment rows were not inserted, updated, or deleted by these security changes.
+- GitHub production smoke checks and static link audit passed for commit `e67cfb5a843d3e2622fce1fd6a0881f04559b9e4`. Pages deployment was still running at the time of this audit update.
+- Full payment-to-revenue-to-partner-payable reconciliation is still not certified. Active revenue allocation rules, partner quote/assignment test fixtures, and a successful provider sandbox trace are still required before enabling live payments.
