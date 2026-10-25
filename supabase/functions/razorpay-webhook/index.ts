@@ -181,6 +181,14 @@ error: "Missing webhook event type",
 );
 }
 
+// Explicitly allow only event types this handler actually reconciles.
+// Unknown provider events are acknowledged as ignored, but are never recorded as processed.
+const supportedEvents = new Set(["payment.failed", "payment.captured", "payment.authorized"]);
+if (!supportedEvents.has(eventType)) {
+console.warn("Ignoring unsupported Razorpay webhook event:", eventType);
+return jsonResponse({ success: true, received: true, ignored: true, reason: "UNSUPPORTED_EVENT_TYPE" });
+}
+
 const supabaseAdmin = createClient(
 supabaseUrl,
 serviceRoleKey,
@@ -414,51 +422,74 @@ if (
   }, 409);
 }
 
-// Idempotent paid state.
+// Idempotency must bind an already-paid order to the same provider payment ID.
 if (paymentOrder.status === "paid") {
-await supabaseAdmin
+if (paymentOrder.razorpay_payment_id !== razorpayPaymentId) {
+console.error("Conflicting captured payment for an already-paid KRIM order.", {
+orderId: paymentOrder.id,
+hasStoredPaymentId: Boolean(paymentOrder.razorpay_payment_id),
+});
+return jsonResponse({
+success: false,
+error: "This KRIM order is already paid by a different payment ID; manual reconciliation is required.",
+code: "PAYMENT_ID_CONFLICT",
+}, 409);
+}
+
+const { error: duplicateFinalizeError } = await supabaseAdmin
 .from("payment_webhook_events")
-.update({
-processed: true,
-processed_at: new Date().toISOString(),
-})
+.update({ processed: true, processed_at: new Date().toISOString() })
 .eq("event_id", razorpayEventId);
 
-return jsonResponse({
-success: true,
-already_paid: true,
-});
+if (duplicateFinalizeError) {
+console.error("Could not finalize matching duplicate webhook.", duplicateFinalizeError);
+return jsonResponse({ success: false, error: "Webhook processing finalization failed" }, 500);
+}
+
+return jsonResponse({ success: true, already_paid: true, duplicate_payment: true });
 }
 
 /*
-* Mark the payment as paid.
+* Conditional paid-state transition. Only the observed prior state may transition.
+* The returned row lets us detect concurrent deliveries instead of overwriting them.
 */
-const { error: updatePaymentError } =
-await supabaseAdmin
+const { data: paidOrder, error: updatePaymentError } = await supabaseAdmin
 .from("payment_orders")
 .update({
 status: "paid",
-razorpay_payment_id:
-razorpayPaymentId ||
-paymentOrder.razorpay_payment_id,
+razorpay_payment_id: razorpayPaymentId,
 paid_at: new Date().toISOString(),
 failure_reason: null,
 })
-.eq("id", paymentOrder.id);
+.eq("id", paymentOrder.id)
+.eq("status", paymentOrder.status)
+.select("id, status, razorpay_payment_id")
+.maybeSingle();
 
 if (updatePaymentError) {
-console.error(
-"Failed to mark payment as paid:",
-updatePaymentError,
-);
+console.error("Failed to mark payment as paid:", updatePaymentError);
+return jsonResponse({ success: false, error: "Could not reconcile payment" }, 500);
+}
 
-return jsonResponse(
-{
+if (!paidOrder) {
+const { data: currentOrder, error: currentOrderError } = await supabaseAdmin
+.from("payment_orders")
+.select("id, status, razorpay_payment_id")
+.eq("id", paymentOrder.id)
+.maybeSingle();
+
+if (currentOrderError) {
+console.error("Could not verify concurrent payment reconciliation.", currentOrderError);
+return jsonResponse({ success: false, error: "Could not verify payment reconciliation" }, 500);
+}
+
+if (currentOrder?.status !== "paid" || currentOrder.razorpay_payment_id !== razorpayPaymentId) {
+return jsonResponse({
 success: false,
-error: "Could not reconcile payment",
-},
-500,
-);
+error: "Payment order changed during reconciliation; manual review may be required.",
+code: "PAYMENT_RECONCILIATION_CONFLICT",
+}, 409);
+}
 }
 }
 
