@@ -104,3 +104,9 @@ If a payment is pending or its status is ambiguous, do not automatically retry w
 - Checkout.com platform and market overview: https://www.checkout.com/
 
 Provider coverage and eligibility change; re-check official terms during onboarding and before activation.
+
+## Registry update — 2026-10-25
+
+The Supabase provider registry now includes planned entries for PayPal, Adyen and Checkout.com, alongside the existing Stripe candidate. The country/currency capability registry also has disabled roadmap rows for these providers across the United States/USD, United Kingdom/GBP, Germany/EUR, United Arab Emirates/AED and Singapore/SGD; additional planned bank-transfer and regional-wallet placeholders are recorded for those markets and India/INR where applicable.
+
+**These are roadmap records, not integrations.** All newly added provider/method rows have `checkout_enabled=false`, `integration_status=planned`, and all eligibility, presentment, settlement, refund and FX verification flags false. They must remain unavailable in customer checkout until the corresponding adapter, merchant approval, secure webhooks, reconciliation, refund flow and automated tests are completed. Razorpay remains the only integrated checkout adapter; its live readiness is also not yet certified.
