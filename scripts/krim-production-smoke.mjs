@@ -133,6 +133,18 @@ if (!razorpayWebhookSource.includes('webhookCurrency !== expectedCurrency') || !
   failures.push("Razorpay webhook must compare provider amount and currency against the canonical payment order.");
 }
 
+// Regression guard for the previously-commented-out amount/currency/status validation.
+// Keep the executable guard outside a block comment and only use payment.captured
+// as the paid event carrying the payment entity that is checked above.
+if (razorpayWebhookSource.includes("/*\\n// Fail closed unless the signed provider event") ||
+    razorpayWebhookSource.includes("/*\\n* Fail closed unless the signed provider event")) {
+  failures.push("Razorpay webhook payment validation must not be enclosed in a block comment.");
+}
+if (razorpayWebhookSource.includes('eventType === "order.paid"')) {
+  failures.push("Razorpay webhook must not mark a payment paid from order.paid without a validated payment entity.");
+}
+
+
 // Public contact/support pages must not claim success or show invented ticket data.
 const contactPath = "public/contact.html";
 if (existsSync(contactPath)) {
