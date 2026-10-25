@@ -108,3 +108,12 @@ Inspected database functions further establish that:
 **Current result:** no safe end-to-end production trace is available from existing canonical allocation/payable rows. No financial records or database functions were changed. Do not run payable creation against existing production shipments as an audit shortcut.
 
 **Required implementation/test sequence:** (1) establish a dedicated sandbox shipment with a real accepted customer quote, accepted partner quote, and assignment; (2) ensure the verified payment transaction links to the same canonical shipment/quote/organization; (3) add or verify a deterministic, idempotent orchestration path from verified payment to accounting recognition without conflating customer gross receipts with partner cost; (4) create partner payable only after its independent delivery/completion eligibility checks; (5) test duplicate webhook/browser verification, failure, refund, and retry cases in sandbox; (6) confirm exact ledger entries and balances before production activation.
+
+
+## Concurrent verification guard (2026-10-25)
+
+- Updated `verify-razorpay-payment` to condition the paid-state update on the status read earlier, preventing a concurrent browser verification/webhook from blindly overwriting the payment-order row.
+- If another process wins the state transition, the verifier rereads the canonical order and proceeds only when it is already paid by the exact same Razorpay payment ID. A different payment ID is rejected with HTTP 409.
+- Deployed to Supabase as `verify-razorpay-payment` version 10; JWT verification remains enabled.
+- Added a static regression guard in `scripts/krim-production-smoke.mjs`. This guard is not a substitute for a real provider sandbox test.
+- No payment rows, allocations, partner payables, payout rows, or revenue-ledger rows were inserted or changed during this work.
