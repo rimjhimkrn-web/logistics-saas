@@ -40,3 +40,18 @@ Establish one real, approved India lane with the business/partner's documented c
 
 ## Current acceptance state
 **No rate cards or partner records were modified in this follow-up.** Step 3 remains blocked by missing genuine commercial inputs, not by a need to invent a test price.
+
+
+## Follow-up verification — 2026-10-25
+- Re-queried production: still 1 rate-card row, and 0 active/effective/positive-price rate cards. The existing row remains unsuitable for customer pricing.
+- Confirmed six countries are marked active in the country catalogue and six market rows are marked active, but only one market has an explicitly active `market_activation` setting. Tariff quote creation now checks that setting for both origin and destination.
+- Confirmed 12 active India location records exist (including Ranchi, Jamshedpur, Kolkata, Ahmedabad, Chennai, Jaipur, Guwahati, Hyderabad, Pune, Bengaluru, Mumbai and Delhi). These are catalogue locations, not proof of partner coverage or a commercially serviced lane.
+- Reviewed partner records: `KRIM Test Transport Partner` is not verified; `ABC Logistics` is marked verification/compliance pending and its metadata labels it development-test/sample-only with commercial access false; `KRIM Driver Account` is not a verified operating carrier. None can be treated as evidence of an approved commercial rate.
+- Inspected `krim_admin_create_global_rate_card`: it validates positive price, active countries/currency, supported tier/mode and dates, and creates a draft with approval required. It does not itself establish carrier cost, margin approval, tax review or real service capacity. The status function's positive-price/date checks alone are not commercial approval evidence.
+- No price, partner verification status, market activation, or financial record was fabricated or changed in this follow-up.
+
+## Current acceptance decision
+Step 3 remains **blocked by real-world commercial inputs**, not by absence of a pricing table. The system can create a draft rate card, but it must not be activated as a live customer rate until a verified partner supplies a documented cost for a defined lane and KRIM's fee/margin, charge basis, tax handling and approval are recorded.
+
+## Fastest safe next step
+Obtain these minimum values for one lane: (1) origin and destination service area, (2) mode and service tier, (3) partner/carrier buy price and dated evidence, (4) KRIM platform fee or margin, (5) charge basis and minimum charge, (6) tax/surcharge treatment, and (7) approver and effective dates. Then create the rate card in draft, verify the calculated quote, and activate only after approval.
