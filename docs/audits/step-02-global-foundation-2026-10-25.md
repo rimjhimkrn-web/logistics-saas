@@ -56,3 +56,13 @@ This was a live schema/data audit plus a small language-catalogue seed. It did n
 - Confirmed `krim_locales` and `krim_country_localization` have zero rows. Country-specific formatting cannot yet be considered configured.
 - The locations catalogue contains 32 active locations across six countries; this is selective coverage, not complete national coverage.
 - Next gate: inspect frontend and backend market-activation checks, then add verified locale/unit-system master data and country localization without enabling non-operational markets.
+
+
+## Market activation enforcement change (2026-10-25)
+
+Migration `20261025143500_enforce_active_markets_for_shipment_booking.sql` adds a fail-closed check to `krim_create_global_shipment_from_places` with the explicit route type. Both origin and destination must match a configured country/market whose country and market catalogue rows are active and whose `market_activation` setting is active. This prevents catalogue-only countries from being treated as operational booking markets.
+
+- Migration committed to GitHub (commit `5304bf94ee546135c0cd16f0543ed796ad0eaf51`) and applied to production via Supabase migration tooling.
+- Read-only post-change verification confirmed the function contains activation checks and the expected origin/destination rejection messages.
+- The same verification confirmed India is the only operational booking market; UAE, Germany, UK, Singapore, and US remain disabled.
+- This is database-level definition/configuration verification, not an authenticated browser end-to-end test. A real customer booking test remains in the end-to-end test phase.
