@@ -143,3 +143,10 @@ The matching version-controlled SQL migration is still pending. Payment-to-reven
 - Queried `pg_indexes` after deployment and confirmed all 13 named indexes exist.
 - Supabase security advisor reports zero `SECURITY DEFINER` functions executable by `anon`; 29 remain executable by `authenticated` and require function-by-function authorization review rather than blanket revocation, because these are used by signed-in workspace flows.
 - Retired Cashfree order, verification, and webhook functions were inspected; each returns HTTP 410 with `PAYMENT_PROVIDER_RETIRED`, so the deployed legacy names do not accept or settle new Cashfree payments.
+
+
+## SECURITY DEFINER RPC review (2026-10-25)
+
+A database query filtered exposed, callable, non-trigger SECURITY DEFINER functions for absence of all reviewed auth/authorization markers (`auth.uid()`, `is_admin()`, `has_role()`, `krim_has_permission`, `krim_has_organization_access`) and returned zero matches. Representative platform-admin functions explicitly require `admin.platform`; shipment/quote functions check organization access and operation permissions. This static marker check is not a substitute for negative integration tests across unauthenticated, unrelated-organization, non-admin, and authorized callers. The 29 authenticated-callable SECURITY DEFINER routines remain subject to function-by-function role tests; no blanket revoke was applied because workspace RPCs depend on them.
+
+Financial readiness remains blocked: zero revenue-allocation rules, partner quotes, shipment-partner assignments, invoices, canonical partner-payable rows, and revenue-allocation rows were observed. No synthetic financial records or payouts were created.
