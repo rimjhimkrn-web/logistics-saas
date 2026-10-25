@@ -327,8 +327,7 @@ error: "Payment reconciliation failed",
 * payment.captured
 */
 if (
-eventType === "payment.captured" ||
-eventType === "order.paid"
+eventType === "payment.captured"
 ) {
 if (!razorpayOrderId) {
 console.error("Webhook has no Razorpay order ID");
@@ -389,7 +388,6 @@ error: "KRIM payment order not found",
 );
 }
 
-/*
 // Fail closed unless the signed provider event matches the exact KRIM order amount,
 // currency, payment ID, and captured state. A valid webhook signature alone does not
 // prove that this is the amount/currency expected by this specific KRIM payment order.
@@ -415,8 +413,7 @@ if (
   }, 409);
 }
 
-* Idempotent paid state.
-*/
+// Idempotent paid state.
 if (paymentOrder.status === "paid") {
 await supabaseAdmin
 .from("payment_webhook_events")
