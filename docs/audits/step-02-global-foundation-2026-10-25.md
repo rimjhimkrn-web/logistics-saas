@@ -17,7 +17,7 @@ Status: **In progress — master-data gaps and market-activation conflicts remai
 
 ## Change made and verified
 
-Migration `20261025150000_seed_supported_global_languages.sql` was committed to GitHub and applied to production. A follow-up query confirmed exactly the supported active language rows:
+Migration `20261025142414_seed_supported_global_languages.sql` is committed to GitHub and the Supabase migration history records version `20261025142414` as applied. A follow-up query confirmed the two active language rows:
 - English — `en`
 - Hindi — `hi`
 
