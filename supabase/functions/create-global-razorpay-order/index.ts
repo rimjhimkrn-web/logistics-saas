@@ -72,6 +72,20 @@ error:
 );
 }
 
+// Keep test and live environments explicit. Unknown key formats fail closed.
+const razorpayKeyMode = razorpayKeyId.startsWith("rzp_test_")
+  ? "test"
+  : razorpayKeyId.startsWith("rzp_live_")
+    ? "live"
+    : null;
+
+if (!razorpayKeyMode) {
+  return jsonResponse({
+    error: "Razorpay key mode could not be verified. Checkout is disabled.",
+    code: "PAYMENT_KEY_MODE_UNVERIFIED",
+  }, 503);
+}
+
 // --------------------------------------------------
 // Authorization
 // --------------------------------------------------
@@ -471,6 +485,21 @@ code: "PAYMENT_CAPABILITY_NOT_ENABLED",
 },
 503
 );
+}
+
+// Test credentials may exercise the India/INR sandbox path. Live credentials
+// require explicit merchant, settlement, refund, and FX readiness in the registry.
+if (razorpayKeyMode === "live" && !(
+  paymentCapability.merchant_eligibility_verified === true &&
+  paymentCapability.presentment_supported === true &&
+  paymentCapability.settlement_supported === true &&
+  paymentCapability.refunds_supported === true &&
+  paymentCapability.fx_supported === true
+)) {
+  return jsonResponse({
+    error: "Live checkout is locked until merchant eligibility, presentment, settlement, refunds, and FX are verified for this provider/currency.",
+    code: "PAYMENT_LIVE_CAPABILITIES_UNVERIFIED",
+  }, 503);
 }
 
 const nonInrCurrencyVerified = currency === "INR" || (
