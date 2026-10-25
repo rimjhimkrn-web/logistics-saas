@@ -34,3 +34,9 @@ The API returns `Cache-Control: no-store`. It requires a valid JWT, uses a servi
 ## Verification still required
 
 Run authenticated integration tests for: valid market/currency, absent registry record, invalid country/currency, expired JWT, provider disabled, missing evidence, and a verified enabled capability. Confirm the checkout order-creation endpoint independently rejects every disabled provider/currency combination. No production payment or payout is created by this API.
+
+## Checkout interface integration — 2026-10-25
+
+The public quote-result checkout page now calls this endpoint after authenticating the customer. Its Global Payment Network panel has a market selector for India/INR, United States/USD, United Kingdom/GBP, Germany/EUR, United Arab Emirates/AED and Singapore/SGD. Provider cards are rendered from the live capability response and show whether each record is configured, gated, or unavailable. Provider labels and blocker text are inserted using DOM text nodes rather than HTML interpolation.
+
+The market selector is discovery only: it does not alter the accepted quote, convert currencies, select a payment adapter, or enable a provider. The existing payment path still independently creates Razorpay orders. The new API is not a payment-success signal. The public GitHub Pages deployment and authenticated browser-level behavior still need verification after the commit.
