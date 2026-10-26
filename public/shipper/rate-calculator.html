@@ -163,7 +163,20 @@ a:not(.btn){text-decoration-color:#38bdf870}
   const user=sessionData.session.user;
   const {data:memberships,error:membershipError}=await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",user.id).eq("status","active");
   if(membershipError)throw membershipError;
-  const orgIds=[...new Set((memberships||[]).filter(m=>/customer|shipper|client/i.test(String(m.role||"").replace(/[_-]/g," "))).map(m=>m.organization_id).filter(Boolean))];
+  const activeMemberships=Array.isArray(memberships)?memberships:[];
+  const membershipOrgIds=[...new Set(activeMemberships.map(m=>m.organization_id).filter(Boolean))];
+  if(!membershipOrgIds.length)throw new Error("No active organization membership is available for this account.");
+  const {data:organizations,error:organizationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",membershipOrgIds);
+  if(organizationError)throw organizationError;
+  const orgById=new Map((organizations||[]).map(org=>[String(org.id),org]));
+  const orgIds=[...new Set(activeMemberships.filter(m=>{
+    const org=orgById.get(String(m.organization_id));
+    if(!org||String(org.status||"").toLowerCase()!=="active")return false;
+    const role=String(m.role||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
+    const type=String(org.organization_type||org.organization_type_code||"").toLowerCase().replace(/[^a-z0-9]+/g,"_");
+    if(/platform_admin|platform_superadmin|superadmin|partner|carrier|driver|warehouse|customs|finance|operations|enterprise|dispatcher/.test(role))return false;
+    return /customer|shipper|client/.test(role)||/customer|shipper|client/.test(type);
+  }).map(m=>m.organization_id))];
   if(!orgIds.length)throw new Error("No active customer organization membership is available for this account.");
   setLoadStatus("Loading shipment…",false);
   const {data,error}=await client.from("krim_shipments").select("id,customer_organization_id,total_weight_kg,status,requested_transport_mode,requested_route_type,origin_place_label,destination_place_label,origin_place_type,destination_place_type").eq("id",id).in("customer_organization_id",orgIds).single();
