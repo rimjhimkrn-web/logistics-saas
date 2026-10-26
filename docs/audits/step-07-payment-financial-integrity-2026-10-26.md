@@ -45,3 +45,17 @@ These must remain exceptions until matched to provider dashboard evidence or ano
 
 ## Safety decision
 Do not enable live payments or declare Step 7 complete until the acceptance tests pass and the exceptions/reconciliation are resolved with evidence. No production financial records were modified for this audit.
+
+
+## Additional live database verification (2026-10-26)
+Fresh read-only queries were successfully run after the initial audit:
+- All six canonical transaction rows match their payment-order amount, currency, and Razorpay order reference.
+- Five orders are still `created`; one order is `paid` for KRIM shipment 15 (INR 35,000 / 3,500,000 paise). Its transaction is `paid`, provider order/payment references match, and `verified_at` is present.
+- KRIM shipments 10–15 currently show `confirmed`; this status alone is not evidence that their payment and financial allocation chain is reconciled.
+- The historical `shipment_financials` row for legacy shipment 14 has `krim_shipment_id = NULL`, customer amount INR 5,000, partner cost INR 3,000, and platform margin INR 2,000.
+- The only legacy `partner_payouts` row is INR 3,000, marked `paid`, with transaction reference `TEST-PAYOUT-002`, legacy shipment 14, and no KRIM shipment link. This is test-labelled historical data, not evidence of a real payout.
+- The only `revenue_ledger` row is shipment reference `SHP-2026-001`, INR 12,500, partner payout INR 11,250, commission INR 1,250, marked `reconciled`. It does not map to the current KRIM shipment numbers 10–15 on the evidence inspected.
+- Therefore the paid INR 35,000 order for shipment 15 has a matching canonical transaction, but the reviewed legacy ledger/payout records do not prove a complete linked financial lifecycle for it.
+
+## Final gate decision
+Database consistency checks for the six order/transaction pairs pass. The full Step 7 acceptance criteria do not pass: the four historical events remain unmatched, ledger/payout lineage is not proven, and provider-signed success/failure/duplicate/retry tests have not been executed. Do not modify historical statuses to make these checks appear green. This is a real blocker requiring provider evidence and a controlled test session, not a documentation-only issue.
