@@ -901,6 +901,29 @@ if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIE
 if (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED")) failures.push("Treasury dashboard must prominently disclose that balances are illustrative and not live-connected.");
 if (!revenuePageTruth.includes("Demonstration data — not actual KRIM revenue") || !revenuePageTruth.includes("live revenue telemetry and accounting reconciliation are not connected")) failures.push("Revenue reports must prominently disclose illustrative, non-live figures.");
 
+// Additional Step 7 regression guards: these inspect source only and do not claim
+// that provider-signed integration tests or financial settlement have run.
+for (const [label, token] of [
+  ["raw-body HMAC signing", "generateSignature(webhookSecret,\\nrawBody)"],
+  ["constant-time signature comparison", "safeEqual(receivedBytes, expectedBytes)"],
+  ["failed-payment no-downgrade guard", 'failedOrder.status !== "paid"'],
+  ["failed-payment conditional update", '.neq("status", "paid")'],
+  ["conflicting paid-payment protection", "PAYMENT_ID_CONFLICT"],
+  ["conditional captured-payment transition", '.eq("status", paymentOrder.status)'],
+  ["webhook event completion timestamp", 'processed_at: new Date().toISOString()'],
+  ["retryable concurrent event delivery", "Webhook event is already being processed; retry delivery"],
+  ["unsupported event fail-closed behavior", "UNSUPPORTED_EVENT_TYPE"],
+]) {
+  if (!razorpayWebhookSource.includes(token)) {
+    failures.push("Step 7 webhook regression guard missing (" + label + "): " + token);
+  }
+}
+if (!razorpayWebhookSource.includes('if (existingEvent?.processed)') ||
+    !razorpayWebhookSource.includes('if (!existingEvent)') ||
+    !razorpayWebhookSource.includes('insertEventError.code === "23505"')) {
+  failures.push("Step 7 webhook must distinguish completed duplicates from retryable in-progress/failed deliveries.");
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
