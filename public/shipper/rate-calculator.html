@@ -211,13 +211,13 @@ a:not(.btn){text-decoration-color:#38bdf870}
      if(opportunityError)throw opportunityError;
      if(!opportunity||!opportunity.id)throw new Error("The server did not confirm a partner-bid request.");
      showFeedback("No approved tariff matches this shipment. A partner-bid request was created; no customer price has been invented. Opening quote & bid status…","success");
-     setTimeout(()=>window.location.href=BASE+"public/shipper/spot-approvals.html",1200);return;
+     setTimeout(()=>window.location.href=BASE+"public/shipper/partner-bid-status.html?shipment_id="+encodeURIComponent(shipmentId),1200);return;
     }
     throw error;
    }
    if(!data||!data.id)throw new Error("The server did not return a quotation reference.");
    showFeedback("A server-calculated quote was created. Opening quote & bid status…","success");
-   setTimeout(()=>window.location.href=BASE+"public/shipper/spot-approvals.html",1000);
+   setTimeout(()=>window.location.href=BASE+"public/shipper/partner-bid-status.html?shipment_id="+encodeURIComponent(shipmentId),1000);
   }catch(err){showFeedback("Quote request failed: "+(err.message||"Unknown error"),"error");btn.disabled=false;btn.textContent="Request authoritative quote →";}
  });
  init();
