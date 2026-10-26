@@ -67,3 +67,8 @@ Added Step 7 static regression assertions to `scripts/krim-production-smoke.mjs`
 - Follow-up assertion correction: `f9319a862992c8f2dad35451d6dfc7a4549e6245`
 - GitHub Actions smoke workflow: **PASS** on `f9319a862992c8f2dad35451d6dfc7a4549e6245` — https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40259864259
 This passing workflow is source-level regression coverage only; it does not simulate Razorpay-signed webhook deliveries or prove settlement/reconciliation.
+
+
+## Latest CI confirmation (2026-10-26)
+The current main-branch commit `46132fce08f76642320796e3c450186e5dd2274b` passed the **KRIM production smoke checks** workflow (run `40259901363`) and the **KRIM static link audit** workflow (run `40259901351`). The Pages build/deployment workflow (run `40259900829`) also completed successfully. The smoke job explicitly passed both `scripts/krim-production-smoke.mjs` and `scripts/krim-complete-static-audit.mjs`.
+These are repository/source checks and successful Pages deployment only. They do not replace provider-signed webhook delivery tests, settlement evidence, or approved rate-card-backed booking-to-payment testing.
