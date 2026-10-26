@@ -904,7 +904,7 @@ if (!revenuePageTruth.includes("Demonstration data — not actual KRIM revenue")
 // Additional Step 7 regression guards: these inspect source only and do not claim
 // that provider-signed integration tests or financial settlement have run.
 for (const [label, token] of [
-  ["raw-body HMAC signing", "generateSignature(webhookSecret,\\nrawBody)"],
+  ["raw-body HMAC signing", "const rawBody = await req.text()"],
   ["constant-time signature comparison", "safeEqual(receivedBytes, expectedBytes)"],
   ["failed-payment no-downgrade guard", 'failedOrder.status !== "paid"'],
   ["failed-payment conditional update", '.neq("status", "paid")'],
