@@ -59,3 +59,11 @@ Fresh read-only queries were successfully run after the initial audit:
 
 ## Final gate decision
 Database consistency checks for the six order/transaction pairs pass. The full Step 7 acceptance criteria do not pass: the four historical events remain unmatched, ledger/payout lineage is not proven, and provider-signed success/failure/duplicate/retry tests have not been executed. Do not modify historical statuses to make these checks appear green. This is a real blocker requiring provider evidence and a controlled test session, not a documentation-only issue.
+
+
+## Automated regression coverage update (2026-10-26)
+Added Step 7 static regression assertions to `scripts/krim-production-smoke.mjs` for raw-body signature handling, constant-time signature comparison, failed-payment no-downgrade, conditional captured-payment transition, conflicting paid-payment protection, webhook finalization, retryable concurrent delivery, and unsupported-event fail-closed behavior.
+- Regression-guard commit: `955ebbe1e2b3b7876c56e866372ff199148d51e5`
+- Follow-up assertion correction: `f9319a862992c8f2dad35451d6dfc7a4549e6245`
+- GitHub Actions smoke workflow: **PASS** on `f9319a862992c8f2dad35451d6dfc7a4549e6245` — https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/40259864259
+This passing workflow is source-level regression coverage only; it does not simulate Razorpay-signed webhook deliveries or prove settlement/reconciliation.
