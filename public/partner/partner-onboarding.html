@@ -440,7 +440,34 @@ body>footer{margin-top:12px}
             const city = document.createElement("input"); city.dataset.field="city"; city.maxLength=120; city.placeholder="e.g. Ranchi"; city.className="w-full border rounded-lg p-2"; city.value=old.city || document.getElementById("partner-operating-city").value || "";
             cityWrap.append(cityLabel,city);
             grid.append(countryWrap,regionWrap,cityWrap);
-            card.append(title,grid); host.appendChild(card);
+            const evidenceGuides = {
+              FREIGHT_FORWARDING:["Forwarding / intermediary registration or licence, if required locally","Agency or carrier agreements and proof of cargo-liability cover","Customs-broker authorisation separately, if your company performs customs clearance"],
+              ROAD_FTL:["Carrier / operator permits applicable to the routes served","Vehicle registration, fitness/inspection and commercial motor insurance","Driver licence records and dangerous-goods permits where relevant"],
+              OCEAN_NVOCC:["NVOCC / ocean transport intermediary authorisation where required","Carrier, vessel-space or agency agreements and bill-of-lading authority","P&I or freight-forwarder liability cover, as applicable"],
+              AIR_CHARTER:["Air cargo operator / intermediary permissions applicable to your role","Airline or handling-agent agreements and cargo-security approvals where required","Cargo liability cover and any dangerous-goods handling approvals"],
+              INTERMODAL_RAIL:["Rail operator access, terminal or intermodal service agreements","Wagon/container interchange and safety documentation applicable to the network","Dangerous-goods permissions and liability cover where relevant"],
+              WAREHOUSE:["Facility ownership, lease or lawful operating-control evidence","Local land-use, fire-safety, building and facility permits where applicable","Stock-control, security, pest-control or temperature-control records when relevant"],
+              THREE_PL_FOUR_PL:["Customer service scope and subcontractor / carrier agreements","Documented operating procedures, claims handling and service-level controls","Appropriate liability, warehouse or cargo cover for the services actually undertaken"],
+              LAST_MILE:["Local delivery / courier operator registration where required","Vehicle, driver, worker and commercial insurance records","Proof-of-delivery, parcel custody, complaint and data-protection procedures"],
+              CUSTOMS_BROKER:["Customs broker licence or written customs authority approval for each jurisdiction served","Responsible licensed personnel and any required bond / guarantee","Customs-system access and power-of-attorney controls"],
+              SPECIALIZED_LOGISTICS:["Specific permits for the cargo class or activity (e.g. temperature-controlled or dangerous goods)","Equipment inspection, calibration, training and handling procedures","Specialist liability / environmental cover where applicable"],
+              CARGO_INSURANCE:["Insurance intermediary / broker authorisation in each market where required","Insurer appointment, delegated authority or placement agreements","Professional indemnity / errors-and-omissions cover and complaints controls"],
+              INSPECTION_CERTIFICATION:["Accreditation or regulator recognition for the inspection scope, where required","Auditor / inspector qualifications, impartiality and quality procedures","Sample reports, equipment calibration and professional liability cover"],
+              PORT_TERMINAL:["Port, terminal, concession or cargo-handling access authorisation","Occupational safety, environmental and equipment permits applicable to operations","Cargo-handling liability, security procedures and emergency plans"]
+            };
+            const guide = document.createElement("details");
+            guide.className = "mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm";
+            const summary = document.createElement("summary");
+            summary.className = "cursor-pointer font-bold text-blue-900";
+            summary.textContent = "Service-specific evidence to prepare";
+            const note = document.createElement("p");
+            note.className = "mt-2 text-xs text-slate-600";
+            note.textContent = "Examples only—not a universal legal checklist. KRIM will confirm the exact documents and permissions for this service and country before approval.";
+            const list = document.createElement("ul");
+            list.className = "mt-2 list-disc pl-5 space-y-1 text-xs text-slate-700";
+            (evidenceGuides[value] || []).forEach(item => { const li=document.createElement("li"); li.textContent=item; list.appendChild(li); });
+            guide.append(summary,note,list);
+            card.append(title,grid,guide); host.appendChild(card);
           });
         }
         document.getElementById("partner-categories").addEventListener("change", renderCategoryCoverage);
