@@ -271,14 +271,24 @@ body>footer{margin-top:12px}
               <p class="text-slate-500 text-[10px]">Use the official identifier applicable in your country; formats vary by jurisdiction.</p>
             </div>
 
-            <div class="space-y-1">
-              <label class="text-slate-400 text-[10px] uppercase font-bold block">Primary Fleet Operational Category *</label>
-              <select id="partner-category" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
-                <option value="ROAD_FTL">Road Freight (FTL / LTL)</option>
-                <option value="OCEAN_NVOCC">Ocean Carrier / NVOCC</option>
-                <option value="AIR_CHARTER">Air Cargo Charter</option>
-                <option value="INTERMODAL_RAIL">Intermodal Rail Drayage</option>
+            <div class="space-y-1 sm:col-span-2">
+              <label for="partner-categories" class="text-slate-400 text-[10px] uppercase font-bold block">All Services Your Business Provides *</label>
+              <select id="partner-categories" multiple size="7" class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-amber-500" required>
+                <option value="FREIGHT_FORWARDING">Freight Forwarding</option>
+                <option value="ROAD_FTL">Road Freight / FTL / LTL</option>
+                <option value="OCEAN_NVOCC">Ocean Freight / NVOCC</option>
+                <option value="AIR_CHARTER">Air Cargo</option>
+                <option value="INTERMODAL_RAIL">Rail / Intermodal</option>
+                <option value="WAREHOUSE">Warehousing & Storage</option>
+                <option value="THREE_PL_FOUR_PL">3PL / 4PL Logistics</option>
+                <option value="LAST_MILE">First-mile / Last-mile Delivery</option>
+                <option value="CUSTOMS_BROKER">Customs Brokerage / Clearing</option>
+                <option value="SPECIALIZED_LOGISTICS">Specialised Logistics</option>
+                <option value="CARGO_INSURANCE">Cargo Insurance</option>
+                <option value="INSPECTION_CERTIFICATION">Inspection / Certification</option>
+                <option value="PORT_TERMINAL">Port / Terminal / Cargo Handling</option>
               </select>
+              <p class="text-slate-500 text-[10px]">Select every service your company genuinely provides (Ctrl/Command or tap multiple options). Each selected service is recorded separately and remains pending verification.</p>
             </div>
           </div>
         </div>
@@ -490,7 +500,7 @@ body>footer{margin-top:12px}
         const legalName = document.getElementById("partner-legal-name").value.trim();
         const countryCode = document.getElementById("partner-country").value;
         const authorityId = document.getElementById("partner-authority-id").value.trim();
-        const category = document.getElementById("partner-category").value;
+        const categories = Array.from(document.getElementById("partner-categories").selectedOptions).map(option => option.value);
         const operatingCountryCode = document.getElementById("partner-operating-country").value;
         const registeredAddress = document.getElementById("partner-registered-address").value.trim();
         const registeredCity = document.getElementById("partner-registered-city").value.trim();
@@ -501,6 +511,7 @@ body>footer{margin-top:12px}
         const postalCode = document.getElementById("partner-postal-code").value.trim();
         const website = document.getElementById("partner-website").value.trim();
         if (!operatingCountryCode) throw new Error("Choose your primary operating country.");
+        if (!categories.length) throw new Error("Select at least one service category.");
         if (registeredAddress.length < 5 || registeredCity.length < 2) throw new Error("Enter the official registered business street address and city.");
         if (website && !/^https?:\/\/[^\s]+\.[^\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
         if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and business registration / operating authority ID.");
@@ -514,11 +525,11 @@ body>footer{margin-top:12px}
         const documentPaths = [await uploadPartnerDocument(registrationFile, "business registration certificate")];
         if (insuranceFile) documentPaths.push(await uploadPartnerDocument(insuranceFile, "insurance certificate"));
 
-        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding_global_v2", {
+        const { data, error } = await onboardingClient.rpc("krim_submit_partner_onboarding_global_multi_v1", {
           p_legal_name: legalName,
           p_country_code: countryCode,
           p_authority_id: authorityId,
-          p_operational_category: category,
+          p_operational_categories: categories,
           p_document_paths: documentPaths,
           p_operating_country_code: operatingCountryCode,
           p_registered_address: registeredAddress,
