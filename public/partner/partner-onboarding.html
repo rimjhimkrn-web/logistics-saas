@@ -288,7 +288,8 @@ body>footer{margin-top:12px}
                 <option value="INSPECTION_CERTIFICATION">Inspection / Certification</option>
                 <option value="PORT_TERMINAL">Port / Terminal / Cargo Handling</option>
               </select>
-              <p class="text-slate-500 text-[10px]">Select every service your company genuinely provides (Ctrl/Command or tap multiple options). Each selected service is recorded separately and remains pending verification.</p>
+              <p class="text-slate-500 text-[10px]">Select every service your company genuinely provides. Each service can have its own operating country, region and city.</p>
+              <div id="partner-category-coverage" class="sm:col-span-2 space-y-3" aria-live="polite"></div>
             </div>
           </div>
         </div>
@@ -398,6 +399,53 @@ body>footer{margin-top:12px}
         populateCountrySelect("partner-operating-country", "Select primary operating country");
         populateCountrySelect("individual-country", "Select your operating country");
 
+        const categoryLabels = Object.fromEntries(Array.from(document.getElementById("partner-categories").options).map(o => [o.value,o.textContent]));
+        function renderCategoryCoverage() {
+          const selected = Array.from(document.getElementById("partner-categories").selectedOptions);
+          const host = document.getElementById("partner-category-coverage");
+          const previous = new Map(Array.from(host.querySelectorAll("[data-category-card]")).map(card => [card.dataset.categoryCard, {
+            country:card.querySelector("[data-field=country]")?.value || "",
+            region:card.querySelector("[data-field=region]")?.value || "",
+            city:card.querySelector("[data-field=city]")?.value || ""
+          }]));
+          host.replaceChildren();
+          selected.forEach(option => {
+            const value = option.value, old = previous.get(value) || {};
+            const card = document.createElement("div");
+            card.dataset.categoryCard = value;
+            card.className = "rounded-xl border border-slate-200 bg-white p-4 space-y-3";
+            const title = document.createElement("strong");
+            title.className = "block text-sm";
+            title.textContent = categoryLabels[value] + " — operating coverage";
+            const grid = document.createElement("div");
+            grid.className = "grid grid-cols-1 sm:grid-cols-3 gap-3";
+            const countryWrap = document.createElement("div");
+            const countryLabel = document.createElement("label");
+            countryLabel.textContent = "Country *";
+            const country = document.createElement("select");
+            country.dataset.field = "country";
+            country.required = true;
+            country.className = "w-full border rounded-lg p-2";
+            Array.from(document.getElementById("partner-operating-country").options).forEach(source => {
+              const opt = document.createElement("option"); opt.value = source.value; opt.textContent = source.textContent; country.appendChild(opt);
+            });
+            country.value = old.country || document.getElementById("partner-operating-country").value || "";
+            countryWrap.append(countryLabel,country);
+            const regionWrap = document.createElement("div");
+            const regionLabel = document.createElement("label"); regionLabel.textContent = "State / Region";
+            const region = document.createElement("input"); region.dataset.field="region"; region.maxLength=120; region.placeholder="e.g. Jharkhand"; region.className="w-full border rounded-lg p-2"; region.value=old.region || document.getElementById("partner-operating-region").value || "";
+            regionWrap.append(regionLabel,region);
+            const cityWrap = document.createElement("div");
+            const cityLabel = document.createElement("label"); cityLabel.textContent = "City";
+            const city = document.createElement("input"); city.dataset.field="city"; city.maxLength=120; city.placeholder="e.g. Ranchi"; city.className="w-full border rounded-lg p-2"; city.value=old.city || document.getElementById("partner-operating-city").value || "";
+            cityWrap.append(cityLabel,city);
+            grid.append(countryWrap,regionWrap,cityWrap);
+            card.append(title,grid); host.appendChild(card);
+          });
+        }
+        document.getElementById("partner-categories").addEventListener("change", renderCategoryCoverage);
+        renderCategoryCoverage();
+
         function updatePartnerModeUI() {
           const mode = document.getElementById("partner-account-mode").value;
           const businessFields = document.getElementById("registered-business-fields");
@@ -502,6 +550,12 @@ body>footer{margin-top:12px}
         const authorityId = document.getElementById("partner-authority-id").value.trim();
         const categories = Array.from(document.getElementById("partner-categories").selectedOptions).map(option => option.value);
         const operatingCountryCode = document.getElementById("partner-operating-country").value;
+        const categoryCoverage = Array.from(document.querySelectorAll("#partner-category-coverage [data-category-card]")).map(card => ({
+          category: card.dataset.categoryCard,
+          country_code: card.querySelector("[data-field=country]").value,
+          region: card.querySelector("[data-field=region]").value.trim() || null,
+          city: card.querySelector("[data-field=city]").value.trim() || null
+        }));
         const registeredAddress = document.getElementById("partner-registered-address").value.trim();
         const registeredCity = document.getElementById("partner-registered-city").value.trim();
         const registeredRegion = document.getElementById("partner-registered-region").value.trim();
@@ -512,6 +566,7 @@ body>footer{margin-top:12px}
         const website = document.getElementById("partner-website").value.trim();
         if (!operatingCountryCode) throw new Error("Choose your primary operating country.");
         if (!categories.length) throw new Error("Select at least one service category.");
+        if (categoryCoverage.length !== categories.length || categoryCoverage.some(item => !item.country_code)) throw new Error("Choose a country for every selected service.");
         if (registeredAddress.length < 5 || registeredCity.length < 2) throw new Error("Enter the official registered business street address and city.");
         if (website && !/^https?:\/\/[^\s]+\.[^\s]+$/i.test(website)) throw new Error("Enter a full website URL beginning with https:// or http://.");
         if (legalName.length < 2 || authorityId.length < 3) throw new Error("Enter a valid registered company name and business registration / operating authority ID.");
@@ -530,6 +585,7 @@ body>footer{margin-top:12px}
           p_country_code: countryCode,
           p_authority_id: authorityId,
           p_operational_categories: categories,
+          p_category_coverage: categoryCoverage,
           p_document_paths: documentPaths,
           p_operating_country_code: operatingCountryCode,
           p_registered_address: registeredAddress,
