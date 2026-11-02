@@ -565,6 +565,7 @@ if (existsSync(securityMigration)) {
 
 const partnerWorkspace = existsSync("app/partner/index.html") ? readFileSync("app/partner/index.html", "utf8") : "";
 const partnerMarketplace = existsSync("public/partner/load-marketplace.html") ? readFileSync("public/partner/load-marketplace.html", "utf8") : "";
+const partnerLiveExchange = existsSync("public/partner/available-loads.html") ? readFileSync("public/partner/available-loads.html", "utf8") : "";
 const partnerOnboarding = existsSync("public/partner/partner-onboarding.html") ? readFileSync("public/partner/partner-onboarding.html", "utf8") : "";
 const partnerBid = existsSync("public/partner/submit-quote.html") ? readFileSync("public/partner/submit-quote.html", "utf8") : "";
 const booking = existsSync("public/shipments/shipment-create.html") ? readFileSync("public/shipments/shipment-create.html", "utf8") : "";
@@ -577,9 +578,11 @@ const customerPaymentHistory = existsSync("public/customer-os/customer-services/
 for (const [label, source, pattern] of [
   ["partner workspace distinguishes development/test mode", partnerWorkspace, /development_test/],
   ["partner workspace clearly locks live operations in test mode", partnerWorkspace, /Live commercial operations are disabled/],
-  ["marketplace reads backend partner account mode", partnerMarketplace, /partner_account_mode/],
-  ["marketplace blocks bidding in development/test mode", partnerMarketplace, /!commercialAccess\s*\|\|\s*!currentPartnerOrgId\s*\|\|\s*demoMode/],
-  ["marketplace submits through the dedicated partner quote RPC", partnerMarketplace, /rpc\(['"]krim_submit_partner_quote['"]/],
+  ["legacy marketplace route redirects to the live freight exchange", partnerMarketplace, /available-loads\.html[\s\S]*window\.location\.replace/],
+  ["live freight exchange requires an authenticated session", partnerLiveExchange, /client\.auth\.getSession\(\)/],
+  ["live freight exchange blocks unverified partner organizations", partnerLiveExchange, /partner_verification_status[\s\S]*partner_compliance_status[\s\S]*Partner verification required/],
+  ["partner quote form requires verified organization eligibility", partnerBid, /function partnerEligible\(o\)[\s\S]*partner_verification_status[\s\S]*partner_compliance_status/],
+  ["partner quote form submits through the dedicated partner quote RPC", partnerBid, /rpc\(['"]krim_submit_partner_quote['"]/],
   ["onboarding supports the three explicit partner pathways", partnerOnboarding, /development_test[\s\S]*individual_interest[\s\S]*registered_business/i],
   ["onboarding saves account mode through the backend RPC", partnerOnboarding, /rpc\(['"]krim_set_partner_account_mode['"]/],
   ["partner bid page requires verified eligible organization", partnerBid, /partner_verification_status[\s\S]*partner_lifecycle_status[\s\S]*partner_compliance_status/i],
