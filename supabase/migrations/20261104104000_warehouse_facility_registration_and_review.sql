@@ -10,6 +10,7 @@ alter table public.krim_warehouse_facilities add constraint krim_warehouse_facil
 create index if not exists krim_warehouse_facilities_review_queue_idx on public.krim_warehouse_facilities(review_status,created_at desc);
 
 drop policy if exists krim_wh_facilities_org_member on public.krim_warehouse_facilities;
+drop policy if exists krim_wh_facilities_org_member_select on public.krim_warehouse_facilities;
 create policy krim_wh_facilities_org_member_select on public.krim_warehouse_facilities for select to authenticated using (
  exists(select 1 from public.krim_organization_members m join public.krim_organizations o on o.id=m.organization_id
  where m.organization_id=krim_warehouse_facilities.organization_id and m.user_id=(select auth.uid()) and m.status='active'
@@ -116,6 +117,7 @@ begin
  select pg_get_functiondef('public.krim_warehouse_record_movement(bigint,uuid,text,numeric,text,uuid,text,text,text,text,text,text,text,text)'::regprocedure) into v_def;
  v_old:='if v_org_type is null then raise exception ''Active warehouse organization membership required'' using errcode=''42501''; end if;';
  v_new:='if v_org_type is null or not exists(select 1 from public.krim_organizations o where o.id=p_organization_id and o.partner_account_mode=''registered_business'' and o.partner_verification_status in (''verified'',''approved'') and o.partner_lifecycle_status in (''active'',''verified'') and o.partner_compliance_status in (''clear'',''compliant'',''approved'',''verified'',''not_required'',''not_applicable'')) then raise exception ''Verified registered-business warehouse organisation required'' using errcode=''42501''; end if;';
- if position(v_old in v_def)=0 then raise exception 'Could not locate warehouse movement authorization guard';end if;
- execute replace(v_def,v_old,v_new);
+ if position(v_old in v_def)>0 then execute replace(v_def,v_old,v_new);
+ elsif position('partner_account_mode=''registered_business''' in v_def)=0 then raise exception 'Could not locate warehouse movement authorization guard';
+ end if;
 end;$patch$;
