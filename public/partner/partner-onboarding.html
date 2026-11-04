@@ -276,9 +276,11 @@
         const globalCountryCodes = ("AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW").split(/\s+/);
         const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
         let countryMap = new Map(globalCountryCodes.map(code => [code, regionNames.of(code) || code]));
+        let activeCountryCodes = new Set();
         try {
           const { data: countries } = await onboardingClient.from("krim_countries")
             .select("iso2_code, code, name").eq("is_active", true).order("name", { ascending: true });
+          activeCountryCodes = new Set((countries || []).map(country => String(country.iso2_code || country.code || "").toUpperCase()).filter(code => /^[A-Z]{2}$/.test(code)));
           (countries || []).forEach(country => {
             const code = String(country.iso2_code || country.code || "").toUpperCase();
             if (/^[A-Z]{2}$/.test(code) && country.name) countryMap.set(code, String(country.name));
@@ -293,13 +295,18 @@
           placeholder.value = "";
           placeholder.textContent = placeholderText;
           select.appendChild(placeholder);
-          [...countryMap.entries()].sort((a,b) => a[1].localeCompare(b[1])).forEach(([code,name]) => {
+          [...countryMap.entries()].sort((a,b) => {
+            if (a[0] === "IN") return -1;
+            if (b[0] === "IN") return 1;
+            return a[1].localeCompare(b[1]);
+          }).forEach(([code,name]) => {
             const option = document.createElement("option");
             option.value = code;
             option.textContent = name + " (" + code + ")";
             select.appendChild(option);
           });
           if (select.options.length < 200) throw new Error("The global country catalog could not be loaded. Refresh and retry.");
+          if (["partner-country","partner-operating-country","individual-country"].includes(selectId)) select.value = "IN";
         }
         populateCountrySelect("partner-country", "Select country of incorporation");
         populateCountrySelect("partner-operating-country", "Select primary operating country");
@@ -333,10 +340,20 @@
             country.required = true;
             country.className = "w-full border rounded-lg p-2";
             Array.from(document.getElementById("partner-operating-country").options).forEach(source => {
-              const opt = document.createElement("option"); opt.value = source.value; opt.textContent = source.textContent; country.appendChild(opt);
+              const opt = document.createElement("option");
+              opt.value = source.value;
+              opt.textContent = source.textContent;
+              if (source.value && !activeCountryCodes.has(source.value)) {
+                opt.disabled = true;
+                opt.textContent += " — not yet enabled";
+              }
+              country.appendChild(opt);
             });
-            country.value = old.country || document.getElementById("partner-operating-country").value || "";
-            countryWrap.append(countryLabel,country);
+            country.value = old.country || document.getElementById("partner-operating-country").value || "IN";
+            const marketNote = document.createElement("p");
+            marketNote.textContent = "Only markets currently activated in KRIM can be submitted as service coverage. Other countries remain in the global country framework but are not yet enabled for partner service activation.";
+            marketNote.className = "text-slate-500 text-[10px]";
+            countryWrap.append(countryLabel,country,marketNote);
             const regionWrap = document.createElement("div");
             const regionLabel = document.createElement("label"); regionLabel.textContent = "State / Region";
             const region = document.createElement("input"); region.dataset.field="region"; region.maxLength=120; region.placeholder="e.g. Jharkhand"; region.className="w-full border rounded-lg p-2"; region.value=old.region || document.getElementById("partner-operating-region").value || "";
