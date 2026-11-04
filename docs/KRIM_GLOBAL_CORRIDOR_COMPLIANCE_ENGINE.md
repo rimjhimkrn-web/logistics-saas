@@ -40,3 +40,9 @@ This dossier workflow does not itself provide live sanctions screening, customs/
 - `supabase/migrations/20261104234500_seed_proposed_corridor_catalogue.sql`
 
 The production changes were applied before the repository migration files were committed. On a fresh environment, apply the migration sequence in timestamp order and verify referenced base schemas and permissions first.
+
+## Shipment write-boundary enforcement
+
+A private database trigger now runs on shipment INSERT and on changes to origin, destination or requested transport mode. It rejects writes unless an exact active origin/destination corridor exists with an approved corridor dossier and a matching transport mode. It re-checks every mandatory corridor control, its evidence/rationale, expiry and current reviewed source, and re-checks every mandatory country-pack control for every jurisdiction leg. This gate is independent of the existing market activation trigger and partner capability checks.
+
+A negative test updated an existing shipment's requested mode without an approved matching corridor; the database rejected the write with the expected check-violation path. No shipment data was changed. This is a negative control only; no positive route can be tested because there are no approved corridor dossiers, country packs or active providers.
