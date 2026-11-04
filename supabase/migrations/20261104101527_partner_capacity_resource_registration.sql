@@ -1,0 +1,99 @@
+create or replace function public.krim_partner_register_capacity_resource(
+  p_organization_id bigint,
+  p_resource_type text,
+  p_resource_name text,
+  p_transport_mode_id bigint,
+  p_location_id bigint,
+  p_capacity_value numeric,
+  p_capacity_unit text,
+  p_availability_type text,
+  p_available_from timestamptz,
+  p_available_until timestamptz,
+  p_notes text default ''
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_user_id uuid := auth.uid();
+  v_resource_id bigint;
+  v_availability_id bigint;
+  v_resource_type text := lower(btrim(coalesce(p_resource_type,'')));
+  v_availability_type text := lower(btrim(coalesce(p_availability_type,'')));
+  v_name text := left(btrim(coalesce(p_resource_name,'')),180);
+  v_unit text := left(btrim(coalesce(p_capacity_unit,'')),32);
+  v_notes text := left(btrim(coalesce(p_notes,'')),500);
+begin
+  if v_user_id is null then
+    raise exception using errcode='28000', message='Authentication required';
+  end if;
+
+  if p_organization_id is null or not private.krim_has_permission(v_user_id,p_organization_id,'partner.manage') then
+    raise exception using errcode='42501', message='Partner capacity management permission is required for this organization';
+  end if;
+
+  if not exists (
+    select 1 from public.krim_organizations o
+    where o.id=p_organization_id
+      and lower(o.status)='active'
+      and o.partner_account_mode='registered_business'
+      and lower(coalesce(o.partner_verification_status,'')) in ('verified','approved')
+      and lower(coalesce(o.partner_lifecycle_status,'')) in ('active','verified')
+      and lower(coalesce(o.partner_compliance_status,'')) in ('clear','compliant','approved','verified','not_required','not_applicable')
+  ) then
+    raise exception using errcode='42501', message='Only an active, verified and compliant registered business partner can register operational capacity';
+  end if;
+
+  if v_resource_type not in ('vehicle','equipment','warehouse','handling','container','other') then
+    raise exception using errcode='22023', message='Unsupported resource type';
+  end if;
+  if v_availability_type not in ('vehicle','equipment','weight','volume','container','slot','service') then
+    raise exception using errcode='22023', message='Unsupported availability type';
+  end if;
+  if v_name='' or v_unit='' or p_capacity_value is null or p_capacity_value<=0 then
+    raise exception using errcode='22023', message='Resource name, positive capacity and capacity unit are required';
+  end if;
+  if p_available_from is null or p_available_until is null or p_available_from<now() or p_available_until<=p_available_from then
+    raise exception using errcode='22023', message='Provide a future availability window with an end after its start';
+  end if;
+
+  if not exists(select 1 from public.krim_transport_modes m where m.id=p_transport_mode_id and m.is_active=true) then
+    raise exception using errcode='22023', message='Select an active KRIM transport mode';
+  end if;
+  if not exists(select 1 from public.krim_locations l where l.id=p_location_id and coalesce(l.is_active,true)=true) then
+    raise exception using errcode='22023', message='Select an active KRIM location';
+  end if;
+
+  insert into public.krim_capacity_resources(
+    organization_id,resource_type,resource_name,transport_mode_id,location_id,
+    capacity_value,capacity_unit,available_from,available_until,status,metadata
+  ) values (
+    p_organization_id,v_resource_type,v_name,p_transport_mode_id,p_location_id,
+    p_capacity_value,v_unit,p_available_from,p_available_until,'available',
+    jsonb_build_object('source_type','partner_reported','submitted_by',v_user_id,'notes',v_notes,'verification_state','unverified')
+  ) returning id into v_resource_id;
+
+  insert into public.krim_partner_capacity_availability(
+    organization_id,capacity_resource_id,transport_mode_id,availability_type,
+    available_from,available_until,capacity_value,capacity_unit,status,source_type,metadata
+  ) values (
+    p_organization_id,v_resource_id,p_transport_mode_id,v_availability_type,
+    p_available_from,p_available_until,p_capacity_value,v_unit,'available','partner_reported',
+    jsonb_build_object('submitted_by',v_user_id,'notes',v_notes,'verification_state','unverified')
+  ) returning id into v_availability_id;
+
+  return jsonb_build_object(
+    'resource_id',v_resource_id,
+    'availability_id',v_availability_id,
+    'organization_id',p_organization_id,
+    'status','available',
+    'source_type','partner_reported',
+    'verification_state','unverified'
+  );
+end;
+$function$;
+
+revoke all on function public.krim_partner_register_capacity_resource(bigint,text,text,bigint,bigint,numeric,text,text,timestamptz,timestamptz,text) from public, anon, authenticated;
+grant execute on function public.krim_partner_register_capacity_resource(bigint,text,text,bigint,bigint,numeric,text,text,timestamptz,timestamptz,text) to authenticated;
