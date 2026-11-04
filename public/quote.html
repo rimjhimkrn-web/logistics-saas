@@ -2,100 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071a2d">
   <title>Request a Freight Quote | KRIM Logistics</title>
-  <meta name="description" content="Start a KRIM freight quote request. Sign in to provide shipment details and receive verified pricing based on available rates and partner quotes.">
-  <script>
-    (function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";window.KRIM_BASE_PATH=b;var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll("[data-krim-path]").forEach(function(a){a.href=b+a.dataset.krimPath.replace(/^\/+/, "");});});}());
-  </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Start a shipment request with KRIM Logistics. Share your route and cargo details, then review pricing when a valid rate or eligible partner quote is available.">
   <style>
-    :root{color-scheme:light;--navy:#071a2d;--blue:#078df4}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .quote-hero{background:linear-gradient(100deg,rgba(4,18,34,.97),rgba(4,18,34,.88) 52%,rgba(4,18,34,.58)),url("https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1800&q=85") center/cover}
-    .focus-ring:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
-    .mode-card{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
-    .mode-card:hover{transform:translateY(-3px);border-color:#7dd3fc;box-shadow:0 12px 26px rgba(7,26,45,.08)}
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    :root{color-scheme:light;--ink:#10243a;--muted:#5d6d7e;--navy:#071a2d;--blue:#1677d2;--teal:#0c8d83;--line:#dce5ed;--surface:#f4f7fa;--white:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.55}
+    a{color:inherit}.skip{position:absolute;left:-9999px;top:8px;z-index:100;background:#fff;padding:12px;border-radius:8px}.skip:focus{left:8px}
+    :focus-visible{outline:3px solid #f3b43f;outline-offset:3px}
+    .wrap{width:min(1160px,calc(100% - 40px));margin-inline:auto}
+    .header{position:sticky;top:0;z-index:20;background:rgba(7,26,45,.97);color:#fff;border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px)}
+    .navrow{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;letter-spacing:.04em}.brandmark{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(140deg,#5cc8ee,#1677d2);font-size:23px;color:#06213a}.brand small{display:block;font-size:10px;letter-spacing:.23em;color:#9ec9e8}
+    .navlinks{display:flex;align-items:center;gap:26px}.navlinks a,.nav-actions a{font-size:14px;font-weight:700;text-decoration:none;color:#e5edf5}.navlinks a:hover{color:#7dd3fc}
+    .nav-actions{display:flex;align-items:center;gap:10px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 18px;border-radius:11px;text-decoration:none;font-weight:800;font-size:14px;border:1px solid transparent;transition:transform .18s ease,background .18s ease}.btn:hover{transform:translateY(-1px)}.btn-primary{background:#1685df;color:#fff!important}.btn-primary:hover{background:#0872c8}.btn-outline{border-color:#91a7ba;color:#fff!important}.btn-light{border-color:#cbd8e3;color:var(--ink);background:#fff}
+    .menu{display:none;border:1px solid #63798c;border-radius:10px;background:transparent;color:#fff;padding:9px 12px;font-weight:800}
+    .hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 82% 22%,rgba(25,145,190,.28),transparent 35%),linear-gradient(115deg,#071a2d 0%,#0c3049 62%,#075b65 100%);color:#fff}
+    .hero:after{content:"";position:absolute;width:460px;height:460px;border:1px solid rgba(167,226,245,.14);border-radius:50%;right:-120px;bottom:-270px;box-shadow:0 0 0 42px rgba(167,226,245,.035),0 0 0 90px rgba(167,226,245,.025)}
+    .hero-inner{position:relative;z-index:1;padding:78px 0 84px;max-width:780px}
+    .eyebrow{font-size:12px;letter-spacing:.19em;text-transform:uppercase;font-weight:900;color:#7dd3fc}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.04;letter-spacing:-.045em;margin:17px 0 20px}.hero p{max-width:660px;color:#d5e2ec;font-size:18px;line-height:1.7;margin:0}.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+    .trustline{display:flex;flex-wrap:wrap;gap:18px 26px;margin-top:34px;color:#c2d5e3;font-size:13px}.trustline span:before{content:"✓";color:#6ee7c1;font-weight:900;margin-right:8px}
+    .section{padding:72px 0}.section-muted{background:var(--surface)}.section-head{max-width:700px;margin-bottom:30px}.kicker{font-size:12px;letter-spacing:.17em;text-transform:uppercase;color:#0c827b;font-weight:900}.section h2{font-size:clamp(27px,4vw,39px);line-height:1.15;letter-spacing:-.03em;margin:9px 0 12px}.section-head p,.muted{color:var(--muted)}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:25px;min-height:210px}.stepno{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#e6f4fb;color:#096b9f;font-weight:900}.step h3{margin:17px 0 7px;font-size:19px}.step p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+    .content-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:start}.checklist{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:23px}.check{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:700}.check:before{content:"+";color:var(--teal);font-weight:900;margin-right:9px}
+    .notice{border:1px solid #b9ded9;background:#effaf8;border-radius:18px;padding:23px}.notice strong{display:block;margin-bottom:7px}.notice p{margin:0;color:#405e60;font-size:14px;line-height:1.7}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 18px 45px rgba(15,39,60,.08)}.panel h2{font-size:26px;margin:0 0 8px}.panel p{color:var(--muted);font-size:14px}.panel .btn{width:100%;margin-top:11px}.panel .secondary{margin-top:10px}.divider{height:1px;background:var(--line);margin:22px 0}.small-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0c827b;font-weight:900}
+    .role-note{display:flex;gap:15px;align-items:flex-start;padding:20px;border-radius:16px;background:#0d2a40;color:#e6f0f7;margin-top:22px}.role-note b{display:block;margin-bottom:4px}.role-note p{margin:0;color:#c0d2df;font-size:13px}
+    .footer{background:#061625;color:#b9c8d5;padding:30px 0}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.footer a{color:#e2edf5;text-decoration:none;font-size:13px}.footer-links{display:flex;gap:20px;flex-wrap:wrap}.footer small{font-size:12px}
+    @media(max-width:850px){.navlinks{gap:16px}.content-grid{grid-template-columns:1fr;gap:28px}.panel{max-width:620px}.hero-inner{padding:64px 0}}
+    @media(max-width:700px){.navrow{min-height:68px}.menu{display:inline-flex}.navlinks{display:none;position:absolute;top:68px;left:0;right:0;background:#071a2d;padding:18px 22px 22px;flex-direction:column;align-items:stretch;border-top:1px solid #31475b}.navlinks.open{display:flex}.navlinks a{padding:9px 4px}.nav-actions .btn-outline{display:none}.steps{grid-template-columns:1fr}.step{min-height:0}.hero-inner{padding:57px 0 64px}.hero p{font-size:16px}.section{padding:55px 0}}
+    @media(max-width:440px){.wrap{width:min(100% - 30px,1160px)}.brand small{font-size:9px}.nav-actions .btn{padding:9px 11px;font-size:12px;min-height:41px}.checklist{grid-template-columns:1fr}.panel{padding:22px}.hero h1{font-size:39px}.hero-actions .btn{width:100%}.footer-inner{align-items:flex-start;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
   </style>
-<style id="krim-page03-color-refresh">
-
-/* Page 03 — quote request: emerald/teal commercial theme with amber wayfinding */
-:root{--krim-quote-emerald:#047857;--krim-quote-teal:#0f766e;--krim-quote-amber:#f59e0b}
-.quote-hero{background:linear-gradient(108deg,rgba(5,35,42,.96),rgba(6,78,74,.87) 54%,rgba(13,148,136,.55)),url("https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1800&q=85") center/cover}
-.quote-hero p.text-sky-300{color:#99f6e4!important}
-.mode-card:hover{border-color:#5eead4;box-shadow:0 14px 30px rgba(15,118,110,.13)}
-.mode-card span{background:linear-gradient(135deg,#ccfbf1,#dbeafe)!important;color:#0f766e!important}
-a[class*="bg-sky-500"]{background:linear-gradient(110deg,#0f766e,#0d9488)!important}
-a[class*="text-sky-700"]{color:#0f766e!important}
-section .border-sky-100{border-color:#99f6e4!important}
-section .bg-sky-50{background:linear-gradient(135deg,#f0fdfa,#eff6ff)!important}
-:focus-visible{outline:3px solid #f59e0b;outline-offset:3px}
-
-</style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">Skip to main content</a>
-  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#07182a]/95 text-white backdrop-blur">
-    <div class="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-      <a data-krim-path="public/" href="./" aria-label="KRIM Logistics home" class="focus-ring flex items-center gap-3 rounded-lg">
-        <span class="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-sky-300 to-blue-700 text-xl font-black">↗</span>
-        <span><span class="block text-xl font-black tracking-tight">KRIM</span><span class="-mt-1 block text-[10px] font-bold uppercase tracking-[.28em] text-sky-200">LOGISTICS</span></span>
-      </a>
-      <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-200 md:flex" aria-label="Main navigation">
-        <a data-krim-path="public/solutions.html" href="solutions.html" class="focus-ring rounded hover:text-sky-300">Solutions</a>
-        <a data-krim-path="public/network.html" href="network.html" class="focus-ring rounded hover:text-sky-300">Network</a>
-        <a data-krim-path="public/tracking.html" href="tracking.html" class="focus-ring rounded hover:text-sky-300">Track Shipment</a>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <header class="header">
+    <div class="wrap navrow">
+      <a class="brand" href="../index.html" aria-label="KRIM Logistics home"><span class="brandmark" aria-hidden="true">↗</span><span>KRIM<small>LOGISTICS</small></span></a>
+      <nav class="navlinks" id="primary-navigation" aria-label="Main navigation">
+        <a href="solutions.html">Solutions</a><a href="../network.html">Network</a><a href="../global-markets.html">Global markets</a><a href="tracking.html">Track shipment</a>
       </nav>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring rounded-xl border border-white/50 px-3 py-2.5 text-sm font-bold text-white hover:bg-white/10 sm:px-5">Sign In</a>
-        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring rounded-xl bg-sky-500 px-3 py-2.5 text-sm font-extrabold text-white hover:bg-sky-400 sm:px-5">Get Started</a>
-      </div>
+      <div class="nav-actions"><a class="btn btn-outline" href="../auth/login.html">Sign in</a><a class="btn btn-primary" href="../auth/signup.html">Get started</a><button class="menu" type="button" aria-controls="primary-navigation" aria-expanded="false">Menu</button></div>
     </div>
   </header>
-
   <main id="main">
-    <section class="quote-hero text-white">
-      <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
-        <p class="text-xs font-extrabold uppercase tracking-[.24em] text-sky-300 sm:text-sm">Freight quote request</p>
-        <h1 class="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">Move your shipment forward.</h1>
-        <p class="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">Tell KRIM what you need to move. Sign in to submit shipment details and follow your quote through the connected workflow.</p>
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div class="eyebrow">Shipment request · KRIM Logistics</div>
+        <h1>Move freight with a clearer next step.</h1>
+        <p>Share what needs to move, where it is going and when it is required. KRIM brings the request into a structured workflow so you can review the next step when suitable service capability and valid pricing are available.</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="../auth/login.html">Sign in to request a quote <span aria-hidden="true">&nbsp;→</span></a><a class="btn btn-outline" href="../auth/signup.html">Create your account</a></div>
+        <div class="trustline"><span>No invented prices</span><span>Request does not equal booking</span><span>Role-based workspace access</span></div>
       </div>
     </section>
-
-    <section class="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[1.2fr_.8fr] lg:py-14">
-      <div>
-        <p class="text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">How it works</p>
-        <h2 class="mt-2 text-2xl font-black tracking-tight sm:text-3xl">A clear path from request to booking</h2>
-        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">KRIM does not display invented prices. Final pricing depends on an approved rate card or a valid quote from an eligible logistics partner.</p>
-        <div class="mt-7 grid gap-4 sm:grid-cols-3">
-          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">01</span><h3 class="mt-4 font-extrabold">Share details</h3><p class="mt-2 text-sm leading-6 text-slate-600">Provide origin, destination, cargo and preferred transport mode in your workspace.</p></article>
-          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">02</span><h3 class="mt-4 font-extrabold">Review pricing</h3><p class="mt-2 text-sm leading-6 text-slate-600">Review a quote only when valid pricing is available and confirmed.</p></article>
-          <article class="mode-card rounded-2xl border border-slate-200 bg-white p-5"><span class="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-xl text-sky-700">03</span><h3 class="mt-4 font-extrabold">Confirm & track</h3><p class="mt-2 text-sm leading-6 text-slate-600">Accept the quote when ready, then use shipment tracking for available updates.</p></article>
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head"><div class="kicker">A transparent process</div><h2>From shipment details to a decision you can review.</h2><p>Each stage should make the status and next action clear. Availability and timing depend on the route, cargo, service requirements and participating provider.</p></div>
+        <div class="steps">
+          <article class="step"><div class="stepno">01</div><h3>Describe the shipment</h3><p>Enter origin and destination, cargo description, dimensions or weight, ready date, preferred mode and any handling requirements.</p></article>
+          <article class="step"><div class="stepno">02</div><h3>Review the available response</h3><p>Where a valid approved rate or eligible partner quote is available, review its scope, price, assumptions and validity before deciding.</p></article>
+          <article class="step"><div class="stepno">03</div><h3>Confirm only when ready</h3><p>Proceed only after the service, commercial terms, capacity and required payment or approval status are confirmed in the workflow.</p></article>
         </div>
-        <div class="mt-6 rounded-2xl border border-sky-100 bg-sky-50 p-5"><p class="font-bold text-slate-900">Pricing transparency</p><p class="mt-1 text-sm leading-6 text-slate-700">A request is not a confirmed booking. Transport capacity, rate validity, payment status and booking confirmation must be verified in the system.</p></div>
       </div>
-
-      <aside class="self-start rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
-        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-sky-100 text-2xl text-sky-700" aria-hidden="true">↗</div>
-        <p class="mt-5 text-xs font-extrabold uppercase tracking-[.2em] text-sky-700">Get started</p>
-        <h2 class="mt-2 text-2xl font-black tracking-tight">Request your freight quote</h2>
-        <p class="mt-3 text-sm leading-6 text-slate-600">Sign in to submit and manage shipment requests. New to KRIM? Create an account first.</p>
-        <a data-krim-path="auth/login.html" href="../auth/login.html" class="focus-ring mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-sky-500 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-900/10 hover:bg-sky-400">Sign in to continue <span class="ml-2" aria-hidden="true">→</span></a>
-        <a data-krim-path="auth/signup.html" href="../auth/signup.html" class="focus-ring mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-800 hover:bg-slate-50">Create an account</a>
-        <div class="mt-6 border-t border-slate-100 pt-5"><p class="text-xs leading-5 text-slate-500">Are you a transport provider? Join the partner network to register your business.</p><a data-krim-path="auth/partner-signup.html" href="../auth/partner-signup.html" class="mt-2 inline-flex text-sm font-bold text-sky-700 hover:text-sky-900">Register as a carrier →</a></div>
-      </aside>
+    </section>
+    <section class="section section-muted">
+      <div class="wrap content-grid">
+        <div>
+          <div class="kicker">Prepare your request</div><h2>What helps us understand your shipment?</h2><p class="muted">Having these details ready can reduce avoidable follow-up. You can provide the information through your signed-in customer workspace.</p>
+          <div class="checklist"><div class="check">Pickup location and PIN code</div><div class="check">Delivery location and PIN code</div><div class="check">Cargo type and description</div><div class="check">Weight, dimensions and quantity</div><div class="check">Ready date and delivery needs</div><div class="check">Handling or documentation needs</div></div>
+          <div class="notice" style="margin-top:22px"><strong>Pricing and service availability</strong><p>KRIM will not present an estimate as a confirmed rate. A shipment request is not a booking, carrier assignment or guarantee of capacity. Service scope and price must be validated before confirmation.</p></div>
+        </div>
+        <aside>
+          <div class="panel">
+            <div class="small-label">Customer workspace</div><h2>Start your shipment request</h2><p>Sign in to create and manage shipment requests, review quote responses and follow the status made available to your account.</p>
+            <a class="btn btn-primary" href="../auth/login.html">Sign in to continue →</a>
+            <a class="btn btn-light secondary" href="../auth/signup.html">Create a customer account</a>
+            <div class="divider"></div><div class="small-label">New to KRIM?</div><p>Learn how the platform is structured before you begin.</p><a href="solutions.html" style="font-weight:800;color:#126da7;text-decoration:none">Explore KRIM solutions →</a>
+          </div>
+          <div class="role-note"><span aria-hidden="true">◇</span><div><b>Are you a logistics provider?</b><p>Use the partner onboarding route to submit your business details for review. Creating an account does not automatically approve or activate a provider.</p><a href="../auth/partner-signup.html" style="display:inline-block;margin-top:10px;color:#8edcf3;font-weight:800;text-decoration:none">Explore partner registration →</a></div></div>
+        </aside>
+      </div>
     </section>
   </main>
-
-  <footer class="border-t border-slate-200 bg-[#071a2d] text-slate-300">
-    <div class="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
-      <a data-krim-path="public/" href="./" class="font-extrabold text-white">KRIM LOGISTICS</a>
-      <div class="flex flex-wrap gap-x-5 gap-y-2"><a data-krim-path="public/global-coverage.html" href="global-coverage.html" class="hover:text-white">Global coverage</a><a data-krim-path="public/tracking.html" href="tracking.html" class="hover:text-white">Tracking</a><a data-krim-path="auth/login.html" href="../auth/login.html" class="hover:text-white">Sign in</a></div>
-      <p class="text-xs text-slate-400">© <span id="year">2026</span> KRIM Logistics. All rights reserved.</p>
-    </div>
-  </footer>
-  <script>document.getElementById("year").textContent=String(new Date().getFullYear());</script>
+  <footer class="footer"><div class="wrap footer-inner"><a href="../index.html" aria-label="KRIM Logistics home"><strong>KRIM LOGISTICS</strong></a><div class="footer-links"><a href="../about.html">About</a><a href="../network.html">Partner network</a><a href="../contact.html">Contact</a><a href="tracking.html">Tracking</a></div><small>© <span id="year">2026</span> KRIM Logistics. All rights reserved.</small></div></footer>
+  <script>
+    (function(){var button=document.querySelector(".menu"),nav=document.getElementById("primary-navigation");if(!button||!nav)return;function close(){nav.classList.remove("open");button.setAttribute("aria-expanded","false");}button.addEventListener("click",function(){var open=button.getAttribute("aria-expanded")==="true";button.setAttribute("aria-expanded",String(!open));nav.classList.toggle("open",!open);});nav.addEventListener("click",function(e){if(e.target.closest("a"))close();});document.addEventListener("keydown",function(e){if(e.key==="Escape")close();});window.addEventListener("resize",function(){if(window.innerWidth>700)close();});document.getElementById("year").textContent=String(new Date().getFullYear());}());
+  </script>
 </body>
 </html>
