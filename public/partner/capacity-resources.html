@@ -39,7 +39,7 @@
    <div class="form-field"><label for="capacity-unit">Capacity unit</label><input id="capacity-unit" maxlength="32" required placeholder="kg, tonne, m3, pallet, vehicle…"></div>
    <div class="form-field"><label for="capacity-from">Availability starts</label><input id="capacity-from" type="datetime-local" required></div>
    <div class="form-field"><label for="capacity-until">Availability ends</label><input id="capacity-until" type="datetime-local" required></div>
-   <div class="form-field full"><label for="capacity-notes">Operational notes (optional)</label><textarea id="capacity-notes" maxlength="500" placeholder="Non-sensitive notes about condition, operating limits or resource scope."></textarea></div>
+   <div class="form-field full"><label for="capacity-evidence">Supporting resource evidence · PDF, JPG or PNG · up to 5 files, 10 MB each</label><input id="capacity-evidence" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" multiple required><small class="sub">Upload relevant vehicle, equipment or facility evidence. Files remain in KRIM private storage and are visible only to authorised organisation members and MFA-verified platform administrators.</small></div><div class="form-field full"><label for="capacity-notes">Operational notes (optional)</label><textarea id="capacity-notes" maxlength="500" placeholder="Non-sensitive notes about condition, operating limits or resource scope."></textarea></div>
   </div>
   <div class="form-actions"><button class="btn primary" id="capacity-submit" type="submit">Register resource & availability</button><span class="sub">Both records are saved together as one database transaction.</span></div>
  </form>
@@ -78,7 +78,8 @@ warnings=[];data.resources=await readTable("krim_capacity_resources","id,organiz
 
 $("capacity-form").addEventListener("submit",async event=>{
  event.preventDefault();
- const button=$("capacity-submit");button.disabled=true;button.textContent="Saving securely…";
+ const button=$("capacity-submit");button.disabled=true;button.textContent="Uploading evidence securely…";
+ const uploadedPaths=[];let registered=false;
  try{
   const from=new Date($("capacity-from").value),until=new Date($("capacity-until").value);
   if(Number.isNaN(from.getTime())||Number.isNaN(until.getTime())||until<=from||from<=new Date())throw new Error("Choose a future availability window with an end after its start.");
@@ -96,13 +97,33 @@ $("capacity-form").addEventListener("submit",async event=>{
    p_notes:clean($("capacity-notes").value)
   };
   if(!args.p_organization_id||!args.p_transport_mode_id||!args.p_location_id||!args.p_resource_name||!args.p_capacity_unit||!Number.isFinite(args.p_capacity_value)||args.p_capacity_value<=0)throw new Error("Complete all required resource and capacity fields.");
+  const files=Array.from($("capacity-evidence").files||[]);
+  if(files.length<1||files.length>5)throw new Error("Upload between 1 and 5 supporting evidence files.");
+  const {data:userData,error:userError}=await client.auth.getUser();if(userError)throw userError;if(!userData?.user?.id)throw new Error("Your authenticated user session could not be verified.");
+  if(!window.crypto?.randomUUID)throw new Error("This browser does not support secure file identifiers. Update the browser and retry.");
+  for(const file of files){
+   const ext=(file.name.split(".").pop()||"").toLowerCase();
+   if(!["pdf","png","jpg","jpeg"].includes(ext))throw new Error("Only PDF, PNG and JPG/JPEG evidence files are accepted.");
+   if(file.size<=0||file.size>10*1024*1024)throw new Error("Each evidence file must be between 1 byte and 10 MB.");
+   const mime=ext==="pdf"?"application/pdf":ext==="png"?"image/png":"image/jpeg";
+   const objectPath=args.p_organization_id+"/"+userData.user.id+"/capacity-"+window.crypto.randomUUID()+"."+ext;
+   const {error:uploadError}=await client.storage.from("krim-partner-verification").upload(objectPath,file,{cacheControl:"3600",upsert:false,contentType:mime});
+   if(uploadError)throw uploadError;
+   uploadedPaths.push(objectPath);
+  }
+  args.p_document_paths=uploadedPaths;
+  button.textContent="Registering resource…";
   const {data:result,error}=await client.rpc("krim_partner_register_capacity_resource",args);
   if(error)throw error;
+  if(!result?.resource_id||!result?.availability_id)throw new Error("The database did not confirm both resource and availability records.");
+  registered=true;
   $("capacity-form").reset();
-  msg("Resource #"+result.resource_id+" and availability #"+result.availability_id+" registered and queued for administrator review. It is not bookable yet, and no shipment capacity has been reserved.","success");
-  await load();
- }catch(e){msg(e?.message||"Capacity registration failed. No record was confirmed.","error")}
- finally{button.disabled=false;button.textContent="Register resource & availability"}
+  msg("Resource #"+result.resource_id+" and availability #"+result.availability_id+" registered with "+uploadedPaths.length+" private evidence file(s), pending administrator review. It is not bookable yet.","success");
+  try{await load()}catch(e){msg("Resource was registered successfully, but the register could not refresh: "+(e.message||"refresh error"),"error")}
+ }catch(e){
+  if(!registered&&uploadedPaths.length){const {error:cleanupError}=await client.storage.from("krim-partner-verification").remove(uploadedPaths);if(cleanupError)msg("Registration failed and some unlinked uploads may need cleanup: "+cleanupError.message,"error");}
+  if(!registered)msg(e?.message||"Capacity registration failed. No resource was confirmed.","error");
+ }finally{button.disabled=false;button.textContent="Register resource & availability"}
 });
 function exportRows(){const rows=currentRows();if(!rows.length){msg("No visible records to export.","error");return}const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))];const cell=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const csv=[keys,...rows.map(r=>keys.map(k=>r[k]))].map(r=>r.map(cell).join(",")).join("\r\n");const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="krim-capacity-"+activeTab+"-"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(url);msg("Exported "+rows.length+" visible authorized record(s).","success")}
 $("export").addEventListener("click",exportRows);$("refresh").addEventListener("click",async()=>{const b=$("refresh");b.disabled=true;try{await load()}catch(e){msg(e.message||"Could not load capacity data.","error")}finally{b.disabled=false}});["search","status-filter","sort"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));$("clear").addEventListener("click",()=>{$("search").value="";$("status-filter").value="all";$("sort").value="newest";render()});document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{activeTab=b.dataset.tab;document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("status-filter").value="all";render()}));try{await load()}catch(e){$("gate-title").textContent="Partner access could not be verified";$("gate-message").textContent=e.message||"KRIM could not verify partner access.";msg(e.message||"Access check failed.","error")}
