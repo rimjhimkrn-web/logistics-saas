@@ -261,3 +261,31 @@ The global country pack foundation is now deployed in production and committed:
 ## 19. Corridor compliance implementation record (4 November 2026)
 
 The evidence-led corridor dossier engine and draft candidate catalogue are documented in `docs/KRIM_GLOBAL_CORRIDOR_COMPLIANCE_ENGINE.md`. This adds jurisdiction legs, twelve mandatory controls per jurisdiction, AAL2 platform-admin RPCs, append-only decision events and a private Control Centre workspace. Six draft origin-destination candidates were seeded from existing active locations; they are not route geometry, provider commitments, approved routes or bookable services. A private shipment-write trigger now rejects shipment creation or route/mode changes unless an exact active corridor has an approved dossier, matching mode, current reviewed sources, evidenced mandatory controls and approved current country packs. A negative test confirmed rejection for an existing shipment update without an approved corridor. No dossier or control is approved; positive route testing and signed-in AAL2 workflow testing remain outstanding.
+
+
+## 20. India-first operational pilot readiness snapshot (4 November 2026)
+
+India remains the initial commercial launch market. This section records the current production blockers and prevents catalogue or test records from being mistaken for live operating capacity.
+
+**Production snapshot**
+- India market catalogue record exists and is active as a catalogue entry; that does not mean its operational activation gate is approved.
+- India country operating pack: 18 mandatory controls; 0 approved; pack remains `research_pending`.
+- India market readiness: 22 mandatory assessment records; 0 approved; all 22 remain pending.
+- India partner network: 0 active, verified and compliant partner organisations; 0 active verified India partner capabilities. Existing partner organisations are test/development or pending-verification records, not commercial providers.
+- India route catalogue: one Ranchi → Kolkata pilot candidate is recorded as `draft`, with `commercial_availability=false` and `operational_authorisation=false`. It is not a service promise or bookable route.
+- Corridor shipment-write trigger is installed. A shipment requires an exact origin/destination corridor, active corridor status, approved mode-matched corridor dossier, current mandatory corridor controls and approved country packs. Missing evidence fails closed.
+- No market/country/corridor approval has been fabricated to accelerate launch.
+
+**Immediate India activation workstreams**
+1. Obtain written Indian counsel/CA/CS advice on KRIM's actual platform role and funds flow: marketplace/e-commerce entity, service intermediary, agent/broker, principal logistics provider, common carrier, or combinations. The 2021 amendment to Consumer Protection (E-Commerce) Rules Rule 4(1) replaced the original blanket legal-form wording; it does not automatically exclude sole proprietorships. This does not remove the need for a full applicability and obligations opinion. Official amendment: https://egazette.gov.in/WriteReadData/2021/227003.pdf.
+2. Obtain a written Carriage by Road Act assessment before KRIM undertakes goods booking, forwarding, brokerage or carriage activity. The Act's common-carrier definition expressly includes certain goods-booking companies, contractors, agents and brokers; Section 3 requires registration for a person engaging in common-carrier business. Official Act: https://www.indiacode.nic.in/handle/123456789/2043?locale=en.
+3. Complete the GST/ECO/TCS and Section 9(5) assessment against the actual supply and collection model. Section 52 TCS depends on the statutory conditions and consideration collected by the operator; it is not a blanket percentage on all platform revenue. Official CBIC Section 52: https://taxinformation.cbic.gov.in/content-page/explore-act/1000325/1000001.
+4. Obtain RBI/payment-provider advice on who contracts with the customer, receives funds, holds funds, splits/settles funds and refunds. Razorpay account activation alone does not authorise KRIM to act as a payment aggregator or hold customer funds.
+5. Complete GST registration and invoice design, business address evidence, consumer disclosures/grievance officer, insurance/liability allocation, partner agreements, cargo exclusions, privacy/security and incident response.
+6. Recruit and verify at least one genuine India road carrier with valid business identity, applicable common-carrier registration/authority, vehicle/driver/insurance documents, capacity and service coverage. A development/test partner is not eligible.
+7. Complete the India country pack and India market readiness evidence with current official sources and qualified legal/tax opinions; then review and approve the specific pilot corridor dossier. A country pack approval, market approval and corridor approval are separate gates.
+8. Conduct controlled end-to-end tests: customer enquiry/quote, partner response, quote acceptance, shipment creation, dispatch/driver assignment, proof of delivery, cancellation/refund, Razorpay webhook reconciliation, ledger and tax records, complaints and incident escalation.
+
+**Permitted interim posture:** keep customer acquisition, non-binding enquiries and partner recruitment separate from confirmed bookings, transport commitments and customer-fund collection. Do not advertise unverified routes, rates, transit times or partner capacity. Whether even an enquiry-only public pilot requires additional disclosures must be confirmed by Indian counsel based on the live product and marketing.
+
+**Launch decision:** India is not yet cleared for commercial shipment bookings. The blocking facts are evidence-based and measurable: 18/18 country controls pending; 22/22 India readiness assessments pending; zero active verified India partner capabilities; no approved India corridor dossier. Do not bypass these gates.
