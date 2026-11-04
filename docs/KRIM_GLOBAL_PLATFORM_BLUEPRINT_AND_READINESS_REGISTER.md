@@ -133,3 +133,49 @@ KRIM must not be described as fully operational until all applicable gates are e
 For each workstream: inspect existing code and schema → identify gaps → implement the smallest safe change → commit source and migration → verify database/ACL/RLS → run negative and positive tests where test fixtures permit → record evidence and remaining blockers.
 
 Do not fabricate test data as real network coverage. Do not activate a market, language, currency, payment rail, provider or route merely to make a dashboard appear complete.
+
+
+## 10. Newly added blueprint domains — mandatory, not optional
+
+The companion legal framework is now part of the governing blueprint:
+- `docs/KRIM_LEGAL_REGULATORY_AND_COMPLIANCE_FRAMEWORK.md`
+- It covers India-first legal structure, global country packs, mode-specific transport rules, cargo restrictions, tax, payment/FX, privacy, cybersecurity, labour, insurance, contracts, consumer protection and market activation gates.
+
+The original blueprint was missing explicit workstreams. Add the following as independent platform capabilities and acceptance gates:
+
+| # | Additional workstream | Required capability / acceptance evidence |
+|---|---|---|
+| 22 | Legal entity and operating-model governance | Per-country classification of KRIM as marketplace, agent, principal, carrier, broker, forwarder, warehouse operator or technology provider; legal counsel approval and entity eligibility. |
+| 23 | Licences, permits and regulatory evidence | Issuer-verified licences, territories, scopes, expiry alerts, renewal blocks and immutable approval history for KRIM and every provider. |
+| 24 | Country/corridor compliance engine | Origin, transit, destination, customer, partner, payment and data-jurisdiction rules evaluated before quote, booking, payment or dispatch. |
+| 25 | Cargo admissibility and dangerous goods | HS code, restricted/prohibited goods, UN number, DG class, permits, end-use, sanctions, temperature, battery and hazardous cargo controls; fail-closed manual release. |
+| 26 | Insurance and claims | Policy validation, territory/mode/cargo coverage, exclusions, limits, claims notice, incident evidence, liability and subrogation workflows. |
+| 27 | Contracts and electronic execution | Versioned customer, partner, carrier, driver, warehouse, customs and enterprise contracts; signatures, authority, acceptance and audit evidence. |
+| 28 | Tax and statutory reporting | Country-specific tax engine, invoice rules, GST/VAT/sales tax, TCS/TDS/withholding, e-invoice, customs duties, filings and reconciliation. |
+| 29 | Sanctions, AML/KYC and export controls | Risk-based customer/provider/beneficial-owner screening, vessel/aircraft/party/destination/end-use checks, escalation, false-positive handling and approved human release. |
+| 30 | Worker, driver and workplace safety | Employment/contractor classification, qualifications, working conditions, accident reporting, safety training and premises/warehouse controls. |
+| 31 | Environmental and sustainability controls | Emissions methodology/provenance, waste, battery, packaging, hazardous storage, environmental permits and substantiation of environmental claims. |
+| 32 | Insurance, liability and dispute resolution | Mode/country liability rules, claims limitation clocks, evidence preservation, dispute routing, arbitration/court enforceability and insurer notifications. |
+| 33 | Vendor and subprocessor governance | Due diligence, data-processing terms, security assessments, residency/subprocessor map, service continuity, exit and breach obligations. |
+| 34 | Accessibility and inclusive product quality | WCAG-aligned accessibility, keyboard/screen-reader support, low-bandwidth/mobile performance, language/RTL and assistive-technology QA. |
+| 35 | Data governance and records lifecycle | Data inventory, purpose/legal basis, retention schedules, deletion/legal hold, data-subject requests, cross-border transfers and auditable exports. |
+| 36 | AI governance and model risk | Role-aware retrieval, source provenance, evaluation, hallucination controls, prompt-injection defense, human approval, tool allowlists and action audit. |
+| 37 | Business continuity and resilience | Tested backups/restore, disaster recovery, RTO/RPO, incident command, vendor outage fallback, queue recovery, business continuity and crisis communications. |
+| 38 | Trust, fraud and marketplace integrity | Fake partner/document detection, account takeover controls, payment fraud, review integrity, pricing transparency, ranking neutrality and abuse response. |
+| 39 | Product governance and release safety | Feature flags, jurisdiction gates, staged rollout, migration rollback, release approvals, regression suite, dependency/SBOM and vulnerability remediation. |
+| 40 | Unit economics and commercial controls | Cost-to-serve, contribution margin, partner payable, refunds/claims, acquisition cost, corridor profitability and price floors; no uneconomic or unapproved booking. |
+| 41 | Regulatory change management | Official source monitoring, impact assessment, accountable owner, effective-date alerts, policy/code change, regression and signed closure evidence. |
+
+## 11. India-first legal blocker and launch decision
+
+KRIM is currently described by the founder as a sole proprietorship. Before commercial marketplace launch, obtain written Indian legal advice on whether the intended KRIM marketplace falls within Rule 4(1)(a) of the Consumer Protection (E-Commerce) Rules, 2020 and whether the current legal form is eligible. The 2026 amendments effective 1 January 2027 add further marketplace and consumer-facing duties. Also obtain a separate opinion on common-carrier/booking/broker registration under the Carriage by Road Act, 2007. These are launch gates, not routine future enhancements.
+
+GST treatment must be designed around the actual supply and funds flow; do not assume a flat TCS treatment. Payment aggregation/funds custody, customs-broker activity, foreign exchange and cross-border settlements each require separate legal classification and provider/bank approval.
+
+## 12. Global readiness means controlled activation, not worldwide availability
+
+Every country and route must have an activation dossier covering legal entity, tax, licensing, partners, mode, customs, cargo eligibility, insurance, payment/FX, privacy, security, support, contracts, language and operational evidence. A country, language, currency or transport-mode catalogue entry does not make that market/service active.
+
+## 13. Continuous assurance and no-guarantee principle
+
+No system can promise that there will never be a mistake or that laws will never change. KRIM's durable control is a continuous assurance cycle: official-source monitoring → legal applicability review → implementation → test evidence → independent sign-off → controlled activation → ongoing monitoring → incident/claim learning → periodic re-certification. High-risk changes require legal and operational approval before deployment.
