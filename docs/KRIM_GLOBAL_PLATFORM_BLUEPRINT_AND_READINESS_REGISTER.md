@@ -239,3 +239,20 @@ The first operational activation control is deployed. It is separate from the ex
 Added `docs/KRIM_GLOBAL_COUNTRY_AND_CORRIDOR_LEGAL_OPERATIONS_STANDARD.md` as the governing global design standard for country packs and corridor-level legal operation. It defines 18 mandatory country-pack domains, granular country × service × corridor × cargo × party × funds-flow × data-flow activation, regional research queues that do not replace country approvals, treaty and mode-specific overlays, actual-conduct role classification, evidence hierarchy, human legal sign-off, runtime fail-closed enforcement, and a controlled pilot sequence.
 
 **Important boundary:** this is an architecture and control standard, not a country-by-country legal opinion or evidence of licences. The existing readiness/source/activation system remains an initial foundation; complete country packs, service/corridor enforcement, party and cargo screening, and all transaction-boundary checks remain implementation work. No market is approved for global operation. The system must be globally extensible while each unapproved jurisdiction/service stays blocked.
+
+
+## 18. Global country operating pack engine (4 November 2026)
+
+The global country pack foundation is now deployed in production and committed:
+
+- Created one country operating pack for each of the 249 country catalogue entries; each pack starts as `research_pending`.
+- Seeded 18 review domains per country (4,482 country controls): entity/presence, licensing, transport modes, tax, payments/FX, customs/trade, cargo admissibility, privacy/data, consumer/marketplace, workforce/safety, insurance/liability, contracts/disputes, competition/integrity, cybersecurity/resilience, environment/facilities, language/accessibility, local operations, and regulatory monitoring.
+- Controls default to unknown applicability and pending review. No legal facts, licences, opinions, country approvals or service availability were fabricated.
+- Added guarded AAL2 platform-admin RPCs to list country summaries, load one country's detailed pack, review controls and approve/suspend a country pack. Approval requires a reviewed jurisdiction-matching source, evidence reference, resolved applicability and reviewer rationale; designated legal/tax domains require a qualified legal/tax opinion marked legal-reviewed.
+- Added append-only control and country-pack decision event tables. Country-pack tables have forced RLS and no direct anon/authenticated table grants; data is exposed only through guarded RPCs.
+- Updated the operational market activation evaluator to require an approved country pack and all mandatory country controls to remain evidenced, source-backed and unexpired. A country pack approval alone does not activate a market; the separate market activation and partner/service readiness gates remain mandatory.
+- Added private administrator workspace `app/platform-admin/country-packs.html`, linked from the Control Centre. The page loads country summaries first and fetches detailed controls only for the selected jurisdiction to reduce mobile bandwidth and rendering cost.
+
+**Production verification:** 249 country packs; 4,482 controls; zero approved controls; zero approved country packs; zero active operational markets. All four country-pack tables have RLS enabled and forced, and direct anon/authenticated SELECT is denied. The administrator page JavaScript syntax passed. A real signed-in AAL2 browser workflow and positive legal-evidence review remain outstanding. Supabase Security Advisor flags guarded SECURITY DEFINER RPCs for manual review and reports RLS-enabled/no-policy notices for these private RPC-only tables; those notices are intentional, but the privileged function bodies still require ongoing code review.
+
+**Interpretation:** KRIM now has a global country-pack structure, not 249 completed legal dossiers. Every pack remains pending until qualified jurisdiction-specific review and evidence are entered. Global readiness is designed in; global legal authorisation is not claimed.
