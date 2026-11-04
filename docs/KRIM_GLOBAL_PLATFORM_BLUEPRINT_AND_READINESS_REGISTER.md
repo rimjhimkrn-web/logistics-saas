@@ -179,3 +179,23 @@ Every country and route must have an activation dossier covering legal entity, t
 ## 13. Continuous assurance and no-guarantee principle
 
 No system can promise that there will never be a mistake or that laws will never change. KRIM's durable control is a continuous assurance cycle: official-source monitoring → legal applicability review → implementation → test evidence → independent sign-off → controlled activation → ongoing monitoring → incident/claim learning → periodic re-certification. High-risk changes require legal and operational approval before deployment.
+
+## 14. Implementation status — global market readiness register (4 November 2026)
+
+The first implementation slice of the legal and market-activation control plane is now deployed to the production Supabase project and committed to the repository.
+
+- Added `krim_market_readiness_requirements`: a reusable global and jurisdiction-specific requirement register.
+- Added `krim_market_readiness_assessments`: per-market evidence and review status.
+- Added `krim_market_readiness_events`: append-only assessment change history, alongside the existing platform audit event.
+- Added AAL2 + platform-permission protected RPCs to list and update assessments.
+- Added the restricted administrator page at `app/platform-admin/market-readiness.html` and linked it from the private Control Centre.
+- Seeded 12 global readiness categories and 10 India-specific legal/operational review tracks. The 6 existing market catalogue records now have 82 pending assessments.
+- All 82 assessments remain `pending`. No evidence has been fabricated, no legal review has been represented as complete, and no market status or booking capability was changed.
+- The requirement source-review status remains `draft` until official primary sources and qualified local advice have been checked and recorded.
+- Direct anon/authenticated table access is revoked; RLS is enabled and forced. The two RPCs reject missing authentication and require AAL2 plus the platform administrator permission.
+
+**Important interpretation:** the six records in `krim_markets` are catalogue entries. Their existing catalogue status is not evidence of an activated commercial market, local licensing, operational partner coverage, or legal approval. The readiness register does not activate a market.
+
+**Verification boundary:** schema, seed counts, RLS flags, direct table grants, RPC execute grants, and unauthenticated rejection were checked. A signed-in AAL2 administrator browser session and a positive evidence-review workflow have not yet been tested. Security Advisor still reports the expected no-policy informational notices for the three tables (direct table access is intentionally revoked) and flags the two authenticated SECURITY DEFINER RPCs for manual review; their bodies enforce authentication, AAL2, and platform permission.
+
+**Next implementation gates:** build source-version review and evidence attachment controls; test the full register as a real AAL2 administrator; then design a separate market activation decision engine that checks legal, tax, payment, service-specific licensing, verified partner capacity, customer protections, safety, and live operational controls. Do not activate India or any other market until its required evidence and counsel decisions are complete.
