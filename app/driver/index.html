@@ -148,6 +148,8 @@ async function loadWorkspace(){
  if(!client)throw new Error('Supabase client is not configured. Check config.js.');
  const s=await client.auth.getSession();if(s.error)throw s.error;session=s.data.session;
  if(!session){location.replace((window.krimPath?window.krimPath('auth/driver-signin.html'):'../../auth/driver-signin.html'));return false;}
+ const inviteToken=sessionStorage.getItem('krim_driver_invite_token')||new URLSearchParams(location.search).get('invite');
+ if(inviteToken){const accepted=await client.rpc('krim_accept_driver_invitation',{p_token:inviteToken});if(accepted.error)throw new Error('Carrier invitation could not be accepted: '+accepted.error.message);sessionStorage.removeItem('krim_driver_invite_token');setNotice('Carrier invitation accepted. Your driver profile remains pending verification until reviewed.');}
  const m=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
  if(m.error)throw new Error('KRIM could not verify your active membership: '+m.error.message);
  const driverMembers=(m.data||[]).filter(x=>/^driver$/i.test(String(x.role||'').trim()));
