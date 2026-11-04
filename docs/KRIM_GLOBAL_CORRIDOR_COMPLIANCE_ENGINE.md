@@ -47,3 +47,10 @@ The production changes were applied before the repository migration files were c
 A private database trigger now runs on shipment INSERT and on changes to origin, destination or requested transport mode. It rejects writes unless an exact active origin/destination corridor exists with an approved corridor dossier and a matching transport mode. It re-checks every mandatory corridor control, its evidence/rationale, expiry and current reviewed source, and re-checks every mandatory country-pack control for every jurisdiction leg. This gate is independent of the existing market activation trigger and partner capability checks.
 
 A negative test updated an existing shipment's requested mode without an approved matching corridor; the database rejected the write with the expected check-violation path. No shipment data was changed. This is a negative control only; no positive route can be tested because there are no approved corridor dossiers, country packs or active providers.
+
+
+## Latest performance and security-advisor follow-up
+
+Added covering indexes for the twelve foreign keys reported by the performance advisor and changed the two driver-document RLS policies to evaluate `auth.uid()` through a scalar subquery. The subsequent performance-advisor snapshot no longer reported unindexed foreign keys or auth RLS initialization-plan findings. It still reports 16 multiple-permissive-policy warnings and many unused-index informational findings; unused indexes were not bulk-dropped because the system has not yet accumulated production workload.
+
+The latest security-advisor snapshot reports 21 RLS-enabled/no-policy informational findings (including intentionally RPC-only tables), 73 authenticated SECURITY DEFINER function warnings requiring manual code review, and leaked-password protection disabled. The corridor and country admin RPCs perform their own identity, AAL2 and platform-permission checks, but this does not substitute for a complete review of every privileged function or enabling leaked-password protection in Supabase Auth settings.
