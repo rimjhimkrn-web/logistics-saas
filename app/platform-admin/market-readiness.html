@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#0b1f3a">
+<title>Market Readiness | KRIM Global Control Centre</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172c45;background:#f3f6fa;--navy:#0b1f3a;--blue:#1769e8;--muted:#687990;--line:#dfe7f0;--green:#087c62;--amber:#a56609;--red:#bd3345}
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa}button,input,select,textarea{font:inherit}.shell{max-width:1440px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.brand{font-size:12px;letter-spacing:.14em;font-weight:900;color:var(--navy)}.brand small{display:block;color:#73839a;letter-spacing:.08em;font-size:9px;margin-top:4px}.back{color:#1769e8;font-weight:800;font-size:12px}.hero{background:linear-gradient(120deg,#0b1f3a,#153e63);color:white;border-radius:20px;padding:28px;margin-bottom:20px}.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8fe2d5;font-weight:900}.hero h1{font-size:clamp(25px,4vw,38px);line-height:1.12;margin:9px 0}.hero p{color:#c6d6e8;max-width:850px;margin:0;font-size:13px}.notice{margin-top:17px;padding:12px 14px;border:1px solid #ffffff35;border-radius:11px;color:#fff;font-size:12px;background:#ffffff0c}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}.stat,.panel,.market{background:white;border:1px solid var(--line);border-radius:15px;box-shadow:0 5px 20px #122c4808}.stat{padding:16px}.stat strong{display:block;font-size:26px;color:var(--navy)}.stat span{font-size:11px;color:var(--muted)}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.toolbar input,.toolbar select{min-height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;color:#20344c}.toolbar input{flex:1;min-width:200px}.btn{border:0;border-radius:10px;background:var(--blue);color:white;font-weight:800;padding:11px 15px;cursor:pointer}.btn.secondary{background:#eaf1fa;color:#23415f}.btn:disabled{opacity:.55;cursor:wait}.market{margin:14px 0;overflow:hidden}.market-head{padding:17px 19px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}.market-head h2{font-size:17px;margin:0;color:var(--navy)}.market-head p{margin:4px 0 0;font-size:11px;color:var(--muted)}.badge{display:inline-flex;border-radius:99px;padding:5px 9px;font-size:10px;font-weight:900;background:#fff4df;color:#8a5700}.badge.good{background:#e4f6ef;color:#087c62}.badge.bad{background:#ffeaec;color:#a32a3c}.market-body{padding:8px 18px 18px}.req{display:grid;grid-template-columns:minmax(220px,1.1fr) minmax(180px,1fr) minmax(180px,.9fr);gap:12px;padding:15px 0;border-bottom:1px solid #edf1f5;align-items:start}.req:last-child{border-bottom:0}.req h3{margin:0 0 5px;font-size:13px;color:#1c3450}.req p{margin:0;font-size:11px;color:#687990;line-height:1.55}.meta{font-size:10px;color:#8391a3;margin-top:7px}.req label{display:block;font-size:10px;font-weight:850;color:#64758a;margin-bottom:5px}.req select,.req input,.req textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;background:white;color:#20344c;font-size:11px}.req textarea{min-height:62px;resize:vertical}.fields{display:grid;gap:8px}.save{margin-top:8px;justify-self:start;padding:8px 11px;font-size:10px}.empty,.error{padding:22px;border-radius:12px;background:#fff;border:1px solid var(--line);color:#66788f;font-size:13px}.error{color:#9c2639;background:#fff0f1}.loading{padding:25px;text-align:center;color:#687990}.footer{font-size:10px;color:#7b899b;margin:25px 0;text-align:center}
+@media(max-width:850px){.req{grid-template-columns:1fr 1fr}.req>div:first-child{grid-column:1/-1}}@media(max-width:560px){.shell{padding:13px}.hero{padding:21px}.stats{grid-template-columns:repeat(2,1fr)}.req{grid-template-columns:1fr}.req>div:first-child{grid-column:auto}.market-head{align-items:flex-start;flex-direction:column}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top"><div class="brand">KRIM LOGISTICS<small>GLOBAL CONTROL CENTRE · RESTRICTED</small></div><a class="back" href="index.html">← Control Centre</a></header>
+<section class="hero"><div class="eyebrow">Global governance / market activation controls</div><h1>Market readiness register</h1><p>Country-by-country legal, regulatory, tax, payment, safety, partner and operating evidence. Catalogue presence is not commercial availability. Each gate remains pending until an authorised reviewer records evidence.</p><div class="notice">This register is an internal control system, not legal advice or a certification. Never approve a requirement without current primary-source review and the required qualified professional evidence. This page does not activate a market or enable bookings.</div></section>
+<div class="stats">
+<div class="stat"><strong id="markets">—</strong><span>Market catalogues</span></div><div class="stat"><strong id="requirements">—</strong><span>Applicable assessments</span></div><div class="stat"><strong id="pending">—</strong><span>Pending / in review</span></div><div class="stat"><strong id="approved">—</strong><span>Recorded approvals</span></div>
+</div>
+<div class="toolbar"><input id="search" type="search" placeholder="Search country, requirement, category or code"><select id="statusFilter"><option value="">All assessment statuses</option><option value="pending">Pending</option><option value="in_review">In review</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="not_applicable">Not applicable</option></select><button class="btn secondary" id="refresh">Refresh register</button></div>
+<div id="state" class="loading" role="status" aria-live="polite">Verifying privileged session…</div>
+<div id="marketsList"></div>
+<div class="footer">KRIM internal governance surface · Every change is recorded in the database audit trail · No market is activated by this register.</div>
+</div>
+<script>
+(function(){
+"use strict";
+const URL="https://ebltviniygljwwseplph.supabase.co";
+const KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const db=window.supabase?.createClient(URL,KEY);
+const $=id=>document.getElementById(id);
+let rows=[];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const label=v=>String(v||"").replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+function fail(msg){$("state").className="error";$("state").textContent=msg;$("marketsList").innerHTML="";}
+async function secure(){
+ if(!db)throw Error("Supabase client could not be initialized.");
+ const {data:{session},error}=await db.auth.getSession();if(error)throw error;if(!session)throw Error("No signed-in session. Sign in through the KRIM administrator access route.");
+ const {data:userData,error:userError}=await db.auth.getUser();if(userError)throw userError;if(!userData.user)throw Error("Authenticated user could not be verified.");
+ const {data:aal,error:aalError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(aalError)throw aalError;
+ if(aal?.currentLevel!=="aal2")throw Error("AAL2 multi-factor authentication is required. Complete administrator MFA, then reopen this page.");
+}
+async function load(){
+ $("state").className="loading";$("state").textContent="Checking administrator identity and loading the readiness register…";
+ try{
+  await secure();
+  const {data,error}=await db.rpc("krim_admin_list_market_readiness");if(error)throw error;
+  rows=data?.markets||[];
+  const all=rows.flatMap(m=>(m.requirements||[]).map(r=>({...r,market_id:m.market_id,market_code:m.market_code,market_name:m.market_name,country_code:m.country_code,country_name:m.country_name})));
+  $("markets").textContent=rows.length;$("requirements").textContent=all.length;
+  $("pending").textContent=all.filter(x=>["pending","in_review"].includes(x.assessment_status)).length;
+  $("approved").textContent=all.filter(x=>x.assessment_status==="approved").length;
+  $("state").className="";$("state").textContent="Privileged session verified · "+all.length+" assessments loaded · market activation remains disabled.";
+  render();
+ }catch(e){fail("Access or data request failed: "+(e.message||"Unknown error")+" This surface requires a signed-in platform administrator with AAL2.");}
+}
+function render(){
+ const term=$("search").value.trim().toLowerCase(),filter=$("statusFilter").value;
+ const html=rows.map(m=>{
+  const reqs=(m.requirements||[]).filter(r=>{
+   const text=[m.market_name,m.country_code,r.title,r.description,r.category,r.requirement_code].join(" ").toLowerCase();
+   return (!term||text.includes(term))&&(!filter||(r.assessment_status||"pending")===filter);
+  });
+  if(!reqs.length)return "";
+  const all=m.requirements||[],approved=all.filter(r=>r.assessment_status==="approved").length;
+  return '<section class="market"><div class="market-head"><div><h2>'+esc(m.market_name)+' <span style="color:#7a8ba0;font-size:12px">· '+esc(m.country_code)+'</span></h2><p>Catalogue: '+esc(m.catalogue_status||"unknown")+' · '+approved+' / '+all.length+' assessments recorded as approved</p></div><span class="badge '+(approved===all.length&&all.length?"good":"")+'">'+(approved===all.length&&all.length?"All assessments marked approved":"Readiness not established")+'</span></div><div class="market-body">'+reqs.map(r=>rowHtml(m,r)).join("")+'</div></section>';
+ }).join("");
+ $("marketsList").innerHTML=html||'<div class="empty">No matching readiness requirements.</div>';
+}
+function rowHtml(m,r){
+ const id="r"+m.market_id+"_"+r.requirement_id;
+ return '<article class="req" data-key="'+esc(id)+'"><div><h3>'+esc(r.title)+'</h3><p>'+esc(r.description)+'</p><div class="meta">'+esc(r.requirement_code)+' · '+esc(label(r.category))+' · '+(r.mandatory?"Mandatory gate":"Advisory")+' · Source review: '+esc(label(r.source_review_status))+'</div></div><div class="fields"><div><label for="'+id+'_status">Assessment status</label><select id="'+id+'_status"><option value="pending" '+sel(r.assessment_status,"pending")+'>Pending</option><option value="in_review" '+sel(r.assessment_status,"in_review")+'>In review</option><option value="approved" '+sel(r.assessment_status,"approved")+'>Approved</option><option value="rejected" '+sel(r.assessment_status,"rejected")+'>Rejected</option><option value="not_applicable" '+sel(r.assessment_status,"not_applicable")+'>Not applicable</option></select></div><div><label for="'+id+'_evidence">Evidence reference (document ID / counsel memo / licence reference)</label><input id="'+id+'_evidence" maxlength="300" value="'+esc(r.evidence_reference||"")+'" placeholder="Enter verifiable evidence reference"></div></div><div class="fields"><div><label for="'+id+'_reason">Reviewer rationale (minimum 20 characters)</label><textarea id="'+id+'_reason" maxlength="2000" placeholder="What was reviewed, by whom, and why this decision is justified?">'+esc(r.reviewer_note||"")+'</textarea></div><button class="btn save" data-save="'+esc(id)+'" data-market="'+m.market_id+'" data-req="'+r.requirement_id+'">Save audited assessment</button><div class="meta">'+(r.reviewed_at?"Last reviewed: "+esc(new Date(r.reviewed_at).toLocaleString()):"No review recorded")+(r.expires_at?" · Expires: "+esc(new Date(r.expires_at).toLocaleDateString()):"")+'</div></div></article>';
+}
+function sel(a,b){return (a||"pending")===b?"selected":""}
+$("marketsList").addEventListener("click",async e=>{
+ const b=e.target.closest("[data-save]");if(!b)return;
+ const id=b.dataset.save,status=$(id+"_status").value,reason=$(id+"_reason").value.trim(),evidence=$(id+"_evidence").value.trim();
+ if(reason.length<20){alert("Please enter a reviewer rationale of at least 20 characters.");return}
+ if(["approved","not_applicable"].includes(status)&&!evidence){alert("A verifiable evidence reference is required for approval or not-applicable decisions.");return}
+ if(!confirm("Record this assessment in the immutable review history? This does not activate the market."))return;
+ b.disabled=true;b.textContent="Saving…";
+ try{
+  const {data,error}=await db.rpc("krim_admin_set_market_readiness_assessment",{p_market_id:Number(b.dataset.market),p_requirement_id:Number(b.dataset.req),p_status:status,p_reason:reason,p_evidence_reference:evidence||null,p_expires_at:null});
+  if(error)throw error;
+  await load();
+ }catch(err){alert("Assessment not saved: "+(err.message||"Request failed"));b.disabled=false;b.textContent="Save audited assessment";}
+});
+$("search").addEventListener("input",render);$("statusFilter").addEventListener("change",render);$("refresh").addEventListener("click",load);
+load();
+})();
+</script>
+</body></html>
