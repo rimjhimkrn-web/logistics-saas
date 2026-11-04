@@ -40,6 +40,8 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
   }
   try{
     const params=new URLSearchParams(location.search);
+    const driverInvite=params.get("invite");
+    if(driverInvite && /^[a-f0-9]{64}$/.test(driverInvite)) sessionStorage.setItem("krim_driver_invite_token",driverInvite);
     const code=params.get("code");
     let session=null;
     if(code){
