@@ -69,7 +69,8 @@ $('mfaForm').addEventListener('submit',async e=>{e.preventDefault();const code=$
   // If this session has no driver membership, do not auto-provision a different
   // account merely because the user opened the driver sign-in page. Ask them to
   // sign out and explicitly authenticate the intended driver identity instead.
-  if(role!=='driver'){
+  const hasInvite=!!(new URLSearchParams(location.search).get('invite')||sessionStorage.getItem('krim_driver_invite_token'));
+  if(role!=='driver'&&!hasInvite){
    const membership=await client.from('krim_organization_members').select('organization_id').eq('user_id',user.id).eq('role','driver').eq('status','active').limit(1);
    if(membership.error)throw membership.error;
    if(!membership.data?.length){
