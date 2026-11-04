@@ -26,18 +26,33 @@ section article{min-width:0;overflow-wrap:anywhere}
 @media(max-width:900px){.header-inner{position:relative}.menu-toggle{display:inline-flex!important;visibility:visible!important;opacity:1!important;order:1;margin-left:.25rem}.market-nav{order:4}.header-actions{order:2}.market-nav.is-open{display:flex}.market-nav a{width:100%;padding:.75rem .25rem;border-bottom:1px solid #e2e8f0}.market-nav a:last-child{border-bottom:0}}
 @media(max-width:520px){.header-inner{padding-top:.65rem;padding-bottom:.65rem}.header-actions .signin{display:none}.header-actions a:last-child{padding:.7rem .85rem;font-size:.82rem}.hero-section{padding-top:3rem;padding-bottom:3rem}.hero-title{letter-spacing:-.045em}.section-pad{padding-top:3rem;padding-bottom:3rem}}
 @media(max-width:380px){.brand-name{font-size:.8rem}.header-inner{column-gap:.5rem}.menu-toggle{min-width:44px;min-height:44px}.header-actions a:last-child{font-size:.75rem;padding:.65rem .7rem}}
+
+/* Single-menu header: all navigation and account actions live inside the hamburger on every viewport. */
+.header-inner{position:relative;flex-wrap:nowrap!important}
+.menu-toggle{display:inline-flex!important;visibility:visible!important;opacity:1!important;cursor:pointer;flex:0 0 44px;min-width:44px;min-height:44px;margin-left:auto;z-index:62}
+.market-nav,.market-nav.flex{display:none!important;position:absolute;top:calc(100% + 1px);right:0;left:auto;width:min(calc(100vw - 2rem),380px);max-height:calc(100dvh - 6rem);overflow-y:auto;overscroll-behavior:contain;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:.65rem;background:#fff;border:1px solid #e2e8f0;border-radius:0 0 1rem 1rem;box-shadow:0 18px 40px rgba(15,23,42,.16);z-index:61}
+.market-nav.is-open,.market-nav.flex.is-open{display:flex!important}
+.market-nav>a{display:flex!important;align-items:center;width:100%;min-height:48px;padding:.75rem .9rem!important;border-bottom:1px solid #eef2f7;color:#334155;text-decoration:none}
+.market-nav>a:hover{background:#f8fafc;color:#0369a1}
+.market-nav .header-actions{display:flex;flex-direction:column;gap:.5rem;padding:.8rem .5rem .45rem;border-top:1px solid #e2e8f0;margin-top:.4rem}
+.market-nav .header-actions a{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;padding:.7rem 1rem;border-radius:.75rem;font-weight:700;text-decoration:none}
+.market-nav .header-actions .signin{border:1px solid #cbd5e1;color:#334155}
+.market-nav .header-actions .get-started{background:#0f172a;color:#fff}
+.market-nav .header-actions a:focus-visible,.market-nav>a:focus-visible,.menu-toggle:focus-visible{outline:3px solid #0284c7;outline-offset:3px}
+@media(max-width:380px){.header-inner{padding-left:1rem;padding-right:1rem}.market-nav{right:0;width:calc(100vw - 2rem)}.brand-name{font-size:.82rem}}
+
 </style>
 </head>
 <body class="bg-white text-slate-900 min-h-screen flex flex-col font-sans antialiased">
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-white focus:p-3">Skip to content</a>
 <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-50">
-<div class="header-inner max-w-7xl mx-auto px-5 sm:px-6 min-h-20 flex flex-wrap items-center justify-between py-3">
-<a href="./index.html" class="flex items-center gap-3" aria-label="KRIM Logistics home"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</span><span><span class="brand-name block text-base font-extrabold tracking-wide uppercase">KRIM Logistics</span><span class="block text-[11px] tracking-widest text-sky-700 font-semibold uppercase">Global Markets</span></span></a>
-<button class="menu-toggle items-center justify-center min-h-11 min-w-11 rounded-lg border border-slate-300 text-slate-800" type="button" aria-expanded="false" aria-controls="market-navigation" aria-label="Open navigation"><span aria-hidden="true">☰</span></button>
-<nav id="market-navigation" class="market-nav flex items-center gap-x-5 gap-y-2 text-sm font-medium text-slate-600" aria-label="Main navigation">
+<div class="header-inner max-w-7xl mx-auto px-5 sm:px-6 min-h-20 flex items-center justify-between py-3">
+<a href="./index.html" class="flex items-center gap-3 shrink-0" aria-label="KRIM Logistics home"><span class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</span><span><span class="brand-name block text-base font-extrabold tracking-wide uppercase">KRIM Logistics</span><span class="block text-[11px] tracking-widest text-sky-700 font-semibold uppercase">Global Markets</span></span></a>
+<button class="menu-toggle inline-flex items-center justify-center min-h-11 min-w-11 rounded-lg border border-slate-300 bg-white text-slate-800 hover:bg-slate-50" type="button" aria-expanded="false" aria-controls="market-navigation" aria-label="Open main navigation"><span aria-hidden="true">☰</span></button>
+<nav id="market-navigation" class="market-nav" aria-label="Main navigation">
 <a href="./platform.html">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a><a href="./global-markets.html" aria-current="page" class="text-slate-900 font-bold">Global Markets</a><a href="./tracking.html">Tracking</a><a href="./about.html">About</a><a href="./contact.html">Contact</a>
+<div class="header-actions"><a class="signin" href="./auth/login.html">Sign in</a><a href="./auth/signup.html" class="get-started">Get started <span aria-hidden="true">→</span></a></div>
 </nav>
-<div class="header-actions flex items-center gap-3 text-sm font-semibold"><a class="signin text-slate-600 hover:text-sky-700" href="./auth/login.html">Sign in</a><a href="./auth/signup.html" class="bg-slate-900 hover:bg-slate-700 text-white px-4 py-3 rounded-xl">Get started <span aria-hidden="true">→</span></a></div>
 </div></header>
 <main id="main" class="flex-grow">
 <section class="hero-section section-pad max-w-7xl mx-auto px-5 sm:px-6 py-20 lg:py-28">
@@ -103,8 +118,8 @@ section article{min-width:0;overflow-wrap:anywhere}
 <script>
 (function(){
 var b=document.querySelector('.menu-toggle'),n=document.getElementById('market-navigation');if(!b||!n)return;
-function close(restoreFocus){n.classList.remove('is-open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');if(restoreFocus)b.focus();}
-b.addEventListener('click',function(){var open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'Close main navigation':'Open main navigation');n.classList.toggle('is-open',open);});
+function close(restoreFocus){n.classList.remove('is-open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');var icon=b.querySelector('span[aria-hidden]');if(icon)icon.textContent='☰';if(restoreFocus)b.focus();}
+b.addEventListener('click',function(){var open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'Close main navigation':'Open main navigation');n.classList.toggle('is-open',open);var icon=b.querySelector('span[aria-hidden]');if(icon)icon.textContent=open?'×':'☰';});
 document.addEventListener('click',function(e){if(n.classList.contains('is-open')&&!b.contains(e.target)&&!n.contains(e.target))close(false);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&n.classList.contains('is-open'))close(true);});
 n.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){close(false);});});
