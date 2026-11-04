@@ -42,3 +42,34 @@ $guard$
     EXECUTE v_def;
   END IF;
 END $$;
+
+-- Require at least one currently active, administrator-verified capability
+-- before a partner organisation can submit a commercial marketplace bid.
+DO $$
+DECLARE v_def text;
+BEGIN
+  SELECT pg_get_functiondef('public.krim_submit_partner_quote(bigint,numeric,text,timestamp with time zone,text)'::regprocedure)
+  INTO v_def;
+  IF position('FROM public.krim_partner_capabilities pc' in v_def)=0 THEN
+    v_def := replace(
+      v_def,
+      $old$AND o.partner_compliance_status IN ('clear', 'compliant', 'approved', 'verified', 'not_required', 'not_applicable')
+  ORDER BY m.created_at ASC$old$,
+      $new$AND o.partner_compliance_status IN ('clear', 'compliant', 'approved', 'verified', 'not_required', 'not_applicable')
+    AND EXISTS (
+      SELECT 1
+      FROM public.krim_partner_capabilities pc
+      WHERE pc.organization_id = o.id
+        AND pc.active IS TRUE
+        AND pc.verification_status = 'verified'
+        AND (pc.effective_from IS NULL OR pc.effective_from <= now())
+        AND (pc.effective_until IS NULL OR pc.effective_until > now())
+    )
+  ORDER BY m.created_at ASC$new$
+    );
+    IF position('FROM public.krim_partner_capabilities pc' in v_def)=0 THEN
+      RAISE EXCEPTION 'Expected partner eligibility insertion point was not found; no change applied';
+    END IF;
+    EXECUTE v_def;
+  END IF;
+END $$;
