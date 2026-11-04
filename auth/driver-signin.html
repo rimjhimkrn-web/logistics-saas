@@ -12,7 +12,7 @@
 (async function(){
 'use strict';const $=id=>document.getElementById(id),client=window.KRIM_SUPABASE;let factorId=null,challengeId=null;
 function feedback(message,type=''){const el=$('feedback');el.textContent=message;el.className='feedback show '+type;}
-function path(p){return window.krimPath?window.krimPath(p):('../'+p);}
+function path(p){return window.krimPath?window.krimPath(p):('../'+p);}const inviteParam=new URLSearchParams(location.search).get('invite');if(inviteParam){const signup=document.querySelector('a[href="driver-signup.html"]');if(signup)signup.href='driver-signup.html?invite='+encodeURIComponent(inviteParam);}
 function normalize(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');}
 $('toggle').addEventListener('click',()=>{const p=$('password'),show=p.type==='password';p.type=show?'text':'password';$('toggle').textContent=show?'Hide':'Show';});
 async function verifyDriver(user){
