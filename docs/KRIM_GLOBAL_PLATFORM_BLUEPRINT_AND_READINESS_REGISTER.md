@@ -214,3 +214,19 @@ The next compliance-control slice is implemented:
 - A real signed-in AAL2 administrator browser test remains outstanding. Supabase Security Advisor reports the three administrator RPCs among the authenticated SECURITY DEFINER warnings; each includes explicit identity, AAL2 and platform-permission checks, but the warnings remain open for manual code review. RLS-no-policy notices on the source tables are intentional because direct client table access is revoked; data access is through the guarded RPCs.
 
 **Workflow rule:** source verification, professional legal/tax review, market assessment approval and commercial market activation are four separate controls. One must never be inferred from another.
+
+## 16. Fail-closed operational market activation engine (4 November 2026)
+
+The first operational activation control is deployed. It is separate from the existing country and market catalogues.
+
+- Added `krim_market_activation_controls` with operational states `blocked`, `pending_second_approval`, `active` and `suspended`. All six existing market catalogue entries were initialised to `blocked`; their catalogue `is_active/status` fields were not changed.
+- Added `krim_market_activation_events` for append-only activation requests, approvals and suspensions.
+- Added the live gate evaluator. It checks active market/country status, active locations, mandatory market assessments (approved, evidence reference present, reviewer rationale present, not expired), a reviewed source for every mandatory requirement, qualified legal/tax opinion evidence for regulated categories, and at least one verified, active, in-date partner capability in the market country.
+- Activation uses two-person control: one AAL2 platform administrator requests; a different AAL2 platform administrator approves; all gates are recomputed at approval time. Suspension is an audited administrator action.
+- The shipment-creation database RPC now checks both origin and destination country against the operational activation control. The gate is recomputed at booking time so expired assessments or lapsed partner capability block new bookings even after prior activation.
+- Legacy route-type booking overloads were aligned to the same authoritative gate. Direct authenticated INSERT/UPDATE on `krim_shipments` is not granted, so clients cannot bypass the guarded RPC with direct table writes.
+- Added private Control Centre page `app/platform-admin/market-activation.html`.
+
+**Production verification:** six market controls exist and all six are `blocked`; zero countries currently pass the operational gate. India has 22 mandatory assessments; the other five catalogue markets each have 12. All 82 assessments are still pending. There are zero verified active partner capabilities. Each market therefore reports blockers for partner capacity, mandatory assessments and reviewed source/legal-opinion evidence. The shipment creation function contains the operational gate; direct authenticated shipment INSERT is denied; activation RPC calls without an authenticated administrator context are rejected; new activation tables have forced RLS and no direct anon/authenticated table grants; administrator page JavaScript syntax passed.
+
+**Important:** this is an enforcement foundation, not a claim that all booking/dispatch/payment workflows have been fully E2E tested. Existing catalogue flags and the existing India `market_activation` setting are not treated as sufficient authorisation. New bookings remain blocked in all six markets until evidence is completed and the two-person approval is performed. A real signed-in AAL2 administrator workflow and a controlled positive shipment test remain outstanding.
