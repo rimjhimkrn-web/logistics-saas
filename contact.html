@@ -31,8 +31,14 @@
     .menu-panel.is-open{display:flex;flex-direction:column}
     .menu-panel a{display:flex;align-items:center;min-height:46px;padding:11px 12px;border-radius:10px;color:#334155;text-decoration:none;font-size:14px;font-weight:650}
     .menu-panel a:hover,.menu-panel a:focus-visible{background:#eef7fc;color:#075985}
-    .menu-panel .menu-primary{margin-top:7px;background:#10243a;color:#fff;justify-content:center}
-    .menu-panel .menu-primary:hover{background:#1e3a56;color:#fff}
+    .menu-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #e2eaf0}
+    .menu-actions a{justify-content:center;border:1px solid #d9e4eb}
+    .menu-actions .menu-primary{background:#10243a;color:#fff;border-color:#10243a}
+    .menu-actions .menu-primary:hover{background:#1e3a56;color:#fff}
+    .menu-panel{max-height:calc(100dvh - 6rem);overscroll-behavior:contain}
+    .menu-toggle{cursor:pointer;touch-action:manipulation}
+    .support-note{border:1px solid #dbeafe;background:#f5faff;border-radius:16px;padding:18px}
+    @media(max-width:380px){.menu-actions{grid-template-columns:1fr}.menu-panel{right:-2px}}
     .hero-bg{background:radial-gradient(circle at 80% 10%,#dff2fc 0,transparent 32%),linear-gradient(135deg,#f7fbfe,#fff 64%)}
     .eyebrow{font-size:.74rem;letter-spacing:.16em;font-weight:800;text-transform:uppercase;color:#0879b9}
     .field-label{display:block;margin-bottom:8px;font-size:.83rem;font-weight:700;color:#263b4d}
@@ -64,11 +70,13 @@
         <a href="./public/solutions.html">Solutions</a>
         <a href="./network.html">Network</a>
         <a href="./global-markets.html">Global Markets</a>
-        <a href="./tracking.html">Track a shipment</a>
         <a href="./about.html">About KRIM</a>
         <a href="./contact.html" aria-current="page" class="!bg-sky-50 !text-sky-800">Contact</a>
-        <a href="./auth/login.html">Sign in</a>
-        <a href="./public/quote.html" class="menu-primary">Request a quote <span aria-hidden="true">&nbsp;→</span></a>
+        <a href="./tracking.html">Track a shipment</a>
+        <div class="menu-actions">
+          <a href="./auth/login.html">Sign in</a>
+          <a href="./public/quote.html" class="menu-primary">Request a quote <span aria-hidden="true">&nbsp;→</span></a>
+        </div>
       </nav>
     </div>
   </header>
@@ -79,11 +87,15 @@
         <div class="pt-2">
           <p class="eyebrow">Start a conversation</p>
           <h1 class="hero-title mt-5 max-w-xl text-5xl font-extrabold leading-[1.08] tracking-tight text-krim-navy sm:text-6xl">Let’s move your next step forward.</h1>
-          <p class="mt-6 max-w-xl text-lg leading-8 text-slate-600">Tell us what you need. Whether you are shipping goods, exploring a logistics partnership or discussing a business requirement, your enquiry will be routed for review.</p>
+          <p class="mt-6 max-w-xl text-lg leading-8 text-slate-600">Reach the right KRIM workflow for a shipment, a partner proposal, an enterprise requirement or help with an existing enquiry. Share the details once; our team can review the request and confirm the appropriate next step.</p>
           <div class="mt-8 space-y-4">
             <div class="flex gap-3"><span class="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sky-100 text-sm font-bold text-sky-800">1</span><div><h2 class="font-bold text-krim-navy">Choose the right enquiry</h2><p class="mt-1 text-sm leading-6 text-slate-600">Customer shipments, partner onboarding, enterprise needs or existing shipment support.</p></div></div>
             <div class="flex gap-3"><span class="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sky-100 text-sm font-bold text-sky-800">2</span><div><h2 class="font-bold text-krim-navy">Share useful details</h2><p class="mt-1 text-sm leading-6 text-slate-600">Origin, destination, cargo or service requirements help us understand your request.</p></div></div>
             <div class="flex gap-3"><span class="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sky-100 text-sm font-bold text-sky-800">3</span><div><h2 class="font-bold text-krim-navy">We review your enquiry</h2><p class="mt-1 text-sm leading-6 text-slate-600">Availability, pricing, next steps and response timing are confirmed individually.</p></div></div>
+          </div>
+          <div class="support-note mt-8">
+            <h2 class="font-bold text-krim-navy">A note about support</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">This form is an enquiry channel, not a live chat or emergency dispatch service. For a shipment already in transit, include its KRIM reference and follow any direct operational instructions from the confirmed service provider. KRIM does not publish an unverified 24/7 or fixed response-time promise.</p>
           </div>
           <div class="mt-9 grid gap-3 sm:grid-cols-2">
             <a href="./public/quote.html" class="rounded-xl bg-krim-navy px-5 py-4 text-center text-sm font-bold text-white no-underline hover:bg-slate-700">Request a shipment quote <span aria-hidden="true">→</span></a>
@@ -107,7 +119,8 @@
                 <option>Logistics partner — join the network</option>
                 <option>Enterprise — business or integration requirement</option>
                 <option>Existing shipment — support or status</option>
-                <option>General question</option>
+                <option>Privacy or data request</option>
+                <option>General business enquiry</option>
               </select>
             </div>
             <div class="grid gap-5 sm:grid-cols-2">
@@ -140,12 +153,13 @@
     </section>
 
     <section class="container py-14 sm:py-16">
-      <div class="grid gap-5 md:grid-cols-3">
+      <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <article class="info-card"><p class="text-xs font-extrabold tracking-[.14em] text-sky-700">SHIPMENTS</p><h2 class="mt-3 text-lg font-bold text-krim-navy">Need to move freight?</h2><p class="mt-2 text-sm leading-6 text-slate-600">Use the quote journey for shipment details and a request that can be assessed against available partner capacity.</p><a href="./public/quote.html" class="mt-4 inline-flex text-sm font-bold text-sky-800 underline">Start a quote →</a></article>
         <article class="info-card"><p class="text-xs font-extrabold tracking-[.14em] text-sky-700">PARTNERS</p><h2 class="mt-3 text-lg font-bold text-krim-navy">Interested in the network?</h2><p class="mt-2 text-sm leading-6 text-slate-600">Tell us your service capabilities, operating areas and business details for partner review.</p><a href="./auth/partner-signup.html" class="mt-4 inline-flex text-sm font-bold text-sky-800 underline">Partner onboarding →</a></article>
+        <article class="info-card"><p class="text-xs font-extrabold tracking-[.14em] text-sky-700">ENTERPRISE</p><h2 class="mt-3 text-lg font-bold text-krim-navy">Discuss a business requirement</h2><p class="mt-2 text-sm leading-6 text-slate-600">For multi-location operations, integrations or tailored logistics workflows, select Enterprise in the enquiry form and describe your use case.</p><a href="#krim-contact-form" class="mt-4 inline-flex text-sm font-bold text-sky-800 underline">Contact the team →</a></article>
         <article class="info-card"><p class="text-xs font-extrabold tracking-[.14em] text-sky-700">EXISTING SHIPMENTS</p><h2 class="mt-3 text-lg font-bold text-krim-navy">Need a status update?</h2><p class="mt-2 text-sm leading-6 text-slate-600">Open shipment tracking if you already have a KRIM shipment reference.</p><a href="./tracking.html" class="mt-4 inline-flex text-sm font-bold text-sky-800 underline">Go to tracking →</a></article>
       </div>
-      <p class="mt-8 text-center text-xs leading-6 text-slate-500">Submitting an enquiry does not itself confirm a quote, booking, partner approval, route availability or service commitment. KRIM will confirm applicable next steps after review.</p>
+      <p class="mt-8 text-center text-xs leading-6 text-slate-500">A successful submission confirms receipt of an enquiry only. It does not confirm a quote, booking, partner approval, route availability, service commitment or a guaranteed response time. Requests are reviewed against actual operational capability and applicable requirements.</p>
     </section>
   </main>
 
