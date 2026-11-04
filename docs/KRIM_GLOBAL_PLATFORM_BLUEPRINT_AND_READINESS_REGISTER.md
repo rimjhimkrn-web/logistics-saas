@@ -272,7 +272,7 @@ India remains the initial commercial launch market. This section records the cur
 - India country operating pack: 18 mandatory controls; 0 approved; pack remains `research_pending`.
 - India market readiness: 22 mandatory assessment records; 0 approved; all 22 remain pending.
 - India partner network: 0 active, verified and compliant partner organisations; 0 active verified India partner capabilities. Existing partner organisations are test/development or pending-verification records, not commercial providers.
-- India route catalogue: one Ranchi → Kolkata pilot candidate is recorded as `draft`, with `commercial_availability=false` and `operational_authorisation=false`. It is not a service promise or bookable route.
+- India route catalogue: seven origin-destination candidates are recorded as `draft` (Ranchi–Kolkata, Ranchi–Jamshedpur, Ranchi–Dubai, Ranchi–Frankfurt, Ranchi–London, Ranchi–Singapore and Ranchi–New York). They are not route geometry, provider commitments, approved routes or bookable services; commercial availability and operational authorisation remain false.
 - Corridor shipment-write trigger is installed. A shipment requires an exact origin/destination corridor, active corridor status, approved mode-matched corridor dossier, current mandatory corridor controls and approved country packs. Missing evidence fails closed.
 - No market/country/corridor approval has been fabricated to accelerate launch.
 
