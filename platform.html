@@ -1,154 +1,83 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Platform Architecture & Enterprise Infrastructure</title>
-    <meta name="description" content="Explore KRIM OS institutional architecture featuring Supabase Row Level Security (RLS) multi-tenancy, stateless edge compute, and secure escrow settlement mechanisms.">
-    <!-- Tailwind CSS Modern Styling Engine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#026f9e',
-                            900: '#0f172a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_1 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071827">
+  <title>KRIM Platform | Global Logistics Operating System</title>
+  <meta name="description" content="Explore the KRIM Logistics operating model: connected shipment workflows, customer and partner workspaces, transport capabilities, finance, visibility and global-ready architecture.">
+  <link rel="canonical" href="https://krimlogistics.com/platform.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#102333;--muted:#607383;--navy:#071827;--navy2:#0c2639;--blue:#1676a8;--cyan:#69c6d7;--paper:#f5f8fa;--line:#dce6eb;--white:#fff;--green:#177d65;--amber:#9a6416;--max:1160px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:"DM Sans",sans-serif;line-height:1.6;background:#fff}a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible{outline:3px solid #64c5e2;outline-offset:3px}.wrap{width:min(var(--max),calc(100% - 48px));margin:auto}
+    .topbar{background:var(--navy);color:#c6d6df;font-size:12px}.topbar .wrap{min-height:36px;display:flex;align-items:center;justify-content:space-between;gap:16px}.topbar strong{color:#fff;letter-spacing:.08em}
+    header{position:sticky;top:0;z-index:20;background:#ffffffed;backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:12px;font-family:Manrope,sans-serif;font-weight:800;letter-spacing:.02em}.brandmark{width:39px;height:39px;border-radius:12px;background:linear-gradient(145deg,#2c9bc0,#0b3148);display:grid;place-items:center;color:#fff;font-size:19px}.brand small{display:block;color:var(--muted);font:600 9px "DM Sans";letter-spacing:.18em;text-transform:uppercase}.navlinks{display:flex;align-items:center;gap:26px;font-size:13px;font-weight:700;color:#536777}.navlinks a:hover,.navlinks a[aria-current=page]{color:#0879a9}.navcta{display:flex;align-items:center;gap:10px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:9px;padding:12px 17px;font-size:13px;font-weight:700;transition:.2s;border:1px solid transparent}.btn-primary{background:#087cac;color:#fff;box-shadow:0 8px 22px #087cac26}.btn-primary:hover{background:#06668e;transform:translateY(-1px)}.btn-outline{border-color:#cbd9e1;color:#173447;background:#fff}.btn-outline:hover{border-color:#7fa9bd;background:#f5fafc}.menu{display:none;border:1px solid var(--line);background:white;border-radius:8px;padding:9px 12px;font-size:19px}
+    .hero{background:radial-gradient(ellipse at 80% 20%,#16445d 0,transparent 38%),linear-gradient(115deg,#071827,#0b2a3e 70%,#0b3548);color:#fff;padding:88px 0 72px;overflow:hidden;position:relative}.hero:after{content:"";position:absolute;width:520px;height:520px;border:1px solid #ffffff16;border-radius:50%;right:-170px;bottom:-360px;box-shadow:0 0 0 55px #ffffff08,0 0 0 110px #ffffff05}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#70ccdb}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:58px;align-items:center;position:relative;z-index:1}.hero h1{font:800 clamp(38px,5vw,62px)/1.08 Manrope,sans-serif;letter-spacing:-.045em;margin:18px 0 20px;max-width:700px}.hero p{font-size:17px;color:#c4d4dd;max-width:650px;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.hero .btn-outline{background:#ffffff0c;border-color:#ffffff45;color:#fff}.hero-note{margin-top:20px;color:#9fb7c4;font-size:12px}.architecture-card{background:#ffffff0c;border:1px solid #ffffff25;border-radius:18px;padding:24px;box-shadow:0 24px 70px #0003}.architecture-card h2{font:700 14px Manrope;margin:0 0 16px;color:#d9eaf0;letter-spacing:.04em}.layer{border:1px solid #ffffff24;background:#ffffff0b;border-radius:10px;padding:14px 16px;margin-top:10px}.layer b{display:block;font:700 13px Manrope;color:#fff}.layer span{font-size:11px;color:#adc4ce}.layer.core{background:#0b7194;border-color:#39a6c0}.layer.core span{color:#d6f0f4}.layer-children{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .proofbar{background:#fff;border-bottom:1px solid var(--line)}.proofgrid{display:grid;grid-template-columns:repeat(4,1fr);padding:22px 0}.proof{padding:4px 20px;border-right:1px solid var(--line)}.proof:first-child{padding-left:0}.proof:last-child{border:0}.proof b{display:block;font:800 13px Manrope;color:#17384c}.proof span{font-size:11px;color:var(--muted)}
+    section{scroll-margin-top:100px}.section{padding:82px 0}.section-soft{background:var(--paper)}.section-head{max-width:720px;margin-bottom:34px}.kicker{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#087da8}.section h2{font:800 clamp(28px,3.5vw,42px)/1.15 Manrope,sans-serif;letter-spacing:-.035em;margin:12px 0;color:#102a3b}.section-head p{color:var(--muted);font-size:15px;margin:0}.grid{display:grid;gap:16px}.cap-grid{grid-template-columns:repeat(4,1fr)}.card{border:1px solid var(--line);border-radius:14px;padding:23px;background:#fff;min-width:0}.icon{width:38px;height:38px;border-radius:10px;background:#e8f5f8;color:#087da8;display:grid;place-items:center;font-size:17px;font-weight:800;margin-bottom:16px}.card h3{font:700 16px Manrope;margin:0 0 8px}.card p{font-size:13px;color:var(--muted);margin:0}.card small{display:inline-block;margin-top:14px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#177d65}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;counter-reset:step}.flowitem{position:relative;background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px 16px}.flowitem:before{counter-increment:step;content:"0" counter(step);display:block;font:800 12px Manrope;color:#1683a9;margin-bottom:16px}.flowitem:not(:last-child):after{content:"→";position:absolute;right:-12px;top:40%;z-index:2;color:#1683a9;font-weight:800;background:var(--paper);width:22px;text-align:center}.flowitem h3{font:700 14px Manrope;margin:0 0 7px}.flowitem p{font-size:12px;color:var(--muted);margin:0}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}.list{list-style:none;margin:20px 0 0;padding:0}.list li{padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;color:#405768}.list li:before{content:"✓";color:var(--green);font-weight:800;margin-right:10px}.role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.role{border:1px solid var(--line);border-radius:10px;padding:15px;background:#fff}.role b{display:block;font:700 13px Manrope}.role span{font-size:11px;color:var(--muted)}
+    .status{display:grid;grid-template-columns:1fr 1fr;gap:16px}.statusbox{border-radius:14px;padding:22px;background:#fff;border:1px solid var(--line)}.statusbox h3{font:700 15px Manrope;margin:0 0 10px}.statusbox p{font-size:13px;color:var(--muted);margin:0}.statusbox.confirmed{border-top:3px solid #258b70}.statusbox.dependent{border-top:3px solid #d39a3c}.statusbox .label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;color:#177d65}.statusbox.dependent .label{color:var(--amber)}
+    .cta{background:linear-gradient(110deg,#092236,#0b4058);color:#fff;border-radius:18px;padding:42px;display:flex;justify-content:space-between;gap:28px;align-items:center}.cta h2{color:#fff;font:800 clamp(25px,3vw,34px)/1.15 Manrope;margin:0 0 9px}.cta p{color:#c2d4dd;margin:0;font-size:14px}.cta .btn-outline{white-space:nowrap}
+    footer{background:#071827;color:#b5c8d2;padding:48px 0 24px}.footgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px}.footbrand{color:#fff;font:800 18px Manrope}.footgrid p{font-size:12px;color:#9eb3bf;max-width:300px}.footgrid h3{font:700 12px Manrope;color:#fff;margin:0 0 12px}.footgrid a{display:block;font-size:12px;color:#adc1cb;margin:8px 0}.footgrid a:hover{color:#fff}.copyright{border-top:1px solid #ffffff1c;margin-top:34px;padding-top:18px;font-size:11px;color:#8199a6;display:flex;justify-content:space-between;gap:15px}
+    @media(max-width:980px){.navlinks{gap:14px}.hero-grid{gap:30px}.cap-grid{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(3,1fr)}.flowitem:after{display:none}.role-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:720px){.wrap{width:min(var(--max),calc(100% - 34px))}.topbar .wrap{justify-content:center}.topbar .wrap span:last-child{display:none}.nav{height:66px}.menu{display:block}.navlinks{display:none;position:absolute;left:0;right:0;top:66px;background:#fff;padding:16px 24px 22px;border-bottom:1px solid var(--line);box-shadow:0 16px 25px #0a26351a;flex-direction:column;align-items:stretch;gap:0}.navlinks.open{display:flex}.navlinks a{padding:11px 0;border-bottom:1px solid #edf1f3}.navcta .btn-outline{display:none}.navcta .btn{padding:10px 12px}.hero{padding:64px 0 52px}.hero-grid{grid-template-columns:1fr}.hero h1{font-size:42px}.hero p{font-size:15px}.architecture-card{max-width:520px}.proofgrid{grid-template-columns:1fr 1fr;row-gap:16px}.proof:nth-child(2){border:0}.proof:nth-child(3){padding-left:0}.section{padding:60px 0}.two-col{grid-template-columns:1fr;gap:24px}.flow{grid-template-columns:1fr 1fr}.role-grid{grid-template-columns:1fr 1fr}.status{grid-template-columns:1fr}.cta{padding:28px;display:block}.cta .btn{margin-top:20px}.footgrid{grid-template-columns:1fr 1fr}.copyright{display:block}.copyright span{display:block;margin-top:8px}}
+    @media(max-width:430px){.brand{font-size:14px}.brandmark{width:34px;height:34px}.brand small{font-size:8px}.navcta .btn{font-size:11px;padding:9px}.hero h1{font-size:36px}.hero-actions .btn{width:100%}.cap-grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.role-grid{grid-template-columns:1fr 1fr}.footgrid{grid-template-columns:1fr}.proof{padding-left:10px;padding-right:10px}.architecture-card{padding:17px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+  </style>
 </head>
-<body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
-
-    <!-- Institutional Navigation Header -->
-    <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                    K
-                </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-slate-900 uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-600 font-semibold uppercase">Platform Architecture</span>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
-                <a href="./platform.html" class="text-slate-900 font-semibold transition">Solutions</a>
-                <a href="./network.html" class="hover:text-slate-900 transition">Global Network</a>
-                <a href="./tracking.html" class="hover:text-slate-900 transition">Track Shipment</a>
-            </nav>
-
-            <div class="flex items-center space-x-4 text-sm font-medium">
-                <a href="./portal.html" class="text-slate-600 hover:text-slate-900 transition">Sign In</a>
-                <a href="./auth/signup.html" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition shadow-sm">Get Started →</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow">
-        
-        <!-- Hero Section -->
-        <section class="max-w-7xl mx-auto px-6 py-20 lg:py-28 space-y-12 text-center">
-            <div class="space-y-6 max-w-3xl mx-auto">
-                <span class="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-600 border border-sky-200 uppercase tracking-widest">
-                    Enterprise Technical Specification
-                </span>
-                <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                    Institutional-Grade Logistics Infrastructure
-                </h1>
-                <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
-                    Built for absolute multi-tenant data isolation, sub-second telemetry propagation, and cryptographically verified financial ledgers.
-                </p>
-                <div class="flex flex-wrap justify-center gap-4 pt-2">
-                    <a href="./auth/signup.html" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20">
-                        Deploy Enterprise Tenant →
-                    </a>
-                    <a href="./network.html" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-7 py-4 rounded-xl text-xs uppercase tracking-wider transition">
-                        Explore Global Network
-                    </a>
-                </div>
-            </div>
-
-            <!-- Architecture Modules Grid -->
-            <div class="max-w-6xl mx-auto pt-16 space-y-12 text-left">
-                <div class="text-center space-y-2 max-w-xl mx-auto">
-                    <span class="text-xs font-semibold uppercase tracking-widest text-sky-600 font-mono">Core Subsystems</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900">Designed for Zero-Trust Operations</h2>
-                    <p class="text-slate-600 text-sm">Every layer of KRIM OS is architected for maximum security, auditability, and operational resilience.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            01
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Row Level Security (RLS) Tenancy</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Database queries automatically enforce tenant separation based on cryptographic user tokens and organization membership mappings, preventing data leaks across competitors.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            02
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">AAL2 / TOTP Multi-Factor Auth</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Mandatory hardware and authenticator app verification ensures high-privilege administrative and carrier partner nodes remain secure against credential theft.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            03
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Stateless Edge Compute</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Razorpay payment validation, currency conversions, and dynamic rate engines execute via lightning-fast serverless edge functions distributed globally.
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 font-bold font-mono text-sm">
-                            04
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Immutable Audit & ePOD Vaults</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            All electronic proofs of delivery, spot bids, and settlement receipts are permanently stored with cryptographic hashes to ensure full legal non-repudiation.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Clean Footer -->
-    <footer class="bg-white border-t border-slate-100 py-10 text-xs text-slate-500 font-mono">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-            <div class="flex space-x-6">
-                <a href="./network.html" class="hover:text-slate-800 transition">Network</a>
-                <a href="./tracking.html" class="hover:text-slate-800 transition">Tracking</a>
-                <a href="./portal.html" class="hover:text-slate-800 transition">Sign In</a>
-            </div>
-        </div>
-    </footer>
-
+<body>
+  <div class="topbar"><div class="wrap"><strong>KRIM LOGISTICS</strong><span>Global Logistics Operating System</span><span>India-first operations · Global-ready architecture</span></div></div>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="./index.html" aria-label="KRIM Logistics home"><span class="brandmark">K</span><span>KRIM LOGISTICS<small>Move Freight. Connect Globally.</small></span></a>
+      <button class="menu" id="menuButton" aria-label="Open navigation" aria-expanded="false" aria-controls="mainNav">☰</button>
+      <nav class="navlinks" id="mainNav" aria-label="Main navigation">
+        <a href="./platform.html" aria-current="page">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a><a href="./global-markets.html">Markets</a><a href="./about.html">About</a><a href="./contact.html">Contact</a>
+      </nav>
+      <div class="navcta"><a class="btn btn-outline" href="./tracking.html">Track shipment</a><a class="btn btn-primary" href="./auth/login.html">Sign in ↗</a></div>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div><div class="eyebrow">The KRIM platform</div><h1>One connected operating layer for every shipment.</h1><p>KRIM brings customers, logistics partners and operations into a coordinated digital workflow — from shipment enquiry and partner quotation to execution updates, delivery and financial records.</p><div class="hero-actions"><a class="btn btn-primary" href="./public/quote.html">Start a shipment enquiry ↗</a><a class="btn btn-outline" href="./auth/partner-signup.html">Join the partner network</a></div><div class="hero-note">A quote request is an enquiry, not a confirmed booking. Service availability, pricing and execution are confirmed for each shipment.</div></div>
+        <div class="architecture-card" aria-label="KRIM platform architecture diagram"><h2>ONE OPERATING MODEL · CONNECTED WORKSPACES</h2><div class="layer"><b>Customers & Enterprise Shippers</b><span>Enquiries · shipment requirements · approvals</span></div><div class="layer core"><b>KRIM Global Logistics Core</b><span>Workflow coordination · permissions · records · partner matching</span></div><div class="layer-children"><div class="layer"><b>Partner Network</b><span>Quotes · capacity · execution</span></div><div class="layer"><b>Operations</b><span>Milestones · exceptions · support</span></div><div class="layer"><b>Finance</b><span>Quotes · payment records · settlement workflow</span></div><div class="layer"><b>Intelligence</b><span>Operational data · decision support</span></div></div></div>
+      </div>
+    </section>
+    <div class="proofbar"><div class="wrap proofgrid"><div class="proof"><b>One connected workflow</b><span>From enquiry to delivery record</span></div><div class="proof"><b>Multi-party workspaces</b><span>Role-based operational access</span></div><div class="proof"><b>Multi-modal design</b><span>Road, rail, ocean and air</span></div><div class="proof"><b>India first</b><span>Market activation before expansion</span></div></div></div>
+    <section class="section"><div class="wrap"><div class="section-head"><div class="kicker">Platform capabilities</div><h2>Built around the real work of moving freight.</h2><p>The platform is organised around the connected tasks that make a shipment happen. Each service is activated only where a suitable provider, commercial terms and operational process are in place.</p></div><div class="grid cap-grid">
+      <article class="card"><div class="icon">↗</div><h3>Shipment orchestration</h3><p>Capture shipment requirements, create records and move requests through a structured workflow.</p><small>Core workflow</small></article>
+      <article class="card"><div class="icon">⇄</div><h3>Partner quotations</h3><p>Route eligible opportunities to partners and collect commercial offers for review and acceptance.</p><small>Partner-dependent</small></article>
+      <article class="card"><div class="icon">⌖</div><h3>Tracking & milestones</h3><p>Present shipment status and recorded milestones as operational updates become available.</p><small>Update-dependent</small></article>
+      <article class="card"><div class="icon">▤</div><h3>Documents & records</h3><p>Keep shipment, commercial and operational information organised around the transaction.</p><small>Workflow capability</small></article>
+      <article class="card"><div class="icon">▣</div><h3>Road & rail</h3><p>Coordinate domestic and inland movement through approved transport partners.</p><small>Route-dependent</small></article>
+      <article class="card"><div class="icon">◒</div><h3>Ocean & air</h3><p>Support international freight workflows as forwarding, carrier and customs partners are activated.</p><small>Market-dependent</small></article>
+      <article class="card"><div class="icon">⌂</div><h3>Warehousing & fulfilment</h3><p>Connect storage and fulfilment requirements with providers that meet the shipment's needs.</p><small>Provider-dependent</small></article>
+      <article class="card"><div class="icon">◎</div><h3>Finance & intelligence</h3><p>Connect quote, payment and transaction records with operational reporting and decision support.</p><small>Integration-dependent</small></article>
+    </div></div></section>
+    <section class="section section-soft"><div class="wrap"><div class="section-head"><div class="kicker">How the workflow connects</div><h2>From request to completed movement.</h2><p>A controlled transaction path helps prevent an enquiry from being mistaken for a confirmed shipment.</p></div><div class="flow">
+      <div class="flowitem"><h3>Shipment enquiry</h3><p>Customer submits origin, destination, cargo and service requirements.</p></div>
+      <div class="flowitem"><h3>Rate & partner check</h3><p>Check applicable commercial terms or invite an eligible partner to quote.</p></div>
+      <div class="flowitem"><h3>Review & acceptance</h3><p>Customer reviews a valid offer; booking proceeds only after required checks.</p></div>
+      <div class="flowitem"><h3>Payment & execution</h3><p>Complete applicable payment steps and coordinate the confirmed service.</p></div>
+      <div class="flowitem"><h3>Milestones & delivery</h3><p>Record available progress, exceptions and delivery confirmation.</p></div>
+    </div></div></section>
+    <section class="section"><div class="wrap two-col"><div><div class="kicker">Connected workspaces</div><h2>Every participant has a defined role.</h2><p style="color:var(--muted);font-size:14px">KRIM's workspace model separates customer activity, partner execution and internal coordination. Access should be granted according to verified identity, organisation membership and role permissions.</p><ul class="list"><li>Customer and enterprise shipment management</li><li>Partner opportunities, quotations and assignments</li><li>Driver and warehouse operational updates</li><li>Customs, finance and control-tower coordination</li><li>Private administration — never exposed as a public workspace</li></ul></div><div class="role-grid">
+      <a class="role" href="./app/customer/index.html"><b>Customer</b><span>Enquiries & shipments</span></a><a class="role" href="./app/partner/index.html"><b>Partner</b><span>Quotes & assignments</span></a><a class="role" href="./app/driver/index.html"><b>Driver</b><span>Movement updates</span></a><a class="role" href="./app/warehouse/index.html"><b>Warehouse</b><span>Handling workflows</span></a><a class="role" href="./app/customs/index.html"><b>Customs</b><span>Trade coordination</span></a><a class="role" href="./app/finance/index.html"><b>Finance</b><span>Commercial records</span></a><a class="role" href="./app/operations/index.html"><b>Operations</b><span>Exceptions & oversight</span></a><a class="role" href="./app/enterprise/index.html"><b>Enterprise</b><span>Business workspace</span></a>
+    </div></div></section>
+    <section class="section section-soft"><div class="wrap"><div class="section-head"><div class="kicker">Honest operating status</div><h2>Global-ready design. Real-world activation, market by market.</h2><p>KRIM's architecture is intended to support multiple countries, currencies, languages and regulatory workflows. That does not mean every lane, provider or local process is already live.</p></div><div class="status">
+      <div class="statusbox confirmed"><div class="label">Platform foundations</div><h3>Digital workflow foundations</h3><p>Public shipment enquiry, authenticated customer and partner workspaces, shipment and quote workflow components, and a public tracking interface are present in the codebase. End-to-end production operation still requires live testing.</p></div>
+      <div class="statusbox dependent"><div class="label">Activation required</div><h3>Service and market availability</h3><p>Rates, provider capacity, accepted assignments, live milestone feeds, customs coverage, settlement and cross-border service must be verified for each route before being offered as available.</p></div>
+    </div></div></section>
+    <section class="section"><div class="wrap"><div class="cta"><div><h2>Build your next shipment with KRIM.</h2><p>Start with your requirement. KRIM will confirm the next operational step based on route, service and provider availability.</p></div><a class="btn btn-outline" href="./public/quote.html">Request a shipment quote ↗</a></div></div></section>
+  </main>
+  <footer><div class="wrap"><div class="footgrid"><div><div class="footbrand">KRIM LOGISTICS</div><p>Global Logistics Operating System. Move Freight. Connect Globally.</p><p>India-first operations with a global-ready platform architecture.</p></div><div><h3>Platform</h3><a href="./platform.html">Platform overview</a><a href="./public/solutions.html">Solutions</a><a href="./global-markets.html">Markets</a><a href="./network.html">Partner network</a></div><div><h3>Get started</h3><a href="./public/quote.html">Request a quote</a><a href="./tracking.html">Track shipment</a><a href="./auth/partner-signup.html">Become a partner</a><a href="./auth/login.html">Sign in</a></div><div><h3>Company</h3><a href="./about.html">About KRIM</a><a href="./contact.html">Contact</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a></div></div><div class="copyright"><span>© 2026 KRIM Logistics. All rights reserved.</span><span>Move Freight. Connect Globally.</span></div></div></footer>
+  <script>
+    (function(){var b=document.getElementById('menuButton'),n=document.getElementById('mainNav');if(!b||!n)return;b.addEventListener('click',function(){var open=n.classList.toggle('open');b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'Close navigation':'Open navigation');b.textContent=open?'×':'☰'});n.addEventListener('click',function(e){if(e.target.closest('a')){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open navigation');b.textContent='☰'}})})();
+  </script>
 </body>
 </html>
