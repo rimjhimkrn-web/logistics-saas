@@ -65,6 +65,23 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 @media(max-width:800px){.partner-hero-grid{grid-template-columns:1fr!important}.partner-hero-aside{display:block!important;max-width:420px}.partner-trust-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}main{width:calc(100% - 32px)!important;margin:24px auto 40px!important}}
 @media(max-width:560px){body>header{min-height:66px!important;padding:9px 14px!important}.partner-hero-grid h1{font-size:34px!important}.partner-hero-aside{max-width:none;padding:16px}.partner-trust-strip{grid-template-columns:1fr!important}.partner-trust-item{min-height:0}.partner-trust-item p{font-size:10px!important}main{width:calc(100% - 24px)!important;margin:18px auto 32px!important;gap:12px!important}main>section:first-child{padding:22px 18px!important}main>section:nth-child(3){padding:16px!important}#partner-onboarding-form>div:not(:last-child){padding:15px!important}#partner-onboarding-form .grid{grid-template-columns:1fr!important;gap:10px!important}#registered-business-steps{grid-template-columns:1fr!important}#partner-onboarding-form>div:last-child{align-items:stretch!important;flex-direction:column!important}#partner-onboarding-form button[type=submit]{width:100%}body>footer{padding:16px 14px!important}body>footer>div{align-items:flex-start!important;flex-direction:column!important}}
 
+
+/* Three clear partner entry pathways */
+.partner-pathway-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.partner-pathway-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;min-height:260px;padding:19px 17px;border:1px solid #d4deea;border-radius:12px;background:#fff;color:#20334d;text-align:left;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s}
+.partner-pathway-card:hover{border-color:#7fa5df;box-shadow:0 9px 24px rgba(8,26,54,.08);transform:translateY(-2px)}
+.partner-pathway-card:focus-visible{outline:3px solid #36aeb0;outline-offset:3px}
+.partner-pathway-card[aria-pressed=true]{border:2px solid #2563eb;padding:18px 16px;background:linear-gradient(160deg,#f1f6ff,#fff 75%);box-shadow:0 0 0 3px rgba(37,99,235,.09)}
+.partner-pathway-card strong{display:block;color:#081a36;font-size:16px;line-height:1.25;letter-spacing:-.02em}
+.partner-pathway-card .pathway-number{color:#1760c7;font-size:9px;font-weight:900;letter-spacing:.12em}
+.partner-pathway-card .pathway-summary{color:#425670;font-size:11px;line-height:1.6}
+.partner-pathway-card .pathway-detail{padding-top:10px;border-top:1px solid #e2e9f1;color:#697a8e;font-size:10px;line-height:1.65}
+.partner-pathway-card .pathway-action{margin-top:auto;color:#175ac3;font-size:10px;font-weight:900}
+.partner-pathway-footnote{margin:10px 0 0!important;color:#66768b!important;font-size:10px!important}
+.partner-mode-native{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:900px){.partner-pathway-grid{grid-template-columns:1fr}.partner-pathway-card{min-height:0}.partner-pathway-card .pathway-action{margin-top:2px}}
+@media(prefers-reduced-motion:reduce){.partner-pathway-card{transition:none}.partner-pathway-card:hover{transform:none}}
+
 </style>
 </head>
 <body><a class="skip" href="#main">Skip to partner verification</a>
@@ -138,14 +155,37 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
       <form id="partner-onboarding-form" class="space-y-6">
         <div class="rounded-2xl border border-slate-800 bg-[#040814] p-5 space-y-3">
           <div class="partner-section-heading"><span class="partner-section-kicker">START HERE</span><h3 class="text-sm font-extrabold uppercase tracking-wider">Choose your partner pathway</h3><p>Select the pathway that accurately describes your current operating status.</p></div>
-          <label for="partner-account-mode" class="block text-[10px] font-bold uppercase">Account pathway *</label>
-          <select id="partner-account-mode" required class="w-full bg-[#040814] border border-slate-800 rounded-xl px-3.5 py-3 text-white">
-            <option value="">Choose the pathway that fits you</option>
-            <option value="development_test">Development / Test Account — no business documents</option>
+          <label class="block text-[10px] font-bold uppercase" id="partner-pathway-label">Select one partner pathway *</label>
+          <div class="partner-pathway-grid" role="group" aria-labelledby="partner-pathway-label">
+            <button type="button" class="partner-pathway-card" data-mode-card="development_test" aria-pressed="false">
+              <span class="pathway-number">01 · EXPLORE</span>
+              <strong>Development / Test</strong>
+              <span class="pathway-summary">For platform testing, demos and learning the partner workspace.</span>
+              <span class="pathway-detail">No business documents. Sample/test environment only. No live loads, customer data, bookings or payouts.</span>
+              <span class="pathway-action">Choose test pathway →</span>
+            </button>
+            <button type="button" class="partner-pathway-card" data-mode-card="individual_interest" aria-pressed="false">
+              <span class="pathway-number">02 · INDEPENDENT</span>
+              <strong>Individual / Independent</strong>
+              <span class="pathway-summary">For individuals or self-employed operators interested in providing logistics services.</span>
+              <span class="pathway-detail">Submit basic interest details first. Identity, permits and eligibility are reviewed separately before any activation.</span>
+              <span class="pathway-action">Register interest →</span>
+            </button>
+            <button type="button" class="partner-pathway-card" data-mode-card="registered_business" aria-pressed="false">
+              <span class="pathway-number">03 · BUSINESS</span>
+              <strong>Registered Business</strong>
+              <span class="pathway-summary">For an established logistics company or legally registered service provider.</span>
+              <span class="pathway-detail">Provide legal identity, operating scope and supporting documents for human compliance review.</span>
+              <span class="pathway-action">Start verification →</span>
+            </button>
+          </div>
+          <select id="partner-account-mode" required aria-label="Selected partner pathway" class="partner-mode-native">
+            <option value="">Choose a pathway</option>
+            <option value="development_test">Development / Test Account</option>
             <option value="individual_interest">Individual / Independent Partner</option>
             <option value="registered_business">Registered Logistics Business</option>
           </select>
-          <p class="text-slate-400 text-[11px]">Use Development / Test if you are building or testing KRIM and do not yet operate a registered logistics business.</p>
+          <p class="partner-pathway-footnote">Choose the option that matches your current status. Selecting a pathway does not itself verify you or grant commercial access. You can return and change your selection before submitting.</p>
           <div id="development-test-note" hidden class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
             <strong>Development / Test mode</strong>
             <p class="mt-1">No company name, registration number, or documents are needed. You can explore the partner workspace using clearly labelled sample records. This does not verify a business and cannot access real loads, customer data, bookings, or payouts.</p>
@@ -452,6 +492,10 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 
         function updatePartnerModeUI() {
           const mode = document.getElementById("partner-account-mode").value;
+          document.querySelectorAll("[data-mode-card]").forEach(card => {
+            const selected = card.dataset.modeCard === mode;
+            card.setAttribute("aria-pressed", selected ? "true" : "false");
+          });
           const businessFields = document.getElementById("registered-business-fields");
           const individualFields = document.getElementById("individual-interest-fields");
           const registered = mode === "registered_business";
@@ -467,6 +511,12 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
           button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : mode === "registered_business" ? "Submit Business Verification →" : "Choose a Partner Pathway →";
         }
         document.getElementById("partner-account-mode").addEventListener("change", updatePartnerModeUI);
+        document.querySelectorAll("[data-mode-card]").forEach(card => {
+          card.addEventListener("click", () => {
+            document.getElementById("partner-account-mode").value = card.dataset.modeCard;
+            updatePartnerModeUI();
+          });
+        });
         updatePartnerModeUI();
 
         const { data: memberships, error: membershipError } = await onboardingClient
