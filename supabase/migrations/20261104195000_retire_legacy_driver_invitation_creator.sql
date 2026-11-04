@@ -1,0 +1,1 @@
+revoke all on function public.krim_create_driver_invitation(text) from public,anon,authenticated;
