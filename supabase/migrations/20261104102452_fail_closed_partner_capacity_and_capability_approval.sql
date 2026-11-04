@@ -62,7 +62,7 @@ begin
  if char_length(coalesce(v_reason,''))>1000 then raise exception using errcode='22023',message='Review notes must be 1000 characters or fewer';end if;
  select c.organization_id,c.verification_status,o.partner_account_mode,o.status,o.partner_lifecycle_status,o.partner_verification_status,o.partner_compliance_status,
   jsonb_build_object('capability_id',c.id,'active',c.active,'verification_status',c.verification_status,'metadata',c.metadata)
- into v_org_id,v_cap_status,v_org_mode,v_org_status,v_org_lifecycle,v_org_verification,v_org_compliance
+ into v_org_id,v_cap_status,v_org_mode,v_org_status,v_org_lifecycle,v_org_verification,v_org_compliance,v_old_state
  from public.krim_partner_capabilities c join public.krim_organizations o on o.id=c.organization_id where c.id=p_capability_id for update of c,o;
  if v_org_id is null then raise exception using errcode='P0002',message='Partner capability not found';end if;
  if v_cap_status<>'pending' then raise exception using errcode='55000',message='Only pending capabilities can be reviewed';end if;
