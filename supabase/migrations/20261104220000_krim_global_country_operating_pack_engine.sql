@@ -75,13 +75,13 @@ begin
  return jsonb_build_object('success',true,'control_id',p_control_id,'review_status',p_review_status);
 end $$;
 create or replace function public.krim_internal_market_activation_gate(p_market_id bigint) returns jsonb language plpgsql security definer set search_path='' as $$
-declare m public.krim_markets%rowtype; cid bigint; cc text; missing jsonb; miss_n integer; ass_n integer; cap_n integer; loc_n integer; src_n integer; exp_n integer; blockers jsonb; pack_id bigint; pack_status text; pc_expected integer; pc_approved integer;
+declare m public.krim_markets%rowtype; cid bigint; cc text; missing jsonb; miss_n integer; ass_n integer; cap_n integer; loc_n integer; src_n integer; exp_n integer; blockers jsonb; v_pack_id bigint; v_pack_status text; pc_expected integer; pc_approved integer;
 begin
  select * into m from public.krim_markets where id=p_market_id; if not found then raise exception using errcode='P0002',message='Market not found'; end if;
  cid:=m.country_id; select upper(code) into cc from public.krim_countries where id=cid;
- select id,krim_country_operating_packs.pack_status into pack_id,pack_status from public.krim_country_operating_packs where jurisdiction_code=cc;
- select count(*) into pc_expected from public.krim_country_pack_controls where krim_country_pack_controls.pack_id=pack_id and mandatory;
- select count(*) into pc_approved from public.krim_country_pack_controls c join public.krim_market_regulatory_sources s on s.id=c.source_id where c.pack_id=pack_id and c.mandatory and c.review_status='approved' and c.applicability in('yes','no','conditional') and nullif(btrim(c.evidence_reference),'') is not null and nullif(btrim(c.reviewer_note),'') is not null and s.review_status in('source_checked','legal_reviewed') and (c.expires_at is null or c.expires_at>now());
+ select id,krim_country_operating_packs.pack_status into v_pack_id,v_pack_status from public.krim_country_operating_packs where jurisdiction_code=cc;
+ select count(*) into pc_expected from public.krim_country_pack_controls where krim_country_pack_controls.pack_id=v_pack_id and mandatory;
+ select count(*) into pc_approved from public.krim_country_pack_controls c join public.krim_market_regulatory_sources s on s.id=c.source_id where c.pack_id=v_pack_id and c.mandatory and c.review_status='approved' and c.applicability in('yes','no','conditional') and nullif(btrim(c.evidence_reference),'') is not null and nullif(btrim(c.reviewer_note),'') is not null and s.review_status in('source_checked','legal_reviewed') and (c.expires_at is null or c.expires_at>now());
  select count(*) into loc_n from public.krim_locations l where l.country_id=cid and l.is_active;
  select count(*) into cap_n from public.krim_partner_capabilities pc join public.krim_organizations o on o.id=pc.organization_id where pc.coverage_country_id=cid and pc.active and pc.verification_status='verified' and (pc.effective_from is null or pc.effective_from<=now()) and (pc.effective_until is null or pc.effective_until>now()) and o.status='active';
  select count(*) into exp_n from public.krim_market_readiness_requirements r where r.mandatory and r.jurisdiction_code in('*',upper(m.code));
@@ -95,10 +95,10 @@ begin
  (case when cap_n=0 then 'No verified active partner capability in this country' end),
  (case when miss_n>0 then 'Mandatory market assessments missing, unapproved, unsupported or expired' end),
  (case when src_n<>exp_n then 'Mandatory market requirements lack reviewed sources or required qualified opinions' end),
- (case when pack_id is null then 'Country operating pack is missing' end),
- (case when pack_id is not null and (pack_status<>'approved' or pc_expected=0 or pc_approved<>pc_expected) then 'Country pack controls are incomplete, unapproved or expired' end)
+ (case when v_pack_id is null then 'Country operating pack is missing' end),
+ (case when v_pack_id is not null and (v_pack_status<>'approved' or pc_expected=0 or pc_approved<>pc_expected) then 'Country pack controls are incomplete, unapproved or expired' end)
  ) b(x) where x is not null;
- return jsonb_build_object('market_id',p_market_id,'market_code',m.code,'catalogue_active',m.is_active and m.status='active','country_pack_status',coalesce(pack_status,'missing'),'country_pack_controls_approved',pc_approved,'country_pack_controls_expected',pc_expected,'market_locations',loc_n,'verified_active_partner_capabilities',cap_n,'mandatory_assessments_approved',ass_n,'mandatory_requirements_expected',exp_n,'requirements_with_reviewed_sources',src_n,'missing_assessments',missing,'missing_assessment_count',miss_n,'eligible',(m.is_active and m.status='active' and loc_n>0 and cap_n>0 and miss_n=0 and src_n=exp_n and pack_id is not null and pack_status='approved' and pc_expected>0 and pc_approved=pc_expected),'blockers',blockers);
+ return jsonb_build_object('market_id',p_market_id,'market_code',m.code,'catalogue_active',m.is_active and m.status='active','country_pack_status',coalesce(v_pack_status,'missing'),'country_pack_controls_approved',pc_approved,'country_pack_controls_expected',pc_expected,'market_locations',loc_n,'verified_active_partner_capabilities',cap_n,'mandatory_assessments_approved',ass_n,'mandatory_requirements_expected',exp_n,'requirements_with_reviewed_sources',src_n,'missing_assessments',missing,'missing_assessment_count',miss_n,'eligible',(m.is_active and m.status='active' and loc_n>0 and cap_n>0 and miss_n=0 and src_n=exp_n and v_pack_id is not null and v_pack_status='approved' and pc_expected>0 and pc_approved=pc_expected),'blockers',blockers);
 end $$;
 revoke all on function public.krim_admin_list_country_packs() from public,anon;
 revoke all on function public.krim_admin_review_country_pack_control(bigint,text,text,bigint,text,text,timestamptz) from public,anon;
