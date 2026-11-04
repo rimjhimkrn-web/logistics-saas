@@ -256,3 +256,8 @@ The global country pack foundation is now deployed in production and committed:
 **Production verification:** 249 country packs; 4,482 controls; zero approved controls; zero approved country packs; zero active operational markets. All four country-pack tables have RLS enabled and forced, and direct anon/authenticated SELECT is denied. The administrator page JavaScript syntax passed. A real signed-in AAL2 browser workflow and positive legal-evidence review remain outstanding. Supabase Security Advisor flags guarded SECURITY DEFINER RPCs for manual review and reports RLS-enabled/no-policy notices for these private RPC-only tables; those notices are intentional, but the privileged function bodies still require ongoing code review.
 
 **Interpretation:** KRIM now has a global country-pack structure, not 249 completed legal dossiers. Every pack remains pending until qualified jurisdiction-specific review and evidence are entered. Global readiness is designed in; global legal authorisation is not claimed.
+
+
+## 19. Corridor compliance implementation record (4 November 2026)
+
+The evidence-led corridor dossier engine and draft candidate catalogue are documented in `docs/KRIM_GLOBAL_CORRIDOR_COMPLIANCE_ENGINE.md`. This adds jurisdiction legs, twelve mandatory controls per jurisdiction, AAL2 platform-admin RPCs, append-only decision events and a private Control Centre workspace. Six draft origin-destination candidates were seeded from existing active locations; they are not route geometry, provider commitments, approved routes or bookable services. No dossier or control is approved. Signed-in AAL2 tests and transaction-boundary corridor enforcement remain outstanding.
