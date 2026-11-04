@@ -82,7 +82,7 @@ async function loadProfile(){
  profile=r.data;
  if(!profile){
   const m=session.user.user_metadata||{};
-  profile={user_id:session.user.id,organization_id:membership.organization_id,full_name:String(m.full_name||''),country_code:String(m.country_code||'').toUpperCase(),phone:String(m.phone||''),company_name:String(m.company_name||''),licence_number:String(m.driver_licence_number||''),verification_status:'pending',onboarding_mode:m.driver_onboarding_mode==='development_test'?'development_test':'standard'};
+  profile={user_id:session.user.id,organization_id:membership.organization_id,full_name:String(m.full_name||''),country_code:String(m.country_code||'').toUpperCase(),phone:String(m.phone||''),company_name:String(m.company_name||''),licence_number:String(m.driver_licence_number||''),verification_status:'pending',onboarding_mode:'standard'};
   if(!profile.full_name)profile.full_name=String(session.user.email||'').split('@')[0]||'';
   // Persist registration details immediately when the required profile fields are valid.
   if(profile.full_name.trim().length>=2 && /^[A-Z]{2}$/.test(profile.country_code)){
