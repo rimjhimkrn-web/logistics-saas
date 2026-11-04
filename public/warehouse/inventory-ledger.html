@@ -47,7 +47,7 @@
   }
   await refreshLedger();
   form.addEventListener("reset",()=>{if(idempotencyKey)return;setTimeout(()=>{if(!suppressResetStatus)formStatus.textContent="Form cleared. No stock movement submitted.";},0);});
-  $("clearMovement").addEventListener("click",e=>{if(idempotencyKey){e.preventDefault();formStatus.textContent="A previous request may have reached the database. Retry the same movement first; its idempotency key is retained to prevent double-counting.";}});\n  $("clearMovement").addEventListener("click",e=>{if(idempotencyKey){e.preventDefault();formStatus.textContent="A previous request may have reached the database. Retry the same movement first; its idempotency key is retained to prevent double-counting.";}});
+  $("clearMovement").addEventListener("click",e=>{if(idempotencyKey){e.preventDefault();formStatus.textContent="A previous request may have reached the database. Retry the same movement first; its idempotency key is retained to prevent double-counting.";}});
   form.addEventListener("submit",async e=>{
    e.preventDefault();if(save.disabled)return;save.disabled=true;formStatus.textContent="Verifying facility and submitting the atomic stock movement…";
    try{
