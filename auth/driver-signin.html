@@ -16,6 +16,8 @@ function path(p){return window.krimPath?window.krimPath(p):('../'+p);}
 function normalize(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');}
 $('toggle').addEventListener('click',()=>{const p=$('password'),show=p.type==='password';p.type=show?'text':'password';$('toggle').textContent=show?'Hide':'Show';});
 async function verifyDriver(user){
+ const invite=new URLSearchParams(location.search).get('invite')||sessionStorage.getItem('krim_driver_invite_token');
+ if(invite){const accepted=await client.rpc('krim_accept_driver_invitation',{p_token:invite});if(accepted.error)throw new Error(accepted.error.message||'Driver invitation could not be accepted.');sessionStorage.removeItem('krim_driver_invite_token');history.replaceState({},'',location.pathname);}
  const meta=user.user_metadata||{};
  const metaRole=normalize(meta.krim_account_type||meta.account_type);
  // Workspace authorization is determined by the server-backed active membership,
