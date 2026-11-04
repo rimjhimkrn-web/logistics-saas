@@ -191,14 +191,16 @@
     const mapped = [...new Set(memberships.map(m => mapMembership(m, orgById.get(String(m.organization_id)))).filter(Boolean))];
     // Multi-service partner organisations can hold a verified WAREHOUSE capability
     // without changing their legal organisation type from "partner".
-    const warehouseCapabilityResult = await client.from("krim_partner_capabilities")
-      .select("organization_id").in("organization_id", orgIds)
-      .eq("active", true).eq("verification_status", "verified").eq("service_type", "warehouse");
-    if (warehouseCapabilityResult.error) {
-      console.error("KRIM warehouse capability lookup failed:", warehouseCapabilityResult.error);
-      throw new Error("KRIM could not verify your warehouse service capability. Reference: WAREHOUSE_CAPABILITY_LOOKUP_FAILED.");
+    if (requestedRole === "warehouse" && !mapped.includes("warehouse")) {
+      const warehouseCapabilityResult = await client.from("krim_partner_capabilities")
+        .select("organization_id").in("organization_id", orgIds)
+        .eq("active", true).eq("verification_status", "verified").eq("service_type", "warehouse");
+      if (warehouseCapabilityResult.error) {
+        console.error("KRIM warehouse capability lookup failed:", warehouseCapabilityResult.error);
+        throw new Error("KRIM could not verify your warehouse service capability. Reference: WAREHOUSE_CAPABILITY_LOOKUP_FAILED.");
+      }
+      if ((warehouseCapabilityResult.data || []).length) mapped.push("warehouse");
     }
-    if ((warehouseCapabilityResult.data || []).length && !mapped.includes("warehouse")) mapped.push("warehouse");
     if (mapped.includes("platform_admin")) {
       throw new Error("Platform administration uses a separate privileged sign-in.");
     }
