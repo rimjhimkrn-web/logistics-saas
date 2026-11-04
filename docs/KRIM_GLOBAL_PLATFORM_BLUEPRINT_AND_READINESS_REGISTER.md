@@ -199,3 +199,18 @@ The first implementation slice of the legal and market-activation control plane 
 **Verification boundary:** schema, seed counts, RLS flags, direct table grants, RPC execute grants, and unauthenticated rejection were checked. A signed-in AAL2 administrator browser session and a positive evidence-review workflow have not yet been tested. Security Advisor still reports the expected no-policy informational notices for the three tables (direct table access is intentionally revoked) and flags the two authenticated SECURITY DEFINER RPCs for manual review; their bodies enforce authentication, AAL2, and platform permission.
 
 **Next implementation gates:** build source-version review and evidence attachment controls; test the full register as a real AAL2 administrator; then design a separate market activation decision engine that checks legal, tax, payment, service-specific licensing, verified partner capacity, customer protections, safety, and live operational controls. Do not activate India or any other market until its required evidence and counsel decisions are complete.
+
+## 15. Regulatory source versioning and review workflow (4 November 2026)
+
+The next compliance-control slice is implemented:
+
+- Added `krim_market_regulatory_sources` for versioned official laws/regulator guidance, qualified legal/tax opinions, and licence/provider evidence references.
+- Added `krim_market_regulatory_source_events` for append-only review decisions.
+- Added administrator-only RPCs to list, register and review source versions. They require an authenticated AAL2 session and `admin.platform` permission.
+- Official-source registration requires HTTPS. A source cannot be marked `source_checked` without an official URL and a recorded SHA-256 snapshot. A legal/tax opinion cannot be marked `legal_reviewed` without a qualified opinion record and evidence reference.
+- Source versions are registered as new records; review status changes are audited and prior source versions are retained.
+- Added the private page `app/platform-admin/regulatory-sources.html` and linked it from the private Control Centre.
+- Production schema, RLS, grants, function ACLs, JavaScript syntax and unauthenticated denial paths were checked. The source register currently contains zero records; no legal source or opinion has been falsely marked verified.
+- A real signed-in AAL2 administrator browser test remains outstanding. Supabase Security Advisor reports the three administrator RPCs among the authenticated SECURITY DEFINER warnings; each includes explicit identity, AAL2 and platform-permission checks, but the warnings remain open for manual code review. RLS-no-policy notices on the source tables are intentional because direct client table access is revoked; data access is through the guarded RPCs.
+
+**Workflow rule:** source verification, professional legal/tax review, market assessment approval and commercial market activation are four separate controls. One must never be inferred from another.
