@@ -169,7 +169,7 @@ async function loadWorkspace(){
  $('submitProof').disabled=!currentAssignment()||['delivered','cancelled'].includes(currentAssignment().status);
  return true;
 }
-$('profileForm').addEventListener('submit',saveProfile);\n$('driverVerificationForm').addEventListener('submit',submitVerificationDocument);
+$('profileForm').addEventListener('submit',saveProfile);$('driverVerificationForm').addEventListener('submit',submitVerificationDocument);
 $('tripFilter').addEventListener('change',renderAssignments);
 $('tripSearch').addEventListener('input',renderAssignments);
 $('selectedAssignment').addEventListener('change',async e=>{selectedId=e.target.value;renderAssignments();await loadEvents();await loadEvidence();$('proofAssignment').value=selectedId;$('submitProof').disabled=!currentAssignment()||['delivered','cancelled'].includes(currentAssignment().status);});
