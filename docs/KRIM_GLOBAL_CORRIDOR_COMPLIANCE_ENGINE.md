@@ -18,14 +18,14 @@ This engine provides an evidence-led administrative workflow for researching pro
 
 ## Candidate catalogue records
 
-Six draft candidates were added using existing active location catalogue records: Ranchi–Kolkata, Ranchi–Dubai, Ranchi–Frankfurt, Ranchi–London, Ranchi–Singapore and Ranchi–New York. These are **proposed origin-destination pairs only**. No route geometry, transit jurisdictions, mode, permit, partner, serviceability or commercial availability is implied. All remain `draft` and not open for booking.
+Seven draft candidates are present using existing active location catalogue records: Ranchi–Kolkata, Ranchi–Jamshedpur, Ranchi–Dubai, Ranchi–Frankfurt, Ranchi–London, Ranchi–Singapore and Ranchi–New York. These are **proposed origin-destination pairs only**. No route geometry, transit jurisdictions, mode, permit, partner, serviceability or commercial availability is implied. All remain `draft` and not open for booking.
 
 ## Current verification
 
 - Four corridor tables have RLS enabled and forced.
 - Six admin RPCs deny anon execute and allow authenticated execute; each function independently checks AAL2 and platform-admin permission.
 - Workspace JavaScript syntax passed.
-- Six draft catalogue candidates are present.
+- Seven draft catalogue candidates are present.
 - No dossiers or corridor controls have been created; no corridor or country pack is approved.
 - Signed-in AAL2 browser testing, source-entry/review positive testing and full transaction-level corridor enforcement tests remain outstanding.
 - Security Advisor warnings for privileged SECURITY DEFINER functions require ongoing manual review.
@@ -37,7 +37,8 @@ This dossier workflow does not itself provide live sanctions screening, customs/
 ## Repository migration history
 
 - `supabase/migrations/20261104230000_krim_global_corridor_compliance_engine.sql`
-- `supabase/migrations/20261104234500_seed_proposed_corridor_catalogue.sql`
+- `supabase/migrations/20261104234500_seed_proposed_corridor_catalogue.sql
+- `supabase/migrations/20261104234500_seed_india_domestic_pilot_corridor_candidate.sql``
 
 The production changes were applied before the repository migration files were committed. On a fresh environment, apply the migration sequence in timestamp order and verify referenced base schemas and permissions first.
 
