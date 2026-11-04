@@ -5,7 +5,7 @@
 <label class="wide">Authorized facility<select id="movementFacility" name="facility_id" required><option value="">Loading authorized facilities…</option></select></label>
 <label>SKU / item reference<input name="sku" required maxlength="120" placeholder="e.g. CARTON-001"></label>
 <label>Quantity change<input name="quantity" type="number" min="0.001" step="0.001" required placeholder="10"></label>
-<label>Movement type<select name="movement_type" required><option value="">Choose movement…</option><option value="receipt">Receipt — add stock</option><option value="putaway">Put-away</option><option value="pick">Pick — remove stock</option><option value="dispatch">Dispatch — remove stock</option><option value="return">Return — add stock</option><option value="adjustment">Adjustment</option></select></label>
+<label>Movement type<select name="movement_type" required><option value="">Choose movement…</option><option value="receipt">Receipt — add stock</option><option value="pick">Pick — remove stock</option><option value="dispatch">Dispatch — remove stock</option><option value="return">Return — add stock</option><option value="adjustment">Adjustment</option></select></label>
 <label>Adjustment direction<select name="direction"><option value="add">Add stock</option><option value="remove">Remove stock</option></select></label>
 <label>Item description<input name="item_description" maxlength="240" placeholder="Optional description"></label>
 <label>Lot / handling unit<input name="lot_code" maxlength="120" placeholder="Optional lot reference"></label>
@@ -56,7 +56,7 @@
     if(!facilityId||!activeOrgIds.includes(String(orgId)))throw new Error("Choose a facility in your verified warehouse organization.");
     const sku=form.elements.sku.value.trim(),quantity=Number(form.elements.quantity.value),type=form.elements.movement_type.value;
     if(!sku||!Number.isFinite(quantity)||quantity<=0)throw new Error("Enter a valid SKU and a quantity greater than zero.");
-    let delta=quantity;if(type==="pick"||type==="dispatch")delta=-quantity;else if((type==="adjustment"||type==="putaway")&&form.elements.direction.value==="remove")delta=-quantity;
+    let delta=quantity;if(type==="pick"||type==="dispatch")delta=-quantity;else if((type==="adjustment")&&form.elements.direction.value==="remove")delta=-quantity;
     if((type==="receipt"||type==="return")&&delta<0)throw new Error("Receipt and return must add stock.");
     const args={p_organization_id:Number(orgId),p_facility_id:facilityId,p_sku:sku,p_quantity_delta:delta,p_movement_type:type,p_item_description:form.elements.item_description.value.trim(),p_lot_code:form.elements.lot_code.value.trim()||null,p_unit_code:form.elements.unit_code.value.trim()||"unit",p_storage_location:form.elements.storage_location.value.trim()||null,p_quality_status:form.elements.quality_status.value,p_reference_type:form.elements.reference_type.value.trim()||null,p_reference_id:form.elements.reference_id.value.trim()||null,p_notes:form.elements.notes.value.trim()};
     const signature=JSON.stringify(args);if(!idempotencyKey){idempotencyKey=crypto.randomUUID();pendingMovementSignature=signature;}else if(pendingMovementSignature!==signature)throw new Error("This request may already have reached the database. Restore the original movement fields and retry before starting a different movement.");args.p_idempotency_key=idempotencyKey;
