@@ -401,3 +401,21 @@ The earlier note that a domestic-lane database migration was required was incorr
 The private admin console is linked in the admin navigation, checks AAL2, and uses the existing server-side permission-checked pricing RPCs. Static script validation and RPC argument/signature inspection passed; signed-in browser E2E has not been claimed.
 
 **Step 3 engineering deliverables are complete:** governed global rate-card lifecycle, private admin workflow, direct table-write lockdown, evidence/approval/activation checks, quote fail-closed behavior, and domestic/cross-border market-count handling. **Commercial publication remains disabled by design** because production currently has zero active verified partner capabilities and zero eligible markets, with no genuine provider cost evidence, KRIM margin decision or qualified tax review. The one existing pricing row is a zero-value non-commercial template; no invented commercial values were added. This gate must remain in force until actual business evidence is available.
+
+
+## 11. Step 3 — Commercial Pricing & Rate Cards (5 November 2026)
+
+**Governance and quote-integrity implementation: applied. Commercial activation: evidence-gated and not yet accepted.**
+
+- Global rate-card table writes are restricted to permission-checked privileged RPCs. Anonymous and direct authenticated writes are revoked; RLS remains enabled.
+- Rate activation requires documented provider cost, KRIM platform fee, currency-precision reconciliation, qualified tax-treatment review, explicit approval, verified registered-business provider capabilities in both route countries, and both markets passing the full activation gate.
+- Same-country domestic lanes are supported alongside cross-border lanes. Conflicting concurrent rate-card activations are serialized.
+- All quote paths require active, evidence-backed and approved rate cards, market activation, route/service-tier matching and currency-aware rounding.
+- Issued tariff quotes persist a price-basis snapshot without exposing provider buy cost or KRIM margin to the customer.
+- A private admin rate-governance console is linked from the private Control Centre. The partner rate-card register is organization-scoped and read-only. The legacy fictional rate-card examples have been removed.
+- The zero-value INR placeholder remains a draft. Production currently has 0 active/positive rate cards, 0 partner rate cards, 0 partner quotes, 0 verified active partner capabilities, 0 active FX rates and 0 tax rules.
+- No rates, carrier offers, margins, tax values or approvals have been fabricated. No quote, payment, shipment or market activation was attempted.
+
+**Commercial acceptance remains pending:** at least one defined India-first lane requires a verified provider, dated carrier buy-rate evidence, approved KRIM fee/margin, qualified tax treatment, active market readiness and a verified persisted customer quote. Tax-exclusive pricing and international FX conversion are not enabled until their reviewed calculation paths and reference data exist.
+
+Detailed evidence: `docs/audits/step-03-commercial-pricing-readiness-2026-11-05.md`.
