@@ -386,3 +386,10 @@ Current rate-card creation rejects same-country origin/destination, and approval
 A real lane still requires a verified registered-business partner, dated carrier buy-rate evidence, an approved KRIM fee/margin, explicit charge basis/minimum, qualified tax review, applicable surcharge evidence and documented approval/effective dates. No commercial values, providers, tax rules, FX rates or coverage have been invented.
 
 **Step 3 is not accepted as complete. Step 4 must not begin until the pending migration is applied and verified and the first genuine commercial lane is evidenced and approved.**
+
+
+### Step 3 implementation update — 5 November 2026
+- Added a private platform-admin Commercial Pricing & Rate Cards console at `app/platform-admin/commercial-pricing.html` and linked it in `app/platform-admin/index.html`.
+- The console requires AAL2, uses the existing permission-checked administrator RPCs for list/create/evidence/approve/status, and preserves the no-direct-table-DML control. It supports evidence references, provider buy-rate/platform-fee reconciliation inputs, qualified tax-review reference, commercial approval reference, effective dates, and guarded activation/suspension/expiry.
+- JavaScript syntax checks passed; all five RPCs were confirmed executable by the authenticated database role. This does not establish browser E2E: no signed-in AAL2 session was available for an actual UI workflow test.
+- Domestic same-country lane creation remains explicitly blocked in the UI until the pending migration is applied and verified.
