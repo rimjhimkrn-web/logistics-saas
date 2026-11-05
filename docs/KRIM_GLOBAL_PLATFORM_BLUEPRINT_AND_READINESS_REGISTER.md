@@ -462,3 +462,11 @@ Created `docs/growth/partner-prospect-register-2026-11-05.md` with six source-ba
 
 - Customer partner-selection now restores an already-awarded quote after refresh and keeps checkout locked if the quote has expired, even when capacity is reserved.
 Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
+
+
+### Step 6 — Operational fulfilment (initial audit; in progress)
+- Initial production snapshot shows 0 driver profiles/assignments, 0 approved warehouse facilities/tasks/inventory, 0 dispatches, 0 POD records, 0 customs records and 0 operational exceptions. Only 1 tracking event and 2 shipment milestones exist; these do not establish active execution or live telemetry.
+- Confirmed authenticated driver and warehouse workspaces, AAL2 admin review, driver assignment/milestone and warehouse task/evidence guardrails, and an opaque-token public tracking endpoint that returns recorded events only.
+- Retired six legacy pages containing fabricated GPS, POD/settlement, warehouse KPI, fleet telemetry or exception/SLA claims. Routes now redirect to authenticated or canonical workflows.
+- **State:** initial audit and legacy cleanup only. Complete the remaining driver, warehouse, dispatch, customs, exception and POD page/workflow audit before Step 6 can be accepted. No real operations have started.
+- Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
