@@ -550,3 +550,10 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 - Warehouse admin facility review requires AAL2 and platform-admin permission. No live facility/warehouse transaction was created.
 - **Step 6 remains in progress:** no active verified warehouse facility is available for end-to-end tests; shipment/leg linking, authorized operations dispatch gateway, cross-org negative tests and signed-in browser E2E remain open. Dispatch handover is not yet equivalent to shipment dispatch or driver assignment.
 - Detailed audit: `docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md`.
+
+
+### Step 6 — Warehouse chain and mixed-quality lot guard
+- Added live read-only Warehouse Performance and Alerts & Queue modules. They use authorized database records only and clearly distinguish in-app queues from external notification delivery.
+- Inventory receipt movement now rejects merging stock into an existing SKU/lot balance when quality states differ. This protects already-released stock from being mixed with pending/held/rejected receipts. Inventory movement RPC remains service-role-only; authenticated direct calls are denied.
+- Current warehouse production counts are all zero (facilities, tasks, receipts, inventory, movements, evidence). No operational data was fabricated or created.
+- **Step 6 is not complete** until warehouse receipts/dispatch are authoritatively linked to shipment legs, Operations Control Tower dispatch is safely integrated, cross-workspace visibility is tested, and signed-in multi-user E2E passes on an approved facility.
