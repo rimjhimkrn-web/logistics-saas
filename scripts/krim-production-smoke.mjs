@@ -192,7 +192,7 @@ if (existsSync(supportPath)) {
 const e2eDashboardPath = "public/testing/e2e-test-runner.html";
 if (existsSync(e2eDashboardPath)) {
   const dashboard = readFileSync(e2eDashboardPath, "utf8");
-  if (/100% Passing Rate|ALL SUITES GREEN|Executing full E2E test suite[\\s\\S]*?All tests passed successfully|Zero Downtime Failover/i.test(dashboard)) {
+  if (/100% Passing Rate|ALL SUITES GREEN|Executing full E2E test suite[\s\\S]*?All tests passed successfully|Zero Downtime Failover/i.test(dashboard)) {
     failures.push("E2E dashboard contains fabricated/unverified test-success claims.");
   }
   if (!/NOT RUN|Runner Not Connected/i.test(dashboard)) {
@@ -409,7 +409,7 @@ for (const file of customerOsPages) {
   const html = readFileSync(file, "utf8");
   for (const match of html.matchAll(/(?:href|src|action)=["']([^"'#]+)["']/gi)) {
     const raw = match[1].trim();
-    if (!raw || raw.includes("<") || /\\s/.test(raw) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
+    if (!raw || raw.includes("<") || /\s/.test(raw) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
     const clean = raw.split(/[?#]/)[0];
     if (!clean) continue;
     let target;
@@ -450,7 +450,7 @@ for (const file of allHtmlFiles) {
   const html = readFileSync(file, "utf8");
   for (const match of html.matchAll(/(?:href|src|action)=["']([^"'#]+)["']/gi)) {
     const raw = match[1].trim();
-    if (!raw || raw.includes("<") || /\\s/.test(raw) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
+    if (!raw || raw.includes("<") || /\s/.test(raw) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) continue;
     const clean = raw.split(/[?#]/)[0];
     if (!clean) continue;
     let candidates = [];
@@ -832,12 +832,12 @@ for (const file of phaseNineInterfaceFiles) {
   // Retired legacy routes intentionally use a tiny noindex redirect document.
   // They must not masquerade as workspace pages or be forced to duplicate the shell.
   const retiredRedirect =
-    /<meta\\s+name=["']robots["']\\s+content=["']noindex,nofollow["']/i.test(source) &&
-    /location\\.replace\\(/.test(source) &&
+    /<meta\s+name=["']robots["']\s+content=["']noindex,nofollow["']/i.test(source) &&
+    /location\.replace\\(/.test(source) &&
     /legacy page|page has been retired|page has been replaced/i.test(source);
   if (retiredRedirect) continue;
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  const cssCount = (head.match(/core\\/krim-global-interface\\.css/g) || []).length;
+  const cssCount = (head.match(/core\/krim-global-interface\.css/g) || []).length;
   if (cssCount !== 1) failures.push("Phase 9 page must load exactly one shared KRIM stylesheet: " + file);
   if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 9 page is missing the KRIM global shell: " + file);
   const expectedHref = /^(?:app\/|public\/(?:warehouse|operations|partner|shipments)\/)/.test(file) ? "../../core/krim-global-interface.css" : "../core/krim-global-interface.css";
