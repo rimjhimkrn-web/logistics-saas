@@ -70,7 +70,7 @@ nav.innerHTML=groups.map(g=>{const count=PAGE.cards.filter(m=>{const n=Number(m.
 sections.innerHTML=groups.map(g=>{
 const cards=PAGE.cards.filter(m=>{const n=Number(m.n);return n>=g.min&&n<=g.max});
 return '<section class="module-group" id="'+g.id+'" aria-labelledby="'+g.id+'-title"><div class="module-group-head"><div><h3 id="'+g.id+'-title">'+esc(g.label)+'</h3><p>'+esc(g.description)+'</p></div></div><div class="grid">'+cards.map(m=>{
-const locked=m.approval&&!approved,href=root(m.href);
+const commercialApproval=PAGE.mode==="registered_business"&&approved;const locked=m.approval&&!commercialApproval,href=root(m.href);
 return '<article class="card '+(locked?"locked":"")+'"><div class="card-top"><span class="num">WORK AREA '+esc(m.n)+'</span><span class="state">'+(locked?"APPROVAL REQUIRED":m.approval?"ELIGIBILITY-GATED":"SETUP / REFERENCE")+'</span></div><h3>'+esc(m.title)+'</h3><p>'+esc(m.desc)+'</p>'+(locked?'<span class="locked-label">Available after organization approval</span>':'<a href="'+esc(href)+'">Open workspace →</a>')+'</article>';
 }).join("")+'</div></section>';
 }).join("");
