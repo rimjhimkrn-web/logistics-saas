@@ -57,3 +57,30 @@ The retired pages contained unsupported GPS broadcast claims, fabricated coordin
 - Signed-in browser E2E remains pending. No driver, facility, shipment, dispatch, POD, customs or exception records were fabricated or created.
 
 **Current state:** Initial Step 6 audit and legacy cleanup only. Operational fulfilment engineering remains in progress; real operations remain deferred until the user's full ecosystem review and explicit launch authorization.
+
+
+## Follow-up engineering pass — 5 November 2026
+
+### Driver proof-of-delivery workflow implemented
+- Added a driver-only POD evidence form to `app/driver/module-10-proof-of-delivery.html`.
+- The form lists only the signed-in driver's own assignments in `in_transit` state. It requires recipient name and an actual evidence file; accepts JPEG, PNG, WEBP or PDF up to 10 MB.
+- Files upload to the private `krim-driver-evidence` bucket under the authenticated user/assignment path. The page then registers metadata in `krim_driver_delivery_evidence`.
+- Applied migration `secure_driver_delivery_evidence_registration`: authenticated SELECT/INSERT are granted, UPDATE/DELETE remain denied, and the INSERT policy now requires the authenticated user's active driver membership, own non-closed assignment, strict path structure, allowed MIME type/size, and an existing storage object owned by that user.
+- The existing trip-event RPC still independently requires an evidence row before a driver can record the delivered event. Uploading evidence does not mark a shipment delivered or authorize final shipment closure.
+- Verified the migration is recorded, RLS remains enabled, SELECT/INSERT grants are present, UPDATE/DELETE are false, and the updated page JavaScript passes syntax validation. No file or POD record was uploaded or created during verification.
+
+### Legacy route consolidation
+The audit identified a large set of older static pages that displayed fictitious trips, warehouse KPIs/inventory, unsupported customs actions, placeholder operations screens, or GPS/AIS/air/rail/sensor telemetry without a connected provider. These routes were converted to noindex, path-safe redirects to the authenticated/canonical workflows:
+- Driver legacy pages: assigned trips, assignment details, cargo condition, delay/incident reports, delivery checklist, failed delivery, loading confirmation, photo/recipient/signature/POD, trip completion/details/status, earnings, expenses, maintenance, performance, profile, route navigation, safety, emergency support, settings and offline sync.
+- Warehouse legacy pages: appointment calendar, container management, cross-docking, cycle counting, dock scheduling, facility capacity/profile, inventory, labour, outbound dispatch, packing, picking, putaway, returns, stock movements, performance, yard, analytics, notifications and quality control. Existing task-backed warehouse modules and the audit page were retained.
+- Customs/trade pages: old static declaration, duty, export/import, free-trade-zone, HS code, origin, regulatory audit, sanctions and shipping-instruction forms now route to the authenticated Customs & Trade Workspace.
+- Operations: old dashboard/control tower, disruption/ETA/audit dashboards and blank placeholder routes now route to the appropriate authenticated operations modules.
+- Visibility: old air/rail/road/vessel, AIS, geofence, temperature, container-condition, ETA, prediction, milestone and tracking-sharing demo pages now route to secure recorded tracking. The canonical public tracking service does not claim live GPS/AIS/flight/sensor feeds.
+- Obsolete partner POD forms now route to the authenticated partner document/evidence register and no longer claim automatic escrow payout or e-way-bill closure.
+
+### Remaining Step 6 work
+- Verify warehouse facility onboarding, evidence upload, task transitions, inventory movement and dispatch handover as one role-separated chain.
+- Verify driver assignment lifecycle and POD verification/authorization across the partner assignment model and the driver assignment model; these are distinct schema paths and must not be conflated.
+- Review customs declaration read/write permissions, evidence storage and authority status semantics.
+- Review dispatch and exception management with actual role-scoped data.
+- Signed-in browser E2E remains pending. The user has deferred all real operations until full ecosystem review. No real shipment, driver, facility, inventory, customs declaration, POD or delivery event was created.
