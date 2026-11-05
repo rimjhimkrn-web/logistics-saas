@@ -44,7 +44,7 @@ async function verify(){
  if(!(gate.data?.roles||[]).includes("platform_superadmin"))throw new Error("Platform Super Admin access is required for capacity resource decisions.");
  document.documentElement.classList.add("authorized");
 }
-function eligible(x){return x.partner_account_mode==="registered_business"&&x.organization_status==="active"&&["active","verified"].includes(x.partner_lifecycle_status)&&["verified","approved"].includes(x.partner_verification_status)&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(x.partner_compliance_status)&&x.verified_capability_exists===true}
+function eligible(x){return ["partner","carrier","warehouse","forwarder","logistics_provider","warehouse_operator"].includes(String(x.organization_type||"").toLowerCase())&&x.partner_account_mode==="registered_business"&&x.organization_status==="active"&&["active","verified"].includes(x.partner_lifecycle_status)&&["verified","approved"].includes(x.partner_verification_status)&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(x.partner_compliance_status)&&x.verified_capability_exists===true}
 function fmt(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}
 function render(){
  const term=$("filter").value.trim().toLowerCase(),list=items.filter(x=>JSON.stringify(x).toLowerCase().includes(term));
