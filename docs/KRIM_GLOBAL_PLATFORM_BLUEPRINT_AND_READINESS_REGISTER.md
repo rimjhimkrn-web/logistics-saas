@@ -482,6 +482,8 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - POD lifecycle hardening: driver assignments now link to the exact partner assignment; driver POD submission requires owned private evidence; pending POD tracking no longer appears as delivered; and AAL2 admin review is required before final delivery authorization. A private admin verification page is linked from the control centre. Source and SQL checks passed; no live evidence or operational records were created. Signed-in E2E remains pending.
 
 - Operational milestone RPC now binds driver users to their exact linked driver assignment, requires shipment update/dispatch permission for other partner users, fails closed on ambiguous multi-leg matches and rejects direct `delivered` events pending verified POD authorization. The Driver Milestones UI still needs atomic event/tracking integration and remains an open Step 6 item.
+
+- Operations Control Tower Shipment Control and Dispatch & Handover now include RLS-scoped read-only shipment registers. No dispatch, assignment, milestone, customs, or shipment mutation is exposed from these pages. Customs remains read-only under SELECT-only grants; no authority decision is fabricated. Current operational tables contain zero dispatches, customs records, warehouse facilities/tasks/movements, driver assignments or POD evidence. A stale expired open opportunity is blocked by the quote RPC and documented for cleanup.
 Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
 
 
