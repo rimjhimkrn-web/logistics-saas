@@ -534,3 +534,11 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 - Static JavaScript syntax passed for 15 key warehouse/admin pages. No signed-in browser E2E performed.
 - **State:** Step 6 remains in progress. The warehouse operational chain is implemented but cannot be proven end-to-end until a genuinely verified warehouse organization/facility is available in an approved test context. Shipment-level dispatch integration, returns/transfers/adjustments, cycle-count and bin-capacity controls remain open.
 - Detailed audit: `docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md`.
+
+
+### Step 6 — Independent warehouse quality release
+- Added the Warehouse Quality Review interface using the existing maker-checker RPC. A completed goods-receipt/damage task, task-linked inspection report and reviewer distinct from task creator/completer are required; decisions are audited.
+- Applied `20261105064221_harden_warehouse_task_idempotency_and_quality_gate` and `20261105064301_warehouse_maker_checker_release_gate`. Task idempotency is serialized and conflicting key reuse rejected. Initial goods receipt cannot mark stock Released; inbound quality holds must remain held/rejected until independent review.
+- Inbound Receiving and Goods Receipt UI no longer offer a direct Released choice. Quality review linked from the Warehouse Control Centre and read-only Inventory Ledger.
+- Verified database grants: internal movement RPC not executable by authenticated/anon; controlled task transition and independent review remain authenticated; all warehouse production records remain zero.
+- **State:** Step 6 still in progress pending two-user signed-in E2E, an approved warehouse facility, shipment-level dispatch integration and remaining governed workflows.
