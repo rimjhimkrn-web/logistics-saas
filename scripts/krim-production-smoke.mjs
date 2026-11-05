@@ -833,7 +833,7 @@ for (const file of phaseNineInterfaceFiles) {
   // They must not masquerade as workspace pages or be forced to duplicate the shell.
   const retiredRedirect =
     /<meta\s+name=["']robots["']\s+content=["']noindex,nofollow["']/i.test(source) &&
-    /location\.replace\\(/.test(source) &&
+    /location\.replace\(/.test(source) &&
     /legacy page|page has been retired|page has been replaced/i.test(source);
   if (retiredRedirect) continue;
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
