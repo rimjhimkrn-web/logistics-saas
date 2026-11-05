@@ -9,7 +9,8 @@ let orgIds=[],quote=null,shipment=null;
 function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function money(amount,currency){const n=Number(amount);if(!Number.isFinite(n))return 'Price not recorded';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:String(currency||'INR').toUpperCase(),maximumFractionDigits:2}).format(n)}catch(_){return String(currency||'')+' '+n.toLocaleString()}}
-function taxTreatment(value){return value==='included_in_rate'?'Tax included in quoted rate':value==='not_applicable'?'Tax reviewed as not applicable':'Tax treatment not recorded';}\nfunction date(value){if(!value)return 'Not recorded';const d=new Date(value);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
+function taxTreatment(value){return value==='included_in_rate'?'Tax included in quoted rate':value==='not_applicable'?'Tax reviewed as not applicable':'Tax treatment not recorded';}
+function date(value){if(!value)return 'Not recorded';const d=new Date(value);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function renderList(rows){
  const root=$('quote-list');root.replaceChildren();
@@ -34,7 +35,7 @@ async function loadList(){
 }
 async function loadDetail(){
  if(!Number.isSafeInteger(quoteId)||quoteId<=0){say('A valid quote_id is required. Open a quote from your quote register.','warn');$('quote-actions').classList.add('hidden');return}
- const {data:q,error:qe}=await client.from('krim_quotes').select('id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at').eq('id',quoteId).in('customer_organization_id',orgIds).maybeSingle();if(qe)throw qe;
+ const {data:q,error:qe}=await client.from('krim_quotes').select('id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at,pricing_snapshot').eq('id',quoteId).in('customer_organization_id',orgIds).maybeSingle();if(qe)throw qe;
  if(!q){say('Quote not found in your authorized customer organizations. No record outside your organization was displayed.','error');$('quote-actions').classList.add('hidden');return}
  quote=q;
  const {data:s,error:se}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,origin_place_label,destination_place_label,goods_description,requested_transport_mode,status').eq('id',Number(q.shipment_id)).in('customer_organization_id',orgIds).maybeSingle();if(se)throw se;shipment=s||null;
