@@ -829,8 +829,15 @@ const phaseNineInterfaceFiles = [...new Set([
 ])];
 for (const file of phaseNineInterfaceFiles) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
+  // Retired legacy routes intentionally use a tiny noindex redirect document.
+  // They must not masquerade as workspace pages or be forced to duplicate the shell.
+  const retiredRedirect =
+    /<meta\\s+name=["']robots["']\\s+content=["']noindex,nofollow["']/i.test(source) &&
+    /location\\.replace\\(/.test(source) &&
+    /legacy page|page has been retired|page has been replaced/i.test(source);
+  if (retiredRedirect) continue;
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  const cssCount = (head.match(/core\/krim-global-interface\.css/g) || []).length;
+  const cssCount = (head.match(/core\\/krim-global-interface\\.css/g) || []).length;
   if (cssCount !== 1) failures.push("Phase 9 page must load exactly one shared KRIM stylesheet: " + file);
   if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 9 page is missing the KRIM global shell: " + file);
   const expectedHref = /^(?:app\/|public\/(?:warehouse|operations|partner|shipments)\/)/.test(file) ? "../../core/krim-global-interface.css" : "../core/krim-global-interface.css";
