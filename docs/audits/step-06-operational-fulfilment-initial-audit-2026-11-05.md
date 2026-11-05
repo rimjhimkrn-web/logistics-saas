@@ -140,3 +140,9 @@ The audit identified a large set of older static pages that displayed fictitious
 
 ### Step 6 remains open
 The POD chain is now connected in source and database design, but it has not been exercised end-to-end. Warehouse-to-dispatch chain, customs permissions/status semantics, exception workflow and role-separated browser tests still need review. Do not mark operational fulfilment complete.
+
+### Additional milestone authorization correction — 6 November 2026
+- Review found that the former operational milestone RPC selected a partner assignment by shipment and active organisation membership alone. A driver membership was not required to match a specific driver assignment, and the RPC accepted a direct `delivered` event.
+- Replaced the function with assignment-scoped authorization: drivers must have the exact linked driver assignment; non-driver partner users need `shipment.update` or `shipment.dispatch`; ambiguous multi-leg assignment matches fail closed; direct `delivered` milestones are rejected in favour of verified POD authorization.
+- Database verification confirms the driver-assignment link guard and permission checks are present, anonymous EXECUTE is false, authenticated EXECUTE remains enabled, and the old direct-delivered path is blocked.
+- **Remaining gap:** the Driver Milestones page is still a read-only assignment view and has not yet been wired to an atomic driver-event + leg-specific tracking RPC. Do not treat pickup/in-transit actions as operationally complete until that page and shipment/leg state transitions are connected and tested.
