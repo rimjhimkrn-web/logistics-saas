@@ -38,7 +38,7 @@
   const $=id=>document.getElementById(id);
   const params=new URLSearchParams(location.search);
   const shipmentId=params.get("shipment_id");
-  let user=null,shipment=null,offers=[],selected=null,customerQuoteId=null,selectedPartnerQuoteId=null;
+  let user=null,shipment=null,offers=[],selected=null,customerQuoteId=null,selectedPartnerQuoteId=null,customerQuoteValidUntil=null;
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const date=v=>{if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?"Not recorded":new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(d)};
   const money=(amount,currency)=>{const n=Number(amount);if(!Number.isFinite(n))return "Amount unavailable";try{return new Intl.NumberFormat(undefined,{style:"currency",currency:currency||"INR",maximumFractionDigits:2}).format(n)}catch(_){return (currency||"Currency")+" "+n.toLocaleString()}};
@@ -61,6 +61,14 @@
       $("shipmentbox").hidden=false;$("shipmentref").textContent=shipment.shipment_number||("Shipment #"+shipment.id);
       $("origin").textContent=shipment.origin_place_label||"Origin not recorded";$("destination").textContent=shipment.destination_place_label||"Destination not recorded";
       $("shipmeta").textContent=[shipment.goods_description,shipment.requested_transport_mode,shipment.total_weight_kg!=null?Number(shipment.total_weight_kg).toLocaleString()+" kg":null].filter(Boolean).join(" · ")||"Shipment details are limited to recorded fields.";
+      customerQuoteId=null;selectedPartnerQuoteId=null;customerQuoteValidUntil=null;
+      const existingQuoteResult=await client.from("krim_quotes").select("id,partner_quote_id,status,valid_until").eq("shipment_id",Number(shipment.id)).eq("customer_organization_id",Number(shipment.customer_organization_id)).eq("status","accepted").order("id",{ascending:false}).limit(1).maybeSingle();
+      if(existingQuoteResult.error)throw existingQuoteResult.error;
+      if(existingQuoteResult.data&&existingQuoteResult.data.partner_quote_id){
+        customerQuoteId=Number(existingQuoteResult.data.id);
+        selectedPartnerQuoteId=Number(existingQuoteResult.data.partner_quote_id);
+        customerQuoteValidUntil=existingQuoteResult.data.valid_until||null;
+      }
       const qr=await client.from("krim_partner_quotes").select("id,opportunity_id,shipment_id,partner_organization_id,quote_number,amount,currency_code,valid_until,status,notes,submitted_at").eq("shipment_id",Number(shipmentId)).in("status",["submitted","under_review","shortlisted"]).order("amount",{ascending:true});
       if(qr.error)throw qr.error;
       offers=(qr.data||[]).filter(q=>Number(q.amount)>0&&(!q.valid_until||new Date(q.valid_until).getTime()>Date.now()));
@@ -85,7 +93,7 @@
       const validUntil=new Date(Date.now()+7*24*60*60*1000).toISOString();
       const {data,error}=await client.rpc("krim_award_partner_quote_for_checkout",{p_partner_quote_id:Number(q.id),p_valid_until:validUntil});
       if(error)throw error;
-      customerQuoteId=Number(data?.id);selectedPartnerQuoteId=Number(q.id);
+      customerQuoteId=Number(data?.id);selectedPartnerQuoteId=Number(q.id);customerQuoteValidUntil=data?.valid_until||null;
       if(!customerQuoteId)throw new Error("The server did not return a customer quote ID. Do not proceed to checkout.");
       $("assignmentstate").textContent="Award submitted for "+(q.quote_number||("offer #"+q.id))+". Checking whether the partner has accepted the assignment.";
       $("check-assignment").disabled=false;
@@ -110,9 +118,13 @@
           if(br.error)throw br.error;
           const binding=br.data;
           const capacityConfirmed=!!(binding&&binding.status==="confirmed"&&binding.reservation_id&&Number(binding.shipment_id)===Number(shipment.id)&&Number(binding.shipment_leg_id)===Number(r.data.shipment_leg_id));
-          if(capacityConfirmed){
+          if(capacityConfirmed&&customerQuoteValidUntil&&new Date(customerQuoteValidUntil).getTime()>Date.now()){
             $("assignmentstate").textContent="Partner accepted and verified capacity reserved · "+(r.data.assignment_number||("assignment #"+r.data.id))+". Secure checkout is available.";
             $("checkout").disabled=false;banner("Assignment and capacity confirmed","KRIM records an accepted assignment and a confirmed capacity binding. The payment server will revalidate the linked reservation before creating a payment order.","good");
+          }else if(capacityConfirmed){
+            $("checkout").disabled=true;
+            $("assignmentstate").textContent="Capacity is reserved, but the accepted customer quote has expired or has no valid expiry. Request a fresh eligible quote before checkout.";
+            banner("Customer quote is no longer valid","The capacity reservation does not extend quote validity. Checkout remains locked until a valid customer quote is available.","warn");
           }else{
             $("checkout").disabled=true;
             $("assignmentstate").textContent="Partner accepted, but the capacity binding is not confirmed. Checkout remains locked.";
