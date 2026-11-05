@@ -46,6 +46,7 @@ BEGIN
  IF NOT FOUND OR NOT EXISTS(SELECT 1 FROM public.krim_driver_verification_documents d WHERE d.profile_id=v_profile.id AND d.document_type='licence_front' AND d.review_status='accepted') OR NOT EXISTS(SELECT 1 FROM public.krim_driver_verification_documents d WHERE d.profile_id=v_profile.id AND d.document_type='licence_back' AND d.review_status='accepted') THEN RAISE EXCEPTION USING errcode='42501',message='Driver must have active membership, verified profile and independently accepted front/back licence evidence';END IF;
  SELECT v.* INTO v_vehicle FROM public.krim_vehicles v JOIN public.krim_vehicle_driver_bindings b ON b.vehicle_id=v.id AND b.organization_id=v_pa.partner_organization_id AND b.driver_user_id=p_driver_user_id AND b.status='active' WHERE v.organization_id=v_pa.partner_organization_id AND v.verification_status='verified' AND v.operational_status='active' FOR UPDATE OF v;
  IF NOT FOUND THEN RAISE EXCEPTION USING errcode='42501',message='Driver must have an active binding to a verified, operational vehicle in this partner organisation';END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.krim_vehicle_document_requirements r WHERE r.registration_country_code=v_vehicle.registration_country_code AND lower(r.vehicle_category)=lower(v_vehicle.vehicle_category) AND r.is_required=true) OR EXISTS(SELECT 1 FROM public.krim_vehicle_document_requirements r WHERE r.registration_country_code=v_vehicle.registration_country_code AND lower(r.vehicle_category)=lower(v_vehicle.vehicle_category) AND r.is_required=true AND NOT EXISTS(SELECT 1 FROM public.krim_vehicle_documents vd WHERE vd.vehicle_id=v_vehicle.id AND vd.document_type=r.document_type AND vd.review_status='approved' AND (vd.expires_at IS NULL OR vd.expires_at>=current_date))) THEN RAISE EXCEPTION USING errcode='55000',message='Vehicle mandatory evidence is missing, unapproved or expired';END IF;
  IF v_ship.total_weight_kg IS NULL OR v_ship.total_weight_kg<=0 OR v_vehicle.payload_capacity IS NULL OR v_vehicle.payload_unit IS NULL THEN RAISE EXCEPTION USING errcode='55000',message='Shipment weight and verified vehicle payload capacity are required before dispatch assignment';END IF;
  CASE lower(btrim(v_vehicle.payload_unit))
   WHEN 'kg' THEN v_capacity_kg:=v_vehicle.payload_capacity;
@@ -70,9 +71,10 @@ BEGIN
  END IF;
  INSERT INTO public.krim_driver_assignments(user_id,organization_id,shipment_id,shipment_leg_id,partner_assignment_id,vehicle_id,status,pickup_location,delivery_location,created_by)
  VALUES(p_driver_user_id,v_driver_org,v_ship.id,v_leg.id,p_partner_assignment_id,v_vehicle.id,'assigned',v_pickup,v_delivery,v_user) RETURNING * INTO v_assignment;
+ INSERT INTO public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,new_state) VALUES(v_user,v_driver_org,'shipment.driver_vehicle.assigned','driver_assignment',v_assignment.id::text,'dispatch-compatibility',jsonb_build_object('shipment_id',v_ship.id,'shipment_leg_id',v_leg.id,'driver_user_id',p_driver_user_id,'vehicle_id',v_vehicle.id),jsonb_build_object('status','assigned','vehicle_id',v_vehicle.id));
  RETURN v_assignment;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_driver_accept_assignment(p_assignment_id uuid)
  RETURNS krim_driver_assignments
@@ -90,6 +92,7 @@ BEGIN
  IF v_assignment.vehicle_id IS NULL THEN RAISE EXCEPTION USING errcode='55000',message='This assignment has no linked verified vehicle; operations must correct the assignment before acceptance';END IF;
  SELECT v.* INTO v_vehicle FROM public.krim_vehicles v JOIN public.krim_vehicle_driver_bindings b ON b.vehicle_id=v.id AND b.driver_user_id=v_user AND b.organization_id=v_assignment.organization_id AND b.status='active' WHERE v.id=v_assignment.vehicle_id AND v.organization_id=v_assignment.organization_id AND v.verification_status='verified' AND v.operational_status='active' FOR UPDATE OF v;
  IF NOT FOUND THEN RAISE EXCEPTION USING errcode='55000',message='The assigned vehicle is no longer verified, active or bound to this driver';END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.krim_vehicle_document_requirements r WHERE r.registration_country_code=v_vehicle.registration_country_code AND lower(r.vehicle_category)=lower(v_vehicle.vehicle_category) AND r.is_required=true) OR EXISTS(SELECT 1 FROM public.krim_vehicle_document_requirements r WHERE r.registration_country_code=v_vehicle.registration_country_code AND lower(r.vehicle_category)=lower(v_vehicle.vehicle_category) AND r.is_required=true AND NOT EXISTS(SELECT 1 FROM public.krim_vehicle_documents vd WHERE vd.vehicle_id=v_vehicle.id AND vd.document_type=r.document_type AND vd.review_status='approved' AND (vd.expires_at IS NULL OR vd.expires_at>=current_date))) THEN RAISE EXCEPTION USING errcode='55000',message='Vehicle mandatory evidence is missing, unapproved or expired';END IF;
  IF v_assignment.status='accepted' THEN IF v_assignment.accepted_by IS DISTINCT FROM v_user OR v_assignment.accepted_at IS NULL THEN RAISE EXCEPTION USING errcode='23514',message='Accepted assignment metadata is inconsistent; contact operations';END IF;RETURN v_assignment;END IF;
  IF v_assignment.status<>'assigned' THEN RAISE EXCEPTION USING errcode='55000',message='Only a pending driver assignment can be accepted';END IF;
  SELECT * INTO v_partner FROM public.krim_shipment_partner_assignments WHERE id=v_assignment.partner_assignment_id AND shipment_id=v_assignment.shipment_id AND shipment_leg_id=v_assignment.shipment_leg_id AND partner_organization_id=v_assignment.organization_id AND status IN('accepted','active') FOR UPDATE;
@@ -113,7 +116,7 @@ BEGIN
  IF NOT FOUND OR (SELECT code FROM public.krim_transport_modes WHERE id=v_leg.transport_mode_id)<>'ROAD' THEN RAISE EXCEPTION USING errcode='23514',message='Shipment leg is no longer assigned to this partner or is not a road leg';END IF;
  UPDATE public.krim_driver_assignments SET status='accepted',accepted_at=now(),accepted_by=v_user,updated_at=now() WHERE id=v_assignment.id RETURNING * INTO v_assignment;RETURN v_assignment;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_vehicle_driver_bind(p_organization_id bigint, p_vehicle_id uuid, p_driver_user_id uuid)
  RETURNS uuid
@@ -136,7 +139,7 @@ BEGIN
  INSERT INTO public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,new_state) VALUES(v_user,p_organization_id,'vehicle.driver.bound','vehicle_driver_binding',v_binding::text,'fleet-compatibility',jsonb_build_object('vehicle_id',p_vehicle_id,'driver_user_id',p_driver_user_id),jsonb_build_object('status','active'));
  RETURN v_binding;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_vehicle_driver_binding_list(p_organization_id bigint)
  RETURNS TABLE(binding_id uuid, vehicle_id uuid, registration_number text, driver_user_id uuid, driver_name text, status text, created_at timestamp with time zone)
@@ -152,7 +155,7 @@ BEGIN
  JOIN public.krim_driver_profiles dp ON dp.id=b.driver_profile_id
  WHERE b.organization_id=p_organization_id ORDER BY b.created_at DESC;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_vehicle_driver_eligible_drivers(p_organization_id bigint)
  RETURNS TABLE(driver_user_id uuid, driver_profile_id uuid, full_name text, licence_number text)
@@ -173,7 +176,7 @@ BEGIN
  AND NOT EXISTS(SELECT 1 FROM public.krim_vehicle_driver_bindings b WHERE b.driver_user_id=dp.user_id AND b.status='active')
  ORDER BY dp.full_name;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_vehicle_driver_eligible_vehicles(p_organization_id bigint)
  RETURNS TABLE(vehicle_id uuid, registration_number text, registration_country_code text, vehicle_category text, vehicle_type text, payload_capacity numeric, payload_unit text)
@@ -192,7 +195,7 @@ BEGIN
  AND NOT EXISTS(SELECT 1 FROM public.krim_vehicle_driver_bindings b WHERE b.vehicle_id=v.id AND b.status='active')
  ORDER BY v.registration_number;
 END;$function$
-
+;
 
 CREATE OR REPLACE FUNCTION public.krim_vehicle_driver_unbind(p_binding_id uuid, p_reason text)
  RETURNS text
@@ -213,7 +216,7 @@ BEGIN
  VALUES(v_user,v_binding.organization_id,'vehicle.driver.unbound','vehicle_driver_binding',v_binding.id::text,'fleet-compatibility',jsonb_build_object('reason',btrim(p_reason)),jsonb_build_object('status','active'),jsonb_build_object('status','revoked','revoked_at',now()));
  RETURN 'revoked';
 END;$function$
-
+;
 REVOKE ALL ON FUNCTION public.krim_vehicle_driver_eligible_drivers(bigint) FROM PUBLIC,anon;
 REVOKE ALL ON FUNCTION public.krim_vehicle_driver_eligible_vehicles(bigint) FROM PUBLIC,anon;
 REVOKE ALL ON FUNCTION public.krim_vehicle_driver_binding_list(bigint) FROM PUBLIC,anon;
