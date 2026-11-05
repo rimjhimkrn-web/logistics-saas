@@ -42,3 +42,9 @@ Corrections:
 ## Remaining acceptance boundary
 
 The matching and assignment code paths are guarded, but a positive end-to-end assignment cannot be demonstrated without a real verified partner, approved capacity resource and available schedule. The user has explicitly deferred real partner/customer operations until the entire ecosystem has been completed and reviewed. Therefore no partner was contacted, no shipment was awarded, no capacity was reserved and no payment was attempted. Signed-in browser E2E and a real partner/capacity acceptance test remain launch gates, not claims of completion.
+
+
+## Follow-up continuity correction — 5 November 2026
+- The customer partner-selection page now restores the latest accepted customer quote and selected partner quote from the authenticated shipment record after a page refresh. This allows the customer to resume assignment/capacity checks after the partner completes the later reservation step.
+- Checkout restoration also requires the accepted customer quote to have a future validity timestamp; a confirmed capacity reservation does not extend an expired quote.
+- The updated inline JavaScript was syntax-checked. No shipment, quote, assignment or payment data was created or changed.
