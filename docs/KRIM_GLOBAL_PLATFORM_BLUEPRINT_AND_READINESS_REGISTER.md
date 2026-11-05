@@ -289,3 +289,9 @@ India remains the initial commercial launch market. This section records the cur
 **Permitted interim posture:** keep customer acquisition, non-binding enquiries and partner recruitment separate from confirmed bookings, transport commitments and customer-fund collection. Do not advertise unverified routes, rates, transit times or partner capacity. Whether even an enquiry-only public pilot requires additional disclosures must be confirmed by Indian counsel based on the live product and marketing.
 
 **Launch decision:** India is not yet cleared for commercial shipment bookings. The blocking facts are evidence-based and measurable: 18/18 country controls pending; 22/22 India readiness assessments pending; zero active verified India partner capabilities; no approved India corridor dossier. Do not bypass these gates.
+
+## India commercial launch gate register — 5 November 2026
+
+The evidence-backed India launch sequence, release gates, stop conditions and current production snapshot are maintained in `docs/KRIM_INDIA_COMMERCIAL_LAUNCH_GATES.md`. The current decision is **not cleared for commercial shipment bookings**: India country controls 0/18 approved, India market readiness assessments 0/22 approved, active verified India partner capabilities 0, and approved India corridor dossiers 0. Ranchi–Jamshedpur and Ranchi–Kolkata remain draft candidates only. Do not equate existing shipment/quote records with fulfilled commercial operations.
+
+The India pilot must pass legal/entity and carriage-registration review, GST/ECO/TCS review, payment/funds-flow approval, real carrier verification, route/cargo approval, insurance/contract controls, end-to-end financial and operational tests, and customer grievance readiness before any commercial activation. This register supersedes no legal advice and does not itself authorize operations.
