@@ -94,3 +94,5 @@ A large collection of old partner pages was found to contain static sample compa
 - Signed-in browser E2E for application upload, admin review, capability approval, partner quote, assignment, capacity reservation and driver invitation remains pending; no fake business evidence or synthetic partner has been inserted to force a pass.
 - Existing open verification case and pending capability require genuine evidence and authorized human review; they were not altered.
 - Step 4 is **backend-guarded and legacy-page cleanup substantially complete, but not fully acceptance-tested**. It remains open until a controlled test with an explicitly designated test account and genuine test documents can verify the complete workflow without activating a real commercial partner.
+
+- Static JavaScript syntax checks passed for the authenticated partner gateway, development/test and business pathway workspaces, both AAL2 admin review queues, and the retained live partner opportunity, accepted-assignment, capacity, driver-invitation and dispatch-assignment pages. These are source-level checks only; they do not substitute for authenticated browser E2E.
