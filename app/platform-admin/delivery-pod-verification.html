@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#0b1f3a">
+<title>KRIM | Delivery POD Verification</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172c48;background:#f3f6fb;--navy:#0b1f3a;--blue:#1769e8;--line:#e0e8f2;--muted:#718198;--green:#138564;--red:#bd3345}
+*{box-sizing:border-box}body{margin:0}html{visibility:hidden}html.authorized{visibility:visible}button,input{font:inherit}.top{height:66px;background:white;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 clamp(14px,3vw,32px);gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:.08em;color:var(--navy)}.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#37bfd5,#1769e8 65%,#7357d9);color:#fff;display:grid;place-items:center;font-size:19px}.brand small{display:block;font-size:9px;color:#8291a5;letter-spacing:.15em}.actions{display:flex;gap:8px}.btn{border:1px solid #dce5ef;border-radius:9px;padding:9px 12px;background:white;color:#314863;font-size:11px;font-weight:850;cursor:pointer}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.danger{color:var(--red);border-color:#efcbd1}.btn:disabled{opacity:.45;cursor:not-allowed}.wrap{max-width:1450px;margin:auto;padding:clamp(16px,3vw,32px)}.crumb,.eyebrow{font-size:10px;font-weight:950;letter-spacing:.14em;color:#7d8ca1}.head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:14px 0 22px}.head h1{margin:7px 0;color:var(--navy);font-size:clamp(27px,3vw,38px);letter-spacing:-.04em}.head p{margin:0;color:var(--muted);font-size:12px;line-height:1.7;max-width:850px}.eyebrow{color:var(--blue)}.badge,.state{display:inline-flex;border-radius:99px;padding:6px 9px;background:#f0f4f9;color:#61738a;font-size:9px;font-weight:900;white-space:nowrap}.state.good{background:#e9fbf3;color:#11724f}.state.bad{background:#fff0f2;color:#a92b40}.state.warn{background:#fff6e5;color:#94600b}.hero{background:linear-gradient(110deg,#0b1f3a,#164a77 70%,#087f91);border-radius:17px;color:white;padding:22px 24px;margin-bottom:16px}.hero h2{font-size:19px;margin:0 0 7px}.hero p{font-size:11px;color:#d8e9f7;line-height:1.7;margin:0;max-width:920px}.alert{display:none;padding:12px 14px;border-radius:10px;font-size:11px;line-height:1.6;margin-bottom:14px}.alert.show{display:block}.alert.error{background:#fff0f2;color:#9f2639;border:1px solid #f1cbd1}.alert.success{background:#effbf5;color:#11724f;border:1px solid #c7eadb}.card{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 6px 22px #15365708}.cardhead{padding:16px 18px;border-bottom:1px solid #edf1f6;display:flex;justify-content:space-between;align-items:center;gap:12px}.cardhead h3{font-size:13px;margin:0;color:var(--navy)}.cardhead p{font-size:10px;margin:4px 0 0;color:#8391a5}.toolbar{padding:12px 15px;border-bottom:1px solid #edf1f6;display:flex;gap:8px;flex-wrap:wrap}.toolbar input{flex:1;min-width:200px;border:1px solid #dce5ef;border-radius:9px;padding:10px;font-size:11px}.list{display:grid;gap:12px;padding:14px}.case{border:1px solid #e5ebf3;border-radius:12px;padding:15px}.casehead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.case h4{margin:0;color:#172c48;font-size:13px}.meta{font-size:10px;color:#78899e;line-height:1.7;margin-top:5px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}.field{padding:10px;border:1px solid #edf1f6;border-radius:9px;min-width:0}.field label{display:block;font-size:9px;color:#8291a5;text-transform:uppercase;letter-spacing:.08em;font-weight:900;margin-bottom:5px}.field div{font-size:11px;color:#314863;overflow-wrap:anywhere}.docs{margin-top:13px;padding:12px;background:#f8fafd;border-radius:10px}.docs h5{margin:0 0 9px;font-size:10px;color:#304864}.doclinks{display:flex;gap:7px;flex-wrap:wrap}.doclinks a{font-size:10px;font-weight:850;color:#1769e8;text-decoration:none;border:1px solid #dbe7f8;background:#fff;border-radius:8px;padding:8px 10px}.caseactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.caseactions input{flex:1;min-width:200px;border:1px solid #dce5ef;border-radius:9px;padding:9px;font-size:10px}.empty{padding:30px;text-align:center;color:#718198;font-size:11px;line-height:1.7}.statusline{padding:12px 16px;border-top:1px solid #edf1f6;color:#7c8ca1;font-size:10px}.notice{margin-top:14px;padding:13px 15px;border:1px solid #f0dfb9;background:#fff9ec;color:#7c5b20;border-radius:11px;font-size:10px;line-height:1.7}.foot{text-align:center;color:#8a98aa;font-size:10px;padding:22px}
+@media(max-width:700px){.head{display:block}.head .badge{display:inline-flex;margin-top:12px}.grid{grid-template-columns:1fr 1fr}.casehead{display:block}.casehead .state{margin-top:8px}.wrap{padding:16px 12px}}
+@media(max-width:430px){.grid{grid-template-columns:1fr}.top{height:60px}.actions .badge{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style></head>
+<body>
+<header class="top"><div class="brand"><span class="mark">K</span><span>KRIM GLOBAL<small>PLATFORM CONTROL PLANE</small></span></div><div class="actions"><span class="badge">● PRIVATE · MFA REQUIRED</span><button class="btn" id="reload">↻ Refresh</button><button class="btn" id="signout">Sign out</button></div></header>
+<main class="wrap">
+<div class="crumb">KRIM / PLATFORM ADMINISTRATION / OPERATIONAL FULFILMENT</div>
+<section class="head"><div><div class="eyebrow">DELIVERY GOVERNANCE · RESTRICTED</div><h1>Proof of delivery verification</h1><p>Review delivery evidence submitted by an assigned driver. Verification and final shipment delivery authorization are a single audited action; a submitted document alone never marks freight delivered.</p></div><span class="badge" id="access-state">VERIFYING ACCESS</span></section>
+<section class="hero"><h2>Evidence first. Delivery only after authorization.</h2><p>Only pending delivery PODs are listed. Evidence files remain in private storage and open through 60-second signed links. The database requires AAL2 and platform administrator permission for every list and decision request.</p></section>
+<div class="alert" id="message" role="status" aria-live="polite"></div>
+<section class="card"><div class="cardhead"><div><h3>Pending delivery POD queue</h3><p>Review shipment, partner, assigned leg, receiver and evidence before making a documented decision.</p></div><a href="index.html" style="font-size:10px;font-weight:850;color:#1769e8;text-decoration:none">← Control centre</a></div>
+<div class="toolbar"><input id="filter" type="search" placeholder="Filter by shipment, partner, receiver or status…" aria-label="Filter delivery PODs"><button class="btn" id="reload-queue">Reload queue</button></div>
+<div id="cases"><div class="empty">Checking administrator access…</div></div><div class="statusline" id="status">No POD decision has been made.</div></section>
+<div class="notice"><strong>Decision boundary:</strong> verify only after reviewing genuine delivery evidence and confirming the shipment/leg/recipient. Rejection requires a reason. A verified POD triggers the protected delivery-authorization function and updates the linked driver assignment; it does not authorize payment or partner settlement by itself.</div>
+<div class="foot">KRIM Logistics · Private administrator workspace · No public administrator access</div>
+</main>
+<script>
+(function(){
+"use strict";
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const $=id=>document.getElementById(id);
+let pods=[];
+function esc(v){return String(v===null||v===undefined||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function message(t,k){$("message").textContent=t;$("message").className="alert show "+k}
+function setAccess(t,bad){$("access-state").textContent=t;$("access-state").className=bad?"state bad":"state good"}
+async function verify(){
+ if(!client)throw new Error("Secure authentication client unavailable.");
+ const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error("No active administrator session.");
+ const {data:gate,error:ge}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+ if(ge||!gate||gate.ok!==true)throw new Error(gate?.code==="MFA_REQUIRED"?"Complete MFA before accessing delivery evidence.":gate?.error||ge?.message||"Administrator access denied.");
+ if(!(gate.data?.roles||[]).some(x=>["platform_superadmin","platform_admin"].includes(x)))throw new Error("Platform administrator permission required.");
+ document.documentElement.classList.add("authorized");
+}
+function render(){
+ const term=$("filter").value.trim().toLowerCase();
+ const list=pods.filter(x=>JSON.stringify(x).toLowerCase().includes(term));
+ if(!list.length){$("cases").innerHTML='<div class="empty">'+(pods.length?"No PODs match this filter.":"No delivery PODs are awaiting review.")+'</div>';return}
+ $("cases").innerHTML='<div class="list">'+list.map(row=>{
+  const evidence=Array.isArray(row.evidence_metadata?.driver_evidence)?row.evidence_metadata.driver_evidence:[];
+  return '<article class="case"><div class="casehead"><div><h4>'+esc(row.shipment_number)+' · POD #'+esc(row.pod_id)+'</h4><div class="meta">Partner assignment #'+esc(row.assignment_id)+' · Shipment leg '+esc(row.leg_sequence)+' · Submitted '+esc(row.submitted_at?new Date(row.submitted_at).toLocaleString():"—")+'</div></div><span class="state warn">'+esc(row.status)+'</span></div><div class="grid"><div class="field"><label>Partner</label><div>'+esc(row.partner_name)+'</div></div><div class="field"><label>Shipment status</label><div>'+esc(row.shipment_status)+'</div></div><div class="field"><label>Leg status</label><div>'+esc(row.leg_status)+'</div></div><div class="field"><label>Recipient</label><div>'+esc(row.received_by_name)+'</div></div><div class="field"><label>Recipient role</label><div>'+esc(row.received_by_role)+'</div></div><div class="field"><label>Evidence files</label><div>'+evidence.length+' file(s)</div></div></div><div class="docs"><h5>Private delivery evidence</h5><div class="doclinks">'+(evidence.length?evidence.map((e,i)=>'<button class="btn doc-open" type="button" data-pod="'+esc(row.pod_id)+'" data-index="'+i+'">Open evidence '+(i+1)+' · '+esc(e.file_name)+'</button>').join(""):'<span class="meta">No driver evidence metadata is attached. Do not verify this POD.</span>')+'</div></div>'+(evidence.length?'<div class="caseactions"><input id="reason-'+esc(row.pod_id)+'" maxlength="1000" placeholder="Evidence review basis / rejection reason" aria-label="Decision reason for POD '+esc(row.pod_id)+'"><button class="btn primary verify-pod" data-id="'+esc(row.pod_id)+'">Verify & authorize delivery</button><button class="btn danger reject-pod" data-id="'+esc(row.pod_id)+'">Reject POD</button></div>':'')+'</article>';
+ }).join("")+'</div>';
+ $("cases").querySelectorAll(".doc-open").forEach(b=>b.addEventListener("click",()=>openDocument(Number(b.dataset.pod),Number(b.dataset.index))));
+ $("cases").querySelectorAll(".verify-pod").forEach(b=>b.addEventListener("click",()=>decide(Number(b.dataset.id),"verify")));
+ $("cases").querySelectorAll(".reject-pod").forEach(b=>b.addEventListener("click",()=>decide(Number(b.dataset.id),"reject")));
+}
+async function load(){
+ $("cases").innerHTML='<div class="empty">Loading pending delivery PODs…</div>';
+ try{
+  const {data,error}=await client.rpc("krim_admin_list_delivery_pods");if(error)throw error;
+  pods=Array.isArray(data?.items)?data.items:[];
+  render();$("status").textContent="Loaded "+pods.length+" pending delivery POD(s).";setAccess("MFA VERIFIED",false);
+ }catch(e){pods=[];$("cases").innerHTML='<div class="empty">'+esc(e.message||"Delivery POD queue unavailable")+'</div>';$("status").textContent="No decision was submitted.";setAccess("QUEUE UNAVAILABLE",true)}
+}
+async function openDocument(podId,index){
+ const row=pods.find(x=>Number(x.pod_id)===podId);
+ const evidence=Array.isArray(row?.evidence_metadata?.driver_evidence)?row.evidence_metadata.driver_evidence:[];
+ const path=evidence[index]?.storage_path;
+ if(typeof path!=="string"||!path){message("Evidence path is missing. No file was opened.","error");return}
+ const win=window.open("about:blank","_blank");if(!win){message("Allow pop-ups to preview this private evidence.","error");return}
+ try{
+  const {data,error}=await client.storage.from("krim-driver-evidence").createSignedUrl(path,60);
+  if(error)throw error;if(!data?.signedUrl)throw new Error("Storage did not return a signed preview URL.");
+  win.opener=null;win.location.replace(data.signedUrl);
+  message("Private evidence preview opened. The signed link expires in 60 seconds.","success");
+ }catch(e){win.close();message(e.message||"Private evidence access denied.","error")}
+}
+async function decide(id,decision){
+ const reason=$("reason-"+id)?.value.trim()||"";
+ if(reason.length<5){message("Enter the evidence review basis or rejection reason (at least 5 characters).","error");return}
+ const action=decision==="verify"?"verify and authorize delivery":"reject this POD";
+ if(!confirm("Confirm decision to "+action+" for POD #"+id+"? This is an audited operational decision."))return;
+ try{
+  const {data,error}=await client.rpc("krim_admin_review_delivery_pod",{p_pod_id:id,p_decision:decision,p_reason:reason});
+  if(error)throw error;
+  if(!data||data.decision!==decision)throw new Error("Database did not confirm the POD decision.");
+  message("POD #"+id+" "+decision+" decision confirmed by the database.","success");
+  await load();
+ }catch(e){message(e.message||"POD decision failed. No success was assumed.","error")}
+}
+$("reload").addEventListener("click",load);$("reload-queue").addEventListener("click",load);$("filter").addEventListener("input",render);
+$("signout").addEventListener("click",async()=>{try{await client.auth.signOut()}finally{location.replace("../../auth/krim-admin-access.html?reason=signed-out")}});
+(async()=>{try{await verify();setAccess("MFA VERIFIED",false);await load()}catch(e){setAccess("ACCESS DENIED",true);$("cases").innerHTML='<div class="empty">'+esc(e.message)+'<br><br><a href="../../auth/krim-admin-access.html">Open privileged access gateway →</a></div>';document.documentElement.classList.add("authorized")}})();
+})();
+</script></body></html>
