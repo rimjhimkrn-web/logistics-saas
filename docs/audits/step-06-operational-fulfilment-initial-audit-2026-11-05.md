@@ -227,3 +227,12 @@ The POD chain is now connected in source and database design, but it has not bee
 - Warehouse task references are still operator-entered reference codes; receipt rows have an optional shipment_id but the current task creation UI does not establish an authoritative shipment/leg link. Dispatch handover is a warehouse custody record and does not itself dispatch the KRIM shipment or assign a driver. A reviewed shipment/leg bridge and authorized operations gateway remain required before claiming full end-to-end fulfilment.
 - Partial lot splitting, bin-capacity enforcement, barcode scanning, temperature telemetry, automated replenishment, and a formal multi-step returns workflow are not enabled in this release.
 - **Step 6 remains in progress; no real commercial operation has been activated.**
+
+
+## Warehouse chain completion work — further hardening
+
+- Added live, read-only Warehouse Performance and Alerts & Queue pages. Performance indicators are calculated from authorized live records and disclose that task history is capped at the 250 records returned by the RPC; the attention queue does not claim to send external notifications. Both pages pass JavaScript syntax checks and are linked from the authenticated warehouse control centre.
+- Verified the applied warehouse migration sequence includes atomic inventory movement lockdown, movement idempotency, task idempotency, maker-checker quality release, private evidence ownership and cleanup controls.
+- Applied migration `20261105133000_prevent_mixed_quality_lot_receipts.sql` (Supabase migration version `20261105064750`). A receipt can no longer merge a new lot quantity into an existing SKU/lot balance if the quality states differ. This prevents uninspected stock from inheriting a previously released lot's quality state. Movement RPC remains service-role-only; authenticated direct execution is denied.
+- Verified production warehouse counts remain zero: facilities 0, tasks 0, receipts 0, inventory rows 0, movements 0, evidence 0. This means no real warehouse operations have been performed and there is no live facility with which to run end-to-end transaction tests.
+- **Step 6 remains in progress** pending shipment/leg linkage for warehouse receipts and dispatch, Operations Control Tower dispatch gateway, customer/partner cross-workspace visibility checks, and signed-in multi-user browser E2E on an approved facility.
