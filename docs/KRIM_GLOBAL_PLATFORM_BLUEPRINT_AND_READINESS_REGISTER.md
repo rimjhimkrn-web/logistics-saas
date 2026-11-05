@@ -442,3 +442,21 @@ A further security review found that the five pricing RPCs relied on the admin p
 
 ### Step 4 prospect discovery update — 5 November 2026
 Created `docs/growth/partner-prospect-register-2026-11-05.md` with six source-backed priority leads (Kiran Group, Deepak Roadlines, CJ Darcl Logistics, Pranik Logistics, Patel Integrated Logistics and Delivery Partners) plus separately labelled lower-confidence local discovery leads. Public company contact channels and official source links are recorded. All leads remain discovered, uncontacted and unverified; no outreach, CRM write, form submission, partner approval or commercial activation was performed. See the Step 4 audit for details.
+
+
+## 9. Sequential engineering checkpoint — 5 November 2026
+
+### Step 4 — Partner acquisition & verification
+- Digital admission, onboarding, organisation verification, capability review, private document access, MFA controls and legacy-route cleanup have been inspected and source-level checked.
+- The public onboarding country helper now distinguishes catalogue availability from actual market activation.
+- Legacy partner legal/registration pages that contained unsupported company, guarantee, SLA, certification and settlement claims now redirect to the current governed framework or onboarding flow.
+- **Boundary:** no real partner outreach, approval, agreement execution or commercial activation is authorised until the user completes the ecosystem review and explicitly starts operations. Source-backed prospect research is parked; it is not an active outreach pipeline.
+
+### Step 5 — Shipment matching & assignment
+- Verified capability, route, mode, weight and reservable-capacity matching; authorized quote award; partner assignment response; idempotent capacity reservation; and audit paths have been inspected.
+- Customer checkout now requires both partner acceptance and a matching confirmed capacity binding. The Razorpay order Edge Function independently checks the confirmed reservation against the same partner, shipment and leg before creating or reusing an order.
+- Legacy static matching pages with fabricated live-engine or shipment claims have been retired to the current authenticated workflows.
+- **Current evidence:** 18 shipments; 0 partner quotes; 0 assignments; 0 capacity resources; 0 capacity availability rows; 0 reservations; 0 capacity bindings. No positive commercial E2E was fabricated or run.
+- **State:** engineering guardrails implemented and source/deployment checked; positive partner assignment and capacity E2E remains pending genuine partner and capacity evidence. No real operations have started.
+
+Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
