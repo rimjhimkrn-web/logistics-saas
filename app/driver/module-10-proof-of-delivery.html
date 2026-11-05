@@ -44,9 +44,11 @@ $('podForm').addEventListener('submit',async ev=>{
  button.disabled=true;result.textContent='Uploading private evidence and registering its metadata…';result.className='notice';
  const ext=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','application/pdf':'pdf'})[file.type];
  const storagePath=session.user.id+'/'+assignment.id+'/'+crypto.randomUUID()+'.'+ext;
+ let uploaded=false;
  try{
   const upload=await db.storage.from('krim-driver-evidence').upload(storagePath,file,{cacheControl:'3600',upsert:false,contentType:file.type});
   if(upload.error)throw upload.error;
+  uploaded=true;
   const saved=await db.from('krim_driver_delivery_evidence').insert({
    assignment_id:assignment.id,user_id:session.user.id,recipient_name:recipient,notes,
    storage_path:storagePath,original_file_name:file.name,content_type:file.type,file_size:file.size
@@ -58,7 +60,11 @@ $('podForm').addEventListener('submit',async ev=>{
   select.value='';
  }catch(err){
   console.error(err);
-  result.textContent='Evidence was not fully registered: '+(err.message||'submission failed')+'. Do not report delivery as complete. If the file uploaded but metadata registration failed, contact operations before retrying.';
+  if(uploaded){
+   const cleanup=await db.storage.from('krim-driver-evidence').remove([storagePath]);
+   if(cleanup.error)console.error('Private evidence cleanup needs administrator review:',cleanup.error);
+  }
+  result.textContent='Evidence was not fully registered: '+(err.message||'submission failed')+'. The system attempted to remove any unregistered upload. Do not report delivery as complete; if cleanup failed, contact operations before retrying.';
   result.className='notice warn';
  }finally{button.disabled=false;}
 });
