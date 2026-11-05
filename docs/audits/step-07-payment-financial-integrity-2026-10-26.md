@@ -94,3 +94,5 @@ These are repository/source checks and successful Pages deployment only. They do
 
 ### Current decision
 Step 7 remains **IN PROGRESS / NOT LIVE-APPROVED**. The source-level capacity-verification gap is corrected. The four unmatched historical events, five old created orders, legacy ledger lineage, absent payable rows, and unverified live merchant/settlement/refund/FX evidence remain blockers. The approved rate-card/partner/capacity chain and controlled signed test events are also required before launch. Do not turn on live checkout or alter unmatched historical events to force a green status.
+
+- Extended `scripts/krim-production-smoke.mjs` with static regression assertions requiring `verify-razorpay-payment` to re-check the accepted assignment's exact capacity binding and matching confirmed reservation, including fail-closed error codes. This ensures the newly fixed verification gate is covered by future CI runs.
