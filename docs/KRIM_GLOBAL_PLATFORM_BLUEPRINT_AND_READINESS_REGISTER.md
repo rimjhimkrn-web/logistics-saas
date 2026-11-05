@@ -393,3 +393,11 @@ A real lane still requires a verified registered-business partner, dated carrier
 - The console requires AAL2, uses the existing permission-checked administrator RPCs for list/create/evidence/approve/status, and preserves the no-direct-table-DML control. It supports evidence references, provider buy-rate/platform-fee reconciliation inputs, qualified tax-review reference, commercial approval reference, effective dates, and guarded activation/suspension/expiry.
 - JavaScript syntax checks passed; all five RPCs were confirmed executable by the authenticated database role. This does not establish browser E2E: no signed-in AAL2 session was available for an actual UI workflow test.
 - Domestic same-country lane creation remains explicitly blocked in the UI until the pending migration is applied and verified.
+
+
+### Step 3 verification correction — 5 November 2026
+The earlier note that a domestic-lane database migration was required was incorrect. Live function definitions were inspected directly: rate-card creation accepts same-country lanes, and both approval and activation already expect one market for domestic routes and two for cross-border routes. The stale, unapplied migration candidate was removed; the admin console's obsolete client-side domestic-route block was removed as well. No production database change was needed for domestic-lane support.
+
+The private admin console is linked in the admin navigation, checks AAL2, and uses the existing server-side permission-checked pricing RPCs. Static script validation and RPC argument/signature inspection passed; signed-in browser E2E has not been claimed.
+
+**Step 3 engineering deliverables are complete:** governed global rate-card lifecycle, private admin workflow, direct table-write lockdown, evidence/approval/activation checks, quote fail-closed behavior, and domestic/cross-border market-count handling. **Commercial publication remains disabled by design** because production currently has zero active verified partner capabilities and zero eligible markets, with no genuine provider cost evidence, KRIM margin decision or qualified tax review. The one existing pricing row is a zero-value non-commercial template; no invented commercial values were added. This gate must remain in force until actual business evidence is available.
