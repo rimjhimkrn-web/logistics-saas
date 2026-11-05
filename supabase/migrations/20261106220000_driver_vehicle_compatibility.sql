@@ -2,16 +2,10 @@
 ALTER TABLE public.krim_driver_assignments ADD COLUMN IF NOT EXISTS vehicle_id uuid REFERENCES public.krim_vehicles(id) ON DELETE RESTRICT;
 CREATE INDEX IF NOT EXISTS krim_driver_assignments_vehicle_status_idx ON public.krim_driver_assignments(vehicle_id,status) WHERE vehicle_id IS NOT NULL;
 CREATE TABLE IF NOT EXISTS public.krim_vehicle_driver_bindings (
- id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
- organization_id bigint NOT NULL REFERENCES public.krim_organizations(id) ON DELETE CASCADE,
- vehicle_id uuid NOT NULL REFERENCES public.krim_vehicles(id) ON DELETE RESTRICT,
- driver_profile_id uuid NOT NULL REFERENCES public.krim_driver_profiles(id) ON DELETE RESTRICT,
- driver_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
- status text NOT NULL DEFAULT 'active' CHECK(status IN('active','revoked')),
- created_by uuid NOT NULL REFERENCES auth.users(id),
- created_at timestamptz NOT NULL DEFAULT now(),
- revoked_by uuid REFERENCES auth.users(id),
- revoked_at timestamptz,
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id bigint NOT NULL REFERENCES public.krim_organizations(id) ON DELETE CASCADE,
+ vehicle_id uuid NOT NULL REFERENCES public.krim_vehicles(id) ON DELETE RESTRICT, driver_profile_id uuid NOT NULL REFERENCES public.krim_driver_profiles(id) ON DELETE RESTRICT,
+ driver_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT, status text NOT NULL DEFAULT 'active' CHECK(status IN('active','revoked')),
+ created_by uuid NOT NULL REFERENCES auth.users(id), created_at timestamptz NOT NULL DEFAULT now(), revoked_by uuid REFERENCES auth.users(id), revoked_at timestamptz,
  CHECK((status='active' AND revoked_at IS NULL AND revoked_by IS NULL) OR (status='revoked' AND revoked_at IS NOT NULL AND revoked_by IS NOT NULL))
 );
 CREATE UNIQUE INDEX IF NOT EXISTS krim_vehicle_driver_one_active_vehicle_idx ON public.krim_vehicle_driver_bindings(vehicle_id) WHERE status='active';
@@ -19,11 +13,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS krim_vehicle_driver_one_active_driver_idx ON p
 CREATE INDEX IF NOT EXISTS krim_vehicle_driver_org_status_idx ON public.krim_vehicle_driver_bindings(organization_id,status,created_at DESC);
 ALTER TABLE public.krim_vehicle_driver_bindings ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.krim_vehicle_driver_bindings FROM PUBLIC,anon,authenticated;
-DO $$ BEGIN
- IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='krim_vehicle_driver_bindings' AND policyname='krim_vehicle_driver_bindings_deny_direct_api') THEN
-  CREATE POLICY krim_vehicle_driver_bindings_deny_direct_api ON public.krim_vehicle_driver_bindings FOR ALL TO anon,authenticated USING(false) WITH CHECK(false);
- END IF;
-END $$;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='krim_vehicle_driver_bindings' AND policyname='krim_vehicle_driver_bindings_deny_direct_api') THEN CREATE POLICY krim_vehicle_driver_bindings_deny_direct_api ON public.krim_vehicle_driver_bindings FOR ALL TO anon,authenticated USING(false) WITH CHECK(false); END IF; END $$;
 CREATE OR REPLACE FUNCTION public.krim_assign_driver_to_partner_shipment(p_partner_assignment_id bigint, p_driver_user_id uuid)
  RETURNS krim_driver_assignments
  LANGUAGE plpgsql
@@ -69,6 +59,7 @@ BEGIN
   IF v_assignment.shipment_id IS DISTINCT FROM v_ship.id OR v_assignment.shipment_leg_id IS DISTINCT FROM v_leg.id OR v_assignment.organization_id IS DISTINCT FROM v_pa.partner_organization_id THEN RAISE EXCEPTION USING errcode='23514',message='Existing driver assignment linkage is inconsistent and requires review';END IF;
   RETURN v_assignment;
  END IF;
+ IF EXISTS(SELECT 1 FROM public.krim_driver_assignments da WHERE (da.user_id=p_driver_user_id OR da.vehicle_id=v_vehicle.id) AND da.status IN('assigned','accepted','pickup_complete','in_transit','exception')) THEN RAISE EXCEPTION USING errcode='55000',message='Driver or vehicle already has an open shipment assignment';END IF;
  INSERT INTO public.krim_driver_assignments(user_id,organization_id,shipment_id,shipment_leg_id,partner_assignment_id,vehicle_id,status,pickup_location,delivery_location,created_by)
  VALUES(p_driver_user_id,v_driver_org,v_ship.id,v_leg.id,p_partner_assignment_id,v_vehicle.id,'assigned',v_pickup,v_delivery,v_user) RETURNING * INTO v_assignment;
  INSERT INTO public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,new_state) VALUES(v_user,v_driver_org,'shipment.driver_vehicle.assigned','driver_assignment',v_assignment.id::text,'dispatch-compatibility',jsonb_build_object('shipment_id',v_ship.id,'shipment_leg_id',v_leg.id,'driver_user_id',p_driver_user_id,'vehicle_id',v_vehicle.id),jsonb_build_object('status','assigned','vehicle_id',v_vehicle.id));
