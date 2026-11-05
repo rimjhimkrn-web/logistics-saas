@@ -31,3 +31,11 @@
 
 ## Acceptance boundary
 The acquisition and verification workflow foundation is implemented, and misleading prospect dashboards have been retired. The actual network has not yet been acquired: the live queue contains one open verification case and one pending capability, with zero verified active capabilities. A real partner can only be marked verified after genuine documents are reviewed and an authorised administrator records the decision. Commercial activation still depends on eligible market gates, valid capabilities, genuine cost evidence, tax review and approval. No invented partner, document, service coverage, contact or verification outcome was added.
+
+
+## Partner prospect research update — 5 November 2026
+A source-backed India-first prospect register has been created at `docs/growth/partner-prospect-register-2026-11-05.md`.
+
+Six priority organisations were identified through official company sources: Kiran Group (Ranchi), Deepak Roadlines (Ranchi), CJ Darcl Logistics (formal fleet-partner intake), Pranik Logistics (Eastern India), Patel Integrated Logistics (Ranchi branch), and Hyperlocal Delivery Partners / Delivery Partners (Ranchi branch). The register captures publicly published business contact channels, stated service fit, a proposed first-discussion angle, source links and an explicit uncontacted/unverified status. Lower-confidence local discovery leads are separated from priority leads.
+
+No contact has been made, no web form submitted, no CRM lead created, no consent assumed and no partner status changed. Public directories and company marketing claims are treated as leads only, not evidence of licensing, fleet ownership, available capacity or compliance. Due diligence and authorised verification remain mandatory.
