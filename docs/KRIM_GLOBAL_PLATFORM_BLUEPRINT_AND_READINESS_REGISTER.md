@@ -328,3 +328,37 @@ The India pilot must pass legal/entity and carriage-registration review, GST/ECO
 ### Explicit test boundary
 
 There are currently no verified active partner capabilities, partner quote rows or assignments to support a positive partner-award/assignment transaction. No fabricated partner, rate or booking was created, and no live booking, payment, shipment or partner activation was attempted. This is an intentional safety boundary, not a claim that live operations have been proven. Step 13 must run the full positive/negative end-to-end regression when eligible test fixtures and all nine workspaces are ready.
+
+
+## 10. Step 2 — Global Foundation (5 November 2026)
+
+**Technical foundation status: implemented.** The global reference layer is expanded across the full 249-country catalogue. This is architecture and reference-data readiness, not approval to offer services in every country.
+
+### Applied reference-data upgrades
+
+- ISO 3166-1 alpha-3 identifiers are populated for all 249 country records; all 249 codes are valid-format and unique.
+- Country defaults now include a single current tender currency for 240 countries and a single IANA timezone for 217 countries. Countries with multiple currencies or time zones are not assigned an arbitrary default. Each active service location must continue to carry its own validated IANA timezone.
+- Currency catalogue expanded to 154 current territory tender currencies. A three-character ISO 4217 numeric code is present for all 154 records. Only the existing six currencies (AED, EUR, GBP, INR, SGD and USD) remain active; all newly added currency records remain inactive.
+- Currency precision on the six active currencies was checked: all currently active currencies use two minor-unit digits. A separate ISO 4217 alignment migration has been committed at `supabase/migrations/20261105173000_align_currency_minor_units_with_iso4217.sql`, but the Supabase migration action blocked its application. Therefore, do not activate any additional currency until that queued correction is applied and verified against the current ISO 4217 List One data.
+- Language catalogue expanded to all 184 ISO 639-1 two-letter language codes. English and Hindi remain the only active languages; 10 languages are flagged right-to-left.
+- Locale catalogue expanded to 257 records, with at least one country-specific primary locale record for all 249 countries. New locale records remain inactive until native-language translation, accessibility and workspace regression QA are complete.
+- All 32 currently active locations have a valid IANA timezone. All six configured market records reference an active currency and a valid market timezone.
+- The public Global Markets page now correctly labels operational activation as **gated**, not active, and explicitly separates global-ready architecture from actual service coverage.
+
+### Readiness and fail-closed verification
+
+- Six market catalogue records exist. Their 82 market readiness assessments have zero approvals.
+- All 249 country operating packs exist, with 18 controls each (4,482 total); zero controls are approved.
+- Seven corridor catalogue records exist; zero are active and zero compliance dossiers are approved.
+- The regulatory source registry currently contains zero reviewed source records.
+- The market activation gate was evaluated for all six configured markets. All six returned `eligible=false`. Each is blocked by zero verified active partner capabilities, missing/unapproved market assessments and unapproved country-pack controls/reviewed sources.
+- No market was activated, no country control was approved, no regulatory conclusion was invented, and no international service coverage was represented as available.
+
+### Reference-data provenance and activation policy
+
+- Country identifiers and ISO 639-1 language codes: pycountry 24.6.1 ISO datasets.
+- Country currency assignments, locale display names and formatting patterns: Unicode CLDR data through Babel 2.18.0. These are reference defaults, not legal or payment approval.
+- Country timezone mappings and single-timezone defaults: IANA timezone database distributed through pytz 2026.2. Actual location-level timezone values remain authoritative for scheduling.
+- ISO 4217 numeric codes for XCG and ZWG were cross-checked against SIX Maintenance Agency amendments 176 and 177. The queued currency-alignment migration must be applied before newly catalogued currencies can be activated.
+
+**Step 2 boundary:** KRIM now has the global country, currency, language and locale reference foundation, with India remaining the initial operating focus. Market, corridor, provider, legal, tax, payment and customer-service activation remain independently evidence-gated. The reference catalogues must never be interpreted as proof of operational coverage.
