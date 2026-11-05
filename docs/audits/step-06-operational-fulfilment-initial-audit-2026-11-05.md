@@ -173,3 +173,17 @@ The POD chain is now connected in source and database design, but it has not bee
 - The data-backed views are still source-level validated only. Signed-in browser E2E and role-by-role RLS visibility testing remain pending.
 
 - Shared-interface validation exposed that the authenticated Partner and Warehouse entry pages and legacy route redirects were not represented correctly in the smoke audit. Added the shared KRIM interface stylesheet/body shell to Partner, Warehouse and access pages; applied the same shell to the retained warehouse workflow pages; corrected the audit to validate noindex redirects as redirects rather than full workspace pages. The final GitHub Actions production smoke check and static link audit both passed on commit `d79d3fab500c0c582180742f8808622618efd026`. Pages deployment was still running at the time of this audit update.
+
+
+## Warehouse fulfilment checkpoint — 5 November 2026
+
+- Applied `20261105120500_harden_warehouse_inventory_movement_chain`. Direct authenticated/anon execution of the internal movement primitive is revoked; only receipt and pick are accepted internally; picks recheck released quality after locking the stock row. A unique organization/idempotency-key constraint and advisory lock prevent duplicate concurrent movement requests; conflicting key reuse is rejected. No movement rows existed at migration time.
+- The inventory ledger is now read-only and no longer calls the internal movement RPC from the browser. Stock changes must follow the controlled goods-receipt or pick/pack task lifecycle. Dispatch, transfer, return and manual adjustment remain disabled pending their own approval workflows.
+- Applied `20261105121500_harden_warehouse_evidence_ownership_and_cleanup`. Evidence registration verifies actual storage object ownership, organization/user/file path, MIME and 10 MB maximum size. The bucket remains private. A narrow cleanup policy permits removal only of the user's own unregistered upload; registered evidence is excluded.
+- Warehouse performance and attention-queue pages now use authenticated database results. The attention queue is not represented as external notification delivery. Dispatch handover is explicitly a warehouse custody checkpoint, not shipment dispatch or driver assignment.
+- JavaScript syntax passed for 15 key warehouse/admin pages. This is static validation only; no signed-in browser E2E was performed. Warehouse evidence and inventory movement rows remain zero.
+
+### Remaining Step 6 gates
+- No approved real warehouse organization/facility exists, so the full receipt → goods receipt → put-away → pick/pack chain cannot be safely exercised in production without fabricated operational records.
+- Shipment-level dispatch gateway and carrier/driver handoff integration remain open. Returns, transfers, stock adjustments, cycle-count reconciliation and bin-capacity controls remain disabled pending dedicated governed workflows.
+- Signed-in E2E remains required for facility approval, task sequence, inventory balances, private evidence preview, cross-organization isolation and shipment dispatch. No real partner/customer outreach or live shipment activity has occurred.
