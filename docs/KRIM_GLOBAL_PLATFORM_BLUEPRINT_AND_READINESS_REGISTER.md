@@ -419,3 +419,12 @@ The private admin console is linked in the admin navigation, checks AAL2, and us
 **Commercial acceptance remains pending:** at least one defined India-first lane requires a verified provider, dated carrier buy-rate evidence, approved KRIM fee/margin, qualified tax treatment, active market readiness and a verified persisted customer quote. Tax-exclusive pricing and international FX conversion are not enabled until their reviewed calculation paths and reference data exist.
 
 Detailed evidence: `docs/audits/step-03-commercial-pricing-readiness-2026-11-05.md`.
+
+
+### Privileged RPC MFA hardening — 5 November 2026
+A further security review found that the five pricing RPCs relied on the admin permission check but did not independently enforce AAL2 in their database function bodies. The browser-side MFA check alone was insufficient because authenticated users can call RPC endpoints directly. This has now been corrected:
+- Applied production migration `20261105102900_enforce_aal2_on_global_rate_card_admin_rpcs`.
+- Added a server-side `auth.jwt()->>'aal' = 'aal2'` guard to the administrator list, create-draft, record-evidence, approve and status RPCs.
+- Re-queried all five live function definitions: all five contain the AAL2 guard; authenticated EXECUTE is present; anon EXECUTE is false.
+- Committed the exact applied SQL to `supabase/migrations/20261105102900_enforce_aal2_on_global_rate_card_admin_rpcs.sql`; migration history confirms it is applied.
+- The pricing table remains RLS-enabled with authenticated direct INSERT/UPDATE/DELETE denied. The pricing console reads and writes only through the guarded administrator RPCs.
