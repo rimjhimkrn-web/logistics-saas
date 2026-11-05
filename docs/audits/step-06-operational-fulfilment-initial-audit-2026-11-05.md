@@ -87,3 +87,30 @@ The audit identified a large set of older static pages that displayed fictitious
 
 - A further seven non-functional public operations placeholders (capacity planning, carrier matching, route planner, service-level monitoring, trip monitoring, vehicle capacity and operations reports) were redirected to their authenticated `app/operations/` equivalents. This prevents blank “Loading KRIM Operations” pages from being mistaken for working operational consoles.
 - The post-migration security advisor still reports existing project-wide findings (including RLS-enabled tables without policies and SECURITY DEFINER warnings). These are tracked for the dedicated Step 8 Security & Compliance review; no broad permissions were changed as part of Step 6.
+
+
+## Continued audit — 5 November 2026 (POD and customs/dispatch controls)
+
+### Driver proof-of-delivery evidence
+- Implemented the actual authenticated Driver Workspace upload form in `app/driver/module-10-proof-of-delivery.html`. It is available only for the signed-in driver's own `in_transit` assignments; it validates recipient, file type and 10 MB maximum size, uploads to the private `krim-driver-evidence` bucket, then registers metadata.
+- Applied database migration `20261105054211_secure_driver_delivery_evidence_registration` (GitHub migration filename aligned to the applied version). The INSERT policy requires the authenticated user to own the uploaded storage object, use the exact user/assignment/file path shape, have active driver membership, and own a non-delivered/non-cancelled assignment. Evidence metadata grants are SELECT/INSERT only; UPDATE/DELETE remain denied. Storage bucket is private and permits only JPEG, PNG, WebP and PDF up to 10 MB.
+- If metadata registration fails after upload, the page attempts to remove the unregistered object and warns the driver not to claim delivery completion. The milestone transition remains a separate server-side operation; POD upload alone does not close the shipment.
+- JavaScript syntax check passed. No signed-in browser E2E or live upload was performed; production POD row count remains zero.
+
+### Customs and dispatch controls
+- Customs workspace source audit passed JavaScript syntax check. It is a read-only evidence/status review workspace; it explicitly states KRIM does not submit declarations or guarantee clearance. The only customs data table has RLS and organization/permission-scoped SELECT policies; no authenticated INSERT/UPDATE/DELETE grants are present. Customs records currently: 0. Filing/release is not enabled.
+- Dispatch & Handover and Exception Management pages are authenticated preparation screens only. They explicitly state that browser forms are not connected to operational writes and that no operational record is changed. JavaScript syntax checks passed. This is a deliberate fail-closed limitation until audited, role-scoped write workflows are completed.
+- The service-role-only `krim_dispatch_shipment` and `krim_transition_shipment` functions are not directly executable by authenticated users. No browser-side dispatch action is presented as live. Do not expose these functions directly to the browser without a dedicated permission-checked server gateway and end-to-end authorization review.
+
+### Legacy page cleanup progress
+- Retired static/demo pages across Driver, Warehouse, Customs/Trade, Operations and Visibility. Old routes now redirect to authenticated or canonical pages; public telemetry routes point to secure recorded-event tracking rather than implying live GPS/AIS/flight/rail/sensor feeds.
+- All redirects are compatibility routes, not authorization substitutes. The destination workspace must still enforce its own authentication and membership checks.
+
+### Still open — Step 6 not complete
+- Signed-in browser E2E for driver evidence upload, assignment lifecycle and milestone transition.
+- Verify warehouse facility approval → task → receiving → inventory movement → picking → dispatch handover chain, including role separation and private evidence access.
+- Implement/verify an authorized dispatch gateway and operational exception write workflow; current operations pages remain preparation-only.
+- Review customs document/evidence workflows and ensure authority release statuses cannot be self-certified by KRIM users.
+- Verify customer-visible POD evidence through a controlled, privacy-preserving read path; the private driver evidence bucket must not become public.
+- Confirm partner-side and driver-side assignment/POD models remain correctly linked without cross-organization data exposure.
+- No real operational records were created and no external partner/customer contact was made.
