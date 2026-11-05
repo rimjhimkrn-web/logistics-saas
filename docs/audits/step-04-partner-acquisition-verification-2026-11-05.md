@@ -48,3 +48,10 @@ No contact has been made, no web form submitted, no CRM lead created, no consent
 - Corrected an inaccurate onboarding helper message: country catalogue availability is not the same as market activation. The form now explicitly says a submitted country is proposed coverage only and that market, regulatory, partner and capacity approvals remain separate.
 - Re-parsed the onboarding page inline JavaScript after the change. This is a source-level check, not a signed-in browser or upload E2E test.
 - Production counts remain: 1 verification case, 1 partner capability, 3 partner opportunities, 0 growth prospect records. No records or approval states were changed.
+
+
+## Legacy partner-page retirement — 5 November 2026
+- Retired four stale routes that contained materially misleading or obsolete claims: an unregistered corporate legal-entity name, global regulator/certification requirements presented as universal, guaranteed freight loads, guaranteed 99.5% uptime, sub-minute telemetry commitments, binding rate filing and automated escrow settlement.
+- `legal/partner-terms.html` and `public/legal/partner-terms.html` now preserve their URLs as noindex compatibility redirects to the current Partner Standards page, which expressly states it is a framework and not an executed contract.
+- `public/partner/registration.html` and `public/partner/business-verification.html` now preserve their URLs as noindex compatibility redirects to the single current authenticated partner-onboarding flow.
+- This removes conflicting duplicate admission and legal surfaces without creating new commercial commitments. No agreements were issued and no partner was contacted or activated.
