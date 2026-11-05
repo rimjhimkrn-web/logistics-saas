@@ -362,3 +362,27 @@ There are currently no verified active partner capabilities, partner quote rows 
 - ISO 4217 numeric codes for XCG and ZWG were cross-checked against SIX Maintenance Agency amendments 176 and 177. The queued currency-alignment migration must be applied before newly catalogued currencies can be activated.
 
 **Step 2 boundary:** KRIM now has the global country, currency, language and locale reference foundation, with India remaining the initial operating focus. Market, corridor, provider, legal, tax, payment and customer-service activation remain independently evidence-gated. The reference catalogues must never be interpreted as proof of operational coverage.
+
+
+## 11. Step 3 — Commercial Pricing & Rate Cards (5 November 2026)
+
+**Acceptance status: incomplete.** The commercial pricing governance layer exists, but no production lane is priced or approved.
+
+### Current production snapshot
+- One global rate-card row exists: a zero-value, non-commercial India ROAD template in INR, draft, with no service tier. Zero global cards are active.
+- Zero partner rate cards, rate lines, partner quotes, pricing calculation runs, quote items, quote pricing components, FX rates, tax rules and accessorial charges.
+- Seven customer quote records exist; zero are currently valid sent quotes.
+- Direct authenticated INSERT/UPDATE/DELETE access to the global pricing table is denied. Quote paths fail closed unless a matching active, effective, evidence-backed approved rate exists and market activation gates pass.
+
+### Implemented controls
+- Draft rate creation validates active country/currency references, supported mode/tier, positive base amount, minimum charge, effective dates and priority.
+- Provider evidence must identify an active verified registered-business provider with verified capabilities for the lane and mode. Provider buy rate plus KRIM platform fee must reconcile to the customer rate. Dated cost evidence, tax-review reference, approval evidence, eligible market gates and duplicate active-card checks are required before activation.
+- The static sample partner tariff catalogue was retired; the partner compatibility route now directs users to the authenticated, RLS-controlled commercial-rate register.
+
+### Pending domestic-lane correction
+Current rate-card creation rejects same-country origin/destination, and approval/activation expect two active markets. This blocks domestic India lanes. The correction is committed at `supabase/migrations/20261105190000_support_domestic_same_country_rate_cards.sql`, but it was not applied because the Supabase migration action was blocked by safety checks. Do not bypass the block or treat domestic rate-card support as live.
+
+### Completion boundary
+A real lane still requires a verified registered-business partner, dated carrier buy-rate evidence, an approved KRIM fee/margin, explicit charge basis/minimum, qualified tax review, applicable surcharge evidence and documented approval/effective dates. No commercial values, providers, tax rules, FX rates or coverage have been invented.
+
+**Step 3 is not accepted as complete. Step 4 must not begin until the pending migration is applied and verified and the first genuine commercial lane is evidenced and approved.**
