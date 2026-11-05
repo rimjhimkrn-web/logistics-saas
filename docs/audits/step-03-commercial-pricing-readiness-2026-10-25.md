@@ -55,3 +55,30 @@ Step 3 remains **blocked by real-world commercial inputs**, not by absence of a 
 
 ## Fastest safe next step
 Obtain these minimum values for one lane: (1) origin and destination service area, (2) mode and service tier, (3) partner/carrier buy price and dated evidence, (4) KRIM platform fee or margin, (5) charge basis and minimum charge, (6) tax/surcharge treatment, and (7) approver and effective dates. Then create the rate card in draft, verify the calculated quote, and activate only after approval.
+
+## Production re-audit — 5 November 2026
+
+### Current production evidence
+- `public.krim_pricing_rate_cards`: 1 row, 0 active. The only row is ID 1, a non-commercial India ROAD flat-rate template with INR, base amount 0, minimum charge 0, no service tier, and metadata explicitly marking it non-commercial and not customer-quote eligible.
+- `public.krim_rate_cards` and `public.krim_rate_lines`: 0 rows each.
+- `public.krim_partner_quotes`: 0 rows. No submitted carrier bid exists to substantiate a customer rate.
+- `public.krim_quotes`: 7 historical rows; 0 currently valid sent quotes.
+- `public.krim_pricing_calculation_runs`, `krim_quote_items`, and `krim_quote_pricing_components`: 0 rows each.
+- `public.krim_fx_rates`, `krim_tax_rules`, and `krim_accessorial_charges`: 0 rows each. No approved FX conversion table, tax-rule catalogue, or accessorial schedule is available for commercial calculations.
+- RLS is enabled on the global pricing table. Authenticated direct INSERT, UPDATE and DELETE privileges are all false; rate governance is routed through privileged database functions.
+- Quote creation and orchestration fail closed unless a matching active, effective, commercially evidenced and approved rate exists and both route markets pass operational activation gates. The configured markets remain gated under Step 2.
+
+### Pricing governance already present
+- Draft rate creation validates country, active currency, supported mode/tier, positive base amount, non-negative minimum charge, effective dates and priority.
+- Commercial evidence recording checks an active verified registered-business provider, active verified capability for both lane countries and the selected mode, a dated cost evidence reference, tax review evidence, and exact reconciliation of provider buy rate plus KRIM platform fee to the customer-facing rate.
+- Approval and activation check the market readiness gates, evidence and approval references, provider status/capability, effective dates, and duplicate active route/tier/priority conflicts.
+- No real commercial evidence was supplied or inserted during this audit. No rates were priced, approved or activated.
+
+### Defect found: domestic same-country lanes
+The rate-card creation RPC currently rejects origin and destination being in the same country, and the approval/activation RPCs expect two active markets. This prevents a domestic lane such as Ranchi–Kolkata from using the global rate-card governance path, even though India is the initial operating market. A correction has been prepared in `supabase/migrations/20261105190000_support_domestic_same_country_rate_cards.sql`: domestic lanes will require one distinct country/market gate; cross-border lanes will continue to require two. **The migration file is committed but was not applied because the Supabase migration action was blocked by the safety checks.** Do not treat domestic rate-card support as live until this migration is approved, applied and verified.
+
+### Partner rate-card interface correction
+The old `public/partner/rate-cards.html` page contained hard-coded sample carrier names, routes, amounts, fuel-surcharge percentages and an unsupported claim of four active cards. Those sample claims have been removed. The compatibility page now forwards to `public/partner/commercial-rates.html`, which reads permitted records from the authenticated partner workspace and does not create sample prices. The partner page remains read-only for global rate governance.
+
+### Current acceptance decision
+**Step 3 remains incomplete / blocked.** Technical governance is substantially present, but the domestic-lane correction is pending and there is no genuine, verified partner buy-rate, KRIM fee/margin approval, qualified tax review, surcharge evidence, or approved lane. No customer-facing rate may be published and no payment/checkout may be enabled on the basis of the zero-value template. The next valid completion point is after the pending migration is applied and a real lane's documented commercial inputs are supplied and approved.
