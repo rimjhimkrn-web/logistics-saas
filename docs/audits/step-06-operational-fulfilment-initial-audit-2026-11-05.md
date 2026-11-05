@@ -146,3 +146,13 @@ The POD chain is now connected in source and database design, but it has not bee
 - Replaced the function with assignment-scoped authorization: drivers must have the exact linked driver assignment; non-driver partner users need `shipment.update` or `shipment.dispatch`; ambiguous multi-leg assignment matches fail closed; direct `delivered` milestones are rejected in favour of verified POD authorization.
 - Database verification confirms the driver-assignment link guard and permission checks are present, anonymous EXECUTE is false, authenticated EXECUTE remains enabled, and the old direct-delivered path is blocked.
 - **Remaining gap:** the Driver Milestones page is still a read-only assignment view and has not yet been wired to an atomic driver-event + leg-specific tracking RPC. Do not treat pickup/in-transit actions as operationally complete until that page and shipment/leg state transitions are connected and tested.
+
+
+### Operations control read-only data layer — follow-up
+- Rebuilt the authenticated Shipment Control Tower and Dispatch & Handover pages with an RLS-scoped, read-only shipment register sourced from `krim_shipments`.
+- The register shows shipment reference, route labels (or location IDs where labels are unavailable), current recorded status and creation time. It explicitly reports query errors as unavailable rather than presenting them as zero, and it states that visible rows are not a complete global count.
+- No operational write RPC is invoked by either page. The existing preparation forms remain browser-only and state clearly that nothing is saved.
+- Both pages passed inline JavaScript syntax validation after the change. A signed-in browser query test remains pending.
+- Customs workspace is currently read-only: `krim_shipment_customs` has RLS-enabled SELECT policies for the customer organization and eligible customs organization, with no authenticated INSERT/UPDATE/DELETE grants. No customs authority clearance is inferred or created.
+- Live production snapshot confirms zero dispatches, zero customs records, zero warehouse facilities/tasks/inventory movements, zero driver assignments and zero POD records. The one legacy assigned shipment leg belongs to already-closed shipment #1 and has no active partner assignment; it is historical data, not an active dispatch.
+- One partner opportunity remains marked open while its response deadline has passed (shipment #30). Server-side quote submission rejects it as expired; the row remains a stale status-label issue and was not mutated during this audit.
