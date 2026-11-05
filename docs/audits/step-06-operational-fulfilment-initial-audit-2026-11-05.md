@@ -236,3 +236,11 @@ The POD chain is now connected in source and database design, but it has not bee
 - Applied migration `20261105133000_prevent_mixed_quality_lot_receipts.sql` (Supabase migration version `20261105064750`). A receipt can no longer merge a new lot quantity into an existing SKU/lot balance if the quality states differ. This prevents uninspected stock from inheriting a previously released lot's quality state. Movement RPC remains service-role-only; authenticated direct execution is denied.
 - Verified production warehouse counts remain zero: facilities 0, tasks 0, receipts 0, inventory rows 0, movements 0, evidence 0. This means no real warehouse operations have been performed and there is no live facility with which to run end-to-end transaction tests.
 - **Step 6 remains in progress** pending shipment/leg linkage for warehouse receipts and dispatch, Operations Control Tower dispatch gateway, customer/partner cross-workspace visibility checks, and signed-in multi-user browser E2E on an approved facility.
+
+
+## Final static verification pass — 5 November 2026
+
+- Rechecked all 16 key Warehouse Workspace and admin pages after the quality-control addition: 16/16 JavaScript syntax checks passed, 16/16 include viewport metadata, 16/16 include an authenticated session or admin-control gate. All 13 Warehouse Control Centre module links resolve to existing repository pages.
+- The independent quality-review page now includes a 60-second signed private inspection-report preview before the reviewer makes a decision. It continues to enforce maker-checker separation and requires a reason for every decision.
+- The two new migration files are aligned to applied Supabase versions: `20261105063808_harden_warehouse_inventory_movement_chain.sql` and `20261105063941_harden_warehouse_evidence_ownership_and_cleanup.sql`. Task idempotency and maker-checker gate migrations are also committed at their applied versions.
+- Static checks are not a substitute for authenticated browser testing. No live organization, facility, task, inventory, evidence or movement record was created.
