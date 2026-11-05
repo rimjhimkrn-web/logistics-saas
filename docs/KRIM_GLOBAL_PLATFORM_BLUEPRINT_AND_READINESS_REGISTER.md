@@ -438,3 +438,7 @@ A further security review found that the five pricing RPCs relied on the admin p
 - No partner was fabricated, approved, contacted or commercially activated. Genuine verification decisions remain subject to evidence review and authorised administrator action.
 - Detailed audit: `docs/audits/step-04-partner-acquisition-verification-2026-11-05.md`.
 - **Step 4 foundation status:** acquisition and verification workflow foundations implemented; actual partner-network acquisition and verified coverage remain dependent on genuine applicant submissions and human evidence review. Step 5 is not started.
+
+
+### Step 4 prospect discovery update — 5 November 2026
+Created `docs/growth/partner-prospect-register-2026-11-05.md` with six source-backed priority leads (Kiran Group, Deepak Roadlines, CJ Darcl Logistics, Pranik Logistics, Patel Integrated Logistics and Delivery Partners) plus separately labelled lower-confidence local discovery leads. Public company contact channels and official source links are recorded. All leads remain discovered, uncontacted and unverified; no outreach, CRM write, form submission, partner approval or commercial activation was performed. See the Step 4 audit for details.
