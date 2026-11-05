@@ -39,3 +39,12 @@ A source-backed India-first prospect register has been created at `docs/growth/p
 Six priority organisations were identified through official company sources: Kiran Group (Ranchi), Deepak Roadlines (Ranchi), CJ Darcl Logistics (formal fleet-partner intake), Pranik Logistics (Eastern India), Patel Integrated Logistics (Ranchi branch), and Hyperlocal Delivery Partners / Delivery Partners (Ranchi branch). The register captures publicly published business contact channels, stated service fit, a proposed first-discussion angle, source links and an explicit uncontacted/unverified status. Lower-confidence local discovery leads are separated from priority leads.
 
 No contact has been made, no web form submitted, no CRM lead created, no consent assumed and no partner status changed. Public directories and company marketing claims are treated as leads only, not evidence of licensing, fleet ownership, available capacity or compliance. Due diligence and authorised verification remain mandatory.
+
+
+## Follow-up ecosystem accuracy check — 5 November 2026
+- Re-inspected the live partner onboarding form, organisation verification queue, capability review queue, storage policies and corresponding production RPC definitions.
+- Confirmed the verification and capability administrator list/review RPCs enforce AAL2 and `admin.platform`; anonymous EXECUTE is revoked; review functions lock the target row and write audit events.
+- Confirmed the verification document bucket is private, capped at 10 MiB, and limited to PDF/JPEG/PNG. Applicant uploads are scoped to the active partner organisation and authenticated user; administrator reads require AAL2 and platform permission.
+- Corrected an inaccurate onboarding helper message: country catalogue availability is not the same as market activation. The form now explicitly says a submitted country is proposed coverage only and that market, regulatory, partner and capacity approvals remain separate.
+- Re-parsed the onboarding page inline JavaScript after the change. This is a source-level check, not a signed-in browser or upload E2E test.
+- Production counts remain: 1 verification case, 1 partner capability, 3 partner opportunities, 0 growth prospect records. No records or approval states were changed.
