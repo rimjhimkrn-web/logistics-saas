@@ -525,3 +525,12 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 - Retired empty legacy POD storage/table access paths referencing `shipment_requests`/`partners`; canonical private POD evidence remains intact. Five storage buckets are private; no anonymous Storage policies.
 - Public Edge Functions reviewed: Razorpay webhook signature/deduplication, public tracking opaque UUID token (no IP throttle yet), public inquiry IP/email limits, Cashfree webhook 410 retirement stub. `config.js` contains only the public publishable key; secrets were not read.
 - **Outstanding:** leaked-password protection is disabled and Supabase docs indicate Pro+; project-wide new-user MFA enrollment was not verifiable; public tracking throttling is recommended; per-function SECURITY DEFINER review remains ongoing. See `docs/audits/step-08-security-compliance-2026-11-05.md`.
+
+
+### Step 6 — Warehouse fulfilment security checkpoint (5 November 2026)
+- Applied `20261105120500_harden_warehouse_inventory_movement_chain`: direct authenticated/anon access to the internal inventory movement primitive revoked; receipt/pick only; pick rechecks released quality after row lock; organization-scoped unique idempotency key and payload conflict rejection added. Manual dispatch, transfer, return and adjustment remain disabled pending dedicated governed workflows.
+- Inventory ledger rebuilt as read-only. Warehouse performance and attention queue pages now display live database-derived values with explicit record-window/notification limitations. Warehouse dispatch handover is labelled as a warehouse custody checkpoint only, not shipment dispatch or carrier assignment.
+- Applied `20261105121500_harden_warehouse_evidence_ownership_and_cleanup`: evidence registration verifies actual storage object owner, path, MIME and size; private bucket retained; own unregistered-object cleanup only. Evidence count remains zero.
+- Static JavaScript syntax passed for 15 key warehouse/admin pages. No signed-in browser E2E performed.
+- **State:** Step 6 remains in progress. The warehouse operational chain is implemented but cannot be proven end-to-end until a genuinely verified warehouse organization/facility is available in an approved test context. Shipment-level dispatch integration, returns/transfers/adjustments, cycle-count and bin-capacity controls remain open.
+- Detailed audit: `docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md`.
