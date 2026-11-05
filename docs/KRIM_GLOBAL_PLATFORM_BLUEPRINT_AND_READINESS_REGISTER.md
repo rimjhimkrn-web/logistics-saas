@@ -542,3 +542,11 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 - Inbound Receiving and Goods Receipt UI no longer offer a direct Released choice. Quality review linked from the Warehouse Control Centre and read-only Inventory Ledger.
 - Verified database grants: internal movement RPC not executable by authenticated/anon; controlled task transition and independent review remain authenticated; all warehouse production records remain zero.
 - **State:** Step 6 still in progress pending two-user signed-in E2E, an approved warehouse facility, shipment-level dispatch integration and remaining governed workflows.
+
+
+### Step 6 — Warehouse quality and evidence security checkpoint (5 November 2026)
+- Independent warehouse quality review added. Goods-receipt tasks cannot self-release stock; release/hold/reject requires a completed source task, private task-linked inspection report, independent reviewer (not creator/completer), reason, matching SKU/lot and audit events. Authenticated-only RPC and UI are in place.
+- Warehouse evidence registration now checks storage-object ownership, organisation/user/file path, private bucket, size and MIME type. Failed metadata registration triggers best-effort cleanup. Direct authenticated table writes remain denied; SELECT is RLS-scoped.
+- Warehouse admin facility review requires AAL2 and platform-admin permission. No live facility/warehouse transaction was created.
+- **Step 6 remains in progress:** no active verified warehouse facility is available for end-to-end tests; shipment/leg linking, authorized operations dispatch gateway, cross-org negative tests and signed-in browser E2E remain open. Dispatch handover is not yet equivalent to shipment dispatch or driver assignment.
+- Detailed audit: `docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md`.
