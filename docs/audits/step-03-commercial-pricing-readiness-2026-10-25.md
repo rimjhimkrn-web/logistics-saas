@@ -128,3 +128,12 @@ The pricing engine and governed administration workflow are implemented, but no 
 - No live rate, provider cost, platform margin, tax treatment, FX rate, surcharge or coverage was fabricated.
 
 **Engineering acceptance:** the rate-card lifecycle, permissioned admin workflow, direct-DML lockdown, quote fail-closed controls and domestic/cross-border market-count logic are implemented. **Commercial activation remains deliberately gated** until real verified partner cost evidence, KRIM fee approval, qualified tax review and market eligibility exist. This is a dependency on genuine business evidence and partner verification, not an outstanding domestic-lane code defect.
+
+
+### Privileged RPC MFA hardening — 5 November 2026
+A further security review found that the five pricing RPCs relied on the admin permission check but did not independently enforce AAL2 in their database function bodies. The browser-side MFA check alone was insufficient because authenticated users can call RPC endpoints directly. This has now been corrected:
+- Applied production migration `20261105102900_enforce_aal2_on_global_rate_card_admin_rpcs`.
+- Added a server-side `auth.jwt()->>'aal' = 'aal2'` guard to the administrator list, create-draft, record-evidence, approve and status RPCs.
+- Re-queried all five live function definitions: all five contain the AAL2 guard; authenticated EXECUTE is present; anon EXECUTE is false.
+- Committed the exact applied SQL to `supabase/migrations/20261105102900_enforce_aal2_on_global_rate_card_admin_rpcs.sql`; migration history confirms it is applied.
+- The pricing table remains RLS-enabled with authenticated direct INSERT/UPDATE/DELETE denied. The pricing console reads and writes only through the guarded administrator RPCs.
