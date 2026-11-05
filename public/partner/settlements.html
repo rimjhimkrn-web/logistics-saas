@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
 
 <!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_5 -->
 <script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
@@ -108,59 +109,39 @@
         </div>
     </footer>
 
-    <!-- Settlements Script -->
+    <!-- Authenticated, organization-scoped settlement register -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-
-        async function initSettlements() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "/auth/login.html";
-                return;
-            }
-            document.getElementById('session-identity-node').innerText = `Partner Node: ${session.user.email}`;
-            loadPartnerSettlements();
-        }
-
-        async function loadPartnerSettlements() {
-            try {
-                const { data, error } = await supabaseClient.from('krim_quotes').select('*').order('created_at', { ascending: false });
-                const tbody = document.getElementById('settlements-tbody');
-                tbody.innerHTML = '';
-
-                if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">No settlement records found in ledger.</td></tr>`;
-                    return;
-                }
-
-                data.forEach((s, idx) => {
-                    const isPaid = s.status === 'paid';
-                    const statusColor = isPaid ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
-                    const settlementRef = `SETTLE-2026-${(5000 + idx)}`;
-
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">${settlementRef}</td>
-                            <td class="py-4 px-4 font-mono text-slate-600">#${s.shipment_id}</td>
-                            <td class="py-4 px-4 font-mono font-bold text-slate-900">${s.currency_code || 'INR'} ${Number(s.amount).toLocaleString('en-IN')}.00</td>
-                            <td class="py-4 px-4"><span class="px-2.5 py-1 rounded-full text-[11px] font-mono border font-semibold uppercase ${statusColor}">${isPaid ? 'Settled & Paid Out' : 'Pending Escrow'}</span></td>
-                            <td class="py-4 px-4 font-mono text-xs text-slate-500">${new Date(s.created_at || Date.now()).toLocaleDateString()}</td>
-                            <td class="py-4 px-4 text-right">
-                                <a href="/logistics-saas/public/shipper/epod-vault.html?shipment_id=${s.shipment_id}" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider font-semibold transition shadow-xs">
-                                    Audit ePOD →
-                                </a>
-                            </td>
-                        </tr>`;
-                });
-            } catch (err) {
-                console.error("Error loading partner settlements:", err);
-            }
-        }
-
-        initSettlements();
+    (function(){
+      "use strict";
+      const db=window.KRIM_SUPABASE||window.supabaseClient;
+      const tbody=document.getElementById("settlements-tbody");
+      const identity=document.getElementById("session-identity-node");
+      const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const money=(v,c)=>{const n=Number(v),cc=String(c||"").toUpperCase();if(!Number.isFinite(n)||!/^[A-Z]{3}$/.test(cc))return "Not recorded";try{return new Intl.NumberFormat(undefined,{style:"currency",currency:cc,currencyDisplay:"code"}).format(n)}catch(_){return cc+" "+n.toLocaleString()}};
+      const date=v=>{if(!v)return "Not scheduled";const d=new Date(v);return Number.isNaN(d.getTime())?"Not recorded":d.toLocaleDateString()};
+      function message(s){tbody.innerHTML='<tr><td colspan="6" class="py-8 text-center text-slate-500 font-mono text-xs">'+esc(s)+'</td></tr>'}
+      async function loadPartnerSettlements(){
+        if(!db){message("Secure KRIM database configuration is unavailable.");return}
+        const {data:auth,error:ae}=await db.auth.getSession();
+        if(ae||!auth?.session){location.href="../../auth/partner-signin.html?next="+encodeURIComponent(location.pathname);return}
+        identity.textContent="Authenticated partner · "+(auth.session.user.email||"account");
+        message("Loading authorized settlement records…");
+        const {data:members,error:me}=await db.from("krim_organization_members").select("organization_id").eq("user_id",auth.session.user.id).eq("status","active");
+        if(me){message("Organization access could not be verified.");return}
+        const ids=[...new Set((members||[]).map(x=>Number(x.organization_id)).filter(x=>Number.isSafeInteger(x)&&x>0))];
+        if(!ids.length){message("No active organization membership is associated with this account.");return}
+        const {data:orgs,error:oe}=await db.from("krim_organizations").select("id,organization_type,status").in("id",ids).eq("status","active");
+        if(oe){message("Partner organization status could not be verified.");return}
+        const partnerIds=(orgs||[]).filter(o=>["partner","carrier","forwarder","logistics_provider","warehouse_operator"].includes(String(o.organization_type||"").toLowerCase())).map(o=>Number(o.id));
+        if(!partnerIds.length){message("No active partner organization is available for this account.");return}
+        const {data:rows,error}=await db.from("krim_settlements").select("id,settlement_number,shipment_id,settlement_type,status,currency_code,gross_amount,adjustments,net_amount,settlement_date,reference_number,created_at").in("partner_organization_id",partnerIds).order("created_at",{ascending:false}).limit(200);
+        if(error){message("Settlement records are unavailable: "+error.message);return}
+        if(!rows?.length){message("No settlement records are currently recorded for your authorized partner organizations.");return}
+        tbody.innerHTML=rows.map(s=>'<tr class="border-b border-slate-100"><td class="py-4 px-4 font-mono font-bold">'+esc(s.settlement_number||("Record #"+s.id))+'</td><td class="py-4 px-4 font-mono">'+(s.shipment_id?'#'+esc(s.shipment_id):"Not linked")+'</td><td class="py-4 px-4 font-mono">'+esc(money(s.net_amount,s.currency_code))+'<div class="text-xs text-slate-500">Gross '+esc(money(s.gross_amount,s.currency_code))+' · Adjustments '+esc(money(s.adjustments,s.currency_code))+'</div></td><td class="py-4 px-4">'+esc(String(s.status||"not recorded").replace(/_/g," "))+'</td><td class="py-4 px-4">'+esc(date(s.settlement_date||s.created_at))+'</td><td class="py-4 px-4 text-right">'+(s.reference_number?'<span class="text-xs font-mono">'+esc(s.reference_number)+'</span>':'<span class="text-xs text-slate-400">No reference</span>')+'</td></tr>').join("");
+      }
+      window.loadPartnerSettlements=loadPartnerSettlements;
+      loadPartnerSettlements().catch(e=>message(e?.message||"Settlement register could not be loaded."));
+    })();
     </script>
 </body>
 </html>
