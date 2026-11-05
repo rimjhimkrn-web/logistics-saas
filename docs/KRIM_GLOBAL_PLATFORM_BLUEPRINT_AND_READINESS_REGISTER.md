@@ -486,6 +486,8 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - Operations Control Tower Shipment Control and Dispatch & Handover now include RLS-scoped read-only shipment registers. No dispatch, assignment, milestone, customs, or shipment mutation is exposed from these pages. Customs remains read-only under SELECT-only grants; no authority decision is fabricated. Current operational tables contain zero dispatches, customs records, warehouse facilities/tasks/movements, driver assignments or POD evidence. A stale expired open opportunity is blocked by the quote RPC and documented for cleanup.
 
 - Verified the retained warehouse task/evidence modules and server-side operator/facility authorization; admin facility review requires AAL2. Fixed a driver POD bypass: drivers can no longer mark assignments delivered directly through the trip-event RPC; delivery completion is now reserved for AAL2 POD review plus delivery authorization. Migration `require_verified_pod_before_driver_delivery_completion` is applied and verified (authenticated EXECUTE true; anon false). No operational records were created or changed.
+
+- Added RLS-scoped read-only source registers across the seven Operations Control modules: shipments, dispatch, exceptions, recorded tracking events, route plans, warehouse facilities and customs declarations. All seven updated inline scripts pass syntax checks; no live operational writes or fabricated telemetry are enabled. Signed-in browser E2E and role-by-role visibility tests remain pending.
 Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
 
 
