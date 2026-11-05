@@ -557,3 +557,8 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 - Inventory receipt movement now rejects merging stock into an existing SKU/lot balance when quality states differ. This protects already-released stock from being mixed with pending/held/rejected receipts. Inventory movement RPC remains service-role-only; authenticated direct calls are denied.
 - Current warehouse production counts are all zero (facilities, tasks, receipts, inventory, movements, evidence). No operational data was fabricated or created.
 - **Step 6 is not complete** until warehouse receipts/dispatch are authoritatively linked to shipment legs, Operations Control Tower dispatch is safely integrated, cross-workspace visibility is tested, and signed-in multi-user E2E passes on an approved facility.
+
+
+### Step 6 — Customer ePOD evidence visibility
+- Customer access to driver POD files is now gated by a storage SELECT policy: only evidence paths explicitly attached to an independently verified POD for a shipment belonging to the signed-in customer's authorized organization are accessible. The driver bucket remains private; unverified/rejected evidence and unrelated files remain inaccessible.
+- The canonical customer ePOD vault now offers user-initiated 60-second signed previews for verified evidence only. JavaScript syntax passed. Production currently has no POD records, so browser preview and cross-organization negative tests remain outstanding.
