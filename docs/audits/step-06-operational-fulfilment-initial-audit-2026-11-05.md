@@ -84,3 +84,6 @@ The audit identified a large set of older static pages that displayed fictitious
 - Review customs declaration read/write permissions, evidence storage and authority status semantics.
 - Review dispatch and exception management with actual role-scoped data.
 - Signed-in browser E2E remains pending. The user has deferred all real operations until full ecosystem review. No real shipment, driver, facility, inventory, customs declaration, POD or delivery event was created.
+
+- A further seven non-functional public operations placeholders (capacity planning, carrier matching, route planner, service-level monitoring, trip monitoring, vehicle capacity and operations reports) were redirected to their authenticated `app/operations/` equivalents. This prevents blank “Loading KRIM Operations” pages from being mistaken for working operational consoles.
+- The post-migration security advisor still reports existing project-wide findings (including RLS-enabled tables without policies and SECURITY DEFINER warnings). These are tracked for the dedicated Step 8 Security & Compliance review; no broad permissions were changed as part of Step 6.
