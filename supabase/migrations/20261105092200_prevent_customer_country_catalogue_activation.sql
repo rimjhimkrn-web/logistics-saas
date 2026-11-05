@@ -45,11 +45,15 @@ BEGIN
   END IF;
 
   v_definition := pg_get_functiondef(v_oid);
-  IF position(v_old IN v_definition)=0 THEN
+  IF position(v_old IN v_definition)>0 THEN
+    v_definition := replace(v_definition,v_old,v_new);
+    EXECUTE v_definition;
+  ELSIF position('Origin country is not present in the KRIM country catalogue' IN v_definition)>0
+    AND position('Destination country is not present in the KRIM country catalogue' IN v_definition)>0
+  THEN
+    NULL; -- Already applied; permits safe migration-history reconciliation.
+  ELSE
     RAISE EXCEPTION 'Expected country activation block did not match; migration aborted safely';
   END IF;
-
-  v_definition := replace(v_definition,v_old,v_new);
-  EXECUTE v_definition;
 END
 $migration$;
