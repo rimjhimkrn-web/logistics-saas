@@ -57,7 +57,7 @@ $('accept-button').addEventListener('click',async()=>{
  const b=$('accept-button');b.disabled=true;b.textContent='Validating and accepting…';say('Waiting for KRIM server-side quote acceptance…');
  try{
   const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:Number(quote.id)});if(error)throw error;
-  const result=Array.isArray(data)?data[0]:data;if(!result||Number(result.id)!==Number(quote.id)||String(result.status)!=='accepted')throw new Error('The server did not confirm acceptance of this exact quote.');
+  const result=Array.isArray(data)?data[0]:data;if(!result||Number(result.id)!==Number(quote.id))throw new Error('The server did not return the exact quote record.');if(String(result.status)==='expired'){quote.status='expired';b.disabled=true;b.textContent='Quote expired';say('KRIM confirmed that this quote has expired. It was not accepted. Request a fresh quote before proceeding.','warn');return;}if(String(result.status)!=='accepted')throw new Error('The server did not confirm acceptance of this exact quote.');
   quote.status='accepted';b.textContent='Quote accepted ✓';say('KRIM confirmed quote acceptance. Partner assignment, final booking and payment still require their own verified states.');
   const a=$('compare-link');a.textContent='Return to quote comparison →';a.href=path('public/shipper/quote-comparison.html')+'?shipment_id='+encodeURIComponent(quote.shipment_id);
  }catch(e){say((e&&e.message)||'Quote acceptance failed. Refresh and review the current quote status.','error');b.disabled=false;b.textContent='Accept quote securely'}
