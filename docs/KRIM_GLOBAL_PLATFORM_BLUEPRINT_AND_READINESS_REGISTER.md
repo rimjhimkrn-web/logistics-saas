@@ -517,3 +517,11 @@ Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11
 
 - Follow-up: inspected the four unprocessed webhook rows; they are two historical event pairs whose provider order IDs do not match any current canonical payment order. One includes a legacy shipment-14 note, but that shipment's current payment order has a different provider order ID. Left all four quarantined and unchanged pending provider-side evidence; did not replay, ignore, or delete them. Five September `created` orders also remain unchanged until their provider-side state is confirmed.
 - Added read-only RLS-scoped payment-order and partner-payable registers to `app/finance/payment-processing.html` and `app/finance/partner-settlements.html`. No financial write path was added; JavaScript syntax validation passed. Step 7 remains not live-approved.
+
+
+### Step 8 — Security & Compliance (in progress)
+- Security Advisor: 23 RLS-enabled/no-policy tables (INFO); every affected table has zero anon/authenticated grants. 249 public SECURITY DEFINER functions, 79 authenticated-executable, 0 anon-executable; all 79 include `auth.uid()`, all 249 have explicit `search_path`. No blanket revocation is appropriate.
+- Fixed the only authenticated `admin.platform` SECURITY DEFINER RPC missing server-side AAL2: `krim_admin_schedule_inquiry_followup`. Migration `enforce_aal2_on_admin_inquiry_followup` applied and verified; zero admin RPC AAL2 gaps remain.
+- Retired empty legacy POD storage/table access paths referencing `shipment_requests`/`partners`; canonical private POD evidence remains intact. Five storage buckets are private; no anonymous Storage policies.
+- Public Edge Functions reviewed: Razorpay webhook signature/deduplication, public tracking opaque UUID token (no IP throttle yet), public inquiry IP/email limits, Cashfree webhook 410 retirement stub. `config.js` contains only the public publishable key; secrets were not read.
+- **Outstanding:** leaked-password protection is disabled and Supabase docs indicate Pro+; project-wide new-user MFA enrollment was not verifiable; public tracking throttling is recommended; per-function SECURITY DEFINER review remains ongoing. See `docs/audits/step-08-security-compliance-2026-11-05.md`.
