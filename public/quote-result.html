@@ -69,7 +69,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div id="checkout-feedback" class="feedback notice" role="status" aria-live="polite">Checking your quote, shipment and payment eligibility…</div>
 </div>
 <div class="card">
-<div class="cardhead"><div><h2>Required security checks</h2><p>Checkout stays locked unless every required condition passes.</p></div><span class="pill">Live validation</span></div>
+<div class="cardhead"><div><h2>Required security checks</h2><p>Checkout stays locked unless every required condition passes, including confirmed partner capacity reservation.</p></div><span class="pill">Live validation</span></div>
 <div class="check-list">
 <div class="check-row"><span class="check-icon pending" id="check-session">…</span><span><strong>Customer authentication</strong><br><span id="check-session-text">Checking your sign-in…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-quote">…</span><span><strong>Accepted and unexpired quote</strong><br><span id="check-quote-text">Loading quote from KRIM…</span></span></div>
@@ -206,17 +206,27 @@ async function init(){
  byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; the existing INR checkout remains active.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
  let assignmentOk=false;
  if(quote.partner_quote_id){
-   const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
-   if(!a.error&&a.data){assignment=a.data;assignmentOk=assignment.status==="accepted";byId("assignment-status").textContent=String(assignment.status||"unknown").replace(/_/g," ").toUpperCase();byId("partner-reference").textContent="Assignment "+(assignment.assignment_number||("#"+assignment.id))+" · offer #"+assignment.partner_quote_id;}
+   const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at,capacity_binding_id,shipment_leg_id").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   if(!a.error&&a.data){
+     assignment=a.data;
+     if(assignment.status==="accepted"&&assignment.capacity_binding_id&&assignment.shipment_leg_id){
+       const bindingResult=await client.from("krim_capacity_leg_bindings").select("id,status,reservation_id,shipment_id,shipment_leg_id").eq("id",Number(assignment.capacity_binding_id)).maybeSingle();
+       if(bindingResult.error)throw bindingResult.error;
+       const binding=bindingResult.data;
+       assignmentOk=!!(binding&&binding.status==="confirmed"&&binding.reservation_id&&Number(binding.shipment_id)===Number(shipment.id)&&Number(binding.shipment_leg_id)===Number(assignment.shipment_leg_id));
+     }
+     byId("assignment-status").textContent=assignment.status==="accepted"?(assignmentOk?"ACCEPTED · CAPACITY RESERVED":"ACCEPTED · CAPACITY PENDING"):String(assignment.status||"unknown").replace(/_/g," ").toUpperCase();
+     byId("partner-reference").textContent="Assignment "+(assignment.assignment_number||("#"+assignment.id))+" · offer #"+assignment.partner_quote_id+(assignment.capacity_binding_id?" · capacity binding #"+assignment.capacity_binding_id:"");
+   }
    else {byId("assignment-status").textContent="Not accepted";byId("partner-reference").textContent="No matching assignment was found.";}
  }else{byId("assignment-status").textContent="Not linked";byId("partner-reference").textContent="A selected partner offer is required.";}
- check("assignment",assignmentOk,assignmentOk?"The linked partner assignment is accepted.":"Partner offer must be awarded and the selected partner must accept before payment.");
+ check("assignment",assignmentOk,assignmentOk?"The partner assignment is accepted and its matching capacity binding is confirmed.":"The selected partner must accept the assignment and reserve matching verified capacity before payment.");
  const shipmentConfirmed=shipment.status==="confirmed";
  if(!shipmentConfirmed){message("Checkout is locked because this shipment is currently "+(shipment.status||"in an unknown state")+". The shipment must be confirmed and its selected partner assignment accepted before payment.","info");}
  else if(!quoteValid){message("Checkout is locked because the accepted quote is expired or its amount is invalid.","error");}
  else if(!amountValid){message("Checkout is locked because this currency is not enabled by KRIM's verified payment capability register, or the quote amount is invalid. KRIM will not silently convert currencies.","error");}
- else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment. No payment order has been created.","info");}
- else {message("Quote, shipment, currency and partner assignment checks passed. Continue when you are ready to open Razorpay.","success");}
+ else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment and reserves matching verified capacity. No payment order has been created.","info");}
+ else {message("Quote, shipment, currency, partner assignment and capacity reservation checks passed. Continue when you are ready to open Razorpay.","success");}
  byId("payment-order-meta").textContent="No new payment order has been created yet.";
  gateway(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"PRE-CHECKS PASSED":"AWAITING ELIGIBILITY",quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"good":"wait");
  setPayReady(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed);
