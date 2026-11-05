@@ -54,7 +54,14 @@ $('podForm').addEventListener('submit',async ev=>{
    storage_path:storagePath,original_file_name:file.name,content_type:file.type,file_size:file.size
   }).select('id').single();
   if(saved.error)throw saved.error;
-  result.textContent='Evidence uploaded and registered successfully (record '+saved.data.id+'). The trip is not marked delivered. Open the Milestone console and record the delivery event only after the physical handover is complete.';
+  const pod=await db.rpc('krim_driver_submit_delivery_pod',{
+   p_driver_assignment_id:assignment.id,
+   p_received_by_name:recipient,
+   p_received_by_role:null,
+   p_signature_reference:null
+  });
+  if(pod.error)throw new Error('Evidence file and metadata were saved, but POD submission did not complete: '+pod.error.message);
+  result.textContent='Delivery evidence and POD submission are recorded (evidence '+saved.data.id+', POD '+(pod.data?.pod_id||'submitted')+'). Status: awaiting authorized verification. The shipment is NOT marked delivered until verification and delivery authorization are completed.';
   result.className='notice';
   $('podForm').reset();
   select.value='';
