@@ -112,7 +112,7 @@ $("create-form").addEventListener("submit",async e=>{
  const mode=$("mode").value,tier=$("tier").value;
  if((tier==="air_priority"&&mode!=="AIR")||(tier!=="air_priority"&&mode!=="ROAD"))throw Error("The selected service tier and transport mode do not match.");
  const from=new Date($("from").value);const until=$("until").value?new Date($("until").value):null;
- if(Number($("origin").value)===Number($("destination").value))throw Error("The current production RPC rejects same-country domestic rate cards. Do not create a workaround; the domestic-lane migration is still pending.");
+ // Domestic same-country lanes are supported by the current approval and activation RPCs; their market gate is evaluated once for the distinct country.
  const args={p_origin_country_id:Number($("origin").value),p_destination_country_id:Number($("destination").value),p_transport_mode_code:mode,p_service_tier:tier,p_rate_type:$("rate-type").value,p_base_amount:Number($("amount").value),p_currency_code:$("currency").value,p_minimum_charge:Number($("minimum").value),p_effective_from:from.toISOString(),p_effective_until:until?until.toISOString():null,p_priority:Number($("priority").value)};
  const data=await runRpc("krim_admin_create_global_rate_card",args,"Create a non-public draft rate card? No customer price will be published.");
  if(data){$("evidence-rate").value=data.id;$("approval-rate").value=data.id;$("status-rate").value=data.id;state("Draft rate card #"+data.id+" created. It is not active or customer-visible.","good");await refresh();$("create-form").reset()}
