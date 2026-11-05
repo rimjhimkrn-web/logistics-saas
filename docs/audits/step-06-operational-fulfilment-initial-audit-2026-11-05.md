@@ -187,3 +187,18 @@ The POD chain is now connected in source and database design, but it has not bee
 - No approved real warehouse organization/facility exists, so the full receipt → goods receipt → put-away → pick/pack chain cannot be safely exercised in production without fabricated operational records.
 - Shipment-level dispatch gateway and carrier/driver handoff integration remain open. Returns, transfers, stock adjustments, cycle-count reconciliation and bin-capacity controls remain disabled pending dedicated governed workflows.
 - Signed-in E2E remains required for facility approval, task sequence, inventory balances, private evidence preview, cross-organization isolation and shipment dispatch. No real partner/customer outreach or live shipment activity has occurred.
+
+
+## Independent quality release workflow — 5 November 2026
+
+- The existing warehouse maker-checker backend was found during the extended audit: `krim_warehouse_review_inventory_quality`. It requires a completed goods-receipt or damage-exception task, an attached inspection report, an active authorized warehouse operator, and a reviewer different from both task creator and completer. It records both a warehouse task event and a KRIM audit event.
+- Implemented the authenticated `public/warehouse/quality-control.html` review interface and linked it from the Warehouse Control Centre and Inventory Ledger. The page displays only completed tasks with a matching current inventory SKU/lot; it clearly blocks self-review and missing inspection reports before presenting a decision form. The database remains the final enforcement layer.
+- Applied migration `20261105064301_warehouse_maker_checker_release_gate`. Initial goods receipt cannot set inventory to Released; the independent reviewer must release it after the inspection report is attached. A receipt already on quality hold must remain Hold or Rejected through goods receipt; it cannot be converted to available stock.
+- Updated Inbound Receiving and Goods Receipt forms to remove the misleading direct Released choice. This aligns the UI with the server-side maker-checker rule.
+- Applied task idempotency migration `20261105064221_harden_warehouse_task_idempotency_and_quality_gate`: creation requests are serialized by organization/key and conflicting reuse of the same key is rejected.
+- Verified: create-task RPC authenticated EXECUTE=true/anon=false; task transition RPC authenticated EXECUTE=true and SECURITY DEFINER; internal movement RPC authenticated/anon EXECUTE=false/service_role=true; quality review RPC authenticated EXECUTE=true/anon=false with independent-review and inspection-report guards. Current production counts remain tasks=0, facilities=0, inventory=0, movements=0, evidence=0.
+- Static JavaScript syntax passed for the new quality-control page and modified receiving/warehouse dashboard pages. No live quality decision or warehouse transaction was created.
+
+### Remaining Step 6 gates
+- Quality workflow is implemented but cannot be exercised without an approved warehouse facility and two distinct authorized warehouse users. Signed-in E2E must prove evidence upload, maker-checker separation, quality release and picking denial/allowance.
+- Shipment-level dispatch integration and the other previously listed operational controls remain open.
