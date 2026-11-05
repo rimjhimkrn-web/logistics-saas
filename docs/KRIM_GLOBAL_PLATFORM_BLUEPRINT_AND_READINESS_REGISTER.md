@@ -488,6 +488,8 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - Verified the retained warehouse task/evidence modules and server-side operator/facility authorization; admin facility review requires AAL2. Fixed a driver POD bypass: drivers can no longer mark assignments delivered directly through the trip-event RPC; delivery completion is now reserved for AAL2 POD review plus delivery authorization. Migration `require_verified_pod_before_driver_delivery_completion` is applied and verified (authenticated EXECUTE true; anon false). No operational records were created or changed.
 
 - Added RLS-scoped read-only source registers across the seven Operations Control modules: shipments, dispatch, exceptions, recorded tracking events, route plans, warehouse facilities and customs declarations. All seven updated inline scripts pass syntax checks; no live operational writes or fabricated telemetry are enabled. Signed-in browser E2E and role-by-role visibility tests remain pending.
+
+- Final GitHub Actions production smoke checks and static link audit passed after the global-shell and retired-route audit corrections (commit `d79d3fab500c0c582180742f8808622618efd026`). Pages deployment was still in progress at the time of this note.
 Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
 
 
