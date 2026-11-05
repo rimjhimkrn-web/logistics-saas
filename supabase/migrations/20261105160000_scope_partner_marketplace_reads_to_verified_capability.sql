@@ -1,11 +1,7 @@
--- Step 1: expose open commercial opportunities only to registered businesses
+-- Step 1: restrict commercial marketplace reads to registered businesses
 -- with a currently verified capability that covers the specific shipment.
-DROP POLICY IF EXISTS "KRIM verified partners can view open opportunities"
-  ON public.krim_partner_opportunities;
-
-CREATE POLICY "KRIM verified capable businesses can view open opportunities"
+ALTER POLICY "KRIM verified partners can view open opportunities"
   ON public.krim_partner_opportunities
-  FOR SELECT TO authenticated
   USING (
     status = 'open'
     AND EXISTS (
@@ -36,12 +32,8 @@ CREATE POLICY "KRIM verified capable businesses can view open opportunities"
     )
   );
 
-DROP POLICY IF EXISTS "KRIM verified partners can view open opportunity shipments"
-  ON public.krim_shipments;
-
-CREATE POLICY "KRIM verified capable businesses can view open opportunity shipments"
+ALTER POLICY "KRIM verified partners can view open opportunity shipments"
   ON public.krim_shipments
-  FOR SELECT TO authenticated
   USING (
     EXISTS (
       SELECT 1
