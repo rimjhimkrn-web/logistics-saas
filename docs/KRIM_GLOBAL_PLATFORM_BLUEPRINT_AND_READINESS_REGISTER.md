@@ -478,6 +478,8 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - **State:** substantial page cleanup and POD evidence foundation completed; warehouse-to-dispatch chain, partner/driver POD lifecycle alignment, customs authorization, exception handling and signed-in browser E2E remain open. Step 6 is not complete and no real operations have started.
 - 
 - Additional non-functional public operations placeholder routes now redirect to authenticated Operations Control modules. Project-wide RLS/SECURITY DEFINER advisor findings remain assigned to Step 8 rather than being changed outside the security workstream.
+
+- POD lifecycle hardening: driver assignments now link to the exact partner assignment; driver POD submission requires owned private evidence; pending POD tracking no longer appears as delivered; and AAL2 admin review is required before final delivery authorization. A private admin verification page is linked from the control centre. Source and SQL checks passed; no live evidence or operational records were created. Signed-in E2E remains pending.
 Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
 
 
