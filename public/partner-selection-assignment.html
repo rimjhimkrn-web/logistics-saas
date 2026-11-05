@@ -98,11 +98,27 @@
     if(!shipment||!selectedPartnerQuoteId)return;
     $("check-assignment").disabled=true;$("check-assignment").textContent="Checking…";
     try{
-      const r=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,assignment_number,accepted_at").eq("shipment_id",Number(shipment.id)).eq("partner_quote_id",selectedPartnerQuoteId).order("created_at",{ascending:false}).limit(1).maybeSingle();
+      const r=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,assignment_number,accepted_at,capacity_binding_id,shipment_leg_id").eq("shipment_id",Number(shipment.id)).eq("partner_quote_id",selectedPartnerQuoteId).order("created_at",{ascending:false}).limit(1).maybeSingle();
       if(r.error)throw r.error;
       if(r.data&&r.data.status==="accepted"){
-        $("assignmentstate").textContent="Partner assignment accepted · "+(r.data.assignment_number||("assignment #"+r.data.id))+". Secure checkout is available.";
-        $("checkout").disabled=false;banner("Partner accepted the assignment","The linked assignment is recorded as accepted. Continue to checkout to revalidate the quote and booking requirements.","good");
+        if(!r.data.capacity_binding_id||!r.data.shipment_leg_id){
+          $("checkout").disabled=true;
+          $("assignmentstate").textContent="Partner accepted the assignment, but verified capacity has not yet been reserved. Checkout remains locked.";
+          banner("Capacity reservation pending","The partner must schedule the shipment leg and reserve matching verified vehicle or weight capacity before checkout can continue.","info");
+        }else{
+          const br=await client.from("krim_capacity_leg_bindings").select("id,status,reservation_id,shipment_id,shipment_leg_id").eq("id",Number(r.data.capacity_binding_id)).maybeSingle();
+          if(br.error)throw br.error;
+          const binding=br.data;
+          const capacityConfirmed=!!(binding&&binding.status==="confirmed"&&binding.reservation_id&&Number(binding.shipment_id)===Number(shipment.id)&&Number(binding.shipment_leg_id)===Number(r.data.shipment_leg_id));
+          if(capacityConfirmed){
+            $("assignmentstate").textContent="Partner accepted and verified capacity reserved · "+(r.data.assignment_number||("assignment #"+r.data.id))+". Secure checkout is available.";
+            $("checkout").disabled=false;banner("Assignment and capacity confirmed","KRIM records an accepted assignment and a confirmed capacity binding. The payment server will revalidate the linked reservation before creating a payment order.","good");
+          }else{
+            $("checkout").disabled=true;
+            $("assignmentstate").textContent="Partner accepted, but the capacity binding is not confirmed. Checkout remains locked.";
+            banner("Capacity not confirmed","A matching confirmed capacity reservation is required before checkout. Refresh after the partner completes scheduling and reservation.","warn");
+          }
+        }
       }else{
         $("checkout").disabled=true;$("assignmentstate").textContent=r.data?"Assignment status: "+String(r.data.status||"pending").replace(/_/g," ")+". Waiting for partner acceptance.":"Award submitted; no matching assignment record is currently visible.";
         banner("Waiting for partner acceptance","Checkout stays locked until KRIM records an accepted assignment. Refresh this status after the partner responds.","info");
