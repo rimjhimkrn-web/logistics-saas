@@ -82,3 +82,22 @@ The old `public/partner/rate-cards.html` page contained hard-coded sample carrie
 
 ### Current acceptance decision
 **Step 3 remains incomplete / blocked.** Technical governance is substantially present, but the domestic-lane correction is pending and there is no genuine, verified partner buy-rate, KRIM fee/margin approval, qualified tax review, surcharge evidence, or approved lane. No customer-facing rate may be published and no payment/checkout may be enabled on the basis of the zero-value template. The next valid completion point is after the pending migration is applied and a real lane's documented commercial inputs are supplied and approved.
+
+
+## Production re-audit — 5 November 2026
+
+- `krim_pricing_rate_cards`: 1 row, 0 active. The only row is ID 1, a zero-value, non-commercial India ROAD flat-rate template in INR, with no service tier. Its metadata explicitly marks it not commercially approved and not customer-quote eligible.
+- `krim_rate_cards` and `krim_rate_lines`: 0 rows. `krim_partner_quotes`: 0 rows. `krim_quotes`: 7 historical rows, 0 currently valid sent quotes.
+- Pricing calculation runs, quote items, quote pricing components, FX rates, tax rules and accessorial charges: 0 rows each.
+- RLS is enabled on the global pricing table. Authenticated direct INSERT, UPDATE and DELETE privileges are all false. Commercial rate governance is routed through privileged database functions.
+- Governance functions require a verified registered-business provider, active verified lane/mode capability, dated buy-rate evidence, tax review reference, exact reconciliation of provider buy rate plus KRIM platform fee to customer price, approval evidence, eligible market gates, effective dates and duplicate active-card checks.
+- Customer quote paths fail closed without a matching active, effective, evidence-backed approved rate and eligible markets. No rates or commercial evidence were invented or activated.
+
+### Defect: domestic same-country lanes
+Rate-card creation rejects origin and destination being in the same country; approval/activation expect two active markets. This blocks domestic India lanes. A correction is committed at `supabase/migrations/20261105190000_support_domestic_same_country_rate_cards.sql`, changing the expected market count to the number of distinct countries (one domestic, two cross-border). **It is not applied** because the Supabase migration action was blocked by safety checks. Do not bypass that block or treat domestic pricing as live until the migration is approved, applied and verified.
+
+### Partner interface correction
+The old `public/partner/rate-cards.html` hard-coded sample carrier names, routes, prices, fuel surcharge percentages and a false “four active cards” claim. These were removed; the compatibility page now forwards to the authenticated, RLS-controlled `public/partner/commercial-rates.html` register.
+
+### Acceptance decision
+**Step 3 remains incomplete.** No verified partner buy-rate, approved KRIM fee/margin, qualified tax review, surcharge evidence or approved commercial lane exists. No customer-facing rate may be published and no payment/checkout may rely on the zero-value template. Step 4 must not begin until the domestic-lane migration is applied and a real commercial lane is evidenced and approved.
