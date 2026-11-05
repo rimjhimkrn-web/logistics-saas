@@ -131,6 +131,9 @@ if (!razorpayVerifySource.includes('.eq("status", paymentOrder.status)') ||
 for (const token of ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature', 'razorpayPayment.order_id', 'razorpayPayment.amount', 'razorpayPayment.currency', 'razorpayStatus !== "captured"', 'krim_shipment_partner_assignments', 'partner_quote_id']) {
   if (!razorpayVerifySource.includes(token)) failures.push("Razorpay verification must bind payment to the provider order, amount, currency, captured state and accepted partner quote: " + token);
 }
+for (const token of ['capacity_binding_id', 'krim_capacity_leg_bindings', 'krim_capacity_reservations', 'CAPACITY_RESERVATION_REQUIRED', 'CAPACITY_BINDING_NOT_CONFIRMED', 'CAPACITY_RESERVATION_NOT_CONFIRMED']) {
+  if (!razorpayVerifySource.includes(token)) failures.push("Razorpay payment verification must re-check the accepted assignment's exact confirmed capacity binding and reservation: " + token);
+}
 for (const token of ['x-razorpay-signature', 'x-razorpay-event-id', 'payment_orders', 'amount_paise', 'PAYMENT_ORDER_MISMATCH', 'webhookPaymentStatus !== "captured"']) {
   if (!razorpayWebhookSource.includes(token)) failures.push("Razorpay webhook verification guard is missing: " + token);
 }
