@@ -130,3 +130,14 @@ BEGIN
 END;$$;
 REVOKE ALL ON FUNCTION public.krim_vehicle_admin_vehicle_list() FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.krim_vehicle_admin_vehicle_list() TO authenticated;
+DO $$ BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='krim_vehicle_document_requirements' AND policyname='krim_vehicle_requirements_deny_direct_api') THEN
+  CREATE POLICY krim_vehicle_requirements_deny_direct_api ON public.krim_vehicle_document_requirements FOR ALL TO anon,authenticated USING(false) WITH CHECK(false);
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='krim_vehicle_documents' AND policyname='krim_vehicle_documents_deny_direct_api') THEN
+  CREATE POLICY krim_vehicle_documents_deny_direct_api ON public.krim_vehicle_documents FOR ALL TO anon,authenticated USING(false) WITH CHECK(false);
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='krim_vehicles' AND policyname='krim_vehicles_deny_direct_api') THEN
+  CREATE POLICY krim_vehicles_deny_direct_api ON public.krim_vehicles FOR ALL TO anon,authenticated USING(false) WITH CHECK(false);
+ END IF;
+END $$;
