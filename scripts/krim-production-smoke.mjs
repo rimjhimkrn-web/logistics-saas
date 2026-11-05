@@ -834,7 +834,8 @@ for (const file of phaseNineInterfaceFiles) {
   const retiredRedirect =
     /<meta\s+name=["']robots["']\s+content=["']noindex,nofollow["']/i.test(source) &&
     /location\.replace\(/.test(source) &&
-    /legacy page|page has been retired|page has been replaced/i.test(source);
+    /legacy/i.test(source) &&
+    /(retired|replaced)/i.test(source);
   if (retiredRedirect) continue;
   const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
   const cssCount = (head.match(/core\/krim-global-interface\.css/g) || []).length;
