@@ -72,3 +72,25 @@ This passing workflow is source-level regression coverage only; it does not simu
 ## Latest CI confirmation (2026-10-26)
 The current main-branch commit `46132fce08f76642320796e3c450186e5dd2274b` passed the **KRIM production smoke checks** workflow (run `40259901363`) and the **KRIM static link audit** workflow (run `40259901351`). The Pages build/deployment workflow (run `40259900829`) also completed successfully. The smoke job explicitly passed both `scripts/krim-production-smoke.mjs` and `scripts/krim-complete-static-audit.mjs`.
 These are repository/source checks and successful Pages deployment only. They do not replace provider-signed webhook delivery tests, settlement evidence, or approved rate-card-backed booking-to-payment testing.
+
+
+## Fresh follow-up audit — 5 November 2026
+
+### Current production snapshot (read-only)
+- `payment_orders`: 6 total — 5 `created`, 1 `paid`; all six use Razorpay and INR. The five created orders (shipments 10–14) have Razorpay order IDs but no payment IDs. The paid order is shipment 15 for INR 35,000.
+- `krim_financial_transactions`: 1 row. It matches the paid order for shipment 15 at INR 35,000 / INR 35,000 equivalent, provider Razorpay and payment reference `pay_TgZLYhQF6oenEG`; its canonical transaction status is `completed` while the checkout order status is `paid`. This is the expected semantic mapping, not a duplicate transaction.
+- `payment_webhook_events`: 10 total — 6 processed and 4 unprocessed. The four historical unprocessed events listed above remain unmatched. No event was modified.
+- `krim_inbound_webhook_events`: 0.
+- `krim_partner_payables`: 0. Legacy `shipment_financials`, `partner_payouts` and `revenue_ledger` each still contain one row, but their shipment references do not establish a canonical relationship to shipment 15. No historical financial rows were altered.
+- Direct authenticated table policies on payment orders and financial transactions are SELECT-only; financial tables have RLS enabled. Payment-order unique constraints protect Razorpay order/payment IDs and one open order per quote. Financial transaction provider-reference and idempotency indexes are unique.
+- Capability registry: India/INR/Razorpay is marked implemented with checkout enabled for the sandbox path, but merchant eligibility, settlement, refunds and FX are not verified. All other country/provider/currency combinations remain planned and checkout-disabled. The deployed order-creation function blocks live-key checkout until those capabilities are evidence-backed and approved.
+
+### Edge Function state
+- Razorpay webhook remains ACTIVE (v15), `verify_jwt=false` as required for provider delivery, but verifies the Razorpay signature over the raw request body, requires an event ID, deduplicates events, validates captured amount/currency, fails closed on unknown order references and protects paid orders from failed-event downgrades.
+- Global Razorpay order creation remains ACTIVE (v15), requires a signed-in customer, accepted customer quote, accepted partner assignment, confirmed capacity binding and matching confirmed capacity reservation. It checks key mode and blocks live checkout while merchant eligibility, settlement, refunds and FX remain unverified.
+- `verify-razorpay-payment` was found to re-check accepted quote/assignment but not the capacity reservation, unlike order creation. Updated the deployed function to v13 and committed source at `supabase/functions/verify-razorpay-payment/index.ts` (commit `eb81cb5296b917dda36a274baa4a035626d4edff`). It now requires the exact assignment's confirmed capacity binding and matching confirmed reservation before verifying any unpaid order. Migration is not required; this is Edge Function code.
+- Legacy `create-razorpay-order`, `process-payment--`, Cashfree order/verification and Cashfree webhook endpoints remain deployed as ACTIVE names but their current function bodies return HTTP 410 with `PAYMENT_ENDPOINT_RETIRED` / `PAYMENT_ENDPOINT_RETIRED`-style codes. They are not active checkout paths; do not mistake their ACTIVE deployment status for an enabled provider.
+- No provider secret values were read, no live/sandbox payment was initiated, no webhook was replayed, and no payout was attempted.
+
+### Current decision
+Step 7 remains **IN PROGRESS / NOT LIVE-APPROVED**. The source-level capacity-verification gap is corrected. The four unmatched historical events, five old created orders, legacy ledger lineage, absent payable rows, and unverified live merchant/settlement/refund/FX evidence remain blockers. The approved rate-card/partner/capacity chain and controlled signed test events are also required before launch. Do not turn on live checkout or alter unmatched historical events to force a green status.
