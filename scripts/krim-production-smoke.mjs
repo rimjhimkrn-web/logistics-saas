@@ -938,6 +938,25 @@ if (!razorpayWebhookSource.includes('if (existingEvent?.processed)') ||
   failures.push("Step 7 webhook must distinguish completed duplicates from retryable in-progress/failed deliveries.");
 }
 
+// Step 7 finance workspaces must display real RLS-scoped records without adding
+// browser-side financial write paths or implying that a payment is a payout.
+const paymentProcessingPage = readFileSync("app/finance/payment-processing.html", "utf8");
+const partnerSettlementPage = readFileSync("app/finance/partner-settlements.html", "utf8");
+for (const [label, source, tokens] of [
+  ["payment processing register", paymentProcessingPage, ["from(\"payment_orders\")", "paymentRegisterRows", "paymentRegisterState", "Data unavailable. No zero-count claim is made."]],
+  ["partner payable register", partnerSettlementPage, ["from(\"krim_partner_payables\")", "payableRegisterRows", "payableRegisterState", "A payable is not an executed payout."]],
+]) {
+  for (const token of tokens) {
+    if (!source.includes(token)) failures.push("Step 7 " + label + " is missing read-only register safeguard: " + token);
+  }
+  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)[\\s\\S]{0,500}\\.(?:insert|update|upsert|delete)\\(/.test(source)) {
+    failures.push("Step 7 " + label + " must remain read-only in the browser.");
+  }
+}
+for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_capacity_reservations", "CAPACITY_RESERVATION_REQUIRED", "CAPACITY_BINDING_NOT_CONFIRMED", "CAPACITY_RESERVATION_NOT_CONFIRMED"]) {
+  if (!razorpayVerifySource.includes(token)) failures.push("Step 7 payment verification capacity regression guard missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
