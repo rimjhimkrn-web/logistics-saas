@@ -949,7 +949,7 @@ for (const [label, source, tokens] of [
   for (const token of tokens) {
     if (!source.includes(token)) failures.push("Step 7 " + label + " is missing read-only register safeguard: " + token);
   }
-  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)[\\s\\S]{0,500}\\.(?:insert|update|upsert|delete)\\(/.test(source)) {
+  if (/\.from\(["'](?:payment_orders|krim_partner_payables)["']\)[\s\S]{0,500}\.(?:insert|update|upsert|delete)\(/.test(source)) {
     failures.push("Step 7 " + label + " must remain read-only in the browser.");
   }
 }
