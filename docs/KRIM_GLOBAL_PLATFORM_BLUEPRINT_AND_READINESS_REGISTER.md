@@ -459,4 +459,6 @@ Created `docs/growth/partner-prospect-register-2026-11-05.md` with six source-ba
 - **Current evidence:** 18 shipments; 0 partner quotes; 0 assignments; 0 capacity resources; 0 capacity availability rows; 0 reservations; 0 capacity bindings. No positive commercial E2E was fabricated or run.
 - **State:** engineering guardrails implemented and source/deployment checked; positive partner assignment and capacity E2E remains pending genuine partner and capacity evidence. No real operations have started.
 
+
+- Customer partner-selection now restores an already-awarded quote after refresh and keeps checkout locked if the quote has expired, even when capacity is reserved.
 Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
