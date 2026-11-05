@@ -55,3 +55,12 @@ No contact has been made, no web form submitted, no CRM lead created, no consent
 - `legal/partner-terms.html` and `public/legal/partner-terms.html` now preserve their URLs as noindex compatibility redirects to the current Partner Standards page, which expressly states it is a framework and not an executed contract.
 - `public/partner/registration.html` and `public/partner/business-verification.html` now preserve their URLs as noindex compatibility redirects to the single current authenticated partner-onboarding flow.
 - This removes conflicting duplicate admission and legal surfaces without creating new commercial commitments. No agreements were issued and no partner was contacted or activated.
+
+
+## Handoff into Step 5 — 5 November 2026
+- Step 4 digital foundations were rechecked: partner onboarding, verification, capability review, private document access, MFA and navigation. Step 4 remains an engineering foundation only; no real partner outreach, applicant approval, agreement execution or commercial activation was performed.
+- Step 5 review identified that partner acceptance alone was previously sufficient to unlock customer checkout, even though the partner's separate schedule-and-reserve action could still be pending.
+- The customer assignment page now keeps checkout locked until it can read a matching confirmed capacity binding. The Razorpay order Edge Function independently verifies the assignment, binding, and linked reservation against the same shipment, leg and partner before creating or reusing a payment order.
+- Deployed `create-global-razorpay-order` version 15 with JWT verification still enabled. The deployed source contains the capacity-reservation gate. No payment order was created.
+- Retired two misleading legacy matching routes: the static growth page that claimed an active/optimized engine and displayed a sample route, and the static carrier-assignment form with a fabricated shipment reference. They now redirect to the current authenticated operations/customer assignment workflows.
+- Production currently contains 0 partner assignments, 0 capacity bindings and 0 capacity reservations. No positive commercial flow was fabricated or run. Source-level syntax and deployed-version checks passed; signed-in browser E2E remains pending.
