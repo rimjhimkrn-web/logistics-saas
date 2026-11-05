@@ -382,7 +382,7 @@ data: assignment,
 error: assignmentError,
 } = await supabase
 .from("krim_shipment_partner_assignments")
-.select("id, status, partner_quote_id")
+.select("id, status, partner_quote_id, partner_organization_id, shipment_leg_id, capacity_binding_id")
 .eq("shipment_id", shipmentId)
 .eq("partner_quote_id", quote.partner_quote_id)
 .order("created_at", { ascending: false })
@@ -398,9 +398,62 @@ if (!assignment || assignment.status !== "accepted") {
 return jsonResponse(
 {
 error: "The selected partner has not accepted the assignment yet. Payment remains locked.",
+code: "PARTNER_ACCEPTANCE_REQUIRED",
 },
 409
 );
+}
+
+// Partner acceptance is not sufficient by itself. Checkout also requires a
+// confirmed capacity binding and its matching confirmed reservation.
+if (!assignment.capacity_binding_id || !assignment.shipment_leg_id) {
+  return jsonResponse({
+    error: "The partner has accepted, but verified shipment capacity has not yet been reserved. Payment remains locked.",
+    code: "CAPACITY_RESERVATION_REQUIRED",
+  }, 409);
+}
+
+const { data: capacityBinding, error: bindingError } = await supabase
+  .from("krim_capacity_leg_bindings")
+  .select("id, shipment_id, shipment_leg_id, reservation_id, status")
+  .eq("id", assignment.capacity_binding_id)
+  .eq("shipment_id", shipmentId)
+  .eq("shipment_leg_id", assignment.shipment_leg_id)
+  .eq("status", "confirmed")
+  .maybeSingle();
+
+if (bindingError) {
+  console.error("Capacity binding lookup error:", bindingError);
+  return jsonResponse({ error: "Unable to verify the partner capacity binding" }, 500);
+}
+
+if (!capacityBinding?.reservation_id) {
+  return jsonResponse({
+    error: "A matching confirmed capacity binding is required before payment.",
+    code: "CAPACITY_BINDING_NOT_CONFIRMED",
+  }, 409);
+}
+
+const { data: capacityReservation, error: reservationError } = await supabase
+  .from("krim_capacity_reservations")
+  .select("id, organization_id, shipment_id, shipment_leg_id, status")
+  .eq("id", capacityBinding.reservation_id)
+  .eq("organization_id", assignment.partner_organization_id)
+  .eq("shipment_id", shipmentId)
+  .eq("shipment_leg_id", assignment.shipment_leg_id)
+  .eq("status", "confirmed")
+  .maybeSingle();
+
+if (reservationError) {
+  console.error("Capacity reservation lookup error:", reservationError);
+  return jsonResponse({ error: "Unable to verify the partner capacity reservation" }, 500);
+}
+
+if (!capacityReservation) {
+  return jsonResponse({
+    error: "The linked capacity reservation is missing, released or does not match this shipment and partner. Payment remains locked.",
+    code: "CAPACITY_RESERVATION_NOT_CONFIRMED",
+  }, 409);
 }
 
 // --------------------------------------------------
