@@ -470,3 +470,10 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - Retired six legacy pages containing fabricated GPS, POD/settlement, warehouse KPI, fleet telemetry or exception/SLA claims. Routes now redirect to authenticated or canonical workflows.
 - **State:** initial audit and legacy cleanup only. Complete the remaining driver, warehouse, dispatch, customs, exception and POD page/workflow audit before Step 6 can be accepted. No real operations have started.
 - Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
+
+
+### Step 6 — Operational fulfilment (continued; still in progress)
+- Implemented the driver POD evidence upload path in the authenticated Driver Workspace. Private file upload is followed by row registration; the database policy requires a matching object owned by the signed-in driver, an active driver membership and the driver's own non-closed assignment. Only SELECT/INSERT are granted; UPDATE/DELETE remain denied. Evidence submission does not itself mark delivery complete.
+- Retired legacy static/demo routes across driver, warehouse, customs/trade, operations, visibility and partner POD workflows. They now redirect to authenticated/canonical pages. Unsupported GPS/AIS/air/rail/sensor and prediction claims are not presented as live data.
+- **State:** substantial page cleanup and POD evidence foundation completed; warehouse-to-dispatch chain, partner/driver POD lifecycle alignment, customs authorization, exception handling and signed-in browser E2E remain open. Step 6 is not complete and no real operations have started.
+- Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
