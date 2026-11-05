@@ -114,3 +114,29 @@ The audit identified a large set of older static pages that displayed fictitious
 - Verify customer-visible POD evidence through a controlled, privacy-preserving read path; the private driver evidence bucket must not become public.
 - Confirm partner-side and driver-side assignment/POD models remain correctly linked without cross-organization data exposure.
 - No real operational records were created and no external partner/customer contact was made.
+
+
+## POD lifecycle integration and delivery authorization — 6 November 2026
+
+### Defects found
+- Driver assignments previously had no direct foreign key to the accepted commercial partner assignment. This made it difficult to prove which exact shipment leg the driver was executing, especially for multi-leg freight.
+- The internal partner POD submission function selected the first shipment leg rather than the leg on the accepted partner assignment.
+- POD submission wrote a `delivered` tracking event before POD verification and final delivery authorization. That could present an unverified handover as a completed delivery event.
+
+### Corrections applied
+1. Added nullable `partner_assignment_id` to `krim_driver_assignments`, with a foreign key and unique partial index. Updated `krim_assign_driver_to_partner_shipment` to bind each driver assignment to the exact accepted partner assignment and shipment leg, and to prevent one partner leg being assigned to two drivers.
+2. Updated `krim_internal_submit_delivery_pod` to require and lock the exact `shipment_leg_id` on the partner assignment. It now records `pod_submitted` (not `delivered`) in the tracking timeline.
+3. Added authenticated `krim_driver_submit_delivery_pod`. It verifies the signed-in driver's own in-transit assignment, active driver membership, linked partner assignment, and uploaded private evidence before creating the partner-level POD record.
+4. Updated the driver POD page to submit the stored evidence through this bridge and display a pending-verification state. The driver cannot directly authorize delivery.
+5. Added AAL2-gated admin RPCs `krim_admin_list_delivery_pods` and `krim_admin_review_delivery_pod`. A verification decision calls the internal verification and final delivery-authorization routines, then updates the linked driver assignment. Rejection requires a reason and leaves the shipment uncompleted.
+6. Added an AAL2 + platform-permission storage SELECT policy for private driver POD previews, a dedicated admin page `app/platform-admin/delivery-pod-verification.html`, and a link from the private platform control centre.
+
+### Verification and limits
+- All five new/updated migration entries are present in Supabase migration history.
+- SQL inspection confirms the driver-to-partner assignment column and foreign key exist; anonymous execution is revoked from the new RPCs; the driver POD submission RPC is authenticated-only; both admin POD RPCs contain server-side AAL2 checks; and the private admin evidence-preview policy exists.
+- JavaScript syntax checks passed for the driver POD page, new admin POD page and admin control-centre index.
+- No test file, driver, partner assignment, POD record or delivery event was created. Production counts remain 0 driver assignments, 0 driver evidence rows, 0 POD records and 0 dispatches.
+- Signed-in browser E2E, evidence upload, signed preview and admin verification test remain pending. The real operational acceptance test is deferred until the user's full ecosystem review and explicit authorization.
+
+### Step 6 remains open
+The POD chain is now connected in source and database design, but it has not been exercised end-to-end. Warehouse-to-dispatch chain, customs permissions/status semantics, exception workflow and role-separated browser tests still need review. Do not mark operational fulfilment complete.
