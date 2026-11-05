@@ -479,3 +479,11 @@ Detailed audit: docs/audits/step-05-shipment-matching-assignment-2026-11-05.md.
 - 
 - Additional non-functional public operations placeholder routes now redirect to authenticated Operations Control modules. Project-wide RLS/SECURITY DEFINER advisor findings remain assigned to Step 8 rather than being changed outside the security workstream.
 Detailed audit: docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md.
+
+
+### Step 6 — Operational fulfilment (POD security and customs/dispatch checkpoint)
+- Driver POD upload form now writes only private file evidence for the signed-in driver's own in-transit assignment. Migration `20261105054211_secure_driver_delivery_evidence_registration` is applied; RLS verifies uploaded object ownership, exact user/assignment path, active driver membership and non-closed assignment. Evidence table UPDATE/DELETE remain denied; failed metadata registration triggers a best-effort private-object cleanup.
+- Customs workspace is read-only, organization/permission-scoped and explicitly does not file declarations or guarantee authority clearance. No customs records exist.
+- Dispatch and exception pages remain preparation-only; the underlying dispatch/transition functions are service-role-only. Do not expose them directly to browser users. A dedicated authorized server gateway and browser E2E are still required.
+- **State:** Step 6 remains in progress. Warehouse end-to-end chain, authorized dispatch/exception workflows, customer-safe POD visibility, customs evidence authorization and signed-in E2E remain open. No live operational records or outreach were created.
+- Detailed audit: `docs/audits/step-06-operational-fulfilment-initial-audit-2026-11-05.md`.
