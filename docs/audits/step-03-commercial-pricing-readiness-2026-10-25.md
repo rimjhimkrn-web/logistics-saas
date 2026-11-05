@@ -110,3 +110,21 @@ The old `public/partner/rate-cards.html` hard-coded sample carrier names, routes
 - It provides active country/currency selectors, supported ROAD/AIR service-tier validation, date/priority inputs, cost and tax evidence references, approval reference, and activation/suspension/expiry controls.
 - JavaScript syntax validation passed. RPC execute grants for all five functions were verified for the authenticated role. Actual signed-in AAL2 browser interaction was not performed in this audit, so no claim of device/browser E2E is made.
 - The UI explicitly blocks same-country draft creation while the domestic-lane correction is pending. The pending migration remains unapplied.
+
+
+## Correction after function-definition reinspection — 5 November 2026
+The earlier domestic-lane defect finding was incorrect and is superseded by this verification:
+- The live `krim_admin_create_global_rate_card` definition does not reject equal origin/destination country IDs.
+- The live `krim_admin_approve_global_rate_card` and `krim_admin_set_global_rate_card_status` definitions already require one active market for a same-country route and two for a cross-border route, using `CASE WHEN origin_country_id=destination_country_id THEN 1 ELSE 2 END`.
+- Therefore no domestic-lane database migration is required. The previously committed migration candidate used a stale text-match assumption and was removed from the repository without being applied.
+- Removed the obsolete client-side same-country rejection from the private commercial-pricing console. Domestic lanes now pass to the existing server-side governance checks.
+- Verified the console is linked from the private platform-admin navigation. Its AAL2 session check, admin-only list RPC and mutation RPC names/argument shapes were inspected against live definitions. This remains static/backend verification, not signed-in browser E2E.
+
+## Current production gate — 5 November 2026
+The pricing engine and governed administration workflow are implemented, but no genuine commercial lane can be activated yet:
+- Global pricing cards: 1 existing non-commercial zero-value template; 0 active.
+- Partner quotes: 0; FX rates: 0; tax rules: 0; accessorial charges: 0.
+- Active verified partner capabilities: 0; eligible markets: 0.
+- No live rate, provider cost, platform margin, tax treatment, FX rate, surcharge or coverage was fabricated.
+
+**Engineering acceptance:** the rate-card lifecycle, permissioned admin workflow, direct-DML lockdown, quote fail-closed controls and domestic/cross-border market-count logic are implemented. **Commercial activation remains deliberately gated** until real verified partner cost evidence, KRIM fee approval, qualified tax review and market eligibility exist. This is a dependency on genuine business evidence and partner verification, not an outstanding domestic-lane code defect.
