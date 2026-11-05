@@ -101,3 +101,12 @@ The old `public/partner/rate-cards.html` hard-coded sample carrier names, routes
 
 ### Acceptance decision
 **Step 3 remains incomplete.** No verified partner buy-rate, approved KRIM fee/margin, qualified tax review, surcharge evidence or approved commercial lane exists. No customer-facing rate may be published and no payment/checkout may rely on the zero-value template. Step 4 must not begin until the domestic-lane migration is applied and a real commercial lane is evidenced and approved.
+
+
+### Admin pricing governance interface — implemented 5 November 2026
+- Added `app/platform-admin/commercial-pricing.html` and linked it from the private platform-admin navigation.
+- The page requires a valid Supabase session and AAL2 MFA. The administrator-only list RPC and each mutation RPC independently enforce the `admin.platform` permission server-side.
+- The interface uses the existing privileged RPCs for draft creation, commercial evidence recording, approval and status changes. It does not grant direct table writes and does not expose provider cost/evidence metadata in the register.
+- It provides active country/currency selectors, supported ROAD/AIR service-tier validation, date/priority inputs, cost and tax evidence references, approval reference, and activation/suspension/expiry controls.
+- JavaScript syntax validation passed. RPC execute grants for all five functions were verified for the authenticated role. Actual signed-in AAL2 browser interaction was not performed in this audit, so no claim of device/browser E2E is made.
+- The UI explicitly blocks same-country draft creation while the domestic-lane correction is pending. The pending migration remains unapplied.
