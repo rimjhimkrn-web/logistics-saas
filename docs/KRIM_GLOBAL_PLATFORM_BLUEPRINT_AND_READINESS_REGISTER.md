@@ -1,6 +1,6 @@
 # KRIM Global Logistics OS — Master Blueprint & Operational Readiness Register
 
-Last reviewed: 4 November 2026  
+Last reviewed: 5 November 2026  
 Repository: rimjhimkrn-web/logistics-saas  
 Initial operating focus: India  
 Architecture objective: Global-ready, multi-country logistics operating system; market activation is evidence-gated.
@@ -295,3 +295,36 @@ India remains the initial commercial launch market. This section records the cur
 The evidence-backed India launch sequence, release gates, stop conditions and current production snapshot are maintained in `docs/KRIM_INDIA_COMMERCIAL_LAUNCH_GATES.md`. The current decision is **not cleared for commercial shipment bookings**: India country controls 0/18 approved, India market readiness assessments 0/22 approved, active verified India partner capabilities 0, and approved India corridor dossiers 0. Ranchi–Jamshedpur and Ranchi–Kolkata remain draft candidates only. Do not equate existing shipment/quote records with fulfilled commercial operations.
 
 The India pilot must pass legal/entity and carriage-registration review, GST/ECO/TCS review, payment/funds-flow approval, real carrier verification, route/cargo approval, insurance/contract controls, end-to-end financial and operational tests, and customer grievance readiness before any commercial activation. This register supersedes no legal advice and does not itself authorize operations.
+
+
+## 9. Step 1 — Database & Booking Integrity (5 November 2026)
+
+**Technical acceptance status: completed for the database and booking-control scope.** This does not certify a live commercial shipment journey; positive end-to-end testing remains assigned to Step 13 and controlled live acceptance remains assigned to Steps 14–15.
+
+### Applied and verified controls
+
+- Customer-submitted origin/destination data can no longer activate or upsert country catalogue records. Shipment creation resolves both country codes against the existing catalogue and fails closed when a country is absent.
+- Expired quote acceptance now returns and persists the `expired` state instead of raising an exception that would roll back the expiry update. The customer quote interface handles that returned state, disables acceptance and directs the customer to request a fresh quote.
+- The canonical five-argument customer shipment-creation RPC is executable by `authenticated` only, not `anon`. Its server-side checks enforce active organization access, `shipment.create`, distinct active locations, active country/market gates and valid shipment inputs.
+- Readiness gates are server-maintained: direct authenticated INSERT/UPDATE/DELETE privileges were revoked; authenticated users retain SELECT only. Anonymous SELECT privileges were removed from partner quotes and shipment status history.
+- Partner quote submission now requires the organization-scoped `quote.create` permission. That permission is granted to the `partner_user` role, and the submission RPC still requires a registered-business organization with active, verified, currently effective capability and valid route coverage.
+- Open commercial opportunities and their shipment records are visible to registered-business partners only when the partner has an active verified capability that covers that specific shipment. Development/test partners are excluded from commercial opportunity visibility and bidding.
+- Quote acceptance, partner quote award and assignment response use row locks and server-side organization/permission/eligibility checks. Awarding is serialized on the opportunity; assignment response rechecks capability and compliance. Shipment transitions remain behind the internal transition RPC and readiness enforcement.
+- RLS is enabled on all seven booking tables reviewed: shipments, customer quotes, partner opportunities, partner quotes, shipment assignments, shipment status history and shipment readiness gates. Organization-scoped policies remain in place.
+
+### Database and source verification
+
+- Six Step 1 migrations are present in GitHub and confirmed in Supabase migration history:
+  `prevent_customer_country_catalogue_activation`,
+  `persist_quote_expiry_on_accept_attempt`,
+  `enable_secured_customer_shipment_booking_rpc`,
+  `secure_booking_readiness_and_anon_reads`,
+  `enforce_partner_quote_create_permission`,
+  `scope_partner_marketplace_reads_to_verified_capability`.
+- Verified zero orphan customer quotes, zero orphan partner quotes, zero orphan assignments, zero assignment/quote shipment-partner mismatches, zero duplicate active partner quote groups, zero duplicate active assignment groups and zero duplicate open opportunities per shipment.
+- Customer quote JavaScript syntax check passed.
+- Current preserved database snapshot: 18 shipments (8 draft, 3 quoted, 6 confirmed, 1 closed), 7 customer quotes, 0 partner quotes and 0 assignments. Eight legacy `shipment_requests` rows remain preserved. Historical shipment records were not rewritten.
+
+### Explicit test boundary
+
+There are currently no verified active partner capabilities, partner quote rows or assignments to support a positive partner-award/assignment transaction. No fabricated partner, rate or booking was created, and no live booking, payment, shipment or partner activation was attempted. This is an intentional safety boundary, not a claim that live operations have been proven. Step 13 must run the full positive/negative end-to-end regression when eligible test fixtures and all nine workspaces are ready.
