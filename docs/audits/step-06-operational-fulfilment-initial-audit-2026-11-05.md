@@ -202,3 +202,28 @@ The POD chain is now connected in source and database design, but it has not bee
 ### Remaining Step 6 gates
 - Quality workflow is implemented but cannot be exercised without an approved warehouse facility and two distinct authorized warehouse users. Signed-in E2E must prove evidence upload, maker-checker separation, quality release and picking denial/allowance.
 - Shipment-level dispatch integration and the other previously listed operational controls remain open.
+
+
+## Warehouse chain hardening — 5 November 2026
+
+### Independent quality control
+- Applied migration `20261105130000_warehouse_quality_maker_checker.sql` and committed the exact migration to GitHub.
+- Added a database trigger that blocks a `goods_receipt` task from being created or updated with `quality_status='released'`. Goods receipt inventory begins pending/held/rejected; the receiving operator cannot self-release it.
+- Added `krim_warehouse_review_inventory_quality`, authenticated-only and anon-denied. It requires a completed goods-receipt or damage-exception task, verified active facility/operator access, a separate reviewer who is neither task creator nor completer, an attached task-linked inspection report, matching SKU/lot inventory, and a 5–1,000 character reason. It updates quality status only and writes both warehouse task-event and KRIM audit records.
+- Added/verified the authenticated Quality Review page at `public/warehouse/quality-control.html` and a dashboard link. JavaScript syntax passed. Goods Receipt no longer offers a direct Released option and points to independent Quality Control.
+
+### Warehouse evidence security
+- Applied migration `20261105123500_harden_warehouse_evidence_registration.sql`. Evidence registration now checks exact three-part org/user/file path, task organisation match, private bucket, storage-object ownership by the signed-in user, file size (1 byte–10 MB) and allowed MIME type before creating metadata/audit events.
+- Updated Warehouse Evidence UI to attempt deletion of an uploaded object if metadata registration fails. The bucket remains private and preview URLs remain short-lived.
+- Warehouse Evidence and Quality Review pages pass JavaScript syntax checks.
+
+### Warehouse direct database access
+- Verified authenticated users have SELECT only on warehouse task, inventory, movement, receipt, facility and evidence tables; direct INSERT/UPDATE/DELETE are denied. Writes are routed through permission-checked RPCs.
+- Verified warehouse tables have RLS enabled, private evidence bucket is not public, warehouse RPCs deny anon execution, and admin facility review requires AAL2 plus platform-admin permission.
+
+### Remaining validation and limitations
+- No verified active warehouse organisation/facility exists in current production state, so no actual receiving, inventory, picking, dispatch or quality-review transaction was performed.
+- No signed-in browser E2E, real upload, maker-checker user-pair test, cross-organisation negative test, or mobile device test has been performed. Syntax and database-definition/privilege checks are not a substitute for those tests.
+- Warehouse task references are still operator-entered reference codes; receipt rows have an optional shipment_id but the current task creation UI does not establish an authoritative shipment/leg link. Dispatch handover is a warehouse custody record and does not itself dispatch the KRIM shipment or assign a driver. A reviewed shipment/leg bridge and authorized operations gateway remain required before claiming full end-to-end fulfilment.
+- Partial lot splitting, bin-capacity enforcement, barcode scanning, temperature telemetry, automated replenishment, and a formal multi-step returns workflow are not enabled in this release.
+- **Step 6 remains in progress; no real commercial operation has been activated.**
