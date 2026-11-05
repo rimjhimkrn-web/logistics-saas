@@ -64,3 +64,33 @@ No contact has been made, no web form submitted, no CRM lead created, no consent
 - Deployed `create-global-razorpay-order` version 15 with JWT verification still enabled. The deployed source contains the capacity-reservation gate. No payment order was created.
 - Retired two misleading legacy matching routes: the static growth page that claimed an active/optimized engine and displayed a sample route, and the static carrier-assignment form with a fabricated shipment reference. They now redirect to the current authenticated operations/customer assignment workflows.
 - Production currently contains 0 partner assignments, 0 capacity bindings and 0 capacity reservations. No positive commercial flow was fabricated or run. Source-level syntax and deployed-version checks passed; signed-in browser E2E remains pending.
+
+
+## Digital ecosystem audit — follow-up 5 November 2026
+
+The current scope is strictly technical readiness. No real partner outreach, application submission, approval, commercial activity or activation was performed.
+
+### Verified backend controls
+- Partner onboarding submission is authenticated and requires registered-business mode, an active matching partner organization, valid active country coverage for each selected service, and evidence paths under the signed-in user/organization folder. Submission creates a review case; it does not auto-approve the organization.
+- Account-mode selection explicitly records `commercial_access=false`. Development/test mode records `sample_data_only=true` and `commercial_access=false`; the development workspace explains that no real customers, shipments, quotes, bids, assignments, invoices, payments, capacity commitments or payouts may be entered there.
+- Partner quote submission is server-side restricted to an active registered-business organization with verified/approved organization status, active/verified lifecycle, acceptable compliance, active verified capability, route coverage and `quote.create` permission. The partner opportunities RLS policy independently exposes open tenders only to eligible verified organizations with a matching capability. Anonymous EXECUTE is denied.
+- Capacity registration requires active membership and `partner.manage`, registered-business mode, active/verified/compliant organization, an individually verified capability for the selected mode and country, a valid future availability window and private supporting evidence. New resource records are created as `pending_review`; availability is initially `unavailable`.
+- Driver invitations require verified, active, compliant registered-business transport partners with an approved transport capability. The driver remains subject to separate identity/licence review; invitation does not approve a driver or vehicle.
+- Partner assignment acceptance, capacity reservation and driver assignment use authenticated, organization/permission-scoped RPCs. The driver assignment workflow requires an accepted partner assignment and a driver with active membership in the same partner organization.
+- Platform verification and capability-review RPCs require authenticated AAL2 and `admin.platform`; review actions write audit events. Anonymous execution is denied.
+- `krim-partner-verification` is private, 10 MB maximum, restricted to PDF/JPEG/PNG. Upload policy requires an active organization membership and a user-specific object path. Partner members can read only their own organization's objects; platform administrators require AAL2 for evidence reads.
+- RLS is enabled on the audited partner opportunities, quotes, capabilities, verification cases, capacity resources/availability and shipment-partner-assignment tables. Partner-facing direct writes are not granted for these controlled records; privileged writes go through the reviewed RPCs.
+
+### Production snapshot (read-only)
+- Partner organization #14 is in `development_test` mode, with verification and compliance pending and lifecycle `verification_pending`.
+- 1 partner verification case; 1 partner capability; 3 opportunities (1 open and 2 cancelled); 0 partner quotes; 0 partner assignments; 0 capacity resources; 0 capacity-availability rows; 0 driver invitations.
+- No verified active commercial partner capability is currently available. The test organization is not eligible to see open opportunities or submit bids under the RLS/RPC gates.
+
+### Legacy route consolidation
+A large collection of old partner pages was found to contain static sample companies, fictitious fleet/load details, unsupported telemetry, false payout/escrow/invoice/settlement screens, or non-functional forms without a real database workflow. Those legacy URLs were replaced with noindex, path-safe redirects to the authenticated Partner Workspace. The partner directory/profile routes now point to the factual network information page. The retained functional routes are the current onboarding, partner workspace pathways, verified opportunity/quote flow, accepted-assignment/capacity flow, driver invitations, partner evidence, integration/automation, notifications/support, performance/security audit, coverage and capability modules.
+
+### Remaining gates
+- Do not conduct real partner acquisition or submit/approve a real partner application before the full ecosystem and all workspace pages have been reviewed by the user.
+- Signed-in browser E2E for application upload, admin review, capability approval, partner quote, assignment, capacity reservation and driver invitation remains pending; no fake business evidence or synthetic partner has been inserted to force a pass.
+- Existing open verification case and pending capability require genuine evidence and authorized human review; they were not altered.
+- Step 4 is **backend-guarded and legacy-page cleanup substantially complete, but not fully acceptance-tested**. It remains open until a controlled test with an explicitly designated test account and genuine test documents can verify the complete workflow without activating a real commercial partner.
