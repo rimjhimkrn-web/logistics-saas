@@ -244,3 +244,10 @@ The POD chain is now connected in source and database design, but it has not bee
 - The independent quality-review page now includes a 60-second signed private inspection-report preview before the reviewer makes a decision. It continues to enforce maker-checker separation and requires a reason for every decision.
 - The two new migration files are aligned to applied Supabase versions: `20261105063808_harden_warehouse_inventory_movement_chain.sql` and `20261105063941_harden_warehouse_evidence_ownership_and_cleanup.sql`. Task idempotency and maker-checker gate migrations are also committed at their applied versions.
 - Static checks are not a substitute for authenticated browser testing. No live organization, facility, task, inventory, evidence or movement record was created.
+
+
+## Customer-visible verified POD evidence — 5 November 2026
+
+- Applied migration `customer_access_verified_pod_evidence` (storage policy `Customers read evidence for verified POD`). Authenticated customers can read only objects in the private driver-evidence bucket that are explicitly referenced by a `krim_pod_records` row with status `verified`, non-null `verified_at`, and a shipment whose customer organisation the current user is authorized to access. Submitted, under-review, rejected and unrelated driver files remain inaccessible.
+- Updated canonical customer ePOD vault `public/shipper/epod-vault.html` to show private evidence buttons only for independently verified POD records and request 60-second signed URLs on user click. JavaScript syntax passed. No POD records exist in production, so actual customer download and negative authorization tests remain unperformed.
+- Customer POD record visibility remains organization-scoped through existing RLS. No public bucket or permanent public URL was created.
