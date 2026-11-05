@@ -428,3 +428,13 @@ A further security review found that the five pricing RPCs relied on the admin p
 - Re-queried all five live function definitions: all five contain the AAL2 guard; authenticated EXECUTE is present; anon EXECUTE is false.
 - Committed the exact applied SQL to `supabase/migrations/20261105102900_enforce_aal2_on_global_rate_card_admin_rpcs.sql`; migration history confirms it is applied.
 - The pricing table remains RLS-enabled with authenticated direct INSERT/UPDATE/DELETE denied. The pricing console reads and writes only through the guarded administrator RPCs.
+
+
+## Step 4 — Partner Acquisition & Verification (5 November 2026)
+- Implemented a unified global partner-network admission page and retained the existing country-aware application flow and private evidence upload.
+- Confirmed existing AAL2-protected administrator workflows for organisation verification and service-capability review; both are linked from Platform Admin navigation.
+- Retired three misleading static growth dashboards that showed fabricated partner names, scores, response rates, applications, PIN coverage and activation claims. Legacy URLs redirect to the truthful partner-network page.
+- Production snapshot: 1 open verification case, 1 pending capability, 1 open partner opportunity, 2 cancelled opportunities, 0 growth prospect records, and no verified active partner capability.
+- No partner was fabricated, approved, contacted or commercially activated. Genuine verification decisions remain subject to evidence review and authorised administrator action.
+- Detailed audit: `docs/audits/step-04-partner-acquisition-verification-2026-11-05.md`.
+- **Step 4 foundation status:** acquisition and verification workflow foundations implemented; actual partner-network acquisition and verified coverage remain dependent on genuine applicant submissions and human evidence review. Step 5 is not started.
