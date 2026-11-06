@@ -58,6 +58,7 @@ returns boolean language plpgsql security definer set search_path=public,pg_cata
 declare v_user uuid:=auth.uid(); v_record bigint; v_shipment bigint; v_submitter uuid; v_status text; v_broker bigint; v_customer bigint; v_is_admin boolean; v_actor_org bigint;
 begin
  if v_user is null then raise exception 'Authentication required'; end if;
+ if coalesce(auth.jwt()->>'aal','aal1')<>'aal2' then raise exception 'Multi-factor authentication required'; end if;
  if length(trim(coalesce(p_note,'')))<10 then raise exception 'A meaningful review note of at least 10 characters is required'; end if;
  select d.customs_record_id,d.shipment_id,d.submitted_by_user_id,d.status,s.customer_organization_id into v_record,v_shipment,v_submitter,v_status,v_customer
  from public.krim_customs_document_submissions d join public.krim_shipments s on s.id=d.shipment_id where d.id=p_submission_id for update of d;
