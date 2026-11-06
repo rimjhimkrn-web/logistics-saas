@@ -34,7 +34,8 @@
    <div class="form-field"><label for="capacity-resource-type">Resource category</label><select id="capacity-resource-type" required><option value="vehicle">Vehicle / fleet</option><option value="equipment">Equipment</option><option value="warehouse">Warehouse resource</option><option value="handling">Handling resource</option><option value="container">Container</option><option value="other">Other</option></select></div>
    <div class="form-field"><label for="capacity-resource-name">Resource name / reference</label><input id="capacity-resource-name" maxlength="180" required placeholder="e.g. 32-ft multi-axle truck / WH-RNC-01"></div>
    <div class="form-field"><label for="capacity-mode">Transport mode</label><select id="capacity-mode" required><option value="">Loading active modes…</option></select></div>
-   <div class="form-field"><label for="capacity-location">Current resource location</label><select id="capacity-location" required><option value="">Loading active locations…</option></select></div>
+   <div class="form-field"><label for="capacity-location">Resource origin location</label><select id="capacity-location" required><option value="">Loading active locations…</option></select></div>
+   <div class="form-field"><label for="capacity-lane">Active KRIM operating lane</label><select id="capacity-lane" required disabled><option value="">Select transport mode and origin first</option></select></div>
    <div class="form-field"><label for="capacity-availability-type">Availability measure</label><select id="capacity-availability-type" required><option value="vehicle">Vehicle count · reservation enabled</option><option value="weight">Weight (kg / metric tonnes) · reservation enabled</option><option value="equipment">Equipment · review only</option><option value="volume">Volume · review only</option><option value="container">Container · review only</option><option value="slot">Warehouse slot · review only</option><option value="service">Service capacity · review only</option></select></div>
    <div class="form-field"><label for="capacity-value">Available capacity</label><input id="capacity-value" type="number" min="0.001" step="0.001" required placeholder="Enter a positive quantity"></div>
    <div class="form-field"><label for="capacity-unit">Capacity unit</label><input id="capacity-unit" maxlength="32" required placeholder="kg, tonne, m3, pallet, vehicle…"></div>
@@ -74,7 +75,9 @@ if(modeError)throw modeError;
 $("capacity-mode").innerHTML='<option value="">Select transport mode</option>'+(modes||[]).map(x=>'<option value="'+Number(x.id)+'">'+esc(x.name||x.code)+'</option>').join("");if(!(modes||[]).length)throw new Error("No active transport modes are available in the KRIM catalogue.");
 const {data:locations,error:locationError}=await client.from("krim_locations").select("id,city,state_region,location_code").eq("is_active",true).order("city").limit(500);
 if(locationError)throw locationError;
-$("capacity-location").innerHTML='<option value="">Select resource location</option>'+(locations||[]).map(x=>'<option value="'+Number(x.id)+'">'+esc([x.city,x.state_region,x.location_code].filter(Boolean).join(", ")||("Location #"+x.id))+'</option>').join("");if(!(locations||[]).length)throw new Error("No active KRIM resource locations are available.");$("gate").hidden=true;$("workspace").hidden=false;
+$("capacity-location").innerHTML='<option value="">Select resource location</option>'+(locations||[]).map(x=>'<option value="'+Number(x.id)+'">'+esc([x.city,x.state_region,x.location_code].filter(Boolean).join(", ")||("Location #"+x.id))+'</option>').join("");if(!(locations||[]).length)throw new Error("No active KRIM resource locations are available.");
+const {data:lanes,error:laneError}=await client.from("krim_network_lanes").select("id,lane_code,lane_name,origin_location_id,destination_location_id,transport_mode_id").eq("status","active").order("lane_code").limit(1000);if(laneError)throw laneError;
+const laneRows=lanes||[];function refreshLaneOptions(){const mode=Number($("capacity-mode").value),origin=Number($("capacity-location").value);const matches=laneRows.filter(l=>Number(l.transport_mode_id)===mode&&Number(l.origin_location_id)===origin);$("capacity-lane").innerHTML='<option value="">Select active destination lane</option>'+matches.map(l=>'<option value="'+Number(l.id)+'">'+esc((l.lane_code||("Lane #"+l.id))+" · "+(l.lane_name||"")+" · destination #"+l.destination_location_id)+'</option>').join("");$("capacity-lane").disabled=!matches.length;if(!matches.length)$("capacity-lane").innerHTML='<option value="">No active lane matches this origin and mode</option>'}$("capacity-mode").addEventListener("change",refreshLaneOptions);$("capacity-location").addEventListener("change",refreshLaneOptions);$("gate").hidden=true;$("workspace").hidden=false;
 warnings=[];data.resources=await readTable("krim_capacity_resources","id,organization_id,resource_type,resource_name,transport_mode_id,location_id,capacity_value,capacity_unit,available_from,available_until,status,metadata,created_at,updated_at");data.availability=await readTable("krim_partner_capacity_availability","id,organization_id,capacity_resource_id,lane_id,transport_mode_id,availability_type,available_from,available_until,capacity_value,capacity_unit,booking_window_start,booking_window_end,status,source_type,metadata,created_at,updated_at");data.commitments=await readTable("krim_partner_capacity_commitments","id,organization_id,lane_id,transport_mode_id,commitment_type,committed_capacity,capacity_unit,period_start,period_end,minimum_commitment,reserved_capacity,utilized_capacity,status,contract_reference,metadata,created_at,updated_at");data.fleet=await readTable("partner_fleet","id,partner_id,truck_number,truck_type,capacity,driver_name,driver_phone,availability,created_at,krim_organization_id","krim_organization_id");metrics();render();msg("Loaded authorized partner records. "+(warnings.length?warnings.length+" register(s) could not be read; see details below.":"All four registers returned successfully.")+" Resource registration is enabled above; new submissions remain pending review, while bookings and shipment assignments remain separate controlled workflows.",warnings.length?"error":"success");if(warnings.length){const d=document.createElement("p");d.className="sub";d.textContent="Backend access notes: "+warnings.join(" | ");statusEl.appendChild(d)}}
 
 $("capacity-form").addEventListener("submit",async event=>{
@@ -90,6 +93,7 @@ $("capacity-form").addEventListener("submit",async event=>{
    p_resource_name:clean($("capacity-resource-name").value),
    p_transport_mode_id:Number($("capacity-mode").value),
    p_location_id:Number($("capacity-location").value),
+   p_lane_id:Number($("capacity-lane").value),
    p_capacity_value:Number($("capacity-value").value),
    p_capacity_unit:clean($("capacity-unit").value),
    p_availability_type:$("capacity-availability-type").value,
@@ -97,7 +101,7 @@ $("capacity-form").addEventListener("submit",async event=>{
    p_available_until:until.toISOString(),
    p_notes:clean($("capacity-notes").value)
   };
-  if(!args.p_organization_id||!args.p_transport_mode_id||!args.p_location_id||!args.p_resource_name||!args.p_capacity_unit||!Number.isFinite(args.p_capacity_value)||args.p_capacity_value<=0)throw new Error("Complete all required resource and capacity fields.");
+  if(!args.p_organization_id||!args.p_transport_mode_id||!args.p_location_id||!args.p_lane_id||!args.p_resource_name||!args.p_capacity_unit||!Number.isFinite(args.p_capacity_value)||args.p_capacity_value<=0)throw new Error("Complete all required resource and capacity fields.");
   const files=Array.from($("capacity-evidence").files||[]);
   if(files.length<1||files.length>5)throw new Error("Upload between 1 and 5 supporting evidence files.");
   const {data:userData,error:userError}=await client.auth.getUser();if(userError)throw userError;if(!userData?.user?.id)throw new Error("Your authenticated user session could not be verified.");
@@ -114,12 +118,12 @@ $("capacity-form").addEventListener("submit",async event=>{
   }
   args.p_document_paths=uploadedPaths;
   button.textContent="Registering resource…";
-  const {data:result,error}=await client.rpc("krim_partner_register_capacity_resource",args);
+  const {data:result,error}=await client.rpc("krim_partner_register_capacity_resource_for_lane",args);
   if(error)throw error;
   if(!result?.resource_id||!result?.availability_id)throw new Error("The database did not confirm both resource and availability records.");
   registered=true;
   $("capacity-form").reset();
-  msg("Resource #"+result.resource_id+" and availability #"+result.availability_id+" registered with "+uploadedPaths.length+" private evidence file(s), pending administrator review. It is not bookable yet.","success");
+  msg("Resource #"+result.resource_id+" and lane-linked availability #"+result.availability_id+" registered with "+uploadedPaths.length+" private evidence file(s), pending administrator review. It is not bookable yet.","success");
   try{await load()}catch(e){msg("Resource was registered successfully, but the register could not refresh: "+(e.message||"refresh error"),"error")}
  }catch(e){
   if(!registered&&uploadedPaths.length){const {error:cleanupError}=await client.storage.from("krim-partner-verification").remove(uploadedPaths);if(cleanupError)msg("Registration failed and some unlinked uploads may need cleanup: "+cleanupError.message,"error");}
