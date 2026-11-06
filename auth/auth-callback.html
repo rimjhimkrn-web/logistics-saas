@@ -60,6 +60,8 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
     const metadata=session.user&&session.user.user_metadata||{};
     const accountType=metadata.krim_account_type;
     const organizationName=String(metadata.company_name||"").trim();
+    const partnerMode=String(metadata.krim_partner_account_mode||"");
+    const partnerProfile=metadata.krim_partner_profile&&typeof metadata.krim_partner_profile==="object"?metadata.krim_partner_profile:{};
     // Driver email confirmation must return through role-checked sign-in.
     // Never send a newly confirmed driver directly into an operational workspace.
     let destination=base+"/auth/login.html";
@@ -77,6 +79,17 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
       if(provision.error){
         fail("Your identity is verified, but workspace setup could not finish. Please sign in to retry.");
         return;
+      }
+      if(accountType==="partner"){
+        if(!["registered_business","individual_interest","development_test"].includes(partnerMode)){
+          fail("Your account predates pathway selection. Sign in and contact KRIM support to complete the correct partner pathway before onboarding.");
+          return;
+        }
+        const modeResult=await client.rpc("krim_set_partner_account_mode",{p_mode:partnerMode,p_profile:partnerProfile});
+        if(modeResult.error){
+          fail("Your account is verified, but pathway setup is incomplete. Sign in again or contact KRIM support; commercial access remains locked.");
+          return;
+        }
       }
     }
     // Enrollment is part of the normal first-login journey, not a hidden/manual page.
