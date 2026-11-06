@@ -39,7 +39,7 @@
 <section class="card">
 <div class="cardhead"><div><h3>Network lane register</h3><p>Protected administrator view of draft and published lane records.</p></div><span class="badge" id="lane-count">— lanes</span></div>
 <div class="toolbar"><input id="filter" type="search" placeholder="Filter code, route, mode or status…" aria-label="Filter network lanes"><button class="btn" id="reload">Reload register</button></div>
-<div class="tablewrap"><table><thead><tr><th>Lane</th><th>Origin</th><th>Destination</th><th>Mode</th><th>Corridor</th><th>Status</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Loading protected lane register…</td></tr></tbody></table></div><div class="statusline" id="status">No lane changes performed.</div>
+<div class="tablewrap"><table><thead><tr><th>Lane</th><th>Origin</th><th>Destination</th><th>Mode</th><th>Corridor</th><th>Status</th><th>Review action</th></tr></thead><tbody id="rows"><tr><td colspan="7" class="empty">Loading protected lane register…</td></tr></tbody></table></div><div class="statusline" id="status">No lane changes performed.</div>
 </section>
 <div class="foot">KRIM Logistics OS · Private administrator workspace · Draft creation only</div>
 </main>
@@ -78,7 +78,7 @@ async function loadOptions(){
 function render(){
  const q=$("filter").value.trim().toLowerCase(),items=lanes.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
  $("lane-count").textContent=lanes.length+" lanes";
- $("rows").innerHTML=items.length?items.map(x=>'<tr><td><strong>'+esc(x.lane_code)+'</strong><br>'+esc(x.lane_name)+'</td><td>'+esc(x.origin_city)+(x.origin_state_region?", "+esc(x.origin_state_region):"")+'</td><td>'+esc(x.destination_city)+(x.destination_state_region?", "+esc(x.destination_state_region):"")+'</td><td>'+esc(x.transport_mode)+'</td><td>'+esc(x.corridor_name||"—")+'<br><small>'+esc(x.corridor_status||"")+'</small></td><td><span class="state">'+esc(x.status)+'</span></td></tr>').join(""):'<tr><td colspan="6" class="empty">'+(lanes.length?"No lanes match this filter.":"No lane records found.")+'</td></tr>';
+ $("rows").innerHTML=items.length?items.map(x=>'<tr><td><strong>'+esc(x.lane_code)+'</strong><br>'+esc(x.lane_name)+'</td><td>'+esc(x.origin_city)+(x.origin_state_region?", "+esc(x.origin_state_region):"")+'</td><td>'+esc(x.destination_city)+(x.destination_state_region?", "+esc(x.destination_state_region):"")+'</td><td>'+esc(x.transport_mode)+'</td><td>'+esc(x.corridor_name||"—")+'<br><small>'+esc(x.corridor_status||"")+'</small></td><td><span class="state">'+esc(x.status)+'</span></td><td>'+(x.status==="retired"?"—":'<button class="btn lane-review" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">Review…</button>')+'</td></tr>').join(""):'<tr><td colspan="6" class="empty">'+(lanes.length?"No lanes match this filter.":"No lane records found.")+'</td></tr>';
  $("status").textContent=items.length+" of "+lanes.length+" lane records shown.";
 }
 async function loadLanes(){const {data,error}=await client.rpc("krim_admin_list_network_lanes");if(error)throw error;lanes=Array.isArray(data?.items)?data.items:[];render();}
@@ -97,6 +97,21 @@ $("lane-form").addEventListener("submit",async e=>{
 });
 $("reload").addEventListener("click",()=>loadLanes().catch(e=>msg(e.message,"error")));
 $("refresh").addEventListener("click",async()=>{try{await loadOptions();await loadLanes();msg("Network lane register refreshed.","success");}catch(e){msg(e.message,"error");}});
+
+$("rows").addEventListener("click",async e=>{
+ const btn=e.target.closest(".lane-review");if(!btn)return;
+ const id=Number(btn.dataset.id),current=btn.dataset.status;
+ const decision=prompt("Enter decision: active, suspended or retired",current==="active"?"suspended":"active");
+ if(!decision)return;
+ const normalized=decision.trim().toLowerCase();
+ if(!["active","suspended","retired"].includes(normalized)){msg("Invalid decision. Use active, suspended or retired.","error");return;}
+ const note=prompt("Enter reviewer rationale (minimum 10 characters):");if(!note)return;
+ if(note.trim().length<10){msg("Reviewer rationale must contain at least 10 characters.","error");return;}
+ if(!confirm("Submit "+normalized+" review for lane #"+id+"? Activation is subject to all database compliance and partner-capability gates."))return;
+ btn.disabled=true;
+ try{const {data,error}=await client.rpc("krim_admin_review_network_lane",{p_lane_id:id,p_decision:normalized,p_reviewer_note:note.trim()});if(error)throw error;msg("Lane review saved. Status: "+data.status+".","success");await loadLanes();}
+ catch(err){msg(err.message||"Lane review was blocked.","error");btn.disabled=false;}
+});
 $("filter").addEventListener("input",render);
 $("signout").addEventListener("click",async()=>{try{if(client)await client.auth.signOut();}finally{location.replace("../../auth/krim-admin-access.html?reason=signed-out");}});
 (async()=>{try{await verify();await loadOptions();await loadLanes();}catch(e){document.documentElement.classList.add("authorized");$("access-state").textContent="ACCESS BLOCKED";msg(e.message||"Administrator access could not be verified.","error");$("rows").innerHTML='<tr><td colspan="6" class="empty">Protected lane register unavailable. <a href="../../auth/krim-admin-access.html">Open privileged access gateway →</a></td></tr>';}})();
