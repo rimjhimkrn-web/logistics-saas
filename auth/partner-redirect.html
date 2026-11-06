@@ -5,28 +5,18 @@
 <script>
 (async function(){
 "use strict";
-const client=window.KRIM_SUPABASE||window.supabaseClient,base=window.KRIM_BASE_PATH||"",status=document.getElementById("status");
-function fail(message){status.textContent=message}
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const base=window.KRIM_BASE_PATH||"";
+const status=document.getElementById("status");
 try{
  if(!client)throw new Error("Authentication service did not load. Return to sign-in and retry.");
- const {data:sessionData,error:sessionError}=await client.auth.getSession();if(sessionError)throw sessionError;
- const session=sessionData.session;if(!session){location.replace(base+"/auth/partner-signin.html");return}
- const user=session.user;
- const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",user.id).eq("status","active");
- if(memberError)throw new Error("KRIM could not verify organization membership. Please retry.");
- const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(id=>Number.isSafeInteger(id)&&id>0))];
- if(!ids.length)throw new Error("No active organization membership was found. Finish account setup or contact KRIM support.");
- const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_verification_status").in("id",ids);
- if(orgError)throw new Error("KRIM could not verify your organization type. Please retry.");
- const org=(orgs||[]).find(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())||["partner","carrier","forwarder"].includes(String(o.organization_type_code||"").toLowerCase()));
- if(!org)throw new Error("Your active organization is not registered as a transport partner. Partner access was not granted.");
- if(String(org.status||"").toLowerCase()!=="active")throw new Error("Your partner organization is not active. Contact KRIM support.");
- if(!["verified","approved"].includes(String(org.partner_verification_status||"").toLowerCase())){
-  status.textContent="Your account is valid. Opening the KRIM Partner Workspace; pending verification will be shown there…";
-  location.replace(base+"/app/partner/index.html?release=partner-workspace-v3");return;
- }
- status.textContent="Partner membership and business approval verified. Opening your workspace…";
- location.replace(base+"/app/partner/index.html?release=partner-workspace-v3");
-}catch(error){fail(error&&error.message?error.message:"Unable to verify partner access.")}
+ const {data,error}=await client.auth.getSession();
+ if(error)throw error;
+ if(!data.session){location.replace(base+"/auth/partner-signin.html");return;}
+ status.textContent="Session confirmed. The secure partner gateway will identify your account pathway and route you to the correct workspace…";
+ location.replace(base+"/app/partner/index.html");
+}catch(error){
+ status.textContent=error&&error.message?error.message:"Unable to verify partner access. Please return to sign-in and retry.";
+}
 })();
 </script></body></html>
