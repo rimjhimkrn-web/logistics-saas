@@ -141,15 +141,18 @@ if (!razorpayWebhookSource.includes('webhookCurrency !== expectedCurrency') || !
   failures.push("Razorpay webhook must compare provider amount and currency against the canonical payment order.");
 }
 
-// Regression guard for the previously-commented-out amount/currency/status validation.
-// Keep the executable guard outside a block comment and only use payment.captured
-// as the paid event carrying the payment entity that is checked above.
+// Regression guard for executable amount/currency/status validation.
+// Both payment.captured and order.paid are accepted only through the same
+// payment-entity checks above (payment ID, amount, currency and captured state).
 if (razorpayWebhookSource.includes("/*\\n// Fail closed unless the signed provider event") ||
     razorpayWebhookSource.includes("/*\\n* Fail closed unless the signed provider event")) {
   failures.push("Razorpay webhook payment validation must not be enclosed in a block comment.");
 }
-if (razorpayWebhookSource.includes('eventType === "order.paid"')) {
-  failures.push("Razorpay webhook must not mark a payment paid from order.paid without a validated payment entity.");
+if (razorpayWebhookSource.includes('eventType === "order.paid"') &&
+    (!razorpayWebhookSource.includes('webhookPaymentStatus !== "captured"') ||
+     !razorpayWebhookSource.includes('webhookAmount !== expectedAmount') ||
+     !razorpayWebhookSource.includes('webhookCurrency !== expectedCurrency'))) {
+  failures.push("Razorpay order.paid must share the validated payment entity amount, currency and captured-state checks.");
 }
 if (!razorpayWebhookSource.includes("if (existingEvent?.processed)") ||
     !razorpayWebhookSource.includes("if (!existingEvent)")) {
