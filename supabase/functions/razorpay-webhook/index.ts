@@ -183,7 +183,7 @@ error: "Missing webhook event type",
 
 // Explicitly allow only event types this handler actually reconciles.
 // Unknown provider events are acknowledged as ignored, but are never recorded as processed.
-const supportedEvents = new Set(["payment.failed", "payment.captured", "payment.authorized"]);
+const supportedEvents = new Set(["payment.failed", "payment.captured", "payment.authorized", "order.paid"]);
 if (!supportedEvents.has(eventType)) {
 console.warn("Ignoring unsupported Razorpay webhook event:", eventType);
 return jsonResponse({ success: true, received: true, ignored: true, reason: "UNSUPPORTED_EVENT_TYPE" });
@@ -336,7 +336,7 @@ return jsonResponse({ success: false, error: "Payment reconciliation failed" }, 
 * payment.captured
 */
 if (
-eventType === "payment.captured"
+eventType === "payment.captured" || eventType === "order.paid"
 ) {
 if (!razorpayOrderId) {
 console.error("Webhook has no Razorpay order ID");
