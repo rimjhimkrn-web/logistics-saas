@@ -530,13 +530,23 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 
         const { data: organizations, error: organizationError } = await onboardingClient
           .from("krim_organizations")
-          .select("id, organization_type")
+          .select("id, organization_type, status, partner_account_mode")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
-        const partnerOrg = (organizations || []).find(org => ["partner", "carrier", "forwarder", "warehouse"].includes(String(org.organization_type || "").toLowerCase()));
+        const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
+        const partnerOrganizations = (organizations || []).filter(org =>
+          acceptedPartnerTypes.includes(String(org.organization_type || "").toLowerCase())
+        );
+        if (partnerOrganizations.length > 1) {
+          throw new Error("Your account has multiple partner organizations. Onboarding is paused to prevent documents or verification details being attached to the wrong organization. Contact KRIM support to establish the correct organization context.");
+        }
+        const partnerOrg = partnerOrganizations[0];
         if (!partnerOrg) throw new Error("This account does not have an active partner organization. Register as a carrier partner first.");
+        if (String(partnerOrg.status || "").toLowerCase() !== "active") {
+          throw new Error("Your partner organization is not active. Verification submission is unavailable until its status is resolved by KRIM support.");
+        }
         onboardingOrganizationId = Number(partnerOrg.id);
-        onboardingMessage("Secure session verified. Upload your required business-registration document; add an insurance certificate when applicable.", "info");
+        onboardingMessage("Secure session verified. Your documents will be associated only with the verified active partner organization.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
         document.querySelector("#partner-onboarding-form button[type=submit]").disabled = true;
