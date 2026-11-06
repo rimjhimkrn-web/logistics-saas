@@ -98,8 +98,8 @@ $("lane-form").addEventListener("submit",async e=>{
 $("reload").addEventListener("click",()=>loadLanes().catch(e=>msg(e.message,"error")));
 $("refresh").addEventListener("click",async()=>{try{await loadOptions();await loadLanes();msg("Network lane register refreshed.","success");}catch(e){msg(e.message,"error");}});
 $("filter").addEventListener("input",render);
-$("signout").addEventListener("click",async()=>{if(client)await client.auth.signOut();location.href="../../login.html";});
-(async()=>{try{await verify();await loadOptions();await loadLanes();}catch(e){$("access-state").textContent="ACCESS BLOCKED";msg(e.message||"Administrator access could not be verified.","error");$("rows").innerHTML='<tr><td colspan="6" class="empty">Protected lane register unavailable.</td></tr>';}})();
+$("signout").addEventListener("click",async()=>{try{if(client)await client.auth.signOut();}finally{location.replace("../../auth/krim-admin-access.html?reason=signed-out");}});
+(async()=>{try{await verify();await loadOptions();await loadLanes();}catch(e){document.documentElement.classList.add("authorized");$("access-state").textContent="ACCESS BLOCKED";msg(e.message||"Administrator access could not be verified.","error");$("rows").innerHTML='<tr><td colspan="6" class="empty">Protected lane register unavailable. <a href="../../auth/krim-admin-access.html">Open privileged access gateway →</a></td></tr>';}})();
 })();
 </script>
 </body></html>
