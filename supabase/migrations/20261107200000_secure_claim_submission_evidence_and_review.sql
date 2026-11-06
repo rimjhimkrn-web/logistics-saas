@@ -25,6 +25,7 @@ alter table public.krim_claims force row level security;
 alter table public.krim_claim_evidence force row level security;
 revoke all on public.krim_claim_events from public,anon,authenticated;
 grant select on public.krim_claim_events to authenticated;
+drop policy if exists "KRIM claim events organization access" on public.krim_claim_events;
 create policy "KRIM claim events organization access" on public.krim_claim_events for select to authenticated using(
  exists(select 1 from public.krim_claims c where c.id=claim_id and (private.krim_has_organization_access((select auth.uid()),c.organization_id) or (c.respondent_organization_id is not null and private.krim_has_organization_access((select auth.uid()),c.respondent_organization_id))))
 );
