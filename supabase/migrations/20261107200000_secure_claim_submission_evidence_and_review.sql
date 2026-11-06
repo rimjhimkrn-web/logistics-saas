@@ -21,6 +21,8 @@ create index if not exists krim_claims_claimant_created_idx on public.krim_claim
 create index if not exists krim_claims_respondent_created_idx on public.krim_claims(respondent_organization_id,created_at desc);
 alter table public.krim_claim_events enable row level security;
 alter table public.krim_claim_events force row level security;
+alter table public.krim_claims force row level security;
+alter table public.krim_claim_evidence force row level security;
 revoke all on public.krim_claim_events from public,anon,authenticated;
 grant select on public.krim_claim_events to authenticated;
 create policy "KRIM claim events organization access" on public.krim_claim_events for select to authenticated using(
@@ -63,7 +65,7 @@ begin
  if v_user is null then raise exception 'Authentication required';end if;
  if p_evidence_type not in ('photo','invoice','receipt','survey_report','delivery_record','correspondence','other') then raise exception 'Unsupported evidence type';end if;
  if p_mime_type not in ('application/pdf','image/jpeg','image/png') or p_file_size not between 1 and 10485760 then raise exception 'Evidence must be PDF/JPEG/PNG and no larger than 10 MB';end if;
- select organization_id,status into v_org,v_status from public.krim_claims where id=p_claim_id;
+ select organization_id,status into v_org,v_status from public.krim_claims where id=p_claim_id for update;
  if v_org is null then raise exception 'Claim not found';end if;
  if v_status not in ('submitted','under_review','evidence_required') then raise exception 'Claim is not accepting additional evidence';end if;
  if not exists(select 1 from public.krim_organization_members m where m.organization_id=v_org and m.user_id=v_user and m.status='active') or not private.krim_has_permission(v_user,v_org,'shipment.update') then raise exception 'Claimant organization shipment.update permission required';end if;
