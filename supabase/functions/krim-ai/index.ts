@@ -49,27 +49,14 @@ Deno.serve(async (req: Request) => {
   if (authError || !authData.user) return json({ error: "invalid_session" }, 401, origin);
   const userId = authData.user.id;
 
-  // Resolve the authenticated user's active KRIM roles and organizations.
-  // All reads below use the caller's JWT client so existing RLS policies remain in force.
+  // Resolve only this authenticated user's roles and organizations through a self-scoped RPC.
+  // The RPC bypasses the role catalogue's admin-only RLS policy but never accepts a user ID.
   let roleCodes: string[] = [];
   let organizationIds: number[] = [];
-  const { data: roleAssignments, error: roleAssignmentError } = await db
-    .from("krim_user_role_assignments")
-    .select("organization_id,role_id")
-    .eq("user_id", userId)
-    .eq("is_active", true)
-    .limit(30);
-  if (!roleAssignmentError && roleAssignments) {
-    roleCodes = [...new Set(roleAssignments.map((row: any) => Number(row.role_id)).filter(Number.isFinite))] as any;
-    organizationIds = [...new Set(roleAssignments.map((row: any) => Number(row.organization_id)).filter(Number.isFinite))];
-    const ids = roleAssignments.map((row: any) => Number(row.role_id)).filter(Number.isFinite);
-    if (ids.length) {
-      const { data: roleDefinitions } = await db
-        .from("krim_security_roles")
-        .select("id,role_code")
-        .in("id", ids);
-      roleCodes = [...new Set((roleDefinitions ?? []).map((row: any) => String(row.role_code)).filter(Boolean))];
-    }
+  const { data: userContextRows, error: userContextError } = await db.rpc("krim_ai_current_user_context");
+  if (!userContextError && userContextRows) {
+    roleCodes = [...new Set(userContextRows.map((row: any) => String(row.role_code)).filter(Boolean))];
+    organizationIds = [...new Set(userContextRows.map((row: any) => Number(row.organization_id)).filter(Number.isFinite))];
   }
   const primaryRole = roleCodes.includes("platform_superadmin") ? "platform_superadmin"
     : roleCodes.includes("platform_admin") ? "platform_admin"
