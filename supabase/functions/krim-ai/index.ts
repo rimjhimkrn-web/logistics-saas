@@ -142,7 +142,7 @@ Deno.serve(async (req: Request) => {
 
   // Fetch only a minimal, read-only operational snapshot when the user's request needs it.
   // Shipment rows are always filtered by the caller's existing RLS policies.
-  const needsOperationalContext = /shipment|track|tracking|booking|delivery|dispatch|partner|carrier|warehouse|customs|invoice|payment|quote|exception|operation|status/i.test(message);
+  const needsOperationalContext = /shipment|track|tracking|booking|delivery|dispatch|driver|trip|vehicle|partner|carrier|capability|onboarding|verification|warehouse|inventory|stock|quality|qc|receipt|facility|customs|clearance|broker|declaration|finance|invoice|payable|reconciliation|payment|payout|refund|quote|exception|delay|disruption|alert|escalation|control tower|operation|status/i.test(message);
   const liveContext: Record<string, unknown> = {
     authenticated_role: primaryRole,
     organization_count: organizationIds.length,
