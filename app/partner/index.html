@@ -70,7 +70,9 @@ if(!ids.length){state("Partner onboarding required","Your account is signed in, 
 $("status-title").textContent="Identifying your partner organization";
 const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);if(orgError)throw orgError;
 const valid=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
-const org=(orgs||[]).find(o=>valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase()));
+const matches=(orgs||[]).filter(o=>valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase()));
+if(matches.length>1){state("Choose the correct partner organization","Your account has more than one active partner organization. Automatic routing is paused to prevent opening the wrong organization workspace.","Ask KRIM support to establish an explicit organization context before continuing.");return}
+const org=matches[0];
 if(!org){state("Partner organization not found","Your account does not currently resolve to a recognized partner organization. Contact KRIM support if you believe this is an error.","The gateway will not infer or create organization permissions.");return}
 if(String(org.status||"").toLowerCase()!=="active"){state("Organization access unavailable","The linked organization is not active. Contact KRIM support for assistance.","An active membership alone does not override organization status.");return}
 const routes={development_test:"development",individual_interest:"individual",registered_business:"business"};
