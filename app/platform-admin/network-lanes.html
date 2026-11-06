@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#0b1f3a">
+<title>KRIM | Network Lane Administration</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../config.js"></script>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172c48;background:#f3f6fb;--navy:#0b1f3a;--blue:#1769e8;--line:#e0e8f2;--muted:#718198}
+*{box-sizing:border-box}body{margin:0;background:#f3f6fb}html{visibility:hidden}html.authorized{visibility:visible}button,input,select{font:inherit}.top{height:66px;background:white;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 clamp(14px,3vw,32px);gap:10px}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:.08em;color:var(--navy)}.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#37bfd5,#1769e8 65%,#7357d9);color:#fff;display:grid;place-items:center;font-size:19px}.brand small{display:block;font-size:9px;color:#8291a5;letter-spacing:.15em}.actions{display:flex;gap:8px;align-items:center}.btn{border:1px solid #dce5ef;border-radius:9px;padding:9px 12px;background:white;color:#314863;font-size:11px;font-weight:850;cursor:pointer}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn:disabled{opacity:.5;cursor:not-allowed}.wrap{max-width:1450px;margin:auto;padding:clamp(16px,3vw,32px)}.crumb,.eyebrow{font-size:10px;font-weight:950;letter-spacing:.14em;color:#7d8ca1}.head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:14px 0 22px}.head h1{margin:7px 0;color:var(--navy);font-size:clamp(27px,3vw,38px);letter-spacing:-.04em}.head p{margin:0;color:var(--muted);font-size:12px;line-height:1.7;max-width:850px}.eyebrow{color:var(--blue)}.badge{display:inline-flex;border-radius:99px;padding:7px 10px;background:#eff5ff;color:#20549b;font-size:9px;font-weight:900;white-space:nowrap}.hero{background:linear-gradient(110deg,#0b1f3a,#164a77 70%,#087f91);border-radius:17px;color:white;padding:22px 24px;margin-bottom:16px}.hero h2{font-size:19px;margin:0 0 7px}.hero p{font-size:11px;color:#d8e9f7;line-height:1.7;margin:0;max-width:920px}.alert{display:none;padding:12px 14px;border-radius:10px;font-size:11px;line-height:1.6;margin-bottom:14px}.alert.show{display:block}.alert.error{background:#fff0f2;color:#9f2639;border:1px solid #f1cbd1}.alert.success{background:#effbf5;color:#11724f;border:1px solid #c7eadb}.card{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 6px 22px #15365708;margin-bottom:16px}.cardhead{padding:16px 18px;border-bottom:1px solid #edf1f6;display:flex;justify-content:space-between;align-items:center;gap:12px}.cardhead h3{font-size:13px;margin:0;color:var(--navy)}.cardhead p{font-size:10px;margin:4px 0 0;color:#8391a5}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;padding:17px}.field label{display:block;font-size:10px;font-weight:850;color:#5b6e87;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #dce5ef;border-radius:9px;padding:11px;background:white;color:#223a57;font-size:11px;min-width:0}.field small{display:block;color:#8997a9;font-size:9px;line-height:1.5;margin-top:5px}.formactions{padding:0 17px 17px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}.notice{margin:0 17px 16px;padding:12px 14px;border:1px solid #f0dfb9;background:#fff9ec;color:#7c5b20;border-radius:10px;font-size:10px;line-height:1.7}.toolbar{padding:12px 15px;border-bottom:1px solid #edf1f6;display:flex;gap:8px;flex-wrap:wrap}.toolbar input{flex:1;min-width:190px;border:1px solid #dce5ef;border-radius:9px;padding:10px;font-size:11px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:800px}th,td{text-align:left;padding:12px 14px;border-bottom:1px solid #edf1f6;font-size:10px;vertical-align:top}th{background:#f8fafd;color:#687990;text-transform:uppercase;letter-spacing:.08em;font-size:9px}td{color:#314762}.state{display:inline-flex;border-radius:99px;padding:6px 9px;background:#fff6e5;color:#94600b;font-size:9px;font-weight:900}.empty{padding:27px;text-align:center;color:#718198;font-size:11px;line-height:1.7}.statusline{padding:12px 16px;border-top:1px solid #edf1f6;color:#7c8ca1;font-size:10px}.foot{text-align:center;color:#8a98aa;font-size:10px;padding:22px}.back{font-size:10px;font-weight:850;color:#1769e8;text-decoration:none}
+@media(max-width:650px){.head{display:block}.head .badge{display:inline-flex;margin-top:12px}.formgrid{grid-template-columns:1fr}.wrap{padding:16px 12px}.top{height:60px}.actions .badge{display:none}.hero{padding:18px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="mark">K</span><span>KRIM GLOBAL<small>PLATFORM CONTROL PLANE</small></span></div><div class="actions"><span class="badge">PRIVATE · AAL2 REQUIRED</span><button class="btn" id="refresh">↻ Refresh</button><button class="btn" id="signout">Sign out</button></div></header>
+<main class="wrap">
+<div class="crumb">KRIM / PLATFORM ADMINISTRATION / NETWORK GOVERNANCE</div>
+<section class="head"><div><div class="eyebrow">NETWORK GOVERNANCE · RESTRICTED</div><h1>Network lane administration</h1><p>Create and inspect route-lane records. This workspace creates draft records only; it does not confirm partner coverage, operational capacity, regulatory clearance or public service availability.</p></div><span class="badge" id="access-state">VERIFYING ACCESS</span></section>
+<section class="hero"><h2>Route registry before capacity publication</h2><p>Each lane must connect distinct active KRIM locations through an active transport mode. If linked to a corridor, its endpoints must match exactly. New records remain draft until a separate authorized publication review is implemented and completed.</p></section>
+<div class="alert" id="message" role="status" aria-live="polite"></div>
+<section class="card">
+<div class="cardhead"><div><h3>Create a draft network lane</h3><p>All fields are validated again by the protected database function.</p></div><a class="back" href="index.html">← Control centre</a></div>
+<form id="lane-form">
+<div class="formgrid">
+<div class="field"><label for="lane-code">Lane code *</label><input id="lane-code" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9_-]{2,63}" placeholder="IN-RAN-CCU-ROAD"><small>3–64 characters; letters, numbers, underscore and hyphen.</small></div>
+<div class="field"><label for="lane-name">Lane name *</label><input id="lane-name" required maxlength="180" placeholder="Ranchi – Kolkata | Road"></div>
+<div class="field"><label for="origin">Origin location *</label><select id="origin" required><option value="">Loading locations…</option></select></div>
+<div class="field"><label for="destination">Destination location *</label><select id="destination" required><option value="">Loading locations…</option></select></div>
+<div class="field"><label for="mode">Transport mode *</label><select id="mode" required><option value="">Loading modes…</option></select></div>
+<div class="field"><label for="corridor">Associated corridor (optional)</label><select id="corridor"><option value="">No corridor association</option></select><small>Only corridors whose endpoints exactly match the selected lane endpoints can be saved.</small></div>
+<div class="field"><label for="service-level">Service level (optional)</label><input id="service-level" maxlength="80" placeholder="e.g. Standard / Express"></div>
+<div class="field"><label for="distance">Distance (optional)</label><input id="distance" type="number" min="0.001" step="any" placeholder="Leave blank if unverified"></div>
+<div class="field"><label for="distance-unit">Distance unit (optional)</label><select id="distance-unit"><option value="">Not specified</option><option value="km">Kilometres (km)</option><option value="mi">Miles (mi)</option></select></div>
+</div>
+<div class="formactions"><button class="btn primary" id="create" type="submit">Create draft lane</button><button class="btn" type="reset">Clear form</button></div>
+</form>
+<div class="notice"><strong>Important:</strong> A draft lane is a registry record, not a service promise. Do not enter estimated distance or service level as verified facts. Do not publish a lane until partner coverage, compliance and operating evidence have been independently checked.</div>
+</section>
+<section class="card">
+<div class="cardhead"><div><h3>Network lane register</h3><p>Protected administrator view of draft and published lane records.</p></div><span class="badge" id="lane-count">— lanes</span></div>
+<div class="toolbar"><input id="filter" type="search" placeholder="Filter code, route, mode or status…" aria-label="Filter network lanes"><button class="btn" id="reload">Reload register</button></div>
+<div class="tablewrap"><table><thead><tr><th>Lane</th><th>Origin</th><th>Destination</th><th>Mode</th><th>Corridor</th><th>Status</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="empty">Loading protected lane register…</td></tr></tbody></table></div><div class="statusline" id="status">No lane changes performed.</div>
+</section>
+<div class="foot">KRIM Logistics OS · Private administrator workspace · Draft creation only</div>
+</main>
+<script>
+(function(){
+"use strict";
+const URL="https://ebltviniygljwwseplph.supabase.co",KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const client=window.KRIM_SUPABASE||window.supabaseClient||window.supabase?.createClient(URL,KEY);
+const $=id=>document.getElementById(id);let lanes=[];
+function esc(v){return String(v===null||v===undefined||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function msg(t,k){$("message").textContent=t;$("message").className="alert show "+k;}
+async function verify(){
+ if(!client)throw new Error("Secure authentication client unavailable.");
+ const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error("No active administrator session.");
+ const {data:gate,error:ge}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+ if(ge||!gate||gate.ok!==true)throw new Error(gate?.code==="MFA_REQUIRED"?"Complete MFA before accessing network administration.":gate?.error||ge?.message||"Administrator access denied.");
+ if(!(gate.data?.roles||[]).includes("platform_superadmin"))throw new Error("Platform Super Admin access is required.");
+ document.documentElement.classList.add("authorized");$("access-state").textContent="AUTHORIZED · AAL2"; 
+}
+async function loadOptions(){
+ const [loc,mode,corr]=await Promise.all([
+  client.from("krim_locations").select("id,city,state_region,is_active").eq("is_active",true).order("city"),
+  client.from("krim_transport_modes").select("id,code,name,is_active").eq("is_active",true).order("name"),
+  client.rpc("krim_admin_list_corridor_catalogue")
+ ]);
+ if(loc.error)throw new Error("Could not load active locations: "+loc.error.message);
+ if(mode.error)throw new Error("Could not load active transport modes: "+mode.error.message);
+ if(corr.error)throw new Error("Could not load protected corridor catalogue: "+corr.error.message);
+ const opt=(x)=>x.map(v=>'<option value="'+esc(v.id)+'">'+esc(v.city+(v.state_region?", "+v.state_region:""))+' · #'+esc(v.id)+'</option>').join("");
+ $("origin").innerHTML='<option value="">Select origin</option>'+opt(loc.data||[]);
+ $("destination").innerHTML='<option value="">Select destination</option>'+opt(loc.data||[]);
+ $("mode").innerHTML='<option value="">Select transport mode</option>'+(mode.data||[]).map(v=>'<option value="'+esc(v.id)+'">'+esc(v.name||v.code)+' · '+esc(v.code)+'</option>').join("");
+ const corridors=corr.data?.corridors||[];
+ $("corridor").innerHTML='<option value="">No corridor association</option>'+corridors.map(v=>'<option value="'+esc(v.id)+'">'+esc(v.corridor_name)+' · '+esc(v.status)+' · #'+esc(v.id)+'</option>').join("");
+}
+function render(){
+ const q=$("filter").value.trim().toLowerCase(),items=lanes.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
+ $("lane-count").textContent=lanes.length+" lanes";
+ $("rows").innerHTML=items.length?items.map(x=>'<tr><td><strong>'+esc(x.lane_code)+'</strong><br>'+esc(x.lane_name)+'</td><td>'+esc(x.origin_city)+(x.origin_state_region?", "+esc(x.origin_state_region):"")+'</td><td>'+esc(x.destination_city)+(x.destination_state_region?", "+esc(x.destination_state_region):"")+'</td><td>'+esc(x.transport_mode)+'</td><td>'+esc(x.corridor_name||"—")+'<br><small>'+esc(x.corridor_status||"")+'</small></td><td><span class="state">'+esc(x.status)+'</span></td></tr>').join(""):'<tr><td colspan="6" class="empty">'+(lanes.length?"No lanes match this filter.":"No lane records found.")+'</td></tr>';
+ $("status").textContent=items.length+" of "+lanes.length+" lane records shown.";
+}
+async function loadLanes(){const {data,error}=await client.rpc("krim_admin_list_network_lanes");if(error)throw error;lanes=Array.isArray(data?.items)?data.items:[];render();}
+$("lane-form").addEventListener("submit",async e=>{
+ e.preventDefault();const btn=$("create");btn.disabled=true;
+ try{
+  const origin=Number($("origin").value),destination=Number($("destination").value),mode=Number($("mode").value);
+  if(!origin||!destination||origin===destination)throw new Error("Select two different active locations.");
+  const distance=$("distance").value.trim();
+  const args={p_lane_code:$("lane-code").value.trim().toUpperCase(),p_lane_name:$("lane-name").value.trim(),p_origin_location_id:origin,p_destination_location_id:destination,p_transport_mode_id:mode,p_corridor_id:$("corridor").value?Number($("corridor").value):null,p_service_level:$("service-level").value.trim()||null,p_distance:distance?Number(distance):null,p_distance_unit:$("distance-unit").value||null,p_metadata:{created_via:"platform_admin_network_lanes"}};
+  const {data,error}=await client.rpc("krim_admin_create_network_lane_draft",args);if(error)throw error;
+  msg("Draft lane "+(data?.lane_code||args.p_lane_code)+" created. It is not published or available for partner capacity registration.","success");
+  $("status").textContent="Created draft lane #"+esc(data?.lane_id??"—")+".";
+  $("lane-form").reset();await loadLanes();
+ }catch(err){msg(err.message||"Could not create draft lane.","error");}finally{btn.disabled=false;}
+});
+$("reload").addEventListener("click",()=>loadLanes().catch(e=>msg(e.message,"error")));
+$("refresh").addEventListener("click",async()=>{try{await loadOptions();await loadLanes();msg("Network lane register refreshed.","success");}catch(e){msg(e.message,"error");}});
+$("filter").addEventListener("input",render);
+$("signout").addEventListener("click",async()=>{if(client)await client.auth.signOut();location.href="../../login.html";});
+(async()=>{try{await verify();await loadOptions();await loadLanes();}catch(e){$("access-state").textContent="ACCESS BLOCKED";msg(e.message||"Administrator access could not be verified.","error");$("rows").innerHTML='<tr><td colspan="6" class="empty">Protected lane register unavailable.</td></tr>';}})();
+})();
+</script>
+</body></html>
