@@ -1,0 +1,89 @@
+name: KRIM encrypted schema-only export
+
+on:
+  push:
+    branches:
+      - mobile/krim-partner-app
+    paths:
+      - .github/workflows/krim-schema-export.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check required repository secrets
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SUPABASE_DB_URL}" ]]; then
+            echo "::error::Add repository secret KRIM_PRODUCTION_DB_URL before rerunning this workflow."
+            exit 1
+          fi
+          if [[ ${#EXPORT_PASSPHRASE} -lt 24 ]]; then
+            echo "::error::Add KRIM_SCHEMA_EXPORT_PASSPHRASE with at least 24 characters."
+            exit 1
+          fi
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Export schema-only SQL and encrypt it
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          set +x
+          umask 077
+          mkdir -p private-export
+          trap 'rm -f private-export/schema.sql' EXIT
+
+          # Explicitly include only KRIM-owned application schemas.
+          # Supabase-managed auth/storage/realtime/vault/cron/net schemas are excluded.
+          supabase db dump \
+            --db-url "${SUPABASE_DB_URL}" \
+            --schema public,private,krim_internal,graphql_public \
+            --file private-export/schema.sql
+
+          test -s private-export/schema.sql
+
+          # Fail closed if a data-bearing statement appears in this schema-only export.
+          if grep -Eiq '^(INSERT INTO|COPY .+ FROM stdin;)' private-export/schema.sql; then
+            echo "::error::Unexpected data statement found; refusing to publish export."
+            exit 1
+          fi
+
+          # Catch common live-provider credential formats before the file leaves the runner.
+          if grep -Eiq 'rzp_live_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{10,}|sk_live_[A-Za-z0-9]{10,}|sb_secret_[A-Za-z0-9]{10,}|eyJhbGciOi[A-Za-z0-9._-]{20,}' private-export/schema.sql; then
+            echo "::error::Potential credential material detected; refusing to publish export. Review locally using a secured environment."
+            exit 1
+          fi
+
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -in private-export/schema.sql \
+            -out private-export/krim-schema-export.sql.enc \
+            -pass env:EXPORT_PASSPHRASE
+
+          sha256sum private-export/krim-schema-export.sql.enc > private-export/SHA256SUMS
+          rm -f private-export/schema.sql
+
+      - name: Upload encrypted export only
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-schema-export-encrypted
+          path: |
+            private-export/krim-schema-export.sql.enc
+            private-export/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 1
