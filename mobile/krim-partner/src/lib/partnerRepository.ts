@@ -41,7 +41,7 @@ export async function loadPartnerOrganizations(client:SupabaseClient,userId:stri
  const ids=[...new Set(eligible.map(m=>Number(m.organization_id)))];
  const {data:orgs,error}=await client.from("krim_organizations")
   .select("id,organization_type,legal_name,display_name,status,partner_lifecycle_status,partner_verification_status,partner_compliance_status,partner_onboarding_status,partner_account_mode")
-  .in("id",ids).in("organization_type",["partner","carrier","forwarder","logistics_provider","warehouse","warehouse_operator"]);
+  .in("id",ids).in("organization_type",["partner","carrier","forwarder"]);
  if(error)throw error;
  const roles=new Map<number,string>(); for(const m of eligible)roles.set(Number(m.organization_id),String(m.role));
  return (orgs??[]).map(o=>({...o,id:Number(o.id),role:roles.get(Number(o.id))??"member"}));
