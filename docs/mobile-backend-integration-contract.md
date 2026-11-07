@@ -58,24 +58,23 @@ Supabase project: Logistics SaaS (project ref ebltviniygljwwseplph)
 
 ## Current mobile integration blockers
 
-1. The three app screens are still preview-oriented; no live organization-context resolver or data repositories are integrated.
-2. The current customer shipment request form does not submit or persist. Keep this clear until the complete create-request flow is tested.
-3. Partner opportunity and shipment views are not connected; partner RLS policy and RPCs must be reviewed together.
-4. Driver task reads and execution RPCs need real-account tests, including rejected/expired assignment, wrong driver, inactive membership, stale partner assignment, vehicle mismatch, weight mismatch, invalid event order and terminal shipment cases.
+1. Customer app now has a live read-only organization, shipment, quote and tracking workspace. Real-account/device validation remains required; shipment creation and quote acceptance are disabled.
+2. Partner app now has live read-only organization, capability, opportunity, quote and assignment views. Multi-organization opportunity visibility is suppressed; quote submission and assignment response remain disabled because quote RPC organization resolution is ambiguous.
+3. Driver app now has live read-only own-assignment, driver-profile and trip-event history views. It queries assignments for the authenticated user and relies on existing driver-membership RLS. Dispatch acceptance, trip event writes, background location and POD uploads remain disabled.
+4. Driver execution needs real-account tests, including wrong driver, inactive membership, rejected/expired assignment, stale partner assignment, vehicle mismatch, weight mismatch, invalid event order and terminal shipment cases.
 5. Payment screens are not integrated. Razorpay must be server-order-created, signature/webhook verified, idempotently reconciled and posted to the ledger before any app displays paid/failed/refunded/settled states.
 6. No real device, live authentication, EAS signing, APK/AAB, Play Console or App Store acceptance is implied by CI export.
 
 ## Required integration and acceptance sequence
 
 1. Review function definitions, execute grants, RLS policies, storage policies and Edge Function auth for every intended operation.
-2. Add read-only organization context repositories; handle multiple organizations and no-membership states safely.
-3. Connect customer shipment list and tracking via verified customer-scoped access.
-4. Connect partner opportunities and assignments using the existing eligibility policy; do not allow quote submission until partner permissions and quote creation checks are proven.
-5. Connect driver own-assignment reads and the three reviewed RPCs; keep POD blocked until evidence upload policy and second-party verification are confirmed.
-6. Integrate payments only after end-to-end Razorpay order/webhook/ledger/refund tests pass.
-7. Add automated negative authorization tests across two organizations and all three personas.
-8. Perform real Android device tests, offline/retry tests, accessibility checks, and release signing/build verification.
-9. Release only after market-specific legal, partner, operational and support readiness is confirmed.
+2. Customer read-only organization, shipment, quote and tracking workspace is implemented on the feature branch; complete real-account validation before enabling commercial writes.
+3. Partner read-only organization, capability, opportunity, quote and assignment workspace is implemented on the feature branch; keep quote submission and assignment responses disabled pending contract fixes and end-to-end verification.
+4. Driver read-only profile, own-assignment and trip-event history workspace is implemented on the feature branch. Keep operational writes and POD disabled pending full evidence-storage review and real-device tests.
+5. Integrate payments only after end-to-end Razorpay order/webhook/ledger/refund tests pass.
+6. Add automated negative authorization tests across two organizations and all three personas.
+7. Perform real Android device tests, offline/retry tests, accessibility checks, and release signing/build verification.
+8. Release only after market-specific legal, partner, operational and support readiness is confirmed.
 
 ## CI note
 
