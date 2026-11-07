@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import {
