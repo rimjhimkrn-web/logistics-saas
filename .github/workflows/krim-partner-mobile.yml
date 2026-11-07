@@ -1,21 +1,27 @@
-name: KRIM Partner mobile validation
+name: KRIM mobile app validation
 on:
   push:
     branches: [mobile/krim-partner-app]
     paths:
       - 'mobile/krim-partner/**'
+      - 'mobile/krim-customer/**'
       - '.github/workflows/krim-partner-mobile.yml'
   pull_request:
     paths:
       - 'mobile/krim-partner/**'
+      - 'mobile/krim-customer/**'
       - '.github/workflows/krim-partner-mobile.yml'
   workflow_dispatch:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [krim-partner, krim-customer]
     defaults:
       run:
-        working-directory: mobile/krim-partner
+        working-directory: mobile/${{ matrix.app }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
