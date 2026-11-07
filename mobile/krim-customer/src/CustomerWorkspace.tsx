@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "./supabase";
+import { supabase } from "./lib/supabase";
 import {
   loadCustomerOrganizations,
   loadCustomerShipments,
@@ -10,7 +10,7 @@ import {
   type CustomerOrganization,
   type CustomerShipment,
   type CustomerQuote,
-} from "./customerRepository";
+} from "./lib/customerRepository";
 
 type Props = { session: Session; onSignOut: () => void };
 type Tracking = { shipment?: Record<string, unknown>; events?: Array<Record<string, unknown>>; milestones?: Array<Record<string, unknown>> };
