@@ -248,3 +248,31 @@ These database records are not proof of successful bank settlement or actual wit
 ### Audit boundary
 
 This review inspected deployed Edge Function source and read-only database metadata/aggregate records. No Razorpay API payment/refund was created, no refund was initiated, no payout was sent, no payment/webhook status was modified, and no secrets or keys were read. Live provider and bank reconciliation remains outstanding.
+
+
+## Shipment, tracking, POD, and document-access review — 2026-11-07
+
+### Controls observed
+
+- The public tracking Edge Function has JWT verification disabled by design, but accepts only a 32-character uppercase hexadecimal opaque token (128 bits of entropy), not sequential shipment IDs. It returns a restricted set of shipment status, route locations, and tracking-event timestamps/location references. It does not return customer identity, goods description, pricing, invoices, or POD files in the inspected response.
+- The authenticated shipment tracking RPC requires a signed-in user and checks customer-organization access or active membership in an accepted/active partner assignment before returning shipment details and event history.
+- Global shipment creation requires active origin and destination countries/locations, organization access, shipment.create permission, and operational activation of both markets.
+- Global quote acceptance checks organization access and shipment.update permission and locks the quote/shipment rows.
+- Shipment status transition RPC is not directly executable by anon or authenticated roles; this is consistent with a controlled internal transition path.
+- Delivery POD submission verifies the authenticated driver owns the assignment, has active driver membership, is in transit, is linked to an accepted/active partner assignment, and has private evidence uploaded by that driver.
+- POD review requires AAL2 MFA and platform-admin permission, rejects self-review by the driver who submitted the evidence, requires an existing private driver evidence object, and records a reason and audit event. Verification then authorizes delivery through an internal function.
+- All five inspected Storage buckets are private: pod-documents, krim-partner-verification, krim-driver-evidence, krim-warehouse-evidence, and krim-driver-verification. Storage access is governed by object policies; the inspected customer POD evidence policy requires a verified POD and customer-organization access.
+- Customs document submission/review functions require authenticated users, AAL2 for review, accepted broker/customer role checks, uploader ownership, file metadata/path checks, and submitter/reviewer separation.
+
+### Items requiring deeper verification
+
+1. The private pod-documents bucket had no direct authenticated/anonymous object policies in the inspected policy listing. Confirm whether it is intentionally service-role/signed-URL-only and whether it is still used; do not make it public.
+2. The public tracking endpoint uses a 128-bit opaque token. Confirm tokens are generated with a cryptographically secure random source, unique constraint/index, and no predictable fallback. The legacy generate_tracking_number() trigger function returns a sequential TRK-<id> value; that legacy identifier must never be accepted by the public token endpoint.
+3. Review the complete JSON fields stored in tracking-event metadata before returning any new event types publicly. Keep customer/partner contact data, internal notes, commercial terms, and evidence references out of public tracking responses.
+4. The authenticated krim_get_shipment_tracking RPC returns event metadata, coordinates, milestone notes, goods description, and route labels to authorized customer/partner users. Confirm role-based field minimization for each role and ensure partner access is limited to assignments that are still operationally valid.
+5. Complete a full call-graph review of all document and POD storage policies, signed URL generation, expiry, revocation, and access logging. Current metadata inspection is not a signed-link penetration test.
+6. Verify that every document upload has MIME/content-signature validation, file-size limits, malware scanning or a documented compensating control, and retention/deletion ownership. Storage bucket MIME settings alone are not content validation.
+
+### Current decision
+
+The inspected controls show good design direction for private evidence and role-scoped shipment access. No document, POD, tracking token, storage object, policy, or production record was changed. No public bucket was enabled. The remaining work is focused validation and role-by-role testing, not broad permission changes.
