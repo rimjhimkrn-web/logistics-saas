@@ -88,6 +88,7 @@ WITH expected(table_name, column_name) AS (
     ('krim_partner_quotes','amount'),
     ('krim_partner_quotes','currency_code'),
     ('krim_partner_quotes','valid_until'),
+    ('krim_partner_quotes','notes'),
     ('krim_partner_quotes','status'),
     ('krim_partner_quotes','submitted_at'),
     ('krim_partner_quotes','pricing_snapshot'),
