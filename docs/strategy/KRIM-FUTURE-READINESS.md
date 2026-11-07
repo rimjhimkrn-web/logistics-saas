@@ -276,3 +276,47 @@ This review inspected deployed Edge Function source and read-only database metad
 ### Current decision
 
 The inspected controls show good design direction for private evidence and role-scoped shipment access. No document, POD, tracking token, storage object, policy, or production record was changed. No public bucket was enabled. The remaining work is focused validation and role-by-role testing, not broad permission changes.
+
+
+## AI assistant and workflow reliability review — 2026-11-07
+
+### KRIM AI assistant controls observed
+
+- The active `krim-ai` Edge Function has JWT verification enabled, accepts POST only, rejects unapproved browser origins, and independently validates the caller's bearer token with Supabase Auth.
+- AI context is resolved through a self-scoped RPC that uses `auth.uid()` and does not accept a caller-supplied user ID.
+- AI requests are rate-limited by a database RPC to 20 requests per authenticated user per rolling 10-minute window. If the rate-limit service is unavailable, the endpoint fails closed.
+- Conversation lookup is constrained to the authenticated user's own active conversation. Message history is limited to 20 entries, each truncated to 6,000 characters.
+- Live operational context is queried using the caller's JWT and existing RLS policies. Inspected policies scope shipments, driver assignments, warehouse tasks/inventory, customs documents, invoices, partner payables/capabilities, exceptions, and alerts to relevant organizations, roles, or assignments.
+- The system prompt explicitly makes AI read-only: it cannot execute shipments, approve partners, move funds, issue refunds, change access, or activate markets. It instructs the assistant not to invent rates, shipment status, verification, payment state, FX, legal approvals or compliance.
+- Provider calls have a 30-second timeout, output is capped at 1,000 tokens, and provider errors are returned without exposing raw provider response bodies. Requests use `store: false`.
+- AI conversation and message RLS policies restrict records to the owning user.
+
+### Notification provider and retry worker
+
+- Notification provider adapter has JWT verification enabled and requires an authenticated platform administrator.
+- Resend is currently a credential-readiness check only; the inspected adapter does not send customer email.
+- Telegram test path sends a clearly identified founder-authorized test message, not customer/partner notifications.
+- Notification retry worker has JWT verification disabled at the gateway, but requires a high-entropy cron secret or a validated authenticated platform administrator before creating a service-role client and processing queued work.
+- The retry worker uses bounded provider timeouts and separate claim/finish RPCs for founder enquiry and follow-up Telegram queues. The secret itself was not read.
+
+### Workflow engine snapshot
+
+- 9 workflow runs were present and all 9 were completed.
+- 18 action executions were present and all 18 were marked succeeded.
+- No queue leases and no dead-letter records were present in the inspected queue tables.
+- Automation execution logs contained 3,662 successful workflow-runtime entries, 10 partner-discovery entries, 3 daily-settlement entries, and 2 autonomous-outreach entries. These are application log records, not independent proof that every external message or settlement occurred.
+- The current database has extensive workflow queue, lease, retry, idempotency, concurrency-lock and dead-letter tables. The queue tables were empty in the inspected snapshot; the active notification retry worker handles the founder Telegram retry queues.
+
+### Evolution and reliability gaps
+
+1. The AI provider model is currently hard-coded to `gpt-4.1`. Add a centrally controlled model/provider configuration and compatibility test suite so model upgrades can be evaluated and rolled back without changing business workflows.
+2. Add automated tenant-isolation regression tests for every role and every live-context table. The current source uses caller JWT/RLS and the inspected policies are scoped, but source inspection is not a cross-tenant penetration test.
+3. Add prompt-injection, data-exfiltration, multilingual, long-history, provider-timeout, malformed-response, rate-limit and cost-ceiling tests.
+4. Add monitoring for AI provider latency/error rates, token/cost usage, rate-limit denials, context query failures, and conversation persistence failures. No end-to-end monitoring dashboard or alert delivery was proven in this review.
+5. Add notification retry tests for duplicate claims, expired leases, concurrent workers, provider 429/5xx, invalid credentials, timeout after provider acceptance, and idempotent completion. No external customer notification was sent during this audit.
+6. Keep automated outreach disabled or tightly approval-gated until partner/customer consent, suppression lists, unsubscribe handling, rate limits, and message templates are verified.
+7. Confirm the workflow runtime scheduler/worker invocation and recovery behavior operationally. A zero queue/dead-letter snapshot alone does not prove that scheduled workers are running continuously.
+
+### Audit boundary
+
+This was a read-only source, RLS-policy and aggregate-record review. No AI prompt, provider model, rate limit, workflow, notification, secret, queue, or production data was changed. No customer or partner message was sent, and no AI provider request was triggered by this audit.
