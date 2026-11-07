@@ -69,10 +69,9 @@ BEGIN
     AND o.organization_type IN ('partner', 'carrier', 'forwarder')
     AND o.status = 'active'
     AND o.partner_account_mode = 'registered_business'
-    AND o.partner_verification_status IN ('verified', 'approved')
-    AND o.partner_lifecycle_status IN ('active', 'verified')
-    AND o.partner_compliance_status IN
-      ('clear', 'compliant', 'approved', 'verified', 'not_required', 'not_applicable')
+    AND o.partner_verification_status = 'verified'
+    AND o.partner_lifecycle_status IN ('approved', 'active')
+    AND o.partner_compliance_status = 'compliant'
     AND EXISTS (
       SELECT 1
       FROM public.krim_partner_capabilities pc
@@ -85,7 +84,7 @@ BEGIN
 
   IF NOT FOUND THEN
     RAISE EXCEPTION USING errcode = '42501',
-      message = 'Selected organization is not an active, verified partner organization with an approved capability';
+      message = 'Selected organization is not an active, verified partner organization with current compliance and an approved capability';
   END IF;
 
   IF NOT private.krim_has_permission(v_user_id, p_partner_organization_id, 'quote.create') THEN
