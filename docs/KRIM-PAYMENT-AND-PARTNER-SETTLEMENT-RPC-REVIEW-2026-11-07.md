@@ -44,3 +44,15 @@ Selected SECURITY DEFINER routines:
 ## Release decision
 
 The reviewed SQL shows useful authorization and financial-integrity controls, but this is not proof of a complete money-flow E2E. No actual payment, bank withdrawal, partner payout, or settlement was tested. Keep production live-money launch NO-GO until isolated authenticated/service-role tests and a real approved accounting reconciliation are complete.
+
+
+## Follow-up ACL and schema verification
+
+A second read-only check confirmed the exact EXECUTE grantees for all five KRIM internal payment/settlement functions listed above are `postgres` and `service_role` only. Neither `anon` nor `authenticated` nor `PUBLIC` is granted EXECUTE.
+
+Schema privileges:
+- `krim_internal`: `anon` and `authenticated` have neither USAGE nor CREATE; `service_role` has USAGE but not CREATE.
+- `private`: `anon` has neither USAGE nor CREATE; `authenticated` has USAGE but not CREATE; `service_role` has USAGE but not CREATE.
+- `public`: client roles have USAGE but not CREATE.
+
+This materially reduces the search-path concern for the internal settlement functions: untrusted client roles cannot create shadow objects in `krim_internal` or `public`, and cannot use `krim_internal` directly. Keep the search_path hardening review as defense-in-depth, but the inspected schema ACLs do not show client CREATE access in those schemas.
