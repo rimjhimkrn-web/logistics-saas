@@ -320,3 +320,60 @@ The inspected controls show good design direction for private evidence and role-
 ### Audit boundary
 
 This was a read-only source, RLS-policy and aggregate-record review. No AI prompt, provider model, rate limit, workflow, notification, secret, queue, or production data was changed. No customer or partner message was sent, and no AI provider request was triggered by this audit.
+
+
+## Database scalability, scheduler, and resilience baseline — 2026-11-07
+
+### Current database footprint and headroom
+
+- Project is ACTIVE_HEALTHY on PostgreSQL 17.6.1, region ap-northeast-1.
+- Database size at audit time: approximately 65 MB.
+- Current connections: 13 of configured max_connections 60 (snapshot only; not a concurrency/load test).
+- Database buffer cache hit ratio reported 100% at audit time (not a substitute for latency/load testing).
+- No deadlocks were recorded in pg_stat_database at audit time; 847 rollbacks and 3,302,716 commits were cumulative counters, not recent-window error rates.
+- Largest application tables by size were job_run_details (~12 MB total), krim_country_pack_controls (~1.5 MB), schema_migrations (~872 kB), automation_execution_logs (~608 kB), and audit_log_entries (~288 kB). Current canonical shipments estimate 18 rows; this is a small early-stage workload, not a production-scale benchmark.
+
+### Scheduler reliability evidence
+
+Six active pg_cron jobs were inspected. Their run-history snapshot showed zero failures:
+- workflow runtime every minute: 38,392 successful runs
+- growth-signal worker every five minutes: 7,673 successful runs
+- inquiry follow-up queue every five minutes: 2,002 successful runs
+- exception escalation every five minutes: 304 successful runs
+- capacity-hold expiry every five minutes: 298 successful runs
+- notification retry worker every five minutes: 231 successful runs
+
+All six had recent successful executions on 2026-11-07. This is positive scheduler evidence, but does not prove downstream third-party delivery or end-user outcomes.
+
+### Performance advisor findings
+
+- 27 foreign-key relationships lack a covering index. Review by query workload and join/delete path; do not add all automatically.
+- 10 RLS policies have auth-function init-plan warnings. These should be reviewed for safe `(select auth.uid())`/equivalent optimization while preserving policy semantics.
+- 5 tables have multiple permissive SELECT policies. Confirm intended OR semantics and consolidate only with regression tests.
+- 1 exact duplicate partial unique index exists on `krim_capacity_reservations(organization_id, idempotency_key) WHERE idempotency_key IS NOT NULL`. Both indexes are 8 kB and currently show zero index scans. Do not drop until migration history, dependencies, and production constraints are checked; one unique index must remain to preserve idempotency.
+- 671 unused-index notices exist. This is a cumulative/early-workload signal, not a safe deletion list. Keep integrity/unique indexes; evaluate candidates using workload history before any removal.
+- No health-advisor findings were returned in this snapshot.
+- Security advisor still reports 26 RLS-enabled/no-policy tables (many are private/internal tables) and 126 authenticated-executable SECURITY DEFINER functions, plus leaked-password protection disabled. These are security review items, not automatically database performance defects.
+
+### Query and log interpretation
+
+The top cumulative pg_stat_statements entries at audit time were dominated by schema/introspection queries and the one-minute workflow batch. The workflow batch averaged about 20.7 ms over 38,403 calls. This is encouraging for the worker itself; it is not a user-facing API latency benchmark. No production load test or representative shipment-volume test has been run.
+
+### Resilience and cost safeguards
+
+1. No Supabase development branches existed at audit time. Production DDL must be tested on a branch or isolated staging database before merge; branch creation may incur costs, so confirm pricing first.
+2. Verify backup/PITR entitlement, retention window, and restore procedure in the Supabase dashboard. This tool audit did not establish backup availability or a successful restore test.
+3. Establish an encrypted, independent export/backup procedure for critical business records and payment reconciliation evidence, subject to privacy and retention rules.
+4. Define recovery objectives: RPO/RTO, incident severity, responsible operator, and customer communication.
+5. Add alerts for database connection saturation, slow queries, failed scheduled jobs, queue age/dead letters, storage growth, Edge Function errors, and payment reconciliation drift.
+6. Set a retention/archive policy for `job_run_details`, automation logs, audit logs, webhook payloads and other high-growth records. Never purge financial/audit evidence without a documented retention schedule and compliant archive.
+7. Before scale-up, benchmark realistic flows: customer shipment creation, partner quote search/acceptance, capacity reservation, driver updates, warehouse receipt, customs documents, POD verification, payment webhook reconciliation, and customer tracking.
+8. Do not increase compute, create branches, add paid monitoring, or delete indexes until a measured need and cost are known.
+
+### Current scale assessment
+
+The database is small and healthy in this snapshot, with a scheduler showing consistent successful runs. That is a sound early foundation, but it does not establish readiness for high traffic, high availability, disaster recovery, or global multi-region operations. The next engineering task is safe query/policy optimization and tested backup/restore planning, followed by measured end-to-end load tests.
+
+### Audit boundary
+
+Read-only project, advisor, SQL statistics, migration/branch metadata and scheduler history were inspected. No indexes, policies, tables, migrations, compute settings, backups, cron schedules, or production records were changed.
