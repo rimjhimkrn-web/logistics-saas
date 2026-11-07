@@ -17,9 +17,9 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
  useEffect(()=>{void refreshOrganizations();},[refreshOrganizations]);
  const refreshData=useCallback(async()=>{if(!supabase||organizationId===null){setCapabilities([]);setQuotes([]);setAssignments([]);setOpportunities([]);return;}setLoading(true);setError("");try{const [c,o,q,a]=await Promise.all([loadPartnerCapabilities(supabase,organizationId),organizations.length===1?loadPartnerOpportunities(supabase):Promise.resolve([]),loadPartnerQuotes(supabase,organizationId),loadPartnerAssignments(supabase,organizationId)]);setCapabilities(c);setOpportunities(o);setQuotes(q);setAssignments(a);}catch{setError("Some partner data is unavailable. Existing backend authorization remains in force; no permissions have been bypassed.");}finally{setLoading(false);}},[organizationId,organizations.length]);
  useEffect(()=>{void refreshData();},[refreshData]);
- const verified=selected?.partner_verification_status==="verified"||selected?.partner_verification_status==="approved";
+ const verified=selected?.partner_verification_status==="verified";
  const compliance=selected?.partner_compliance_status;
- const complianceCurrent=["clear","compliant","approved","verified","not_required","not_applicable"].includes(compliance??"");
+ const complianceCurrent=compliance==="compliant";
  const activeCaps=capabilities.filter(c=>c.active&&c.verification_status==="verified"&&(!c.effective_from||new Date(c.effective_from).getTime()<=Date.now())&&(!c.effective_until||new Date(c.effective_until).getTime()>Date.now())).length;
  const openAssignments=assignments.filter(a=>a.status==="offered").length;
  return <View style={s.safe}>
@@ -31,7 +31,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
     {loadingOrg?<ActivityIndicator color={blue}/>:organizations.length===0?<><Text style={s.muted}>No active partner organization membership is visible for this account.</Text><Action title="Start partner onboarding" onPress={()=>{void import("react-native").then(({Linking})=>Linking.openURL(onboarding));}} secondary/></>:<>
      <Text style={s.org}>{selected?.display_name||selected?.legal_name}</Text><Text style={s.tiny}>{selected?.organization_type} · {selected?.role} · {selected?.partner_account_mode||"Account mode not set"}</Text>
      <View style={s.chips}>{organizations.map(o=><Pressable key={o.id} onPress={()=>setOrganizationId(o.id)} style={[s.chip,o.id===organizationId&&s.chipOn]}><Text style={[s.chipText,o.id===organizationId&&s.chipTextOn]}>{o.display_name||o.legal_name}</Text></Pressable>)}</View>
-     <View style={s.statusRow}><Status label="Verification" value={selected?.partner_verification_status||"Pending"} good={!!verified}/><Status label="Compliance" value={compliance||"Pending"} good={complianceCurrent}/><Status label="Lifecycle" value={selected?.partner_lifecycle_status||"Pending"} good={selected?.partner_lifecycle_status==="active"}/></View>
+     <View style={s.statusRow}><Status label="Verification" value={selected?.partner_verification_status||"Pending"} good={!!verified}/><Status label="Compliance" value={compliance||"Pending"} good={complianceCurrent}/><Status label="Lifecycle" value={selected?.partner_lifecycle_status||"Pending"} good={selected?.partner_lifecycle_status==="active"||selected?.partner_lifecycle_status==="approved"}/></View>
     </>}
    </View>
    {tab==="Overview"&&<><Header kicker="PARTNER CONTROL CENTRE" title="Your operating network" sub="Live readiness and activity for the selected partner organization."/>
