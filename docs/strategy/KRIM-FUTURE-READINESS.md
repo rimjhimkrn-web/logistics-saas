@@ -377,3 +377,44 @@ The database is small and healthy in this snapshot, with a scheduler showing con
 ### Audit boundary
 
 Read-only project, advisor, SQL statistics, migration/branch metadata and scheduler history were inspected. No indexes, policies, tables, migrations, compute settings, backups, cron schedules, or production records were changed.
+
+
+## Edge Function deployment, scheduler, and backup-access review — 2026-11-07
+
+### Edge Function inventory
+
+The project reported 19 ACTIVE Edge Functions at audit time. Key observations:
+- Canonical Razorpay order creation and payment verification require JWT verification.
+- Razorpay webhook has gateway JWT verification disabled, as expected for provider callbacks; its handler must validate the Razorpay webhook signature itself.
+- Public tracking, public contact inquiry, and notification retry worker also have gateway JWT verification disabled by design/implementation; each must retain its own strong token, abuse-control, or cron-secret authentication.
+- AI, admin, notification provider adapter, payment status/capability endpoints, and refund execution require JWT verification.
+- Legacy Cashfree create/verify/webhook functions remain deployed and ACTIVE even though their handlers were previously inspected and found to return HTTP 410. This is not currently evidence that Cashfree processing is available, but leaving retired endpoints deployed increases maintenance and configuration surface. Confirm no clients or webhooks depend on them, then retire/delete through a reviewed deployment change.
+- Older Razorpay create/process endpoints also remain deployed and were previously inspected as HTTP 410. Consolidate frontend references to the canonical global Razorpay flow before retiring old endpoints.
+- No secrets or key values were read.
+
+### Scheduler and monitoring
+
+The six active cron jobs and their successful run histories are recorded in the preceding section. The unified logging tool exposed source categories, but detailed Edge Function error aggregation could not be reliably queried through the current log schema in this audit. Do not infer zero Edge Function errors from that limitation. Build a supported monitoring query/dashboard and alert test before launch.
+
+### Backups and disaster recovery — unresolved
+
+The available connected project metadata and tools did not expose backup schedule, retention, PITR entitlement, or restore-point details. No restore was initiated. Therefore backup coverage and recoverability remain UNVERIFIED.
+Required manual verification in Supabase Dashboard:
+1. Open Project Settings / Database backups (exact navigation may vary by dashboard version).
+2. Record whether daily backups are included on the current plan and their retention period.
+3. Check whether Point-in-Time Recovery is available and its retention/cost.
+4. Confirm storage and database backups include the data required for business recovery.
+5. Plan a restore rehearsal into a separate isolated project only after confirming price and access. Never test restore against production.
+6. Export and securely retain payment reconciliation and legally required business records independently, with access control and encryption.
+
+### Immediate resilience actions
+
+- Keep production unchanged until there is an isolated test environment; no Supabase development branches currently exist, and branch creation may incur cost.
+- Create a controlled inventory of deployed functions, public routes, auth mode, owning feature, provider dependency, and retirement status.
+- Retire unused legacy payment endpoints only after checking frontend, webhook and environment references.
+- Add actual Edge Function invocation/error/latency monitoring and notification tests; cron success only proves the scheduled SQL/HTTP job completed successfully at the scheduler layer.
+- Establish backup verification and restore test before processing material customer volumes or relying on the platform for time-critical shipments.
+
+### Audit boundary
+
+This stage was read-only. No Edge Functions were deployed, deleted, invoked, or reconfigured; no secrets were accessed; no cron schedules changed; no restore or backup operation was initiated.
