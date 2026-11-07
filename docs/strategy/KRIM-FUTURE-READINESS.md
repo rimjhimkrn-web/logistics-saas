@@ -184,3 +184,15 @@ The 26 RLS-enabled/no-policy tables were also checked for direct table grants. N
 ### Current safety decision
 
 No RLS policy, table grant, function grant, function body, index, Auth setting, or production data was changed in this continuation. The evidence gathered is read-only. Security hardening should proceed as targeted, tested migrations after the remaining call paths and intended access contracts are established.
+
+
+### Privileged RPC scope sampling
+
+A further metadata pass grouped the authenticated-executable SECURITY DEFINER functions by operational area:
+
+- 53 admin-prefixed functions were found. 52 contain auth.uid(), the permission helper, and an AAL2/admin guard marker. The remaining lane-aware capacity list is a wrapper around the already-guarded capacity-list function.
+- 28 partner/capacity/capability functions were found; 25 contain auth.uid() and 21 contain the organization permission helper. The remaining cases require call-graph review rather than assuming a vulnerability.
+- The current function-name grouping returned no SECURITY DEFINER functions with payment/finance/refund/settlement/payout names. This does **not** establish payment security: payment handling may be implemented in Edge Functions, triggers, or differently named routines and remains a separate review task.
+- 16 shipment/document/POD-related functions were identified for the next targeted call-graph and tenant-isolation review.
+
+These are code-pattern inventory results, not penetration-test results. A marker can appear without a correct authorization check, and a function can be protected by a delegated helper without containing the marker itself.
