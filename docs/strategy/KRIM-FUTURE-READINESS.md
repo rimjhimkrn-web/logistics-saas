@@ -196,3 +196,55 @@ A further metadata pass grouped the authenticated-executable SECURITY DEFINER fu
 - 16 shipment/document/POD-related functions were identified for the next targeted call-graph and tenant-isolation review.
 
 These are code-pattern inventory results, not penetration-test results. A marker can appear without a correct authorization check, and a function can be protected by a delegated helper without containing the marker itself.
+
+
+## Payment and Razorpay operating-path audit — 2026-11-07
+
+### Controls observed in active Edge Functions
+
+- Canonical Razorpay order creation and payment verification are active with JWT verification enabled; both independently validate the Supabase user token.
+- Order creation checks customer-organization access, confirmed shipment state, accepted customer quote, accepted partner assignment, confirmed capacity reservation/binding, amount/currency precision, and the payment capability registry.
+- Live checkout fails closed unless the payment capability registry confirms the provider/currency readiness flags. Non-INR currency requires explicit merchant, presentment, settlement, refund, and FX evidence.
+- Payment verification validates the Razorpay HMAC signature, fetches the payment from Razorpay, checks provider order ID, amount, currency, and captured status, then conditionally updates the local payment order.
+- The signed webhook verifies HMAC against the raw request body, requires Razorpay event ID, records events idempotently, validates captured amount/currency/status against the canonical order, and invokes a service-role-only transactional finance reconciler.
+- The finance reconciler checks the paid order's shipment/organization/accepted quote/partner quote and accepted assignment with confirmed capacity reservation before creating the completed INR financial transaction. Unique provider-reference and idempotency constraints are present.
+- Refund execution requires authenticated AAL2, finance approval and permission, requester/reviewer separation, full INR payment amount, and a stable idempotency key. Provider outcomes are reconciled through signed refund webhooks. No refund request rows existed at audit time.
+- Legacy Cashfree create, verify, and webhook endpoints inspected are deployed but return HTTP 410 with a retired-provider message. Legacy Razorpay create/process endpoints inspected also return HTTP 410. They are retired at the application endpoint, not deleted from the project.
+
+### Payment data snapshot
+
+| Record category | Current observed state |
+|---|---|
+| Razorpay payment orders | 1 paid; 5 created |
+| Financial transactions | 1 completed Razorpay payment |
+| Webhook events | 6 processed payment.authorized; 4 unprocessed captured/order.paid events |
+| Refund requests | 0 |
+| Partner payouts | 1 marked paid |
+
+These database records are not proof of successful bank settlement or actual withdrawable funds. Provider dashboard and bank reconciliation are still required.
+
+### Exceptions requiring manual reconciliation
+
+1. Four unprocessed payment.captured/order.paid webhook events date from 2026-09-15. Their Razorpay order IDs do not match any current local payment_orders row. Their payloads show captured INR payment attempts, but they are not linked to a canonical KRIM payment order. Do not mark them processed, create revenue, or assume they represent valid KRIM customer receipts. Reconcile against the Razorpay dashboard and original test/live context; preserve the raw event records.
+2. Five Razorpay payment_orders remain in created state from 2026-09-25/26, each without a KRIM quote binding and without a stored payment ID. They are about six weeks old. Their provider order status and whether any payment attempt occurred must be checked in Razorpay before expiry/closure or any customer communication. Do not mark them failed/refunded or delete them based only on age.
+3. The canonical order creator calls Razorpay before inserting the local payment_orders row. If the provider order succeeds but the database insert fails, it can leave an orphan Razorpay order. The client response currently includes the provider order ID and database error details. Add a safe reconciliation/idempotency design and return a generic public error in a reviewed code change.
+4. The order creation request has no explicit timeout/retry strategy around the Razorpay API call. Design a stable idempotency/correlation key and bounded timeout/reconciliation flow before changing this path. Never blindly retry an uncertain provider order creation.
+5. The webhook's failed-payment branch updates the canonical order to failed unless it is already paid. Verify retry semantics for multiple failed payment attempts followed by a successful captured payment, and add an explicit state-transition regression test.
+
+### Positive database controls
+
+- Unique constraints exist for Razorpay order ID, Razorpay payment ID, webhook event ID, one open payment order per quote, refund request per payment, refund idempotency key, and provider transaction reference.
+- Internal Razorpay financial reconciliation is SECURITY DEFINER with an empty search_path and explicitly requires service_role. It is not executable by anon or authenticated roles.
+- Legacy payout mutation functions inspected are not executable by anon or authenticated roles; service_role only. Their older shipment_requests/shipment_financials data model should be kept out of the canonical KRIM shipment payout path until separately reconciled.
+
+### Next safe payment work
+
+1. Reconcile the four orphan webhook events and five stale created orders in the Razorpay dashboard; preserve evidence and do not mutate production status until provider state is known.
+2. Add a documented operational reconciliation runbook and a support/finance owner.
+3. Harden order-creation uncertainty handling and generic error responses in a separate reviewed Edge Function release.
+4. Add regression tests for failed-attempt-then-captured, duplicate event delivery, concurrent order creation, provider timeout, orphan provider order, amount/currency mismatch, duplicate payment ID, refund retry, and payout reconciliation.
+5. Verify the one completed financial transaction and one paid payout against provider settlement reports and bank records before describing either as settled or withdrawable.
+
+### Audit boundary
+
+This review inspected deployed Edge Function source and read-only database metadata/aggregate records. No Razorpay API payment/refund was created, no refund was initiated, no payout was sent, no payment/webhook status was modified, and no secrets or keys were read. Live provider and bank reconciliation remains outstanding.
