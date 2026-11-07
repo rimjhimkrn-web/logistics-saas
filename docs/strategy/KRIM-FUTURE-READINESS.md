@@ -158,3 +158,29 @@ This baseline used connected Supabase project metadata, table inventory, advisor
 ## Definition of success
 
 KRIM is future-ready when it can safely add or replace providers, introduce new modes and corridors, improve AI and automation, and adapt to regulatory changes without destabilizing existing customers or compromising funds, data, partner trust, or operational evidence—and when each expansion is supported by measurable customer demand and sustainable economics.
+
+
+## Security review continuation — 2026-11-07
+
+A second read-only review checked the 10 authenticated-executable SECURITY DEFINER functions that did not contain the common textual markers auth.uid(), is_admin(), or has_role(). This is important because textual searches can produce false positives.
+
+- The capacity-resource admin wrapper delegates to krim_admin_list_capacity_resources(), which explicitly requires a signed-in user, AAL2 MFA, and the admin.platform permission.
+- The lane-specific partner capacity registration wrapper delegates to krim_partner_register_capacity_resource(), which checks auth.uid(), active organization membership, partner.manage permission, current compliance, verified capability, and evidence storage paths.
+- The service-capability submission wrapper delegates to krim_partner_submit_service_capability(), which checks auth.uid(), partner.manage permission, registered-business partner status, current compliance, valid mode/country, and private evidence storage.
+- The six vehicle administration/review functions inspected call krim_vehicle_admin_guard(), which requires an authenticated AAL2 session and admin.platform permission. The inspected review/finalization paths also enforce separation of duties and evidence validity.
+
+**Result:** These 10 sampled exceptions have an identifiable authorization guard in their own body or in a delegated function/guard. This reduces the concern raised by the static marker heuristic, but does not replace a full review of all 126 externally executable functions and their call graphs.
+
+The 26 RLS-enabled/no-policy tables were also checked for direct table grants. None of those tables had direct SELECT/INSERT/UPDATE/DELETE privileges for anon or authenticated roles in the inspected grant check. This supports an internal/server-only interpretation, but the intended access paths, views, triggers, and service-role use still need documentation and verification. Do not add client policies or grants without an explicit user journey and authorization design.
+
+### Revised security review queue
+
+1. Continue function-by-function authorization and call-graph review for the remaining authenticated-executable SECURITY DEFINER functions, prioritizing admin, payment, payout, partner verification, shipment transition, and document access paths.
+2. Map each no-policy table to its callers, views, triggers, Edge Functions, and service-role access.
+3. Confirm compromised-password protection in the Supabase Auth configuration UI/API; the current connected toolset did not expose an Auth settings read/write operation, so it has not been changed.
+4. Review the five multiple-permissive-policy warnings for equivalent access semantics before considering consolidation.
+5. Review the duplicate capacity-reservation indexes and foreign-key index recommendations against constraints and query plans. Do not drop indexes based only on unused-index notices.
+
+### Current safety decision
+
+No RLS policy, table grant, function grant, function body, index, Auth setting, or production data was changed in this continuation. The evidence gathered is read-only. Security hardening should proceed as targeted, tested migrations after the remaining call paths and intended access contracts are established.
