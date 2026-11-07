@@ -36,9 +36,12 @@ Supabase project: Logistics SaaS (project ref ebltviniygljwwseplph)
 ### Partner operations
 
 - `public.krim_partner_opportunities`: includes shipment/customer organization, opportunity number, status, requested/deadline timestamps, awarded partner organization and metadata.
-- `public.krim_partner_capabilities`: includes organization, transport mode, service type, country/region coverage, weight limit, refrigerated/hazardous flags, active state, verification status and effective dates.
-- `public.krim_shipments` has a scoped read policy that allows an open opportunity only for active, registered-business, verified/approved partner organizations with compliant lifecycle and a currently verified capability that covers the shipment.
-- This is the baseline for partner opportunity visibility; do not create a broader client-side query or relax RLS.
+- `public.krim_partner_capabilities`: includes organization, transport mode, service type, country/region coverage, weight limit, refrigerated/hazardous flags, active state, verification status and effective dates. Its SELECT policy is organization-scoped.
+- `public.krim_partner_quotes`: includes opportunity/shipment/partner organization, quote number, amount/currency, validity, status and submitted timestamps. Its SELECT policy is scoped to the partner organization or related customer organization.
+- `public.krim_shipment_partner_assignments`: includes shipment, partner organization, partner quote, assignment number, status and response timestamps. Its SELECT policy is scoped to the customer or assigned partner organization.
+- Opportunity and shipment RLS gates include active membership, eligible partner organization types, registered-business mode, verification/lifecycle/compliance state, verified effective capabilities and shipment coverage. The partner app displays these records read-only. For accounts with multiple partner organizations, it deliberately suppresses the opportunity feed until an organization-scoped endpoint is available.
+- `krim_submit_partner_quote(p_opportunity_id bigint, p_amount numeric, p_currency_code text, p_valid_until timestamptz, p_notes text)` is SECURITY DEFINER and performs eligibility/permission checks, but resolves the partner organization by selecting the earliest active eligible membership rather than accepting an explicitly selected organization ID. Quote submission is therefore NOT exposed until this multi-organization contract is corrected and independently reviewed.
+- `krim_respond_to_partner_assignment(p_assignment_id bigint, p_accept boolean, p_reason text)` is SECURITY DEFINER and checks active organization access, `shipment.update`, offer state, deadline, capability coverage and current compliance. Accepting can create shipment legs and tracking/audit events. It remains disabled in the app pending end-to-end tests.
 
 ### Driver execution
 
