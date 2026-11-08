@@ -38,6 +38,36 @@ jobs:
         with:
           version: latest
 
+      - name: Validate database URL format without printing credentials
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, re, sys
+          from urllib.parse import urlsplit
+          value = os.environ["SUPABASE_DB_URL"]
+          try:
+              parsed = urlsplit(value)
+              valid = (
+                  parsed.scheme in ("postgres", "postgresql")
+                  and bool(parsed.hostname)
+                  and bool(parsed.username)
+                  and parsed.password is not None
+                  and bool(parsed.path.strip("/"))
+                  and "[YOUR-PASSWORD]" not in value
+                  and not re.search(r"%(?![0-9A-Fa-f]{2})", value)
+                  and not any(ch.isspace() for ch in value)
+              )
+          except Exception:
+              valid = False
+          if not valid:
+              print("::error::KRIM_PRODUCTION_DB_URL is not a valid PostgreSQL URI. Copy the Database connection URI from Supabase and replace [YOUR-PASSWORD]. Percent-encode reserved characters in the password (for example @ as %40). Do not paste the URI into logs or chat.")
+              sys.exit(1)
+          print("Database URI format check passed; credentials were not displayed.")
+          PY
+
       - name: Export schema-only SQL and encrypt it
         shell: bash
         env:
@@ -50,10 +80,11 @@ jobs:
           mkdir -p private-export
           trap 'rm -f private-export/schema.sql' EXIT
 
+          # Supabase CLI v3: --remote=<postgres-url> replaces deprecated --db-url.
           supabase db dump \
-            --db-url "${SUPABASE_DB_URL}" \
             --schema public,private,krim_internal,graphql_public \
-            --file private-export/schema.sql
+            --file private-export/schema.sql \
+            --remote="${SUPABASE_DB_URL}"
 
           test -s private-export/schema.sql
 
