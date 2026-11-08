@@ -1,3 +1,4 @@
+# Re-run after repository secrets are configured; schema export remains encrypted and data-free.
 name: KRIM encrypted schema-only export
 
 on:
@@ -49,8 +50,6 @@ jobs:
           mkdir -p private-export
           trap 'rm -f private-export/schema.sql' EXIT
 
-          # Explicitly include only KRIM-owned application schemas.
-          # Supabase-managed auth/storage/realtime/vault/cron/net schemas are excluded.
           supabase db dump \
             --db-url "${SUPABASE_DB_URL}" \
             --schema public,private,krim_internal,graphql_public \
@@ -58,13 +57,11 @@ jobs:
 
           test -s private-export/schema.sql
 
-          # Fail closed if a data-bearing statement appears in this schema-only export.
           if grep -Eiq '^(INSERT INTO|COPY .+ FROM stdin;)' private-export/schema.sql; then
             echo "::error::Unexpected data statement found; refusing to publish export."
             exit 1
           fi
 
-          # Catch common live-provider credential formats before the file leaves the runner.
           if grep -Eiq 'rzp_live_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{10,}|sk_live_[A-Za-z0-9]{10,}|sb_secret_[A-Za-z0-9]{10,}|eyJhbGciOi[A-Za-z0-9._-]{20,}' private-export/schema.sql; then
             echo "::error::Potential credential material detected; refusing to publish export. Review locally using a secured environment."
             exit 1
