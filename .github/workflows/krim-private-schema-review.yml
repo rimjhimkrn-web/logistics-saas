@@ -1,6 +1,12 @@
 name: KRIM private schema inventory review
 
 on:
+  push:
+    branches:
+      - mobile/krim-partner-app
+    paths:
+      - .github/workflows/krim-private-schema-review.yml
+      - scripts/krim_sanitized_schema_inventory.py
   workflow_dispatch:
     inputs:
       source_run_id:
@@ -25,7 +31,7 @@ jobs:
       - name: Download encrypted schema artifact
         env:
           GH_TOKEN: ${{ github.token }}
-          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id || '42619599274' }}
         shell: bash
         run: |
           set -euo pipefail
