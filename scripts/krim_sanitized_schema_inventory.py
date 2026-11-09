@@ -37,7 +37,7 @@ missing_search_path = 0
 for i, match in enumerate(function_starts):
     end = function_starts[i + 1].start() if i + 1 < len(function_starts) else len(sql)
     body = sql[match.start():end]
-    if re.search(r"(?is)\bSECURITY\s+DEFINER\b", body) and not re.search(r"(?is)\bSET\s+search_path\s*=", body):
+    if re.search(r"(?is)\bSECURITY\s+DEFINER\b", body) and not re.search(r"(?is)\bSET\s+search_path\s+(?:=|TO)\s*", body):
         missing_search_path += 1
 
 report = {
