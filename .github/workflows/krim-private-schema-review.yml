@@ -31,7 +31,7 @@ jobs:
           set -euo pipefail
           mkdir -p private-export
           gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name krim-schema-export-encrypted --dir private-export
-          find private-export -maxdepth 3 -type f -printf '%P\\n'
+          find private-export -maxdepth 3 -type f -printf '%P\n'
 
       - name: Verify checksum and decrypt only in ephemeral runner
         env:
@@ -47,7 +47,7 @@ jobs:
           SUM="$(find private-export -type f -name 'SHA256SUMS' -print -quit)"
           test -n "$ENC" && test -n "$SUM"
           (cd "$(dirname "$SUM")" && sha256sum -c "$(basename "$SUM")")
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \\
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
             -in "$ENC" -out private-export/schema.sql -pass env:EXPORT_PASSPHRASE
           test -s private-export/schema.sql
 
