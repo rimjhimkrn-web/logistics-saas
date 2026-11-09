@@ -59,11 +59,6 @@ jobs:
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
             -in "$ENC" -out private-export/schema.sql -pass env:EXPORT_PASSPHRASE
           test -s private-export/schema.sql
-
-      - name: Generate sanitized inventory (no SQL output)
-        shell: bash
-        run: |
-          set -euo pipefail
           python scripts/krim_sanitized_schema_inventory.py private-export/schema.sql
           test -s sanitized-schema-review.json
 
