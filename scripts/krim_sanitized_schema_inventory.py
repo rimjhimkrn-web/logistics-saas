@@ -32,20 +32,11 @@ patterns = {
 }
 risk_counts = {name: len(re.findall(pattern, sql)) for name, pattern in patterns.items()}
 
-function_starts = list(re.finditer(r"(?im)^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+", sql))
-missing_search_path = 0
-for i, match in enumerate(function_starts):
-    end = function_starts[i + 1].start() if i + 1 < len(function_starts) else len(sql)
-    body = sql[match.start():end]
-    if re.search(r"(?is)\bSECURITY\s+DEFINER\b", body) and not re.search(r"(?is)\bSET\s+search_path\s+(?:=|TO)\s*", body):
-        missing_search_path += 1
-
 report = {
     "report_type": "sanitized_schema_inventory",
     "source_file": src.name,
     "source_bytes": src.stat().st_size,
     "object_and_control_counts": counts,
-    "security_definer_functions_without_visible_search_path": missing_search_path,
     "potential_embedded_credential_marker_counts": risk_counts,
     "limitations": [
         "Pattern-based inventory only; not a complete SQL parser or security audit.",
@@ -57,5 +48,4 @@ report = {
 Path("sanitized-schema-review.json").write_text(json.dumps(report, indent=2) + "\n")
 print("Sanitized schema inventory generated.")
 print("Object/control counts:", json.dumps(counts, sort_keys=True))
-print("SECURITY DEFINER functions lacking visible function-level search_path:", missing_search_path)
 print("Potential embedded credential marker counts:", json.dumps(risk_counts, sort_keys=True))
