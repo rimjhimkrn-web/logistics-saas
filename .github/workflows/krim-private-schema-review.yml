@@ -1,0 +1,71 @@
+name: KRIM private schema inventory review
+
+on:
+  push:
+    branches:
+      - mobile/krim-partner-app
+    paths:
+      - .github/workflows/krim-private-schema-review.yml
+      - scripts/krim_sanitized_schema_inventory.py
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "GitHub Actions run ID containing the encrypted schema artifact"
+        required: true
+        default: "42619599274"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  sanitized-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout review script
+        uses: actions/checkout@v4
+        with:
+          ref: mobile/krim-partner-app
+
+      - name: Download encrypted schema artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id || '42619599274' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p private-export
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name krim-schema-export-encrypted --dir private-export
+          find private-export -maxdepth 3 -type f -printf '%P\n'
+
+      - name: Verify checksum and decrypt only in ephemeral runner
+        env:
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +x
+          umask 077
+          trap 'rm -rf private-export/schema.sql private-export/krim-schema-export.sql private-export/krim-schema-export.sql.enc' EXIT
+          test -n "$EXPORT_PASSPHRASE"
+          ENC="$(find private-export -type f -name 'krim-schema-export.sql.enc' -print -quit)"
+          SUM="$(find private-export -type f -name 'SHA256SUMS' -print -quit)"
+          test -n "$ENC" && test -n "$SUM"
+          EXPECTED_HASH="$(awk 'NR==1 {print $1}' "$SUM")"
+          ACTUAL_HASH="$(sha256sum "$ENC" | awk '{print $1}')"
+          test -n "$EXPECTED_HASH" && test "$EXPECTED_HASH" = "$ACTUAL_HASH"
+          echo "Encrypted artifact checksum verified."
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in "$ENC" -out private-export/schema.sql -pass env:EXPORT_PASSPHRASE
+          test -s private-export/schema.sql
+          python scripts/krim_sanitized_schema_inventory.py private-export/schema.sql
+          test -s sanitized-schema-review.json
+
+      - name: Upload sanitized report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-sanitized-schema-review
+          path: sanitized-schema-review.json
+          if-no-files-found: error
+          retention-days: 7

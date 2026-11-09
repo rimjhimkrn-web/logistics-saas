@@ -1,0 +1,37 @@
+name: KRIM mobile app validation
+on:
+  push:
+    branches: [mobile/krim-partner-app]
+    paths:
+      - 'mobile/krim-partner/**'
+      - 'mobile/krim-customer/**'
+      - 'mobile/krim-driver/**'
+      - '.github/workflows/krim-partner-mobile.yml'
+  pull_request:
+    paths:
+      - 'mobile/krim-partner/**'
+      - 'mobile/krim-customer/**'
+      - 'mobile/krim-driver/**'
+      - '.github/workflows/krim-partner-mobile.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [krim-partner, krim-customer, krim-driver]
+    defaults:
+      run:
+        working-directory: mobile/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npx expo export --platform android
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder

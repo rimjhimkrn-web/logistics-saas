@@ -1,0 +1,56 @@
+name: KRIM Android internal APK build
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: Select the KRIM app to build
+        required: true
+        type: choice
+        options:
+          - krim-partner
+          - krim-customer
+          - krim-driver
+
+permissions:
+  contents: read
+
+concurrency:
+  group: krim-android-apk-${{ inputs.app }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ inputs.app }} Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mobile/${{ inputs.app }}
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: mobile/krim-partner-app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install app dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate TypeScript
+        run: npm run typecheck
+
+      - name: Validate Expo Android export
+        run: npx expo export --platform android
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
+
+      - name: Build internal Android APK with EAS
+        run: npx --yes eas-cli@latest build --platform android --profile preview --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

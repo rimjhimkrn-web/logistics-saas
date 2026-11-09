@@ -1,0 +1,185 @@
+# Re-run after repository secrets are configured; schema export remains encrypted and data-free.
+name: KRIM encrypted schema-only export
+
+on:
+  push:
+    branches:
+      - mobile/krim-partner-app
+    paths:
+      - .github/workflows/krim-schema-export.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check required repository secrets
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SUPABASE_DB_URL}" ]]; then
+            echo "::error::Add repository secret KRIM_PRODUCTION_DB_URL before rerunning this workflow."
+            exit 1
+          fi
+          if [[ ${#EXPORT_PASSPHRASE} -lt 24 ]]; then
+            echo "::error::Add KRIM_SCHEMA_EXPORT_PASSPHRASE with at least 24 characters."
+            exit 1
+          fi
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Validate database URL format without printing credentials
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, re, sys
+          from urllib.parse import urlsplit
+          value = os.environ["SUPABASE_DB_URL"]
+          try:
+              parsed = urlsplit(value)
+              valid = (
+                  parsed.scheme in ("postgres", "postgresql")
+                  and bool(parsed.hostname)
+                  and bool(parsed.username)
+                  and parsed.password is not None
+                  and bool(parsed.path.strip("/"))
+                  and "[YOUR-PASSWORD]" not in value
+                  and not re.search(r"%(?![0-9A-Fa-f]{2})", value)
+                  and not any(ch.isspace() for ch in value)
+              )
+          except Exception:
+              valid = False
+          if not valid:
+              print("::error::KRIM_PRODUCTION_DB_URL is not a valid PostgreSQL URI. Copy the Database connection URI from Supabase and replace [YOUR-PASSWORD]. Percent-encode reserved characters in the password (for example @ as %40). Do not paste the URI into logs or chat.")
+              sys.exit(1)
+          print("Database URI format check passed; credentials were not displayed.")
+          PY
+
+      - name: Export schema-only SQL and encrypt it
+        shell: bash
+        env:
+          SUPABASE_DB_URL: ${{ secrets.KRIM_PRODUCTION_DB_URL }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          set +x
+          umask 077
+          mkdir -p private-export
+          trap 'rm -f private-export/schema.sql' EXIT
+
+          # Supabase CLI v3: --remote=<postgres-url> replaces deprecated --db-url.
+          supabase db dump \
+            --schema public,private,krim_internal,graphql_public \
+            --file private-export/schema.sql \
+            --remote="${SUPABASE_DB_URL}"
+
+          test -s private-export/schema.sql
+
+          # Detect executable data statements while ignoring comments and quoted SQL.
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+
+          def mask_sql_literals(sql):
+              out = list(sql)
+              i, n = 0, len(sql)
+              def blank(a, b):
+                  for k in range(a, b):
+                      if out[k] != "\n":
+                          out[k] = " "
+              while i < n:
+                  if sql.startswith("--", i):
+                      j = sql.find("\n", i)
+                      j = n if j < 0 else j
+                      blank(i, j); i = j; continue
+                  if sql.startswith("/*", i):
+                      start, depth, i = i, 1, i + 2
+                      while i < n and depth:
+                          if sql.startswith("/*", i): depth += 1; i += 2
+                          elif sql.startswith("*/", i): depth -= 1; i += 2
+                          else: i += 1
+                      blank(start, i); continue
+                  if sql[i] == "'":
+                      start = i
+                      i += 1
+                      while i < n:
+                          if sql[i] == "'":
+                              if i + 1 < n and sql[i + 1] == "'": i += 2; continue
+                              i += 1; break
+                          if sql[i] == "\\" and i + 1 < n: i += 2
+                          else: i += 1
+                      blank(start, i); continue
+                  if sql[i] == '"':
+                      start = i; i += 1
+                      while i < n:
+                          if sql[i] == '"':
+                              if i + 1 < n and sql[i + 1] == '"': i += 2; continue
+                              i += 1; break
+                          i += 1
+                      blank(start, i); continue
+                  if sql[i] == "$":
+                      m = re.match(r"\$[A-Za-z_][A-Za-z_0-9]*\$|\$\$", sql[i:])
+                      if m:
+                          tag = m.group(0); start = i; i += len(tag)
+                          end = sql.find(tag, i)
+                          i = n if end < 0 else end + len(tag)
+                          blank(start, i); continue
+                  i += 1
+              return "".join(out)
+
+          tests = [
+              ("CREATE FUNCTION f() RETURNS void AS $$\nINSERT INTO t VALUES (1);\n$$ LANGUAGE plpgsql;", False),
+              ("-- INSERT INTO t VALUES (1);\nCREATE TABLE t(id int);", False),
+              ("INSERT INTO public.t(id) VALUES (1);", True),
+              ("COPY public.t (id) FROM stdin;\n1\n\\.\n", True),
+          ]
+          for sample, expected in tests:
+              cleaned = mask_sql_literals(sample)
+              found = bool(re.search(r"(?im)^\s*(?:INSERT\s+INTO\b|COPY\s+.+?\s+FROM\s+stdin\s*;)", cleaned))
+              if found != expected:
+                  print("::error::SQL data-statement scanner self-test failed.")
+                  sys.exit(1)
+
+          sql = Path("private-export/schema.sql").read_text(errors="replace")
+          cleaned = mask_sql_literals(sql)
+          if re.search(r"(?im)^\s*(?:INSERT\s+INTO\b|COPY\s+.+?\s+FROM\s+stdin\s*;)", cleaned):
+              print("::error::Executable SQL data statement found; refusing to publish export.")
+              sys.exit(1)
+          print("SQL data-statement safety check passed; quoted function bodies were excluded.")
+          PY
+
+          if grep -Eiq 'rzp_live_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{10,}|sk_live_[A-Za-z0-9]{10,}|sb_secret_[A-Za-z0-9]{10,}|eyJhbGciOi[A-Za-z0-9._-]{20,}' private-export/schema.sql; then
+            echo "::error::Potential credential material detected; refusing to publish export. Review locally using a secured environment."
+            exit 1
+          fi
+
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -in private-export/schema.sql \
+            -out private-export/krim-schema-export.sql.enc \
+            -pass env:EXPORT_PASSPHRASE
+
+          sha256sum private-export/krim-schema-export.sql.enc > private-export/SHA256SUMS
+          rm -f private-export/schema.sql
+
+      - name: Upload encrypted export only
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-schema-export-encrypted
+          path: |
+            private-export/krim-schema-export.sql.enc
+            private-export/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 1
