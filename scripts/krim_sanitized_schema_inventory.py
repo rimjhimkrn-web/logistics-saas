@@ -8,39 +8,36 @@ import json, re, sys
 src = Path(sys.argv[1])
 sql = src.read_text(errors="replace")
 checks = {
-    "tables": r"(?im)^CREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?",
-    "views": r"(?im)^CREATE\\s+(?:OR\\s+REPLACE\\s+)?(?:MATERIALIZED\\s+)?VIEW\\s+",
-    "functions": r"(?im)^CREATE\\s+(?:OR\\s+REPLACE\\s+)?FUNCTION\\s+",
-    "procedures": r"(?im)^CREATE\\s+(?:OR\\s+REPLACE\\s+)?PROCEDURE\\s+",
-    "policies": r"(?im)^CREATE\\s+POLICY\\s+",
-    "triggers": r"(?im)^CREATE\\s+(?:CONSTRAINT\\s+)?TRIGGER\\s+",
-    "indexes": r"(?im)^CREATE\\s+(?:UNIQUE\\s+)?INDEX\\s+",
-    "extensions": r"(?im)^CREATE\\s+EXTENSION\\s+",
-    "security_definer": r"(?is)\\bSECURITY\\s+DEFINER\\b",
-    "row_level_security_enable": r"(?im)^ALTER\\s+TABLE\\s+.+?ENABLE\\s+ROW\\s+LEVEL\\s+SECURITY",
-    "row_level_security_force": r"(?im)^ALTER\\s+TABLE\\s+.+?FORCE\\s+ROW\\s+LEVEL\\s+SECURITY",
-    "grant_statements": r"(?im)^GRANT\\s+",
-    "revoke_statements": r"(?im)^REVOKE\\s+",
+    "tables": r"(?im)^CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?",
+    "views": r"(?im)^CREATE\s+(?:OR\s+REPLACE\s+)?(?:MATERIALIZED\s+)?VIEW\s+",
+    "functions": r"(?im)^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+",
+    "procedures": r"(?im)^CREATE\s+(?:OR\s+REPLACE\s+)?PROCEDURE\s+",
+    "policies": r"(?im)^CREATE\s+POLICY\s+",
+    "triggers": r"(?im)^CREATE\s+(?:CONSTRAINT\s+)?TRIGGER\s+",
+    "indexes": r"(?im)^CREATE\s+(?:UNIQUE\s+)?INDEX\s+",
+    "extensions": r"(?im)^CREATE\s+EXTENSION\s+",
+    "security_definer": r"(?is)\bSECURITY\s+DEFINER\b",
+    "row_level_security_enable": r"(?im)^ALTER\s+TABLE\s+.+?ENABLE\s+ROW\s+LEVEL\s+SECURITY",
+    "row_level_security_force": r"(?im)^ALTER\s+TABLE\s+.+?FORCE\s+ROW\s+LEVEL\s+SECURITY",
+    "grant_statements": r"(?im)^GRANT\s+",
+    "revoke_statements": r"(?im)^REVOKE\s+",
 }
 counts = {name: len(re.findall(pattern, sql)) for name, pattern in checks.items()}
 
-# Count potential embedded credential/config literals without exposing their values.
 patterns = {
     "provider_key_markers": r"rzp_live_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{10,}|sk_live_[A-Za-z0-9]{10,}|sb_secret_[A-Za-z0-9]{10,}",
     "jwt_like_literals": r"eyJhbGciOi[A-Za-z0-9._-]{20,}",
     "private_key_headers": r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
-    "credential_assignment_literals": r"(?i)(?:password|passwd|secret|api[_-]?key|access[_-]?token|refresh[_-]?token)\\s*[:=]\\s*'[^']{8,}'",
+    "credential_assignment_literals": r"(?i)(?:password|passwd|secret|api[_-]?key|access[_-]?token|refresh[_-]?token)\s*[:=]\s*\x27[^\x27]{8,}\x27",
 }
 risk_counts = {name: len(re.findall(pattern, sql)) for name, pattern in patterns.items()}
 
-# SECURITY DEFINER is not automatically unsafe. This reports a coarse count of
-# function definitions that do not visibly declare a function-level search_path.
-function_starts = list(re.finditer(r"(?im)^CREATE\\s+(?:OR\\s+REPLACE\\s+)?FUNCTION\\s+", sql))
+function_starts = list(re.finditer(r"(?im)^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+", sql))
 missing_search_path = 0
 for i, match in enumerate(function_starts):
     end = function_starts[i + 1].start() if i + 1 < len(function_starts) else len(sql)
     body = sql[match.start():end]
-    if re.search(r"(?is)\\bSECURITY\\s+DEFINER\\b", body) and not re.search(r"(?is)\\bSET\\s+search_path\\s*=", body):
+    if re.search(r"(?is)\bSECURITY\s+DEFINER\b", body) and not re.search(r"(?is)\bSET\s+search_path\s*=", body):
         missing_search_path += 1
 
 report = {
@@ -57,7 +54,7 @@ report = {
         "No SQL definitions, object names, literal values, or database rows are included."
     ]
 }
-Path("sanitized-schema-review.json").write_text(json.dumps(report, indent=2) + "\\n")
+Path("sanitized-schema-review.json").write_text(json.dumps(report, indent=2) + "\n")
 print("Sanitized schema inventory generated.")
 print("Object/control counts:", json.dumps(counts, sort_keys=True))
 print("SECURITY DEFINER functions lacking visible function-level search_path:", missing_search_path)
