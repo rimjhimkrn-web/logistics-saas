@@ -46,7 +46,10 @@ jobs:
           ENC="$(find private-export -type f -name 'krim-schema-export.sql.enc' -print -quit)"
           SUM="$(find private-export -type f -name 'SHA256SUMS' -print -quit)"
           test -n "$ENC" && test -n "$SUM"
-          (cd "$(dirname "$SUM")" && sha256sum -c "$(basename "$SUM")")
+          EXPECTED_HASH="$(awk 'NR==1 {print $1}' "$SUM")"
+          ACTUAL_HASH="$(sha256sum "$ENC" | awk '{print $1}')"
+          test -n "$EXPECTED_HASH" && test "$EXPECTED_HASH" = "$ACTUAL_HASH"
+          echo "Encrypted artifact checksum verified."
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
             -in "$ENC" -out private-export/schema.sql -pass env:EXPORT_PASSPHRASE
           test -s private-export/schema.sql
