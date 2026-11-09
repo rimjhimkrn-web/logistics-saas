@@ -88,8 +88,7 @@ jobs:
 
           test -s private-export/schema.sql
 
-          # Detect executable data statements while ignoring comments, quoted strings,
-          # and dollar-quoted function bodies (which may legitimately contain INSERT text).
+          # Detect executable data statements while ignoring comments and quoted SQL.
           python - <<'PY'
           from pathlib import Path
           import re, sys
@@ -99,11 +98,11 @@ jobs:
               i, n = 0, len(sql)
               def blank(a, b):
                   for k in range(a, b):
-                      if out[k] != "\\n":
+                      if out[k] != "\n":
                           out[k] = " "
               while i < n:
                   if sql.startswith("--", i):
-                      j = sql.find("\\n", i)
+                      j = sql.find("\n", i)
                       j = n if j < 0 else j
                       blank(i, j); i = j; continue
                   if sql.startswith("/*", i):
@@ -114,13 +113,13 @@ jobs:
                           else: i += 1
                       blank(start, i); continue
                   if sql[i] == "'":
-                      start; start = i
+                      start = i
                       i += 1
                       while i < n:
                           if sql[i] == "'":
                               if i + 1 < n and sql[i + 1] == "'": i += 2; continue
                               i += 1; break
-                          if sql[i] == "\\\\" and i + 1 < n: i += 2
+                          if sql[i] == "\\" and i + 1 < n: i += 2
                           else: i += 1
                       blank(start, i); continue
                   if sql[i] == '"':
@@ -132,7 +131,7 @@ jobs:
                           i += 1
                       blank(start, i); continue
                   if sql[i] == "$":
-                      m = re.match(r"\\$[A-Za-z_][A-Za-z_0-9]*\\$|\\$\\$", sql[i:])
+                      m = re.match(r"\$[A-Za-z_][A-Za-z_0-9]*\$|\$\$", sql[i:])
                       if m:
                           tag = m.group(0); start = i; i += len(tag)
                           end = sql.find(tag, i)
@@ -141,23 +140,22 @@ jobs:
                   i += 1
               return "".join(out)
 
-          # Self-tests: function-body text must not trigger, real data statements must.
           tests = [
-              ("CREATE FUNCTION f() RETURNS void AS $\\nINSERT INTO t VALUES (1);\\n$ LANGUAGE plpgsql;", False),
-              ("-- INSERT INTO t VALUES (1);\\nCREATE TABLE t(id int);", False),
+              ("CREATE FUNCTION f() RETURNS void AS $$\nINSERT INTO t VALUES (1);\n$$ LANGUAGE plpgsql;", False),
+              ("-- INSERT INTO t VALUES (1);\nCREATE TABLE t(id int);", False),
               ("INSERT INTO public.t(id) VALUES (1);", True),
-              ("COPY public.t (id) FROM stdin;\\n1\\n\\\\.\\n", True),
+              ("COPY public.t (id) FROM stdin;\n1\n\\.\n", True),
           ]
           for sample, expected in tests:
               cleaned = mask_sql_literals(sample)
-              found = bool(re.search(r"(?im)^\\s*(?:INSERT\\s+INTO\\b|COPY\\s+.+?\\s+FROM\\s+stdin\\s*;)", cleaned))
+              found = bool(re.search(r"(?im)^\s*(?:INSERT\s+INTO\b|COPY\s+.+?\s+FROM\s+stdin\s*;)", cleaned))
               if found != expected:
                   print("::error::SQL data-statement scanner self-test failed.")
                   sys.exit(1)
 
           sql = Path("private-export/schema.sql").read_text(errors="replace")
           cleaned = mask_sql_literals(sql)
-          if re.search(r"(?im)^\\s*(?:INSERT\\s+INTO\\b|COPY\\s+.+?\\s+FROM\\s+stdin\\s*;)", cleaned):
+          if re.search(r"(?im)^\s*(?:INSERT\s+INTO\b|COPY\s+.+?\s+FROM\s+stdin\s*;)", cleaned):
               print("::error::Executable SQL data statement found; refusing to publish export.")
               sys.exit(1)
           print("SQL data-statement safety check passed; quoted function bodies were excluded.")
