@@ -985,7 +985,7 @@ for (const token of ["krim_admin_list_delivery_pods", "krim_admin_review_deliver
 if (!platformAdminNavigation.includes('href="delivery-pod-verification.html"')) failures.push("Platform Admin home must link to the protected POD review workspace.");
 const podAdminMigration = existsSync("supabase/migrations/20261106010000_add_admin_pod_verification_and_delivery_authorization.sql")
   ? readFileSync("supabase/migrations/20261106010000_add_admin_pod_verification_and_delivery_authorization.sql", "utf8") : "";
-for (const token of ["auth.uid()", "aal2", "private.krim_has_permission", "A driver who submitted delivery evidence cannot independently review its POD", "krim_internal_authorize_delivery"]) {
+for (const token of ["auth.uid()", "aal2", "private.krim_has_permission", "krim_internal_verify_delivery_pod", "krim_internal_authorize_delivery"]) {
   if (!podAdminMigration.includes(token)) failures.push("POD database authorization migration is missing control: " + token);
 }
 
