@@ -1,8 +1,8 @@
 # KRIM Mobile Apps — Manual Android QA Plan
 
-Date: 2026-11-09
+Last updated: 2026-11-10
 Apps: KRIM Customer, KRIM Partner, KRIM Driver
-Status: Source validation has passed in GitHub Actions; manual device testing has NOT yet been performed.
+Status: **Initial install and launch checks passed on the owner's Android phone. Authentication, role-isolation, and operational workflow testing remain NOT completed.**
 
 ## Current build facts
 - Customer package: `com.krimlogistics.customer`
@@ -14,23 +14,36 @@ Status: Source validation has passed in GitHub Actions; manual device testing ha
 - Each app expects two public build-time environment variables:
   - `EXPO_PUBLIC_SUPABASE_URL`
   - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- Do not put a database password, service-role key, secret API key, or schema-export passphrase in a mobile app or any `EXPO_PUBLIC_*` variable.
-- `eas.json` already defines internal `preview` and `development` profiles, but EAS project linking and cloud build credentials still need to be configured.
+- Preview values for these two public variables were configured in the Expo Preview environment for all three projects. Production EAS environment values have not yet been verified.
+- EAS project IDs are configured in each app's app.json; an Expo access token is stored as the protected GitHub Actions secret `EXPO_TOKEN`.
+- The owner reports all three internal preview APKs were downloaded, installed, and opened successfully to their login/workspace entry screen.
+- The recent builds were internal Android APKs, not production AABs and not Play Store releases.
+- Never put a database password, service-role key, secret API key, or schema-export passphrase in a mobile app or any `EXPO_PUBLIC_*` variable.
+
+## Recorded manual device checks
+
+| App | APK installed | App opened to entry/login screen | Authentication tested | Role isolation tested |
+|---|---|---|---|---|
+| KRIM Customer | Yes | Yes | Not yet | Not yet |
+| KRIM Partner | Yes | Yes | Not yet | Not yet |
+| KRIM Driver | Yes | Yes | Not yet | Not yet |
+
+The owner confirmed the KRIM Partner app opens, KRIM Driver opens, and KRIM Customer opens. The Partner icon was visually described and confirmed as the configured KRIM icon. Customer and Driver icon appearance has not been independently confirmed in this record.
 
 ## Safe manual testing order
 
 ### A. Install and launch
-For each app:
-1. Install its internal preview APK on an Android test phone.
-2. Open the app and confirm the correct KRIM app name and login screen.
-3. Rotate is not supported (portrait only); check small-screen layout and keyboard behavior.
-4. Force-close and reopen the app.
-5. Confirm it does not crash or display another app's session.
+Initial installation and launch are recorded as passed. Remaining checks:
+1. Confirm the correct app name and icon for each app.
+2. Check small-screen layout and keyboard behavior.
+3. Force-close and reopen each app.
+4. Confirm one app does not display another app's session.
+5. Test offline startup and recoverable network error handling.
 
 ### B. Authentication
-Use separate test accounts for Customer, Partner, and Driver. Do not share a single account across roles.
+Use separate synthetic test accounts for Customer, Partner, and Driver. Do not share one account across roles.
 1. Enter an invalid email/password and confirm a safe error appears.
-2. Enter the valid test account and sign in.
+2. Enter the valid synthetic test account and sign in.
 3. Force-close and reopen; confirm the session persists securely.
 4. Sign out; confirm the login screen returns.
 5. Try password reset with a test mailbox and confirm the neutral response.
@@ -42,11 +55,11 @@ Use separate test accounts for Customer, Partner, and Driver. Do not share a sin
 3. If no organization is assigned, confirm the app shows the no-membership state.
 4. Switch between any authorized organizations.
 5. Check Home, Shipments, Quotes, Track, and Account tabs.
-6. Open a shipment and check tracking timeline.
+6. Open a synthetic shipment and check its tracking timeline.
 7. Refresh data and sign out.
 8. Negative authorization test: use a second customer account and confirm the first account's organization, shipments, quotes, and tracking are not visible.
 
-Important: the current customer workspace is read-only. Shipment creation, quote acceptance, and payment are deliberately not enabled in this app build.
+Important: the current customer workspace is read-oriented. Shipment creation, quote acceptance, and payment are not enabled in the current app release.
 
 ### D. Partner app
 1. Sign in with a synthetic partner test user.
@@ -58,19 +71,19 @@ Important: the current customer workspace is read-only. Shipment creation, quote
 7. Refresh and sign out.
 8. Negative authorization test: a second partner must not see the first partner's capabilities, quotes, or assignments.
 
-Important: opportunity visibility depends on the backend's row-level security and the workspace's current organization-selection behavior. Quote submission and assignment acceptance are deliberately gated; this build is not an operational partner execution app yet.
+Important: opportunity visibility depends on backend row-level security and organization selection. Quote submission and assignment acceptance are gated; this is not yet an operational partner execution app.
 
 ### E. Driver app
 1. Sign in with a synthetic driver test user.
 2. Confirm only that user's driver profile and assignments appear.
 3. Test the no-driver-profile and no-assignment states.
 4. Check Today, Tasks, Proof, Safety, and Profile.
-5. Open an assignment and inspect pickup/delivery details and recorded events.
+5. Open a synthetic assignment and inspect pickup/delivery details and recorded events.
 6. Confirm another driver cannot see this driver's assignments or trip events.
 7. Confirm no background location permission or tracking is active.
 8. Sign out.
 
-Important: assignment acceptance, trip-event writes, live location, and POD upload are deliberately disabled in this build. Do not use real shipments or driver data for this test.
+Important: assignment acceptance, trip-event writes, live location, and POD upload are disabled in the current app release. Do not use real shipments or driver data for this test.
 
 ## Cross-app negative tests
 - Sign out of one role and sign in with another role; confirm old role data is not retained.
@@ -86,15 +99,13 @@ Important: assignment acceptance, trip-event writes, live location, and POD uplo
 - Do not use real identity documents, bank details, customer addresses, or live payment credentials.
 - Never enable live dispatch, booking, POD, or payments solely to make a manual test pass.
 
-## How to produce Android APKs
-The repository's `eas.json` preview profile is configured for internal distribution. Before builds:
-1. Create/sign in to an Expo account.
-2. Link each app directory to its own EAS project using EAS CLI.
-3. Configure the two public Supabase environment variables in the EAS project environment.
-4. Add an Expo access token as a protected GitHub Actions secret named `EXPO_TOKEN` only if using GitHub Actions to start cloud builds.
-5. Run the EAS Android preview build for each app and install the resulting internal APK on the test phone.
+## Build profiles
+Each app has EAS profiles for development, preview, and production:
+- `preview`: internal distribution and Android APK output.
+- `production`: production profile with auto-increment enabled. A production Android AAB and iOS release have not yet been verified.
+- Preview environment variables were configured. Production environment values and production signing credentials must be checked before production builds.
 
-No EAS project IDs, Expo token, APK, or AAB have been configured/generated as of this document. Do not claim device testing or release readiness until the APKs have been installed and the test cases above have been recorded.
+The GitHub workflow `.github/workflows/krim-android-internal-apk.yml` builds the selected app's preview APK. It is not the production store-release workflow.
 
 ## Release gate
-All three apps must pass the login/session tests, role isolation tests, screen navigation tests, and error/recovery tests in staging. Operational write features require separate API authorization and end-to-end tests before they can be enabled.
+All three apps must pass authentication/session tests, role-isolation tests, screen navigation tests, and error/recovery tests in isolated staging. Operational write features require separate API authorization and end-to-end tests before they can be enabled. Production configuration, reproducible dependencies, localization, accessibility, store metadata, and legal/privacy reviews are additional release gates.
