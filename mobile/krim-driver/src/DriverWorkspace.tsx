@@ -44,7 +44,8 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
     if(!asset.base64)throw new Error("The selected image could not be prepared. Please choose another image.");
     const bytes=decodeBase64(asset.base64);
     if(bytes.byteLength<1||bytes.byteLength>10*1024*1024)throw new Error("Each evidence image must be smaller than 10 MB.");
-    const contentType=asset.mimeType==="image/png"?"image/png":asset.mimeType==="image/webp"?"image/webp":"image/jpeg";
+    const contentType=asset.mimeType;
+    if(contentType!=="image/jpeg"&&contentType!=="image/png"&&contentType!=="image/webp")throw new Error("Unsupported photo format. Choose a JPEG, PNG or WebP image.");
     const extension=contentType==="image/png"?"png":contentType==="image/webp"?"webp":"jpg";
     const fileName=asset.fileName||("delivery-evidence-"+Date.now()+"-"+i+"."+extension);
     const storagePath=session.user.id+"/"+selected.id+"/"+Date.now()+"-"+i+"."+extension;
