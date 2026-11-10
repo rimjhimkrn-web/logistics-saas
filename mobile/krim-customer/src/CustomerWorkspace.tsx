@@ -271,8 +271,14 @@ function CustomerBooking({ organizationId, onCreated }: { organizationId: number
     const kg=Number(weight);if(!goods.trim()||goods.trim().length>500||!Number.isFinite(kg)||kg<=0||kg>100000000){setMessage("Enter goods details and a valid weight greater than zero.");return;}
     setSubmitting(true);setAttempted(true);setMessage("Submitting securely…");
     try{
-      let requestId=bookingKey;
-      if(!requestId){const keyName="krim_customer_booking_request_"+organizationId;requestId=await SecureStore.getItemAsync(keyName);if(!requestId){requestId=makeId();await SecureStore.setItemAsync(keyName,requestId);}setBookingKey(requestId);}
+      let requestId: string = bookingKey || "";
+      if(!requestId){
+        const keyName="krim_customer_booking_request_"+organizationId;
+        const stored=await SecureStore.getItemAsync(keyName);
+        requestId=stored || makeId();
+        if(!stored) await SecureStore.setItemAsync(keyName,requestId);
+        setBookingKey(requestId);
+      }
       const {data,error}=await supabase.rpc("krim_create_global_shipment_idempotent",{
         p_customer_organization_id:organizationId,p_origin_place:origin,p_destination_place:destination,
         p_goods_description:goods.trim(),p_total_weight_kg:kg,p_transport_mode:mode,p_route_type:routeType,p_booking_request_id:requestId
