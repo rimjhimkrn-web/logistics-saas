@@ -1,6 +1,10 @@
 name: KRIM Android internal APK build
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trigger-krim-apk-build.txt'
   workflow_dispatch:
     inputs:
       app:
@@ -16,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: krim-android-apk-${{ inputs.app }}
+  group: krim-android-apk-${{ github.event_name == 'workflow_dispatch' && inputs.app || 'all' }}
   cancel-in-progress: false
 
 jobs:
