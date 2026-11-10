@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
 import {
@@ -16,7 +17,7 @@ type Props = { session: Session; onSignOut: () => void };
 type Tracking = { shipment?: Record<string, unknown>; events?: Array<Record<string, unknown>>; milestones?: Array<Record<string, unknown>> };
 
 const navy = "#071A35", blue = "#2366D9", teal = "#078B83", muted = "#687A90", line = "#E0E7F0";
-const tabs = ["Home", "Shipments", "Quotes", "Track", "Account"] as const;
+const tabs = ["Home", "Book", "Shipments", "Quotes", "Track", "Account"] as const;
 type Tab = typeof tabs[number];
 
 export default function CustomerWorkspace({ session, onSignOut }: Props) {
@@ -31,6 +32,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [acceptingQuoteId, setAcceptingQuoteId] = useState<number | null>(null);
 
   const refreshOrganizations = useCallback(async () => {
     if (!supabase) return;
@@ -73,7 +75,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
 
   useEffect(() => { void refreshWorkspace(); }, [refreshWorkspace]);
 
-  const showTracking = async (shipmentNumber: string) => {
+  const acceptQuote = async (quoteId: number) => {\n    if (!supabase || organizationId === null || acceptingQuoteId !== null) return;\n    setAcceptingQuoteId(quoteId); setError(""); setNotice("");\n    try {\n      const { error: rpcError } = await supabase.rpc("krim_accept_global_quote", { p_quote_id: quoteId });\n      if (rpcError) throw rpcError;\n      setNotice("Quote accepted. Your shipment is moving to the confirmation workflow.");\n      await refreshWorkspace();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : "Quote could not be accepted. Refresh and check its current status.");\n    } finally { setAcceptingQuoteId(null); }\n  };\n\n  const showTracking = async (shipmentNumber: string) => {
     if (!supabase) return;
     setTracking(null);
     setTrackingShipment(shipmentNumber);
@@ -140,7 +142,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
           </View>
         </>}
 
-        {tab === "Shipments" && <>
+        {tab === "Book" && <CustomerBooking organizationId={organizationId} onCreated={async () => { await refreshWorkspace(); setTab("Shipments"); setNotice("Shipment request created. Check its reference in My Shipments; service and price are not confirmed yet."); }}/>}\n\n        {tab === "Shipments" && <>
           <Header kicker="SHIPMENT VISIBILITY" title="Your shipments" sub="Only records authorized for the selected organization are shown."/>
           {loadingData ? <ActivityIndicator color={blue}/> : shipments.length ? shipments.map((x) => <ShipmentRow key={x.id} shipment={x} onPress={() => void showTracking(x.shipment_number)}/>) : <Empty title="No visible shipments" body="No shipments are currently available for this organization, or your role does not have access."/>}
         </>}
@@ -152,7 +154,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
             <Text style={s.tiny}>Shipment ID {q.shipment_id} · Status: {q.status}</Text>
             <Text style={s.tiny}>Valid until: {new Date(q.valid_until).toLocaleString()}</Text>
-            <Text style={s.tiny}>Commercial acceptance is not enabled in this app build.</Text>
+            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
           </View>) : <Empty title="No visible quotes" body="Confirmed quotes will appear here when available to your organization."/>}
         </>}
 
@@ -181,7 +183,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
         </>}
       </ScrollView>
       <View style={s.nav}>{tabs.map((item) => <Pressable key={item} onPress={() => setTab(item)} accessibilityRole="tab" accessibilityState={{selected: tab === item}} style={s.navItem}>
-        <Text style={[s.navIcon, tab === item && {color: blue}]}>{({Home:"⌂",Shipments:"▤",Quotes:"≋",Track:"◎",Account:"○"} as Record<Tab,string>)[item]}</Text>
+        <Text style={[s.navIcon, tab === item && {color: blue}]}>{({Home:"⌂",Book:"+",Shipments:"▤",Quotes:"≋",Track:"◎",Account:"○"} as Record<Tab,string>)[item]}</Text>
         <Text style={[s.navLabel, tab === item && {color: blue}]}>{item}</Text>
       </Pressable>)}</View>
     </View>
@@ -202,5 +204,94 @@ const s = StyleSheet.create({
  errorBox:{padding:12,borderRadius:11,backgroundColor:"#FDECEC",marginBottom:12},errorText:{fontSize:14,lineHeight:16,color:"#9C2525"},
  panel:{backgroundColor:"#fff",borderWidth:1,borderColor:line,borderRadius:15,padding:15,marginBottom:12},kicker:{fontSize:14,fontWeight:"900",letterSpacing:1.4,color:teal,marginBottom:7},orgName:{fontSize:17,fontWeight:"900",color:navy},tiny:{fontSize:14,color:muted,marginTop:4,lineHeight:15},muted:{fontSize:14,color:muted,lineHeight:19},orgChips:{flexDirection:"row",flexWrap:"wrap",gap:7,marginTop:12},chip:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:11,paddingVertical:8},chipActive:{backgroundColor:blue,borderColor:blue},chipText:{fontSize:14,fontWeight:"800",color:navy},chipTextActive:{color:"#fff"},
  header:{marginBottom:14},title:{fontSize:25,fontWeight:"900",letterSpacing:-.6,color:navy,marginBottom:5},metrics:{flexDirection:"row",gap:10,marginBottom:12},metric:{flex:1,backgroundColor:"#fff",borderWidth:1,borderColor:line,borderRadius:14,padding:13},metricValue:{fontSize:21,fontWeight:"900",color:navy,marginTop:7},panelTitle:{fontSize:14,fontWeight:"900",color:navy,marginBottom:7},body:{fontSize:14,color:muted,lineHeight:17},shipment:{flexDirection:"row",alignItems:"center",paddingVertical:12,borderBottomWidth:1,borderBottomColor:"#EEF1F5"},open:{fontSize:14,fontWeight:"900",color:blue},amount:{fontSize:20,fontWeight:"900",color:navy},bullet:{flexDirection:"row",gap:8,marginTop:8},bulletDot:{fontSize:16,color:teal},action:{minHeight:43,backgroundColor:blue,borderRadius:10,alignItems:"center",justifyContent:"center",paddingHorizontal:12,marginTop:10},actionSecondary:{backgroundColor:"#fff",borderWidth:1,borderColor:line},actionText:{fontSize:14,fontWeight:"900",color:"#fff"},
- nav:{flexDirection:"row",backgroundColor:"#fff",borderTopWidth:1,borderTopColor:line,paddingTop:8,paddingBottom:Platform.OS==="ios"?18:9},navItem:{flex:1,alignItems:"center",gap:3},navIcon:{fontSize:19,color:"#8391A4"},navLabel:{fontSize:14,fontWeight:"800",color:"#8391A4"}
+ nav:{flexDirection:"row",backgroundColor:"#fff",borderTopWidth:1,borderTopColor:line,paddingTop:8,paddingBottom:Platform.OS==="ios"?18:9},navItem:{flex:1,alignItems:"center",gap:3},navIcon:{fontSize:19,color:"#8391A4"},navLabel:{fontSize:14,fontWeight:"800",color:"#8391A4"},\n choice:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:10,paddingVertical:8,marginRight:6,marginBottom:7},choiceActive:{backgroundColor:blue,borderColor:blue},choiceText:{fontSize:14,fontWeight:"800",color:navy},choiceTextActive:{color:"#fff"},choiceRow:{flexDirection:"row",flexWrap:"wrap",marginTop:6,marginBottom:8},fieldLabel:{fontSize:14,fontWeight:"900",color:navy,marginTop:13,marginBottom:6},input:{borderWidth:1,borderColor:line,borderRadius:11,paddingHorizontal:12,paddingVertical:11,fontSize:15,color:navy,backgroundColor:"#FBFCFE",marginBottom:7},result:{padding:11,borderBottomWidth:1,borderBottomColor:line,backgroundColor:"#F6F9FD",borderRadius:8,marginBottom:4},resultText:{fontSize:14,color:navy},smallNote:{fontSize:13,color:muted,lineHeight:18,marginTop:9},bookingMessage:{fontSize:14,fontWeight:"700",color:teal,marginTop:10}
 });
+
+type Place = { name: string; city: string; state: string; country: string; country_code: string; latitude: number; longitude: number; display_name: string; place_type: string };
+type PlaceFeature = { properties?: Record<string, unknown>; geometry?: { coordinates?: number[] } };
+function CustomerBooking({ organizationId, onCreated }: { organizationId: number | null; onCreated: () => Promise<void> }) {
+  const [originQuery,setOriginQuery]=useState(""); const [destinationQuery,setDestinationQuery]=useState("");
+  const [origin,setOrigin]=useState<Place|null>(null); const [destination,setDestination]=useState<Place|null>(null);
+  const [originResults,setOriginResults]=useState<Place[]>([]); const [destinationResults,setDestinationResults]=useState<Place[]>([]);
+  const [goods,setGoods]=useState(""); const [weight,setWeight]=useState(""); const [mode,setMode]=useState("multimodal");
+  const [routeType,setRouteType]=useState("door_to_door"); const [searching,setSearching]=useState<"origin"|"destination"|null>(null);
+  const [submitting,setSubmitting]=useState(false); const [attempted,setAttempted]=useState(false); const [message,setMessage]=useState("");
+  const [bookingKey,setBookingKey]=useState<string|null>(null);
+  const makeId=()=>{const c=(globalThis as any).crypto;if(c&&typeof c.randomUUID==="function")return c.randomUUID();return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,ch=>{const r=Math.random()*16|0;return(ch==="x"?r:(r&3|8)).toString(16);});};
+  const searchPlaces=async(kind:"origin"|"destination",query:string)=>{
+    if(query.trim().length<3){kind==="origin"?setOriginResults([]):setDestinationResults([]);return;}
+    setSearching(kind);
+    try{
+      const response=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(query.trim())+"&limit=6&lang=en",{headers:{Accept:"application/json"}});
+      if(!response.ok)throw new Error("Global place search is unavailable. Try again.");
+      const json=await response.json() as {features?:PlaceFeature[]};
+      const places=(json.features||[]).map(feature=>{
+        const p=feature.properties||{};const coords=feature.geometry?.coordinates||[];
+        const code=String(p.countrycode||p.country_code||"").toUpperCase();
+        const city=String(p.city||p.town||p.village||p.municipality||p.county||p.name||"").trim();
+        const country=String(p.country||"").trim();
+        const lat=Number(coords[1]),lon=Number(coords[0]);
+        if(!city||!country||!/^[A-Z]{2}$/.test(code)||!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+        const state=String(p.state||p.region||"").slice(0,160);
+        const name=String(p.name||city).slice(0,160);
+        const label=[name,city,state,country].filter((v,i,a)=>v&&a.findIndex(x=>x.toLowerCase()===v.toLowerCase())===i).join(", ");
+        return {name:city,city,state,country,country_code:code,latitude:lat,longitude:lon,display_name:label.slice(0,240),place_type:String(p.osm_value||p.type||"place").slice(0,40)} as Place;
+      }).filter((x):x is Place=>!!x);
+      if(kind==="origin")setOriginResults(places);else setDestinationResults(places);
+    }catch(e){setMessage(e instanceof Error?e.message:"Place search failed.");}
+    finally{setSearching(null);}
+  };
+  const pick=(kind:"origin"|"destination",place:Place)=>{
+    if(kind==="origin"){setOrigin(place);setOriginQuery(place.display_name);setOriginResults([]);}
+    else{setDestination(place);setDestinationQuery(place.display_name);setDestinationResults([]);}
+  };
+  const selectStyle=(active:boolean)=>[s.choice,active&&s.choiceActive];
+  const submit=async()=>{
+    if(!supabase||organizationId===null){setMessage("Select an active customer organization first.");return;}
+    if(!origin||!destination){setMessage("Search and select both locations from the global results.");return;}
+    if(origin.latitude===destination.latitude&&origin.longitude===destination.longitude){setMessage("Origin and destination must be different places.");return;}
+    if(routeType==="domestic"&&origin.country_code!==destination.country_code){setMessage("Domestic movement requires both places in the same country.");return;}
+    if(routeType==="cross_border"&&origin.country_code===destination.country_code){setMessage("Cross-border movement requires different countries.");return;}
+    const kg=Number(weight);if(!goods.trim()||goods.trim().length>500||!Number.isFinite(kg)||kg<=0||kg>100000000){setMessage("Enter goods details and a valid weight greater than zero.");return;}
+    setSubmitting(true);setAttempted(true);setMessage("Submitting securely…");
+    try{
+      let requestId=bookingKey;
+      if(!requestId){const keyName="krim_customer_booking_request_"+organizationId;requestId=await SecureStore.getItemAsync(keyName);if(!requestId){requestId=makeId();await SecureStore.setItemAsync(keyName,requestId);}setBookingKey(requestId);}
+      const {data,error}=await supabase.rpc("krim_create_global_shipment_idempotent",{
+        p_customer_organization_id:organizationId,p_origin_place:origin,p_destination_place:destination,
+        p_goods_description:goods.trim(),p_total_weight_kg:kg,p_transport_mode:mode,p_route_type:routeType,p_booking_request_id:requestId
+      });
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data as any;const id=row?.id??row?.shipment_id;
+      if(!id)throw new Error("KRIM returned no shipment reference. Check My Shipments before retrying.");
+      await SecureStore.deleteItemAsync("krim_customer_booking_request_"+organizationId);
+      setBookingKey(null);setMessage("Shipment request created. Reference #"+id+". No carrier, price or dispatch is confirmed yet.");
+      await onCreated();
+    }catch(e){setMessage(e instanceof Error?e.message:"Shipment request failed. If the connection timed out, check My Shipments before retrying.");}
+    finally{setSubmitting(false);}
+  };
+  return <View>
+    <Header kicker="NEW SHIPMENT" title="Create a shipment request" sub="Choose locations and cargo. Coverage, partner capacity and price are checked separately."/>
+    {organizationId===null?<Empty title="Organization required" body="Select an active customer organization before booking."/>:<View style={s.panel}>
+      <Text style={s.kicker}>ROUTE</Text>
+      <Text style={s.fieldLabel}>Origin · Search worldwide</Text>
+      <TextInput value={originQuery} onChangeText={v=>{setOriginQuery(v);setOrigin(null);void searchPlaces("origin",v);}} placeholder="City, airport, port or address" style={s.input} editable={!attempted}/>
+      {searching==="origin"&&<ActivityIndicator color={blue}/>}
+      {originResults.map((p,i)=><Pressable key={"o"+i} style={s.result} onPress={()=>pick("origin",p)}><Text style={s.resultText}>{p.display_name}</Text></Pressable>)}
+      <Text style={s.fieldLabel}>Destination · Search worldwide</Text>
+      <TextInput value={destinationQuery} onChangeText={v=>{setDestinationQuery(v);setDestination(null);void searchPlaces("destination",v);}} placeholder="City, airport, port or address" style={s.input} editable={!attempted}/>
+      {searching==="destination"&&<ActivityIndicator color={blue}/>}
+      {destinationResults.map((p,i)=><Pressable key={"d"+i} style={s.result} onPress={()=>pick("destination",p)}><Text style={s.resultText}>{p.display_name}</Text></Pressable>)}
+      <Text style={s.fieldLabel}>Route type</Text>
+      <View style={s.choiceRow}>{[["door_to_door","Door to door"],["domestic","Domestic"],["cross_border","Cross-border"]].map(([v,label])=><Pressable key={v} disabled={attempted} onPress={()=>setRouteType(v)} style={selectStyle(routeType===v)}><Text style={[s.choiceText,routeType===v&&s.choiceTextActive]}>{label}</Text></Pressable>)}</View>
+      <Text style={s.fieldLabel}>Preferred mode</Text>
+      <View style={s.choiceRow}>{[["multimodal","Multimodal"],["road","Road"],["rail","Rail"],["air","Air"],["ocean","Ocean"],["warehouse_transfer","Warehouse"]].map(([v,label])=><Pressable key={v} disabled={attempted} onPress={()=>setMode(v)} style={selectStyle(mode===v)}><Text style={[s.choiceText,mode===v&&s.choiceTextActive]}>{label}</Text></Pressable>)}</View>
+      <Text style={s.fieldLabel}>Goods description</Text><TextInput value={goods} onChangeText={setGoods} editable={!attempted} placeholder="What are you shipping?" style={s.input} maxLength={500}/>
+      <Text style={s.fieldLabel}>Gross weight (kg)</Text><TextInput value={weight} onChangeText={setWeight} editable={!attempted} placeholder="e.g. 1250" keyboardType="decimal-pad" style={s.input}/>
+      <Text style={s.smallNote}>Geographic search does not confirm service availability. Do not treat this request as a confirmed booking.</Text>
+      {!!message&&<Text style={s.bookingMessage}>{message}</Text>}
+      <Action title={submitting?"Submitting…":attempted?"Retry same request":"Create shipment request"} onPress={()=>void submit()}/>
+      {attempted&&<Text style={s.smallNote}>Retry uses the same secure request reference to prevent duplicate shipments. Check My Shipments before starting another request.</Text>}
+    </View>}
+  </View>;
+}
