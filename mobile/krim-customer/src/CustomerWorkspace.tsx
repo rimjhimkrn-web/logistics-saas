@@ -75,7 +75,20 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
 
   useEffect(() => { void refreshWorkspace(); }, [refreshWorkspace]);
 
-  const acceptQuote = async (quoteId: number) => {\n    if (!supabase || organizationId === null || acceptingQuoteId !== null) return;\n    setAcceptingQuoteId(quoteId); setError(""); setNotice("");\n    try {\n      const { error: rpcError } = await supabase.rpc("krim_accept_global_quote", { p_quote_id: quoteId });\n      if (rpcError) throw rpcError;\n      setNotice("Quote accepted. Your shipment is moving to the confirmation workflow.");\n      await refreshWorkspace();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : "Quote could not be accepted. Refresh and check its current status.");\n    } finally { setAcceptingQuoteId(null); }\n  };\n\n  const showTracking = async (shipmentNumber: string) => {
+  const acceptQuote = async (quoteId: number) => {
+    if (!supabase || organizationId === null || acceptingQuoteId !== null) return;
+    setAcceptingQuoteId(quoteId); setError(""); setNotice("");
+    try {
+      const { error: rpcError } = await supabase.rpc("krim_accept_global_quote", { p_quote_id: quoteId });
+      if (rpcError) throw rpcError;
+      setNotice("Quote accepted. Your shipment is moving to the confirmation workflow.");
+      await refreshWorkspace();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Quote could not be accepted. Refresh and check its current status.");
+    } finally { setAcceptingQuoteId(null); }
+  };
+
+  const showTracking = async (shipmentNumber: string) => {
     if (!supabase) return;
     setTracking(null);
     setTrackingShipment(shipmentNumber);
@@ -142,7 +155,9 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
           </View>
         </>}
 
-        {tab === "Book" && <CustomerBooking organizationId={organizationId} onCreated={async () => { await refreshWorkspace(); setTab("Shipments"); setNotice("Shipment request created. Check its reference in My Shipments; service and price are not confirmed yet."); }}/>}\n\n        {tab === "Shipments" && <>
+        {tab === "Book" && <CustomerBooking organizationId={organizationId} onCreated={async () => { await refreshWorkspace(); setTab("Shipments"); setNotice("Shipment request created. Check its reference in My Shipments; service and price are not confirmed yet."); }}/>}
+
+        {tab === "Shipments" && <>
           <Header kicker="SHIPMENT VISIBILITY" title="Your shipments" sub="Only records authorized for the selected organization are shown."/>
           {loadingData ? <ActivityIndicator color={blue}/> : shipments.length ? shipments.map((x) => <ShipmentRow key={x.id} shipment={x} onPress={() => void showTracking(x.shipment_number)}/>) : <Empty title="No visible shipments" body="No shipments are currently available for this organization, or your role does not have access."/>}
         </>}
@@ -204,7 +219,8 @@ const s = StyleSheet.create({
  errorBox:{padding:12,borderRadius:11,backgroundColor:"#FDECEC",marginBottom:12},errorText:{fontSize:14,lineHeight:16,color:"#9C2525"},
  panel:{backgroundColor:"#fff",borderWidth:1,borderColor:line,borderRadius:15,padding:15,marginBottom:12},kicker:{fontSize:14,fontWeight:"900",letterSpacing:1.4,color:teal,marginBottom:7},orgName:{fontSize:17,fontWeight:"900",color:navy},tiny:{fontSize:14,color:muted,marginTop:4,lineHeight:15},muted:{fontSize:14,color:muted,lineHeight:19},orgChips:{flexDirection:"row",flexWrap:"wrap",gap:7,marginTop:12},chip:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:11,paddingVertical:8},chipActive:{backgroundColor:blue,borderColor:blue},chipText:{fontSize:14,fontWeight:"800",color:navy},chipTextActive:{color:"#fff"},
  header:{marginBottom:14},title:{fontSize:25,fontWeight:"900",letterSpacing:-.6,color:navy,marginBottom:5},metrics:{flexDirection:"row",gap:10,marginBottom:12},metric:{flex:1,backgroundColor:"#fff",borderWidth:1,borderColor:line,borderRadius:14,padding:13},metricValue:{fontSize:21,fontWeight:"900",color:navy,marginTop:7},panelTitle:{fontSize:14,fontWeight:"900",color:navy,marginBottom:7},body:{fontSize:14,color:muted,lineHeight:17},shipment:{flexDirection:"row",alignItems:"center",paddingVertical:12,borderBottomWidth:1,borderBottomColor:"#EEF1F5"},open:{fontSize:14,fontWeight:"900",color:blue},amount:{fontSize:20,fontWeight:"900",color:navy},bullet:{flexDirection:"row",gap:8,marginTop:8},bulletDot:{fontSize:16,color:teal},action:{minHeight:43,backgroundColor:blue,borderRadius:10,alignItems:"center",justifyContent:"center",paddingHorizontal:12,marginTop:10},actionSecondary:{backgroundColor:"#fff",borderWidth:1,borderColor:line},actionText:{fontSize:14,fontWeight:"900",color:"#fff"},
- nav:{flexDirection:"row",backgroundColor:"#fff",borderTopWidth:1,borderTopColor:line,paddingTop:8,paddingBottom:Platform.OS==="ios"?18:9},navItem:{flex:1,alignItems:"center",gap:3},navIcon:{fontSize:19,color:"#8391A4"},navLabel:{fontSize:14,fontWeight:"800",color:"#8391A4"},\n choice:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:10,paddingVertical:8,marginRight:6,marginBottom:7},choiceActive:{backgroundColor:blue,borderColor:blue},choiceText:{fontSize:14,fontWeight:"800",color:navy},choiceTextActive:{color:"#fff"},choiceRow:{flexDirection:"row",flexWrap:"wrap",marginTop:6,marginBottom:8},fieldLabel:{fontSize:14,fontWeight:"900",color:navy,marginTop:13,marginBottom:6},input:{borderWidth:1,borderColor:line,borderRadius:11,paddingHorizontal:12,paddingVertical:11,fontSize:15,color:navy,backgroundColor:"#FBFCFE",marginBottom:7},result:{padding:11,borderBottomWidth:1,borderBottomColor:line,backgroundColor:"#F6F9FD",borderRadius:8,marginBottom:4},resultText:{fontSize:14,color:navy},smallNote:{fontSize:13,color:muted,lineHeight:18,marginTop:9},bookingMessage:{fontSize:14,fontWeight:"700",color:teal,marginTop:10}
+ nav:{flexDirection:"row",backgroundColor:"#fff",borderTopWidth:1,borderTopColor:line,paddingTop:8,paddingBottom:Platform.OS==="ios"?18:9},navItem:{flex:1,alignItems:"center",gap:3},navIcon:{fontSize:19,color:"#8391A4"},navLabel:{fontSize:14,fontWeight:"800",color:"#8391A4"},
+ choice:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:10,paddingVertical:8,marginRight:6,marginBottom:7},choiceActive:{backgroundColor:blue,borderColor:blue},choiceText:{fontSize:14,fontWeight:"800",color:navy},choiceTextActive:{color:"#fff"},choiceRow:{flexDirection:"row",flexWrap:"wrap",marginTop:6,marginBottom:8},fieldLabel:{fontSize:14,fontWeight:"900",color:navy,marginTop:13,marginBottom:6},input:{borderWidth:1,borderColor:line,borderRadius:11,paddingHorizontal:12,paddingVertical:11,fontSize:15,color:navy,backgroundColor:"#FBFCFE",marginBottom:7},result:{padding:11,borderBottomWidth:1,borderBottomColor:line,backgroundColor:"#F6F9FD",borderRadius:8,marginBottom:4},resultText:{fontSize:14,color:navy},smallNote:{fontSize:13,color:muted,lineHeight:18,marginTop:9},bookingMessage:{fontSize:14,fontWeight:"700",color:teal,marginTop:10}
 });
 
 type Place = { name: string; city: string; state: string; country: string; country_code: string; latitude: number; longitude: number; display_name: string; place_type: string };
