@@ -100,7 +100,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
         <Text style={s.signed}>● SECURE SESSION</Text>
       </View>
       <ScrollView contentContainerStyle={s.content}>
-        <View style={s.info}><Text style={s.infoText}>LIVE READ-ONLY WORKSPACE · Shipment and quote visibility is retrieved from KRIM and restricted by your active organization permissions. Booking and payment actions remain gated.</Text></View>
+        <View style={s.info}><Text style={s.infoText}>LIVE DATA · BOOKINGS & PAYMENTS COMING SOON</Text></View>
         {!!error && <View style={s.errorBox}><Text style={s.errorText}>{error}</Text></View>}
         {!!notice && <View style={s.info}><Text style={s.infoText}>{notice}</Text></View>}
 
