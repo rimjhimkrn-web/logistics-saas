@@ -17,6 +17,21 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
  useEffect(()=>{void refreshOrganizations();},[refreshOrganizations]);
  const refreshData=useCallback(async()=>{if(!supabase||organizationId===null){setCapabilities([]);setQuotes([]);setAssignments([]);setOpportunities([]);return;}setLoading(true);setError("");try{const [c,o,q,a]=await Promise.all([loadPartnerCapabilities(supabase,organizationId),organizations.length===1?loadPartnerOpportunities(supabase):Promise.resolve([]),loadPartnerQuotes(supabase,organizationId),loadPartnerAssignments(supabase,organizationId)]);setCapabilities(c);setOpportunities(o);setQuotes(q);setAssignments(a);}catch{setError("Some partner data is unavailable. Existing backend authorization remains in force; no permissions have been bypassed.");}finally{setLoading(false);}},[organizationId,organizations.length]);
  useEffect(()=>{void refreshData();},[refreshData]);
+ const respondToAssignment=async(assignmentId:number,accept:boolean)=>{
+  if(!supabase||organizationId===null||actionBusy)return;
+  if(!accept&&responseReason.trim().length<3){setError("Enter a short reason before declining this assignment.");return;}
+  setActionBusy(true);setError("");setNotice("");
+  try{
+   const {error:rpcError}=await supabase.rpc("krim_respond_to_partner_assignment",{
+    p_assignment_id:assignmentId,p_accept:accept,p_reason:accept?null:responseReason.trim()
+   });
+   if(rpcError)throw rpcError;
+   setResponseReason("");
+   setNotice(accept?"Assignment accepted. Your organization is now responsible for the confirmed execution workflow.":"Assignment declined. KRIM operations has been notified.");
+   await refreshData();
+  }catch(e){setError(e instanceof Error?e.message:"Assignment response failed. Refresh and verify its current status.");}
+  finally{setActionBusy(false);}
+ };
  const verified=selected?.partner_verification_status==="verified";
  const compliance=selected?.partner_compliance_status;
  const complianceCurrent=compliance==="compliant";
