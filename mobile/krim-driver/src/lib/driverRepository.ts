@@ -15,3 +15,10 @@ export async function loadDriverTripEvents(client:SupabaseClient,assignmentIds:s
  const {data,error}=await client.from("krim_driver_trip_events").select("id,assignment_id,event_type,notes,created_at").in("assignment_id",assignmentIds).order("created_at",{ascending:false}).limit(200);
  if(error)throw error;return (data??[]) as DriverTripEvent[];
 }
+
+export type DriverDeliveryEvidence={id:string;assignment_id:string;user_id:string;recipient_name:string;notes:string|null;storage_path:string;original_file_name:string;content_type:string;file_size:number;created_at:string};
+export async function loadDriverDeliveryEvidence(client:SupabaseClient,userId:string,assignmentIds:string[]):Promise<DriverDeliveryEvidence[]>{
+ if(!assignmentIds.length)return [];
+ const {data,error}=await client.from("krim_driver_delivery_evidence").select("id,assignment_id,user_id,recipient_name,notes,storage_path,original_file_name,content_type,file_size,created_at").eq("user_id",userId).in("assignment_id",assignmentIds).order("created_at",{ascending:false}).limit(100);
+ if(error)throw error;return (data??[]) as DriverDeliveryEvidence[];
+}
