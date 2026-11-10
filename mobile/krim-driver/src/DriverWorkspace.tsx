@@ -34,6 +34,7 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   if(!recipientName.trim()){setError("Enter the recipient's name before attaching delivery evidence.");return;}
   setActionBusy(true);
   const uploadedPaths:string[]=[];
+  let evidenceRegistered=false;
   try{
    const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();
    if(!permission.granted)throw new Error("Photo-library permission is required to select delivery evidence.");
@@ -58,10 +59,11 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
    }
    const {error:rowError}=await supabase.from("krim_driver_delivery_evidence").insert(evidenceRows);
    if(rowError)throw rowError;
+   evidenceRegistered=true;
    setNotice("Private delivery evidence uploaded. Submit the recipient details for independent KRIM review.");
    await refresh();
   }catch(e){
-   if(uploadedPaths.length)await supabase.storage.from("krim-driver-evidence").remove(uploadedPaths);
+   if(uploadedPaths.length&&!evidenceRegistered)await supabase.storage.from("krim-driver-evidence").remove(uploadedPaths);
    setError(e instanceof Error?e.message:"Delivery evidence upload failed. Check the connection and retry.");
   }
   finally{setActionBusy(false);}
