@@ -25,7 +25,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
  return <View style={s.safe}>
   <View style={s.top}><View><Text style={s.brand}>KRIM PARTNER</Text><Text style={s.sub}>GLOBAL LOGISTICS OPERATING SYSTEM</Text></View><Text style={s.secure}>● SECURE SESSION</Text></View>
   <ScrollView contentContainerStyle={s.content}>
-   <View style={s.banner}><Text style={s.bannerText}>LIVE READ-ONLY PARTNER WORKSPACE · Opportunities, capabilities, quotes and assignments are retrieved from KRIM with organization-scoped database policies. Commercial actions are deliberately gated.</Text></View>
+   <View style={s.banner}><Text style={s.bannerText}>LIVE DATA · COMMERCIAL ACTIONS REQUIRE APPROVAL</Text></View>
    {!!error&&<View style={s.error}><Text style={s.errorText}>{error}</Text></View>}
    <View style={s.panel}><Text style={s.kicker}>PARTNER ORGANIZATION</Text>
     {loadingOrg?<ActivityIndicator color={blue}/>:organizations.length===0?<><Text style={s.muted}>No active partner organization membership is visible for this account.</Text><Action title="Start partner onboarding" onPress={()=>{void import("react-native").then(({Linking})=>Linking.openURL(onboarding));}} secondary/></>:<>
