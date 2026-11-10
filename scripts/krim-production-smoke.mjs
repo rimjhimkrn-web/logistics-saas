@@ -968,7 +968,7 @@ const partnerMobile = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx")
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
-  ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'registered_business']],
+  ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
   if (!source) { failures.push(label + " source is missing."); continue; }
