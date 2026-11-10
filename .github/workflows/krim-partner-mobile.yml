@@ -30,6 +30,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - name: Stage official KRIM logo inside app bundle
+        run: cp ../../assets/file_00000000242881faa8abc7188d1c40c4.png assets/krim-master-logo.png
+      - name: Generate Expo icon PNG assets
+        run: |
+          npx --yes sharp-cli -i assets/icon.svg -o assets -f png resize 1024 1024
+          npx --yes sharp-cli -i assets/adaptive-icon.svg -o assets -f png resize 1024 1024
       - run: npm run typecheck
       - run: npx expo export --platform android
         env:
