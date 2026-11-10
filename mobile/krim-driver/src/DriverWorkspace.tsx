@@ -33,12 +33,14 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   setError("");setNotice("");
   if(!recipientName.trim()){setError("Enter the recipient's name before attaching delivery evidence.");return;}
   setActionBusy(true);
+  const uploadedPaths:string[]=[];
   try{
    const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();
    if(!permission.granted)throw new Error("Photo-library permission is required to select delivery evidence.");
    const picked=await ImagePicker.launchImageLibraryAsync({mediaTypes:["images"],allowsMultipleSelection:true,selectionLimit:5,quality:0.82,base64:true});
    if(picked.canceled)return;
    if(!picked.assets.length)throw new Error("Select at least one delivery photo.");
+   const evidenceRows:Array<Record<string,unknown>>=[];
    for(let i=0;i<picked.assets.length;i++){
     const asset=picked.assets[i];
     if(!asset.base64)throw new Error("The selected image could not be prepared. Please choose another image.");
@@ -51,12 +53,17 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
     const storagePath=session.user.id+"/"+selected.id+"/"+Date.now()+"-"+i+"."+extension;
     const {error:storageError}=await supabase.storage.from("krim-driver-evidence").upload(storagePath,bytes.buffer as ArrayBuffer,{contentType,upsert:false});
     if(storageError)throw storageError;
-    const {error:rowError}=await supabase.from("krim_driver_delivery_evidence").insert({assignment_id:selected.id,user_id:session.user.id,recipient_name:recipientName.trim(),notes:"Delivery evidence submitted by assigned driver.",storage_path:storagePath,original_file_name:fileName,content_type:contentType,file_size:bytes.byteLength});
-    if(rowError){await supabase.storage.from("krim-driver-evidence").remove([storagePath]);throw rowError;}
+    uploadedPaths.push(storagePath);
+    evidenceRows.push({assignment_id:selected.id,user_id:session.user.id,recipient_name:recipientName.trim(),notes:"Delivery evidence submitted by assigned driver.",storage_path:storagePath,original_file_name:fileName,content_type:contentType,file_size:bytes.byteLength});
    }
+   const {error:rowError}=await supabase.from("krim_driver_delivery_evidence").insert(evidenceRows);
+   if(rowError)throw rowError;
    setNotice("Private delivery evidence uploaded. Submit the recipient details for independent KRIM review.");
    await refresh();
-  }catch(e){setError(e instanceof Error?e.message:"Delivery evidence upload failed. Check the connection and retry.");}
+  }catch(e){
+   if(uploadedPaths.length)await supabase.storage.from("krim-driver-evidence").remove(uploadedPaths);
+   setError(e instanceof Error?e.message:"Delivery evidence upload failed. Check the connection and retry.");
+  }
   finally{setActionBusy(false);}
  };
  const submitDeliveryPod=async()=>{
