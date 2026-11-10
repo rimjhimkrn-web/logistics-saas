@@ -35,7 +35,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   const [notice, setNotice] = useState("");
   const [acceptingQuoteId, setAcceptingQuoteId] = useState<number | null>(null);
   const [paymentQuoteId,setPaymentQuoteId]=useState<number|null>(null);
-  const [checkout,setCheckout]=useState<{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}>|null>(null);
+  const [checkout,setCheckout]=useState<{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}|null>(null);
   const [verifyingPayment,setVerifyingPayment]=useState(false);
 
   const refreshOrganizations = useCallback(async () => {
