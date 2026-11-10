@@ -25,12 +25,16 @@ concurrency:
 
 jobs:
   build:
-    name: Build ${{ inputs.app }} Android APK
+    name: Build ${{ matrix.app }} Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', inputs.app)) || fromJSON('["krim-partner","krim-customer","krim-driver"]') }}
     defaults:
       run:
-        working-directory: mobile/${{ inputs.app }}
+        working-directory: mobile/${{ matrix.app }}
     steps:
       - name: Check out selected branch
         uses: actions/checkout@v4
