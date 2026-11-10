@@ -7,8 +7,20 @@ type Tab="Today"|"Tasks"|"Proof"|"Safety"|"Profile";
 const tabs:Tab[]=["Today","Tasks","Proof","Safety","Profile"],navy="#071A35",blue="#2366D9",teal="#078B83",muted="#687A90",line="#E0E7F0";
 export default function DriverWorkspace({session,onSignOut}:{session:Session;onSignOut:()=>void}){
  const [tab,setTab]=useState<Tab>("Today"),[profiles,setProfiles]=useState<DriverProfile[]>([]),[assignments,setAssignments]=useState<DriverAssignment[]>([]),[events,setEvents]=useState<DriverTripEvent[]>([]),[loading,setLoading]=useState(true),[refreshing,setRefreshing]=useState(false),[error,setError]=useState(""),[selectedId,setSelectedId]=useState<string|null>(null);
+ const [notice,setNotice]=useState(""),[actionBusy,setActionBusy]=useState(false),[exceptionNotes,setExceptionNotes]=useState("");
  const refresh=useCallback(async()=>{if(!supabase)return;setRefreshing(true);setError("");try{const [p,a]=await Promise.all([loadDriverProfiles(supabase,session.user.id),loadDriverAssignments(supabase,session.user.id)]);setProfiles(p);setAssignments(a);setEvents(await loadDriverTripEvents(supabase,a.map(x=>x.id)));setSelectedId(current=>a.some(x=>x.id===current)?current:(a[0]?.id??null));}catch{setError("Driver records could not be loaded. Your account access policies remain in force.");}finally{setRefreshing(false);setLoading(false);}},[session.user.id]);
  useEffect(()=>{void refresh();},[refresh]);
+ const runDriverAction=async(rpcName:string,args:Record<string,unknown>,successMessage:string)=>{
+  if(!supabase||actionBusy)return;
+  setActionBusy(true);setError("");setNotice("");
+  try{
+   const {error:rpcError}=await (supabase as any).rpc(rpcName,args);
+   if(rpcError)throw rpcError;
+   setNotice(successMessage);
+   await refresh();
+  }catch(e){setError(e instanceof Error?e.message:"Driver action could not be completed. Refresh and verify the assignment status.");}
+  finally{setActionBusy(false);}
+ };
  const selected=assignments.find(a=>a.id===selectedId)??null,profile=profiles[0]??null;
  const active=assignments.filter(a=>!["delivered","cancelled","completed"].includes(a.status.toLowerCase()));
  const selectedEvents=useMemo(()=>events.filter(e=>e.assignment_id===selectedId),[events,selectedId]);
