@@ -964,9 +964,9 @@ for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_
 // These checks ensure all three mobile clients call the secured workflow contracts;
 // they do not simulate authenticated users or claim a live shipment was executed.
 const customerMobile = existsSync("mobile/krim-customer/src/CustomerWorkspace.tsx") ? readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8") : "";
-const partnerWorkspace = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
+const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
-const partnerMobile = partnerWorkspace + "\\n" + partnerRepository;
+const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
