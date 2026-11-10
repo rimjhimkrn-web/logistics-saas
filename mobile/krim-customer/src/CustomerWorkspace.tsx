@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
@@ -102,7 +102,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
         <Text style={s.signed}>● SECURE SESSION</Text>
       </View>
       <ScrollView contentContainerStyle={s.content}>
-        <View style={s.info}><Text style={s.infoText}>LIVE DATA · BOOKINGS & PAYMENTS COMING SOON</Text></View>
+        <View style={s.info}><Text style={s.infoText}>LIVE DATA · SHIPMENT REQUESTS & TRACKING</Text></View>
         {!!error && <View style={s.errorBox}><Text style={s.errorText}>{error}</Text></View>}
         {!!notice && <View style={s.info}><Text style={s.infoText}>{notice}</Text></View>}
 
