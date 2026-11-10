@@ -55,7 +55,7 @@ export async function loadPartnerCapabilities(client:SupabaseClient,organization
 export async function loadPartnerOpportunities(client:SupabaseClient):Promise<PartnerOpportunity[]>{
  const {data,error}=await client.from("krim_partner_opportunities")
  .select("id,shipment_id,opportunity_number,status,requested_at,response_deadline,service_lane,partner_name")
- .eq("status","open").order("requested_at",{ascending:false}).limit(100);
+ .eq("status","open").or("response_deadline.is.null,response_deadline.gt."+new Date().toISOString()).order("requested_at",{ascending:false}).limit(100);
  if(error)throw error;
  const rows=(data??[]) as PartnerOpportunity[];
  const shipmentIds=[...new Set(rows.map(x=>Number(x.shipment_id)))];
