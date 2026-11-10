@@ -960,6 +960,35 @@ for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_
   if (!razorpayVerifySource.includes(token)) failures.push("Step 7 payment verification capacity regression guard missing: " + token);
 }
 
+// Cross-app shipment lifecycle contract: source-level regression guards only.
+// These checks ensure all three mobile clients call the secured workflow contracts;
+// they do not simulate authenticated users or claim a live shipment was executed.
+const customerMobile = existsSync("mobile/krim-customer/src/CustomerWorkspace.tsx") ? readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8") : "";
+const partnerMobile = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
+const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
+for (const [label, source, tokens] of [
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes']],
+  ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'registered_business']],
+  ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
+]) {
+  if (!source) { failures.push(label + " source is missing."); continue; }
+  for (const token of tokens) if (!source.includes(token)) failures.push(label + " lifecycle contract is missing: " + token);
+}
+if (partnerMobile && (!partnerMobile.includes("organizations.length!==1") || !partnerMobile.includes("activeCaps===0") || !partnerMobile.includes('selected?.partner_account_mode!=="registered_business"'))) {
+  failures.push("Partner quote submission must remain gated to one unambiguous registered, verified and capable organization.");
+}
+const podAdminSource = existsSync("app/platform-admin/delivery-pod-verification.html") ? readFileSync("app/platform-admin/delivery-pod-verification.html", "utf8") : "";
+const platformAdminNavigation = existsSync("app/platform-admin/index.html") ? readFileSync("app/platform-admin/index.html", "utf8") : "";
+for (const token of ["krim_admin_list_delivery_pods", "krim_admin_review_delivery_pod", "AAL2", "PRIVATE"]) {
+  if (!podAdminSource.includes(token)) failures.push("Admin POD review workspace is missing protected workflow control: " + token);
+}
+if (!platformAdminNavigation.includes('href="delivery-pod-verification.html"')) failures.push("Platform Admin home must link to the protected POD review workspace.");
+const podAdminMigration = existsSync("supabase/migrations/20261106010000_add_admin_pod_verification_and_delivery_authorization.sql")
+  ? readFileSync("supabase/migrations/20261106010000_add_admin_pod_verification_and_delivery_authorization.sql", "utf8") : "";
+for (const token of ["auth.uid()", "aal2", "private.krim_has_permission", "A driver who submitted delivery evidence cannot independently review its POD", "krim_internal_authorize_delivery"]) {
+  if (!podAdminMigration.includes(token)) failures.push("POD database authorization migration is missing control: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
