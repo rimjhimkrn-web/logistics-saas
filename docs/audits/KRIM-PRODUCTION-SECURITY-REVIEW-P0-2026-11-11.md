@@ -81,3 +81,69 @@ Result:
 - No broad RLS policies were added. These findings are now classified as **likely intentional service-only / deny-by-default**, pending verification of every service-role Edge Function/RPC caller and API schema exposure.
 
 This materially narrows the RLS remediation: do not add policies simply to clear the advisor. Preserve the deny-by-default grants and document each privileged access path. The RLS advisor warning may remain for intentionally service-only tables.
+
+
+## Authenticated-callable SECURITY DEFINER inventory — static triage batch 1
+
+The live catalog was queried for all public-schema SECURITY DEFINER functions for which the authenticated role has EXECUTE. This inventory returns **126 functions**, all with anon EXECUTE false in the same catalog privilege checks.
+
+### Family distribution
+| Function family | Count |
+|---|---:|
+| Platform admin | 53 |
+| Driver | 11 |
+| Partner | 9 |
+| Customer / shipment lifecycle | 11 |
+| Vehicle / fleet | 16 |
+| Warehouse | 14 |
+| Other shared functions | 12 |
+| **Total** | **126** |
+
+### Static guard-pattern indicators
+Across the 126 function definitions:
+- 116 reference `auth.uid()` directly.
+- 53 reference `auth.jwt()`.
+- 52 explicitly check AAL2.
+- 52 explicitly check `admin.platform`.
+- 83 reference a KRIM permission helper.
+- 9 reference the organisation-access helper.
+- 69 reference `private.krim_has_permission`.
+- 51 use row locking (`FOR UPDATE`).
+- 8 include an idempotency/replay pattern.
+- 15 inspect `storage.objects`.
+
+These are static indicators only. A text match is not proof of correct authorization, and the absence of a direct check is not automatically a vulnerability when a function delegates to a separately guarded function.
+
+### Admin-family review
+52 of 53 `krim_admin_*` functions explicitly include both AAL2 and `admin.platform` permission checks. The remaining function, `krim_admin_list_capacity_resources_lane_aware()`, delegates first to `krim_admin_list_capacity_resources()`, which independently enforces:
+1. non-null `auth.uid()`;
+2. AAL2;
+3. `private.krim_has_permission(user, 1, 'admin.platform')`.
+
+The wrapper returns only the already-authorized result plus lane availability details. This is an inherited guard path, not an unguarded admin endpoint based on the inspected definition. Add a regression test to ensure this delegation remains intact.
+
+### Functions without a direct `auth.uid()` reference
+Ten functions lacked a direct `auth.uid()` string reference in their own definition:
+- `krim_admin_list_capacity_resources_lane_aware()` delegates to the guarded admin list function above.
+- `krim_partner_register_capacity_resource_for_lane(...)` delegates to the guarded base capacity-registration function before attaching the lane to the returned availability record.
+- `krim_partner_submit_service_capability_v2(...)` delegates to the base capability submission function, then attaches bounded metadata to the returned capability.
+- Six vehicle administration functions call `public.krim_vehicle_admin_guard()` to establish the authenticated administrator context before acting.
+- `krim_vehicle_refresh_expiry()` also uses the same guard; it is a privileged maintenance action and should be invoked only by an authorised admin/scheduler pathway, not a general user client.
+
+The delegation paths were inspected in the live definitions. Regression tests must verify that the guard helper itself enforces the expected identity, MFA and permission, and that no replacement overload bypasses it.
+
+### High-priority follow-up review
+The broad static inventory is not a substitute for per-function business-logic review. Highest-risk next targets are:
+1. shipment/customer quote, assignment, driver acceptance and delivery-POD transitions;
+2. partner capability, compliance evidence, service area and capacity registration;
+3. vehicle/driver binding, document review, expiry suspension and maintenance execution;
+4. support ticket, exception and escalation actions;
+5. warehouse evidence, inventory and QC transitions.
+
+For every function, tests must cover unauthenticated execution, wrong organisation, insufficient permission, wrong object owner, self-approval, invalid state, expired evidence, concurrent request and duplicate retry as relevant.
+
+## Current disposition
+- The 126-function authenticated-execution inventory is now captured and grouped.
+- No function grants were changed or revoked. This is intentional: revoking a callable RPC without tracing every web/mobile/Edge Function caller could break production workflows.
+- No broad grants or policies were added.
+- The review is **still in progress** until function-by-function test evidence and a full call-site map exist.
