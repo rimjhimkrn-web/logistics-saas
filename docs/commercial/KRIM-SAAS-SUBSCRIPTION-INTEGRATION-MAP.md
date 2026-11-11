@@ -79,3 +79,11 @@ No production DDL, migration application, payment activation, live billing, tax 
 - It filters the latest 100 general contact enquiries for the exact software-evaluation inquiry label and allows audited status changes through the existing `inquiries` and `update_inquiry_status` actions.
 - This is an enquiry triage surface only. It does not create trial records, grant entitlements, activate paid subscriptions, or create billing records. Do not represent it as trial management.
 - The latest 100 limit is displayed in the UI to avoid implying a complete archive.
+
+## 11 November — trial lifecycle engineering drafts
+Three isolated SQL design drafts have now been added under `docs/drafts/`:
+- `KRIM-SAAS-SUBSCRIPTION-FOUNDATION-DRAFT.sql`: proposed dedicated SaaS catalogue, plan features, subscriptions, entitlements and audit tables with RLS and no client writes.
+- `KRIM-SAAS-TRIAL-APPROVAL-AND-ENTITLEMENT-RPCS.sql`: proposed AAL2 platform-admin trial approval, database-calculated 30-day window, self-approval block and server-side entitlement resolver.
+- `KRIM-SAAS-TRIAL-EXPIRY-WORKER.sql`: proposed server-only expiry transition and idempotency ledger foundation; no cron schedule enabled.
+
+These files are design drafts only. None has been added to `supabase/migrations/`, applied to staging or production, or deployed as an Edge Function. The RPC and worker drafts still require SQL linting, schema/role verification, immutable audit design, full idempotency enforcement, concurrency tests and staging execution. Trial expiry is fail-closed in the proposed resolver even if the scheduled worker is delayed. No automatic paid conversion is designed.
