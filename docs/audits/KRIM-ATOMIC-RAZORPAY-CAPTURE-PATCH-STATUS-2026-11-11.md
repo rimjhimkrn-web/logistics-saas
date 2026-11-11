@@ -68,3 +68,13 @@ Implementation patch prepared; static source checks completed; CI, staging execu
 - Partner rejection path in the existing `krim_respond_to_partner_assignment` remains responsible for reopening the opportunity and withdrawing the selected quote.
 - This draft must be tested alongside the quote acceptance guard and all other writers: `krim_customer_accept_quote`, `krim_accept_global_quote`, `krim_internal.accept_quote_and_commit`, orchestration and legacy customer quote paths.
 - No production/staging SQL execution. No RPC or trigger changed in either environment. The SQL has not been compiled or run against fixtures. Historical accepted quotes/assignments remain untouched.
+
+
+## Second-pass booking lifecycle review — 11 November 2026
+- Rechecked the staging project directly: it is healthy but has **zero applied migration records and zero tables**. It is not a usable KRIM staging database yet. Production remains untouched.
+- Confirmed production CHECK constraints permit opportunity status `shortlisted`, partner quote status `accepted` / `rejected`, assignment status `offered` / `accepted`, customer quote status `sent` / `accepted`, and quote-version status `presented`. The proposed lifecycle values therefore match the current CHECK constraints.
+- Corrected the award lifecycle draft trigger name to `trg_krim_z_finalize_partner_award_after_acceptance`. PostgreSQL orders same-timing triggers alphabetically; this now places award finalisation after the existing `trg_krim_ensure_assignment_capacity_commitment` trigger. If capacity commitment fails, the entire assignment acceptance transaction still rolls back.
+- Strengthened the customer quote acceptance guard draft: it now cross-checks partner quote, assignment, opportunity and shipment ownership; requires the binding leg to match the assignment leg; and locks the exact capacity reservation row while checking its confirmed state and partner organisation.
+- Commits: award trigger ordering `d7bbc6bd3ea7290d29491c51fb9003f3f755c835`; quote guard linkage/locking `de0e7f53a795265b020f73dc2c9f365aaf688455`.
+- Static source re-fetch confirms both changes are present. SQL has not been compiled or executed. Staging remains empty; no production changes, test bookings, payments or deployments occurred.
+- Next blocker: provision a staging schema from the authoritative production schema/migration source, then load synthetic fixtures and test the complete lifecycle. Do not copy production customer, partner, payment or shipment data into staging.
