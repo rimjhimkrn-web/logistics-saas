@@ -220,6 +220,10 @@
             email: credentials.email,
             password: credentials.password,
             options: {
+              data: credentials.termsAccepted === true ? {
+                terms_accepted: true,
+                terms_version: String(credentials.termsVersion || "2026-11-11")
+              } : {},
               emailRedirectTo: new URL("/app/sign-in.html", global.location.origin).href
             }
           });
