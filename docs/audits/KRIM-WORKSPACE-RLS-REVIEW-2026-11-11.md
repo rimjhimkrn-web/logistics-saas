@@ -297,3 +297,30 @@ The existing `confirmed -> assigned` finalizer sequence and readiness evaluator'
 - No matching database-cron lifecycle job was found.
 - No production function, trigger, status constraint, grant, policy, setting or record was changed.
 - Static inspection does not prove external schedulers, webhook callers or UI flows are absent. The remaining trace must include all frontend RPC call sites, Edge Function invocations and external scheduler configuration before the migration is finalised.
+
+
+## Frontend lifecycle RPC caller trace — repository main — 2026-11-11
+
+### Confirmed customer / operations / partner UI call sites
+- `public/operations/partner-selection-assignment.html` calls `krim_award_partner_quote(p_partner_quote_id)` for the operations award action. Its UI copy says an assignment is created and the selected partner must still accept; shipment execution is not yet confirmed. This is inconsistent with the live RPC, which currently attempts `quoted -> confirmed` during award.
+- The same page calls `krim_respond_to_partner_assignment(p_assignment_id,p_accept,p_reason)` for partner acceptance/rejection and validates the returned assignment status.
+- `public/partner-selection-assignment.html` calls `krim_award_partner_quote_for_checkout(p_partner_quote_id,p_valid_until)`. This wrapper currently creates a customer quote with status `accepted` while the assignment returned by the award function is still `offered`.
+- `public/partner/accepted-loads.html` calls `krim_respond_to_partner_assignment` for accept/decline. It also has a separate `krim_partner_reserve_shipment_leg_capacity` call path; this must be checked for duplicate or pre-accept capacity effects in staging.
+- `public/shipper/quote-comparison.html` and `public/customer-os/assets/quote-operations.js` both call `krim_accept_global_quote`. The latter is shared customer quote-operation code, so both call sites need the server-side acceptance regression tests.
+- `public/partner/submit-quote.html` calls `krim_submit_partner_quote` for partner quote submission.
+- `public/shipper/partner-bid-status.html`, `public/partner/quote-history.html`, `public/customer/quote-acceptance.html` and `public/customer/quote-details.html` did not show direct calls to the five award/acceptance RPC names in the inspected source files.
+
+### Mobile and legacy paths
+- The inspected customer and partner mobile repository source files did not contain direct calls to the five lifecycle RPC names. This does not prove there are no indirect repository wrappers or other mobile call sites; expand the search across all mobile source before release.
+- `krim_partner_respond_to_invitation` remains an authenticated backend RPC with no direct call found in the inspected current frontend files. It must be included in the backend compatibility plan and checked against older UI routes, external integrations and grants before retirement.
+- The production database has no matching `cron.job` entries for quote/partner/shipment expiry. External scheduled jobs and Edge Function invocations were not visible through the database catalog query and remain to be checked in Supabase function configuration and repository workflows.
+
+### UI / backend mismatch requiring an explicit acceptance contract
+The operations award UI correctly tells the user that partner acceptance is still pending. The live award RPC nevertheless transitions the shipment to `confirmed`; the checkout wrapper additionally writes an `accepted` customer quote and accepted quote version before partner acceptance. The user-facing UI language is therefore safer than the authoritative persisted state, but the database state remains incorrect for the intended commercial rule.
+
+### Remaining release trace
+- Inspect every RPC caller across the complete repository (including mobile, admin, enterprise and legacy pages), not only the focused files above.
+- Inspect the deployed Edge Function inventory and function source/configuration for direct or indirect lifecycle invocation.
+- Inspect external GitHub Actions, provider webhooks and any third-party scheduler configuration; database cron absence is not proof no external scheduler exists.
+- Check notifications, customer quote lists, payment-order creation, finance ledgers, customer/partner dashboards and operational reporting for assumptions that an `accepted` quote or `confirmed` shipment means the partner has already committed.
+- No production changes were made.
