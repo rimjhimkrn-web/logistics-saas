@@ -31,3 +31,13 @@ Implementation patch prepared; static source checks completed; CI, staging execu
 - Includes staging assertions and a rollback statement.
 - This closes the identified direct-row disclosure path if validated and deployed; customer-facing comparison must continue through the separate customer quote model (`krim_quotes`), not the partner quote base table.
 - This policy change has not been executed against staging or production.
+
+
+## Partner availability implementation draft
+- Added `docs/sql/krim-customer-partner-availability-preflight.review.sql`.
+- The proposed customer-safe RPC checks authenticated customer organisation access, active origin/destination locations, supported transport mode, currently effective verified capability, partner organisation verification/compliance/lifecycle and weight ceiling.
+- It deliberately returns only `no_verified_provider` or `review_required`; it never returns a confirmed match because current capability data does not establish exact end-to-end lane, cargo eligibility and live capacity.
+- The response contains no partner names, organisation IDs, rates or internal notes. It creates no shipment, quote, assignment, payment or ledger rows.
+- Read-only production baseline: one partner capability, inactive and pending; zero active verified capabilities. Current expected result is `no_verified_provider`.
+- Transport mode mapping was aligned to the live catalogue codes (ROAD, RAIL, OCEAN, AIR, WAREHOUSE, MULTIMODAL).
+- This remains a review-only SQL draft. It has not been executed, connected to the booking UI, or deployed. Staging validation and exact partner status-value verification remain mandatory.
