@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#0b1f3a">
+<title>KRIM | SaaS Pilot Enquiries</title>
+<script>
+(function(){const p=location.pathname.split("/").filter(Boolean),b=location.hostname.endsWith("github.io")?"/"+(p[0]||"logistics-saas"):"";const l=document.createElement("link");l.rel="stylesheet";l.href=b+"/core/krim-unified-page.css";document.head.appendChild(l);const g=document.createElement("script");g.src=b+"/auth/krim-admin-guard.js";g.onerror=()=>location.replace(b+"/auth/krim-admin-access.html?reason=guard-unavailable");document.head.appendChild(g)})();
+</script>
+<style>
+:root{--navy:#0b1f3a;--blue:#1769e8;--ink:#1c304b;--muted:#718198;--line:#dfe7f1;--paper:#f3f6fb}
+*{box-sizing:border-box}html{visibility:hidden}html.krim-admin-authorized{visibility:visible}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 Inter,system-ui,sans-serif}.top{background:#fff;border-bottom:1px solid var(--line);padding:15px clamp(16px,4vw,42px);display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:950;color:var(--navy);letter-spacing:.04em}.brand small{display:block;font-size:9px;color:var(--muted);letter-spacing:.15em}.wrap{max-width:1180px;margin:auto;padding:28px clamp(14px,3vw,30px)}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-.04em;color:var(--navy);margin:5px 0}.sub{color:var(--muted);max-width:760px}.eyebrow{font-size:10px;color:var(--blue);font-weight:900;letter-spacing:.15em}.notice{padding:14px 16px;background:#fff8e8;border:1px solid #f0dfb9;border-radius:13px;color:#765719;font-size:12px;margin:20px 0}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit}.toolbar input{flex:1;min-width:200px}.btn{border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:#fff;color:#314863;font-weight:800;cursor:pointer}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.stat,.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px #12345608}.stat{padding:15px}.stat small{color:var(--muted);font-weight:750}.stat strong{display:block;font-size:27px;color:var(--navy);margin-top:5px}.list{display:grid;gap:12px}.card{padding:17px}.rowtop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.name{font-size:16px;font-weight:900;color:var(--navy)}.meta{font-size:11px;color:var(--muted);margin-top:3px}.tag{display:inline-block;border-radius:99px;padding:5px 9px;background:#eef4ff;color:#245da8;font-size:10px;font-weight:900;text-transform:uppercase}.tag.new{background:#fff5df;color:#8b5d08}.tag.in_review{background:#edf3ff;color:#245da8}.tag.responded{background:#e8f8ef;color:#14734d}.tag.closed,.tag.spam{background:#f0f2f5;color:#59697d}.message{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f9fc;border:1px solid #edf1f6;border-radius:10px;padding:12px;margin:13px 0;font-size:12px;max-height:190px;overflow:auto}.actions{display:flex;gap:8px;flex-wrap:wrap}.empty,.error{padding:20px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:13px;color:var(--muted)}.error{color:#a52d3b;border-color:#f0c7cc}.foot{color:#91a0b3;text-align:center;font-size:10px;padding:25px}@media(max-width:650px){.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">KRIM LOGISTICS<small>RESTRICTED PLATFORM ADMINISTRATION</small></div><a class="btn" href="admin-control-center.html#governance">Control centre</a></header>
+<main class="wrap">
+<div class="eyebrow">COMMERCIAL OPERATIONS</div><h1>SaaS pilot enquiries</h1>
+<p class="sub">Review software plan, pricing and guided-evaluation requests submitted through the public KRIM contact form.</p>
+<div class="notice"><strong>Important:</strong> This screen manages enquiry follow-up only. It does not activate a 30-day trial, grant software entitlements, create a subscription or authorize payment. Trial activation remains disabled until the dedicated subscription engine and audited server-side controls are deployed.</div>
+<div class="stats"><div class="stat"><small>Total pilot enquiries</small><strong id="total">—</strong></div><div class="stat"><small>Awaiting review</small><strong id="pending">—</strong></div><div class="stat"><small>Responded / closed</small><strong id="handled">—</strong></div></div>
+<div class="toolbar"><input id="search" type="search" placeholder="Search name, organisation or email"><select id="filter"><option value="all">All statuses</option><option value="new">New</option><option value="in_review">In review</option><option value="responded">Responded</option><option value="closed">Closed</option><option value="spam">Spam</option></select><button class="btn primary" id="refresh">Refresh</button></div>
+<div id="state" class="empty">Loading authorised enquiry records…</div><div id="list" class="list"></div>
+<div class="foot">KRIM Logistics · Private admin data · Access requires platform administration and MFA</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);let items=[];
+const match="Enquiry type: Software subscription — plans, pricing or evaluation";
+function esc(v){return String(v??"")}
+function call(action,body={}){const c=window.KRIM_SUPABASE||window.supabaseClient;if(!c)throw new Error("Admin client unavailable");return c.functions.invoke("global-admin-control",{body:{action,...body}})}
+function isPilot(x){return String(x.message||"").includes(match)}
+function render(){
+ const q=$("search").value.trim().toLowerCase(),f=$("filter").value;
+ const filtered=items.filter(x=>(f==="all"||x.status===f)&&(!q||[x.full_name,x.email,x.organization].some(v=>String(v||"").toLowerCase().includes(q))));
+ $("total").textContent=items.length.toLocaleString();$("pending").textContent=items.filter(x=>["new","in_review"].includes(x.status)).length.toLocaleString();$("handled").textContent=items.filter(x=>["responded","closed"].includes(x.status)).length.toLocaleString();
+ $("list").replaceChildren();
+ if(!filtered.length){$("state").style.display="block";$("state").textContent=items.length?"No enquiries match this filter.":"No software evaluation enquiries found.";return}
+ $("state").style.display="none";
+ filtered.forEach(x=>{
+  const card=document.createElement("article");card.className="card";
+  const top=document.createElement("div");top.className="rowtop";
+  const left=document.createElement("div");const name=document.createElement("div");name.className="name";name.textContent=esc(x.full_name)||"Name not provided";
+  const meta=document.createElement("div");meta.className="meta";meta.textContent=[x.organization||"Organisation not provided",x.email||"Email not provided",x.created_at?new Date(x.created_at).toLocaleString():"Date unavailable"].join(" · ");
+  left.append(name,meta);const tag=document.createElement("span");tag.className="tag "+esc(x.status);tag.textContent=esc(x.status||"new").replaceAll("_"," ");top.append(left,tag);
+  const message=document.createElement("div");message.className="message";message.textContent=esc(x.message);
+  const actions=document.createElement("div");actions.className="actions";
+  [["in_review","Mark in review"],["responded","Mark responded"],["closed","Close enquiry"],["spam","Mark spam"]].forEach(([status,label])=>{const b=document.createElement("button");b.className="btn";b.textContent=label;b.disabled=x.status===status;b.addEventListener("click",()=>updateStatus(x.id,status,b));actions.append(b)});
+  card.append(top,message,actions);$("list").append(card);
+ });
+}
+async function updateStatus(id,status,button){button.disabled=true;button.textContent="Saving…";try{const r=await call("update_inquiry_status",{inquiry_id:id,status});if(r.error||!r.data?.ok)throw new Error(r.data?.error||r.error?.message||"Update failed");const item=items.find(x=>x.id===id);if(item)item.status=status;render()}catch(e){button.disabled=false;button.textContent="Retry";alert(e.message||"Status update failed")}}
+async function load(){ $("state").style.display="block";$("state").className="empty";$("state").textContent="Loading authorised enquiry records…";$("list").replaceChildren();try{const r=await call("inquiries",{limit:100});if(r.error||!r.data?.ok)throw new Error(r.data?.error||r.error?.message||"Could not load enquiries");items=(r.data.data?.items||[]).filter(isPilot);render()}catch(e){$("state").className="error";$("state").textContent="Enquiries could not be loaded: "+(e.message||"request failed")}}
+$("refresh").addEventListener("click",load);$("search").addEventListener("input",render);$("filter").addEventListener("change",render);load();
+})();
+</script>
+</body></html>
