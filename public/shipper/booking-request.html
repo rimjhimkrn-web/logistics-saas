@@ -301,6 +301,36 @@
      const sameCountry=originPlace.country_code===destinationPlace.country_code;
      if(routeType==="domestic"&&!sameCountry){showFeedback("This route is international. Choose Cross-border / international or select two places in the same country.","error");return;}
      if(routeType==="cross_border"&&sameCountry){showFeedback("Both selected places are in the same country. Choose Domestic movement or select a destination in another country.","error");return;}
+    // Check both endpoints against active KRIM market mappings before shipment creation.
+    // This prevents a draft being created when the downstream partner-opportunity RPC cannot route it.
+    async function hasActiveMarket(place){
+      const code=String(place.country_code||"").toUpperCase();
+      const city=String(place.city||place.name||"").trim();
+      const region=String(place.state||"").trim();
+      if(!/^[A-Z]{2}$/.test(code)||!city) return false;
+      const {data:country,error:countryError}=await client.from("krim_countries").select("id").eq("code",code).eq("is_active",true).maybeSingle();
+      if(countryError) throw countryError;
+      if(!country) return false;
+      let locationQuery=client.from("krim_locations").select("id,market_id").eq("country_id",country.id).eq("is_active",true).ilike("city",city).not("market_id","is",null).limit(10);
+      if(region) locationQuery=locationQuery.ilike("state_region",region);
+      const {data:locations,error:locationError}=await locationQuery;
+      if(locationError) throw locationError;
+      const marketIds=[...new Set((locations||[]).map(row=>Number(row.market_id)).filter(Number.isSafeInteger))];
+      if(!marketIds.length) return false;
+      const {data:markets,error:marketError}=await client.from("krim_markets").select("id").in("id",marketIds).eq("is_active",true).eq("status","active");
+      if(marketError) throw marketError;
+      return !!(markets||[]).length;
+    }
+    try{
+      const endpointsReady=await Promise.all([hasActiveMarket(originPlace),hasActiveMarket(destinationPlace)]);
+      if(!endpointsReady.every(Boolean)){
+        showFeedback("This route is not yet mapped to an active KRIM market at both ends. Your shipment has NOT been created. Please contact KRIM for a manual route review while market coverage is being verified.","error");
+        return;
+      }
+    }catch(preflightError){
+      showFeedback("KRIM could not verify active market coverage. Your shipment has NOT been created. Please retry later or contact support.","error");
+      return;
+    }
     if(!goods || goods.length > 500){showFeedback("Enter a goods description (up to 500 characters).","error");return;}
     if(!Number.isFinite(weight) || weight <= 0 || weight > 100000000){showFeedback("Enter a valid gross weight greater than zero and within the supported range.","error");return;}
     submitting = true; button.disabled = true; button.innerHTML = "Creating secure shipment request…";
