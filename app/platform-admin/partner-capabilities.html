@@ -36,7 +36,7 @@
 "use strict";
 const client=window.KRIM_SUPABASE||window.supabaseClient;
 const $=id=>document.getElementById(id);
-let isSuperadmin=false,items=[];
+let isSuperadmin=false,items=[],incompleteCount=0;
 function esc(v){return String(v===null||v===undefined||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function msg(text,type){const el=$("message");el.textContent=text;el.className="alert show "+type}
 function setState(text,kind){$("queue-state").textContent=text;$("queue-state").className="badge"+(kind==="bad"?" state bad":"")}
@@ -51,7 +51,7 @@ async function verifyAccess(){
 }
 function render(){
  const term=$("filter").value.trim().toLowerCase(),filtered=items.filter(x=>JSON.stringify(x).toLowerCase().includes(term));
- if(!filtered.length){$("content").innerHTML='<div class="empty">'+(items.length?"No matching capabilities.":"There are no pending partner capabilities.")+'</div>';$("status").textContent=items.length?"0 matching records":"0 pending records";return}
+ if(!filtered.length){const emptyText=items.length?"No matching evidence-backed capability submissions.":(incompleteCount?"No capability submissions are ready for review. "+incompleteCount+" pending declaration(s) are held until the partner uploads capability-specific evidence through Services & Capabilities.":"There are no pending evidence-backed partner capabilities.");$("content").innerHTML='<div class="empty">'+esc(emptyText)+'</div>';$("status").textContent=items.length?"0 matching records":(incompleteCount?incompleteCount+" held for evidence":"0 review-ready records");return}
  const cell=esc;
  let html='<div class="tablewrap"><table><thead><tr><th>Partner organisation</th><th>Service capability</th><th>Coverage</th><th>Operating limits</th><th>Evidence</th><th>Organisation verification</th><th>Capability state</th><th>Decision</th></tr></thead><tbody>';
  html+=filtered.map(x=>{
@@ -66,7 +66,7 @@ function render(){
 }
 async function load(){
  $("content").innerHTML='<div class="empty">Loading pending capabilities…</div>';
- try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;items=Array.isArray(data?.items)?data.items:[];render();setState(items.length+" PENDING","good")}
+ try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;items=Array.isArray(data?.items)?data.items:[];incompleteCount=Number(data?.incomplete_count||0);render();setState(items.length+" REVIEW-READY"+(incompleteCount?" · "+incompleteCount+" HELD":"") ,"good")}
  catch(e){items=[];$("content").innerHTML='<div class="empty">'+esc(e.message||"Queue unavailable")+'</div>';setState("QUEUE UNAVAILABLE","bad");$("status").textContent="No review decision was submitted."}
 }
 async function review(id,decision){
