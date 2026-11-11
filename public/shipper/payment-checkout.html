@@ -114,7 +114,10 @@ feedback("main-feedback",canContinue?"Readiness checks passed. Continue to the e
 feedback("action-feedback",canContinue?"Ready to open the existing secure Razorpay checkout.":"Checkout remains locked. Return to quote comparison or contact KRIM support if the records need review.",canContinue?"success":"error");
 }
 $("continue-button").addEventListener("click",()=>{if(!ready||!shipment||!quote)return;location.href=path("public/quote-result.html")+"?shipment_id="+encodeURIComponent(shipment.id)+"&quote_id="+encodeURIComponent(quote.id);});
-init().catch(e=>{console.error(e);setReady(false);feedback("main-feedback","KRIM could not verify checkout readiness. No payment order was created. "+(e&&e.message?e.message:"Please retry later."),"error");});
+setReady(false);
+feedback("main-feedback","Partner-direct launch is active. KRIM does not collect freight payments. Pay the selected logistics partner directly under your agreement with them. No KRIM payment order was created.","error");
+feedback("detail-feedback","Freight checkout is disabled for the current KRIM launch model.","error");
+feedback("action-feedback","Checkout is unavailable. Contact the selected logistics partner for payment instructions.","error");
 })();
 </script>
 </body></html>
