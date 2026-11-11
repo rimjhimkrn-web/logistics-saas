@@ -238,3 +238,62 @@ Do not overload the existing word `accepted` to mean both customer selection and
 6. Keep real customer booking and payment disabled until all release gates pass.
 
 **No production schema, RPC, policy, grant, shipment, quote, assignment, payment or other record was changed during this review.**
+
+
+## Booking lifecycle dependency trace — production read-only — 2026-11-11
+
+### Trigger dependencies confirmed
+The following live triggers participate in the award / acceptance / rejection / dispatch lifecycle:
+
+- `trg_krim_cancel_customer_quote_after_partner_rejection` — AFTER UPDATE of assignment status. When an `offered` assignment becomes `rejected`, it cancels an associated customer quote only if that quote is already `accepted`; it also cancels the latest accepted quote version and writes a quote event. This trigger does not handle expiry or cancellation transitions.
+- `trg_krim_ensure_assignment_capacity_commitment` — AFTER INSERT OR UPDATE of assignment status/partner quote/partner org. On transition to `accepted`, it requires positive shipment weight, a matching partner quote/shipment/org, and creates or verifies a current capacity commitment. An acceptance RPC that changes assignment status must satisfy this trigger.
+- `trg_krim_partner_assignment_quote_integrity` — BEFORE INSERT/UPDATE of assignment linkage fields. Enforces matching partner quote, opportunity, shipment, partner and optional shipment leg.
+- `trg_krim_release_capacity_on_assignment_terminal` — releases held/confirmed capacity reservations and bindings on rejected/cancelled/completed/failed assignment status.
+- `krim_shipment_readiness_enforcement` — BEFORE UPDATE of shipment status to confirmed/assigned/dispatched; calls `krim_internal_evaluate_shipment_readiness`.
+- `trg_krim_guard_dispatch_capacity_confirmation` — BEFORE shipment transition to dispatched; requires accepted assignment(s) and confirmed capacity binding/reservation.
+
+### Critical readiness-state interaction
+The current `krim_internal_evaluate_shipment_readiness` explicitly sets partner status to `not_required` while shipment status is one of `draft`, `requested`, `quoted`, or `confirmed`. It only requires an accepted/active partner assignment after the shipment has moved beyond those states. Therefore, the readiness trigger does not stop a `quoted -> confirmed` transition when no partner has accepted. This is a second independent reason the current readiness gate cannot enforce the intended booking rule.
+
+### Additional internal lifecycle dependency
+`krim_internal_finalize_partner_assignment(assignment_id)` requires:
+- shipment status already `confirmed`;
+- assignment status `accepted`;
+- linked partner quote;
+- active committed capacity commitment.
+
+It then changes assignment to `active` and shipment to `assigned`, marks the opportunity awarded and writes an audit event. Thus the proposed correction cannot simply move the existing `confirmed` transition into the current partner-response function without also reconciling this finalizer's required preconditions and status semantics.
+
+`krim_internal_dispatch_assigned_shipment(assignment_id)` requires shipment `assigned`, assignment `active` or `accepted`, linked partner quote, shipment readiness `ready`, and operations dispatch readiness `ready_for_authorized_review`; then it changes shipment to `dispatched` and writes tracking, execution and audit events. Dispatch is separately guarded by the capacity trigger.
+
+### Alternate partner invitation RPC
+A second authenticated SECURITY DEFINER path, `krim_partner_respond_to_invitation(assignment_id, decision, amount, currency, valid_until, notes)`, exists alongside `krim_respond_to_partner_assignment`. Its accept branch creates a partner quote and capacity commitment, then marks the assignment `accepted`. Its decline branch marks the assignment `rejected`. Both branches must be included in any lifecycle migration and regression suite; changing only `krim_respond_to_partner_assignment` would leave an alternate path.
+
+### Status constraints and transition matrix
+Live check constraints allow:
+- shipment statuses: draft, requested, quoted, confirmed, assigned, dispatched, in_transit, delivered, closed, cancelled, exception;
+- assignment statuses: offered, accepted, rejected, cancelled, active, completed, failed;
+- customer quote statuses: draft, sent, accepted, rejected, expired, cancelled;
+- quote-version statuses: draft, calculated, presented, accepted, expired, superseded, rejected, cancelled;
+- partner quote statuses: draft, submitted, under_review, shortlisted, accepted, rejected, withdrawn, expired;
+- opportunity statuses: draft, open, shortlisted, awarded, cancelled, expired.
+
+The current shipment transition table allows `quoted -> confirmed` with `shipment.update`, and `confirmed -> assigned` with `shipment.assign`. It does not define a direct `quoted -> assigned` transition. Any new lifecycle must deliberately update and test the transition matrix, not assume a status path exists.
+
+### Scheduled expiry / automation trace
+A read-only query of `cron.job` found no scheduled job whose command references shipment, quote or partner lifecycle terms. This does not rule out an external scheduler or Edge Function invocation, but no database-cron expiry worker was identified. Assignment response deadlines are checked on response; the inspected trigger handles rejection, not automatic expiry. A future expiry worker must be explicitly designed, idempotent, race-safe against partner acceptance, and reconcile quote, opportunity, capacity and customer notification states.
+
+### Privilege inventory
+The five main lifecycle RPCs inspected (`krim_accept_global_quote`, `krim_award_partner_quote`, `krim_award_partner_quote_for_checkout`, `krim_respond_to_partner_assignment`, `krim_transition_shipment`) are SECURITY DEFINER. `anon` cannot execute any of them. `authenticated` can execute the first four; `krim_transition_shipment` is not executable by authenticated and remains internal/service-only. This makes the authenticated RPC bodies and every alternate path the security boundary.
+
+### Required design correction before migration
+The implementation design must define two distinct concepts rather than overload one status:
+1. **Commercial booking confirmation** — customer terms and a specific partner's accepted commitment are both valid.
+2. **Operational shipment assignment/dispatch readiness** — capacity commitment, assignment activation, shipment readiness, compliance, documents, payment and operations review are complete.
+
+The existing `confirmed -> assigned` finalizer sequence and readiness evaluator's current `confirmed = partner not required` rule must be redesigned together. Do not apply a patch that only moves a status update between the current RPCs. Preserve the existing capacity, quote-cancellation, quote-integrity, dispatch and audit triggers, or replace them with equivalent tested transactional controls.
+
+### Trace completion and limits
+- No matching database-cron lifecycle job was found.
+- No production function, trigger, status constraint, grant, policy, setting or record was changed.
+- Static inspection does not prove external schedulers, webhook callers or UI flows are absent. The remaining trace must include all frontend RPC call sites, Edge Function invocations and external scheduler configuration before the migration is finalised.
