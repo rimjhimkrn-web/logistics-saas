@@ -388,16 +388,29 @@
         var fd=new FormData(form);
         var inquiryType=String(fd.get("inquiry_type")||"").trim();
         var organization=String(fd.get("organization")||"").trim()||"Individual customer";
+        var params=new URLSearchParams(window.location.search);
+        var attribution=[
+          "Landing page: "+window.location.pathname,
+          "Referrer: "+(document.referrer||"Direct / unavailable"),
+          "UTM source: "+(params.get("utm_source")||"Not provided"),
+          "UTM medium: "+(params.get("utm_medium")||"Not provided"),
+          "UTM campaign: "+(params.get("utm_campaign")||"Not provided"),
+          "UTM content: "+(params.get("utm_content")||"Not provided")
+        ];
+        attribution=attribution.map(function(line){return line.slice(0,240);});
         var details=[
           "Enquiry type: "+inquiryType,
           "Phone / WhatsApp: "+(String(fd.get("phone")||"").trim()||"Not provided"),
           "Country / region: "+(String(fd.get("country")||"").trim()||"Not provided"),
           "Shipment / enquiry reference: "+(String(fd.get("shipment_reference")||"").trim()||"Not provided"),
           "",
+          "Acquisition attribution:",
+          attribution.join("\n"),
+          "",
           "Message:",
           String(fd.get("message")||"").trim(),
           "",
-          "Privacy consent: Yes — current privacy notice accepted."
+          "Privacy consent: "+(fd.get("privacy_consent")==="on"?"Yes — current privacy notice accepted.":"Not provided.")
         ].join("\n");
         var payload={
           full_name:String(fd.get("full_name")||"").trim(),
