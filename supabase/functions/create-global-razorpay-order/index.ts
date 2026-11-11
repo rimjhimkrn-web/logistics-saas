@@ -645,33 +645,34 @@ error:
 // Reuse valid existing order
 // --------------------------------------------------
 
-if (
-existingOrder &&
-existingOrder.razorpay_order_id &&
-Number(
-existingOrder.amount_paise
-) === amountPaise &&
-String(
-existingOrder.currency
-).toUpperCase() === currency
-) {
-return jsonResponse({
-success: true,
-reused: true,
-payment_order_id:
-existingOrder.id,
-razorpay_order_id: existingOrder.razorpay_order_id,
-key_id: razorpayKeyId,
-amount_paise:
-amountPaise,
-currency,
-shipment_id:
-shipment.id,
-shipment_number:
-shipment.shipment_number,
-quote_id:
-quote.id,
-});
+if (existingOrder) {
+  // Never create a second provider order while KRIM already has an open order
+  // for this accepted quote. The database unique index is the final race guard.
+  if (!existingOrder.razorpay_order_id) {
+    return jsonResponse({
+      error: "An open KRIM payment order exists but has no Razorpay order ID. Finance reconciliation is required before retrying checkout.",
+      code: "OPEN_PAYMENT_ORDER_UNRESOLVED",
+    }, 409);
+  }
+  if (Number(existingOrder.amount_paise) !== amountPaise ||
+      String(existingOrder.currency).toUpperCase() !== currency) {
+    return jsonResponse({
+      error: "The existing open payment order does not match the current accepted quote amount or currency. Checkout is locked for reconciliation.",
+      code: "OPEN_PAYMENT_ORDER_AMOUNT_CONFLICT",
+    }, 409);
+  }
+  return jsonResponse({
+    success: true,
+    reused: true,
+    payment_order_id: existingOrder.id,
+    razorpay_order_id: existingOrder.razorpay_order_id,
+    key_id: razorpayKeyId,
+    amount_paise: amountPaise,
+    currency,
+    shipment_id: shipment.id,
+    shipment_number: shipment.shipment_number,
+    quote_id: quote.id,
+  });
 }
 
 // --------------------------------------------------
@@ -830,24 +831,48 @@ razorpay_order_id
 .single();
 
 if (paymentInsertError) {
-console.error(
-"Local payment_orders insert failed:",
-paymentInsertError
-);
+  console.error("Local payment_orders insert failed:", paymentInsertError);
 
-return jsonResponse(
-{
-error:
-"Razorpay order created but local payment record failed",
+  // A concurrent checkout may have won the unique open-order-per-quote race.
+  // Return only the canonical KRIM order; never expose the losing provider order.
+  if (paymentInsertError.code === "23505") {
+    const { data: canonicalOrder, error: canonicalLookupError } = await supabase
+      .from("payment_orders")
+      .select("id,krim_shipment_id,krim_quote_id,customer_organization_id,amount_paise,currency,status,razorpay_order_id")
+      .eq("krim_quote_id", quote.id)
+      .eq("customer_id", user.id)
+      .eq("customer_organization_id", organizationId)
+      .eq("payment_provider", "razorpay")
+      .in("status", ["created", "pending"])
+      .maybeSingle();
 
-razorpay_order_id:
-razorpayOrderId,
+    if (canonicalLookupError) {
+      console.error("Canonical payment order lookup failed:", canonicalLookupError);
+      return jsonResponse({ error: "Checkout conflict; canonical payment order could not be verified", code: "PAYMENT_ORDER_CONFLICT" }, 500);
+    }
+    if (!canonicalOrder || !canonicalOrder.razorpay_order_id ||
+        Number(canonicalOrder.amount_paise) !== amountPaise ||
+        String(canonicalOrder.currency).toUpperCase() !== currency) {
+      return jsonResponse({ error: "A concurrent checkout created a conflicting payment order. Checkout is locked for reconciliation.", code: "PAYMENT_ORDER_CONFLICT" }, 409);
+    }
+    return jsonResponse({
+      success: true,
+      reused: true,
+      payment_order_id: canonicalOrder.id,
+      razorpay_order_id: canonicalOrder.razorpay_order_id,
+      key_id: razorpayKeyId,
+      amount_paise: amountPaise,
+      currency,
+      shipment_id: shipment.id,
+      shipment_number: shipment.shipment_number,
+      quote_id: quote.id,
+    });
+  }
 
-database_error:
-paymentInsertError.message,
-},
-500
-);
+  return jsonResponse({
+    error: "Razorpay order created but local payment record failed. Do not retry with another provider until reconciled.",
+    code: "PROVIDER_ORDER_LOCAL_RECORD_FAILED",
+  }, 500);
 }
 
 // --------------------------------------------------
