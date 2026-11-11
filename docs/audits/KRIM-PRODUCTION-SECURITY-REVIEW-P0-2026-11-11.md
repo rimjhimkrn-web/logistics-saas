@@ -67,3 +67,17 @@ Its `audit()` helper awaits an insert into `krim_audit_events` but ignores the r
 
 ## Release decision
 P0 is **in progress, not complete**. The function-level search-path baseline is positive, and selected critical functions show strong access/state controls. However, the 126 exposed SECURITY DEFINER review, 26 no-policy table classifications, admin audit durability, leaked-password protection and authenticated end-to-end tests remain open. Do not declare the platform security-complete or open paid checkout yet.
+
+
+## RLS no-policy privilege classification — read-only follow-up
+The live catalog was queried for every RLS-enabled table with zero policies, including direct table privileges for `anon`, `authenticated` and `service_role`.
+
+Result:
+- **26 / 26** findings had no direct SELECT, INSERT, UPDATE or DELETE privilege for `anon`.
+- **26 / 26** had no direct SELECT, INSERT, UPDATE or DELETE privilege for `authenticated`.
+- **25 / 26** had direct `service_role` SELECT privilege.
+- `private.krim_ai_rate_limits` had no direct SELECT privilege for `service_role` either; this may be accessed through a narrowly scoped privileged function or another controlled path and needs a call-path review.
+- The 21 public-schema tables among these findings are therefore not directly readable or writable by the browser's anon/authenticated database roles, based on the current grants queried. They are still exposed-schema objects and require confirmation that only intended server-side code accesses them.
+- No broad RLS policies were added. These findings are now classified as **likely intentional service-only / deny-by-default**, pending verification of every service-role Edge Function/RPC caller and API schema exposure.
+
+This materially narrows the RLS remediation: do not add policies simply to clear the advisor. Preserve the deny-by-default grants and document each privileged access path. The RLS advisor warning may remain for intentionally service-only tables.
