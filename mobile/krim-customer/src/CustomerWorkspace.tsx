@@ -92,21 +92,9 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
     } finally { setAcceptingQuoteId(null); }
   };
 
-  const startPayment=async(quote:CustomerQuote)=>{
-    if(!supabase||organizationId===null||paymentQuoteId!==null)return;
-    const shipment=shipments.find(x=>x.id===quote.shipment_id);
-    if(quote.status!=="accepted"||!shipment||shipment.status!=="confirmed"){
-      setError("Payment is available only after KRIM confirms the accepted quote, partner assignment and shipment.");return;
-    }
-    if(new Date(quote.valid_until).getTime()<=Date.now()){setError("This quote has expired. Request a fresh quote before payment.");return;}
-    setPaymentQuoteId(quote.id);setError("");setNotice("");
-    try{
-      const {data,error:functionError}=await supabase.functions.invoke("create-global-razorpay-order",{body:{krim_shipment_id:shipment.id,krim_quote_id:quote.id}});
-      if(functionError)throw new Error(functionError.message||"Secure checkout could not be started.");
-      if(!data?.success||!data?.key_id||!data?.razorpay_order_id||!Number.isSafeInteger(Number(data.amount_paise))||Number(data.amount_paise)<=0||String(data.currency)!=="INR")throw new Error(data?.error||"KRIM has not enabled a valid INR checkout for this shipment yet.");
-      setCheckout({keyId:String(data.key_id),orderId:String(data.razorpay_order_id),amount:Number(data.amount_paise),currency:String(data.currency),shipmentNumber:String(data.shipment_number||shipment.shipment_number),email:session.user.email||""});
-    }catch(e){setError(e instanceof Error?e.message:"Secure checkout is currently unavailable.");}
-    finally{setPaymentQuoteId(null);}
+  const startPayment=async()=>{
+    setError("");
+    setNotice("Partner-direct launch: KRIM does not collect freight payments. Confirm payment instructions directly with your selected logistics partner.");
   };
 
   const handleCheckoutMessage=async(event:WebViewMessageEvent)=>{
@@ -208,7 +196,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
             <Text style={s.tiny}>Shipment ID {q.shipment_id} · Status: {q.status}</Text>
             <Text style={s.tiny}>Valid until: {new Date(q.valid_until).toLocaleString()}</Text>
-            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted" ? <Text style={s.tiny}>Partner-direct launch: KRIM does not collect freight payments. Confirm the service and pay your selected logistics partner directly under your agreement with them.</Text> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
+            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted" ? <><Text style={s.tiny}>Partner-direct launch: KRIM does not collect freight payments. Confirm the service and pay your selected logistics partner directly under your agreement with them.</Text><Action title="Payment instructions" onPress={()=>void startPayment()} secondary/></> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
           </View>) : <Empty title="No visible quotes" body="Confirmed quotes will appear here when available to your organization."/>}
         </>}
 
