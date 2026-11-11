@@ -261,3 +261,62 @@ This is the intended boundary: browser users call the guarded entry points; inte
 
 ### Disposition
 Static review found the expected service-role-only privilege boundary for the three internal POD helpers and strong server-side linkage/ownership/state checks in the reviewed entry points. No POD, shipment status, assignment, tracking, or financial records were modified. No live end-to-end test was run because production has no real verified partner/assignment/POD fixtures and should not be populated with fabricated operational transactions.
+
+
+## Finance, payment and refund lifecycle — static batch 4
+
+### Privilege boundary
+The production catalog shows the reviewed internal finance mutation functions are not executable by anon or authenticated roles and are executable by service_role only. Examples include internal payment-to-ledger posting, partner settlement authorization/posting, financial reconciliation, customer invoicing after delivery, and Razorpay captured-payment reconciliation. This is the expected separation between client-facing workflows and privileged payment/ledger mutations.
+
+### Refund workflow
+The customer refund submission private function:
+- requires authenticated identity;
+- locks the payment order;
+- accepts only a paid order;
+- currently permits full refunds only (partial refunds explicitly disabled);
+- checks customer ownership or active organisation membership;
+- requires an idempotency key;
+- allows only one refund request per payment order;
+- writes the request and event in one transaction.
+
+The finance review private function:
+- requires AAL2;
+- requires active finance/platform/operations organisation membership;
+- requires `finance.manage` or `admin.platform`;
+- prevents the original requester from reviewing their own request;
+- requires a meaningful review note;
+- locks the request and enforces valid state transitions;
+- writes the review event in the same transaction.
+
+The refund execution-claim function:
+- requires AAL2;
+- requires the same finance reviewer who approved the request;
+- prevents requester/reviewer self-approval;
+- checks active finance/platform/operations membership and permission;
+- accepts only approved/pending execution states;
+- prevents a second provider refund ID from being generated;
+- checks full INR Razorpay payment/order/amount conditions;
+- persists the idempotency key and execution claim before returning the execution payload.
+
+The public wrappers for refund submit/review delegate to private security-definer implementations. The private refund functions were inspected directly. Do not grant direct browser access to the internal execution helpers.
+
+### Financial controls and gaps
+- Internal ledger posting checks positive amounts, distinct debit/credit accounts, active accounts within the specified organisation and currency consistency. It uses transaction references for duplicate detection; concurrency behaviour must be verified against unique constraints and parallel calls.
+- Partner payout authorization checks approved payable state, active treasury controls, required financial approval, approval amount/currency equality and a stable execution fingerprint. It returns idempotently for already settled/paid records.
+- Partner payout reconciliation requires exactly one matching provider-confirmed completed payout transaction with matching amount, currency and provider reference before reconciling.
+- Financial reconciliation functions are service-role-only, but the global reconciliation path can create exceptions; they must only be run by controlled scheduled/operations workflows and tested on fixtures.
+- One older customer-payment activation helper and a newer Razorpay captured-payment reconciliation path coexist. Their callers, trigger paths, and migration history need an explicit map before any legacy path is removed.
+- Public wrappers for refund request review/submit are authenticated-callable but rely on private function guards. Tests must prove wrong customer, cross-organisation, same-user requester/reviewer, non-finance user, non-AAL2 user and replay cases are denied.
+- Do not activate recurring SaaS checkout or any freight payment pathway from this review. Payment-provider eligibility and commercial approval remain separate blockers.
+
+### Required tests before production sign-off
+1. Full refund request: wrong customer, wrong organisation, unpaid order, amount mismatch, duplicate request, duplicate idempotency key and concurrent retry.
+2. Refund review: customer requester, partner user, ordinary org admin, non-finance member, no MFA, insufficient note, invalid state and concurrent review.
+3. Refund execution: different executor from approver, missing finance permission, expired/revoked membership, mismatched amount/currency, already-present provider refund ID and repeated execution claim.
+4. Ledger: invalid/negative/zero amount, same debit/credit account, inactive/wrong-org account, currency mismatch, duplicate reference and concurrent duplicate posting.
+5. Partner payout: missing treasury rule, approval missing, approval mismatch, duplicate provider payout, provider reference mismatch and repeat reconciliation.
+6. Payment webhooks: duplicate event, stale event, failed then captured, conflicting provider payment ID, amount/currency mismatch, quote changed after order creation, and shipment/assignment state mismatch.
+7. SaaS subscriptions must remain in a separate schema/domain with dedicated plan, subscription, entitlement, invoice, payment-event and refund records.
+
+### Disposition
+The reviewed finance/refund internal helper privilege boundary is fail-closed at the database grant layer, and the refund request/review logic has useful identity, MFA, approval separation and idempotency protections. This is a static code review only. No payment, refund, invoice, payable, ledger or reconciliation record was created or changed. Production payment settings were not modified.
