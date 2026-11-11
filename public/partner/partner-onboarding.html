@@ -320,6 +320,18 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
         </div>
         </div>
 
+        <section id="partner-verification-status" class="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 space-y-3" aria-labelledby="partner-verification-status-title">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div><p class="text-[10px] font-bold uppercase tracking-widest text-amber-300">Your current account status</p><h3 id="partner-verification-status-title" class="text-lg font-extrabold text-white mt-1">Checking partner status…</h3></div>
+            <span id="partner-status-mode" class="rounded-full border border-slate-600 px-3 py-1 text-[10px] font-bold text-slate-300">Loading</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="rounded-xl border border-slate-700 p-3"><span class="block text-[9px] uppercase tracking-wider text-slate-400">Business verification</span><strong id="partner-status-verification" class="block mt-1 text-sm text-white">Loading</strong></div>
+            <div class="rounded-xl border border-slate-700 p-3"><span class="block text-[9px] uppercase tracking-wider text-slate-400">Compliance review</span><strong id="partner-status-compliance" class="block mt-1 text-sm text-white">Loading</strong></div>
+            <div class="rounded-xl border border-slate-700 p-3"><span class="block text-[9px] uppercase tracking-wider text-slate-400">Commercial access</span><strong id="partner-status-access" class="block mt-1 text-sm text-white">Not confirmed</strong></div>
+          </div>
+          <p id="partner-status-guidance" class="text-xs leading-6 text-slate-300">Your status will appear after your secure partner organization is loaded. Selecting a pathway does not approve commercial operations.</p>
+        </section>
         <div id="onboarding-feedback" class="text-sm" role="status" aria-live="polite"></div>
 
         <!-- SUBMIT ACTION -->
@@ -534,7 +546,7 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 
         const { data: organizations, error: organizationError } = await onboardingClient
           .from("krim_organizations")
-          .select("id, organization_type, status, partner_account_mode")
+          .select("id, organization_type, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
         const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
@@ -550,6 +562,17 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
           throw new Error("Your partner organization is not active. Verification submission is unavailable until its status is resolved by KRIM support.");
         }
         onboardingOrganizationId = Number(partnerOrg.id);
+        const statusLabel = value => String(value || "not_started").split(/[_-]+/).map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : "").join(" ");
+        const verification = String(partnerOrg.partner_verification_status || "not_started").toLowerCase();
+        const compliance = String(partnerOrg.partner_compliance_status || "not_started").toLowerCase();
+        const lifecycle = String(partnerOrg.partner_lifecycle_status || "not_applicable").toLowerCase();
+        const commercialReady = partnerOrg.partner_account_mode === "registered_business" && ["verified", "approved"].includes(verification) && ["active", "verified"].includes(lifecycle) && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(compliance);
+        document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Verification decision recorded" : verification === "pending" ? "Your submission is awaiting review" : "Complete your partner verification";
+        document.getElementById("partner-status-mode").textContent = statusLabel(partnerOrg.partner_account_mode || "pathway not selected");
+        document.getElementById("partner-status-verification").textContent = statusLabel(verification);
+        document.getElementById("partner-status-compliance").textContent = statusLabel(compliance);
+        document.getElementById("partner-status-access").textContent = commercialReady ? "Eligible — subject to approved service capabilities" : "Restricted";
+        document.getElementById("partner-status-guidance").textContent = commercialReady ? "Your organisation has passed the recorded organisation and compliance gates. Each service capability and service area still requires separate evidence and approval before it can be offered through KRIM." : verification === "pending" ? "KRIM is reviewing your submitted information. Do not submit duplicate documents. Commercial operations remain locked until verification, compliance and service capability approvals are complete." : "Choose the correct partner pathway and submit the required evidence. Development and individual-interest pathways do not receive commercial access."; 
         onboardingMessage("Secure session verified. Your documents will be associated only with the verified active partner organization.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
