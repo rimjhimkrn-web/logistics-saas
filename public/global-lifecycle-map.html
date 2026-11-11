@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="KRIM Logistics global lifecycle build and launch-readiness audit board.">
+  <title>Global Lifecycle Audit | KRIM Logistics</title>
+  <link rel="stylesheet" href="../core/krim-core.css">
+  <link rel="stylesheet" href="../core/krim-components.css">
+  <style>
+    :root { color-scheme: dark; }
+    body { background: var(--krim-bg, #07121c); color: var(--krim-text, #e9f0f7); }
+    .audit-wrap { width:min(1100px, calc(100% - 28px)); margin:0 auto; padding:24px 0 56px; }
+    .topbar { display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; border-bottom:1px solid var(--krim-border); padding:8px 0 20px; }
+    .brand { font-weight:800; letter-spacing:.08em; }
+    .eyebrow { color:#7cc7ff; font-size:.76rem; letter-spacing:.14em; text-transform:uppercase; }
+    .hero { padding:34px 0 20px; }
+    .hero h1 { font-size:clamp(2rem, 5vw, 3.4rem); max-width:850px; }
+    .muted { color:var(--krim-text-muted, #a0afbd); }
+    .callout { padding:16px; border:1px solid rgba(244,209,132,.4); border-radius:12px; background:rgba(244,209,132,.07); margin:18px 0; }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0 24px; }
+    .stat, .phase { border:1px solid var(--krim-border); border-radius:14px; background:var(--krim-surface); padding:16px; }
+    .stat strong { display:block; font-size:1.7rem; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0; }
+    input[type=search] { flex:1; min-width:180px; background:var(--krim-surface); color:inherit; border:1px solid var(--krim-border-strong); border-radius:9px; padding:12px; }
+    button, .button { border:1px solid var(--krim-border-strong); border-radius:9px; padding:10px 14px; background:var(--krim-surface-soft); color:inherit; cursor:pointer; }
+    .phase { margin:12px 0; }
+    .phase h2 { font-size:1.12rem; margin:0 0 8px; }
+    .phase p { margin:0 0 12px; }
+    .checkrow { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-top:1px solid var(--krim-border); }
+    .checkrow input { margin-top:5px; width:18px; height:18px; flex:0 0 auto; }
+    .checkrow span { flex:1; }
+    .checkrow.done span { text-decoration:line-through; opacity:.68; }
+    .tag { display:inline-block; border:1px solid var(--krim-border); border-radius:999px; padding:3px 8px; font-size:.72rem; color:var(--krim-text-secondary); }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+    footer { border-top:1px solid var(--krim-border); padding-top:20px; margin-top:32px; font-size:.9rem; }
+    @media(max-width:600px){ .stats{grid-template-columns:1fr;} .audit-wrap{width:min(100% - 20px,1100px);} }
+  </style>
+</head>
+<body>
+  <div class="audit-wrap">
+    <header class="topbar">
+      <div><div class="brand">KRIM LOGISTICS</div><div class="eyebrow">Global OS · Build governance</div></div>
+      <a class="button" href="./index.html">Public home ↗</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Lifecycle & ecosystem audit</div>
+        <h1>Build the global system in the right order.</h1>
+        <p class="muted">A practical control board for checking repository coverage, backend contracts, user journeys, security, and launch readiness.</p>
+      </section>
+
+      <div class="callout"><strong>Important:</strong> this is a planning and audit interface, not proof that features are implemented. Checkboxes save only in this browser. A checked item means your team has reviewed it—not that the code is automatically tested or deployed. Never enter secrets here.</div>
+
+      <section class="stats" aria-live="polite">
+        <div class="stat"><span class="muted">Reviewed items</span><strong id="doneCount">0</strong></div>
+        <div class="stat"><span class="muted">Checklist items</span><strong id="allCount">0</strong></div>
+        <div class="stat"><span class="muted">Progress</span><strong id="percent">0%</strong></div>
+      </section>
+
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Filter phases, files, and launch gates…" aria-label="Filter checklist">
+        <button id="showOpen" type="button">Show open items</button>
+        <button id="showAll" type="button">Show all items</button>
+        <button id="reset" type="button">Reset local checks</button>
+      </div>
+
+      <section id="phases" aria-label="Build phases">
+        <article class="phase" data-phase="1">
+          <span class="tag">PHASE 01 · FOUNDATION</span><h2>Shared foundations and repository delivery</h2>
+          <p class="muted">Audit existing shared CSS/configuration first; avoid duplicating or replacing committed foundations.</p>
+          <label class="checkrow"><input type="checkbox"><span>Inventory current files and record EXISTING / PARTIAL / MISSING separately.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Confirm environment-safe routes and GitHub Pages base-path behaviour.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Confirm shared design system, accessible forms, navigation, localization and error handling.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Add repeatable validation, security scanning, migration review and deployment checks.</span></label>
+        </article>
+        <article class="phase" data-phase="2">
+          <span class="tag">PHASE 02 · TRUST & IDENTITY</span><h2>Identity, organizations, permissions and onboarding</h2>
+          <p class="muted">This is a blocker for all real multi-user operations.</p>
+          <label class="checkrow"><input type="checkbox"><span>Visitor → Get Started → signup/login → verification → role selection → organization → correct workspace works end-to-end.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Organization membership, invitation, MFA/recovery and account lifecycle work.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>RLS and server-side RBAC tested across at least two separate organizations and multiple roles.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Privileged Control Centre is isolated from public navigation and protected server-side.</span></label>
+        </article>
+        <article class="phase" data-phase="3">
+          <span class="tag">PHASE 03 · PARTNER NETWORK</span><h2>Partner onboarding and real capacity</h2>
+          <label class="checkrow"><input type="checkbox"><span>Carrier/warehouse/forwarder application, KYB/KYC, licenses, insurance and manual review are operational.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Partner fleet/capacity/service areas and supported corridors are verified.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Load discovery → bid/offer → award → assignment acceptance is connected to backend state.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Partner can report pickup, milestones, exceptions and proof of delivery; operations can audit changes.</span></label>
+        </article>
+        <article class="phase" data-phase="4">
+          <span class="tag">PHASE 04 · CUSTOMER TRANSACTION</span><h2>Quote, booking, shipment and tracking</h2>
+          <label class="checkrow"><input type="checkbox"><span>Quote is calculated by a trusted backend from valid route, cargo, service and market rules.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Accept quote creates one valid booking/shipment; repeated submissions are idempotent.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Every Get Started, quote, booking and workspace action opens the intended next step.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Tracking, document access, exception resolution and delivery proof work with authorization.</span></label>
+        </article>
+        <article class="phase" data-phase="5">
+          <span class="tag">PHASE 05 · MONEY SAFETY</span><h2>Payments, ledger, refunds and settlement</h2>
+          <label class="checkrow"><input type="checkbox"><span>Checkout uses server-priced accepted quote; browser-supplied amount is never authoritative.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Razorpay order, payment verification and webhook names/contracts match deployed functions.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Signature/provider status, amount, currency, customer/order binding and duplicate events are verified server-side.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Frontend shows success only after verified backend response; errors stay visible and recoverable.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Ledger reconciliation, refunds, chargebacks and partner settlement are tested with evidence.</span></label>
+        </article>
+        <article class="phase" data-phase="6">
+          <span class="tag">PHASE 06 · OPERATIONS</span><h2>Global ecosystem, integrations and service quality</h2>
+          <label class="checkrow"><input type="checkbox"><span>Country/market matrix accurately distinguishes configured, supported, and actually live services.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Warehouse, multimodal, customs, enterprise/EDI, notifications, claims and analytics domains have defined contracts.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Logs, alerts, retries, dead letters, idempotency, backups and restore rehearsal are proven.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Privacy, retention, accessibility, sanctions/export controls and local legal requirements reviewed per launch market.</span></label>
+        </article>
+        <article class="phase" data-phase="7">
+          <span class="tag">PHASE 07 · APPROVED GROWTH</span><h2>Partner-first acquisition, then customer growth</h2>
+          <label class="checkrow"><input type="checkbox"><span>Partner prospect pipeline records source, legal basis, consent/suppression and review history.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Outbound campaigns require approved audience/message, rate limits, unsubscribe and monitoring.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Partner capacity and operational support are ready before demand is generated.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Unit economics, repeat usage, on-time delivery, claims and support costs are measured.</span></label>
+        </article>
+        <article class="phase" data-phase="8">
+          <span class="tag">PHASE 08 · CLOUD & LIVE LAUNCH</span><h2>Production readiness gate</h2>
+          <label class="checkrow"><input type="checkbox"><span>Core user journeys pass end-to-end in test mode and results are documented.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Secrets are server-side only; no service-role or Razorpay secret key exists in frontend/repository.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Security, RLS, payments, rollback, monitoring, support and recovery checks have evidence.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Live Razorpay activation is approved only after all required gates pass.</span></label>
+          <label class="checkrow"><input type="checkbox"><span>Launch begins in a deliberately limited, verified corridor; other markets remain clearly unavailable.</span></label>
+        </article>
+      </section>
+
+      <div class="actions">
+        <a class="button" href="../docs/KRIM-GLOBAL-LIFECYCLE-MASTER-CHECKLIST.md">Open full file-by-file master checklist ↗</a>
+        <a class="button" href="https://github.com/rimjhimkrn-web/logistics-saas/tree/krim/global-lifecycle-blueprint">Review blueprint branch ↗</a>
+      </div>
+    </main>
+    <footer class="muted">KRIM Logistics · Build governance. Checklist state is stored in this browser only; it is not written to Supabase and is not a production readiness certificate.</footer>
+  </div>
+<script>
+(function () {
+  "use strict";
+  const key = "krim.lifecycle.audit.v1";
+  const checks = Array.from(document.querySelectorAll("#phases input[type=checkbox]"));
+  const search = document.getElementById("search");
+  let openOnly = false;
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || "[]");
+    checks.forEach((box, i) => { box.checked = saved[i] === true; });
+  } catch (_) {}
+  function render() {
+    let done = 0;
+    checks.forEach(box => {
+      const row = box.closest(".checkrow");
+      const phase = box.closest(".phase");
+      row.classList.toggle("done", box.checked);
+      if (box.checked) done++;
+      const matches = (phase.innerText + " " + row.innerText).toLowerCase().includes(search.value.trim().toLowerCase());
+      row.hidden = !matches || (openOnly && box.checked);
+    });
+    document.querySelectorAll(".phase").forEach(phase => {
+      phase.hidden = !Array.from(phase.querySelectorAll(".checkrow")).some(row => !row.hidden);
+    });
+    document.getElementById("doneCount").textContent = done;
+    document.getElementById("allCount").textContent = checks.length;
+    document.getElementById("percent").textContent = Math.round(done / Math.max(checks.length, 1) * 100) + "%";
+    try { localStorage.setItem(key, JSON.stringify(checks.map(box => box.checked))); } catch (_) {}
+  }
+  checks.forEach(box => box.addEventListener("change", render));
+  search.addEventListener("input", render);
+  document.getElementById("showOpen").addEventListener("click", () => { openOnly = true; render(); });
+  document.getElementById("showAll").addEventListener("click", () => { openOnly = false; render(); });
+  document.getElementById("reset").addEventListener("click", () => {
+    if (!window.confirm("Reset this browser's checklist marks? This does not change GitHub or Supabase.")) return;
+    checks.forEach(box => { box.checked = false; });
+    openOnly = false; render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
