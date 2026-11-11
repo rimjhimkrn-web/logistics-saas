@@ -79,7 +79,7 @@ begin
 
   select tm.id into v_mode_id
   from public.krim_transport_modes tm
-  where tm.code=p_transport_mode and tm.is_active=true
+  where tm.code=case p_transport_mode\n    when 'warehouse_transfer' then 'WAREHOUSE'\n    else upper(p_transport_mode)\n  end\n    and tm.is_active=true
   limit 1;
 
   if v_mode_id is null then
