@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
@@ -150,7 +150,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   return (
     <View style={s.safe}>
       <View style={s.top}>
-        <View><Text style={s.topBrand}>KRIM CUSTOMER</Text><Text style={s.topSub}>GLOBAL LOGISTICS OPERATING SYSTEM</Text></View>
+        <Image source={require("../assets/krim-master-logo.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" />
         <Text style={s.signed}>● SECURE SESSION</Text>
       </View>
       <ScrollView contentContainerStyle={s.content}>
@@ -265,7 +265,7 @@ function Action({title,onPress,secondary=false,disabled=false}:{title:string;onP
 const s = StyleSheet.create({
  safe:{flex:1,backgroundColor:"#F3F6FA"}, top:{backgroundColor:navy,paddingHorizontal:17,paddingVertical:14,flexDirection:"row",alignItems:"center",justifyContent:"space-between"},
  checkoutHeader:{paddingHorizontal:18,paddingVertical:16,backgroundColor:"#fff",borderBottomWidth:1,borderBottomColor:line,flexDirection:"row",alignItems:"center",justifyContent:"space-between"},checkoutTitle:{fontSize:18,fontWeight:"900",color:navy},checkoutClose:{fontSize:14,fontWeight:"900",color:blue},checkoutLoading:{flex:1,alignItems:"center",justifyContent:"center",gap:12},
- topBrand:{fontSize:14,fontWeight:"900",letterSpacing:1,color:"#fff"},topSub:{fontSize:14,letterSpacing:1.5,color:"#B9C9DA",marginTop:3},signed:{fontSize:14,fontWeight:"900",color:"#B9F2D7"},
+ workspaceLogo:{width:190,height:50,maxWidth:"72%"},signed:{fontSize:14,fontWeight:"900",color:"#B9F2D7"},
  content:{padding:15,paddingBottom:28},info:{padding:12,borderRadius:11,backgroundColor:"#EAF2FF",marginBottom:12},infoText:{fontSize:14,lineHeight:16,color:"#234A7D"},
  errorBox:{padding:12,borderRadius:11,backgroundColor:"#FDECEC",marginBottom:12},errorText:{fontSize:14,lineHeight:16,color:"#9C2525"},
  panel:{backgroundColor:"#fff",borderWidth:1,borderColor:line,borderRadius:15,padding:15,marginBottom:12},kicker:{fontSize:14,fontWeight:"900",letterSpacing:1.4,color:teal,marginBottom:7},orgName:{fontSize:17,fontWeight:"900",color:navy},tiny:{fontSize:14,color:muted,marginTop:4,lineHeight:15},muted:{fontSize:14,color:muted,lineHeight:19},orgChips:{flexDirection:"row",flexWrap:"wrap",gap:7,marginTop:12},chip:{borderWidth:1,borderColor:line,borderRadius:18,paddingHorizontal:11,paddingVertical:8},chipActive:{backgroundColor:blue,borderColor:blue},chipText:{fontSize:14,fontWeight:"800",color:navy},chipTextActive:{color:"#fff"},
