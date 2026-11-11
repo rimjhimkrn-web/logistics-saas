@@ -96,3 +96,14 @@ A large collection of old partner pages was found to contain static sample compa
 - Step 4 is **backend-guarded and legacy-page cleanup substantially complete, but not fully acceptance-tested**. It remains open until a controlled test with an explicitly designated test account and genuine test documents can verify the complete workflow without activating a real commercial partner.
 
 - Static JavaScript syntax checks passed for the authenticated partner gateway, development/test and business pathway workspaces, both AAL2 admin review queues, and the retained live partner opportunity, accepted-assignment, capacity, driver-invitation and dispatch-assignment pages. These are source-level checks only; they do not substitute for authenticated browser E2E.
+
+
+## Evidence-backed capability review gate — 11 November 2026
+- Rechecked the live partner onboarding and capability submission contracts against the production RPC signatures.
+- Confirmed the private verification bucket remains non-public, capped at 10 MiB, and restricted to PDF/JPEG/PNG.
+- Found that the capability review list RPC exposed every pending capability row, including legacy/onboarding declarations without capability-specific evidence. The review RPC correctly rejected approval without one to five partner-owned evidence files, which meant those rows were not actionable.
+- Updated `krim_admin_list_partner_capabilities` to return only pending submissions with one to five capability evidence paths, matching organisation/user/capability path structure, and storage ownership by the original submitter. It now separately reports the count of pending declarations held for missing or invalid evidence.
+- Updated the restricted capability review page to distinguish review-ready submissions from held declarations and explain that the partner must submit capability-specific evidence before review.
+- Verified against production data: 1 pending capability row, 0 evidence-backed review-ready submissions, 1 held declaration. Anonymous execution of the list RPC is denied; authenticated execution remains available subject to its in-function AAL2 and platform-permission checks.
+- No partner was approved, no document was created, and no operational coverage or commercial access was activated.
+- Remaining real-world gate: a genuine partner must sign in, submit capability-specific evidence, and complete independent organisation/compliance review before any capability can be approved.
