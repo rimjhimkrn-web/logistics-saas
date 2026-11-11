@@ -150,7 +150,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   return (
     <View style={s.safe}>
       <View style={s.top}>
-        <Image source={require("../assets/krim-master-logo.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" />
+        <Image source={require("../assets/icon.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" />
         <Text style={s.signed}>● SECURE SESSION</Text>
       </View>
       <ScrollView contentContainerStyle={s.content}>
