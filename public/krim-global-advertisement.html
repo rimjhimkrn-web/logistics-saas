@@ -62,6 +62,7 @@ footer{background:#06172a;color:#b5c6d5;padding:30px 0;font-size:11px}footer .wr
 <div class="field full"><label for="interest">I am interested in *</label><select id="interest" name="interest" required><option value="Customer freight enquiry">Customer freight enquiry</option><option value="Logistics partner application">Logistics partner application</option><option value="Enterprise or integration discussion">Enterprise or integration discussion</option><option value="General platform information">General platform information</option></select></div>
 <div class="field full"><label for="message">How can KRIM help? *</label><textarea id="message" name="message" required minlength="10" maxlength="4000" placeholder="Share your location, cargo/service needs, routes or partner capabilities."></textarea></div>
 <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
+<div class="field full"><label style="display:flex;gap:10px;align-items:flex-start;font-weight:600;line-height:1.5"><input id="privacy_consent" name="privacy_consent" type="checkbox" value="true" required style="width:17px;height:17px;min-width:17px;margin-top:2px"> <span>I agree that KRIM Logistics may use these details to respond to my enquiry. I have read the <a href="../privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. *</span></label></div>
 </div><button class="btn primary" id="submit-enquiry" type="submit">Send enquiry securely ↗</button><div class="response" id="form-response" role="status" aria-live="polite"></div><p class="fine">Please do not include passwords, payment-card details or sensitive personal documents. The inquiry service records submissions; automated email replies and a response-time guarantee are not represented as active here.</p>
 </form></div></div></section>
 </main>
@@ -83,7 +84,7 @@ var config=window.KRIM_CONFIG&&window.KRIM_CONFIG.supabase;
 if(!config||!config.url||!config.publishableKey){responseBox.textContent="The enquiry service is not configured. Please try again later.";return;}
 var values=Object.fromEntries(new FormData(form).entries());
 var interest=values.interest;
-var payload={full_name:values.full_name,email:values.email,organization:values.organization,source_page:"krim-global-advertisement.html",message:"Enquiry type: "+interest+"\n\n"+values.message,website:values.website||""};
+var payload={full_name:values.full_name,email:values.email,organization:values.organization,privacy_consent:values.privacy_consent==="true",source_page:"krim-global-advertisement.html",message:"Enquiry type: "+interest+"\n\n"+values.message,website:values.website||""};
 button.disabled=true;button.textContent="Sending enquiry…";responseBox.textContent="Submitting to KRIM's enquiry service…";
 try{
 var res=await fetch(config.url+"/functions/v1/krim-public-contact-inquiry",{method:"POST",headers:{"Content-Type":"application/json","apikey":config.publishableKey},body:JSON.stringify(payload)});
