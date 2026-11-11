@@ -217,3 +217,47 @@ These are strong server-side gates in the inspected definitions. They still requ
 
 ## Status
 This is a static review of live function definitions, not a successful end-to-end operation. No partner capability, quote, assignment, driver assignment, delivery POD, or payment was created or altered during this review.
+
+
+## Delivery POD, shipment completion and privileged helper review — static batch 3
+
+### Driver POD submission
+`krim_driver_submit_delivery_pod(...)`:
+- requires authenticated identity;
+- locks a driver assignment belonging to the signed-in user;
+- requires active driver membership in the assignment organisation;
+- requires the assignment to be in transit and linked to an accepted/active partner shipment assignment;
+- checks private delivery evidence records against `storage.objects` and requires object ownership by the assigned driver;
+- delegates POD creation to the internal submission function.
+
+The internal submission function locks the partner assignment, shipment and leg; checks shipment/assignment state; returns the existing pending/verified POD for a retry; and writes POD, execution, tracking and audit records in one transaction.
+
+### POD review and delivery authorization
+`krim_admin_review_delivery_pod(...)`:
+- requires authenticated identity, AAL2 and `admin.platform`;
+- locks the POD and only permits submitted/under-review states;
+- prevents a driver who submitted delivery evidence from independently reviewing that POD;
+- requires at least one private evidence object owned by the assigned driver;
+- verifies or rejects the POD, then on verification invokes the delivery-authorization helper;
+- records a platform audit event with the decision and reason.
+
+`krim_internal_authorize_delivery(...)` verifies the POD state and the linked assignment/shipment/leg/partner relationships, locks the relevant rows, marks the leg and assignment completed, and marks the shipment delivered only when all other legs are delivered/completed/cancelled. It writes tracking, partner execution and audit events. Already-delivered shipments return an idempotent result.
+
+### Internal helper privilege boundary
+Live privilege checks confirm:
+- `krim_internal_verify_delivery_pod(...)`: anon EXECUTE false; authenticated EXECUTE false; service_role EXECUTE true.
+- `krim_internal_authorize_delivery(...)`: anon false; authenticated false; service_role true.
+- `krim_internal_submit_delivery_pod(...)`: anon false; authenticated false; service_role true.
+- The public driver submission and admin review entry points are authenticated-callable, but contain their own identity/role gates.
+
+This is the intended boundary: browser users call the guarded entry points; internal mutation helpers are not directly callable by anon or authenticated roles.
+
+### Important remaining checks
+1. The admin review entry point checks AAL2 and platform permission; regression tests must prove a driver, partner admin, regular organisation admin and non-MFA platform user cannot verify POD.
+2. The driver submission path verifies evidence ownership and driver/assignment linkage; test a copied storage path, another driver's object, a different partner organisation, and duplicate concurrent submissions.
+3. Delivery authorization is idempotent when shipment status is already delivered. Test two concurrent verification requests and multi-leg shipments where one leg is delivered but the overall shipment must remain in transit.
+4. Review rejection and POD resubmission semantics need explicit tests. Confirm a rejected POD cannot be treated as delivered and that replacement evidence creates a clean review trail.
+5. Verify the helper function owners and all execute grants after any future migration; do not grant internal helpers to authenticated users.
+
+### Disposition
+Static review found the expected service-role-only privilege boundary for the three internal POD helpers and strong server-side linkage/ownership/state checks in the reviewed entry points. No POD, shipment status, assignment, tracking, or financial records were modified. No live end-to-end test was run because production has no real verified partner/assignment/POD fixtures and should not be populated with fabricated operational transactions.
