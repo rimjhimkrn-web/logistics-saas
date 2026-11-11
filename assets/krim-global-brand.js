@@ -28,7 +28,7 @@
     }else{
       var bar=document.createElement("div");bar.className="krim-global-brandbar";
       var link=document.createElement("a");link.className="krim-global-brand-link";link.href="/logistics-saas/";link.setAttribute("aria-label","KRIM Logistics home");
-      var img=document.createElement("img");img.src=base;img.alt="KRIM Logistics — Global Logistics Operating System";link.appendChild(img);bar.appendChild(link);
+      var img=document.createElement("img");img.src=base;img.alt="KRIM Logistics — Global Logistics Operating System";img.className="krim-official-brand-logo";link.appendChild(img);bar.appendChild(link);
       var body=document.body;
       if(header){header.insertBefore(link,header.firstChild);link.className="krim-global-brand-link";link.style.cssText="display:inline-flex;align-items:center;padding:6px 14px;max-width:100%;";}
       else if(body){body.insertBefore(bar,body.firstChild);}
