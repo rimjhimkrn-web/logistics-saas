@@ -130,3 +130,11 @@ KRIM may claim recurring revenue proof only after:
 - No unresolved critical security, legal, tax or payment issue.
 
 These are internal proof standards, not a revenue guarantee.
+
+## Production baseline findings added 11 November 2026
+- No dedicated SaaS plan, price, feature, subscription, trial, entitlement, SaaS invoice, SaaS payment event or SaaS refund tables were found in the inspected public/private catalog.
+- Existing organisation IDs are bigint; the private organization access helper accepts `uuid, bigint`.
+- Existing roles include `organization_owner`, `organization_admin`, `finance_manager`, `platform_admin` and `platform_superadmin`.
+- The current permission catalogue has `finance.view/manage` and `organization.view/manage`, but no explicit SaaS billing, subscription, plan, trial or refund permission codes. Do not assume `finance.manage` alone is sufficient.
+- All 27 matching public/private tables in the catalog baseline had RLS enabled, but this does not grant a new SaaS table any inherited protection.
+- Read-only baseline details: `docs/audits/KRIM-PRODUCTION-SCHEMA-BASELINE-SAAS-READINESS-2026-11-11.md`.
