@@ -22,7 +22,7 @@
 <div class="strip"><div class="shell stripin"><span>● KRIM GLOBAL COMMERCE · PAYMENT READINESS</span><span id="session-label">SECURE ACCESS CHECK</span></div></div>
 <header class="header"><div class="shell nav"><a class="brand" id="home-link" href="#" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:220px;height:58px;max-width:100%;object-fit:contain;object-position:left center"></a><div class="navlinks"><a class="btn" id="back-link" href="#">← Quote comparison</a><a class="btn" id="workspace-link" href="#">Customer workspace ↗</a></div></div></header>
 <main class="shell">
-<section class="hero"><div class="eyebrow">Customer journey · Payment readiness</div><h1>Review the transaction.<br>Then pay securely.</h1><p>Before the payment provider opens, KRIM checks the exact accepted quote, shipment ownership, partner assignment, expiry and supported currency. This page is a readiness review; it does not create an order or claim a payment has succeeded.</p><div class="tags"><span class="tag">🔐 Authenticated customer</span><span class="tag">🧾 Exact accepted quote</span><span class="tag">🤝 Partner assignment gate</span><span class="tag">🌍 Global payment architecture</span><span class="tag">💳 Active checkout: Razorpay · INR</span></div></section>
+<section class="hero"><div class="eyebrow">Customer journey · Payment readiness</div><h1>Review the transaction.<br>Then pay securely.</h1><p>Before the payment provider opens, KRIM checks the exact accepted quote, shipment ownership, partner assignment, expiry and supported currency. This page is a readiness review; it does not create an order or claim a payment has succeeded.</p><div class="tags"><span class="tag">🔐 Authenticated customer</span><span class="tag">🧾 Exact accepted quote</span><span class="tag">🤝 Partner assignment gate</span><span class="tag">🌍 Global payment architecture</span><span class="tag">💳 Razorpay · INR verification required</span></div></section>
 <div id="preview-banner" class="banner preview" hidden><b>INTERFACE PREVIEW — NO LIVE PAYMENT</b><br>Sample route details are illustrative only. No live shipment or quote is loaded. Continue and payment actions are disabled.</div>
 <div id="main-feedback" class="banner">Verifying the quote and shipment reference. No payment order has been created.</div>
 <section class="layout">
@@ -85,15 +85,15 @@ $("origin").textContent=shipment.origin_place_label||"Origin not recorded";$("de
 const expiryOk=!quote.valid_until||new Date(quote.valid_until).getTime()>Date.now();
 const quoteOk=quote.status==="accepted"&&Number(quote.amount)>0&&expiryOk;
 const currency=String(quote.currency_code||"").toUpperCase();
- let foreignCurrencyReady=false;
+ let currencyCapabilityReady=false;
  let currencyBlockers=[];
- if(currency&&currency!=="INR"){
+ if(currency){
    const capabilityResult=await client.functions.invoke("krim-payment-capability-status",{body:{country_code:"IN",currency_code:currency,provider_code:"razorpay"}});
-   foreignCurrencyReady=!capabilityResult.error&&capabilityResult.data&&capabilityResult.data.success===true&&capabilityResult.data.enabled===true;
+   currencyCapabilityReady=!capabilityResult.error&&capabilityResult.data&&capabilityResult.data.success===true&&capabilityResult.data.operationally_verified===true;
    if(!capabilityResult.error&&capabilityResult.data) currencyBlockers=Array.isArray(capabilityResult.data.blockers)?capabilityResult.data.blockers:[];
-   if(capabilityResult.error) currencyBlockers=["KRIM could not verify this currency capability right now."];
+   if(capabilityResult.error) currencyBlockers=["KRIM could not verify merchant, settlement and refund readiness right now."];
  }
- const currencyOk=Number(quote.amount)>0&&(currency==="INR"||foreignCurrencyReady);
+ const currencyOk=Number(quote.amount)>0&&currencyCapabilityReady;
 const shipmentOk=shipment.status==="confirmed";
 let assignmentOk=false;
 if(quote.partner_quote_id){
@@ -105,7 +105,7 @@ check("quote",quoteOk,quoteOk?"Quote is accepted, positive-value and not expired
 check("assignment",assignmentOk,assignmentOk?"Matching partner assignment is accepted.":"Matching partner assignment must be accepted before checkout.");
 check("shipment",shipmentOk,shipmentOk?"Shipment is confirmed.":"Shipment must be confirmed; current status is "+(shipment.status||"unknown")+".");
 const currencyBlockerMessage=currencyBlockers.length?" Blockers: "+currencyBlockers.join(" "):"";
- check("currency",currencyOk,currencyOk?(currency==="INR"?"Current INR checkout path is configured; live merchant and settlement readiness still require verification.":"This currency passed KRIM's server-side capability check."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; no automatic conversion occurs."+currencyBlockerMessage));
+ check("currency",currencyOk,currencyOk?"Provider, merchant eligibility, presentment, settlement, refunds and capability evidence passed KRIM's server-side check.":(currency==="INR"?"INR checkout is configured but cannot open until live merchant eligibility, settlement, refund support and evidence review are verified.":"This currency is not enabled in KRIM's fully verified payment capability registry; no automatic conversion occurs.") + currencyBlockerMessage);
 $("quote-status").textContent=quoteOk?"Accepted":"Blocked";$("quote-status").className="pill "+(quoteOk?"good":"bad");
 const canContinue=quoteOk&&currencyOk&&shipmentOk&&assignmentOk;
 setReady(canContinue);
