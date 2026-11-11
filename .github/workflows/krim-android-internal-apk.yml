@@ -54,12 +54,11 @@ jobs:
       - name: Validate TypeScript
         run: npm run typecheck
 
-      - name: Apply official KRIM master logo to Android app icons
+      - name: Apply official KRIM master logo without cropping
         run: |
-          npx --yes sharp-cli -i ../../assets/file_00000000242881faa8abc7188d1c40c4.png -o assets -f png resize 1024 1024
-          cp assets/file_00000000242881faa8abc7188d1c40c4.png assets/icon.png
-          cp assets/file_00000000242881faa8abc7188d1c40c4.png assets/adaptive-icon.png
-          rm assets/file_00000000242881faa8abc7188d1c40c4.png
+          npx --yes sharp-cli -i ../../assets/file_00000000242881faa8abc7188d1c40c4.png -o assets/icon.png -f png resize 1024 1024 --fit contain --background '#071B35'
+          npx --yes sharp-cli -i ../../assets/file_00000000242881faa8abc7188d1c40c4.png -o assets/adaptive-icon.png -f png resize 680 680 --fit contain --background '#071B35'
+          npx --yes sharp-cli -i assets/adaptive-icon.png -o assets/adaptive-icon.png -f png extend 172 172 172 172 --background '#071B35'
 
       - name: Validate Expo Android export
         run: npx expo export --platform android
