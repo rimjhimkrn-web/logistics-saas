@@ -796,6 +796,25 @@ if (financialReconciliationError || !financialTransactionId) {
   }, 500);
 }
 
+// Read back the committed row so the response reflects the canonical DB state.
+const { data: committedPaymentOrder, error: committedOrderError } = await supabase
+  .from("payment_orders")
+  .select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
+  .eq("id", paymentOrder.id)
+  .maybeSingle();
+
+if (committedOrderError || !committedPaymentOrder ||
+    committedPaymentOrder.status !== "paid" ||
+    committedPaymentOrder.razorpay_payment_id !== razorpayPaymentId) {
+  console.error("Atomic payment committed but read-back verification failed:", committedOrderError);
+  return jsonResponse({
+    error: "Payment reconciliation committed but confirmation is pending; retry required.",
+    code: "PAYMENT_COMMIT_READBACK_PENDING",
+    payment_order_id: paymentOrder.id,
+  }, 500);
+}
+updatedPaymentOrder = committedPaymentOrder;
+
 // --------------------------------------------------
 
 // Final response
