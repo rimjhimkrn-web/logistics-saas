@@ -69,3 +69,29 @@ A review-only SQL file was added at `docs/sql/krim-partner-quote-confidentiality
 
 ### Important deployment gate
 Before applying this policy in staging or production, inspect the complete definitions and authorization of `krim_award_partner_quote_for_checkout`, `krim_respond_to_partner_assignment`, and `krim_internal_prepare_customer_quote`; confirm all internal function calls are security-definer/service-only as intended; and run positive/negative integration tests. No policy or grant was changed in production.
+
+
+## Customer quote / partner award workflow review — 2026-11-11
+
+### Direct customer visibility after the proposed policy
+- `krim_quotes` SELECT is scoped to the customer organisation.
+- `krim_quote_versions` and `krim_quote_events` SELECT are scoped through the parent customer quote's customer organisation.
+- Therefore, the proposed partner-only policy on raw `krim_partner_quotes` does not block customer access to their own quote versions or quote events.
+- However, `krim_award_partner_quote_for_checkout` copies partner quote identifiers, partner quote number, partner organisation ID, amount and currency into `krim_quote_versions.pricing_snapshot`. These fields are currently visible to the customer organisation through quote-version RLS. This is not the raw partner notes exposure, but it is a disclosure decision: confirm whether partner identity and internal partner quote reference are intended customer-visible fields. If not, remove them from customer-visible snapshots or expose an allowlisted projection.
+
+### Release-blocking lifecycle concern
+The live `krim_award_partner_quote(p_partner_quote_id)` function:
+1. Marks the selected partner quote `accepted`.
+2. Marks competing partner quotes `rejected`.
+3. Marks the partner opportunity `awarded`.
+4. Creates a partner assignment with status `offered` and a 24-hour response deadline.
+5. If the shipment is `quoted`, transitions it to `confirmed` before the partner has accepted the offered assignment.
+
+The partner response function later changes the assignment to `accepted` or `rejected`. Thus the shipment can be marked `confirmed` while the partner assignment remains merely `offered`. This conflicts with the intended business rule that a booking is confirmed only after a partner explicitly accepts the specific job and terms. The checkout wrapper also creates a customer quote with status `accepted` immediately after the partner award, before partner assignment acceptance.
+
+**Required remediation:** separate customer selection/award intent from confirmed booking. Keep shipment in a non-confirmed state while assignment is `offered`; only transition to `confirmed` after `krim_respond_to_partner_assignment(..., true, ...)` completes all capability/compliance checks and commits the accepted assignment. Define compensating/reopen behaviour for rejection/expiry, competing quotes, and customer quote/payment state. Preserve idempotency and lock ordering. Do not patch production without state-machine migration review and end-to-end regression tests.
+
+### Verification limits
+- These are static live-function and policy inspections. No test users, quotes, assignments, shipments, payments or financial records were created or modified.
+- No production function, policy, grant or data was changed.
+- The partner-quote confidentiality containment SQL remains review-only and must be tested in staging before deployment.
