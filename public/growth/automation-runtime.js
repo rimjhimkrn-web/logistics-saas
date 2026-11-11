@@ -15,11 +15,11 @@ class AutomationRuntime {
     console.log("🕒 [KRIM Automation Runtime] Initializing Cron Scheduler & Intelligence Learning Engine...");
     this.verifyAutomationSafeguards();
     this.initialized = true;
-    console.log("✅ [KRIM Automation Runtime] Automation & Cron Engine Active.");
+    console.log("[KRIM Automation] Page runtime initialized; this does not indicate scheduled jobs are active.");
   }
 
   verifyAutomationSafeguards() {
-    console.log("🛡️ [Automation Guardrails] Active: Dead-letter queue retries enabled, automated commercial overrides prohibited, and strict deduplication enforced.");
+    console.log("[KRIM Automation] Scheduler, retry, and deduplication status must be verified from backend execution records.");
   }
 }
 
