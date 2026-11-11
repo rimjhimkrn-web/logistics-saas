@@ -37,9 +37,14 @@
     try {
       let result;
       if (mode === "register") {
+        if (values.get("terms_accepted") !== "true") {
+          throw new Error("Please accept the Terms and Privacy Policy to create an account.");
+        }
         result = await window.KRIM.auth.signUp({
           email,
-          password: String(values.get("password") || "")
+          password: String(values.get("password") || ""),
+          termsAccepted: true,
+          termsVersion: "2026-11-11"
         });
       } else if (mode === "recovery") {
         result = await window.KRIM.auth.requestPasswordReset(email);
