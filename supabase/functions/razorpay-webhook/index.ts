@@ -644,62 +644,18 @@ return jsonResponse({ success: false, error: "Webhook processing finalization fa
 return jsonResponse({ success: true, already_paid: true, duplicate_payment: true });
 }
 
-/*
-* Conditional paid-state transition. Only the observed prior state may transition.
-* The returned row lets us detect concurrent deliveries instead of overwriting them.
-*/
-const { data: paidOrder, error: updatePaymentError } = await supabaseAdmin
-.from("payment_orders")
-.update({
-status: "paid",
-razorpay_payment_id: razorpayPaymentId,
-paid_at: new Date().toISOString(),
-failure_reason: null,
-})
-.eq("id", paymentOrder.id)
-.eq("status", paymentOrder.status)
-.select("id, status, razorpay_payment_id")
-.maybeSingle();
-
-if (updatePaymentError) {
-console.error("Failed to mark payment as paid:", updatePaymentError);
-return jsonResponse({ success: false, error: "Could not reconcile payment" }, 500);
-}
-
-if (!paidOrder) {
-const { data: currentOrder, error: currentOrderError } = await supabaseAdmin
-.from("payment_orders")
-.select("id, status, razorpay_payment_id")
-.eq("id", paymentOrder.id)
-.maybeSingle();
-
-if (currentOrderError) {
-console.error("Could not verify concurrent payment reconciliation.", currentOrderError);
-return jsonResponse({ success: false, error: "Could not verify payment reconciliation" }, 500);
-}
-
-if (currentOrder?.status !== "paid" || currentOrder.razorpay_payment_id !== razorpayPaymentId) {
-return jsonResponse({
-success: false,
-error: "Payment order changed during reconciliation; manual review may be required.",
-code: "PAYMENT_RECONCILIATION_CONFLICT",
-}, 409);
-}
-}
-}
-
-// Do not acknowledge captured-payment events until the matching financial
-// transaction exists. The RPC is transactional and idempotent.
+// The canonical RPC atomically binds the captured provider payment and
+// creates/verifies its financial ledger row. No direct paid-state write here.
 if (eventType === "payment.captured" || eventType === "order.paid") {
   const { data: financeTransactionId, error: financeReconciliationError } = await supabaseAdmin.rpc(
     "krim_internal_reconcile_razorpay_captured_payment",
     { p_payment_order_id: paymentOrder.id, p_razorpay_payment_id: razorpayPaymentId },
   );
   if (financeReconciliationError || !financeTransactionId) {
-    console.error("Payment finance reconciliation failed; event remains retryable.", financeReconciliationError);
+    console.error("Atomic payment reconciliation failed; event remains retryable.", financeReconciliationError);
     return jsonResponse({
       success: false,
-      error: "Payment confirmed but finance reconciliation is pending; retry required",
+      error: "Payment finance reconciliation is pending; retry required",
       code: "PAYMENT_FINANCE_RECONCILIATION_PENDING",
     }, 500);
   }
