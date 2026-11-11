@@ -147,3 +147,73 @@ For every function, tests must cover unauthenticated execution, wrong organisati
 - No function grants were changed or revoked. This is intentional: revoking a callable RPC without tracing every web/mobile/Edge Function caller could break production workflows.
 - No broad grants or policies were added.
 - The review is **still in progress** until function-by-function test evidence and a full call-site map exist.
+
+
+## Partner and dispatch lifecycle RPC review — static batch 2
+
+The following live production definitions were inspected:
+
+### Partner capability submission
+`krim_partner_submit_service_capability(...)`:
+- requires authenticated `auth.uid()`;
+- requires `partner.manage` for the submitted organisation;
+- requires an active registered-business partner organisation;
+- requires current organisation compliance;
+- requires an active KRIM transport mode and active coverage country;
+- validates service type, weight and region lengths;
+- limits evidence to one through five files and constrains storage paths to the submitting organisation and user;
+- creates capability records as `active=false`, `verification_status='pending'`;
+- writes an audit event in the same database transaction.
+
+This is correctly fail-closed at submission: a partner cannot activate its own capability. The evidence-object lookup checks the private bucket and path, but the inspected function does not compare `storage.objects.owner` with the submitting user. The path includes the user's ID; nevertheless, owner binding should be enforced explicitly and covered by a negative test before this is considered fully verified.
+
+### Partner service-area submission
+`krim_partner_submit_service_area(...)`:
+- requires authenticated identity and `partner.manage`;
+- validates the country/market/location scope against active catalogues;
+- validates mode/service and effective dates;
+- requires one to five evidence files in the caller's organisation/user path;
+- verifies the evidence object is in the private partner-verification bucket and owned by the submitting user;
+- blocks duplicate pending submissions;
+- creates the request as draft / pending_review and writes an audit event.
+
+### Partner capacity registration and lane wrapper
+`krim_partner_register_capacity_resource_for_lane(...)` delegates to the base capacity registration RPC, then links the resulting availability record to a lane using both the generated availability ID and the submitted organisation ID. The base function is the authoritative identity/permission boundary. The wrapper's delegation must remain intact; add tests for a forged organisation ID, a lane outside the caller's approved scope and replayed registration.
+
+### Partner assignment response
+`krim_respond_to_partner_assignment(...)`:
+- locks the offered assignment;
+- checks the caller belongs to the assignment's partner organisation and has `shipment.update`;
+- enforces response deadline and offered state;
+- on acceptance, rechecks route capability and current compliance;
+- links/creates the shipment leg and writes tracking and audit events;
+- on rejection, updates assignment, quote and opportunity state and writes an audit event.
+
+The function has no explicit idempotency key. It does return already accepted/rejected states in narrow replay cases, but concurrency and repeated acceptance/rejection must be tested for consistency, especially around quote and opportunity state.
+
+### Driver and vehicle assignment
+`krim_assign_driver_to_partner_shipment(...)` includes substantial dispatch gates:
+- partner assignment must already be accepted;
+- caller must have `shipment.dispatch` for the partner organisation;
+- shipment and leg must be assigned and linked to the same partner;
+- partner must be active, verified, compliant and have current capability/service-area coverage;
+- driver must have active driver membership, verified profile and independently accepted front/back licence evidence;
+- driver must be bound to a verified operational vehicle;
+- mandatory vehicle documents must be approved and current;
+- shipment weight must fit the vehicle's verified payload capacity;
+- driver and vehicle cannot have another open assignment.
+
+`krim_driver_accept_assignment(...)` checks that the assignment belongs to the signed-in driver, validates active driver membership and licence evidence, rechecks vehicle binding/verification/documents, partner assignment, shipment and road-leg status, route coverage and payload capacity. It supports a consistent already-accepted replay.
+
+These are strong server-side gates in the inspected definitions. They still require integration tests with test fixtures; no real dispatch or driver acceptance was attempted against production data.
+
+## Findings requiring explicit closure
+1. Add storage object owner binding to `krim_partner_submit_service_capability` and its v2 wrapper path, with a migration and tests in staging before production.
+2. Add or prove idempotent/concurrent behaviour for partner assignment response.
+3. Confirm the service-role and authenticated callers of the lane/capability wrappers and test delegated permission enforcement.
+4. Test all driver/vehicle verification expiry and cross-organisation denial cases.
+5. Inspect the remaining partner compliance and driver POD functions, including evidence storage ownership, delivery completion state and customer verification.
+6. Keep live bookings, driver dispatch and payments disabled unless the specific partner, vehicle, route and job have passed their respective gates.
+
+## Status
+This is a static review of live function definitions, not a successful end-to-end operation. No partner capability, quote, assignment, driver assignment, delivery POD, or payment was created or altered during this review.
