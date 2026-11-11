@@ -141,3 +141,100 @@ The existing customer UI pre-check is useful UX only and must not be treated as 
 
 ### Current status
 This is a static review of live production function definitions and frontend source. No RPC, policy, grant, record or production setting was modified. Fix requires a reviewed migration and staging integration tests before deployment.
+
+
+## Booking state-machine remediation design — 2026-11-11
+
+This section records the exact current lifecycle interactions found in production function definitions. It is a design/test specification, not deployable SQL.
+
+### Current sequence and defects
+
+**Customer award path — `krim_award_partner_quote(bigint)`:**
+- Authenticates the customer and checks `quote.update` + `shipment.update`.
+- Checks partner organisation, verification/compliance, at least one active verified capability and current route coverage.
+- Accepts the selected partner quote, rejects competing quotes, marks opportunity `awarded`, and creates partner assignment `offered` with 24-hour response deadline.
+- Then immediately transitions shipment from `quoted` to `confirmed`.
+- This is the premature confirmation defect.
+
+**Checkout preparation path — `krim_award_partner_quote_for_checkout(bigint,timestamptz)`:**
+- Calls `krim_award_partner_quote`, so it inherits the premature shipment confirmation.
+- Immediately inserts the customer quote with status `accepted`, even though the assignment is still `offered`.
+- Creates an `accepted` quote version and event. The version says payment after partner assignment acceptance, but the quote status already says accepted.
+- The pricing snapshot contains partner quote ID/number and partner organisation ID, which are customer-visible through quote-version access. This is an explicit disclosure choice to resolve; do not assume those identifiers are customer-safe.
+
+**Customer acceptance path — `krim_accept_global_quote(bigint)`:**
+- Checks authenticated customer org access, `shipment.update`, sent/unexpired quote and shipment `quoted`.
+- It does not verify partner quote linkage or assignment acceptance before accepting quote and confirming shipment.
+- The browser quote comparison page checks assignment status before enabling the button, but the server RPC does not repeat this check. Direct RPC invocation bypasses the browser guard.
+
+**Partner response path — `krim_respond_to_partner_assignment(bigint,boolean,text)`:**
+- Checks authenticated membership in the assignment's partner org and `shipment.update`.
+- On acceptance, rechecks route capability and current compliance, marks assignment accepted and assigns the shipment leg.
+- On rejection, marks assignment rejected, withdraws the selected partner quote, reopens opportunity and restores competing quotes to submitted.
+- It does not currently transition a prematurely confirmed shipment back to a non-confirmed state, nor reconcile an already-created accepted customer quote. That leaves stale accepted customer commercial state after rejection.
+
+**Internal quote preparation — `krim_internal_prepare_customer_quote(bigint)`:**
+- Service-only (authenticated EXECUTE false in current catalog).
+- Takes latest quote version and changes customer quote status to `sent`.
+- It counts partner quotes but does not itself enforce a valid accepted partner assignment. Its callers and intended quote lifecycle need to be traced before changing it.
+
+### Target state machine
+
+Do not overload the existing word `accepted` to mean both customer selection and partner commitment. Preserve distinct states:
+
+1. **Partner offer submitted** — partner quote is submitted/shortlisted; no customer commitment.
+2. **Customer selects offer / assignment offered** — selected partner quote is reserved; assignment is `offered`; opportunity is awarded/pending partner response; shipment remains `quoted` (or an explicit non-confirmed `awaiting_partner_acceptance` state if that state is added consistently across constraints, UI and reports). Customer quote must not be `accepted` or payable.
+3. **Partner accepts** — partner response transaction revalidates membership, capability, compliance, capacity, quote validity and exact shipment/opportunity linkage; assignment becomes `accepted`; leg becomes assigned; write immutable audit/tracking event.
+4. **Booking confirmation** — only after step 3, a single transactional server-side operation confirms the shipment and creates/marks the customer-facing quote as accepted/sent according to the agreed commercial model. The customer-safe price/terms must match the selected partner offer. This transition must be atomic with audit/event creation.
+5. **Partner rejects / offer expires** — assignment becomes rejected/expired; selected partner quote withdrawn/expired; opportunity reopens only if no other active award/assignment exists; competing quotes return to eligible state only under a documented policy; shipment stays non-confirmed; any draft customer quote/version is cancelled/voided and never remains accepted/payable. Customer is invited to select another offer.
+6. **Payment** — remains separately gated by confirmed booking, accepted customer terms, provider eligibility and payment reconciliation controls. Do not initiate payment while assignment is merely offered.
+
+### Required implementation shape
+
+- Replace the direct state mutation in `krim_award_partner_quote` with a **selection/reservation** transaction only. It must not call shipment transition to `confirmed`.
+- Make `krim_respond_to_partner_assignment(..., true, ...)` the single server-side commitment boundary. After its current capability/compliance rechecks and leg assignment, it should atomically validate the reservation and finalize the customer-facing quote + shipment confirmation. Use a private internal helper to avoid a second public API path.
+- Make `krim_award_partner_quote_for_checkout` create a non-payable pending customer quote (or defer quote creation until partner acceptance); never mark it `accepted` while assignment is offered.
+- Harden `krim_accept_global_quote` to require the exact linked assignment in `accepted` state and matching shipment/partner quote/opportunity/leg/customer org, plus current partner compliance/capability. Better: make it a customer acknowledgement step after partner acceptance and do not let it independently confirm an unaccepted shipment.
+- Rejection/expiry must reconcile assignment, opportunity, partner quote, customer quote/version and shipment consistently. No accepted quote can survive a rejected assignment.
+- All mutation + audit + quote event + tracking event writes must be in the same transaction. Use consistent lock order across award, response, customer acceptance, expiry and cancellation paths; test deadlock/retry behaviour.
+- Preserve least-privilege grants: no direct client table writes; customer and partner RPCs must verify auth.uid(), active org membership and exact permission. Internal helper functions remain non-executable by anon/authenticated.
+- Keep the customer-safe quote response allowlisted. Do not return partner internal notes, metadata or raw pricing snapshot. Decide whether partner identity is contractually/customer-visible; if yes, expose only an explicit public display identity field, not internal org IDs or partner quote IDs.
+
+### Expanded acceptance tests (release blocking)
+
+**Reservation / award**
+- Customer with quote.update + shipment.update can select an eligible partner quote; assignment is offered; shipment remains non-confirmed; customer quote is not accepted/payable.
+- Customer without either permission, partner user, unrelated customer, anon and development/test partner are denied.
+- Duplicate award returns same reservation without duplicate assignments/events; competing quote award serializes.
+- Expired opportunity/partner quote, inactive/unverified/compliance-held partner, expired capability, wrong route/mode/weight/cargo, wrong shipment/customer org and mismatched quote linkage are denied with no partial writes.
+
+**Partner acceptance / confirmation**
+- Only active member with shipment.update in exact partner org can accept.
+- Acceptance rechecks assignment deadline, partner status, compliance, route coverage, capability validity and capacity.
+- Valid acceptance atomically sets assignment accepted, leg assigned, shipment confirmed and customer quote lifecycle to the agreed final state; exactly one audit and tracking/event set.
+- Duplicate acceptance is idempotent; concurrent accept/reject has exactly one winner.
+- Missing leg or multiple legs follows a documented deterministic leg allocation policy; never attach an assignment to an unrelated leg.
+- If any audit/event/quote/shipment write fails, the whole transaction rolls back.
+
+**Rejection / expiry / cancellation**
+- Rejection leaves shipment unconfirmed and no accepted/payable customer quote.
+- Rejection does not reopen opportunity while another active assignment exists.
+- Expiry worker and partner response racing at deadline serialize deterministically.
+- A rejected/expired offer can be replaced by a different eligible offer without reviving stale quote versions or payment intents.
+- Customer cancellation and partner cancellation after acceptance have explicit compensation rules and audit history.
+
+**Customer acceptance / payment**
+- Direct call to `krim_accept_global_quote` with no partner quote, offered/rejected/expired assignment, mismatched assignment or non-confirmed shipment is denied.
+- Customer can read only customer-safe quote and version fields; raw partner notes and internal metadata remain inaccessible.
+- Payment/order creation is denied until final booking and customer terms are valid; no charge on no-match, offered, rejected or expired states.
+- Repeated acceptance/payment webhook is idempotent; stale quote amount/currency or conflicting provider reference is rejected.
+
+### Deployment sequence
+1. Trace every caller/trigger/cron/Edge Function for the four public lifecycle RPCs and the internal quote-preparation helper.
+2. Confirm status constraints, shipment transition matrix, quote version semantics, notifications and dashboards that depend on `confirmed` / `accepted`.
+3. Build a dedicated test fixture and run all cases in isolated staging.
+4. Deploy database functions and grants as one reviewed migration; then update customer/partner UI labels and checkout gating.
+5. Verify live catalog definitions, execute privileges, RLS and negative/positive integration tests.
+6. Keep real customer booking and payment disabled until all release gates pass.
+
+**No production schema, RPC, policy, grant, shipment, quote, assignment, payment or other record was changed during this review.**
