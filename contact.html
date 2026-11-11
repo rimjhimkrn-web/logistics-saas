@@ -229,6 +229,7 @@
                   <option>Customer — move a shipment</option>
                   <option>Logistics partner — join the network</option>
                   <option>Enterprise — business or integration requirement</option>
+                  <option>Software subscription — plans, pricing or evaluation</option>
                   <option>Existing shipment — support or status</option>
                   <option>Driver — assignment or field operations</option>
                   <option>Warehouse — facility or inventory operations</option>
@@ -386,6 +387,11 @@
       var box=document.getElementById("contact-response-box");
       var button=document.getElementById("contact-submit");
       if(!form||!box||!button)return;
+      var requestedType=new URLSearchParams(window.location.search).get("type");
+      if(requestedType==="software-evaluation"){
+        var typeSelect=document.getElementById("inquiry_type");
+        if(typeSelect)typeSelect.value="Software subscription — plans, pricing or evaluation";
+      }
       form.addEventListener("submit",async function(event){
         event.preventDefault();
         if(!form.reportValidity())return;
