@@ -41,3 +41,10 @@ Implementation patch prepared; static source checks completed; CI, staging execu
 - Read-only production baseline: one partner capability, inactive and pending; zero active verified capabilities. Current expected result is `no_verified_provider`.
 - Transport mode mapping was aligned to the live catalogue codes (ROAD, RAIL, OCEAN, AIR, WAREHOUSE, MULTIMODAL).
 - This remains a review-only SQL draft. It has not been executed, connected to the booking UI, or deployed. Staging validation and exact partner status-value verification remain mandatory.
+
+
+## Customer quote UI capacity gate
+- Updated `public/shipper/quote-comparison.html` so quote acceptance is not enabled unless the linked partner assignment is accepted, its capacity binding is confirmed, and the linked capacity reservation is confirmed.
+- Existing accepted-quote checkout readiness now checks the same confirmed binding and reservation, in addition to shipment/quote/assignment/INR/expiry checks.
+- Static verification re-fetched the committed file and confirmed both acceptance and checkout paths contain the fail-closed binding/reservation checks.
+- Important: this is a customer UI guard only. It is not a security boundary; direct RPC calls could bypass it. The database acceptance RPC must enforce the same conditions before production rollout. No production data or RPC was changed.
