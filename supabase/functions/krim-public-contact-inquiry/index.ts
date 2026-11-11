@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return reply(503, { error: "Contact service is not configured." });
 
-    let body: Record<string, unknown> | unknown[] | null;
+    let body: unknown;
     try {
       body = await readBoundedJson(req);
     } catch (error) {
