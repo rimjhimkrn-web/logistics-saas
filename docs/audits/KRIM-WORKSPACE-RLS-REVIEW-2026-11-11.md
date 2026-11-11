@@ -50,3 +50,22 @@ This review is read-only. No RLS policies, grants, functions, data, Edge Functio
 - Driver profile protected-column update attempts.
 - Revoked membership and deactivated organization.
 - RPC direct-call authorization independent of UI route guards.
+
+
+## Partner quote confidentiality remediation trace — 2026-11-11
+
+### Confirmed direct client callers
+- `public/partner/quote-history.html` selects partner quote history fields scoped to the active partner organisation.
+- `public/partner/submit-quote.html` selects partner bids scoped to the active partner organisation and submits changes through `krim_submit_partner_quote`.
+- `public/shipper/quote-comparison.html` reads customer-facing `krim_quotes`, not `krim_partner_quotes`; it uses the customer quote's `partner_quote_id` only to inspect the related assignment status.
+- `public/shipper/partner-bid-status.html` reads opportunity-level customer-visible status, not raw partner quote rows.
+- No customer-facing view over `krim_partner_quotes` was found in the inspected public views.
+
+### Backend callers found in live function definitions
+Functions referencing `krim_partner_quotes`: `krim_award_partner_quote`, `krim_award_partner_quote_for_checkout`, `krim_ensure_assignment_capacity_commitment`, `krim_internal_aggregate_partner_quotes`, `krim_internal_create_partner_payable`, `krim_internal_create_partner_payable_for_completed_shipment`, `krim_internal_create_partner_payable_for_delivered_shipment`, `krim_internal_prepare_customer_quote`, `krim_partner_respond_to_invitation`, `krim_respond_to_partner_assignment`, and `krim_submit_partner_quote`. Several are internal/service-only; authenticated RPCs that award/submit/respond must retain their current caller authorization and be regression-tested.
+
+### Proposed containment
+A review-only SQL file was added at `docs/sql/krim-partner-quote-confidentiality-remediation.review.sql`. It replaces the current OR policy with partner-organization-only direct SELECT. It is wrapped in ROLLBACK and is not a production migration. Customer-facing quote details should continue through `krim_quotes` and the internal quote-preparation workflow, with an explicit customer-safe field allowlist.
+
+### Important deployment gate
+Before applying this policy in staging or production, inspect the complete definitions and authorization of `krim_award_partner_quote_for_checkout`, `krim_respond_to_partner_assignment`, and `krim_internal_prepare_customer_quote`; confirm all internal function calls are security-definer/service-only as intended; and run positive/negative integration tests. No policy or grant was changed in production.
