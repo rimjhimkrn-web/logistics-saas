@@ -966,6 +966,8 @@ for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_
 // These checks ensure all three mobile clients call the secured workflow contracts;
 // they do not simulate authenticated users or claim a live shipment was executed.
 const customerMobile = existsSync("mobile/krim-customer/src/CustomerWorkspace.tsx") ? readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8") : "";
+if (/react-native-webview|razorpayCheckoutHtml|verify-razorpay-payment|create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not contain an active or dormant KRIM freight checkout implementation in partner-direct mode.");
+
 if (/functions\.invoke\(["']create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not invoke freight order creation during partner-direct launch.");
 const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
