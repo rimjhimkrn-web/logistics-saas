@@ -72,3 +72,10 @@ This is not safe to resolve by blindly replaying files, generating a migration f
 
 ## Explicit non-actions
 No production DDL, migration application, payment activation, live billing, tax calculation or entitlement enforcement was changed by this discovery task.
+
+## 11 November admin workflow increment
+- Added restricted `admin-saas-pilots.html`, linked from the KRIM Global Control Centre governance section.
+- The page uses the existing `global-admin-control` Edge Function and its existing AAL2 + platform-admin gate.
+- It filters the latest 100 general contact enquiries for the exact software-evaluation inquiry label and allows audited status changes through the existing `inquiries` and `update_inquiry_status` actions.
+- This is an enquiry triage surface only. It does not create trial records, grant entitlements, activate paid subscriptions, or create billing records. Do not represent it as trial management.
+- The latest 100 limit is displayed in the UI to avoid implying a complete archive.
