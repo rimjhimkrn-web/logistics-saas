@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { WebView, type WebViewMessageEvent } from "react-native-webview";
 import * as SecureStore from "expo-secure-store";
@@ -284,29 +284,48 @@ function CustomerBooking({ organizationId, onCreated }: { organizationId: number
   const [routeType,setRouteType]=useState("door_to_door"); const [searching,setSearching]=useState<"origin"|"destination"|null>(null);
   const [submitting,setSubmitting]=useState(false); const [attempted,setAttempted]=useState(false); const [message,setMessage]=useState("");
   const [bookingKey,setBookingKey]=useState<string|null>(null);
+  const searchTimers=useRef<{origin?:ReturnType<typeof setTimeout>;destination?:ReturnType<typeof setTimeout>}>({});
+  const searchControllers=useRef<{origin?:AbortController;destination?:AbortController}>({});
+  const searchSequence=useRef({origin:0,destination:0});
+  useEffect(()=>()=>{clearTimeout(searchTimers.current.origin);clearTimeout(searchTimers.current.destination);searchControllers.current.origin?.abort();searchControllers.current.destination?.abort();},[]);
   const makeId=()=>{const c=(globalThis as any).crypto;if(c&&typeof c.randomUUID==="function")return c.randomUUID();return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,ch=>{const r=Math.random()*16|0;return(ch==="x"?r:(r&3|8)).toString(16);});};
-  const searchPlaces=async(kind:"origin"|"destination",query:string)=>{
-    if(query.trim().length<3){kind==="origin"?setOriginResults([]):setDestinationResults([]);return;}
+  const searchPlaces=(kind:"origin"|"destination",query:string)=>{
+    clearTimeout(searchTimers.current[kind]);
+    searchControllers.current[kind]?.abort();
+    const request=++searchSequence.current[kind];
+    if(query.trim().length<3){
+      if(kind==="origin")setOriginResults([]);else setDestinationResults([]);
+      setSearching(current=>current===kind?null:current);
+      return;
+    }
     setSearching(kind);
-    try{
-      const response=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(query.trim())+"&limit=6&lang=en",{headers:{Accept:"application/json"}});
-      if(!response.ok)throw new Error("Global place search is unavailable. Try again.");
-      const json=await response.json() as {features?:PlaceFeature[]};
-      const places=(json.features||[]).map(feature=>{
-        const p=feature.properties||{};const coords=feature.geometry?.coordinates||[];
-        const code=String(p.countrycode||p.country_code||"").toUpperCase();
-        const city=String(p.city||p.town||p.village||p.municipality||p.county||p.name||"").trim();
-        const country=String(p.country||"").trim();
-        const lat=Number(coords[1]),lon=Number(coords[0]);
-        if(!city||!country||!/^[A-Z]{2}$/.test(code)||!Number.isFinite(lat)||!Number.isFinite(lon))return null;
-        const state=String(p.state||p.region||"").slice(0,160);
-        const name=String(p.name||city).slice(0,160);
-        const label=[name,city,state,country].filter((v,i,a)=>v&&a.findIndex(x=>x.toLowerCase()===v.toLowerCase())===i).join(", ");
-        return {name:city,city,state,country,country_code:code,latitude:lat,longitude:lon,display_name:label.slice(0,240),place_type:String(p.osm_value||p.type||"place").slice(0,40)} as Place;
-      }).filter((x):x is Place=>!!x);
-      if(kind==="origin")setOriginResults(places);else setDestinationResults(places);
-    }catch(e){setMessage(e instanceof Error?e.message:"Place search failed.");}
-    finally{setSearching(null);}
+    searchTimers.current[kind]=setTimeout(async()=>{
+      const controller=new AbortController();
+      searchControllers.current[kind]=controller;
+      try{
+        const response=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(query.trim())+"&limit=6&lang=en",{headers:{Accept:"application/json"},signal:controller.signal});
+        if(!response.ok)throw new Error("Global place search is unavailable. Try again.");
+        const json=await response.json() as {features?:PlaceFeature[]};
+        if(controller.signal.aborted||searchSequence.current[kind]!==request)return;
+        const places=(json.features||[]).map(feature=>{
+          const p=feature.properties||{};const coords=feature.geometry?.coordinates||[];
+          const code=String(p.countrycode||p.country_code||"").toUpperCase();
+          const city=String(p.city||p.town||p.village||p.municipality||p.county||p.name||"").trim();
+          const country=String(p.country||"").trim();
+          const lat=Number(coords[1]),lon=Number(coords[0]);
+          if(!city||!country||!/^[A-Z]{2}$/.test(code)||!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+          const state=String(p.state||p.region||"").slice(0,160);
+          const name=String(p.name||city).slice(0,160);
+          const label=[name,city,state,country].filter((v,i,a)=>v&&a.findIndex(x=>x.toLowerCase()===v.toLowerCase())===i).join(", ");
+          return {name:city,city,state,country,country_code:code,latitude:lat,longitude:lon,display_name:label.slice(0,240),place_type:String(p.osm_value||p.type||"place").slice(0,40)} as Place;
+        }).filter((x):x is Place=>!!x);
+        if(kind==="origin")setOriginResults(places);else setDestinationResults(places);
+      }catch(e){
+        if(!controller.signal.aborted&&searchSequence.current[kind]===request)setMessage(e instanceof Error?e.message:"Place search failed.");
+      }finally{
+        if(searchSequence.current[kind]===request)setSearching(current=>current===kind?null:current);
+      }
+    },300);
   };
   const pick=(kind:"origin"|"destination",place:Place)=>{
     if(kind==="origin"){setOrigin(place);setOriginQuery(place.display_name);setOriginResults([]);}
