@@ -95,3 +95,49 @@ The partner response function later changes the assignment to `accepted` or `rej
 - These are static live-function and policy inspections. No test users, quotes, assignments, shipments, payments or financial records were created or modified.
 - No production function, policy, grant or data was changed.
 - The partner-quote confidentiality containment SQL remains review-only and must be tested in staging before deployment.
+
+
+## Critical customer quote acceptance RPC finding — 2026-11-11
+
+A further live production inspection of `public.krim_accept_global_quote(bigint)` found a backend/UI enforcement mismatch.
+
+### Current backend behaviour
+The SECURITY DEFINER RPC:
+- locks the customer quote and shipment;
+- checks customer organisation access and `shipment.update`;
+- requires quote status `sent`, unexpired quote and shipment status `quoted`;
+- changes quote status to `accepted`;
+- calls `krim_transition_shipment(..., 'confirmed', ...)`;
+- returns the accepted customer quote.
+
+**It does not check that the quote has a partner_quote_id, nor that a matching partner assignment exists and is accepted, nor that the assigned partner remains verified/compliant/capable.** The customer quote comparison page checks for an accepted matching assignment before enabling its button, but that is browser-side gating and can be bypassed by directly calling the RPC.
+
+This makes the server-side omission a critical release blocker: an authenticated customer with the relevant shipment permission may invoke the RPC directly and confirm a shipment without partner acceptance, depending on quote data and current shipment state.
+
+### Required server-side acceptance gate
+Before changing any quote or shipment state, the RPC (or a replacement transactional RPC) must:
+1. Lock the quote, shipment, linked partner quote, opportunity and matching assignment in a documented consistent lock order.
+2. Require non-null partner quote linkage and exact matching shipment/opportunity/customer organisation/partner organisation relationships.
+3. Require exactly one authoritative assignment for the selected partner quote in `accepted` state, tied to the same shipment and an accepted/assigned leg.
+4. Revalidate active partner organisation, current verification/compliance and route/mode/cargo/capacity capability at the final acceptance boundary.
+5. Confirm the customer quote amount/currency/validity still match the approved customer-safe quote terms; do not leak partner notes or internal metadata.
+6. Only then mark customer quote accepted and transition shipment to confirmed, atomically with audit event.
+7. Be idempotent for a repeated acceptance of the same quote, but reject stale, conflicting, rejected, expired or cross-organisation state.
+
+The existing customer UI pre-check is useful UX only and must not be treated as an authorization boundary.
+
+### Required regression tests
+- Direct RPC call with no partner linkage is denied; quote and shipment unchanged.
+- Matching assignment `offered` is denied; quote and shipment unchanged.
+- Matching assignment `rejected`, expired, cancelled or wrong shipment is denied.
+- Assignment accepted but partner verification/compliance/capability expired is denied.
+- Wrong customer organisation, unrelated partner, mismatched quote/assignment/opportunity/leg is denied.
+- Wrong amount/currency or expired customer quote is denied.
+- Correct accepted assignment + valid customer quote succeeds atomically.
+- Duplicate acceptance returns the same accepted quote without duplicate events or transitions.
+- Concurrent acceptance and concurrent partner rejection/withdrawal serialize safely.
+- An ordinary customer without `shipment.update` is denied; partner user cannot accept for customer; anon denied.
+- No direct customer query returns partner notes, pricing snapshot or internal metadata.
+
+### Current status
+This is a static review of live production function definitions and frontend source. No RPC, policy, grant, record or production setting was modified. Fix requires a reviewed migration and staging integration tests before deployment.
