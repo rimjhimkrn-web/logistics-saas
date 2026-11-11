@@ -348,7 +348,7 @@ for (const [label, source, pattern] of [
   ["verification independently fetches provider payment", verifyFn, /api\.razorpay\.com\/v1\/payments/],
   ["verification requires captured status", verifyFn, /razorpayStatus\s*!==\s*["']captured["']/],
   ["verification checks amount and currency", verifyFn, /Payment amount mismatch[\s\S]*?Payment currency mismatch/],
-  ["verification creates an idempotent financial transaction", verifyFn, /krim_financial_transactions[\s\S]*?provider_reference/],
+  ["verification calls the atomic idempotent finance reconciler", verifyFn, /krim_internal_reconcile_razorpay_captured_payment/],
 ]) {
   if (!pattern.test(source)) failures.push(`Phase 5 payment safety check missing: ${label}`);
 }
