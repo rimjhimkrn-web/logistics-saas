@@ -11,6 +11,7 @@ const ROOT = process.cwd();
 const IGNORE_DIRS = new Set([".git", "node_modules", ".github"]);
 const HTML_ATTRS = ["href", "src", "action", "formaction", "poster"];
 const errors = [];
+const brandFindings = [];
 let htmlCount = 0;
 
 function walk(dir) {
@@ -63,6 +64,15 @@ function rel(file) {
 
 function inspectHtml(file) {
   const text = fs.readFileSync(file, "utf8");
+  // Report legacy logo placeholders and removed image references across all HTML pages.
+  if (/file_00000000242881faa8abc7188d1c40c4\\.png/i.test(text)) {
+    brandFindings.push({ source: rel(file), reason: "removed legacy uploaded logo asset is still referenced" });
+  }
+  const legacyMarkPattern = /<(?:span|div)[^>]*class=["'][^"']*(?:brandmark|brand-mark|brand-icon|logo-icon|(?:^|\\s)mark(?:\\s|$))[^"']*["'][^>]*>\\s*(?:K|↗)\\s*<\\/(?:span|div)>/gi;
+  let legacyMark;
+  while ((legacyMark = legacyMarkPattern.exec(text))) {
+    brandFindings.push({ source: rel(file), reason: "legacy text-only KRIM mark", snippet: legacyMark[0].slice(0, 160) });
+  }
   const tagPattern = /<(?:a|link|script|img|iframe|form|source|video|audio|button)\b[^>]*>/gi;
   let tag;
   while ((tag = tagPattern.exec(text))) {
@@ -120,6 +130,8 @@ console.log(JSON.stringify({
   html_files_scanned: htmlCount,
   canonical_routes_checked: canonicalRoutes.length,
   broken_local_references: errors.length,
-  findings: errors
+  findings: errors,
+  legacy_brand_findings: brandFindings.length,
+  brand_findings: brandFindings
 }, null, 2));
 process.exitCode = errors.length ? 1 : 0;
