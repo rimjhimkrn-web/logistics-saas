@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return reply(503, { error: "Contact service is not configured." });
 
-    let body: unknown;
+    let body: Record<string, unknown> | unknown[] | null;
     try {
       body = await readBoundedJson(req);
     } catch (error) {
@@ -76,18 +76,19 @@ Deno.serve(async (req: Request) => {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return reply(400, { error: "Invalid request." });
     }
-    if (body.privacy_consent !== true) {
+    const payload = body as Record<string, unknown>;
+    if (payload.privacy_consent !== true) {
       return reply(400, { error: "Please accept the privacy notice before submitting your enquiry." });
     }
-    if (typeof body.website === "string" && body.website.trim()) {
+    if (typeof payload.website === "string" && payload.website.trim()) {
       return reply(200, { success: true });
     }
 
-    const full_name = String(body.full_name || "").trim();
-    const email = String(body.email || "").trim().toLowerCase();
-    const organization = String(body.organization || "").trim();
-    const message = String(body.message || "").trim();
-    const source_page = String(body.source_page || "");
+    const full_name = String(payload.full_name || "").trim();
+    const email = String(payload.email || "").trim().toLowerCase();
+    const organization = String(payload.organization || "").trim();
+    const message = String(payload.message || "").trim();
+    const source_page = String(payload.source_page || "");
 
     if (full_name.length < 2 || full_name.length > 120) {
       return reply(400, { error: "Enter a name between 2 and 120 characters." });
