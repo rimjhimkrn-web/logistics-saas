@@ -58,3 +58,13 @@ Implementation patch prepared; static source checks completed; CI, staging execu
 - The trigger uses row locks on assignment and capacity binding to reduce races. Concurrent cancellation/release behavior and lock ordering still require staging tests.
 - This is review-only SQL. Not executed in staging or production; no DB changes, quote status changes, payment changes or deployment.
 - Next required server-side work: repair award/checkout RPC semantics to create an unaccepted customer offer and offered assignment, then accept only after partner acceptance + confirmed capacity; audit all other quote writers and status transition paths before rollout.
+
+
+## Coordinated partner award and customer offer lifecycle draft
+- Added `docs/sql/krim-partner-award-and-customer-offer-lifecycle.review.sql`.
+- Revised `krim_award_partner_quote(bigint)` proposal now creates an `offered` assignment and moves opportunity to `shortlisted`; it does not accept the partner quote, reject competitors, award the opportunity or confirm the shipment at customer selection time.
+- A new assignment-acceptance trigger finalises the award only after the partner explicitly accepts. It relies on the existing assignment acceptance trigger to create/validate the shipment-level capacity commitment first; trigger alphabetical ordering was considered and must be confirmed in staging.
+- Revised `krim_award_partner_quote_for_checkout(bigint,timestamptz)` proposal requires partner quote and assignment already accepted, then creates customer quote `sent` and quote version `presented`, not accepted. Customer acceptance remains a separate action and the capacity guard must pass.
+- Partner rejection path in the existing `krim_respond_to_partner_assignment` remains responsible for reopening the opportunity and withdrawing the selected quote.
+- This draft must be tested alongside the quote acceptance guard and all other writers: `krim_customer_accept_quote`, `krim_accept_global_quote`, `krim_internal.accept_quote_and_commit`, orchestration and legacy customer quote paths.
+- No production/staging SQL execution. No RPC or trigger changed in either environment. The SQL has not been compiled or run against fixtures. Historical accepted quotes/assignments remain untouched.
