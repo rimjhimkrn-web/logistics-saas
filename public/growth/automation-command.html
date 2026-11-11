@@ -66,38 +66,36 @@
           <span class="text-slate-500 text-[10px]">Scheduled Cron Jobs & Failure Recovery</span>
         </div>
         <h1 class="text-2xl font-extrabold text-white">Acquisition Automation & Cron Command</h1>
-        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Monitor recurring pipeline execution, verify deduplication safeguards, inspect dead-letter queue retries, and review immutable workflow audit logs.</p>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Review the acquisition automation configuration. Live scheduler metrics and execution history will appear only after a verified scheduler is connected.</p>
       </div>
 
-      <button onclick="alert('Forcing immediate cron cycle execution across all acquisition pipelines... All tasks completed successfully with zero errors!')" class="px-5 py-3 bg-blue-500 hover:bg-blue-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-lg shadow-blue-500/20 shrink-0">
-        ⚡ Force Cron Execution
-      </button>
+      <span class="px-5 py-3 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold shrink-0">Execution controls disabled until a verified scheduler is connected</span>
     </section>
 
     <!-- AUTOMATION METRICS GRID -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Scheduled Cron Tasks</span>
-        <span class="text-2xl font-black text-white">24 Active</span>
-        <span class="text-blue-400 text-[10px] block font-bold">Hourly & Daily Execution</span>
+        <span class="text-2xl font-black text-white">Not verified</span>
+        <span class="text-blue-400 text-[10px] block font-bold">No live scheduler data</span>
       </div>
 
       <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Workflow Success Rate</span>
-        <span class="text-2xl font-black text-emerald-400">99.98%</span>
-        <span class="text-emerald-400 text-[10px] block font-bold">Zero Unhandled Exceptions</span>
+        <span class="text-2xl font-black text-emerald-400">Not available</span>
+        <span class="text-emerald-400 text-[10px] block font-bold">No verified execution history</span>
       </div>
 
       <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Dead Letter Queue (DLQ)</span>
-        <span class="text-2xl font-black text-cyan-400">0 Failed Jobs</span>
-        <span class="text-cyan-400 text-[10px] block font-bold">Automatic Retry Safe</span>
+        <span class="text-2xl font-black text-cyan-400">Not available</span>
+        <span class="text-cyan-400 text-[10px] block font-bold">Retry status not verified</span>
       </div>
 
       <div class="bg-[#081020] border border-slate-800 rounded-2xl p-5 space-y-1">
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Duplicate Prevented</span>
-        <span class="text-2xl font-black text-gold-400">1,420 Blocks</span>
-        <span class="text-gold-400 text-[10px] block font-bold">Strict Deduplication Rules</span>
+        <span class="text-2xl font-black text-gold-400">Not available</span>
+        <span class="text-gold-400 text-[10px] block font-bold">No live deduplication metrics</span>
       </div>
     </section>
 
@@ -107,7 +105,7 @@
         <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <span>🕒</span> Scheduled Acquisition Cron Jobs
         </h2>
-        <span class="text-[10px] text-slate-500">Scheduler State: <strong class="text-emerald-400">RUNNING (Supabase Edge Cron)</strong></span>
+        <span class="text-[10px] text-amber-300">Scheduler State: NOT VERIFIED</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -121,22 +119,7 @@
               <th class="py-3 px-2 text-right">Health Status</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60 text-slate-300">
-            <tr class="hover:bg-slate-900/50 transition-all">
-              <td class="py-3.5 px-2 font-bold text-white">global_partner_discovery_cron</td>
-              <td class="py-3.5 px-2 text-slate-300">Every 6 Hours</td>
-              <td class="py-3.5 px-2 text-slate-400">Today, 02:00 UTC</td>
-              <td class="py-3.5 px-2 text-blue-400">In 2 Hours</td>
-              <td class="py-3.5 px-2 text-right"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">HEALTHY</span></td>
-            </tr>
-            <tr class="hover:bg-slate-900/50 transition-all">
-              <td class="py-3.5 px-2 font-bold text-white">autonomous_outreach_dispatch_cron</td>
-              <td class="py-3.5 px-2 text-slate-300">Daily at 08:00 UTC</td>
-              <td class="py-3.5 px-2 text-slate-400">Today, 08:00 UTC</td>
-              <td class="py-3.5 px-2 text-blue-400">Tomorrow</td>
-              <td class="py-3.5 px-2 text-right"><span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">HEALTHY</span></td>
-            </tr>
-          </tbody>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300"><tr><td colspan="5" class="py-6 px-2 text-center text-slate-400">No verified scheduled acquisition jobs are connected. No execution or outreach is being claimed.</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -147,7 +130,7 @@
   <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between font-mono">
       <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Automation Core.</p>
+      <p class="text-[10px] text-slate-600">© 2026 KRIM Logistics · Internal automation workspace.</p>
     </div>
   </footer>
 
