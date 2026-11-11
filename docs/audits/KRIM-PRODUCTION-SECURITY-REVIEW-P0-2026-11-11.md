@@ -320,3 +320,62 @@ The public wrappers for refund submit/review delegate to private security-define
 
 ### Disposition
 The reviewed finance/refund internal helper privilege boundary is fail-closed at the database grant layer, and the refund request/review logic has useful identity, MFA, approval separation and idempotency protections. This is a static code review only. No payment, refund, invoice, payable, ledger or reconciliation record was created or changed. Production payment settings were not modified.
+
+
+## Organisation isolation, document access and storage policies — static batch 5
+
+### Organisation and customer data policies
+The live policy expressions were inspected for organisations, memberships, customer profiles, shipments, invoices, refund requests and selected evidence tables.
+
+- `customer_profiles`: authenticated users can read/update only the row whose id equals `auth.uid()`.
+- `krim_organization_members`: users can read their own membership rows; no direct insert/update grant to authenticated users.
+- `krim_organizations`: active members can read their organisation; platform admin read requires AAL2 and `admin.platform`.
+- `krim_shipments`: read access is scoped through customer organisation access, active partner assignment, authorised operations membership, or a specifically open partner opportunity with active verified/compliant capability and route coverage.
+- `krim_invoices`: read access requires finance.view within the relevant organisation/customer/supplier/partner scope, or active finance-organisation membership and permission.
+- `krim_refund_requests`: row reads are limited to the requester, active customer-organisation members, or finance.view members; RLS is both enabled and forced.
+- `krim_claim_evidence`: read access is limited to the claim's claimant/respondent organisation or an AAL2 platform admin.
+- `krim_warehouse_evidence`: reads require active membership, approved facility and eligible warehouse organisation, or AAL2 platform admin.
+
+These are positive policy-expression findings. They do not replace tests with two separate organisations and two independent users.
+
+### Legacy partner document table — compatibility risk
+The older `partner_documents` table remains directly accessible to authenticated users for SELECT and INSERT, and has an UPDATE table grant, but its inspected policies include only:
+- SELECT where the linked legacy `partners.user_id = auth.uid()`;
+- INSERT where the linked legacy partner row belongs to `auth.uid()`.
+
+No UPDATE policy was present in the inspected policy list, so the UPDATE grant should be denied by RLS. The table also has an anon SELECT grant, but no anon policy was present in the inspected policy list; this should be denied by RLS. This is not evidence of public document disclosure, but the legacy table and grants should be traced to active callers and ideally removed from direct client use after migration to the newer organisation-scoped document workflow. Do not revoke grants until call sites and historic records are understood.
+
+### Private storage buckets
+All five configured KRIM evidence buckets are private:
+- `krim-driver-evidence`
+- `krim-driver-verification`
+- `krim-partner-verification`
+- `krim-warehouse-evidence`
+- `pod-documents`
+
+Four buckets have a 10 MiB object limit and explicit MIME allowlists. The `pod-documents` bucket currently has no configured size or MIME allowlist in bucket metadata; its object policies must remain restrictive and upload validation should enforce type/size in the server workflow. This is a configuration-hardening candidate, not proof that arbitrary uploads are publicly readable.
+
+Storage object policies reviewed include:
+- Driver evidence read/upload bound to the signed-in driver, active driver membership, assignment ID and open assignment state.
+- Driver verification upload bound to the signed-in user's driver profile and active driver membership.
+- Partner verification uploads bound to an active member of the relevant partner/warehouse organisation and a user-specific folder.
+- Partner verification reads limited to the user's active own organisation or AAL2 platform admin.
+- Warehouse evidence read/upload bound to eligible warehouse organisation membership and `partner.manage`; admin read requires AAL2.
+- Customs documents bound to active customs membership, shipment/accepted broker assignment and relevant permissions.
+- Claim evidence upload requires owner = auth.uid(), user-specific path, active membership, permitted claim state and shipment.update; reads are restricted to claimant/respondent organisation or platform admin.
+- Customer POD evidence reads require verified POD, customer organisation access and exact storage path recorded in driver evidence metadata.
+
+### Storage and privacy test cases
+Before production sign-off, test:
+1. Two unrelated organisations cannot read each other's partner, warehouse, customs, claim or shipment evidence.
+2. A user cannot read another user's driver licence or assignment evidence by guessing a storage path.
+3. A customer cannot read POD evidence before independent verification.
+4. A customer can read only the verified evidence for its own shipment.
+5. A removed/suspended member loses access immediately.
+6. A user cannot overwrite or delete a submitted/linked evidence object through cleanup policies.
+7. File MIME, actual content signature, size and path are validated; do not rely only on client-supplied content type.
+8. `pod-documents` has a bounded upload size and allowlist before any client upload workflow is enabled.
+9. Legacy `partner_documents` callers are identified and tested before grants or policies are changed.
+
+### Disposition
+No policy, table grant, bucket setting, storage object, user, organisation or document was modified. This was a read-only production inspection. The review identifies strong organisation-scoped policy patterns alongside legacy partner-document compatibility and POD bucket configuration items requiring closure.
