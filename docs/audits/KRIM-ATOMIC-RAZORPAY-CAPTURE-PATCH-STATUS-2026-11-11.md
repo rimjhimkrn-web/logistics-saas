@@ -48,3 +48,13 @@ Implementation patch prepared; static source checks completed; CI, staging execu
 - Existing accepted-quote checkout readiness now checks the same confirmed binding and reservation, in addition to shipment/quote/assignment/INR/expiry checks.
 - Static verification re-fetched the committed file and confirmed both acceptance and checkout paths contain the fail-closed binding/reservation checks.
 - Important: this is a customer UI guard only. It is not a security boundary; direct RPC calls could bypass it. The database acceptance RPC must enforce the same conditions before production rollout. No production data or RPC was changed.
+
+
+## Server-side customer quote acceptance guard draft
+- Added `docs/sql/krim-server-side-customer-quote-acceptance-capacity-guard.review.sql`.
+- Proposed BEFORE INSERT/UPDATE trigger blocks every transition into customer quote status `accepted` unless the exact linked partner quote has an `accepted` partner assignment, a `confirmed` capacity binding for the same shipment, and its linked `confirmed` capacity reservation.
+- It also blocks accepted quote rows without a linked partner quote. This deliberately fails closed for the legacy `krim_award_partner_quote_for_checkout` path, which currently creates an already-accepted customer quote before partner acceptance and capacity confirmation.
+- Existing production snapshot contains six accepted customer quote rows. The draft explicitly does not backfill or alter historical rows; they require separate reconciliation.
+- The trigger uses row locks on assignment and capacity binding to reduce races. Concurrent cancellation/release behavior and lock ordering still require staging tests.
+- This is review-only SQL. Not executed in staging or production; no DB changes, quote status changes, payment changes or deployment.
+- Next required server-side work: repair award/checkout RPC semantics to create an unaccepted customer offer and offered assignment, then accept only after partner acceptance + confirmed capacity; audit all other quote writers and status transition paths before rollout.
