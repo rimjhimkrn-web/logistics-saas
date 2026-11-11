@@ -1,32 +1,31 @@
 /**
- * KRIM OS — Global Acquisition Runtime
- * Phase 1: Global Acquisition Core & Unified Growth Engine
- * 
- * Drives pipeline state machines, duplicate detection, and acquisition telemetry.
+ * KRIM OS — Acquisition UI Runtime
+ *
+ * This file only initializes the page-side module. It does not perform
+ * duplicate detection, create prospects, send outreach, or run background jobs.
+ * Those actions must be implemented and verified by the secured backend.
  */
-
 class AcquisitionRuntime {
   constructor() {
     this.initialized = false;
+    this.capabilities = Object.freeze({
+      duplicateDetection: "backend_required",
+      prospectCreation: "backend_required",
+      automatedOutreach: "disabled"
+    });
   }
 
   init() {
     if (this.initialized) return;
-    console.log("🌐 [KRIM Acquisition Runtime] Initializing Global Growth & Pipeline Engine...");
-    this.verifyDuplicateEngine();
     this.initialized = true;
-    console.log("✅ [KRIM Acquisition Runtime] Global Acquisition Core Active.");
-  }
-
-  verifyDuplicateEngine() {
-    console.log("🛡️ [Deduplication Engine] Active: Zero redundant prospect insertions permitted.");
+    console.info("[KRIM Acquisition UI] Page module initialized. Backend capabilities are not asserted by this module.");
   }
 }
 
 export const acquisitionRuntime = new AcquisitionRuntime();
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => acquisitionRuntime.init());
+  document.addEventListener("DOMContentLoaded", () => acquisitionRuntime.init(), { once: true });
 } else {
   acquisitionRuntime.init();
 }
