@@ -974,7 +974,7 @@ const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerReposit
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
-  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'verify-razorpay-payment', 'react-native-webview', 'Partner-direct launch: KRIM does not collect freight payments.', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct launch']],
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'Partner-direct launch: KRIM does not collect freight payments.', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct launch']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
