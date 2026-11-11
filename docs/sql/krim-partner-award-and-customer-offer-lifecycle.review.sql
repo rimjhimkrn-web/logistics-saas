@@ -156,8 +156,11 @@ begin
 end;
 $function$;
 
--- Once the partner has accepted and the existing assignment-capacity
--- commitment trigger has succeeded, finalise the opportunity award.
+-- Once the partner has accepted, the existing capacity-commitment trigger
+-- must run first. PostgreSQL orders same-timing triggers alphabetically by name;
+-- the z-prefixed trigger below deliberately runs after the existing
+-- trg_krim_ensure_assignment_capacity_commitment trigger. Any failure rolls
+-- back the entire assignment acceptance transaction.
 create or replace function private.krim_finalize_partner_award_after_acceptance()
 returns trigger
 language plpgsql
@@ -213,10 +216,10 @@ begin
 end;
 $function$;
 
-drop trigger if exists trg_krim_finalize_partner_award_after_acceptance
+drop trigger if exists trg_krim_z_finalize_partner_award_after_acceptance
   on public.krim_shipment_partner_assignments;
 
-create trigger trg_krim_finalize_partner_award_after_acceptance
+create trigger trg_krim_z_finalize_partner_award_after_acceptance
 after update of status on public.krim_shipment_partner_assignments
 for each row
 when (old.status='offered' and new.status='accepted')
