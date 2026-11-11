@@ -328,7 +328,10 @@ for (const [file, html] of [
   if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
 }
 if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
-if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
+if (!secureCheckout.includes("Partner-direct launch is active") || secureCheckout.includes("init().catch(function(e)")) failures.push("Public checkout must fail closed with partner-direct payment guidance and must not initialize the Razorpay checkout flow.");
+if (!paymentReadiness.includes("Partner-direct launch is active") || paymentReadiness.includes("init().catch(e=>")) failures.push("Payment-readiness page must fail closed with partner-direct guidance and must not initialize checkout.");
+if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
+if (/functions\.invoke\(["']create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not invoke freight order creation during partner-direct launch.");
 if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
 if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
@@ -969,7 +972,7 @@ const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerReposit
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
-  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct launch']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
