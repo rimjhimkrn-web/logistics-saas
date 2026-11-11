@@ -125,7 +125,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const attributionKeys = ["Landing page", "Referrer", "UTM source", "UTM medium", "UTM campaign", "UTM content"];
-    const attributionLines = message.split(/\\r?\\n/).filter((line: string) =>
+    const attributionLines = message.split(/\r?\n/).filter((line: string) =>
       attributionKeys.some((key) => line.startsWith(key + ":"))
     ).map((line: string) => line.slice(0, 260)).slice(0, 6);
     const notificationText = [
