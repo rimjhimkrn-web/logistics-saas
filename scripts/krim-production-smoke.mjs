@@ -984,6 +984,9 @@ for (const [label, source, tokens] of [
 if (partnerMobile && (!partnerMobile.includes("organizations.length!==1") || !partnerMobile.includes("activeCaps===0") || !partnerMobile.includes('selected?.partner_account_mode!=="registered_business"'))) {
   failures.push("Partner quote submission must remain gated to one unambiguous registered, verified and capable organization.");
 }
+if (partnerMobile && !partnerMobile.includes("Assignment responses are paused until this account has one unambiguous partner organization.")) {
+  failures.push("Partner assignment accept/decline must be blocked when organization context is ambiguous.");
+}
 const podAdminSource = existsSync("app/platform-admin/delivery-pod-verification.html") ? readFileSync("app/platform-admin/delivery-pod-verification.html", "utf8") : "";
 const platformAdminNavigation = existsSync("app/platform-admin/index.html") ? readFileSync("app/platform-admin/index.html", "utf8") : "";
 for (const token of ["krim_admin_list_delivery_pods", "krim_admin_review_delivery_pod", "AAL2", "PRIVATE"]) {
