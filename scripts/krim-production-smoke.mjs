@@ -484,7 +484,7 @@ const customerWorkflow = existsSync("public/customer-os/assets/customer-workflow
 for (const [label, route] of [
   ["quote comparison", "public/shipper/quote-comparison.html"],
   ["shipment register", "public/customer-os/customer-services/shipment-list.html"],
-  ["payment checkout", "public/shipper/payment-checkout.html"],
+  ["payment history", "public/customer-os/customer-services/payment-history.html"],
   ["quote request", "public/customer/quote-request.html"],
 ]) {
   if (!existsSync(route)) failures.push(`Customer workflow target missing: ${label} -> ${route}`);
