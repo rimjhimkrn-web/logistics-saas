@@ -379,3 +379,67 @@ Before production sign-off, test:
 
 ### Disposition
 No policy, table grant, bucket setting, storage object, user, organisation or document was modified. This was a read-only production inspection. The review identifies strong organisation-scoped policy patterns alongside legacy partner-document compatibility and POD bucket configuration items requiring closure.
+
+
+## Public registration, customer enquiries and partner onboarding — static batch 6
+
+### Public contact/enquiry Edge Function
+Live `krim-public-contact-inquiry` (version 20, JWT verification disabled by design for the public form) was inspected.
+
+Positive controls:
+- POST-only endpoint with OPTIONS preflight and no-store responses.
+- Requires explicit privacy consent.
+- Validates name, email, organisation and message lengths and email format.
+- Has a honeypot field.
+- Uses only the Cloudflare-provided `cf-connecting-ip` header, not caller-supplied `X-Forwarded-For`.
+- IP rate-limit RPC is service-role-only and tracks hashed IPs in 10-minute windows, limiting after 10 requests.
+- Database submission RPC is service-role-only, validates again, takes an email-scoped advisory transaction lock and limits an email to 3 enquiries per hour.
+- Enquiry, acquisition profile, qualification case, event and notification outbox are created transactionally.
+- Public enquiry is linked to a general service request; function explicitly states no quote or booking is created.
+- Telegram failure is queued for retry while the user still receives the enquiry reference.
+- Honeypot submissions receive a generic success response without being inserted.
+
+### Public endpoint hardening item
+The Edge Function currently checks only the declared `Content-Length` header before parsing JSON. That header can be absent or inaccurate, so it is not a reliable body-size limit. Add a server-enforced byte limit while reading the request body (or a bounded stream) before JSON parsing. This is a denial-of-service / resource-control hardening item. The database message limit is 5,000 characters, but that is applied after JSON parsing.
+
+The IP throttle is skipped when Cloudflare's client-IP header is absent. Email throttling remains active, but the endpoint should have a clearly documented fallback policy for missing IP metadata. Do not trust arbitrary forwarded-IP headers as a substitute.
+
+### Customer registration
+`auth/signup.html`:
+- validates organisation name, full name, email, password length (12+), password confirmation and terms checkbox;
+- uses Supabase Auth sign-up, sets account type metadata and sends email confirmation;
+- email callback provisions the customer organisation using the authenticated user identity;
+- the provisioning RPC is SECURITY DEFINER, requires `auth.uid()`, validates legal name, serializes repeated provisioning with an advisory lock, reuses an existing active customer/enterprise membership and otherwise creates a customer organisation, owner membership, role assignment and audit event;
+- provisioning RPC is not executable by anon; authenticated and service_role only.
+
+### Partner registration
+`auth/partner-signup.html`:
+- requires organisation/applicant name, email, password, one of three pathways and Terms/Privacy acceptance;
+- individual-interest path additionally requires country, city and service category;
+- partner organisation provisioning creates pending verification/compliance/onboarding status, verification case, owner membership, partner role and audit event;
+- partner account mode RPC requires an authenticated user and active partner organisation, validates supported mode and individual profile fields, blocks mode changes after approval, records audit and explicitly returns `commercial_access=false`;
+- partner registration does not create a verified capability, approved service, rate, load, assignment or payout.
+
+### Registration caveats
+1. Customer signup requires 12-character passwords; partner signup currently accepts 10-character passwords. Align the policy and test password breach protection / Auth settings consistently.
+2. Terms acceptance and version are sent as user metadata from the browser. That metadata is not, by itself, a durable legal acceptance record. Capture terms/privacy version, timestamp, user, source and consent evidence in a server-side append-only acceptance record before relying on it for contractual audit.
+3. The signup pages have separate client bootstrap patterns and both depend on root `config.js`. Verify production config, auth redirect allowlist, email templates, SMTP deliverability, confirmation-required and confirmation-disabled paths, and MFA enrolment on real test accounts.
+4. Customer/partner provisioning occurs after email confirmation in the auth callback when no session is returned by sign-up. This path needs an end-to-end test; a successful sign-up API response is not proof the workspace was provisioned.
+5. The partner account-mode RPC is callable by any authenticated user, but it first requires an active partner organisation and only records a non-commercial mode; verify direct RPC abuse cannot alter a verified/approved partner.
+6. No public signup flow should grant a verified partner capability or paid entitlement.
+
+### Partner onboarding journey
+The public network page routes applicants to `auth/partner-signup.html`, then to `public/partner/partner-onboarding.html` after account creation and MFA. Its public wording correctly separates application, document review, capability assessment, commercial agreement and controlled activation. It explicitly states that registration is not verification and does not guarantee work.
+
+### Customer quote entry point
+The public quote page describes an enquiry/request process and distinguishes a request from a confirmed quote or booking. Its live form's complete server-side provider-match and no-match behaviour remains part of the separate marketplace-availability release gate; this review does not approve booking or payment activation.
+
+### Tests still required
+- Contact: missing/incorrect Content-Length, oversized streamed body, no CF IP header, 11th request in 10 minutes, 4th email enquiry in one hour, invalid consent, honeypot, duplicate/retry and notification outage.
+- Customer signup: duplicate email, weak/compromised password, email-confirmed and immediate-session branches, callback retry, duplicate provisioning and no accidental cross-role membership.
+- Partner signup: each pathway, invalid profile, repeated callback, attempted mode change after approval, direct RPC without partner membership, and confirmation/MFA failures.
+- Legal acceptance: verify durable versioned acceptance record before relying on the click-through.
+- Quote flow: no provider, expired provider, wrong mode/cargo, capacity mismatch, cross-organisation access, and no booking/payment when no eligible partner exists.
+
+### Disposition
+The public enquiry and signup architecture has meaningful validation, rate limiting, identity-bound provisioning and separation between registration and operational approval. Outstanding items are server-side request-body byte limiting, fallback IP-throttle policy, durable legal-acceptance evidence, consistent password policy, and real email-confirmation/MFA/onboarding E2E tests. No real user accounts, enquiries, organisations, partner records, quotes or bookings were created or modified during this review.
