@@ -208,7 +208,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
             <Text style={s.tiny}>Shipment ID {q.shipment_id} · Status: {q.status}</Text>
             <Text style={s.tiny}>Valid until: {new Date(q.valid_until).toLocaleString()}</Text>
-            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted"&&shipments.find(x=>x.id===q.shipment_id)?.status==="confirmed" ? <Action title={paymentQuoteId===q.id?"Preparing secure checkout…":"Pay securely"} onPress={()=>void startPayment(q)} disabled={paymentQuoteId!==null||verifyingPayment}/> : q.status==="accepted" ? <Text style={s.tiny}>Payment unlocks after KRIM confirms the partner assignment and reserved capacity.</Text> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
+            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted" ? <Text style={s.tiny}>Partner-direct launch: KRIM does not collect freight payments. Confirm the service and pay your selected logistics partner directly under your agreement with them.</Text> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
           </View>) : <Empty title="No visible quotes" body="Confirmed quotes will appear here when available to your organization."/>}
         </>}
 
