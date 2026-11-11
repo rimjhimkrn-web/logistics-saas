@@ -65,10 +65,10 @@ function rel(file) {
 function inspectHtml(file) {
   const text = fs.readFileSync(file, "utf8");
   // Report legacy logo placeholders and removed image references across all HTML pages.
-  if (/file_00000000242881faa8abc7188d1c40c4\\.png/i.test(text)) {
+  if (/file_00000000242881faa8abc7188d1c40c4\.png/i.test(text)) {
     brandFindings.push({ source: rel(file), reason: "removed legacy uploaded logo asset is still referenced" });
   }
-  const legacyMarkPattern = /<(?:span|div)[^>]*class=["'][^"']*(?:brandmark|brand-mark|brand-icon|logo-icon|(?:^|\\s)mark(?:\\s|$))[^"']*["'][^>]*>\\s*(?:K|↗)\\s*<\\/(?:span|div)>/gi;
+  const legacyMarkPattern = /<(?:span|div)[^>]*class=["'][^"']*(?:brandmark|brand-mark|brand-icon|logo-icon|(?:^|\s)mark(?:\s|$))[^"']*["'][^>]*>\s*(?:K|↗)\s*</(?:span|div)>/gi;
   let legacyMark;
   while ((legacyMark = legacyMarkPattern.exec(text))) {
     brandFindings.push({ source: rel(file), reason: "legacy text-only KRIM mark", snippet: legacyMark[0].slice(0, 160) });
