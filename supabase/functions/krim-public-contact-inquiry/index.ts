@@ -7,6 +7,49 @@ const corsHeaders = {
   "Cache-Control": "no-store"
 };
 
+
+const MAX_REQUEST_BYTES = 9000;
+
+async function readBoundedJson(req: Request): Promise<unknown> {
+  const declaredLength = req.headers.get("content-length");
+  if (declaredLength !== null) {
+    const parsedLength = Number(declaredLength);
+    if (Number.isFinite(parsedLength) && parsedLength > MAX_REQUEST_BYTES) {
+      throw new RangeError("Request body too large");
+    }
+  }
+
+  if (!req.body) throw new SyntaxError("Missing request body");
+
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_REQUEST_BYTES) {
+        await reader.cancel("Request body too large").catch(() => {});
+        throw new RangeError("Request body too large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+}
+
 function reply(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
     status,
@@ -18,15 +61,18 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return reply(405, { error: "POST required" });
 
-  const declaredLength = Number(req.headers.get("content-length") || "0");
-  if (declaredLength > 9000) return reply(413, { error: "Request is too large." });
-
   try {
     const url = Deno.env.get("SUPABASE_URL");
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return reply(503, { error: "Contact service is not configured." });
 
-    const body = await req.json().catch(() => null);
+    let body: unknown;
+    try {
+      body = await readBoundedJson(req);
+    } catch (error) {
+      if (error instanceof RangeError) return reply(413, { error: "Request is too large." });
+      return reply(400, { error: "Invalid request." });
+    }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return reply(400, { error: "Invalid request." });
     }
