@@ -56,3 +56,41 @@ Partner application and initial verification review remain free. Approval does n
 - This register is not a legal due-diligence report and does not establish licensing, insurance, solvency, capacity, quality, or willingness to partner.
 
 **Decision:** Start with Kiran Group and Deepak Roadlines for a regional anchor conversation, then SafeShift and All Time Courier for complementary road/parcel options. Keep CJ Darcl as a strategic large-network conversation. Do not activate any provider based on this research alone.
+
+
+## 11 November local discovery refresh
+
+A fresh Ranchi local-business search identified additional discovery leads and useful location-level checks. These are directory/map listings, not proof of corporate status, route capacity, or partner eligibility.
+
+### Additional leads
+
+| Priority | Prospect | Public listing details | Potential fit | Caution / next verification |
+|---|---|---|---|---|
+| P2 | NGT Freight Carriers Pvt. Ltd. — Ranchi office | Listed near Madan Hotel, H.B. Road, Kakar, Ranchi 834001; phone +91 99805 57515 | Potential line-haul / freight network discussion | No reviews shown in the returned listing; confirm official corporate branch contact, legal entity, GST, current services, lanes and vendor policy before approach |
+| P2 | All Time Courier & Cargo Pvt. Ltd. — Pundag | Local listing at Pundag, Ranchi 834004; phone +91 73600 68012 | Regional courier / cargo discovery | Public feedback is mixed, particularly around customer-support responsiveness; assess complaint handling, tracking, POD and escalation before any pilot |
+| P3 | Geetakrishna Enterprises — Kutchery Chowk | Listed as a courier booking agency, KC Complex, Deputy Para Road, Ranchi 834001; phone +91 70040 46249 | Potential referral/booking-channel conversation only | Listing explicitly describes it as a booking agency, not a delivery agency; do not treat as a carrier or operational provider |
+| P3 | Blue Dart DHL (Bluetech & Company) — Kadru/Ashok Nagar | Local courier point listing; phone +91 99553 34078 | Possible authorised courier channel / service-point discussion | Verify franchise/agency authority directly with the brand; a booking counter is not proof of owned delivery capacity or authority to contract for the network |
+| P3 | Maa Bhawani Packers & Movers — Kumhartoli | Local relocation listing; phone +91 99737 78307 | Relocation / household-goods niche only | Not assumed to provide general freight, warehousing or commercial FTL/PTL |
+
+### Location-level verification notes
+
+- SafeShift's official site lists its Ranchi office near Daladali Chowk, behind P Mart, Ranchi Ring Road, and publishes +91 82987 77777 / +91 87575 19477 and info@safeshift.com. Reconfirm current contact and branch scope before outreach.
+- Kiran Group's current official website lists its Ranchi head office at Oriental Bank Lane, Court Road, and +91 86748 40452 / +91 93083 14331. Its website advertises 7 lakh+ sq. ft. warehousing and a 40+ owned-vehicle fleet supported by partner agencies; these are company claims, not independently audited KRIM findings.
+- Deepak Roadlines' official site publishes +91 8102947954 / +91 9334428716 and describes a daily parcel service connecting North/West Indian origins to Jharkhand/Bihar destinations. Local listing feedback is mixed, with reports of both satisfactory and delayed shipments. Do a documented service-quality interview before any pilot.
+
+### Updated outreach order
+
+1. Kiran Group — strategic warehousing/distribution discussion.
+2. SafeShift — regional cargo, PTL/FTL and warehousing discussion.
+3. Deepak Roadlines — parcel/road network discussion, with service-quality checks.
+4. NGT Freight Carriers — verify corporate contact and regional lane capability first.
+5. CJ Darcl — strategic large-network / technology conversation.
+6. All Time Courier & Cargo — only after confirming current service quality and escalation ownership.
+
+### Research sources checked
+
+- Kiran Group official contact and services: https://www.kirangroup.com/contact ; https://www.kirangroup.com/services
+- SafeShift official contact and cargo pages: https://safeshift.com/contact-us/ ; https://safeshift.com/services-cargo-transport/
+- Deepak Roadlines official website: https://www.deepakroadlines.co.in/
+- Ranchi local business listings for NGT Freight Carriers, All Time Courier & Cargo, Geetakrishna Enterprises, Blue Dart DHL (Bluetech & Company), Maa Bhawani Packers & Movers, and Deepak Roadlines. Directory listings and reviews are indicative only and must be reconfirmed.
+
