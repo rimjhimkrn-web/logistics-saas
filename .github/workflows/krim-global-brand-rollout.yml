@@ -1,0 +1,36 @@
+name: KRIM global logo rollout
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/trigger-global-brand-rollout.txt'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: krim-global-brand-rollout
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply global branding loader to every tracked HTML page
+        run: python scripts/apply-global-brand-rollout.py
+      - name: Commit all page updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.html'
+          if git diff --cached --quiet; then
+            echo "All HTML pages already include the global KRIM brand loader."
+          else
+            git commit -m "Apply official KRIM master logo across all HTML pages"
+            git push origin main
+          fi
