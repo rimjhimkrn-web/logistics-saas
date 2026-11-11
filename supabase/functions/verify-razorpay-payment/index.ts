@@ -399,6 +399,16 @@ error:
 );
 }
 
+// A payment order can outlive its original checkout state. Re-check that the
+// shipment is still confirmed immediately before accepting a new payment.
+// Already-paid same-payment retries remain eligible for idempotent recovery.
+if (!alreadyPaid && shipment.status !== "confirmed") {
+  return jsonResponse({
+    error: `Shipment is no longer confirmed. Current status: ${shipment.status}. Payment verification is blocked.`,
+    code: "SHIPMENT_NOT_CONFIRMED",
+  }, 409);
+}
+
 if (
 !shipment.customer_organization_id
 ) {
@@ -797,159 +807,46 @@ if (!updatedPaymentOrderData) {
 }
 }
 
-// Global financial transaction
+// Global financial transaction reconciliation
 // --------------------------------------------------
-
-const {
-data: existingTransaction,
-error:
-existingTransactionError,
-} =
-await supabase
-.from(
-"krim_financial_transactions"
-)
-.select("id")
-.eq(
-"provider",
-"razorpay"
-)
-.eq(
-"provider_reference",
-razorpayPaymentId
-)
-.maybeSingle();
-
-if (
-existingTransactionError
-) {
-console.error(
-"Financial transaction lookup error:",
-existingTransactionError
-);
-
-return jsonResponse(
-{
-error:
-"Payment verified but financial transaction check failed",
-},
-500
-);
+// Use the same service-role-only, transactional and idempotent database
+// reconciler as the signed webhook. Never acknowledge verification merely
+// because a provider reference exists: the database validates the full
+// shipment, quote, assignment, capacity, amount and currency binding.
+if (legacyAlreadyPaid) {
+  return jsonResponse({
+    error: "This legacy paid order lacks the bindings required for automatic financial reconciliation. Manual review is required.",
+    code: "LEGACY_PAYMENT_RECONCILIATION_REQUIRED",
+    payment_order_id: paymentOrder.id,
+  }, 409);
 }
 
-let financialTransactionId =
-existingTransaction?.id ??
-null;
-
-if (!existingTransaction) {
 const {
-data: financialTransaction,
-error:
-financialTransactionError,
-} =
-await supabase
-.from(
-"krim_financial_transactions"
-)
-.insert({
-shipment_id:
-shipment.id,
+  data: financialTransactionId,
+  error: financialReconciliationError,
+} = await supabase.rpc(
+  "krim_internal_reconcile_razorpay_captured_payment",
+  {
+    p_payment_order_id: paymentOrder.id,
+    p_razorpay_payment_id: razorpayPaymentId,
+  },
+);
 
-organization_id:
-shipment.customer_organization_id,
-
-// FIX:
-// Database constraint allows "payment",
-// not "customer_payment".
-transaction_type:
-"payment",
-
-amount:
-Number(
-paymentOrder.amount_paise
-) / (10 ** currencyMinorUnitExponent(localCurrency)),
-
-currency_code:
-localCurrency,
-
-provider:
-"razorpay",
-
-provider_reference:
-razorpayPaymentId,
-
-status:
-"completed",
-
-transaction_time:
-paidAt,
-
-metadata: {
-payment_order_id:
-paymentOrder.id,
-
-razorpay_order_id:
-razorpayOrderId,
-
-razorpay_payment_id:
-razorpayPaymentId,
-
-krim_shipment_id:
-shipment.id,
-
-shipment_number:
-shipment.shipment_number,
-
-source:
-"global_razorpay_verification",
-
-krim_quote_id:
-paymentOrder.krim_quote_id,
-
-partner_quote_id:
-paymentOrder.partner_quote_id,
-
-customer_organization_id:
-paymentOrder.customer_organization_id,
-},
-})
-.select("id")
-.single();
-
-if (financialTransactionError) {
-  // A concurrent webhook/browser verification may have inserted this provider payment
-  // after our initial lookup. The database unique index is the final idempotency guard.
-  if (financialTransactionError.code === "23505") {
-    const { data: racedTransaction, error: racedLookupError } = await supabase
-      .from("krim_financial_transactions")
-      .select("id")
-      .eq("provider", "razorpay")
-      .eq("provider_reference", razorpayPaymentId)
-      .maybeSingle();
-
-    if (racedLookupError || !racedTransaction) {
-      console.error("Payment transaction race could not be reconciled:", racedLookupError);
-      return jsonResponse({
-        error: "Payment verified but financial transaction reconciliation is pending",
-        payment_order_id: updatedPaymentOrder.id,
-        razorpay_payment_id: razorpayPaymentId,
-      }, 500);
-    }
-    financialTransactionId = racedTransaction.id;
-  } else {
-    console.error("Financial transaction creation failed:", financialTransactionError);
-    return jsonResponse({
-      error: "Payment verified but financial transaction creation failed",
-      payment_order_id: updatedPaymentOrder.id,
-      razorpay_payment_id: razorpayPaymentId,
-    }, 500);
-  }
-} else {
-  financialTransactionId = financialTransaction.id;
-}
+if (financialReconciliationError || !financialTransactionId) {
+  console.error(
+    "Payment verified but atomic finance reconciliation failed:",
+    financialReconciliationError,
+  );
+  return jsonResponse({
+    error: "Payment verified but financial reconciliation is pending; retry required.",
+    code: "PAYMENT_FINANCE_RECONCILIATION_PENDING",
+    payment_order_id: updatedPaymentOrder.id,
+    razorpay_payment_id: razorpayPaymentId,
+  }, 500);
 }
 
 // --------------------------------------------------
+
 // Final response
 // --------------------------------------------------
 
@@ -958,7 +855,7 @@ success: true,
 
 verified: true,
 
-already_verified: alreadyPaid && Boolean(existingTransaction),
+already_verified: alreadyPaid,
 
 payment_order_id:
 updatedPaymentOrder.id,
