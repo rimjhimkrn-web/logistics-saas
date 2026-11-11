@@ -23,3 +23,11 @@ This is a code patch on the audit branch, not a production deployment. The SQL f
 
 ## Current status
 Implementation patch prepared; static source checks completed; CI, staging execution, integration tests and production deployment remain pending.
+
+
+## Additional security work in the same implementation branch
+- Added `docs/sql/krim-partner-quote-confidentiality.review.sql`.
+- The draft removes customer-organisation access from the base `krim_partner_quotes` SELECT policy and restricts full-row access to the owning partner organisation.
+- Includes staging assertions and a rollback statement.
+- This closes the identified direct-row disclosure path if validated and deployed; customer-facing comparison must continue through the separate customer quote model (`krim_quotes`), not the partner quote base table.
+- This policy change has not been executed against staging or production.
