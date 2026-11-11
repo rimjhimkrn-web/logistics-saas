@@ -57,7 +57,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
  const activeCaps=capabilities.filter(c=>c.active&&c.verification_status==="verified"&&(!c.effective_from||new Date(c.effective_from).getTime()<=Date.now())&&(!c.effective_until||new Date(c.effective_until).getTime()>Date.now())).length;
  const openAssignments=assignments.filter(a=>a.status==="offered").length;
  return <View style={s.safe}>
-  <View style={s.top}><Image source={require("../assets/icon.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" /><Text style={s.secure}>● SECURE SESSION</Text></View>
+  <View style={s.top}><Image source={require("../assets/krim-master-logo.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" /><Text style={s.secure}>● SECURE SESSION</Text></View>
   <ScrollView contentContainerStyle={s.content}>
    <View style={s.banner}><Text style={s.bannerText}>LIVE DATA · COMMERCIAL ACTIONS REQUIRE APPROVAL</Text></View>
    {!!error&&<View style={s.error}><Text style={s.errorText}>{error}</Text></View>}
