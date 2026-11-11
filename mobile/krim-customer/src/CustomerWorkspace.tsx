@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { WebView, type WebViewMessageEvent } from "react-native-webview";
+import { ActivityIndicator, Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
@@ -34,8 +33,6 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [acceptingQuoteId, setAcceptingQuoteId] = useState<number | null>(null);
-  const [checkout,setCheckout]=useState<{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}|null>(null);
-  const [verifyingPayment,setVerifyingPayment]=useState(false);
 
   const refreshOrganizations = useCallback(async () => {
     if (!supabase) return;
@@ -94,24 +91,6 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   const startPayment=async()=>{
     setError("");
     setNotice("Partner-direct launch: KRIM does not collect freight payments. Confirm payment instructions directly with your selected logistics partner.");
-  };
-
-  const handleCheckoutMessage=async(event:WebViewMessageEvent)=>{
-    let message:any;try{message=JSON.parse(event.nativeEvent.data);}catch{return;}
-    if(message?.type==="dismiss"){setCheckout(null);return;}
-    if(message?.type==="failed"){setCheckout(null);setError(String(message.message||"Razorpay reported that the payment did not complete."));return;}
-    if(message?.type!=="success"||verifyingPayment)return;
-    const paymentId=String(message.razorpay_payment_id||""),orderId=String(message.razorpay_order_id||""),signature=String(message.razorpay_signature||"");
-    if(!paymentId||!orderId||!signature){setCheckout(null);setError("The payment provider returned incomplete verification details. Do not retry until payment status is checked.");return;}
-    setVerifyingPayment(true);setError("");setNotice("Payment received by Razorpay. KRIM is verifying the signature and reconciling the transaction…");
-    try{
-      const {data,error:functionError}=await supabase!.functions.invoke("verify-razorpay-payment",{body:{razorpay_payment_id:paymentId,razorpay_order_id:orderId,razorpay_signature:signature}});
-      if(functionError)throw new Error(functionError.message||"Payment verification is pending. Check payment status before retrying.");
-      if(!data?.verified||data?.status!=="paid")throw new Error(data?.error||"Payment verification is not yet complete. Please contact KRIM support before paying again.");
-      setCheckout(null);setNotice("Payment verified and reconciled for shipment "+String(data.shipment_number||"")+".");
-      await refreshWorkspace();
-    }catch(e){setCheckout(null);setError(e instanceof Error?e.message:"Payment verification is pending. Please do not pay again until KRIM confirms the status.");}
-    finally{setVerifyingPayment(false);}
   };
 
   const showTracking = async (shipmentNumber: string) => {
@@ -223,10 +202,6 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
           <View style={s.panel}><Text style={s.panelTitle}>KRIM</Text><Text style={s.body}>Knowledge · Reliability · Integration · Movement</Text><Text style={s.tiny}>Global-ready architecture · Market availability requires local partner and compliance verification.</Text></View>
         </>}
       </ScrollView>
-      <Modal visible={!!checkout} animationType="slide" onRequestClose={()=>setCheckout(null)}>
-        <View style={s.checkoutHeader}><View><Text style={s.checkoutTitle}>KRIM secure payment</Text><Text style={s.tiny}>{checkout?.shipmentNumber||"Shipment payment"}</Text></View><Pressable onPress={()=>setCheckout(null)} accessibilityRole="button"><Text style={s.checkoutClose}>Close ✕</Text></Pressable></View>
-        {checkout&&<WebView originWhitelist={["https://*","about:blank"]} source={{html:razorpayCheckoutHtml(checkout)}} javaScriptEnabled domStorageEnabled onMessage={handleCheckoutMessage} onShouldStartLoadWithRequest={request=>{const url=request.url;if(url==="about:blank"||url.startsWith("https://"))return true;if(/^(upi|intent|phonepe|paytm|tez|gpay):/i.test(url)){void Linking.openURL(url).catch(()=>setError("The selected payment app could not be opened."));return false;}return false;}} startInLoadingState renderLoading={()=><View style={s.checkoutLoading}><ActivityIndicator size="large" color={blue}/><Text style={s.muted}>Loading Razorpay checkout…</Text></View>}/>}
-      </Modal>
       <View style={s.nav}>{tabs.map((item) => <Pressable key={item} onPress={() => setTab(item)} accessibilityRole="tab" accessibilityState={{selected: tab === item}} style={s.navItem}>
         <Text style={[s.navIcon, tab === item && {color: blue}]}>{({Home:"⌂",Book:"+",Shipments:"▤",Quotes:"≋",Track:"◎",Account:"○"} as Record<Tab,string>)[item]}</Text>
         <Text style={[s.navLabel, tab === item && {color: blue}]}>{item}</Text>
@@ -235,12 +210,6 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   );
 }
 
-function razorpayCheckoutHtml(data:{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}){
-  const escapeHtml=(value:string)=>value.replace(/[&<>"\']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch]||ch));
-  const json=(value:string)=>JSON.stringify(value).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026");
-  const key=json(data.keyId),order=json(data.orderId),currency=json(data.currency),description=json("Shipment "+data.shipmentNumber),email=json(data.email),amount=Number(data.amount),safeShipment=escapeHtml(data.shipmentNumber);
-  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta charset="utf-8"><title>KRIM secure checkout</title><style>body{font-family:Arial,sans-serif;background:#f3f6fa;color:#071a35;display:flex;min-height:90vh;align-items:center;justify-content:center;padding:20px;text-align:center}.box{background:white;border-radius:18px;padding:26px;box-shadow:0 12px 35px #071a3520;max-width:360px}button{background:#2366d9;color:white;border:0;border-radius:10px;padding:14px 24px;font-weight:700;font-size:16px}</style></head><body><div class="box"><h2>KRIM Logistics</h2><p>${safeShipment}</p><h3>${data.currency} ${(amount/100).toLocaleString("en-IN",{maximumFractionDigits:2})}</h3><p>Secure payment powered by Razorpay.</p><button id="pay">Continue to payment</button></div><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script>const options={key:${key},amount:${amount},currency:${currency},name:"KRIM Logistics",description:${description},order_id:${order},prefill:{email:${email}},theme:{color:"#2366d9"},handler:function(r){window.ReactNativeWebView.postMessage(JSON.stringify({type:"success",razorpay_payment_id:r.razorpay_payment_id,razorpay_order_id:r.razorpay_order_id,razorpay_signature:r.razorpay_signature}));},modal:{ondismiss:function(){window.ReactNativeWebView.postMessage(JSON.stringify({type:"dismiss"}));}}};const checkout=new Razorpay(options);checkout.on("payment.failed",function(r){window.ReactNativeWebView.postMessage(JSON.stringify({type:"failed",message:r.error&&r.error.description||"Payment failed"}));});document.getElementById("pay").addEventListener("click",function(){checkout.open();});</script></body></html>`;
-}
 
 function Header({kicker,title,sub}:{kicker:string;title:string;sub:string}) { return <View style={s.header}><Text style={s.kicker}>{kicker}</Text><Text style={s.title}>{title}</Text><Text style={s.muted}>{sub}</Text></View>; }
 function Metric({title,value,detail}:{title:string;value:string;detail:string}) { return <View style={s.metric}><Text style={s.muted}>{title}</Text><Text style={s.metricValue}>{value}</Text><Text style={s.tiny}>{detail}</Text></View>; }
