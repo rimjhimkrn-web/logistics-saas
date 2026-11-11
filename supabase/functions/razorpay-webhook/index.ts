@@ -499,20 +499,23 @@ if (!failedOrder) {
 return jsonResponse({ success: false, error: "KRIM payment order not found" }, 404);
 }
 if (failedOrder.status !== "paid") {
-const { error: updateError } = await supabaseAdmin
-.from("payment_orders")
-.update({
-status: "failed",
-razorpay_payment_id: razorpayPaymentId,
-failure_reason: failureReason,
-})
-.eq("id", failedOrder.id)
-.neq("status", "paid");
+  // Razorpay payment.failed describes one payment attempt, not necessarily the
+  // provider order itself. Keep the KRIM order open so the customer can retry
+  // against the same Razorpay order. Creating a replacement order here could
+  // leave two provider orders payable for the same accepted quote.
+  const { error: updateError } = await supabaseAdmin
+    .from("payment_orders")
+    .update({
+      failure_reason: String(failureReason).slice(0, 1000),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", failedOrder.id)
+    .neq("status", "paid");
 
-if (updateError) {
-console.error("Failed to update failed payment:", updateError);
-return jsonResponse({ success: false, error: "Payment reconciliation failed" }, 500);
-}
+  if (updateError) {
+    console.error("Failed to record payment-attempt failure:", updateError);
+    return jsonResponse({ success: false, error: "Payment-attempt reconciliation failed" }, 500);
+  }
 }
 }
 
