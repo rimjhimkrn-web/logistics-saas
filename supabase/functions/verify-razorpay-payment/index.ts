@@ -753,59 +753,10 @@ error:
 );
 }
 
-// --------------------------------------------------
-// Mark payment order paid
-
-const paidAt =
-paymentOrder.paid_at || new Date().toISOString();
-
+// The database RPC owns the paid-state transition. Keep the provider
+// signature/API verification above, but never write payment_orders.status
+// directly from this Edge Function.
 let updatedPaymentOrder: any = paymentOrder;
-
-if (!alreadyPaid) {
-const {
-data: updatedPaymentOrderData,
-error: updatePaymentError,
-} = await supabase
-.from("payment_orders")
-.update({
-status: "paid",
-razorpay_payment_id: razorpayPaymentId,
-razorpay_signature: razorpaySignature,
-paid_at: paidAt,
-failure_reason: null,
-updated_at: paidAt,
-})
-.eq("id", paymentOrder.id)
-.eq("status", paymentOrder.status)
-.select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
-.maybeSingle();
-
-if (updatePaymentError) {
-console.error("Payment order update failed:", updatePaymentError);
-return jsonResponse({ error: "Payment verified but KRIM payment record could not be updated" }, 500);
-}
-
-if (!updatedPaymentOrderData) {
-  // A webhook or concurrent verification may have won the status transition.
-  // Never overwrite a different payment ID; accept only the same already-paid payment.
-  const { data: currentOrder, error: currentOrderError } = await supabase
-    .from("payment_orders")
-    .select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
-    .eq("id", paymentOrder.id)
-    .maybeSingle();
-
-  if (currentOrderError || !currentOrder) {
-    console.error("Concurrent payment-order state could not be reconciled:", currentOrderError);
-    return jsonResponse({ error: "Payment verified but payment-order reconciliation is pending" }, 500);
-  }
-  if (currentOrder.status !== "paid" || currentOrder.razorpay_payment_id !== razorpayPaymentId) {
-    return jsonResponse({ error: "Payment order changed concurrently; refusing to overwrite its payment state." }, 409);
-  }
-  updatedPaymentOrder = currentOrder;
-} else {
-  updatedPaymentOrder = updatedPaymentOrderData;
-}
-}
 
 // Global financial transaction reconciliation
 // --------------------------------------------------
@@ -844,6 +795,25 @@ if (financialReconciliationError || !financialTransactionId) {
     razorpay_payment_id: razorpayPaymentId,
   }, 500);
 }
+
+// Read back the committed row so the response reflects the canonical DB state.
+const { data: committedPaymentOrder, error: committedOrderError } = await supabase
+  .from("payment_orders")
+  .select("id, krim_shipment_id, krim_quote_id, partner_quote_id, customer_organization_id, amount_paise, currency, status, razorpay_order_id, razorpay_payment_id, paid_at")
+  .eq("id", paymentOrder.id)
+  .maybeSingle();
+
+if (committedOrderError || !committedPaymentOrder ||
+    committedPaymentOrder.status !== "paid" ||
+    committedPaymentOrder.razorpay_payment_id !== razorpayPaymentId) {
+  console.error("Atomic payment committed but read-back verification failed:", committedOrderError);
+  return jsonResponse({
+    error: "Payment reconciliation committed but confirmation is pending; retry required.",
+    code: "PAYMENT_COMMIT_READBACK_PENDING",
+    payment_order_id: paymentOrder.id,
+  }, 500);
+}
+updatedPaymentOrder = committedPaymentOrder;
 
 // --------------------------------------------------
 

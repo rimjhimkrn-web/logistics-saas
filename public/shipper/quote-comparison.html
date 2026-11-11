@@ -91,15 +91,24 @@ return;
 }
 const valid=selected.status==='sent'&&!isExpired(selected.valid_until)&&Number(selected.amount)>0&&!!selected.partner_quote_id;
 if(!valid){actionFeedback('Acceptance is blocked: the quote must be sent, unexpired, positive-value and linked to a partner offer. The current record does not meet every requirement.','error');return;}
-const assignment=await client.from('krim_shipment_partner_assignments').select('id,status').eq('shipment_id',shipment.id).eq('partner_quote_id',selected.partner_quote_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+const assignment=await client.from('krim_shipment_partner_assignments').select('id,status,capacity_binding_id').eq('shipment_id',shipment.id).eq('partner_quote_id',selected.partner_quote_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
 if(assignment.error||!assignment.data||assignment.data.status!=='accepted'){actionFeedback('Acceptance is not available yet. The selected partner offer must have a matching assignment already marked accepted; KRIM will not bypass partner confirmation.','info');return;}
+if(!assignment.data.capacity_binding_id){actionFeedback('Acceptance is blocked until the partner schedules the shipment leg and confirms a capacity reservation.','info');return;}
+const binding=await client.from('krim_capacity_leg_bindings').select('id,reservation_id,status').eq('id',assignment.data.capacity_binding_id).maybeSingle();
+if(binding.error||!binding.data||binding.data.status!=='confirmed'||!binding.data.reservation_id){actionFeedback('The partner capacity binding is not confirmed. KRIM will not enable quote acceptance or checkout.','error');return;}
+const reservation=await client.from('krim_capacity_reservations').select('id,status').eq('id',binding.data.reservation_id).maybeSingle();
+if(reservation.error||!reservation.data||reservation.data.status!=='confirmed'){actionFeedback('The linked capacity reservation is not confirmed. Ask the partner to complete verified capacity scheduling first.','error');return;}
 if(String(shipment.status||'')!=='quoted'){actionFeedback('Acceptance is blocked because the shipment is not in the required quoted state. Current status: '+(shipment.status||'unknown')+'.','error');return;}
-$('accept-selected').disabled=false;actionFeedback('Ready to accept. KRIM has a valid quote, linked partner offer, accepted partner assignment and quoted shipment status.','success');
+$('accept-selected').disabled=false;actionFeedback('Ready to accept. KRIM has a valid quote, accepted partner assignment, confirmed capacity binding and confirmed reservation.','success');
 }
 async function checkCheckoutReadiness(q){
 if(!q.partner_quote_id||shipment.status!=='confirmed')return false;
-const a=await client.from('krim_shipment_partner_assignments').select('id,status').eq('shipment_id',shipment.id).eq('partner_quote_id',q.partner_quote_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
-return !a.error&&!!a.data&&a.data.status==='accepted'&&Number(q.amount)>0&&String(q.currency_code||'').toUpperCase()==='INR'&&!isExpired(q.valid_until);
+const a=await client.from('krim_shipment_partner_assignments').select('id,status,capacity_binding_id').eq('shipment_id',shipment.id).eq('partner_quote_id',q.partner_quote_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+if(a.error||!a.data||a.data.status!=='accepted'||!a.data.capacity_binding_id)return false;
+const b=await client.from('krim_capacity_leg_bindings').select('id,reservation_id,status').eq('id',a.data.capacity_binding_id).maybeSingle();
+if(b.error||!b.data||b.data.status!=='confirmed'||!b.data.reservation_id)return false;
+const r=await client.from('krim_capacity_reservations').select('id,status').eq('id',b.data.reservation_id).maybeSingle();
+return !r.error&&!!r.data&&r.data.status==='confirmed'&&Number(q.amount)>0&&String(q.currency_code||'').toUpperCase()==='INR'&&!isExpired(q.valid_until);
 }
 async function load(){
 if(!sid||!/^\d+$/.test(sid)){feedback('A valid numeric shipment_id is required. Open this page from your shipment or quote workflow.','error');showEmpty('Shipment reference required','No live shipment or quote data has been loaded.');$('session-label').textContent='Shipment reference missing';return;}
