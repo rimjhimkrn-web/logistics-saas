@@ -330,7 +330,6 @@ for (const [file, html] of [
 if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
 if (!secureCheckout.includes("Partner-direct launch is active") || secureCheckout.includes("init().catch(function(e)")) failures.push("Public checkout must fail closed with partner-direct payment guidance and must not initialize the Razorpay checkout flow.");
 if (!paymentReadiness.includes("Partner-direct launch is active") || paymentReadiness.includes("init().catch(e=>")) failures.push("Payment-readiness page must fail closed with partner-direct guidance and must not initialize checkout.");
-if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
 if (/functions\.invoke\(["']create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not invoke freight order creation during partner-direct launch.");
 if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
 if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
@@ -341,6 +340,7 @@ if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentC
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
+if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
   ["order endpoint authenticates the bearer session", orderFn, /auth\.getUser\(token\)/],
