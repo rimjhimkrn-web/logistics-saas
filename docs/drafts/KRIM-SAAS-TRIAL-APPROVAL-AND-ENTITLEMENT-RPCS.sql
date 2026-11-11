@@ -1,4 +1,5 @@
 -- KRIM SaaS trial approval + entitlement resolver — REVIEW DRAFT ONLY
+-- Security revision: approval RPC is service_role-only; entitlement resolver is invoker.
 -- Companion to docs/drafts/KRIM-SAAS-SUBSCRIPTION-FOUNDATION-DRAFT.sql
 -- DO NOT APPLY TO PRODUCTION. Requires a reconciled staging schema and security review.
 -- No checkout, payment capture, recurring billing or auto-conversion is included.
@@ -20,7 +21,8 @@ create index if not exists krim_saas_trial_expiry_idx
 -- Trial start/end are calculated by the database; client cannot choose duration.
 create or replace function public.krim_saas_approve_trial(
   p_subscription_id uuid,
-  p_request_id uuid
+  p_request_id uuid,
+  p_actor_user_id uuid
 )
 returns jsonb
 language plpgsql
@@ -28,18 +30,16 @@ security definer
 set search_path = pg_catalog, public, auth
 as $$
 declare
-  v_actor uuid := auth.uid();
+  -- p_actor_user_id is supplied only by the authenticated Edge Function after
+  -- validating the caller's JWT and AAL2. EXECUTE is service_role-only.
+  v_actor uuid := p_actor_user_id;
   v_sub public.krim_saas_subscriptions%rowtype;
   v_now timestamptz := clock_timestamp();
   v_is_platform_admin boolean := false;
   v_feature_count integer := 0;
 begin
   if v_actor is null then
-    raise exception 'Authentication required' using errcode = '28000';
-  end if;
-
-  if coalesce(auth.jwt()->>'aal','') <> 'aal2' then
-    raise exception 'MFA AAL2 required' using errcode = '42501';
+    raise exception 'Validated actor required' using errcode = '28000';
   end if;
 
   select exists (
@@ -151,7 +151,7 @@ returns table (
 )
 language sql
 stable
-security definer
+security invoker
 set search_path = pg_catalog, public, private, auth
 as $$
   select e.feature_code,
@@ -182,9 +182,14 @@ as $$
 $$;
 
 -- Only authenticated users can call the entitlement resolver; it returns only their org rows.
-revoke all on function public.krim_saas_approve_trial(uuid,uuid) from public, anon, authenticated;
-grant execute on function public.krim_saas_approve_trial(uuid,uuid) to authenticated;
+-- The approval RPC is callable only by the trusted Edge Function's service-role client.
+-- The Edge Function must independently validate the caller JWT, AAL2, platform role,
+-- requester != approver, and request idempotency before passing p_actor_user_id.
+revoke all on function public.krim_saas_approve_trial(uuid,uuid,uuid) from public, anon, authenticated;
+grant execute on function public.krim_saas_approve_trial(uuid,uuid,uuid) to service_role;
 
+-- Entitlement resolution is deliberately SECURITY INVOKER (the default): RLS on the
+-- entitlement/subscription tables remains in force for the authenticated caller.
 revoke all on function public.krim_saas_get_my_entitlements(bigint) from public, anon;
 grant execute on function public.krim_saas_get_my_entitlements(bigint) to authenticated;
 
@@ -195,9 +200,11 @@ commit;
 --    Add a unique request ledger and reject reuse with a different payload before release.
 -- 2. The current subscription table draft's unique partial index includes pending_approval.
 --    Confirm intended one-pending-request-per-org policy and race behavior in staging.
--- 3. Approval function checks role and AAL2 but must be reviewed against actual deployed role assignment
---    schema, global role semantics, and JWT claim freshness.
--- 4. Entitlement resolver's SECURITY DEFINER ownership, EXECUTE grants and helper ACLs need review.
+-- 3. Approval RPC rechecks the platform role for the actor but trusts the service-role
+--    Edge Function to validate the user's JWT and AAL2 before passing p_actor_user_id.
+--    Never grant this RPC to anon/authenticated; only service_role may execute it.
+-- 4. Entitlement resolver is SECURITY INVOKER; verify authenticated SELECT grants and RLS
+--    policies permit only the caller's active organisation memberships.
 -- 5. Add an automated expiry worker that transitions trialing -> expired and appends audit events.
 --    Resolver already fails closed at expiry even if the worker is delayed.
 -- 6. Add immutable audit enforcement and a test for service-role / owner mutation paths.
