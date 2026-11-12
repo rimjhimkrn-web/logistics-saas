@@ -569,7 +569,7 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
         const verification = String(partnerOrg.partner_verification_status || "not_started").toLowerCase();
         const compliance = String(partnerOrg.partner_compliance_status || "not_started").toLowerCase();
         const lifecycle = String(partnerOrg.partner_lifecycle_status || "not_applicable").toLowerCase();
-        const commercialReady = partnerOrg.partner_account_mode === "registered_business" && ["verified", "approved"].includes(verification) && ["active", "verified"].includes(lifecycle) && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(compliance);
+        const commercialReady = partnerOrg.partner_account_mode === "registered_business" && ["verified", "approved"].includes(verification) && ["active", "verified", "approved"].includes(lifecycle) && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(compliance);
         document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Verification decision recorded" : verification === "pending" ? "Your submission is awaiting review" : "Complete your partner verification";
         document.getElementById("partner-status-mode").textContent = statusLabel(partnerOrg.partner_account_mode || "pathway not selected");
         document.getElementById("partner-status-verification").textContent = statusLabel(verification);
