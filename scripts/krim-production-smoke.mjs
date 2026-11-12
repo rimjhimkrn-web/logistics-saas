@@ -332,6 +332,25 @@ if (!/pay your partner directly|pay the partner directly|pay only the partner/i.
 if (!/partner/i.test(customerRefunds) || !/refund/i.test(customerRefunds)) failures.push("Customer refund route must explain partner-direct freight refund handling.");
 if (/Confirm & pay|Payment checkout/i.test(customerHome)) failures.push("Customer homepage must not advertise KRIM freight checkout in partner-direct mode.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Historical payment verification must retain authenticated server-side status verification.");
+for (const retiredPath of [
+  "public/freight/forwarder-settlement.html",
+  "public/finance/customer-invoices.html",
+  "public/finance/tax-invoices.html",
+  "public/finance/invoice-details.html",
+  "public/finance/transaction-details.html",
+  "public/finance/transaction-fees.html",
+  "public/finance/accounts-payable.html",
+  "public/finance/accounts-receivable.html",
+  "public/finance/dispute-management.html",
+  "public/support/payment-disputes.html",
+  "public/support/refund-disputes.html",
+]) {
+  const source = existsSync(retiredPath) ? readFileSync(retiredPath, "utf8") : "";
+  if (!source.includes("Not an active financial transaction workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance/support route must be clearly retired under partner-direct launch: " + retiredPath);
+  if (/<form\\b/i.test(source) || /handleSettlementSubmit|Generate Invoice|Finalize Freight Suite|Submit payment dispute|Submit refund dispute/i.test(source)) failures.push("Retired finance/support route must not expose a legacy form or fake financial action: " + retiredPath);
+}
+if (!/authenticated KRIM support ticket workflow/i.test(paymentDisputesPage + refundDisputesPage)) failures.push("Payment and refund dispute guidance must direct platform issues to authenticated KRIM support.");
+
 if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must not require a KRIM freight payment order or payment verification.");
 if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
 const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
