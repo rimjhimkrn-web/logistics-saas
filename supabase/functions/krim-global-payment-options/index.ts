@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const options = (rows || []).map((row: any) => {
-      const blockers: string[] = [];
+      const blockers: string[] = ["KRIM is operating in partner-direct mode; KRIM freight checkout is disabled."];
       if (row.integration_status !== "implemented") blockers.push("Integration is not implemented.");
       if (row.checkout_enabled !== true) blockers.push("Checkout is disabled.");
       if (row.merchant_eligibility_verified !== true) blockers.push("Merchant eligibility is not verified.");
@@ -66,9 +66,9 @@ Deno.serve(async (req: Request) => {
         country_code: row.country_code,
         currency_code: row.currency_code,
         integration_status: row.integration_status,
-        checkout_configured: row.integration_status === "implemented" && row.checkout_enabled === true,
+        checkout_configured: false,
         operationally_verified: operationallyVerified,
-        selectable: row.integration_status === "implemented" && row.checkout_enabled === true && operationallyVerified,
+        selectable: false,
         blockers,
         reviewed_at: row.reviewed_at,
         notes: row.notes || null,
@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
       currency_code: currency,
       options,
       selectable_count: options.filter((option: any) => option.selectable).length,
-      message: "Only explicitly enabled and evidence-verified provider/country/currency combinations are selectable. Planned providers are displayed as unavailable and cannot create payment orders.",
+      message: "Partner-direct launch mode is active. Customers contract with and pay logistics partners directly. KRIM freight checkout and provider selection are disabled; this endpoint cannot enable them.",
       checked_at: new Date().toISOString(),
     });
   } catch (error) {
