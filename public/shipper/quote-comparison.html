@@ -92,7 +92,7 @@ if(!valid){actionFeedback('Acceptance is blocked: the quote must be sent, unexpi
 const assignment=await client.from('krim_shipment_partner_assignments').select('id,status').eq('shipment_id',shipment.id).eq('partner_quote_id',selected.partner_quote_id).order('created_at',{ascending:false}).limit(1).maybeSingle();
 if(assignment.error||!assignment.data||assignment.data.status!=='accepted'){actionFeedback('Acceptance is not available yet. The selected partner offer must have a matching assignment already marked accepted; KRIM will not bypass partner confirmation.','info');return;}
 if(String(shipment.status||'')!=='quoted'){actionFeedback('Acceptance is blocked because the shipment is not in the required quoted state. Current status: '+(shipment.status||'unknown')+'.','error');return;}
-$('accept-selected').disabled=false;actionFeedback('Ready to accept. KRIM has a valid quote, linked partner offer, accepted partner assignment and quoted shipment status.','success');
+$('accept-selected').disabled=true;actionFeedback('The records are ready for review, but acceptance is temporarily paused until KRIM completes server-side partner, assignment and booking integrity hardening. Do not accept or pay through another channel.','warn');
 }
 async function load(){
 if(!sid||!/^\d+$/.test(sid)){feedback('A valid numeric shipment_id is required. Open this page from your shipment or quote workflow.','error');showEmpty('Shipment reference required','No live shipment or quote data has been loaded.');$('session-label').textContent='Shipment reference missing';return;}
@@ -121,50 +121,7 @@ feedback('Shipment access verified. Quote cards below reflect database records v
 };
 cfg.onerror=()=>feedback('KRIM public configuration could not be loaded. No records or actions are available.','error');document.head.appendChild(cfg);
 }
-$('accept-selected').addEventListener('click',async()=>{
-if(!selected||!client||!shipment)return;
-if(!confirm('Accept KRIM quote #'+selected.id+' for '+money(selected.amount,selected.currency_code)+'? This changes the quote status and shipment lifecycle.'))return;
-const quoteId=Number(selected.id),shipmentId=Number(shipment.id),organizationId=Number(shipment.customer_organization_id),partnerQuoteId=Number(selected.partner_quote_id);
-$('accept-selected').disabled=true;actionFeedback('KRIM is validating quote, organization permissions, validity and shipment status on the server…','info');
-try{
-const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:quoteId});
-if(error)throw error;
-const result=Array.isArray(data)?data[0]:data;
-if(!result||Number(result.id)!==quoteId||String(result.status)!=='accepted')throw new Error('Server response did not confirm the exact quote acceptance.');
-}catch(e){
-console.error(e);
-actionFeedback('The server did not confirm quote acceptance. '+(e&&e.message?e.message:'Server validation failed. Refresh and review the current quote.'),'error');
-$('accept-selected').disabled=false;
-return;
-}
-try{
-actionFeedback('Server accepted the request. Verifying the saved quote, shipment and partner assignment…','info');
-const [quoteRead,shipmentRead,assignmentRead]=await Promise.all([
-client.from('krim_quotes').select('id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id').eq('id',quoteId).eq('shipment_id',shipmentId).eq('customer_organization_id',organizationId).maybeSingle(),
-client.from('krim_shipments').select('id,status,customer_organization_id').eq('id',shipmentId).eq('customer_organization_id',organizationId).maybeSingle(),
-client.from('krim_shipment_partner_assignments').select('id,status,shipment_id,partner_quote_id,partner_organization_id').eq('shipment_id',shipmentId).eq('partner_quote_id',partnerQuoteId).order('created_at',{ascending:false}).limit(1).maybeSingle()
-]);
-if(quoteRead.error)throw quoteRead.error;
-if(shipmentRead.error)throw shipmentRead.error;
-if(assignmentRead.error)throw assignmentRead.error;
-const q=quoteRead.data,s=shipmentRead.data,a=assignmentRead.data;
-if(!q||!s||!a||String(q.status)!=='accepted'||String(s.status)!=='confirmed'||String(a.status)!=='accepted'||Number(q.id)!==quoteId||Number(q.shipment_id)!==shipmentId||Number(q.customer_organization_id)!==organizationId||Number(q.partner_quote_id)!==partnerQuoteId||Number(a.shipment_id)!==shipmentId||Number(a.partner_quote_id)!==partnerQuoteId){
-throw new Error('Persisted quote, shipment and matching accepted assignment do not all agree.');
-}
-const local=quotes.find(x=>String(x.id)===String(quoteId));
-if(local)Object.assign(local,q);
-shipment.status=s.status;
-$('shipment-status').textContent=String(s.status).replace(/_/g,' ');
-$('shipment-status').className='pill good';
-selected=local||q;
-render();
-actionFeedback('Verified: the quote is accepted, the shipment is confirmed, and the matching partner assignment is accepted. Arrange freight payment directly with the partner after independently verifying payment instructions. KRIM does not collect or settle freight charges.','success');
-}catch(e){
-console.error(e);
-actionFeedback('KRIM returned an accepted response, but the final saved state could not be verified. Do not pay or submit another acceptance. Refresh the shipment and contact KRIM support for reconciliation. '+(e&&e.message?e.message:''),'error');
-$('accept-selected').disabled=true;
-}
-});
+$('accept-selected').addEventListener('click',()=>{actionFeedback('Quote acceptance is temporarily unavailable while KRIM completes server-side partner, assignment and booking integrity hardening. No acceptance request was sent.','warn');});
 $('refresh-button').href=location.pathname+(location.search||'');
 if(preview)previewMode();else load();
 })();
