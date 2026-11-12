@@ -313,29 +313,28 @@ if (existsSync(quoteComparison)) {
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
 
- // Phase 5 booking and payment: only server-verified payment can be shown as paid.
+// Phase 5 partner-direct customer flow: KRIM freight payment is not a booking gate.
 const paymentReadiness = existsSync("public/shipper/payment-checkout.html") ? readFileSync("public/shipper/payment-checkout.html", "utf8") : "";
 const secureCheckout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 const paymentVerification = existsSync("public/payment-verification.html") ? readFileSync("public/payment-verification.html", "utf8") : "";
-const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
+const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
+const customerRefunds = existsSync("public/customer-os/customer-services/refunds.html") ? readFileSync("public/customer-os/customer-services/refunds.html", "utf8") : "";
+const customerHome = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
 for (const [file, html] of [
   ["public/shipper/payment-checkout.html", paymentReadiness],
   ["public/quote-result.html", secureCheckout],
-  ["public/payment-verification.html", paymentVerification],
-  ["public/shipment-confirmation.html", existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : ""],
+  ["public/shipment-confirmation.html", shipmentConfirmation],
 ]) {
-  if (!html.includes("krim-global-interface.css")) failures.push(`Phase 5 page is missing the shared global stylesheet: ${file}`);
-  if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
+  if (!html.includes("partner") || !/partner-direct/i.test(html)) failures.push(`Customer payment/confirmation route must explain partner-direct operation: ${file}`);
+  if (/checkout\.razorpay\.com|new Razorpay|create-global-razorpay-order|Pay now|Confirm & pay/i.test(html)) failures.push(`Customer route contains an active or misleading freight checkout action: ${file}`);
 }
-if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
-if (!secureCheckout.includes("Partner-direct launch is active") || secureCheckout.includes("init().catch(function(e)")) failures.push("Public checkout must fail closed with partner-direct payment guidance and must not initialize the Razorpay checkout flow.");
-if (!paymentReadiness.includes("Partner-direct launch is active") || paymentReadiness.includes("init().catch(e=>")) failures.push("Payment-readiness page must fail closed with partner-direct guidance and must not initialize checkout.");
-if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
-if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
-if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
-const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
-if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Shipment confirmation must require authenticated server-verified payment before confirming booking.");
-if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
+if (!/pay your partner directly|pay the partner directly|pay only the partner/i.test(secureCheckout + paymentReadiness + shipmentConfirmation)) failures.push("Customer payment guidance must explicitly direct freight payment to the selected partner.");
+if (!/partner/i.test(customerRefunds) || !/refund/i.test(customerRefunds)) failures.push("Customer refund route must explain partner-direct freight refund handling.");
+if (/Confirm & pay|Payment checkout/i.test(customerHome)) failures.push("Customer homepage must not advertise KRIM freight checkout in partner-direct mode.");
+if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Historical payment verification must retain authenticated server-side status verification.");
+if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must not require a KRIM freight payment order or payment verification.");
+if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
+const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
@@ -510,11 +509,13 @@ for (const duplicateAlias of ["public/customer-os/customer-services/shipment-cre
 
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 for (const [label, pattern] of [
-  ["server-created Razorpay order", /create-global-razorpay-order/],
-  ["server-side payment verification", /verify-razorpay-payment/],
-  ["payment verification result guard", /result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/],
+  ["no Razorpay SDK in customer quote route", /checkout\.razorpay\.com/],
+  ["no Razorpay constructor in customer quote route", /new Razorpay/],
+  ["no customer freight order invocation", /create-global-razorpay-order/],
+  ["partner-direct guidance is present", /Pay your partner directly/],
 ]) {
-  if (!pattern.test(checkout)) failures.push(`Checkout guard missing: ${label}`);
+  const matched = pattern.test(checkout);
+  if (label.startsWith("no ") ? matched : !matched) failures.push(`Partner-direct customer route guard failed: ${label}`);
 }
 
 const razorpayOrder = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
