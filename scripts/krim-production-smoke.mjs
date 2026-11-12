@@ -360,6 +360,23 @@ for (const retiredDemoPath of [
   const source = existsSync(retiredDemoPath) ? readFileSync(retiredDemoPath, "utf8") : "";
   if (!source.includes("Not an active financial transaction or dispute workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance demo must be explicitly retired: " + retiredDemoPath);
   if (/<form\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
+for (const retiredFinancePath of [
+  "public/finance/api-keys.html",
+  "public/finance/audit-logs.html",
+  "public/finance/bank-accounts.html",
+  "public/finance/bank-reconciliation.html",
+  "public/finance/carrier-payables.html",
+  "public/finance/cash-flow-forecast.html",
+  "public/finance/compliance-rules.html",
+  "public/finance/credit-notes.html",
+  "public/finance/executive-dashboard.html",
+  "public/finance/expense-reports.html",
+]) {
+  const source = existsSync(retiredFinancePath) ? readFileSync(retiredFinancePath, "utf8") : "";
+  if (!source.includes("Not an active finance, bank, compliance or payout workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance screen must be explicitly retired: " + retiredFinancePath);
+  if (/<form\\b/i.test(source) || /SWIFT_BATCH_EXECUTE|Execute Transfer|Create Credit Note|Generate API Key|Initiate Payout/i.test(source)) failures.push("Retired finance screen must not retain a demo financial action: " + retiredFinancePath);
+}
+
 }
 const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
 if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
