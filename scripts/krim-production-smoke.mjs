@@ -375,6 +375,18 @@ for (const retiredFinancePath of [
   const source = existsSync(retiredFinancePath) ? readFileSync(retiredFinancePath, "utf8") : "";
   if (!source.includes("Not an active finance, bank, compliance or payout workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance screen must be explicitly retired: " + retiredFinancePath);
   if (/<form\\b/i.test(source) || /SWIFT_BATCH_EXECUTE|Execute Transfer|Create Credit Note|Generate API Key|Initiate Payout/i.test(source)) failures.push("Retired finance screen must not retain a demo financial action: " + retiredFinancePath);
+for (const retiredDashboardPath of [
+  "public/finance/finance-dashboard.html",
+  "public/finance/financial-consolidation.html",
+  "public/finance/fraud-prevention.html",
+  "public/finance/fx-hedging.html",
+  "public/finance/liquidity-overview.html",
+]) {
+  const source = existsSync(retiredDashboardPath) ? readFileSync(retiredDashboardPath, "utf8") : "";
+  if (!source.includes("Not an active finance, treasury, risk or monitoring workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance dashboard must be explicitly retired: " + retiredDashboardPath);
+  if (/<form\\b/i.test(source) || /Execute Hedge|Create Forward Contract|Approve Liquidity Transfer|Mark Fraud Resolved/i.test(source)) failures.push("Retired finance dashboard must not retain a demo financial action: " + retiredDashboardPath);
+}
+
 }
 
 }
