@@ -45,6 +45,7 @@ Deno.serve(async (req: Request) => {
       console.error("Payment capability lookup failed", error);
       return respond({ success: false, error: "Unable to check payment capability" }, 500);
     }
+    void capability; // Registry state is deliberately not used to enable checkout in this launch mode.
 
     // Partner-direct is the active launch model. Capability registry records are informational only\n    // and must never expose checkout as available, regardless of provider configuration.\n    const enabled = false;
 
