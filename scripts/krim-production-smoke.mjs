@@ -399,7 +399,7 @@ for (const retiredTreasuryPath of [
 ]) {
   const source = existsSync(retiredTreasuryPath) ? readFileSync(retiredTreasuryPath, "utf8") : "";
   if (!source.includes("Not an active bank, treasury or transfer workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Treasury page must be explicitly retired: " + retiredTreasuryPath);
-  if (/<form\\b/i.test(source) || /Create Sweep Rule|Execute Sweep|Initiate Transfer|Approve Bank Transfer/i.test(source)) failures.push("Retired treasury page must not expose a transfer action: " + retiredTreasuryPath);
+  if (/<form\b/i.test(source) || /Create Sweep Rule|Execute Sweep|Initiate Transfer|Approve Bank Transfer/i.test(source)) failures.push("Retired treasury page must not expose a transfer action: " + retiredTreasuryPath);
 }
 const customerInvoicePage = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
 if (!/HISTORICAL KRIM RECORDS/i.test(customerInvoicePage) || !/partner issues the freight invoice|logistics partner issues the freight invoice/i.test(customerInvoicePage)) failures.push("Customer invoice register must distinguish KRIM records from partner-issued freight invoices.");
@@ -1030,7 +1030,7 @@ const treasuryPageTruth = readFileSync("public/finance/treasury-dashboard.html",
 const revenuePageTruth = readFileSync("public/finance/revenue-reports.html", "utf8");
 if (adminRuntimeTruth.includes("ISO 27001 / SOC 2 Audit Logger: ONLINE") || adminRuntimeTruth.includes("SHA-256 Cryptographic Seals Active")) failures.push("Admin UI helper must not claim unverified SIEM/compliance/audit-sealing status.");
 if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIED") || productionRuntimeTruth.includes("All 18 Phases Locked")) failures.push("Production UI helper must not claim an unperformed release freeze/hash verification.");
-if (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED")) failures.push("Treasury dashboard must prominently disclose that balances are illustrative and not live-connected.");
+if (!treasuryPageTruth.includes("Not an active bank, treasury or transfer workflow") || !/partner-direct launch controls/i.test(treasuryPageTruth)) failures.push("Treasury dashboard must remain retired and explicitly unavailable in partner-direct mode.");
 if (!revenuePageTruth.includes("No verified KRIM revenue data available") || !revenuePageTruth.includes("No reconciled paid invoices or subscription transactions are available yet")) failures.push("Revenue reports must show an honest empty state until reconciled subscription revenue exists.");
 
 // Additional Step 7 regression guards: these inspect source only and do not claim
