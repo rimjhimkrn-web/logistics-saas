@@ -145,6 +145,7 @@
   let isReady = false;
   let submitting = false;
   const BOOKING_REQUEST_STORAGE_KEY = "krim_global_booking_request_id";
+  const BOOKING_SNAPSHOT_STORAGE_KEY = "krim_global_booking_request_snapshot_v1";
   function newBookingRequestId(){
     if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
     if (window.crypto && typeof window.crypto.getRandomValues === "function") {
@@ -167,7 +168,32 @@
       throw new Error("KRIM could not securely save this booking's retry reference in browser session storage. Enable browser storage and reload; no shipment request was sent.");
     }
   }
-  function clearBookingRequestId(){ try { window.sessionStorage.removeItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {} }
+  function clearBookingRequestId(){ try { window.sessionStorage.removeItem(BOOKING_REQUEST_STORAGE_KEY); window.sessionStorage.removeItem(BOOKING_SNAPSHOT_STORAGE_KEY); } catch (_) {} }
+  function bookingSnapshot(){
+    return {version:1,savedAt:Date.now(),origin:originPlace,destination:destinationPlace,goods:$("booking-goods").value,weight:$("booking-weight").value,routeType:$("booking-route-type").value,transportMode:$("booking-transport-mode").value,serviceTier:$("booking-service-tier").value};
+  }
+  function saveBookingSnapshot(){
+    try { if(!window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY)) return; window.sessionStorage.setItem(BOOKING_SNAPSHOT_STORAGE_KEY,JSON.stringify(bookingSnapshot())); }
+    catch (_) { showFeedback("Browser session storage is unavailable. Keep this page open until the shipment request is confirmed.","error"); }
+  }
+  function restoreBookingSnapshot(){
+    try {
+      const raw=window.sessionStorage.getItem(BOOKING_SNAPSHOT_STORAGE_KEY); if(!raw) return false;
+      const saved=JSON.parse(raw);
+      if(!saved||saved.version!==1||!Number.isFinite(saved.savedAt)||Date.now()-saved.savedAt>86400000) return false;
+      const validPlace=p=>p&&typeof p==="object"&&typeof p.display_name==="string"&&/^[A-Z]{2}$/.test(String(p.country_code||""))&&Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude));
+      if(validPlace(saved.origin)){originPlace=saved.origin;$("booking-origin").value=originPlace.name||originPlace.city||"";$("origin-search").value=placeLabel(originPlace);}
+      if(validPlace(saved.destination)){destinationPlace=saved.destination;$("booking-destination").value=destinationPlace.name||destinationPlace.city||"";$("destination-search").value=placeLabel(destinationPlace);}
+      if(typeof saved.goods==="string") $("booking-goods").value=saved.goods.slice(0,500);
+      if(typeof saved.weight==="string"&&saved.weight.length<32) $("booking-weight").value=saved.weight;
+      if(["door_to_door","airport_to_airport","port_to_port","terminal_to_terminal","warehouse_to_warehouse","domestic","cross_border","first_last_mile","multimodal_end_to_end"].includes(saved.routeType)) $("booking-route-type").value=saved.routeType;
+      if(["multimodal","road","rail","ocean","air","warehouse_transfer","specialist"].includes(saved.transportMode)) $("booking-transport-mode").value=saved.transportMode;
+      if(["surface_express","air_priority","heavy_haul"].includes(saved.serviceTier)) $("booking-service-tier").value=saved.serviceTier;
+      updatePreview();
+      showFeedback("An earlier shipment request may have an uncertain outcome. Your original details and request reference were restored. Retry only with these unchanged details; KRIM's idempotent booking service will return the existing shipment if it was already created.","info");
+      return true;
+    } catch (_) { showFeedback("KRIM could not restore the saved booking details. Check My Shipments or contact support before starting another request.","error"); return false; }
+  }
   const $ = id => document.getElementById(id);
   const form = $("form-booking"), button = $("btn-submit-booking"), feedback = $("booking-feedback");
   function showFeedback(message, type){
@@ -289,7 +315,8 @@
   ["booking-goods","booking-weight"].forEach(id => $(id).addEventListener("input",updatePreview));
   $("booking-service-tier").addEventListener("change",updatePreview);
   $("booking-transport-mode").addEventListener("change",updatePreview);
-  $("booking-route-type").addEventListener("change",updatePreview);
+  $("booking-route-type").addEventListener("change",()=>{updatePreview();saveBookingSnapshot();});
+  ["booking-goods","booking-weight","booking-service-tier","booking-transport-mode"].forEach(id=>$(id).addEventListener((id==="booking-goods"||id==="booking-weight")?"input":"change",saveBookingSnapshot));
   form.addEventListener("submit",async function(event){
     event.preventDefault();
     if(!isReady || submitting || !currentUserOrgId) return;
@@ -337,6 +364,7 @@
     showFeedback("Submitting to the KRIM shipment core. Please keep this page open and do not submit again.", "info");
     try{
       const bookingRequestId = getBookingRequestId();
+      saveBookingSnapshot();
       const {data,error} = await client.rpc("krim_create_global_shipment_idempotent",{
         p_customer_organization_id: currentUserOrgId,
         p_origin_place: originPlace,
@@ -368,6 +396,7 @@
       showFeedback("Shipment request failed: " + (err && err.message ? err.message : "Unknown error") + " No success has been assumed. If the connection timed out, check My Shipments before retrying.", "error");
     }
   });
+  restoreBookingSnapshot();
   initBooking();
 })();
 </script>
