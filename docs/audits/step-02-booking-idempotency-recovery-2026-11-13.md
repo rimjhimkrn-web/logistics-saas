@@ -24,17 +24,17 @@
 
 ## Findings requiring correction before declaring recovery production-ready
 
-### F1 — No explicit recovery lookup after an uncertain result (HIGH)
+### F1 — Recovery is not presented clearly after reload (HIGH)
 
 When the browser loses the RPC response after the database commits, the page tells the customer to check My Shipments, but it does not provide a dedicated “recover this request” action that resolves the original booking UUID to the existing shipment. A customer who cannot identify the shipment in the list may be left uncertain whether to retry.
 
-**Required:** provide a server-authorized recovery operation that accepts the booking UUID and returns only the shipment belonging to the authenticated user’s currently authorized organization. It must not create a shipment. If no matching record exists, it should explicitly report “not found” and allow retry with the same request UUID and unchanged payload.
+**Important refinement from direct production function-definition inspection (read-only):** the existing `krim_create_global_shipment_idempotent` RPC already performs an organization-scoped lookup by booking UUID under an advisory transaction lock. If the same UUID is retried with the same shipment details, it returns the existing shipment row; changed details are rejected. Therefore a separate lookup RPC is not strictly necessary for recovery. The missing part was restoring the exact original payload and guiding the user to retry through this same idempotent RPC. The page has now been updated to preserve that payload in session storage before the RPC call and restore it after reload. This still needs controlled testing.
 
-### F2 — Booking payload is not persisted client-side for safe retry (HIGH)
+### F2 — Booking payload persistence (addressed in code; tests pending)
 
 The retry UUID survives a caught error in session storage, but the form values are not saved as a matching immutable request snapshot. If the customer reloads the page after an uncertain outcome, the UUID may remain while the form fields reset. Reusing that UUID with a different payload should be rejected by the server's idempotency guard, which is safe against duplicates but leaves the customer without a clear recovery path.
 
-**Required:** persist a minimal, non-sensitive request snapshot alongside the UUID for the active tab/session, restore it after reload, and lock the payload while the outcome is uncertain. Do not store identity documents, credentials or unnecessary personal data in browser storage.
+**Change made:** the booking page now saves the selected origin/destination objects and the route, mode, service tier, goods description and weight in session storage immediately before the RPC call. On reload it restores those details when the snapshot is valid and no older than 24 hours, and explains that retry must use unchanged details. The snapshot contains only booking fields, no credentials or identity documents. Browser storage is tab-session scoped, not durable across all browser/device loss scenarios. Automated browser tests and server retry tests remain required.
 
 ### F3 — UUID lifecycle needs explicit “new request” boundaries (MEDIUM)
 
@@ -73,4 +73,4 @@ No production or staging database writes, customer shipment submissions, quote a
 
 ## Exit decision
 
-**Step 2 remains OPEN.** Existing server-side idempotency and client duplicate-submit protection reduce duplicate creation risk, but uncertain-outcome recovery is not complete. Implement the recovery lookup and request snapshot workflow, then run the positive and negative tests above before treating customer booking as fully operational.
+**Step 2 remains OPEN pending tests.** Existing server-side idempotency already returns the existing shipment for a same-UUID/same-payload retry, and the customer page now persists/restores the payload in session storage. This closes the identified implementation gap at code level, but the browser restore flow, lost-response retry, changed-payload rejection and cross-organization isolation must still pass controlled tests before customer booking is treated as fully operational.
