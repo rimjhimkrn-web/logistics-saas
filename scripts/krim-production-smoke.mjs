@@ -412,6 +412,7 @@ if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partne
 const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
+const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
 if (!retiredCustomerTerms.includes('location.replace("../terms.html")') || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
 
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
@@ -422,7 +423,7 @@ const razorpayProviderCallPosition = orderFn.indexOf("https://api.razorpay.com/v
 if (launchGatePosition < 0 || paymentOrderReadPosition < 0 || launchGatePosition > paymentOrderReadPosition || launchGatePosition > razorpayProviderCallPosition) failures.push("Partner-direct launch-mode gate must execute before payment-order access or any Razorpay order API call.");
 const legacyRazorpayOrder = existsSync("supabase/functions/create-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-razorpay-order/index.ts", "utf8") : "";
 if (!legacyRazorpayOrder.includes("PAYMENT_ENDPOINT_RETIRED") || !legacyRazorpayOrder.includes("status: 410") || legacyRazorpayOrder.includes("api.razorpay.com/v1/orders") || legacyRazorpayOrder.includes("orders.create")) failures.push("Legacy Razorpay order endpoint must remain a non-creating HTTP 410 stub.");
-const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
+
 if (!retiredCustomerTerms.includes('location.replace("../terms.html")') || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
 
 const retiredFinancePages = [
