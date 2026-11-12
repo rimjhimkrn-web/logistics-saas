@@ -377,7 +377,6 @@ for (const retiredFinancePath of [
   if (!source.includes("Not an active finance, bank, compliance or payout workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance screen must be explicitly retired: " + retiredFinancePath);
   if (/<form\b/i.test(source) || /SWIFT_BATCH_EXECUTE|Execute Transfer|Create Credit Note|Generate API Key|Initiate Payout/i.test(source)) failures.push("Retired finance screen must not retain a demo financial action: " + retiredFinancePath);
 }
-}
 for (const retiredDashboardPath of [
   "public/finance/finance-dashboard.html",
   "public/finance/financial-consolidation.html",
