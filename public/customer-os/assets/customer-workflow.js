@@ -14,7 +14,7 @@ const routes={
  tracking:'public/visibility/live-tracking-map.html',
  pickup:'public/pickup-tracking.html',
  documents:'public/documents/document-list.html',
- payments:'public/shipper/payment-checkout.html',
+ payments:'public/customer-os/customer-services/payment-history.html',
  invoices:'public/customer-os/customer-services/invoices.html',
  claims:'public/customer-os/customer-services/claims.html',
  support:'public/support/ticket-desk.html',
@@ -27,7 +27,7 @@ const contextActions=[
  {re:/shipment-create|booking-request|reorder|recurring-shipments/,title:'Continue booking',text:'Use the secured shipment booking form to create a real shipment record.',key:'book'},
  {re:/quote|pricing|rate-calculator|surcharge|currency-conversion|tax-estimation/,title:'Continue to live quotes',text:'Submit a real quote request or review quote records from the canonical KRIM workflow.',key:'quotes'},
  {re:/shipment-list|active-shipments|shipment-details|shipment-timeline|dispatch|pickup|milestone|route-planning|tracking|vessel|rail|air-cargo|road-tracking|eta|geofence|container-condition|temperature|deviation|delay-prediction/,title:'Open shipment operations',text:'View shipments or open live visibility tools in the canonical workflow.',key:'shipments'},
- {re:/invoice|payment|refund|settlement|treasury|cash-flow|transaction|credit-note|accounts-payable|accounts-receivable/,title:'Continue to billing',text:'Open the secured billing and payment workflow; never treat a pending payment as completed.',key:'payments'},
+ {re:/invoice|payment|refund|settlement|treasury|cash-flow|transaction|credit-note|accounts-payable|accounts-receivable/,title:'Continue to billing',text:'Review saved payment records. For current freight, contract with and pay your selected logistics partner directly; KRIM does not collect freight payments.',key:'payments'},
  {re:/claim|dispute|ticket|support|complaint|compensation|escalation/,title:'Continue to support',text:'Open the support/claims workflow to raise or review an issue.',key:'support'},
  {re:/document|certificate|licence|license|consignment|signature|epod|pod-/,title:'Open document records',text:'Use the document workflow to view or submit supported shipment evidence.',key:'documents'},
  {re:/address|location|company-profile|team-members|onboarding|verification|cargo-profile|shipping-preference|saved-route/,title:'Manage customer setup',text:'Return to your customer workspace and organization setup tools.',key:'home'}

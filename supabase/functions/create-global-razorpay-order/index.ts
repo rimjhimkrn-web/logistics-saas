@@ -40,6 +40,19 @@ return jsonResponse(
 );
 }
 
+// KRIM launch policy: customers contract with and pay logistics partners directly.
+// Freight checkout must remain disabled unless a separately approved future launch
+// explicitly sets this server-side secret to "freight_checkout". Missing or unknown
+// values fail closed. This gate blocks new orders; it does not disable verification
+// or webhook reconciliation for historical/in-flight provider payments.
+const commercialLaunchMode = Deno.env.get("KRIM_COMMERCIAL_LAUNCH_MODE");
+if (commercialLaunchMode !== "freight_checkout") {
+  return jsonResponse({
+    error: "KRIM currently operates in partner-direct mode. Pay the selected logistics partner directly; KRIM does not collect freight payments.",
+    code: "FREIGHT_CHECKOUT_DISABLED",
+  }, 403);
+}
+
 try {
 // --------------------------------------------------
 // Environment

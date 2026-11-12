@@ -45,20 +45,9 @@ Deno.serve(async (req: Request) => {
       console.error("Payment capability lookup failed", error);
       return respond({ success: false, error: "Unable to check payment capability" }, 500);
     }
+    void capability; // Registry state is deliberately not used to enable checkout in this launch mode.
 
-    const exists = !!capability;
-    const inrEnabled = exists && currency === "INR"
-      && capability.integration_status === "implemented"
-      && capability.checkout_enabled === true;
-    const internationalEnabled = exists && currency !== "INR"
-      && capability.integration_status === "implemented"
-      && capability.checkout_enabled === true
-      && capability.merchant_eligibility_verified === true
-      && capability.presentment_supported === true
-      && capability.settlement_supported === true
-      && capability.refunds_supported === true
-      && capability.fx_supported === true;
-    const enabled = Boolean(inrEnabled || internationalEnabled);
+    // Partner-direct is the active launch model. Capability registry records are informational only\n    // and must never expose checkout as available, regardless of provider configuration.\n    const enabled = false;
 
     return respond({
       success: true,
@@ -66,7 +55,7 @@ Deno.serve(async (req: Request) => {
       country_code: "IN",
       currency_code: currency,
       provider_code: "razorpay",
-      status: exists ? capability.integration_status : "not_configured",
+      status: "partner_direct_disabled",
       reason: enabled
         ? (currency === "INR" ? "Current INR checkout capability is configured." : "International currency capability passed all configured gates.")
         : "This currency is not enabled. Merchant eligibility, presentment, settlement, refunds and FX must be verified before activation.",

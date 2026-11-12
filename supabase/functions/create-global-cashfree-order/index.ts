@@ -11,7 +11,7 @@ Deno.serve(async (req: Request) => {
   return new Response(JSON.stringify({
     error: "This payment integration has been retired.",
     code: "PAYMENT_PROVIDER_RETIRED",
-    message: "Use the KRIM Razorpay checkout. Do not retry through another provider until the original payment status has been reconciled."
+    message: "KRIM is operating in partner-direct mode. Pay your selected logistics partner directly. This retired provider endpoint cannot collect freight payments. For historical payments with unclear status, contact KRIM support for reconciliation; do not submit a second payment."
   }), {
     status: 410,
     headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" }

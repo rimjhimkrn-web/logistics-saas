@@ -38,6 +38,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
  };
  const respondToAssignment=async(assignmentId:number,accept:boolean)=>{
   if(!supabase||organizationId===null||actionBusy)return;
+  if(organizations.length!==1){setError("Assignment responses are paused until this account has one unambiguous partner organization. Contact KRIM support to resolve organization access.");return;}
   if(!accept&&responseReason.trim().length<3){setError("Enter a short reason before declining this assignment.");return;}
   setActionBusy(true);setError("");setNotice("");
   try{

@@ -313,31 +313,170 @@ if (existsSync(quoteComparison)) {
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
 
- // Phase 5 booking and payment: only server-verified payment can be shown as paid.
+// Phase 5 partner-direct customer flow: KRIM freight payment is not a booking gate.
 const paymentReadiness = existsSync("public/shipper/payment-checkout.html") ? readFileSync("public/shipper/payment-checkout.html", "utf8") : "";
 const secureCheckout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 const paymentVerification = existsSync("public/payment-verification.html") ? readFileSync("public/payment-verification.html", "utf8") : "";
-const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
+const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
+const customerRefunds = existsSync("public/customer-os/customer-services/refunds.html") ? readFileSync("public/customer-os/customer-services/refunds.html", "utf8") : "";
+const customerHome = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
 for (const [file, html] of [
   ["public/shipper/payment-checkout.html", paymentReadiness],
   ["public/quote-result.html", secureCheckout],
-  ["public/payment-verification.html", paymentVerification],
-  ["public/shipment-confirmation.html", existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : ""],
+  ["public/shipment-confirmation.html", shipmentConfirmation],
 ]) {
-  if (!html.includes("krim-global-interface.css")) failures.push(`Phase 5 page is missing the shared global stylesheet: ${file}`);
-  if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
+  if (!html.includes("partner") || !/partner-direct/i.test(html)) failures.push(`Customer payment/confirmation route must explain partner-direct operation: ${file}`);
+  if (/checkout\.razorpay\.com|new Razorpay|create-global-razorpay-order|Pay now|Confirm & pay/i.test(html)) failures.push(`Customer route contains an active or misleading freight checkout action: ${file}`);
 }
-if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
-if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
-if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
-if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
-if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
-const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
-if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Shipment confirmation must require authenticated server-verified payment before confirming booking.");
-if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
+if (!/pay your partner directly|pay the partner directly|pay only the partner/i.test(secureCheckout + paymentReadiness + shipmentConfirmation)) failures.push("Customer payment guidance must explicitly direct freight payment to the selected partner.");
+if (!/partner/i.test(customerRefunds) || !/refund/i.test(customerRefunds)) failures.push("Customer refund route must explain partner-direct freight refund handling.");
+if (/Confirm & pay|Payment checkout/i.test(customerHome)) failures.push("Customer homepage must not advertise KRIM freight checkout in partner-direct mode.");
+if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Historical payment verification must retain authenticated server-side status verification.");
+for (const retiredPath of [
+  "public/freight/forwarder-settlement.html",
+  "public/finance/customer-invoices.html",
+  "public/finance/tax-invoices.html",
+  "public/finance/invoice-details.html",
+  "public/finance/transaction-details.html",
+  "public/finance/transaction-fees.html",
+  "public/finance/accounts-payable.html",
+  "public/finance/accounts-receivable.html",
+  "public/finance/dispute-management.html",
+  "public/support/payment-disputes.html",
+  "public/support/refund-disputes.html",
+]) {
+  const source = existsSync(retiredPath) ? readFileSync(retiredPath, "utf8") : "";
+  if (!source.includes("Not an active financial transaction workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance/support route must be clearly retired under partner-direct launch: " + retiredPath);
+  if (/<form\b/i.test(source) || /handleSettlementSubmit|Generate Invoice|Finalize Freight Suite|Submit payment dispute|Submit refund dispute/i.test(source)) failures.push("Retired finance/support route must not expose a legacy form or fake financial action: " + retiredPath);
+}
+const paymentDisputesPage = existsSync("public/support/payment-disputes.html") ? readFileSync("public/support/payment-disputes.html", "utf8") : "";
+const refundDisputesPage = existsSync("public/support/refund-disputes.html") ? readFileSync("public/support/refund-disputes.html", "utf8") : "";
+if (!/authenticated KRIM support ticket workflow/i.test(paymentDisputesPage + refundDisputesPage)) failures.push("Payment and refund dispute guidance must direct platform issues to authenticated KRIM support.");
+for (const retiredDemoPath of [
+  "public/billing/financial-ledger-audit.html",
+  "public/billing/freight-audit-disputes.html",
+  "public/enterprise/billing-consolidation.html",
+]) {
+  const source = existsSync(retiredDemoPath) ? readFileSync(retiredDemoPath, "utf8") : "";
+  if (!source.includes("Not an active financial transaction or dispute workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance demo must be explicitly retired: " + retiredDemoPath);
+  if (/<form\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
+}
+for (const retiredFinancePath of [
+  "public/finance/api-keys.html",
+  "public/finance/audit-logs.html",
+  "public/finance/bank-accounts.html",
+  "public/finance/bank-reconciliation.html",
+  "public/finance/carrier-payables.html",
+  "public/finance/cash-flow-forecast.html",
+  "public/finance/compliance-rules.html",
+  "public/finance/credit-notes.html",
+  "public/finance/executive-dashboard.html",
+  "public/finance/expense-reports.html",
+]) {
+  const source = existsSync(retiredFinancePath) ? readFileSync(retiredFinancePath, "utf8") : "";
+  if (!source.includes("Not an active finance, bank, compliance or payout workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance screen must be explicitly retired: " + retiredFinancePath);
+  if (/<form\b/i.test(source) || /SWIFT_BATCH_EXECUTE|Execute Transfer|Create Credit Note|Generate API Key|Initiate Payout/i.test(source)) failures.push("Retired finance screen must not retain a demo financial action: " + retiredFinancePath);
+}
+for (const retiredDashboardPath of [
+  "public/finance/finance-dashboard.html",
+  "public/finance/financial-consolidation.html",
+  "public/finance/fraud-prevention.html",
+  "public/finance/fx-hedging.html",
+  "public/finance/liquidity-overview.html",
+]) {
+  const source = existsSync(retiredDashboardPath) ? readFileSync(retiredDashboardPath, "utf8") : "";
+  if (!source.includes("Not an active finance, treasury, risk or monitoring workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance dashboard must be explicitly retired: " + retiredDashboardPath);
+  if (/<form\b/i.test(source) || /Execute Hedge|Create Forward Contract|Approve Liquidity Transfer|Mark Fraud Resolved/i.test(source)) failures.push("Retired finance dashboard must not retain a demo financial action: " + retiredDashboardPath);
+}
+const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
+if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
+if (/Platform commission|Partner payout|platform_commission,partner_payout/.test(shipperFinance)) failures.push("Customer-facing historical ledger must not expose internal commission or partner payout allocations.");
+const partnerSettlementHistory = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
+if (!/historical KRIM settlement records/i.test(partnerSettlementHistory) || !/does not initiate payouts/i.test(partnerSettlementHistory)) failures.push("Partner settlement register must be explicitly historical and read-only in partner-direct mode.");
+for (const retiredTreasuryPath of [
+  "public/finance/sweep-rules.html",
+  "public/finance/treasury-dashboard.html",
+]) {
+  const source = existsSync(retiredTreasuryPath) ? readFileSync(retiredTreasuryPath, "utf8") : "";
+  if (!source.includes("Not an active bank, treasury or transfer workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Treasury page must be explicitly retired: " + retiredTreasuryPath);
+  if (/<form\b/i.test(source) || /Create Sweep Rule|Execute Sweep|Initiate Transfer|Approve Bank Transfer/i.test(source)) failures.push("Retired treasury page must not expose a transfer action: " + retiredTreasuryPath);
+}
+const customerInvoicePage = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
+if (!/HISTORICAL KRIM RECORDS/i.test(customerInvoicePage) || !/partner issues the freight invoice|logistics partner issues the freight invoice/i.test(customerInvoicePage)) failures.push("Customer invoice register must distinguish KRIM records from partner-issued freight invoices.");
+
+
+
+
+if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must not require a KRIM freight payment order or payment verification.");
+if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
+const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
-if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
+const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
+if (!retiredCustomerTerms.includes('location.replace("../terms.html")') || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
+const currentPlatformTerms = existsSync("terms.html") ? readFileSync("terms.html", "utf8") : "";
+for (const requiredTerm of ["The customer pays that partner directly.", "KRIM does not collect or hold partner freight payments", "contracting partner issues its own freight invoice", "partner that receives the freight payment is responsible", "not a claim that KRIM is exempt from GST registration"]) {
+  if (!currentPlatformTerms.toLowerCase().includes(requiredTerm.toLowerCase())) failures.push("Current platform terms must disclose partner-direct payment, partner invoicing/refunds and GST-registration caveat: " + requiredTerm);
+}
+
+
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
+if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
+const launchGatePosition = orderFn.indexOf('if (commercialLaunchMode !== "freight_checkout")');
+const paymentOrderReadPosition = orderFn.indexOf('.from("payment_orders")');
+const razorpayProviderCallPosition = orderFn.indexOf("https://api.razorpay.com/v1/orders");
+if (launchGatePosition < 0 || paymentOrderReadPosition < 0 || launchGatePosition > paymentOrderReadPosition || launchGatePosition > razorpayProviderCallPosition) failures.push("Partner-direct launch-mode gate must execute before payment-order access or any Razorpay order API call.");
+const legacyRazorpayOrder = existsSync("supabase/functions/create-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-razorpay-order/index.ts", "utf8") : "";
+if (!legacyRazorpayOrder.includes("PAYMENT_ENDPOINT_RETIRED") || !legacyRazorpayOrder.includes("status: 410") || legacyRazorpayOrder.includes("api.razorpay.com/v1/orders") || legacyRazorpayOrder.includes("orders.create")) failures.push("Legacy Razorpay order endpoint must remain a non-creating HTTP 410 stub.");
+
+
+const retiredFinancePages = [
+  "public/billing/escrow-settlement.html",
+  "public/billing/carrier-payables.html",
+  "public/billing/customer-invoices.html",
+  "public/finance/payment-gateways.html",
+  "public/finance/payment-methods.html",
+  "public/finance/refund-requests.html",
+  "public/finance/refund-status.html",
+  "public/finance/payment-verification.html",
+  "public/finance/merchant-accounts.html",
+  "public/finance/payment-history.html",
+  "public/finance/webhooks.html",
+  "public/enterprise/escrow-settlement.html",
+];
+for (const file of retiredFinancePages) {
+  const html = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!/disabled|not an active|not offered|not a live/i.test(html)) failures.push("Legacy finance page must clearly disclose that the workflow is disabled: " + file);
+  if (/Release Payout|Save Escrow Configuration|Settle →|Opening SWIFT|Payment Reminder Email Transmitted|JPMorgan \/ Citi Escrow Active|ACH\/SEPA disbursements/i.test(html)) failures.push("Legacy finance page contains an active-looking payout, escrow or payment action: " + file);
+}
+const publicPartnerSettlementPage = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
+if (!publicPartnerSettlementPage.includes("Historical Settlement Records") || /<button[^>]*(?:payout|transfer|release)/i.test(publicPartnerSettlementPage)) failures.push("Partner settlement register must remain read-only historical data with no payout action.");
+
+const paymentOptionsFn = existsSync("supabase/functions/krim-global-payment-options/index.ts") ? readFileSync("supabase/functions/krim-global-payment-options/index.ts", "utf8") : "";
+const paymentCapabilityFn = existsSync("supabase/functions/krim-payment-capability-status/index.ts") ? readFileSync("supabase/functions/krim-payment-capability-status/index.ts", "utf8") : "";
+if (!/selectable:\s*false/.test(paymentOptionsFn) || !/checkout_configured:\s*false/.test(paymentOptionsFn) || !/partner-direct mode/i.test(paymentOptionsFn)) failures.push("Global payment options must never expose provider checkout as selectable during partner-direct launch.");
+if (!/const enabled = false/.test(paymentCapabilityFn) || !/partner_direct_disabled/.test(paymentCapabilityFn)) failures.push("Payment capability status must report checkout disabled regardless of registry configuration.");
+const taxSettingsPage = existsSync("public/finance/tax-settings.html") ? readFileSync("public/finance/tax-settings.html", "utf8") : "";
+if (!/Tax configuration is not active/i.test(taxSettingsPage) || !/NOT CONFIGURED · NOT VERIFIED · NOT FOR TAX RELIANCE/i.test(taxSettingsPage) || !/GST registration status/i.test(taxSettingsPage)) failures.push("Tax settings page must clearly state that tax configuration and registration status are not verified.");
+if (/automated tax calculation|Configure multi-jurisdiction tax engines|reverse-charge VAT rules/i.test(taxSettingsPage)) failures.push("Tax settings page must not advertise unavailable automated tax configuration.");
+const billingRuntime = existsSync("public/billing/billing-runtime.js") ? readFileSync("public/billing/billing-runtime.js", "utf8") : "";
+if (!/intentionally inactive/i.test(billingRuntime) || !/return false/.test(billingRuntime) || !/KRIM freight rating is disabled/i.test(billingRuntime)) failures.push("Legacy browser billing runtime must remain inactive and must not assert ledger integrity or rate freight.");
+if (/VERIFIED\)|Financial Settlement Engine Active|Debits == Credits/i.test(billingRuntime)) failures.push("Legacy browser billing runtime must not make unsupported ledger-integrity or settlement-engine claims.");
+const partnerDirectPolicy = existsSync("public/legal/payment-policy.html") ? readFileSync("public/legal/payment-policy.html", "utf8") : "";
+if (!/Customers pay the partner directly/i.test(partnerDirectPolicy) || !/does not collect or hold freight payments/i.test(partnerDirectPolicy) || !/legal and tax advisers/i.test(partnerDirectPolicy)) failures.push("Payment policy must disclose partner-direct freight payment and interim legal/tax review status.");
+const refundGuidance = existsSync("refund.html") ? readFileSync("refund.html", "utf8") : "";
+if (!/partner-collected freight payments/i.test(refundGuidance) || !/Mandatory consumer rights remain unaffected/i.test(refundGuidance)) failures.push("Public refund guidance must preserve customer rights and distinguish partner-collected freight refunds.");
+
+for (const retiredPath of [
+  "supabase/functions/create-razorpay-order/index.ts",
+  "supabase/functions/process-payment--/index.ts",
+  "supabase/functions/create-global-cashfree-order/index.ts",
+  "supabase/functions/verify-global-cashfree-payment/index.ts",
+  "supabase/functions/cashfree-payment-webhook/index.ts",
+]) {
+  const source = existsSync(retiredPath) ? readFileSync(retiredPath, "utf8") : "";
+  if (!source.includes("410") || !/partner-direct mode/i.test(source) || /Use the KRIM (global )?Razorpay checkout/i.test(source)) failures.push("Retired payment endpoint must stay HTTP 410 and provide partner-direct guidance: " + retiredPath);
+}
+
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
   ["order endpoint authenticates the bearer session", orderFn, /auth\.getUser\(token\)/],
@@ -482,7 +621,7 @@ const customerWorkflow = existsSync("public/customer-os/assets/customer-workflow
 for (const [label, route] of [
   ["quote comparison", "public/shipper/quote-comparison.html"],
   ["shipment register", "public/customer-os/customer-services/shipment-list.html"],
-  ["payment checkout", "public/shipper/payment-checkout.html"],
+  ["payment history", "public/customer-os/customer-services/payment-history.html"],
   ["quote request", "public/customer/quote-request.html"],
 ]) {
   if (!existsSync(route)) failures.push(`Customer workflow target missing: ${label} -> ${route}`);
@@ -508,11 +647,13 @@ for (const duplicateAlias of ["public/customer-os/customer-services/shipment-cre
 
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
 for (const [label, pattern] of [
-  ["server-created Razorpay order", /create-global-razorpay-order/],
-  ["server-side payment verification", /verify-razorpay-payment/],
-  ["payment verification result guard", /result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/],
+  ["no Razorpay SDK in customer quote route", /checkout\.razorpay\.com/],
+  ["no Razorpay constructor in customer quote route", /new Razorpay/],
+  ["no customer freight order invocation", /create-global-razorpay-order/],
+  ["partner-direct guidance is present", /Pay your partner directly/],
 ]) {
-  if (!pattern.test(checkout)) failures.push(`Checkout guard missing: ${label}`);
+  const matched = pattern.test(checkout);
+  if (label.startsWith("no ") ? matched : !matched) failures.push(`Partner-direct customer route guard failed: ${label}`);
 }
 
 const razorpayOrder = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
@@ -915,7 +1056,7 @@ const treasuryPageTruth = readFileSync("public/finance/treasury-dashboard.html",
 const revenuePageTruth = readFileSync("public/finance/revenue-reports.html", "utf8");
 if (adminRuntimeTruth.includes("ISO 27001 / SOC 2 Audit Logger: ONLINE") || adminRuntimeTruth.includes("SHA-256 Cryptographic Seals Active")) failures.push("Admin UI helper must not claim unverified SIEM/compliance/audit-sealing status.");
 if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIED") || productionRuntimeTruth.includes("All 18 Phases Locked")) failures.push("Production UI helper must not claim an unperformed release freeze/hash verification.");
-if (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED")) failures.push("Treasury dashboard must prominently disclose that balances are illustrative and not live-connected.");
+if (!treasuryPageTruth.includes("Not an active bank, treasury or transfer workflow") || !/partner-direct launch controls/i.test(treasuryPageTruth)) failures.push("Treasury dashboard must remain retired and explicitly unavailable in partner-direct mode.");
 if (!revenuePageTruth.includes("No verified KRIM revenue data available") || !revenuePageTruth.includes("No reconciled paid invoices or subscription transactions are available yet")) failures.push("Revenue reports must show an honest empty state until reconciled subscription revenue exists.");
 
 // Additional Step 7 regression guards: these inspect source only and do not claim
@@ -964,12 +1105,15 @@ for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_
 // These checks ensure all three mobile clients call the secured workflow contracts;
 // they do not simulate authenticated users or claim a live shipment was executed.
 const customerMobile = existsSync("mobile/krim-customer/src/CustomerWorkspace.tsx") ? readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8") : "";
+if (/react-native-webview|razorpayCheckoutHtml|verify-razorpay-payment|create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not contain an active or dormant KRIM freight checkout implementation in partner-direct mode.");
+
+if (/functions\.invoke\(["']create-global-razorpay-order/.test(customerMobile)) failures.push("Customer mobile app must not invoke freight order creation during partner-direct launch.");
 const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
-  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'Partner-direct launch: KRIM does not collect freight payments.', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct launch']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
@@ -978,6 +1122,9 @@ for (const [label, source, tokens] of [
 }
 if (partnerMobile && (!partnerMobile.includes("organizations.length!==1") || !partnerMobile.includes("activeCaps===0") || !partnerMobile.includes('selected?.partner_account_mode!=="registered_business"'))) {
   failures.push("Partner quote submission must remain gated to one unambiguous registered, verified and capable organization.");
+}
+if (partnerMobile && !partnerMobile.includes("Assignment responses are paused until this account has one unambiguous partner organization.")) {
+  failures.push("Partner assignment accept/decline must be blocked when organization context is ambiguous.");
 }
 const podAdminSource = existsSync("app/platform-admin/delivery-pod-verification.html") ? readFileSync("app/platform-admin/delivery-pod-verification.html", "utf8") : "";
 const platformAdminNavigation = existsSync("app/platform-admin/index.html") ? readFileSync("app/platform-admin/index.html", "utf8") : "";
