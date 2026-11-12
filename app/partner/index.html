@@ -72,7 +72,7 @@ if(!data?.user){redirect("auth/partner-signin.html");return}
 $("status-title").textContent="Checking organization membership";
 const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",data.user.id).eq("status","active");if(memberError)throw memberError;
 const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
-if(!ids.length){state("Partner onboarding required","Your account is signed in, but no active organization membership was returned. Continue through partner onboarding to establish the appropriate pathway.","No workspace is opened until an active partner organization membership is available.");$("signin").hidden=true;return}
+if(!ids.length){state("Partner organization setup needs support","Your account is signed in, but KRIM could not find an active organization membership. Do not create another account or submit documents yet. Contact KRIM support to resolve account-to-organization setup.","No workspace is opened and no organization access is inferred. Partner onboarding requires an existing linked organization.");$("signin").hidden=true;$("onboarding").hidden=true;return}
 $("status-title").textContent="Identifying your partner organization";
 const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);if(orgError)throw orgError;
 const valid=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
