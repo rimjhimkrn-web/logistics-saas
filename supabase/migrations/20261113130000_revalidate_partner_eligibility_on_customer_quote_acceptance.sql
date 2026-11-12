@@ -21,7 +21,7 @@ DECLARE
     WHERE o.id = v_partner_quote.partner_organization_id
       AND o.status = 'active'
       AND o.partner_account_mode = 'registered_business'
-      AND o.partner_lifecycle_status = 'active'
+      AND o.partner_lifecycle_status IN ('approved', 'active')
       AND o.partner_verification_status = 'verified'
       AND o.partner_compliance_status = 'compliant'
       AND private.krim_partner_capability_covers_shipment(
