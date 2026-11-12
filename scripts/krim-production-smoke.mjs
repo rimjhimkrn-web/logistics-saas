@@ -359,7 +359,7 @@ for (const retiredDemoPath of [
 ]) {
   const source = existsSync(retiredDemoPath) ? readFileSync(retiredDemoPath, "utf8") : "";
   if (!source.includes("Not an active financial transaction or dispute workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance demo must be explicitly retired: " + retiredDemoPath);
-  if (/<form\\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
+  if (/<form\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
 }
 const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
 if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
