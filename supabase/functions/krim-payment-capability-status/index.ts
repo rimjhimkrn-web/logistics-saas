@@ -46,18 +46,6 @@ Deno.serve(async (req: Request) => {
       return respond({ success: false, error: "Unable to check payment capability" }, 500);
     }
 
-    const exists = !!capability;
-    const inrEnabled = exists && currency === "INR"
-      && capability.integration_status === "implemented"
-      && capability.checkout_enabled === true;
-    const internationalEnabled = exists && currency !== "INR"
-      && capability.integration_status === "implemented"
-      && capability.checkout_enabled === true
-      && capability.merchant_eligibility_verified === true
-      && capability.presentment_supported === true
-      && capability.settlement_supported === true
-      && capability.refunds_supported === true
-      && capability.fx_supported === true;
     // Partner-direct is the active launch model. Capability registry records are informational only\n    // and must never expose checkout as available, regardless of provider configuration.\n    const enabled = false;
 
     return respond({
