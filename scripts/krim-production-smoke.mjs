@@ -360,6 +360,7 @@ for (const retiredDemoPath of [
   const source = existsSync(retiredDemoPath) ? readFileSync(retiredDemoPath, "utf8") : "";
   if (!source.includes("Not an active financial transaction or dispute workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance demo must be explicitly retired: " + retiredDemoPath);
   if (/<form\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
+}
 for (const retiredFinancePath of [
   "public/finance/api-keys.html",
   "public/finance/audit-logs.html",
@@ -375,6 +376,7 @@ for (const retiredFinancePath of [
   const source = existsSync(retiredFinancePath) ? readFileSync(retiredFinancePath, "utf8") : "";
   if (!source.includes("Not an active finance, bank, compliance or payout workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance screen must be explicitly retired: " + retiredFinancePath);
   if (/<form\b/i.test(source) || /SWIFT_BATCH_EXECUTE|Execute Transfer|Create Credit Note|Generate API Key|Initiate Payout/i.test(source)) failures.push("Retired finance screen must not retain a demo financial action: " + retiredFinancePath);
+}
 }
 for (const retiredDashboardPath of [
   "public/finance/finance-dashboard.html",
