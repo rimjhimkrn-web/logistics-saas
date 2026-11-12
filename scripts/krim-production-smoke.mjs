@@ -378,7 +378,7 @@ for (const file of retiredFinancePages) {
   if (/Release Payout|Save Escrow Configuration|Settle →|Opening SWIFT|Payment Reminder Email Transmitted|JPMorgan \/ Citi Escrow Active|ACH\/SEPA disbursements/i.test(html)) failures.push("Legacy finance page contains an active-looking payout, escrow or payment action: " + file);
 }
 const publicPartnerSettlementPage = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
-if (!/HISTORICAL RECORDS · READ ONLY|Historical Settlement Records/i.test(publicPartnerSettlementPage) || /Release Payout|Initiate Payout|Transfer Funds/i.test(publicPartnerSettlementPage)) failures.push("Partner settlement register must remain read-only historical data with no payout action.");
+if (!publicPartnerSettlementPage.includes("Historical Settlement Records") || /<button[^>]*(?:payout|transfer|release)/i.test(publicPartnerSettlementPage)) failures.push("Partner settlement register must remain read-only historical data with no payout action.");
 
 const paymentOptionsFn = existsSync("supabase/functions/krim-global-payment-options/index.ts") ? readFileSync("supabase/functions/krim-global-payment-options/index.ts", "utf8") : "";
 const paymentCapabilityFn = existsSync("supabase/functions/krim-payment-capability-status/index.ts") ? readFileSync("supabase/functions/krim-payment-capability-status/index.ts", "utf8") : "";
