@@ -364,6 +364,9 @@ for (const retiredDemoPath of [
 const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
 if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
 if (/Platform commission|Partner payout|platform_commission,partner_payout/.test(shipperFinance)) failures.push("Customer-facing historical ledger must not expose internal commission or partner payout allocations.");
+const partnerSettlementHistory = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
+if (!/historical KRIM settlement records/i.test(partnerSettlementHistory) || !/do not initiate payouts/i.test(partnerSettlementHistory)) failures.push("Partner settlement register must be explicitly historical and read-only in partner-direct mode.");
+
 
 
 if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must not require a KRIM freight payment order or payment verification.");
