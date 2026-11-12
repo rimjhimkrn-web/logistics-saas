@@ -339,6 +339,21 @@ if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-88
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
+const paymentOptionsFn = existsSync("supabase/functions/krim-global-payment-options/index.ts") ? readFileSync("supabase/functions/krim-global-payment-options/index.ts", "utf8") : "";
+const paymentCapabilityFn = existsSync("supabase/functions/krim-payment-capability-status/index.ts") ? readFileSync("supabase/functions/krim-payment-capability-status/index.ts", "utf8") : "";
+if (!/selectable:\s*false/.test(paymentOptionsFn) || !/checkout_configured:\s*false/.test(paymentOptionsFn) || !/partner-direct mode/i.test(paymentOptionsFn)) failures.push("Global payment options must never expose provider checkout as selectable during partner-direct launch.");
+if (!/const enabled = false/.test(paymentCapabilityFn) || !/partner_direct_disabled/.test(paymentCapabilityFn)) failures.push("Payment capability status must report checkout disabled regardless of registry configuration.");
+for (const retiredPath of [
+  "supabase/functions/create-razorpay-order/index.ts",
+  "supabase/functions/process-payment--/index.ts",
+  "supabase/functions/create-global-cashfree-order/index.ts",
+  "supabase/functions/verify-global-cashfree-payment/index.ts",
+  "supabase/functions/cashfree-payment-webhook/index.ts",
+]) {
+  const source = existsSync(retiredPath) ? readFileSync(retiredPath, "utf8") : "";
+  if (!source.includes("410") || !/partner-direct mode/i.test(source) || /Use the KRIM (global )?Razorpay checkout/i.test(source)) failures.push("Retired payment endpoint must stay HTTP 410 and provide partner-direct guidance: " + retiredPath);
+}
+
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
   ["order endpoint authenticates the bearer session", orderFn, /auth\.getUser\(token\)/],
