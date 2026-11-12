@@ -393,6 +393,17 @@ if (!/Historical Records|Historical Financial Records|partner-direct launch/i.te
 if (/Platform commission|Partner payout|platform_commission,partner_payout/.test(shipperFinance)) failures.push("Customer-facing historical ledger must not expose internal commission or partner payout allocations.");
 const partnerSettlementHistory = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
 if (!/historical KRIM settlement records/i.test(partnerSettlementHistory) || !/does not initiate payouts/i.test(partnerSettlementHistory)) failures.push("Partner settlement register must be explicitly historical and read-only in partner-direct mode.");
+for (const retiredTreasuryPath of [
+  "public/finance/sweep-rules.html",
+  "public/finance/treasury-dashboard.html",
+]) {
+  const source = existsSync(retiredTreasuryPath) ? readFileSync(retiredTreasuryPath, "utf8") : "";
+  if (!source.includes("Not an active bank, treasury or transfer workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Treasury page must be explicitly retired: " + retiredTreasuryPath);
+  if (/<form\\b/i.test(source) || /Create Sweep Rule|Execute Sweep|Initiate Transfer|Approve Bank Transfer/i.test(source)) failures.push("Retired treasury page must not expose a transfer action: " + retiredTreasuryPath);
+}
+const customerInvoicePage = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
+if (!/HISTORICAL KRIM RECORDS/i.test(customerInvoicePage) || !/partner issues the freight invoice|logistics partner issues the freight invoice/i.test(customerInvoicePage)) failures.push("Customer invoice register must distinguish KRIM records from partner-issued freight invoices.");
+
 
 
 
