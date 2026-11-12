@@ -392,7 +392,7 @@ const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync
 if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
 if (/Platform commission|Partner payout|platform_commission,partner_payout/.test(shipperFinance)) failures.push("Customer-facing historical ledger must not expose internal commission or partner payout allocations.");
 const partnerSettlementHistory = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
-if (!/historical KRIM settlement records/i.test(partnerSettlementHistory) || !/do not initiate payouts/i.test(partnerSettlementHistory)) failures.push("Partner settlement register must be explicitly historical and read-only in partner-direct mode.");
+if (!/historical KRIM settlement records/i.test(partnerSettlementHistory) || !/does not initiate payouts/i.test(partnerSettlementHistory)) failures.push("Partner settlement register must be explicitly historical and read-only in partner-direct mode.");
 
 
 
