@@ -411,6 +411,7 @@ if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(s
 if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
 const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
+const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
 if (!retiredCustomerTerms.includes('location.replace("../terms.html")') || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
 
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
