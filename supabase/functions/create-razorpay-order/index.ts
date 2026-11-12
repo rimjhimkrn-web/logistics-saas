@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
     success: false,
     error: "This legacy payment endpoint has been retired.",
     code: "PAYMENT_ENDPOINT_RETIRED",
-    message: "Use the KRIM global Razorpay checkout. Do not retry with another provider until the original payment status has been reconciled.",
+    message: "KRIM is operating in partner-direct mode. Pay your selected logistics partner directly. Do not retry this retired endpoint or submit freight payment to KRIM.",
   }), {
     status: 410,
     headers: {
