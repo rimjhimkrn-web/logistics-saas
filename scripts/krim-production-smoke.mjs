@@ -440,6 +440,17 @@ const paymentOptionsFn = existsSync("supabase/functions/krim-global-payment-opti
 const paymentCapabilityFn = existsSync("supabase/functions/krim-payment-capability-status/index.ts") ? readFileSync("supabase/functions/krim-payment-capability-status/index.ts", "utf8") : "";
 if (!/selectable:\s*false/.test(paymentOptionsFn) || !/checkout_configured:\s*false/.test(paymentOptionsFn) || !/partner-direct mode/i.test(paymentOptionsFn)) failures.push("Global payment options must never expose provider checkout as selectable during partner-direct launch.");
 if (!/const enabled = false/.test(paymentCapabilityFn) || !/partner_direct_disabled/.test(paymentCapabilityFn)) failures.push("Payment capability status must report checkout disabled regardless of registry configuration.");
+const taxSettingsPage = existsSync("public/finance/tax-settings.html") ? readFileSync("public/finance/tax-settings.html", "utf8") : "";
+if (!/Tax configuration is not active/i.test(taxSettingsPage) || !/NOT CONFIGURED · NOT VERIFIED · NOT FOR TAX RELIANCE/i.test(taxSettingsPage) || !/GST registration status/i.test(taxSettingsPage)) failures.push("Tax settings page must clearly state that tax configuration and registration status are not verified.");
+if (/automated tax calculation|Configure multi-jurisdiction tax engines|reverse-charge VAT rules/i.test(taxSettingsPage)) failures.push("Tax settings page must not advertise unavailable automated tax configuration.");
+const billingRuntime = existsSync("public/billing/billing-runtime.js") ? readFileSync("public/billing/billing-runtime.js", "utf8") : "";
+if (!/intentionally inactive/i.test(billingRuntime) || !/return false/.test(billingRuntime) || !/KRIM freight rating is disabled/i.test(billingRuntime)) failures.push("Legacy browser billing runtime must remain inactive and must not assert ledger integrity or rate freight.");
+if (/VERIFIED\)|Financial Settlement Engine Active|Debits == Credits/i.test(billingRuntime)) failures.push("Legacy browser billing runtime must not make unsupported ledger-integrity or settlement-engine claims.");
+const partnerDirectPolicy = existsSync("public/legal/payment-policy.html") ? readFileSync("public/legal/payment-policy.html", "utf8") : "";
+if (!/Customers pay the partner directly/i.test(partnerDirectPolicy) || !/does not collect or hold freight payments/i.test(partnerDirectPolicy) || !/legal and tax advisers/i.test(partnerDirectPolicy)) failures.push("Payment policy must disclose partner-direct freight payment and interim legal/tax review status.");
+const refundGuidance = existsSync("refund.html") ? readFileSync("refund.html", "utf8") : "";
+if (!/partner-collected freight payments/i.test(refundGuidance) || !/Mandatory consumer rights remain unaffected/i.test(refundGuidance)) failures.push("Public refund guidance must preserve customer rights and distinguish partner-collected freight refunds.");
+
 for (const retiredPath of [
   "supabase/functions/create-razorpay-order/index.ts",
   "supabase/functions/process-payment--/index.ts",
