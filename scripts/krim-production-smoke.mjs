@@ -352,6 +352,19 @@ for (const retiredPath of [
 const paymentDisputesPage = existsSync("public/support/payment-disputes.html") ? readFileSync("public/support/payment-disputes.html", "utf8") : "";
 const refundDisputesPage = existsSync("public/support/refund-disputes.html") ? readFileSync("public/support/refund-disputes.html", "utf8") : "";
 if (!/authenticated KRIM support ticket workflow/i.test(paymentDisputesPage + refundDisputesPage)) failures.push("Payment and refund dispute guidance must direct platform issues to authenticated KRIM support.");
+for (const retiredDemoPath of [
+  "public/billing/financial-ledger-audit.html",
+  "public/billing/freight-audit-disputes.html",
+  "public/enterprise/billing-consolidation.html",
+]) {
+  const source = existsSync(retiredDemoPath) ? readFileSync(retiredDemoPath, "utf8") : "";
+  if (!source.includes("Not an active financial transaction or dispute workflow") || !/partner-direct launch controls/i.test(source)) failures.push("Legacy finance demo must be explicitly retired: " + retiredDemoPath);
+  if (/<form\\b/i.test(source) || /Export GL Journal|Reject Line Item & Issue Debit Note|Accept Adjusted Amount|handleBillingSubmit/i.test(source)) failures.push("Retired finance demo must not retain a fake financial action: " + retiredDemoPath);
+}
+const shipperFinance = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
+if (!/Historical Records|Historical Financial Records|partner-direct launch/i.test(shipperFinance) || !/Customers pay freight partners directly/i.test(shipperFinance)) failures.push("Shipper finance page must clearly identify historical records and partner-direct payment.");
+if (/Platform commission|Partner payout|platform_commission,partner_payout/.test(shipperFinance)) failures.push("Customer-facing historical ledger must not expose internal commission or partner payout allocations.");
+
 
 if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must not require a KRIM freight payment order or payment verification.");
 if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
