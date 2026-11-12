@@ -339,6 +339,28 @@ if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-88
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
+const retiredFinancePages = [
+  "public/billing/escrow-settlement.html",
+  "public/billing/carrier-payables.html",
+  "public/billing/customer-invoices.html",
+  "public/finance/payment-gateways.html",
+  "public/finance/payment-methods.html",
+  "public/finance/refund-requests.html",
+  "public/finance/refund-status.html",
+  "public/finance/payment-verification.html",
+  "public/finance/merchant-accounts.html",
+  "public/finance/payment-history.html",
+  "public/finance/webhooks.html",
+  "public/enterprise/escrow-settlement.html",
+];
+for (const file of retiredFinancePages) {
+  const html = existsSync(file) ? readFileSync(file, "utf8") : "";
+  if (!/disabled|not an active|not offered|not a live/i.test(html)) failures.push("Legacy finance page must clearly disclose that the workflow is disabled: " + file);
+  if (/Release Payout|Save Escrow Configuration|Settle →|Opening SWIFT|Payment Reminder Email Transmitted|JPMorgan \/ Citi Escrow Active|ACH\/SEPA disbursements/i.test(html)) failures.push("Legacy finance page contains an active-looking payout, escrow or payment action: " + file);
+}
+const partnerSettlementPage = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
+if (!/HISTORICAL RECORDS · READ ONLY|Historical Settlement Records/i.test(partnerSettlementPage) || /Release Payout|Initiate Payout|Transfer Funds/i.test(partnerSettlementPage)) failures.push("Partner settlement register must remain read-only historical data with no payout action.");
+
 const paymentOptionsFn = existsSync("supabase/functions/krim-global-payment-options/index.ts") ? readFileSync("supabase/functions/krim-global-payment-options/index.ts", "utf8") : "";
 const paymentCapabilityFn = existsSync("supabase/functions/krim-payment-capability-status/index.ts") ? readFileSync("supabase/functions/krim-payment-capability-status/index.ts", "utf8") : "";
 if (!/selectable:\s*false/.test(paymentOptionsFn) || !/checkout_configured:\s*false/.test(paymentOptionsFn) || !/partner-direct mode/i.test(paymentOptionsFn)) failures.push("Global payment options must never expose provider checkout as selectable during partner-direct launch.");
