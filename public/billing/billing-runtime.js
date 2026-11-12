@@ -1,63 +1,32 @@
 /**
- * KRIM OS — Billing, Settlement & Financial Ledger Runtime
- * Phase 8: Billing, Settlement & Financial Ledger
- * 
- * Handles multi-currency rating logic, double-entry ledger balance
- * checks, escrow state releases, and invoice formatting.
+ * KRIM legacy billing runtime — intentionally inactive.
+ *
+ * Partner-direct launch: KRIM does not rate, invoice, collect, escrow,
+ * settle or disburse partner freight. This module must not claim that a
+ * ledger has been verified or that a financial engine is operational.
  */
-
-import { store } from "/app/app-store.js";
-
 class BillingRuntime {
   constructor() {
     this.initialized = false;
+    this.available = false;
   }
 
-  /**
-   * Boot Financial & Billing Runtime
-   */
   init() {
-    if (this.initialized) return;
-
-    console.log("💵 [KRIM Billing Runtime] Initializing Financial Ledger & Rating Engine...");
-
-    this.verifyLedgerIntegrity();
     this.initialized = true;
-    console.log("✅ [KRIM Billing Runtime] Financial Settlement Engine Active.");
+    this.available = false;
+    return false;
   }
 
-  /**
-   * Verify Double-Entry Balance Integrity
-   */
   verifyLedgerIntegrity() {
-    console.log("📖 [Ledger Engine] Auditing Double-Entry Journal: Debits == Credits (VERIFIED)");
+    // No ledger-integrity assertion is made by this legacy browser module.
+    return false;
   }
 
-  /**
-   * Calculate Multi-Currency Line-Item Freight Rating
-   * @param {number} baseRate 
-   * @param {number} fscPercent 
-   * @param {number} accessorials 
-   * @returns {Object} Rated line-item breakdown
-   */
-  calculateRatedTotal(baseRate, fscPercent, accessorials) {
-    const fscAmount = baseRate * (fscPercent / 100);
-    const totalUSD = baseRate + fscAmount + accessorials;
-
-    return {
-      baseRate,
-      fscAmount: fscAmount.toFixed(2),
-      accessorials,
-      totalUSD: totalUSD.toFixed(2)
-    };
+  calculateRatedTotal() {
+    throw new Error(
+      "KRIM freight rating is disabled in partner-direct launch. Obtain the confirmed price directly from the contracting logistics partner."
+    );
   }
 }
 
 export const billingRuntime = new BillingRuntime();
-
-// Auto-initialize on DOM ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => billingRuntime.init());
-} else {
-  billingRuntime.init();
-}
