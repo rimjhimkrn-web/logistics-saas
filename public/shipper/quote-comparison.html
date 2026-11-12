@@ -126,13 +126,11 @@ if(!selected||!client||!shipment)return;
 if(!confirm('Accept KRIM quote #'+selected.id+' for '+money(selected.amount,selected.currency_code)+'? This changes the quote status and shipment lifecycle.'))return;
 const quoteId=Number(selected.id),shipmentId=Number(shipment.id),organizationId=Number(shipment.customer_organization_id),partnerQuoteId=Number(selected.partner_quote_id);
 $('accept-selected').disabled=true;actionFeedback('KRIM is validating quote, organization permissions, validity and shipment status on the server…','info');
-let rpcAccepted=false;
 try{
 const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:quoteId});
 if(error)throw error;
 const result=Array.isArray(data)?data[0]:data;
 if(!result||Number(result.id)!==quoteId||String(result.status)!=='accepted')throw new Error('Server response did not confirm the exact quote acceptance.');
-rpcAccepted=true;
 }catch(e){
 console.error(e);
 actionFeedback('The server did not confirm quote acceptance. '+(e&&e.message?e.message:'Server validation failed. Refresh and review the current quote.'),'error');
@@ -161,7 +159,6 @@ $('shipment-status').className='pill good';
 selected=local||q;
 render();
 actionFeedback('Verified: the quote is accepted, the shipment is confirmed, and the matching partner assignment is accepted. Arrange freight payment directly with the partner after independently verifying payment instructions. KRIM does not collect or settle freight charges.','success');
-await updateSelection();
 }catch(e){
 console.error(e);
 actionFeedback('KRIM returned an accepted response, but the final saved state could not be verified. Do not pay or submit another acceptance. Refresh the shipment and contact KRIM support for reconciliation. '+(e&&e.message?e.message:''),'error');
