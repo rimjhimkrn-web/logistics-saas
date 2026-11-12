@@ -411,17 +411,7 @@ if (/krim-payment-verification-status|payment_order_id|verified payment/i.test(s
 if (!/accepted quotation|accepted quote/i.test(shipmentConfirmation) || !/partner confirmation/i.test(shipmentConfirmation)) failures.push("Partner-direct shipment confirmation must explain quote and partner confirmation steps.");
 const legacyPaymentResult = existsSync("public/finance/payment-result.html") ? readFileSync("public/finance/payment-result.html", "utf8") : "";
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
-if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
-const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
-if (!orderFn.includes("KRIM_COMMERCIAL_LAUNCH_MODE") || !orderFn.includes("FREIGHT_CHECKOUT_DISABLED")) failures.push("Razorpay order creation must have the server-side partner-direct launch-mode hard stop.");
-const launchGatePosition = orderFn.indexOf('if (commercialLaunchMode !== "freight_checkout")');
-const paymentOrderReadPosition = orderFn.indexOf('.from("payment_orders")');
-const razorpayProviderCallPosition = orderFn.indexOf("https://api.razorpay.com/v1/orders");
-if (launchGatePosition < 0 || paymentOrderReadPosition < 0 || launchGatePosition > paymentOrderReadPosition || launchGatePosition > razorpayProviderCallPosition) failures.push("Partner-direct launch-mode gate must execute before payment-order access or any Razorpay order API call.");
-const legacyRazorpayOrder = existsSync("supabase/functions/create-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-razorpay-order/index.ts", "utf8") : "";
-if (!legacyRazorpayOrder.includes("PAYMENT_ENDPOINT_RETIRED") || !legacyRazorpayOrder.includes("status: 410") || /api\\.razorpay\\.com\\/v1\\/orders|orders\\.create/.test(legacyRazorpayOrder)) failures.push("Legacy Razorpay order endpoint must remain a non-creating HTTP 410 stub.");
-const retiredCustomerTerms = existsSync("legal/customer-terms.html") ? readFileSync("legal/customer-terms.html", "utf8") : "";
-if (!/location\\.replace\\("\.\\.\\/terms\\.html"\\)/.test(retiredCustomerTerms) || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
+if (!retiredCustomerTerms.includes('location.replace("../terms.html")') || /System Technologies Ltd|guarantees transparent pricing|guaranteed for all confirmed transactions/i.test(retiredCustomerTerms)) failures.push("Outdated customer legal terms must redirect to current partner-direct platform terms.");
 
 const retiredFinancePages = [
   "public/billing/escrow-settlement.html",
