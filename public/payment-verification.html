@@ -137,7 +137,7 @@ async function verify(){
  if(busy)return;busy=true;$("check-again").disabled=true;
  try{
   if(!client){paint("Secure client unavailable","KRIM could not initialize its Supabase client. No payment status has been assumed.","bad");return;}
-  if(!orderId||orderId.length>100||!validInt(shipmentId)||!validInt(quoteId)){paint("Verification references missing","Open this page from the secure checkout result. A valid payment-order ID, shipment ID and quote ID are required. No payment status is inferred.","warn");return;}
+  if(!orderId||orderId.length>100||!validInt(shipmentId)||!validInt(quoteId)){paint("Verification references missing","Open this page only with references to an existing historical payment order, shipment and quote. No new checkout is available and no payment status is inferred.","warn");return;}
   const {data:sessionData,error:sessionError}=await client.auth.getSession();const session=sessionData&&sessionData.session;
   if(sessionError||!session){paint("Sign in required","Sign in to the customer account that owns this shipment before viewing payment status.","warn");login();return;}
   $("session-label").textContent="SIGNED IN · "+(session.user.email||"CUSTOMER ACCOUNT");
@@ -154,7 +154,7 @@ async function verify(){
  finally{busy=false;$("check-again").disabled=false;}
 }
 $("order-id").textContent=orderId||"Not provided";$("shipment-id").textContent=shipmentId||"Not provided";$("quote-id").textContent=quoteId?"QT-"+quoteId:"Not provided";
-if(shipmentId&&validInt(shipmentId))$("back-checkout").href="quote-result.html?shipment_id="+encodeURIComponent(shipmentId)+(validInt(quoteId)?"&quote_id="+encodeURIComponent(quoteId):"");
+// Keep the secondary action pointed to the partner-direct enquiry page; do not route users back into legacy freight checkout.
 $("check-again").addEventListener("click",verify);verify();
 })();
 </script>
