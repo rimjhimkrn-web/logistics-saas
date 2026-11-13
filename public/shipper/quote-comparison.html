@@ -106,8 +106,12 @@ if(sessionError||!session){$('session-label').textContent='Sign-in required';fee
 $('session-label').textContent='Signed in · verifying organization';
 const member=await client.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');
 if(member.error)throw member.error;
-orgIds=[...new Set((member.data||[]).filter(m=>/customer|shipper|client/i.test(String(m.role||''))).map(m=>Number(m.organization_id)).filter(Number.isFinite))];
-if(!orgIds.length){feedback('No active customer/shipper organization membership was found for this account. Ask your organization administrator to provision access.','error');showEmpty('Customer membership required','Quote comparison is not available for this account.');return;}
+const memberOrgIds=[...new Set((member.data||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
+if(!memberOrgIds.length){feedback('No active KRIM organization membership was found for this account. Ask your organization administrator to provision access.','error');showEmpty('Customer membership required','Quote comparison is not available for this account.');return;}
+const orgResult=await client.from('krim_organizations').select('id,organization_type,status').in('id',memberOrgIds).eq('status','active');
+if(orgResult.error)throw orgResult.error;
+orgIds=(orgResult.data||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));
+if(!orgIds.length){feedback('No active customer, shipper or enterprise organization is linked to this account. Ask your organization administrator to provision access.','error');showEmpty('Customer organization required','Quote comparison is not available for this account.');return;}
 const sr=await client.from('krim_shipments').select('id,shipment_number,status,customer_organization_id,origin_place_label,destination_place_label,requested_transport_mode,requested_route_type,goods_description').eq('id',Number(sid)).in('customer_organization_id',orgIds).maybeSingle();
 if(sr.error)throw sr.error;
 if(!sr.data){feedback('Shipment not found in your active customer organizations. Access is restricted to your authorized organization records.','error');showEmpty('Shipment not accessible','Check the shipment reference or ask your organization administrator.');return;}
