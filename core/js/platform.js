@@ -224,7 +224,7 @@
                 terms_accepted: true,
                 terms_version: String(credentials.termsVersion || "2026-11-11")
               } : {},
-              emailRedirectTo: new URL("/app/sign-in.html", global.location.origin).href
+              emailRedirectTo: new URL(typeof global.krimPath === "function" ? global.krimPath("app/sign-in.html") : "/app/sign-in.html", global.location.origin).href
             }
           });
           if (result.error) reportError("authentication");
@@ -238,7 +238,7 @@
         if (!client) return { error: new Error("Authentication is unavailable.") };
         try {
           const result = await client.auth.resetPasswordForEmail(email, {
-            redirectTo: new URL("/app/reset-password.html", global.location.origin).href
+            redirectTo: new URL(typeof global.krimPath === "function" ? global.krimPath("app/reset-password.html") : "/app/reset-password.html", global.location.origin).href
           });
           if (result.error) reportError("authentication");
           return result;

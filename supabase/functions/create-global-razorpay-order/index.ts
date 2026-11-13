@@ -40,6 +40,26 @@ return jsonResponse(
 );
 }
 
+// HARD SERVER-SIDE BLOCK: KRIM's approved initial commercial model is partner-direct.
+// Customer freight payments must be made directly to the contracted logistics partner.
+// This endpoint must never create a KRIM freight checkout while that model is in force.
+// There is intentionally no environment-variable override: a misconfigured secret must
+// not silently re-enable freight collection. Revisit only through a separately reviewed
+// commercial-model change, compliance review and explicit release approval.
+return new Response(JSON.stringify({
+  success: false,
+  error: "KRIM customer freight checkout is disabled under the partner-direct launch model.",
+  code: "PARTNER_DIRECT_FREIGHT_CHECKOUT_DISABLED",
+  message: "Customers arrange and pay freight directly with the selected logistics partner. KRIM does not collect or settle freight payments.",
+}), {
+  status: 410,
+  headers: {
+    ...corsHeaders,
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+  },
+});
+
 try {
 // --------------------------------------------------
 // Environment

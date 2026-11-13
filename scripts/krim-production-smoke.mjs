@@ -308,7 +308,7 @@ if (existsSync(quoteReview)) {
 }
 if (existsSync(quoteComparison)) {
   const html = readFileSync(quoteComparison, "utf8");
-  if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC.");
+  if (!/acceptance is temporarily paused until KRIM completes server-side partner, assignment and booking integrity hardening/i.test(html) || !/No acceptance request was sent/i.test(html)) failures.push("Quote comparison must remain fail-closed while partner-direct quote/assignment lifecycle hardening is incomplete.");
   if (!/valid_until|valid until/i.test(html)) failures.push("Quote comparison must expose quote validity.");
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
@@ -328,9 +328,10 @@ for (const [file, html] of [
   if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
 }
 if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
-if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
-if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
-if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
+// KRIM's initial operating model is partner-direct: freight checkout must remain disabled.
+if (!/PARTNER-DIRECT ONLY|partner directly/i.test(secureCheckout)) failures.push("Canonical quote result must clearly direct freight payment to the contracted partner.");
+if (!/No new payment order has been created|No payment order has been created/i.test(secureCheckout)) failures.push("Partner-direct quote result must explicitly confirm no KRIM payment order is created.");
+if (/create-global-razorpay-order|verify-razorpay-payment/.test(secureCheckout)) failures.push("Partner-direct customer page must not invoke Razorpay order or verification functions.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
 const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
 if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Shipment confirmation must require authenticated server-verified payment before confirming booking.");
@@ -507,13 +508,9 @@ for (const duplicateAlias of ["public/customer-os/customer-services/shipment-cre
 }
 
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
-for (const [label, pattern] of [
-  ["server-created Razorpay order", /create-global-razorpay-order/],
-  ["server-side payment verification", /verify-razorpay-payment/],
-  ["payment verification result guard", /result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/],
-]) {
-  if (!pattern.test(checkout)) failures.push(`Checkout guard missing: ${label}`);
-}
+if (!/PARTNER-DIRECT ONLY|partner directly/i.test(checkout)) failures.push("Partner-direct checkout must clearly direct freight payment to the contracted partner.");
+if (!/No new payment order has been created|No payment order has been created/i.test(checkout)) failures.push("Partner-direct checkout must state that KRIM creates no freight payment order.");
+if (/create-global-razorpay-order|verify-razorpay-payment/.test(checkout)) failures.push("Partner-direct checkout must not call KRIM freight payment endpoints.");
 
 const razorpayOrder = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const razorpayVerify = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
@@ -969,7 +966,7 @@ const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerReposit
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
-  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'Contact your contracted logistics partner directly for payment instructions.', 'loadCustomerShipments', 'loadCustomerQuotes']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
