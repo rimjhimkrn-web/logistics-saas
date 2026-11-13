@@ -51,12 +51,12 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="navlinks"><a class="navlink" id="back-quotes" href="shipper/spot-approvals.html">← Back to quote review</a><a class="navlink dark" href="finance/payment-methods.html">Market eligibility ↗</a></div>
 </div></header>
 <main class="shell">
-<section class="hero"><div class="hero-grid"><div><div class="eyebrow">PAGE 06 · Customer journey / Finance core / Secure checkout</div><h1>One verified quote.<br>Direct partner confirmation.</h1><p>KRIM checks your exact accepted quotation, shipment ownership, partner assignment and amount before asking the server to create a Razorpay order. Payment success is recorded only after server-side verification.</p><div class="hero-pills"><span class="hero-pill">Quote-bound amount</span><span class="hero-pill">Server-created order</span><span class="hero-pill">Verified result required</span></div></div><div class="secure-panel"><div class="secure-symbol">✓</div><strong>Protected payment journey</strong><small>Provider response alone does not confirm payment. KRIM verifies the transaction before moving to the receipt.</small></div></div></section>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">PAGE 06 · Customer journey / Finance core / Secure checkout</div><h1>One verified quote.<br>Direct partner confirmation.</h1><p>KRIM checks your accepted quotation, shipment ownership and partner assignment. Under the partner-direct model, you arrange and pay freight charges directly with the contracted logistics partner; KRIM does not create or collect freight payments.</p><div class="hero-pills"><span class="hero-pill">Quote-bound amount</span><span class="hero-pill">Server-created order</span><span class="hero-pill">Verified result required</span></div></div><div class="secure-panel"><div class="secure-symbol">✓</div><strong>Protected payment journey</strong><small>Provider response alone does not confirm payment. KRIM verifies the transaction before moving to the receipt.</small></div></div></section>
 <div class="journey" aria-label="Customer shipment journey">
 <div class="journey-step"><span class="stepno">01</span><span><strong>Book shipment</strong><small>Shipment request</small></span></div>
 <div class="journey-step"><span class="stepno">02</span><span><strong>Get quotation</strong><small>Rates & availability</small></span></div>
 <div class="journey-step"><span class="stepno">03</span><span><strong>Review & accept</strong><small>Customer quote approval</small></span></div>
-<div class="journey-step active"><span class="stepno">06</span><span><strong>Pay securely</strong><small>Verified payment</small></span></div>
+<div class="journey-step active"><span class="stepno">06</span><span><strong>Confirm with partner</strong><small>Partner-direct payment</small></span></div>
 </div>
 <div class="layout">
 <section class="column">
@@ -79,7 +79,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="check-row"><span class="check-icon pending" id="check-quote">…</span><span><strong>Accepted and unexpired quote</strong><br><span id="check-quote-text">Loading quote from KRIM…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-assignment">…</span><span><strong>Partner assignment accepted</strong><br><span id="check-assignment-text">Checking assignment and shipment linkage…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-amount">…</span><span><strong>Amount and currency</strong><br><span id="check-amount-text">Waiting for the authoritative quote</span></span></div>
-<div class="check-row"><span class="check-icon pending" id="check-order">…</span><span><strong>Server-created payment order</strong><br><span id="check-order-text">An order is created only after you continue</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-order">…</span><span><strong>KRIM freight checkout</strong><br><span id="check-order-text">Disabled under the partner-direct model. No KRIM payment order is created.</span></span></div>
 </div>
 </div>
 </section>
@@ -91,8 +91,8 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="metalist">
 <div class="metarow"><span>Freight payment recipient</span><strong>Contracted logistics partner</strong></div>
 <div class="metarow"><span>KRIM freight checkout</span><strong>Disabled · partner-direct model</strong></div>
-<div class="metarow"><span>Order created by</span><strong>KRIM secure server</strong></div>
-<div class="metarow"><span>Payment completion</span><strong>Server verification required</strong></div>
+<div class="metarow"><span>Payment instructions</span><strong>Provided directly by contracted partner</strong></div>
+<div class="metarow"><span>Payment confirmation</span><strong>Confirmed directly with partner</strong></div>
 </div>
 <button id="btn-pay-now" class="paybutton" disabled>KRIM freight checkout is disabled</button>
 <p class="actionnote">If checkout closes or a result is unclear, check the original payment status before attempting another payment. KRIM never changes providers automatically.</p>
@@ -205,9 +205,9 @@ async function init(){
  const foreignCurrencyReady=currency!=="INR"&&!!capability&&capability.enabled===true;
  const currencyReady=currency==="INR"||foreignCurrencyReady;
  const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*currencyFactor(currency))>0;
- const amountMessage=amountValid?(currency==="INR"?"Positive quote total and current INR checkout confirmed.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
+ const amountMessage=amountValid?(currency==="INR"?"Accepted INR quote amount displayed for reference; payment is arranged directly with your partner.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
  check("amount",amountValid,amountMessage);
- byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; the existing INR checkout remains active.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
+ byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote and is shown for reference only. Pay the contracted partner directly.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
  let assignmentOk=false;
  if(quote.partner_quote_id){
    const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at,capacity_binding_id,shipment_leg_id").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
@@ -230,61 +230,16 @@ async function init(){
  else if(!quoteValid){message("Checkout is locked because the accepted quote is expired or its amount is invalid.","error");}
  else if(!amountValid){message("Checkout is locked because this currency is not enabled by KRIM's verified payment capability register, or the quote amount is invalid. KRIM will not silently convert currencies.","error");}
  else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment and reserves matching verified capacity. No payment order has been created.","info");}
- else {message("Quote, shipment, currency, partner assignment and capacity reservation checks passed. Continue when you are ready to open Razorpay.","success");}
+ else {message("Quote, shipment and partner assignment checks passed. These checks do not create a booking or payment. Contact the contracted partner directly for payment instructions.","success");}
  byId("payment-order-meta").textContent="No new payment order has been created yet.";
  gateway(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"PRE-CHECKS PASSED":"AWAITING ELIGIBILITY",quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"good":"wait");
  setPayReady(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed);
 }
 async function startPayment(){
- if(!canPay||paymentBusy||!quote||!session||!shipment)return;
- paymentBusy=true;setPayReady(false);byId("btn-pay-now").textContent="Creating secure payment order…";
- check("order",false,"Requesting a server-created order bound to this accepted quote.");
- message("KRIM is validating the accepted quote, organization, shipment, partner offer and assignment before creating the payment order.","info");
- try{
-   const {data:order,error}=await client.functions.invoke("create-global-razorpay-order",{body:{krim_shipment_id:Number(shipment.id),krim_quote_id:Number(quote.id)}});
-   if(error)throw new Error(error.message||"Secure order request failed.");
-   if(!order||!order.success||!order.razorpay_order_id||!order.key_id||!Number.isFinite(Number(order.amount_paise)))throw new Error((order&&order.error)||"KRIM did not return a valid Razorpay order.");
-   if(Number(order.quote_id)!==Number(quote.id)||Number(order.shipment_id)!==Number(shipment.id))throw new Error("The server-selected quote or shipment differs from this review. Checkout has stopped; refresh and review the current quote.");
-   if(String(order.currency||"").toUpperCase()!==String(quote.currency_code||"").toUpperCase()||Number(order.amount_paise)!==Math.round(Number(quote.amount)*currencyFactor(currency)))throw new Error("Server order amount or currency does not match the accepted quote. Checkout has stopped.");
-   byId("checkout-amount").textContent=money(order.currency,Number(order.amount_paise)/currencyFactor(order.currency));
-   byId("payment-order-meta").textContent="Server order: "+order.razorpay_order_id+" · "+(order.reused?"Existing eligible order reused":"New order created by KRIM");
-   check("order",true,"Order "+order.razorpay_order_id+" was returned by KRIM's server with the accepted quote amount.");
-   const options={
-     key:order.key_id,order_id:order.razorpay_order_id,amount:Number(order.amount_paise),currency:String(order.currency||"INR"),
-     name:"KRIM Logistics",description:"Shipment "+(order.shipment_number||shipment.shipment_number||shipment.id),
-     image:location.origin+(window.krimPath?window.krimPath("assets/krim-logo.png"):"/assets/krim-logo.png"),
-     prefill:{email:session.user.email||""},notes:{krim_shipment_id:String(shipment.id),krim_quote_id:String(quote.id)},
-     theme:{color:"#1769aa"},
-     modal:{ondismiss:function(){paymentBusy=false;byId("btn-pay-now").textContent="Continue to secure payment →";setPayReady(canPay);message("Razorpay checkout was closed before a confirmed result. If you completed a payment, check its status before trying again.","info");}},
-     handler:async function(response){
-       paymentBusy=true;byId("btn-pay-now").textContent="Verifying payment…";byId("btn-pay-now").disabled=true;
-       gateway("VERIFYING WITH PROVIDER","wait");message("Razorpay returned a response. KRIM is verifying its signature and payment details before recording success.","info");
-       try{
-         if(!response.razorpay_payment_id||response.razorpay_order_id!==order.razorpay_order_id||!response.razorpay_signature)throw new Error("Razorpay response is incomplete or the order reference does not match.");
-         const verified=await client.functions.invoke("verify-razorpay-payment",{body:{razorpay_payment_id:response.razorpay_payment_id,razorpay_order_id:response.razorpay_order_id,razorpay_signature:response.razorpay_signature}});
-         if(verified.error)throw new Error(verified.error.message||"Payment verification request failed.");
-         const result=verified.data;
-         if(!result||result.success!==true||result.verified!==true||result.status!=="paid")throw new Error((result&&result.error)||"KRIM has not confirmed this payment as paid. Check payment status before retrying.");
-         gateway("SERVER VERIFIED","good");byId("quote-status").textContent="PAYMENT VERIFIED";byId("quote-status").className="pill good";
-         message("Payment verified successfully by KRIM. Reference "+result.razorpay_payment_id+".","success");
-         byId("payment-order-meta").textContent="Payment reference: "+result.razorpay_payment_id+" · Verified at "+fmtDate(result.paid_at);
-         byId("btn-pay-now").textContent="Payment verified ✓";check("order",true,"Provider signature verified and KRIM financial record updated.");
-         const verificationBase=window.krimPath?window.krimPath("public/payment-verification.html"):"payment-verification.html";
-         const verificationUrl=verificationBase+"?payment_order_id="+encodeURIComponent(result.payment_order_id)+"&shipment_id="+encodeURIComponent(result.krim_shipment_id)+"&quote_id="+encodeURIComponent(quote.id);
-         message("KRIM verified this payment. Opening the independent server-status receipt…","success");
-         setTimeout(function(){location.href=verificationUrl;},1200);
-       }catch(e){gateway("VERIFICATION NEEDS REVIEW","bad");message((e&&e.message?e.message:"Verification could not be completed")+" Do not pay again until the payment status has been checked.","error");byId("btn-pay-now").textContent="Check payment status before retrying";byId("btn-pay-now").disabled=true;}
-       finally{paymentBusy=false;}
-     }
-   };
-   const checkout=new Razorpay(options);
-   checkout.on("payment.failed",function(response){paymentBusy=false;gateway("PAYMENT NOT CONFIRMED","bad");message("Razorpay did not confirm this payment. "+((response&&response.error&&response.error.description)||"Review the provider message and payment status before retrying."),"error");byId("btn-pay-now").textContent="Retry after checking payment status";setPayReady(canPay);});
-   checkout.open();
- }catch(e){
-   paymentBusy=false;gateway("ORDER NOT CREATED","bad");check("order",false,"No valid server-created order was returned.");
-   message((e&&e.message?e.message:"KRIM could not create a payment order")+" No payment window was opened.","error");
-   byId("btn-pay-now").textContent="Try secure checkout again";setPayReady(canPay);
- }
+  setPayReady(false);
+  paymentBusy=false;
+  gateway("PARTNER-DIRECT ONLY","wait");
+  message("KRIM freight checkout is disabled. Contact your contracted logistics partner directly for payment instructions. No KRIM payment order has been created.","info");
 }
 byId("btn-pay-now").addEventListener("click",startPayment);
 init().catch(function(e){gateway("CHECKOUT ERROR","bad");message("Checkout could not initialize: "+(e&&e.message?e.message:"Unexpected error")+". No payment order was created.","error");});
