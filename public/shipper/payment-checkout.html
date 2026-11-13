@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#087f8c">
-<meta name="description" content="KRIM global payment eligibility review. Verify the accepted shipment quote and partner assignment before opening secure Razorpay checkout.">
+<meta name="description" content="KRIM partner-direct payment guidance. Customers pay their contracted logistics partner directly; KRIM freight checkout is disabled.">
 <title>Payment Readiness | KRIM Logistics</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../config.js"></script>
@@ -19,10 +19,10 @@
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 </head>
 <body class="krim-global-shell">
-<div class="strip"><div class="shell stripin"><span>● KRIM GLOBAL COMMERCE · PAYMENT READINESS</span><span id="session-label">SECURE ACCESS CHECK</span></div></div>
+<div class="strip"><div class="shell stripin"><span>● KRIM PARTNER-DIRECT · PAYMENT GUIDANCE</span><span id="session-label">SECURE ACCESS CHECK</span></div></div>
 <header class="header"><div class="shell nav"><a class="brand" id="home-link" href="#" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:220px;height:58px;max-width:100%;object-fit:contain;object-position:left center"></a><div class="navlinks"><a class="btn" id="back-link" href="#">← Quote comparison</a><a class="btn" id="workspace-link" href="#">Customer workspace ↗</a></div></div></header>
 <main class="shell">
-<section class="hero"><div class="eyebrow">Customer journey · Payment readiness</div><h1>Review the transaction.<br>Then pay securely.</h1><p>Before the payment provider opens, KRIM checks the exact accepted quote, shipment ownership, partner assignment, expiry and supported currency. This page is a readiness review; it does not create an order or claim a payment has succeeded.</p><div class="tags"><span class="tag">🔐 Authenticated customer</span><span class="tag">🧾 Exact accepted quote</span><span class="tag">🤝 Partner assignment gate</span><span class="tag">🌍 Global payment architecture</span><span class="tag">💳 Razorpay · INR verification required</span></div></section>
+<section class="hero"><div class="eyebrow">Customer journey · Payment readiness</div><h1>Review the quote.<br>Confirm directly with your partner.</h1><p>Before the payment provider opens, KRIM checks the exact accepted quote, shipment ownership, partner assignment, expiry and supported currency. This page is a readiness review; it does not create an order or claim a payment has succeeded.</p><div class="tags"><span class="tag">🔐 Authenticated customer</span><span class="tag">🧾 Exact accepted quote</span><span class="tag">🤝 Partner assignment gate</span><span class="tag">🌍 Global payment architecture</span><span class="tag">💳 Razorpay · INR verification required</span></div></section>
 <div id="preview-banner" class="banner preview" hidden><b>INTERFACE PREVIEW — NO LIVE PAYMENT</b><br>Sample route details are illustrative only. No live shipment or quote is loaded. Continue and payment actions are disabled.</div>
 <div id="main-feedback" class="banner">Verifying the quote and shipment reference. No payment order has been created.</div>
 <section class="layout">
@@ -108,10 +108,10 @@ const currencyBlockerMessage=currencyBlockers.length?" Blockers: "+currencyBlock
  check("currency",currencyOk,currencyOk?"Provider, merchant eligibility, presentment, settlement, refunds and capability evidence passed KRIM's server-side check.":(currency==="INR"?"INR checkout is configured but cannot open until live merchant eligibility, settlement, refund support and evidence review are verified.":"This currency is not enabled in KRIM's fully verified payment capability registry; no automatic conversion occurs.") + currencyBlockerMessage);
 $("quote-status").textContent=quoteOk?"Accepted":"Blocked";$("quote-status").className="pill "+(quoteOk?"good":"bad");
 const canContinue=quoteOk&&currencyOk&&shipmentOk&&assignmentOk;
-setReady(canContinue);
+setReady(false);
 feedback("detail-feedback",canContinue?"Quote, shipment, organization and partner assignment checks passed. The secure checkout will perform its own final server-side validation.":"One or more required checks failed. No payment order has been created.",canContinue?"success":"error");
-feedback("main-feedback",canContinue?"Readiness checks passed. Continue to the existing Razorpay checkout for server-side order creation and payment verification.":"Payment is blocked until every eligibility check passes. This page does not override missing approvals or currency restrictions.",canContinue?"success":"error");
-feedback("action-feedback",canContinue?"Ready to open the existing secure Razorpay checkout.":"Checkout remains locked. Return to quote comparison or contact KRIM support if the records need review.",canContinue?"success":"error");
+feedback("main-feedback",canContinue?"Quote checks may be reviewed, but KRIM freight checkout is disabled. Arrange payment directly with the contracted logistics partner.":"Payment is blocked until every eligibility check passes. This page does not override missing approvals or currency restrictions.",canContinue?"success":"error");
+feedback("action-feedback",canContinue?"KRIM does not collect or settle freight payments. Contact the contracted partner to arrange payment.":"Checkout remains locked. Return to quote comparison or contact KRIM support if the records need review.",canContinue?"success":"error");
 }
 $("continue-button").addEventListener("click",()=>{if(!ready||!shipment||!quote)return;location.href=path("public/quote-result.html")+"?shipment_id="+encodeURIComponent(shipment.id)+"&quote_id="+encodeURIComponent(quote.id);});
 init().catch(e=>{console.error(e);setReady(false);feedback("main-feedback","KRIM could not verify checkout readiness. No payment order was created. "+(e&&e.message?e.message:"Please retry later."),"error");});
