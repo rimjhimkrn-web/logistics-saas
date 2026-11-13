@@ -163,9 +163,9 @@ jobs:
           fi
 
           # GnuPG symmetric encryption provides authenticated integrity protection (MDC).
-          # The passphrase is supplied through the environment and never printed.
-          gpg --batch --yes --pinentry-mode loopback \
-            --passphrase "${EXPORT_PASSPHRASE}" \
+          # Feed the passphrase on stdin so it is not exposed in process arguments.
+          printf '%s' "${EXPORT_PASSPHRASE}" | gpg --batch --yes --pinentry-mode loopback \
+            --passphrase-fd 0 \
             --symmetric --cipher-algo AES256 \
             --output private-export/krim-schema-export.sql.gpg \
             private-export/schema.sql
