@@ -40,6 +40,26 @@ return jsonResponse(
 );
 }
 
+// Server-side commercial-model gate. Only an explicit, reviewed freight-checkout
+// configuration may enable this endpoint. Missing/unknown values fail closed.
+// The selected KRIM partner-direct model keeps customer freight payments between
+// customer and logistics partner; this endpoint must not create KRIM freight orders.
+if (Deno.env.get("KRIM_COMMERCIAL_LAUNCH_MODE") !== "freight_checkout") {
+  return new Response(JSON.stringify({
+    success: false,
+    error: "KRIM customer freight checkout is disabled under the partner-direct launch model.",
+    code: "PARTNER_DIRECT_FREIGHT_CHECKOUT_DISABLED",
+    message: "Customers arrange and pay freight directly with the selected logistics partner. KRIM does not collect or settle freight payments.",
+  }), {
+    status: 410,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 try {
 // --------------------------------------------------
 // Environment
