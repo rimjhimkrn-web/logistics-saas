@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2563eb">
 <meta name="description" content="Secure KRIM Logistics checkout. Verify the exact accepted quote, shipment, partner assignment and server-created Razorpay payment order.">
-<title>KRIM Logistics | Secure Global Checkout</title>
+<title>Partner Payment & Booking Confirmation | KRIM Logistics</title>
 <link rel="manifest" href="../manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <style>
 :root{--navy:#10243a;--navy2:#183e5d;--blue:#1769aa;--cyan:#55c4e7;--ink:#1d3348;--muted:#647b8e;--line:#dce6ef;--bg:#f3f7fb;--white:#fff;--green:#13795b;--amber:#946000;--red:#b42318;--pale:#edf7ff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 5% 0%,#e7f3fc 0,transparent 33%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}button:disabled{cursor:not-allowed;opacity:.48}.shell{max-width:1200px;margin:auto;padding:0 22px}.topline{background:#091827;color:#d5e3ef;font-size:9px;letter-spacing:.13em;text-transform:uppercase}.topinner{min-height:35px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.top-left{display:flex;align-items:center;gap:9px}.pulse{width:7px;height:7px;border-radius:50%;background:#f6bd55;box-shadow:0 0 0 4px #f6bd551c;flex:0 0 auto}.topstatus{font-weight:850}#session-label{color:#aebfd0;font-weight:750}
@@ -51,7 +51,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="navlinks"><a class="navlink" id="back-quotes" href="shipper/spot-approvals.html">← Back to quote review</a><a class="navlink dark" href="finance/payment-methods.html">Market eligibility ↗</a></div>
 </div></header>
 <main class="shell">
-<section class="hero"><div class="hero-grid"><div><div class="eyebrow">PAGE 06 · Customer journey / Finance core / Secure checkout</div><h1>One verified quote.<br>One secure payment.</h1><p>KRIM checks your exact accepted quotation, shipment ownership, partner assignment and amount before asking the server to create a Razorpay order. Payment success is recorded only after server-side verification.</p><div class="hero-pills"><span class="hero-pill">Quote-bound amount</span><span class="hero-pill">Server-created order</span><span class="hero-pill">Verified result required</span></div></div><div class="secure-panel"><div class="secure-symbol">✓</div><strong>Protected payment journey</strong><small>Provider response alone does not confirm payment. KRIM verifies the transaction before moving to the receipt.</small></div></div></section>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">PAGE 06 · Customer journey / Finance core / Secure checkout</div><h1>One verified quote.<br>Direct partner confirmation.</h1><p>KRIM checks your exact accepted quotation, shipment ownership, partner assignment and amount before asking the server to create a Razorpay order. Payment success is recorded only after server-side verification.</p><div class="hero-pills"><span class="hero-pill">Quote-bound amount</span><span class="hero-pill">Server-created order</span><span class="hero-pill">Verified result required</span></div></div><div class="secure-panel"><div class="secure-symbol">✓</div><strong>Protected payment journey</strong><small>Provider response alone does not confirm payment. KRIM verifies the transaction before moving to the receipt.</small></div></div></section>
 <div class="journey" aria-label="Customer shipment journey">
 <div class="journey-step"><span class="stepno">01</span><span><strong>Book shipment</strong><small>Shipment request</small></span></div>
 <div class="journey-step"><span class="stepno">02</span><span><strong>Get quotation</strong><small>Rates & availability</small></span></div>
@@ -94,7 +94,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="metarow"><span>Order created by</span><strong>KRIM secure server</strong></div>
 <div class="metarow"><span>Payment completion</span><strong>Server verification required</strong></div>
 </div>
-<button id="btn-pay-now" class="paybutton" disabled>Continue to secure payment <span aria-hidden="true">→</span></button>
+<button id="btn-pay-now" class="paybutton" disabled>KRIM freight checkout is disabled</button>
 <p class="actionnote">If checkout closes or a result is unclear, check the original payment status before attempting another payment. KRIM never changes providers automatically.</p>
 <div id="payment-order-meta" class="footnote" aria-live="polite">No new payment order has been created.</div>
 </div></div>
@@ -108,7 +108,7 @@ a:not(.btn){text-decoration-color:#06b6d470}
 </div>
 <div class="card">
 <div class="cardhead"><div><h2>Global payment network</h2><p>Built for expansion, enabled only when verified.</p></div></div>
-<div class="providerbanner"><strong>Currently integrated: Razorpay · India / INR</strong>Razorpay is the only checkout adapter currently integrated. Live merchant eligibility, settlement, refunds and end-to-end reconciliation are not yet fully verified, so this is not a launch-readiness claim. Other methods are roadmap entries only and cannot be selected or charged.</div><div class="market-picker"><label for="payment-market">Explore payment options by market</label><select id="payment-market"><option value="IN">India · INR</option><option value="US">United States · USD</option><option value="GB">United Kingdom · GBP</option><option value="DE">Germany · EUR</option><option value="AE">United Arab Emirates · AED</option><option value="SG">Singapore · SGD</option></select></div><div id="payment-market-currency-note" class="providerbanner" style="margin-top:9px">Market discovery only. KRIM will never convert your accepted quote automatically.</div><div id="global-payment-options" class="provider-grid" aria-live="polite" aria-label="Global payment provider availability"><div class="provider-option"><strong>Checking provider registry…</strong><small>Loading verified market capabilities from KRIM.</small></div></div>
+<div class="providerbanner"><strong>KRIM freight checkout is disabled · partner-direct payments</strong>Razorpay is the only checkout adapter currently integrated. Live merchant eligibility, settlement, refunds and end-to-end reconciliation are not yet fully verified, so this is not a launch-readiness claim. Other methods are roadmap entries only and cannot be selected or charged.</div><div class="market-picker"><label for="payment-market">Explore payment options by market</label><select id="payment-market"><option value="IN">India · INR</option><option value="US">United States · USD</option><option value="GB">United Kingdom · GBP</option><option value="DE">Germany · EUR</option><option value="AE">United Arab Emirates · AED</option><option value="SG">Singapore · SGD</option></select></div><div id="payment-market-currency-note" class="providerbanner" style="margin-top:9px">Market discovery only. KRIM will never convert your accepted quote automatically.</div><div id="global-payment-options" class="provider-grid" aria-live="polite" aria-label="Global payment provider availability"><div class="provider-option"><strong>Checking provider registry…</strong><small>Loading verified market capabilities from KRIM.</small></div></div>
 <div class="sidelinks"><a href="finance/payment-gateways.html">Payment architecture <span>↗</span></a><a href="finance/payment-methods.html">Country & method eligibility <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a></div>
 </div>
 </aside>
@@ -131,7 +131,7 @@ const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amo
 function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
 function gateway(text,state){byId("gateway-status").textContent="KRIM PAYMENT ORCHESTRATOR · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
 function check(name,ok,text){const icon=byId("check-"+name);icon.textContent=ok?"✓":"!";icon.className="check-icon"+(ok?"":" pending");byId("check-"+name+"-text").textContent=text;}
-function setPayReady(ok){canPay=ok;byId("btn-pay-now").disabled=!ok||paymentBusy;}
+function setPayReady(ok){canPay=false;byId("btn-pay-now").disabled=true;}
 const marketCurrencies={IN:"INR",US:"USD",GB:"GBP",DE:"EUR",AE:"AED",SG:"SGD"};
 const providerNames={razorpay:"Razorpay",stripe:"Stripe",paypal:"PayPal",adyen:"Adyen",checkout_com:"Checkout.com",checkoutcom:"Checkout.com",bank_transfer:"Bank transfer",regional_wallet:"Regional wallet",regional_wallets:"Regional wallets"};
 async function loadGlobalPaymentOptions(){
