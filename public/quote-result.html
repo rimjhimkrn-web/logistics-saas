@@ -197,17 +197,10 @@ async function init(){
  const quoteValid=quote.status==="accepted"&&Number(quote.amount)>0&&(!expiry||expiry>Date.now());
  check("quote",quoteValid,quoteValid?"Accepted quote QT-"+quote.id+" is currently valid.":"Quote expired or amount is invalid.");
  const currency=String(quote.currency_code||"").toUpperCase();
- let capability=null;
- if(currency && currency!=="INR"){
-   const capResult=await client.functions.invoke("krim-payment-capability-status",{body:{currency_code:currency}});
-   if(!capResult.error && capResult.data && capResult.data.success===true) capability=capResult.data;
- }
- const foreignCurrencyReady=currency!=="INR"&&!!capability&&capability.enabled===true;
- const currencyReady=currency==="INR"||foreignCurrencyReady;
- const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*currencyFactor(currency))>0;
- const amountMessage=amountValid?(currency==="INR"?"Accepted INR quote amount displayed for reference; payment is arranged directly with your partner.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
+ const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&Math.round(Number(quote.amount)*currencyFactor(currency))>0;
+ const amountMessage=amountValid?"Accepted quote amount and currency are shown for reference only; freight payment is arranged directly with the contracted partner.":"The accepted quote amount is invalid.";
  check("amount",amountValid,amountMessage);
- byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote and is shown for reference only. Pay the contracted partner directly.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
+ byId("amount-caption").textContent="Reference amount only. Pay the contracted logistics partner directly; KRIM freight checkout is disabled.";
  let assignmentOk=false;
  if(quote.partner_quote_id){
    const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at,capacity_binding_id,shipment_leg_id").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
