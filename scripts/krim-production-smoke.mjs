@@ -308,7 +308,7 @@ if (existsSync(quoteReview)) {
 }
 if (existsSync(quoteComparison)) {
   const html = readFileSync(quoteComparison, "utf8");
-  if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC.");
+  if (!/acceptance is temporarily paused until KRIM completes server-side partner, assignment and booking integrity hardening/i.test(html) || !/No acceptance request was sent/i.test(html)) failures.push("Quote comparison must remain fail-closed while partner-direct quote/assignment lifecycle hardening is incomplete.");
   if (!/valid_until|valid until/i.test(html)) failures.push("Quote comparison must expose quote validity.");
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
