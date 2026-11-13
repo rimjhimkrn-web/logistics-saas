@@ -2,11 +2,7 @@
 name: KRIM encrypted schema-only export
 
 on:
-  push:
-    branches:
-      - mobile/krim-partner-app
-    paths:
-      - .github/workflows/krim-schema-export.yml
+  # Deliberately manual: a repository commit must never trigger a production export.
   workflow_dispatch:
 
 permissions:
@@ -166,12 +162,15 @@ jobs:
             exit 1
           fi
 
-          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
-            -in private-export/schema.sql \
-            -out private-export/krim-schema-export.sql.enc \
-            -pass env:EXPORT_PASSPHRASE
+          # GnuPG symmetric encryption provides authenticated integrity protection (MDC).
+          # The passphrase is supplied through the environment and never printed.
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "${EXPORT_PASSPHRASE}" \
+            --symmetric --cipher-algo AES256 \
+            --output private-export/krim-schema-export.sql.gpg \
+            private-export/schema.sql
 
-          sha256sum private-export/krim-schema-export.sql.enc > private-export/SHA256SUMS
+          sha256sum private-export/krim-schema-export.sql.gpg > private-export/SHA256SUMS
           rm -f private-export/schema.sql
 
       - name: Upload encrypted export only
@@ -179,7 +178,7 @@ jobs:
         with:
           name: krim-schema-export-encrypted
           path: |
-            private-export/krim-schema-export.sql.enc
+            private-export/krim-schema-export.sql.gpg
             private-export/SHA256SUMS
           if-no-files-found: error
           retention-days: 1
