@@ -58,9 +58,10 @@ footer{text-align:center;color:#64748b;font-size:12px}
   feedback.style.color=ok?"#065f46":"#9f1239";
  }
  function destination(user){
-  const type=String(user.user_metadata?.krim_account_type||user.app_metadata?.krim_account_type||user.user_metadata?.account_type||"customer").toLowerCase();
-  const routes={customer:"../app/customer/index.html",partner:"../app/partner/index.html",enterprise:"../app/enterprise/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html"};
-  return routes[type]||"../app/customer/index.html";
+  const type=String(user.user_metadata?.krim_account_type||user.app_metadata?.krim_account_type||user.user_metadata?.account_type||"").toLowerCase();
+  const routes={customer:"../app/customer/index.html",partner:"../app/partner/index.html",enterprise:"../app/enterprise/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html",operations:"../app/operations/index.html",platform_admin:"../app/platform-admin/index.html"};
+  // Unknown or missing role metadata must never default to a customer workspace.
+  return routes[type]||"login.html";
  }
  form.addEventListener("submit",async function(event){
   event.preventDefault();
