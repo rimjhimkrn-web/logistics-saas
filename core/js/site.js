@@ -103,9 +103,7 @@
     installButton.hidden = true;
   });
 
-  if ("serviceWorker" in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register("/service-worker.js").catch(() => {
-      console.warn("Offline shell registration unavailable in this browser context.");
-    });
-  }
+  // Offline caching is intentionally disabled until the service worker and
+  // every cached route are verified against the GitHub Pages project base path.
+  // The current worker uses origin-root paths and must not be registered here.
 })();
