@@ -63,6 +63,26 @@ A global launch claim such as "available in every country" or "universal logisti
 5. Run end-to-end tests per activated corridor and service before enabling public availability.
 6. Maintain a market-by-market readiness register and publish only verified service coverage.
 
+
+## 5. Production foundation audit — 2026-11-14
+
+The production country-reference foundation was expanded and verified against the existing 249-record country/area catalogue.
+
+- ISO alpha-2, alpha-3, and numeric identifiers: 249/249.
+- UN M.49 region metadata: 248/249.
+- Country calling codes: 248/249; the dataset does not supply a calling code for United States Minor Outlying Islands, so none was invented.
+- Country-currency references: 253 mappings across 246 jurisdictions, including multiple currency references where the source lists them. Three jurisdictions have no ISO 4217 mapping in this source. A country default currency is not set when the source lists multiple currencies.
+- IANA time-zone reference coverage: 423 country/time-zone links across 247 jurisdictions and 312 distinct zone names. Countries with multiple zones retain all zone records; operations should use the service-location timezone rather than treating a national default as universal.
+- Currency catalogue: 155 codes. Reference data does not automatically enable a currency for payment, payout, or settlement.
+- Country operating packs: 249, all still `research_pending`; 4,482 mandatory pack controls, zero fully approved.
+- Market register: 6 records; all 6 activation controls are `blocked`; zero operationally active markets.
+- Network corridors: 7 catalogue records, zero active.
+- Verified active partner capabilities: zero; active partner service areas: zero.
+
+The metadata import does not activate any market, corridor, partner, service, payment method, or route. It does not mark legal controls as reviewed. The country/time-zone and currency tables are reference data only.
+
+The production Supabase database was observed at PostgreSQL 17.6.1.165. IANA tzdb 2026f was released 2026-10-27. Supabase's 2026-10-30 notice identifies incorrect local-time conversions for Vancouver, Edmonton, and Casablanca on older PostgreSQL builds before 17.11.0.003. Schedule a controlled production database upgrade to a fixed 17.11.0.003-or-later build before relying on those zones for operational scheduling; no database engine upgrade was performed as part of this migration.
+
 ## Operating principle
 
 **Build global by architecture. Activate markets by evidence.** India is the initial operating focus. Other markets remain catalogue-only or in readiness until their own gates are satisfied.
