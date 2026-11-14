@@ -164,7 +164,7 @@
     @media(orientation:landscape) and (max-height:520px){.hero-inner{padding:38px 0}.mobile-nav{max-height:calc(100dvh - 66px)}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
   </style>
-<link rel="stylesheet" href="./assets/krim-public-polish.css?v=1">
+<!-- This page uses its own layout system; the generic public polish layer caused text wrapping and spacing conflicts. -->
 <script src="/logistics-saas/assets/krim-global-language.js?v=20261111-nav" defer></script>
 
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
@@ -195,6 +195,38 @@
   }
   @media(max-width:360px){
     .header .brand .brand-mark{width:185px;max-width:62vw;flex-basis:185px}
+  }
+
+  /* Page-specific layout protection: prevent inherited global rules from splitting
+     paragraph words, shrinking grid children, or clipping content on narrow screens. */
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{overflow-wrap:normal;word-break:normal}
+  main,.hero,.hero-inner,.hero-copy,.form-card,.section,.wrap{min-width:0}
+  .hero-inner{width:min(var(--max),calc(100% - 48px));max-width:var(--max);margin-inline:auto}
+  .hero-copy,.form-card{min-width:0;overflow:visible}
+  .hero-copy p,.route-item p,.form-top p,.field-help,.consent label,
+  .privacy-hint,.path-card p,.role-support-card p,.process-step p,
+  .faq details p,.section-heading p,.disclaimer{
+    max-width:100%;overflow-wrap:break-word;word-break:normal;hyphens:auto;
+    white-space:normal;line-height:1.75
+  }
+  .route-item,.route-item>div,.field,.path-card,.role-support-card,.process-step{min-width:0}
+  .form-grid,.path-grid,.role-support-grid,.process{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media(max-width:1100px){
+    .hero-inner{width:min(100% - 48px,760px);grid-template-columns:minmax(0,1fr);justify-items:stretch}
+    .hero-copy,.form-card{width:100%;max-width:100%;margin-inline:auto}
+  }
+  @media(max-width:600px){
+    .hero-inner{width:calc(100% - 34px);padding:49px 0}
+    .form-grid,.path-grid,.role-support-grid,.process{grid-template-columns:minmax(0,1fr)}
+    .field.full{grid-column:1}
+    .hero-copy h1{font-size:clamp(36px,10vw,54px);overflow-wrap:normal}
+    .hero-copy p,.route-item p,.form-top p,.path-card p,.role-support-card p,
+    .process-step p,.faq details p,.section-heading p{font-size:clamp(12px,3.5vw,15px)}
+  }
+  @media(max-width:360px){
+    .hero-inner{width:calc(100% - 28px)}
+    .hero-copy h1{font-size:36px}
   }
 </style>
 
