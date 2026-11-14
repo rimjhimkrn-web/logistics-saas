@@ -1,15 +1,94 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,follow">
-<title>Shipment Tracking | KRIM Logistics</title>
-<link rel="canonical" href="https://rimjhimkrn-web.github.io/logistics-saas/tracking.html">
-<meta http-equiv="refresh" content="0;url=../tracking.html">
-<script>location.replace("../tracking.html"+location.search+location.hash);</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071a2d">
+<title>Shipment Tracking | KRIM Logistics — Global Logistics Operating System</title>
+<link rel="canonical" href="https://rimjhimkrn-web.github.io/logistics-saas/public/tracking.html">
+<meta name="description" content="Look up a KRIM shipment using the secure tracking reference provided in your shipment details. View available shipment status and recorded milestone updates.">
+<style>
+:root{--navy:#071a2d;--navy2:#0c3048;--ink:#132b40;--muted:#617386;--blue:#147ac0;--cyan:#73d8f1;--teal:#087f78;--line:#dce6ee;--bg:#f4f7fa}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;background:#fff}a{color:inherit}:focus-visible{outline:3px solid #f3b544;outline-offset:3px}
+.wrap{width:min(1160px,calc(100% - 40px));margin:auto}.skip{position:absolute;left:-9999px;top:8px;z-index:99;background:white;padding:12px}.skip:focus{left:8px}
+.header{position:sticky;top:0;z-index:20;background:rgba(7,26,45,.97);color:#fff;border-bottom:1px solid #294257;backdrop-filter:blur(12px)}.navrow{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;letter-spacing:.04em}.mark{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(140deg,#65d2ee,#147ac0);color:#06223a;font-size:22px}.brand small{display:block;color:#9ccde1;font-size:9px;letter-spacing:.2em}.links{display:flex;gap:24px;align-items:center}.links a{color:#e1ebf2;text-decoration:none;font-size:13px;font-weight:700}.links a:hover{color:var(--cyan)}.navright{display:flex;gap:10px;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 17px;border-radius:10px;font-size:13px;font-weight:800;text-decoration:none;border:1px solid transparent}.primary{background:#1684cf;color:#fff}.outline{border-color:#8098aa;color:#fff}.menu{display:none;border:1px solid #6e8799;background:transparent;color:#fff;border-radius:9px;padding:9px 12px;font-weight:800}
+.hero{background:radial-gradient(ellipse at 84% 16%,#1c718b66,transparent 34%),linear-gradient(115deg,var(--navy),var(--navy2));color:#fff;overflow:hidden}.hero-inner{padding:68px 0 78px;max-width:850px}.eyebrow{color:#8edff3;text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:900}.hero h1{font-size:clamp(38px,5.5vw,62px);line-height:1.06;letter-spacing:-.045em;margin:17px 0}.hero p{max-width:730px;color:#d0dfe9;font-size:16px;line-height:1.8;margin:0}
+.lookup-section{background:var(--bg);padding:54px 0 68px}.lookup{max-width:820px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(22px,4vw,38px);box-shadow:0 18px 50px #071a2d12}.lookup-head{display:flex;gap:15px;align-items:flex-start}.icon{display:grid;place-items:center;flex:0 0 46px;height:46px;border-radius:14px;background:#e7f5fb;color:#0878ae;font-size:22px}.lookup h2{margin:0;font-size:25px;letter-spacing:-.025em}.sub{margin:5px 0 0;color:var(--muted);font-size:13px}
+form{margin-top:27px}.field-label{display:block;margin-bottom:8px;font-size:12px;font-weight:900;color:#30495d}.input-row{display:flex;gap:10px}.input-row input{min-width:0;flex:1;min-height:52px;padding:13px 15px;border:1px solid #bdcbd7;border-radius:10px;background:#fbfdff;color:var(--ink);font:600 14px ui-monospace,SFMono-Regular,Consolas,monospace}.input-row button{min-width:125px;border:0;cursor:pointer}.input-row button:disabled{opacity:.65;cursor:wait}.hint{font-size:12px;color:#687c8e;margin:9px 0 0}.privacy-note{display:flex;gap:10px;margin-top:22px;padding:14px 15px;border:1px solid #c8e3e0;border-radius:12px;background:#f0faf8;color:#436260;font-size:12px;line-height:1.7}.privacy-note strong{color:#1c5752}
+.feedback{margin-top:18px;padding:13px 15px;border-radius:10px;font-size:13px;font-weight:700}.feedback[hidden],.results[hidden]{display:none}.feedback.info{background:#eef7fc;color:#155a80}.feedback.error{background:#fff2f0;color:#a6382c}.feedback.success{background:#effaf5;color:#176448}
+.results{margin-top:25px;border-top:1px solid var(--line);padding-top:24px}.result-top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;flex-wrap:wrap}.result-top h3{margin:0;font-size:19px}.ref{font:700 12px ui-monospace,monospace;color:#4b6275;overflow-wrap:anywhere}.status-pill{display:inline-flex;padding:7px 11px;border-radius:30px;background:#e9f5f3;color:#086b63;font-size:11px;font-weight:900;text-transform:capitalize}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:19px 0}.detail{padding:15px;border:1px solid var(--line);border-radius:12px;background:#fbfdff;min-width:0}.detail span{display:block;color:#6b7d8e;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.detail strong{display:block;margin-top:6px;font-size:14px;overflow-wrap:anywhere}
+.events{margin-top:23px}.events h4{margin:0 0 15px;font-size:15px}.event-list{list-style:none;padding:0;margin:0}.event-list li{position:relative;margin-left:8px;padding:0 0 19px 22px;border-left:2px solid #c8e3ed;color:#607386;font-size:12px}.event-list li:last-child{border-left-color:transparent;padding-bottom:0}.event-list li:before{content:"";position:absolute;left:-6px;top:1px;width:10px;height:10px;border-radius:50%;background:#1387b9;border:2px solid white;box-shadow:0 0 0 1px #1387b9}.event-list strong{display:block;color:#243f54;font-size:13px;margin-bottom:3px}.empty-events{padding:15px;background:#f5f8fa;border-radius:10px;color:#687b8c;font-size:12px}
+.after{padding:48px 0}.after-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.info-card{border:1px solid var(--line);border-radius:16px;padding:22px}.info-card h3{margin:0 0 8px;font-size:17px}.info-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}.info-card a{display:inline-block;margin-top:13px;color:#086fa9;font-size:13px;font-weight:900;text-decoration:none}
+.footer{background:#061625;color:#b8c8d5;padding:27px 0}.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.footer a{color:#e3edf4;text-decoration:none;font-size:12px}.footlinks{display:flex;gap:18px;flex-wrap:wrap}.footer small{font-size:11px}
+@media(max-width:850px){.links{gap:14px}.links a{font-size:12px}.navright .outline{display:none}.hero-inner{padding:57px 0 65px}}
+@media(max-width:700px){.navrow{min-height:68px}.menu{display:block}.links{display:none;position:absolute;top:68px;left:0;right:0;background:var(--navy);padding:15px 22px 20px;border-top:1px solid #294257;flex-direction:column;align-items:stretch}.links.open{display:flex}.links a{padding:8px 0}.hero-inner{padding:49px 0 56px}.lookup-section{padding:35px 0 48px}.input-row{flex-direction:column}.input-row button{width:100%}.after-grid{grid-template-columns:1fr}}
+@media(max-width:440px){.wrap{width:calc(100% - 30px)}.navright .primary{padding:9px 11px;font-size:11px}.brand small{font-size:8px}.hero h1{font-size:39px}.details{grid-template-columns:1fr}.lookup{padding:20px}.lookup h2{font-size:22px}.footer-inner{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+
 </head>
 <body>
-<p>Shipment tracking has moved to the KRIM tracking gateway. <a href="../tracking.html">Continue to the official tracking page</a>.</p>
-</body>
-</html>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="header"><div class="wrap navrow">
+<a class="brand" href="../index.html" aria-label="KRIM Logistics home"><img src="../assets/krim-primary.svg?v=20261114-official-tracking" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:225px;height:auto;max-width:min(58vw,225px);object-fit:contain"></a>
+<nav class="links" id="primary-nav" aria-label="Main navigation"><a href="solutions.html">Solutions</a><a href="../network.html">Network</a><a href="../global-markets.html">Global markets</a><a href="quote.html">Request a quote</a></nav>
+<div class="navright"><a class="btn outline" href="../auth/login.html">Sign in</a><a class="btn primary" href="../auth/signup.html">Get started</a><button class="menu" id="menu-button" type="button" aria-controls="primary-nav" aria-expanded="false">Menu</button></div>
+</div></header>
+<main id="main">
+<section class="hero"><div class="wrap hero-inner"><div class="eyebrow">Shipment visibility · KRIM Logistics</div><h1>Track your shipment with clarity.</h1><p>Use the secure KRIM tracking reference provided in your shipment details to view the status and milestone events currently recorded for that shipment.</p></div></section>
+<section class="lookup-section"><div class="wrap"><div class="lookup">
+<div class="lookup-head"><div class="icon" aria-hidden="true">⌖</div><div><h2>Shipment lookup</h2><p class="sub">Enter the complete secure tracking reference. It is case-insensitive.</p></div></div>
+<form id="tracking-form" novalidate><label class="field-label" for="tracking-input">KRIM tracking reference</label><div class="input-row"><input id="tracking-input" name="tracking_reference" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="KRIM- followed by your 32-character reference" maxlength="37" aria-describedby="tracking-hint"><button class="btn primary" id="track-button" type="submit">Track shipment →</button></div><p class="hint" id="tracking-hint">Find this reference in the shipment details shared with you. Do not enter passwords, OTPs or payment information.</p></form>
+<div class="privacy-note"><span aria-hidden="true">🔒</span><div><strong>Keep your tracking reference private.</strong> Anyone with a valid reference may be able to view the limited shipment information returned by the public tracking service. Share it only with people who need access.</div></div>
+<p id="tracking-feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+<section id="tracking-results" class="results" aria-label="Shipment tracking results" hidden>
+<div class="result-top"><div><h3>Shipment status</h3><div class="ref" id="result-reference"></div></div><span class="status-pill" id="result-status">Status unavailable</span></div>
+<div class="details"><div class="detail"><span>Origin</span><strong id="result-origin">Not available</strong></div><div class="detail"><span>Destination</span><strong id="result-destination">Not available</strong></div><div class="detail"><span>Last reported location</span><strong id="result-location">Not available</strong></div><div class="detail"><span>Estimated delivery</span><strong id="result-eta">Not available</strong></div></div>
+<div class="events"><h4>Recorded shipment events</h4><ol class="event-list" id="result-events"></ol></div>
+</section>
+</div></div></section>
+<section class="after"><div class="wrap after-grid"><article class="info-card"><h3>Need to request a shipment?</h3><p>Start with a shipment request. Service availability, valid pricing and booking confirmation are checked as part of the workflow.</p><a href="quote.html">Request a quote →</a></article><article class="info-card"><h3>Looking for more help?</h3><p>Sign in to review the shipment information available to your account, or contact KRIM if your tracking reference is missing or incorrect.</p><a href="../contact.html">Contact KRIM →</a></article></div></section>
+</main>
+<footer class="footer"><div class="wrap footer-inner"><a href="../index.html"><strong>KRIM LOGISTICS</strong></a><div class="footlinks"><a href="../about.html">About</a><a href="../network.html">Network</a><a href="../shipment-tracking-policy.html">Tracking policy</a><a href="../contact.html">Contact</a><a href="../auth/login.html">Sign in</a></div><small>© <span id="year">2026</span> KRIM Logistics. All rights reserved.</small></div></footer>
+<script>
+(function(){
+const menuButton=document.getElementById("menu-button"),nav=document.getElementById("primary-nav");
+function closeMenu(){nav.classList.remove("open");menuButton.setAttribute("aria-expanded","false");}
+menuButton.addEventListener("click",function(){const open=menuButton.getAttribute("aria-expanded")==="true";menuButton.setAttribute("aria-expanded",String(!open));nav.classList.toggle("open",!open);});
+nav.addEventListener("click",function(e){if(e.target.closest("a"))closeMenu();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeMenu();});
+window.addEventListener("resize",function(){if(window.innerWidth>700)closeMenu();});
+document.getElementById("year").textContent=String(new Date().getFullYear());
+})();
+const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const form=document.getElementById("tracking-form"),input=document.getElementById("tracking-input"),button=document.getElementById("track-button");
+const feedback=document.getElementById("tracking-feedback"),results=document.getElementById("tracking-results");
+function showFeedback(message,type){feedback.textContent=message;feedback.className="feedback "+type;feedback.hidden=false;}
+function formatDate(value){if(!value)return "Not available";const d=new Date(value);return Number.isNaN(d.getTime())?"Not available":new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(d);}
+function put(id,value,fallback){document.getElementById(id).textContent=value||fallback||"Not available";}
+function renderEvents(events){
+const list=document.getElementById("result-events");list.replaceChildren();
+if(!events.length){const li=document.createElement("li");li.className="empty-events";li.textContent="No milestone events have been recorded yet.";list.append(li);return;}
+events.forEach(function(event){const li=document.createElement("li"),title=document.createElement("strong"),time=document.createElement("span"),place=document.createElement("div");title.textContent=String(event.event_type||"Shipment update").replace(/[_-]+/g," ");time.textContent=formatDate(event.event_time);place.textContent=event.location||"";li.append(title,time);if(event.location)li.append(place);list.append(li);});
+}
+form.addEventListener("submit",async function(event){
+event.preventDefault();results.hidden=true;
+const raw=input.value.trim().toUpperCase();
+const match=raw.match(/^(?:KRIM-)?([A-F0-9]{32})$/);
+if(!match){showFeedback("Enter the complete KRIM tracking reference: KRIM- followed by 32 letters or numbers from A to F and 0 to 9.", "error");input.focus();return;}
+button.disabled=true;button.textContent="Looking up…";showFeedback("Checking the tracking record securely…","info");
+try{
+const response=await fetch(SUPABASE_URL+"/functions/v1/public-shipment-tracking",{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({tracking_number:"KRIM-"+match[1]})});
+const payload=await response.json().catch(()=>({}));
+if(!response.ok||!payload.success){const message=payload&&typeof payload.error==="string"?payload.error:"Tracking is temporarily unavailable. Please try again later.";throw new Error(message);}
+put("result-reference",payload.shipment_number||payload.tracking_number||"KRIM shipment");
+put("result-status",String(payload.status||"Unknown").replace(/[_-]+/g," "));
+put("result-origin",payload.origin);put("result-destination",payload.destination);put("result-location",payload.current_location);
+put("result-eta",payload.delivered_at?"Delivered "+formatDate(payload.delivered_at):formatDate(payload.estimated_delivery_at));
+renderEvents(Array.isArray(payload.events)?payload.events:[]);
+results.hidden=false;showFeedback("Tracking information retrieved. These are the updates currently recorded by the service.","success");
+}catch(error){showFeedback(error instanceof Error?error.message:"Unable to retrieve tracking information. Please try again later.","error");}
+finally{button.disabled=false;button.textContent="Track shipment →";}
+});
+</script>
+</body></html>
