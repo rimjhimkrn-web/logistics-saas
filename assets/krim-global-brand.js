@@ -8,6 +8,7 @@
     var header=document.querySelector("header");
     var candidates=[
       header&&header.querySelector(".brand-mark"),
+      header&&header.querySelector(".mark"),
       header&&header.querySelector(".brandmark"),
       header&&header.querySelector(".logo"),
       header&&header.querySelector('img[alt*="krim" i],img[alt*="logo" i]'),
@@ -23,7 +24,11 @@
       if(target.tagName==="IMG"){
         target.src=base;target.alt="KRIM Logistics — Global Logistics Operating System";target.classList.add("krim-official-brand-logo");
       }else{
-        target.style.backgroundImage='url("'+base+'")';target.style.backgroundSize="contain";target.style.backgroundRepeat="no-repeat";target.style.backgroundPosition="left center";target.style.width="290px";target.style.height="76px";target.style.borderRadius="0";target.setAttribute("aria-label","KRIM Logistics — Global Logistics Operating System");target.classList.add("krim-official-brand-logo");
+        var replacement=document.createElement("img");
+        replacement.src=base;
+        replacement.alt="KRIM Logistics — Global Logistics Operating System";
+        replacement.className="krim-official-brand-logo";
+        target.replaceWith(replacement);
       }
     }else{
       var bar=document.createElement("div");bar.className="krim-global-brandbar";
