@@ -23,7 +23,22 @@ button:focus-visible,.links a:focus-visible,.btn:focus-visible{outline:3px solid
 .card .btn{margin-top:12px;font-size:11px}
 .card .btn:focus-visible{outline:3px solid #0ea5b7;outline-offset:4px}
 @media(max-width:500px){.card .btn{width:100%}}
-.brand-mark{display:block;width:220px;height:58px;object-fit:contain;object-position:left center}@media(max-width:680px){.brand-mark{width:180px;height:48px}} </style><link rel="stylesheet" href="./assets/krim-public-polish.css?v=1">
+.brand-mark{display:block;width:220px;height:58px;object-fit:contain;object-position:left center}@media(max-width:680px){.brand-mark{width:180px;height:48px}}
+/* KRIM shared navigation standard: desktop links only when the full header fits. */
+@media(min-width:1101px){
+ .nav{flex-wrap:nowrap}
+ .links{display:flex!important;position:static!important;flex-direction:row!important;align-items:center!important;gap:clamp(12px,1.3vw,18px)!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ .menu{display:none!important}
+}
+@media(max-width:1100px){
+ .nav{position:relative;gap:9px}
+ .menu{display:inline-flex!important;order:2}
+ .links{display:none!important;position:absolute;top:calc(100% + 1px);left:0;right:0;z-index:20;padding:10px 18px 16px;background:#fff;border:1px solid var(--l);border-radius:0 0 12px 12px;box-shadow:0 18px 30px #0a26351f;flex-direction:column;align-items:stretch;gap:0}
+ .links.open{display:flex!important}
+ .links a{min-height:46px;padding:9px 2px;border-bottom:1px solid #edf1f3;font-size:14px}
+ .nav>.btn{order:3;white-space:nowrap}
+}
+ </style><link rel="stylesheet" href="./assets/krim-public-polish.css?v=1">
 
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
@@ -79,6 +94,6 @@ b.addEventListener('click',function(){var o=n.classList.toggle('open');b.setAttr
 n.addEventListener('click',function(e){if(e.target.closest('a'))close(false);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&n.classList.contains('open'))close(true);});
 document.addEventListener('click',function(e){if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))close(false);});
-window.addEventListener('resize',function(){if(window.innerWidth>900)close(false);});
+window.addEventListener('resize',function(){if(window.innerWidth>1100)close(false);});
 })();
 </script></body></html>
