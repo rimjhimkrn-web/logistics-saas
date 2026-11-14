@@ -41,9 +41,9 @@
     .desktop-nav>a:hover,.desktop-nav>a[aria-current=page]{color:var(--blue)}
     .nav-cta{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:0 17px;border-radius:9px;background:var(--navy);color:#fff!important}
     .nav-cta:hover{background:#0b4265}
-    .menu-button{display:none;width:46px;height:46px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);align-items:center;justify-content:center;cursor:pointer}
+    .menu-button{display:none;width:46px;height:46px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;flex:0 0 46px}
     .menu-button svg{width:22px;height:22px}
-    .mobile-nav{display:none}
+    .mobile-nav{display:none;touch-action:pan-y;overscroll-behavior:contain}
     .hero{position:relative;overflow:hidden;background:var(--navy);color:#fff}
     .hero:before{content:"";position:absolute;width:740px;height:740px;border:1px solid #ffffff12;border-radius:50%;right:-230px;top:-410px;box-shadow:0 0 0 70px #ffffff08,0 0 0 145px #ffffff05}
     .hero:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 78% 40%,#087db83d,transparent 42%),linear-gradient(110deg,transparent 48%,#0a365322)}
@@ -206,7 +206,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
-    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" hidden>
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
       <a href="./platform.html">Platform</a>
       <a href="./public/solutions.html">Solutions</a>
       <a href="./network.html">Network</a>
@@ -373,7 +373,7 @@
       if(!button||!nav)return;
       function setOpen(open,restoreFocus){
         nav.classList.toggle('is-open',open);
-        nav.hidden=!open;
+
         button.setAttribute('aria-expanded',String(open));
         button.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');
         button.innerHTML=open
@@ -382,10 +382,10 @@
         if(restoreFocus)button.focus();
       }
       button.addEventListener('click',function(){setOpen(button.getAttribute('aria-expanded')!=='true',false);});
-      document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!nav.hidden)setOpen(false,true);});
-      document.addEventListener('click',function(event){if(!nav.hidden&&!nav.contains(event.target)&&!button.contains(event.target))setOpen(false,false);});
+      document.addEventListener('keydown',function(event){if(event.key==='Escape'&&nav.classList.contains('is-open'))setOpen(false,true);});
+      document.addEventListener('click',function(event){if(nav.classList.contains('is-open')&&!nav.contains(event.target)&&!button.contains(event.target))setOpen(false,false);});
       nav.querySelectorAll('a').forEach(function(link){link.addEventListener('click',function(){setOpen(false,false);});});
-      window.addEventListener('resize',function(){if(window.innerWidth>820&&!nav.hidden)setOpen(false,false);});
+      window.addEventListener('resize',function(){if(window.innerWidth>820&&nav.classList.contains('is-open'))setOpen(false,false);});
     }());
   </script>
 </body>
