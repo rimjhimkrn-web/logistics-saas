@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://rimjhimkrn-web.github.io/logistics-saas/auth/partner-signup.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KRIM Logistics">
+<meta property="og:title" content="Partner Registration | KRIM Logistics">
+<meta property="og:description" content="Create a secure partner account. Business, service and country verification are completed separately before activation.">
+<meta property="og:image" content="https://rimjhimkrn-web.github.io/logistics-saas/assets/krim-global-logistics-hero.svg">
+<meta name="twitter:card" content="summary_large_image">
 <title>Partner Registration | KRIM Logistics</title>
 <meta name="description" content="Create a secure KRIM partner account, then complete the separate business and service verification process.">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
@@ -26,6 +34,10 @@ footer{width:min(1120px,calc(100% - 48px));margin:auto;padding:18px 0 24px;displ
 @media(max-width:900px){.layout{grid-template-columns:1fr;max-width:650px;gap:28px;margin:32px auto 48px}.intro{padding-top:0}.intro h1{font-size:clamp(38px,7vw,52px)}}
 @media(max-width:760px){.nav header,footer{width:calc(100% - 28px)}.nav header{min-height:0;padding:8px 0;align-items:center;flex-direction:row;gap:10px;flex-wrap:wrap}.brand{flex:1 1 auto}.brand img{width:220px;height:58px;max-width:68vw}.mobile-menu-button{display:inline-flex;flex:none}.nav header>.nav-links{display:none!important;order:3;width:100%;padding:8px 2px 10px;flex-direction:column;align-items:stretch;gap:0;border-top:1px solid #e8edf2}.nav.is-open header>.nav-links{display:flex!important}.nav-links .headlink{display:block;padding:12px 8px;border-bottom:1px solid #edf1f5;font-size:12px}.layout{width:calc(100% - 28px);margin:25px auto 38px}.pathway-picker{grid-template-columns:1fr}.pathway-choice{min-height:0;padding:13px}.pathway-choice[aria-pressed=true]{padding:12px}.card{padding:21px;border-radius:12px}.card h2{font-size:24px}.intro h1{font-size:39px}.intro>p{font-size:13px}.steps{gap:13px;margin-top:23px}.intro-note{margin-top:22px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+/* Global header fit: compact navigation until all desktop controls fit comfortably. */
+@media(max-width:1100px){.nav header{width:calc(100% - 28px);min-height:0;padding:8px 0;align-items:center;flex-direction:row;gap:10px;flex-wrap:wrap}.brand{flex:1 1 auto}.brand img{width:220px;height:58px;max-width:min(68vw,220px)}.mobile-menu-button{display:inline-flex;flex:none}.nav header>.nav-links{display:none!important;order:3;width:100%;padding:8px 2px 10px;flex-direction:column;align-items:stretch;gap:0;border-top:1px solid #e8edf2}.nav.is-open header>.nav-links{display:flex!important}.nav-links .headlink{display:block;padding:12px 8px;border-bottom:1px solid #edf1f5;font-size:12px}}
+@media(min-width:1101px){.mobile-menu-button{display:none!important}.nav header>.nav-links{display:flex!important;order:initial;width:auto;padding:0;border:0;flex-direction:row;align-items:center;gap:24px}.brand{flex:0 1 290px}.brand img{width:290px;height:76px;max-width:min(30vw,290px)}}
+
 </style>
 
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
@@ -49,7 +61,7 @@ footer{width:min(1120px,calc(100% - 48px));margin:auto;padding:18px 0 24px;displ
 <script>
 (function(){"use strict";
 const client=window.KRIM_SUPABASE,form=document.getElementById("partner-signup-form"),button=document.getElementById("submit-button"),feedback=document.getElementById("feedback"),password=document.getElementById("password");
-document.getElementById("year").textContent=new Date().getFullYear();const nav=document.querySelector(".nav"),menuButton=document.getElementById("mobile-menu-button");menuButton.addEventListener("click",function(){const open=nav.classList.toggle("is-open");menuButton.setAttribute("aria-expanded",String(open));menuButton.querySelector("span:last-child").textContent=open?"Close":"Menu"});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&nav.classList.contains("is-open")){nav.classList.remove("is-open");menuButton.setAttribute("aria-expanded","false");menuButton.querySelector("span:last-child").textContent="Menu"}});
+document.getElementById("year").textContent=new Date().getFullYear();const nav=document.querySelector(".nav"),menuButton=document.getElementById("mobile-menu-button");function closeMenu(restore){nav.classList.remove("is-open");menuButton.setAttribute("aria-expanded","false");menuButton.setAttribute("aria-label","Open main navigation");menuButton.querySelector("span:last-child").textContent="Menu";if(restore)menuButton.focus()}menuButton.addEventListener("click",function(){const open=nav.classList.toggle("is-open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Close main navigation":"Open main navigation");menuButton.querySelector("span:last-child").textContent=open?"Close":"Menu"});nav.querySelectorAll(".nav-links a").forEach(function(link){link.addEventListener("click",function(){closeMenu(false)})});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&nav.classList.contains("is-open"))closeMenu(true)});document.addEventListener("click",function(e){if(nav.classList.contains("is-open")&&!nav.contains(e.target))closeMenu(false)});window.addEventListener("resize",function(){if(window.innerWidth>1100)closeMenu(false)});
 function show(message,type){feedback.textContent=message;feedback.className="feedback "+(type||"")}
 function friendly(error){const m=String(error&&error.message||"");if(/already registered|already been registered|user already exists/i.test(m))return "An account may already exist for this email. Use Partner Sign In or password recovery; do not register again.";if(/rate limit|too many requests/i.test(m))return "Too many attempts. Wait a few minutes and try again.";return m||"Registration could not be completed. Please try again."}
 document.getElementById("partner-mode").addEventListener("change",function(){document.querySelectorAll("[data-partner-mode]").forEach(function(card){card.setAttribute("aria-pressed",String(card.dataset.partnerMode===document.getElementById("partner-mode").value))})});
