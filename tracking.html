@@ -32,14 +32,7 @@
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_6 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-<link rel="stylesheet" href="./assets/krim-public-polish.css?v=1">
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
-
+<!-- Page-specific responsive styles below are authoritative. -->
 <style id="krim-responsive-tracking-fix">
 /* Responsive layout correction: phones, tablets and desktop */
 *,*::before,*::after{box-sizing:border-box}
@@ -75,30 +68,38 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
  header>div{padding-inline:24px!important;gap:14px}
  header nav{gap:14px!important;font-size:13px}
 }
+
+/* KRIM master header: consistent desktop navigation and mobile menu. */
+.krim-track-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-bottom:1px solid #dce5ed}
+.krim-track-navrow{width:min(1160px,calc(100% - 40px));min-height:78px;margin:0 auto;display:flex;align-items:center;gap:clamp(10px,1.2vw,18px)}
+.krim-track-brand{display:flex;align-items:center;flex:0 0 auto;min-width:0}
+.krim-track-brand img{display:block;width:205px;height:auto;max-width:100%;object-fit:contain}
+.krim-track-links{margin-left:auto;display:flex;align-items:center;justify-content:center;gap:clamp(9px,1.1vw,16px);white-space:nowrap}
+.krim-track-links a{display:inline-flex;align-items:center;min-height:44px;color:#52667b;font-size:11px;font-weight:800;text-decoration:none}
+.krim-track-links a:hover,.krim-track-links a[aria-current=page]{color:#d96316}
+.krim-track-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.krim-track-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:900;text-decoration:none;white-space:nowrap}
+.krim-track-secondary{border:1px solid #dce5ed;color:#09243D;background:#fff}
+.krim-track-primary{background:#F47A24;color:#fff}
+.krim-track-primary:hover{background:#d96316}
+.krim-track-menu{display:none;width:46px;height:46px;border:1px solid #dce5ed;border-radius:10px;background:#fff;color:#09243D;font-size:21px;cursor:pointer}
+@media(max-width:1100px) and (min-width:901px){.krim-track-navrow{width:calc(100% - 28px);gap:9px}.krim-track-brand img{width:175px}.krim-track-links{gap:8px}.krim-track-links a{font-size:10px}.krim-track-actions a{padding:0 9px;font-size:9px}}
+@media(max-width:900px){.krim-track-navrow{width:calc(100% - 30px);min-height:70px;gap:10px}.krim-track-brand img{width:190px;max-width:min(60vw,190px)}.krim-track-menu{display:grid;place-items:center;flex:0 0 46px;margin-left:auto}.krim-track-links{display:none;position:absolute;top:calc(100% + 1px);left:0;right:0;margin:0;padding:10px 16px 14px;background:#fff;border:1px solid #dce5ed;border-radius:0 0 13px 13px;box-shadow:0 18px 40px rgba(7,26,44,.12);flex-direction:column;align-items:stretch;gap:0;white-space:normal}.krim-track-links.open{display:flex}.krim-track-links a{min-height:46px;border-bottom:1px solid #edf1f5;font-size:14px}.krim-track-links a:last-child{border:0}.krim-track-actions{display:none}}
+@media(max-width:380px){.krim-track-brand img{width:160px;max-width:52vw}}
 </style>
 
 </head>
 <body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white">
 
-    <!-- KRIM official full wordmark navigation -->
-    <header class="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-5 h-20 flex items-center justify-between gap-5">
-            <a href="./index.html" aria-label="KRIM Logistics home" class="flex items-center shrink-0">
-                <img src="./assets/krim-primary.svg?v=20261114-official-lockup" alt="KRIM LOGISTICS — Global Logistics Operating System" width="225" height="60" style="display:block;width:225px;height:auto;max-width:48vw;object-fit:contain">
-            </a>
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600" aria-label="Main navigation">
-                <a href="./platform.html">Platform</a>
-                <a href="./public/solutions.html">Solutions</a>
-                <a href="./network.html">Network</a>
-                <a href="./tracking.html" aria-current="page" class="text-slate-900">Track Shipment</a>
-                <a href="./contact.html">Contact</a>
-            </nav>
-            <div class="flex items-center gap-3 text-sm font-semibold">
-                <a href="./auth/login.html" class="text-slate-600">Sign In</a>
-                <a href="./auth/access.html" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg">Access Portal →</a>
-            </div>
-        </div>
-    </header>
+    <!-- KRIM responsive master navigation -->
+    <header class="krim-track-header"><div class="krim-track-navrow">
+      <a class="krim-track-brand" href="./index.html" aria-label="KRIM Logistics home"><img src="./assets/krim-primary.svg?v=20261114-master-lockup" alt="KRIM Logistics — Global Logistics Operating System"></a>
+      <button class="krim-track-menu" id="krimTrackMenu" type="button" aria-label="Open main navigation" aria-expanded="false" aria-controls="krimTrackNav">☰</button>
+      <nav class="krim-track-links" id="krimTrackNav" aria-label="Main navigation">
+        <a href="./platform.html">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a><a href="./global-markets.html">Markets</a><a href="./tracking.html" aria-current="page">Track Shipment</a><a href="./contact.html">Contact</a>
+      </nav>
+      <div class="krim-track-actions"><a class="krim-track-secondary" href="./auth/login.html">Sign In</a><a class="krim-track-primary" href="./auth/access.html">Access Portal →</a></div>
+    </div></header>
 
     <!-- Main Content -->
     <main class="flex-grow">
@@ -214,5 +215,7 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
             }
         }
     </script>
+
+<script>(function(){const b=document.getElementById('krimTrackMenu'),n=document.getElementById('krimTrackNav');if(!b||!n)return;function close(){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');b.textContent='☰'}b.addEventListener('click',function(){const o=!n.classList.contains('open');n.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.setAttribute('aria-label',o?'Close main navigation':'Open main navigation');b.textContent=o?'×':'☰'});n.addEventListener('click',e=>{if(e.target.closest('a'))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.addEventListener('click',e=>{if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))close()});window.addEventListener('resize',()=>{if(window.innerWidth>900)close()})}());</script>
 </body>
 </html>
