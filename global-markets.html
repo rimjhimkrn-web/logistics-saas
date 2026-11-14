@@ -154,6 +154,36 @@ td:first-child{font-weight:850;color:var(--navy);white-space:nowrap}
  .navcta{display:none}
 }
 @media(min-width:901px){.menu{display:none!important}.navlinks{display:flex!important;position:static;margin-left:auto}.navcta{display:inline-flex}}
+
+/* Unified KRIM desktop header: master logo, navigation and actions on one line. */
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:clamp(10px,1.25vw,18px);width:min(1160px,calc(100% - 40px));}
+.brand{display:flex;align-items:center;flex:0 0 auto;min-width:0}
+.brand img{width:205px!important;max-width:205px!important;height:auto}
+.navlinks{display:flex;align-items:center;justify-content:center;gap:clamp(9px,1.15vw,17px);margin:0 0 0 auto;flex:0 1 auto;white-space:nowrap}
+.navlinks a{font-size:clamp(10px,.82vw,12px);font-weight:850}
+.navactions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.nav-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:900;white-space:nowrap}
+.nav-action.secondary{border:1px solid var(--line);color:var(--navy);background:#fff}
+.nav-action.primary{background:var(--blue);color:#fff}
+.nav-action.primary:hover{background:#d96316}
+@media(max-width:1100px) and (min-width:901px){
+ .navrow{width:calc(100% - 28px);gap:9px}
+ .brand img{width:175px!important;max-width:175px!important}
+ .navlinks{gap:9px}
+ .navlinks a{font-size:10px}
+ .nav-action{padding:0 9px;font-size:9px}
+}
+@media(max-width:900px){
+ .navrow{width:calc(100% - 30px);gap:10px}
+ .brand img{width:190px!important;max-width:min(60vw,190px)!important}
+ .menu{display:grid;place-items:center;flex:0 0 46px;margin-left:auto}
+ .navlinks{display:none;position:absolute;top:calc(100% + 1px);left:0;right:0;margin:0;padding:10px 16px 14px;background:#fff;border:1px solid var(--line);border-radius:0 0 13px 13px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch;gap:0;z-index:60;white-space:normal}
+ .navlinks.open{display:flex}
+ .navlinks a{min-height:46px;border-bottom:1px solid #edf1f5;font-size:14px}
+ .navlinks a:last-child{border:0}
+ .navactions{display:none}
+}
+@media(min-width:901px){.menu{display:none!important}.navlinks{display:flex!important}}
 </style>
 <link rel="stylesheet" href="./assets/krim-public-polish.css?v=1">
 
@@ -161,11 +191,12 @@ td:first-child{font-weight:850;color:var(--navy);white-space:nowrap}
 <body>
 <a class="skip" href="#main" style="position:absolute;left:12px;top:-100px;background:#fff;padding:12px;z-index:100;color:#071a2c">Skip to content</a>
 <header class="topbar"><div class="wrap navrow">
-<a class="brand" href="./index.html" aria-label="KRIM Logistics home"><img src="./assets/krim-primary.svg?v=20261114-master-lockup" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:225px;height:auto;max-width:min(58vw,225px);object-fit:contain"></a>
+<a class="brand" href="./index.html" aria-label="KRIM Logistics home"><img src="./assets/krim-primary.svg?v=20261114-master-lockup" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:205px;height:auto;max-width:100%;object-fit:contain"></a>
 <button class="menu" id="menuButton" type="button" aria-label="Open main navigation" aria-expanded="false" aria-controls="mainNav">☰</button>
 <nav class="navlinks" id="mainNav" aria-label="Main navigation">
-<a href="./platform.html">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a><a href="./global-markets.html" aria-current="page">Global Markets</a><a href="./tracking.html">Tracking</a><a href="./about.html">About</a><a href="./contact.html">Contact</a>
-</nav><a class="navcta" href="./public/quote.html">Request a quote <span aria-hidden="true">→</span></a>
+<a href="./platform.html">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a><a href="./global-markets.html" aria-current="page">Markets</a><a href="./about.html">About</a><a href="./contact.html">Contact</a>
+</nav>
+<div class="navactions"><a class="nav-action secondary" href="./tracking.html">Track shipment</a><a class="nav-action primary" href="./auth/login.html">Sign in ↗</a></div>
 </div></header>
 <main id="main">
 <section class="hero"><div class="wrap hero-grid">
