@@ -156,8 +156,8 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 
 <style id="krim-solutions-header-alignment">
-/* Match KRIM homepage and Platform navigation breakpoints. */
-@media(min-width:901px){
+/* KRIM shared header: full navigation on wide desktop; accessible menu on tablet/mobile. */
+@media(min-width:1101px){
  header .nav{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:clamp(10px,1.4vw,20px)!important;min-height:78px!important;height:auto!important}
  header .brand{display:flex!important;flex:0 1 205px!important;width:205px!important;min-width:165px!important;max-width:205px!important;align-items:center!important}
  header .brand img{display:block!important;width:100%!important;max-width:205px!important;height:auto!important;object-fit:contain!important}
@@ -167,16 +167,10 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid 
  header .navactions .btn{display:inline-flex!important;white-space:nowrap!important;min-height:40px!important;padding:9px 10px!important;font-size:9px!important}
  header .menu{display:none!important;visibility:hidden!important}
 }
-@media(min-width:901px) and (max-width:1100px){
- header .nav{gap:8px!important}
- header .brand{flex-basis:175px!important;width:175px!important;min-width:150px!important}
- header .brand img{max-width:175px!important}
- header .navlinks{gap:9px!important}
- header .navlinks a{font-size:10px!important}
- header .navactions{gap:6px!important}
- header .navactions .btn{padding-inline:8px!important;font-size:8px!important}
-}
-@media(max-width:900px){
+@media(max-width:1100px){
+ header .nav{position:relative!important;gap:10px!important}
+ header .brand{flex:0 1 205px!important;width:auto!important;min-width:0!important;max-width:205px!important}
+ header .brand img{display:block!important;width:100%!important;max-width:205px!important;height:auto!important}
  header .navlinks{display:none!important;position:absolute!important;left:0!important;right:0!important;top:calc(100% - 1px)!important;z-index:60!important;flex-direction:column!important;align-items:stretch!important;padding:12px 20px 18px!important;background:#fff!important;border:1px solid var(--line)!important;border-radius:0 0 12px 12px!important;box-shadow:0 18px 30px #0a26351f!important}
  header .navlinks.open{display:flex!important}
  header .navlinks a{display:flex!important;min-height:44px!important;align-items:center!important;padding:12px 2px!important;border-bottom:1px solid #edf1f3!important;font-size:13px!important}
@@ -309,7 +303,7 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid 
     if(nav.classList.contains('open')&&!nav.contains(event.target)&&!button.contains(event.target))close(false);
   });
   window.addEventListener('resize',function(){
-    if(window.innerWidth>900)close(false);
+    if(window.innerWidth>1100)close(false);
   });
 })();
 </script>
