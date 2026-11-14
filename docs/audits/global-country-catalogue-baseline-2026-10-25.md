@@ -20,3 +20,24 @@ Before activating any additional market, validate its currency and time-zone met
 
 ## Launch impact
 This catalogue seed did not modify shipment, payment, partner, or historical operational records. New catalogue entries remain inactive to avoid implying unsupported service.
+
+## 2026-11-14 production addendum
+
+The country reference foundation was subsequently expanded using the DataHub `core/country-codes` dataset (2026-10-15) and IANA Time Zone Database 2026f:
+
+- 249/249 records have ISO alpha-2, alpha-3, and numeric identifiers.
+- 248/249 have a calling code; the one absent source value remains null.
+- 248/249 have UN M.49 region metadata.
+- 253 country-currency mappings across 246 jurisdictions; 155 currency codes are in the KRIM currency catalogue. Multiple currency references are retained; no single default is inferred when multiple are listed.
+- 423 country/time-zone links across 247 jurisdictions, representing 312 IANA zone names. Multi-zone jurisdictions retain all listed zones.
+- Single-zone defaults were filled only where a jurisdiction had exactly one IANA zone and no existing default; all other defaults were preserved.
+- The new reference tables are RLS-enabled and read-only for Data API clients; writes remain restricted to service-role/database administration.
+- No market, corridor, partner capability, service area, rate card, or booking was activated.
+
+Current operating readiness remains separate: all 6 market activation controls are blocked, all 249 country operating packs are research-pending, 0/4,482 mandatory country-pack controls are fully approved, 0 corridors are active, and 0 active verified partner capabilities are present.
+
+Source references:
+- DataHub country reference dataset: https://datahub.io/core/country-codes
+- ISO 3166 overview: https://www.iso.org/iso-3166-country-codes.html
+- IANA tzdb 2026f: https://www.iana.org/time-zones/releases/2026f
+
