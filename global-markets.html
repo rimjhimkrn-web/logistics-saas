@@ -184,6 +184,23 @@ td:first-child{font-weight:850;color:var(--navy);white-space:nowrap}
  .navactions{display:none}
 }
 @media(min-width:901px){.menu{display:none!important}.navlinks{display:flex!important}}
+
+/* KRIM global navigation standard: full links only when the complete header fits. */
+@media(max-width:1100px){
+ .navrow{width:calc(100% - 30px);min-height:68px;gap:10px}
+ .menu{display:grid!important;place-items:center;flex:0 0 46px;margin-left:auto;order:2}
+ .navlinks{display:none!important;position:absolute;top:calc(100% + 1px);left:0;right:0;margin:0;padding:10px 16px 14px;background:#fff;border:1px solid var(--line);border-radius:0 0 13px 13px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch;gap:0;z-index:60;white-space:normal}
+ .navlinks.open{display:flex!important}
+ .navlinks a{min-height:46px;border-bottom:1px solid #edf1f5;font-size:14px}
+ .navlinks a:last-child{border:0}
+ .navactions{display:none!important}
+ .brand img{width:190px!important;max-width:min(60vw,190px)!important}
+}
+@media(min-width:1101px){
+ .menu{display:none!important}
+ .navlinks{display:flex!important;position:static;margin-left:auto;white-space:nowrap}
+ .navactions{display:flex!important}
+}
 </style>
 <!-- Page-specific header styles are authoritative; shared polish stylesheet intentionally omitted. -->
 
@@ -262,6 +279,6 @@ td:first-child{font-weight:850;color:var(--navy);white-space:nowrap}
 </main>
 <footer class="footer"><div class="wrap"><div class="footer-grid"><div><div class="footer-brand">KRIM LOGISTICS</div><p>Global Logistics Operating System.<br>India-first activation. Global-ready by design.</p></div><div><h3>PLATFORM</h3><a href="./platform.html">Platform</a><a href="./public/solutions.html">Solutions</a><a href="./network.html">Network</a></div><div><h3>EXPLORE</h3><a href="./global-markets.html">Global Markets</a><a href="./tracking.html">Tracking</a><a href="./public/quote.html">Request a quote</a></div><div><h3>COMPANY</h3><a href="./about.html">About</a><a href="./contact.html">Contact</a><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a></div></div><div class="copyright">© 2026 KRIM Logistics. All rights reserved.</div></div></footer>
 <script>
-(function(){var button=document.getElementById('menuButton'),nav=document.getElementById('mainNav');if(!button||!nav)return;function close(restore){nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open main navigation');button.textContent='☰';if(restore)button.focus();}button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')!=='true';nav.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close main navigation':'Open main navigation');button.textContent=open?'×':'☰';});nav.addEventListener('click',function(e){if(e.target.closest('a'))close(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nav.classList.contains('open'))close(true);});document.addEventListener('click',function(e){if(nav.classList.contains('open')&&!nav.contains(e.target)&&!button.contains(e.target))close(false);});window.addEventListener('resize',function(){if(window.innerWidth>760)close(false);});}());
+(function(){var button=document.getElementById('menuButton'),nav=document.getElementById('mainNav');if(!button||!nav)return;function close(restore){nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open main navigation');button.textContent='☰';if(restore)button.focus();}button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')!=='true';nav.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close main navigation':'Open main navigation');button.textContent=open?'×':'☰';});nav.addEventListener('click',function(e){if(e.target.closest('a'))close(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nav.classList.contains('open'))close(true);});document.addEventListener('click',function(e){if(nav.classList.contains('open')&&!nav.contains(e.target)&&!button.contains(e.target))close(false);});window.addEventListener('resize',function(){if(window.innerWidth>1100)close(false);});}());
 </script>
 </body></html>
