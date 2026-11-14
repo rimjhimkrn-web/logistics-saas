@@ -81,24 +81,70 @@
 "use strict";
 var button=document.getElementById("menuButton"),nav=document.getElementById("mobileNav");
 if(button&&nav){
-function closeMenu(){button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu");nav.classList.remove("open");nav.hidden=true;}
-function openMenu(){nav.hidden=false;nav.classList.add("open");button.setAttribute("aria-expanded","true");button.setAttribute("aria-label","Close navigation menu");}
-button.addEventListener("click",function(){if(button.getAttribute("aria-expanded")==="true")closeMenu();else openMenu();});
-document.addEventListener("click",function(event){if(!nav.hidden&&!nav.contains(event.target)&&!button.contains(event.target))closeMenu();});
-document.addEventListener("keydown",function(event){if(event.key==="Escape"&&!nav.hidden){closeMenu();button.focus();}});
-nav.querySelectorAll("a").forEach(function(link){link.addEventListener("click",closeMenu);});
-window.addEventListener("resize",function(){if(window.innerWidth>1100&&!nav.hidden)closeMenu();});
+ function closeMenu(){button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu");nav.classList.remove("open");nav.hidden=true;}
+ function openMenu(){nav.hidden=false;nav.classList.add("open");button.setAttribute("aria-expanded","true");button.setAttribute("aria-label","Close navigation menu");}
+ button.addEventListener("click",function(){button.getAttribute("aria-expanded")==="true"?closeMenu():openMenu();});
+ document.addEventListener("click",function(event){if(!nav.hidden&&!nav.contains(event.target)&&!button.contains(event.target))closeMenu();});
+ document.addEventListener("keydown",function(event){if(event.key==="Escape"&&!nav.hidden){closeMenu();button.focus();}});
+ nav.querySelectorAll("a").forEach(function(link){link.addEventListener("click",closeMenu);});
+ window.addEventListener("resize",function(){if(window.innerWidth>1100&&!nav.hidden)closeMenu();});
 }
-var search=document.getElementById("faqSearch"),items=Array.from(document.querySelectorAll(".faq-item")),groups=Array.from(document.querySelectorAll(".group")),count=document.getElementById("searchCount"),empty=document.getElementById("emptyState");
-function normalise(value){return String(value||"").toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N}]+/gu," ").trim();}
-var stopWords=new Set(["a","an","and","are","can","do","does","for","from","how","i","in","is","it","me","my","of","on","or","the","to","we","what","when","where","which","who","why","with","you","your"]);
-function tokenMatches(text,term){if(text.includes(term))return true;var variants={track:["tracking","tracked"],shipment:["shipments"],payment:["payments","paid"],refund:["refunded","refunding"],partner:["partners","partnership"],quote:["quotes","quoting"],book:["booking","bookings"],deliver:["delivery","delivered"],account:["accounts"]};return (variants[term]||[]).some(function(v){return text.includes(v);});}
-function filterFaq(){var raw=(search.value||"").trim(),normal=normalise(raw),terms=normal.split(/\s+/).filter(function(term){return term.length>1&&!stopWords.has(term);}),visible=0;
-items.forEach(function(item){var text=normalise(item.textContent),match=!terms.length||terms.every(function(term){return tokenMatches(text,term);});item.hidden=!match;if(match){visible++;if(raw)item.open=true;}});
-groups.forEach(function(group){var has=Array.from(group.querySelectorAll(".faq-item")).some(function(item){return !item.hidden;});group.hidden=!has;});
-count.textContent=raw?(visible+" matching answer"+(visible===1?"":"s")):"Showing all help topics";empty.classList.toggle("show",visible===0);}
-if(search){search.addEventListener("input",filterFaq);search.addEventListener("keydown",function(event){if(event.key==="Escape"&&search.value){search.value="";filterFaq();}});}
+var search=document.getElementById("faqSearch");
+var items=Array.prototype.slice.call(document.querySelectorAll(".faq-item"));
+var groups=Array.prototype.slice.call(document.querySelectorAll(".group"));
+var count=document.getElementById("searchCount"),empty=document.getElementById("emptyState");
+var clear=document.getElementById("faqSearchClear");
+function normalise(value){
+ var text=String(value||"").toLowerCase();
+ if(text.normalize) text=text.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+ return text.replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();
+}
+var synonyms={
+ track:["tracking","tracked","tracker"],tracking:["track","tracked","tracker"],
+ shipment:["shipments","consignment","cargo"],shipments:["shipment","consignment","cargo"],
+ quote:["quotes","quotation","pricing","rate"],quotes:["quote","quotation","pricing","rate"],
+ book:["booking","bookings","reserve","reservation"],booking:["book","bookings","reserve","reservation"],
+ pay:["payment","payments","paid","checkout"],payment:["pay","payments","paid","checkout"],
+ refund:["refunds","refunded","cancellation","cancel"],partner:["partners","carrier","provider"],
+ deliver:["delivery","delivered"],account:["accounts","login","signin"]
+};
+var stopWords=new Set(["a","an","and","are","can","do","does","for","from","how","i","in","is","it","me","my","of","on","or","the","to","we","what","when","where","which","who","why","with","you","your","please"]);
+function matchesTerm(text,term){
+ if(text.indexOf(term)!==-1)return true;
+ var options=synonyms[term]||[];
+ for(var i=0;i<options.length;i++){if(text.indexOf(options[i])!==-1)return true;}
+ return false;
+}
+function filterFaq(){
+ var raw=search?search.value.trim():"";
+ var query=normalise(raw);
+ var terms=query.split(" ").filter(function(term){return term.length>1&&!stopWords.has(term);});
+ var visible=0;
+ items.forEach(function(item){
+  var summary=item.querySelector("summary");
+  var answer=item.querySelector(".answer");
+  var haystack=normalise((summary?summary.textContent:"")+" "+(answer?answer.textContent:item.textContent));
+  var match=terms.length===0||terms.every(function(term){return matchesTerm(haystack,term);});
+  item.hidden=!match;
+  if(match){visible++;if(raw)item.open=true;}
+ });
+ groups.forEach(function(group){
+  var has=group.querySelector(".faq-item:not([hidden])")!==null;
+  group.hidden=!has;
+ });
+ if(count)count.textContent=raw?(visible+" matching answer"+(visible===1?"":"s")):"Showing all "+items.length+" help topics";
+ if(empty)empty.classList.toggle("show",visible===0);
+ if(clear)clear.hidden=!raw;
+}
+if(search){
+ search.addEventListener("input",filterFaq);
+ search.addEventListener("search",filterFaq);
+ search.addEventListener("keydown",function(event){
+  if(event.key==="Escape"&&search.value){search.value="";filterFaq();search.focus();}
+ });
+}
+if(clear&&search){clear.addEventListener("click",function(){search.value="";filterFaq();search.focus();});}
 var year=document.getElementById("year");if(year)year.textContent=new Date().getFullYear();
-})();
-</script>
+filterFaq();
+})();</script>
 </body></html>
