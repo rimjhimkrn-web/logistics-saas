@@ -76,6 +76,10 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
 @media(max-width:1100px) and (min-width:901px){.krim-track-navrow{width:calc(100% - 28px);gap:9px}.krim-track-brand img{width:175px}.krim-track-links{gap:8px}.krim-track-links a{font-size:10px}.krim-track-actions a{padding:0 9px;font-size:9px}}
 @media(max-width:900px){.krim-track-navrow{width:calc(100% - 30px);min-height:70px;gap:10px}.krim-track-brand img{width:190px;max-width:min(60vw,190px)}.krim-track-menu{display:grid;place-items:center;flex:0 0 46px;margin-left:auto}.krim-track-links{display:none;position:absolute;top:calc(100% + 1px);left:0;right:0;margin:0;padding:10px 16px 14px;background:#fff;border:1px solid #dce5ed;border-radius:0 0 13px 13px;box-shadow:0 18px 40px rgba(7,26,44,.12);flex-direction:column;align-items:stretch;gap:0;white-space:normal}.krim-track-links.open{display:flex}.krim-track-links a{min-height:46px;border-bottom:1px solid #edf1f5;font-size:14px}.krim-track-links a:last-child{border:0}.krim-track-actions{display:none}}
 @media(max-width:380px){.krim-track-brand img{width:160px;max-width:52vw}}
+/* Final KRIM navigation breakpoint: use the compact menu until the full header fits. */
+@media(max-width:1100px){.krim-track-navrow{width:calc(100% - 30px);min-height:70px;gap:10px}.krim-track-menu{display:grid!important;place-items:center;flex:0 0 46px;margin-left:auto}.krim-track-links{display:none!important;position:absolute;top:calc(100% + 1px);left:0;right:0;margin:0;padding:10px 16px 14px;background:#fff;border:1px solid #dce5ed;border-radius:0 0 13px 13px;box-shadow:0 18px 40px rgba(7,26,44,.12);flex-direction:column;align-items:stretch;gap:0;white-space:normal;z-index:110}.krim-track-links.open{display:flex!important}.krim-track-links a{min-height:46px;border-bottom:1px solid #edf1f5;font-size:14px}.krim-track-links a:last-child{border:0}.krim-track-actions{display:none!important}.krim-track-brand img{width:190px;max-width:min(60vw,190px)}}
+@media(min-width:1101px){.krim-track-menu{display:none!important}.krim-track-links{display:flex!important;position:static;margin-left:auto;white-space:nowrap}.krim-track-actions{display:flex!important}}
+@media(max-width:380px){.krim-track-brand img{width:160px;max-width:52vw}}
 </style>
 
 </head>
@@ -112,18 +116,18 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
             <div class="max-w-3xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 shadow-xl shadow-slate-200/50 space-y-6">
                 <div class="space-y-1">
                     <h2 class="text-xl font-bold text-slate-900">Track a KRIM shipment</h2>
-                    <p class="text-slate-600 text-sm">Enter the shipment reference provided for your consignment. Results depend on available partner updates.</p>
+                    <p id="tracking-help" class="text-slate-600 text-sm">Enter the shipment reference provided for your consignment. Results depend on available partner updates.</p>
                 </div>
                 <form onsubmit="handleTrackingSearch(event)" class="space-y-4">
                     <div class="space-y-2">
-                        <label class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Shipment Reference ID</label>
-                        <input type="text" id="tracking-input" required placeholder="Paste your secure KRIM tracking reference" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
+                        <label for="tracking-input" class="block text-xs font-mono text-slate-500 uppercase tracking-wider">Shipment Reference ID</label>
+                        <input type="text" id="tracking-input" name="tracking_reference" required maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="tracking-help" placeholder="Paste your secure KRIM tracking reference" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-sm focus:outline-none focus:border-sky-500 transition">
                     </div>
                     <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-md cursor-pointer">
                         Find Shipment →
                     </button>
                 </form>
-                <div id="tracking-results-container" class="space-y-4 pt-4 font-mono text-xs"></div>
+                <div id="tracking-results-container" class="space-y-4 pt-4 font-mono text-xs" role="status" aria-live="polite" aria-atomic="true"></div>
             </div>
         </section>
     </main>
@@ -206,6 +210,6 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
         }
     </script>
 
-<script>(function(){const b=document.getElementById('krimTrackMenu'),n=document.getElementById('krimTrackNav');if(!b||!n)return;function close(){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');b.textContent='☰'}b.addEventListener('click',function(){const o=!n.classList.contains('open');n.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.setAttribute('aria-label',o?'Close main navigation':'Open main navigation');b.textContent=o?'×':'☰'});n.addEventListener('click',e=>{if(e.target.closest('a'))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.addEventListener('click',e=>{if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))close()});window.addEventListener('resize',()=>{if(window.innerWidth>900)close()})}());</script>
+<script>(function(){const b=document.getElementById('krimTrackMenu'),n=document.getElementById('krimTrackNav');if(!b||!n)return;function close(){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');b.textContent='☰'}b.addEventListener('click',function(){const o=!n.classList.contains('open');n.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.setAttribute('aria-label',o?'Close main navigation':'Open main navigation');b.textContent=o?'×':'☰'});n.addEventListener('click',e=>{if(e.target.closest('a'))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.addEventListener('click',e=>{if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))close()});window.addEventListener('resize',()=>{if(window.innerWidth>1100)close()})}());</script>
 </body>
 </html>
