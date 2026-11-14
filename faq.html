@@ -90,8 +90,13 @@ nav.querySelectorAll("a").forEach(function(link){link.addEventListener("click",c
 window.addEventListener("resize",function(){if(window.innerWidth>1100&&!nav.hidden)closeMenu();});
 }
 var search=document.getElementById("faqSearch"),items=Array.from(document.querySelectorAll(".faq-item")),groups=Array.from(document.querySelectorAll(".group")),count=document.getElementById("searchCount"),empty=document.getElementById("emptyState");
-function filterFaq(){var q=(search.value||"").trim().toLowerCase(),visible=0;items.forEach(function(item){var match=!q||item.textContent.toLowerCase().includes(q);item.hidden=!match;if(match)visible++;});groups.forEach(function(group){var has=Array.from(group.querySelectorAll(".faq-item")).some(function(item){return !item.hidden;});group.hidden=!has;});count.textContent=q?(visible+" matching answer"+(visible===1?"":"s")):"Showing all help topics";empty.classList.toggle("show",visible===0);}
-if(search)search.addEventListener("input",filterFaq);
+function normalise(value){return String(value||"").toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^\\p{L}\\p{N}]+/gu," ").trim();}
+var stopWords=new Set(["a","an","and","are","can","do","does","for","from","how","i","in","is","it","me","my","of","on","or","the","to","we","what","when","where","which","who","why","with","you","your"]);
+function filterFaq(){var raw=(search.value||"").trim(),normal=normalise(raw),terms=normal.split(/\\s+/).filter(function(term){return term.length>1&&!stopWords.has(term);}),visible=0;
+items.forEach(function(item){var text=normalise(item.textContent),match=!terms.length||terms.every(function(term){return text.includes(term);});item.hidden=!match;if(match){visible++;if(raw)item.open=true;}});
+groups.forEach(function(group){var has=Array.from(group.querySelectorAll(".faq-item")).some(function(item){return !item.hidden;});group.hidden=!has;});
+count.textContent=raw?(visible+" matching answer"+(visible===1?"":"s")):"Showing all help topics";empty.classList.toggle("show",visible===0);}
+if(search){search.addEventListener("input",filterFaq);search.addEventListener("keydown",function(event){if(event.key==="Escape"&&search.value){search.value="";filterFaq();}});}
 var year=document.getElementById("year");if(year)year.textContent=new Date().getFullYear();
 })();
 </script>
