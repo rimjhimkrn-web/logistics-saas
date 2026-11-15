@@ -3,7 +3,7 @@ import {ActivityIndicator,Alert,Image,Platform,Pressable,ScrollView,StyleSheet,T
 import * as ImagePicker from "expo-image-picker";
 import type {Session} from "@supabase/supabase-js";
 import {supabase} from "./lib/supabase";
-import {DRIVER_GPS_LAUNCH_ENABLED,getTripTrackingStatus,startTripTracking,stopTripTracking} from "./lib/locationTracking";
+import {DRIVER_GPS_LAUNCH_ENABLED,DRIVER_GPS_CONSENT_NOTICE_APPROVED,DRIVER_GPS_CONSENT_NOTICE_TEXT,DRIVER_GPS_CONSENT_NOTICE_VERSION,getTripTrackingStatus,startTripTracking,stopTripTracking} from "./lib/locationTracking";
 import {loadDriverProfiles,loadDriverAssignments,loadDriverTripEvents,loadDriverDeliveryEvidence,type DriverProfile,type DriverAssignment,type DriverTripEvent,type DriverDeliveryEvidence} from "./lib/driverRepository";
 type Tab="Today"|"Tasks"|"Proof"|"Safety"|"Profile";
 const tabs:Tab[]=["Today","Tasks","Proof","Safety","Profile"],navy="#071A35",blue="#2366D9",teal="#078B83",muted="#687A90",line="#E0E7F0";
@@ -31,14 +31,15 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
  const profileVerified=profile?.verification_status.toLowerCase()==="verified"||profile?.verification_status.toLowerCase()==="approved";
  const active=assignments.filter(a=>!["delivered","cancelled","completed"].includes(a.status.toLowerCase()));
  const startLocationSharing=()=>{
+  if(!DRIVER_GPS_LAUNCH_ENABLED||!DRIVER_GPS_CONSENT_NOTICE_APPROVED){setNotice("GPS sharing remains disabled pending the approved location notice, retention schedule and deletion/legal-hold controls.");return;}
   const client=supabase;
   if(!selected||selected.status!=="in_transit"||!profileVerified||!client||trackingBusy)return;
   Alert.alert("Share location for this trip?",
-   "KRIM Driver will share this device's location with KRIM operations and authorized shipment viewers only for this assigned trip. On Android 13+, background sharing starts only if you allow the ongoing notification and background-location permission; otherwise tracking remains foreground-only. It stops when you stop sharing, the trip leaves in-transit status, or you sign out/terminate the app; force-stop and device settings can interrupt it. You can decline or stop sharing at any time. Never use the phone while driving.",
+   DRIVER_GPS_CONSENT_NOTICE_TEXT,
    [{text:"Not now",style:"cancel"},{text:"Agree and continue",onPress:()=>void (async()=>{
     setTrackingBusy(true);setError("");setNotice("");
     try{
-     const {data,error:sessionError}=await client.functions.invoke("krim-driver-tracking-session",{body:{action:"start",assignment_id:selected.id,consent_version:"2026-11-15-v1",platform:Platform.OS}});
+     const {data,error:sessionError}=await client.functions.invoke("krim-driver-tracking-session",{body:{action:"start",assignment_id:selected.id,consent_version:DRIVER_GPS_CONSENT_NOTICE_VERSION,platform:Platform.OS}});
      if(sessionError||!data?.session_id)throw sessionError||new Error("KRIM could not record your tracking consent.");
      const mode=await startTripTracking(selected.id,String(data.session_id));
      setTrackingMode(mode);setTrackingAssignmentId(selected.id);
