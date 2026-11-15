@@ -40,6 +40,7 @@ const required = [
   "supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql",
   "supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql",
   "auth/partner-signup.html",
+  ".github/workflows/krim-android-internal-apk.yml",
   "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
@@ -1119,6 +1120,14 @@ for (const token of ["GRANT EXECUTE", "private.krim_partner_capability_covers_sh
 }
 if (partnerPolicyGrantMigration.includes("TO anon") || partnerPolicyGrantMigration.includes("TO PUBLIC")) {
   failures.push("Partner RLS capability helper must not be granted to anonymous users or PUBLIC.");
+}
+const apkWorkflow = existsSync(".github/workflows/krim-android-internal-apk.yml")
+  ? readFileSync(".github/workflows/krim-android-internal-apk.yml", "utf8") : "";
+for (const token of ["build-window-guard", "build_allowed=false", "build_allowed=true", "date -u -d '2026-12-01T00:00:00Z'", "needs.build-window-guard.outputs.build_allowed == 'true'"]) {
+  if (!apkWorkflow.includes(token)) failures.push("APK build pause guard is missing: " + token);
+}
+if (/github\\.run_started_at\\s*[<>]=/.test(apkWorkflow)) {
+  failures.push("APK build date gating must use an explicit timestamp comparison, not a string relational expression.");
 }
 const provisioningHardeningMigration = existsSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql")
   ? readFileSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql", "utf8") : "";
