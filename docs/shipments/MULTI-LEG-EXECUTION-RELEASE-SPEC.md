@@ -445,3 +445,26 @@ A database-level fail-closed guard has therefore been added:
 - No shipment or plan data was changed; live plan count remains zero.
 
 This is an intentional safety barrier, not completion of multi-leg dispatch. The next implementation must introduce a leg-scoped dispatch command and state, exact-leg driver/vehicle/capacity binding, custody handover acceptance between legs, and shipment-level aggregation only after the appropriate leg milestones. Do not enable multi-leg dispatch until those controls and real-participant end-to-end tests exist.
+
+
+## Implementation update — leg-to-leg custody transfer
+
+A dedicated custody-transfer record and receiving-partner response workflow is now installed in the live database.
+
+- `public.krim_create_leg_custody_transfer(...)` lets the authorised releasing partner offer a custody transfer only for adjacent legs in the same active route plan, with distinct partner organisations.
+- The releasing leg must be completed and have a recorded actual arrival; the outgoing partner assignment must match the leg.
+- The receiving leg must have an accepted partner assignment and confirmed physical capacity reservation.
+- The cargo manifest must account for every shipment cargo line with its recorded quantity and unit.
+- The releasing partner must provide a private uploader-owned evidence object in the `krim-warehouse-evidence` bucket; accepted MIME types and a 10 MB size ceiling are enforced.
+- `public.krim_respond_to_leg_custody_transfer(...)` lets only the receiving partner accept or reject; rejection requires a reason. Events are append-only.
+- A database trigger blocks a later leg from entering `in_transit` until the immediately preceding leg's custody transfer is accepted by the receiving partner.
+- Both transfer tables have RLS enabled and no direct client table grants. RPCs require authenticated users and the organisation-scoped `partner.manage` permission; SECURITY DEFINER functions use an empty search_path.
+
+Live verification:
+- Both RPCs and the leg-status trigger exist.
+- RPCs use SECURITY DEFINER with empty search_path; anon execution is revoked and authenticated execution is granted.
+- Private trigger function execution is restricted to the database owner.
+- Custody transfer and event counts are both zero; no operational records were created.
+- No active multi-leg plan or verified partner/capacity data exists, so positive end-to-end acceptance was not attempted.
+
+Release limitation: this establishes the custody record and gate, but does not yet implement the leg-scoped dispatch command or prove real-participant dispatch. Multi-leg execution remains blocked pending exact-leg driver/vehicle readiness, warehouse/customs release integration, browser tests and a real corridor end-to-end test.
