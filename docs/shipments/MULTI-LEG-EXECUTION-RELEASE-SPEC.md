@@ -468,3 +468,28 @@ Live verification:
 - No active multi-leg plan or verified partner/capacity data exists, so positive end-to-end acceptance was not attempted.
 
 Release limitation: this establishes the custody record and gate, but does not yet implement the leg-scoped dispatch command or prove real-participant dispatch. Multi-leg execution remains blocked pending exact-leg driver/vehicle readiness, warehouse/customs release integration, browser tests and a real corridor end-to-end test.
+
+
+## Exact-leg dispatch authorisation and driver execution integration (15 Nov 2026)
+
+A dedicated `krim_shipment_leg_dispatch_authorizations` record now represents partner/operations authorisation for one exact leg. `public.krim_authorize_leg_dispatch(bigint,text)` requires an accepted leg-scoped partner assignment, organisation-scoped `shipment.dispatch` permission, an assigned leg, a confirmed physical capacity binding and its partner-owned confirmed reservation. Road dispatch additionally requires an accepted driver assignment, active driver membership, verified driver with current licence and accepted front/back licence evidence, active verified vehicle, active driver-vehicle binding, and current mandatory vehicle documents. The route-plan trigger additionally requires the active multi-leg plan item to match the exact leg, partner assignment, registered-business organisation, current compliance and exact-leg capability. Non-road authorisation is currently held fail-closed until mode-specific physical resource controls exist.
+
+Authorisation is not physical departure. Driver pickup and transit are separate trip events. The driver trip-event RPC now requires an active exact-leg authorisation for active multi-leg plans, restricts driver events to ROAD legs, and keeps the shipment-level status unchanged during multi-leg transit. The ordinary single-leg shipment-wide path remains intact.
+
+## Dispatch revocation and live execution revalidation (15 Nov 2026)
+
+`public.krim_revoke_leg_dispatch_authorization(bigint,text)` provides a reasoned, permission-checked revocation before pickup or transit. Revocation is idempotent. A partial unique index permits only one active authorisation per leg while preserving prior revoked records; a new authorisation requires a new idempotency key.
+
+At driver pickup and transit, an internal-only helper revalidates the active authorisation, active route plan and exact plan item, exact partner assignment, current registered-business partner/compliance, exact-leg capability, confirmed capacity binding and reservation, and accepted custody for later legs. Revocation is refused once pickup or transit exists, preserving execution history.
+
+Live verification confirms:
+- Anonymous execute is blocked for the revocation RPC; authenticated execute is granted.
+- The internal revalidation helper is not executable by authenticated clients.
+- The driver event RPC remains SECURITY DEFINER with an empty search_path.
+- A non-existent leg/assignment lookup fails closed.
+- No dispatch authorisation, active multi-leg plan or driver trip-event records were created during validation.
+
+Release limitations:
+- Non-road dispatch remains blocked pending mode-specific resource and evidence workflows.
+- The live environment has no accepted leg-specific partner assignments, active route plans, confirmed physical reservations, verified drivers or vehicles; therefore no positive end-to-end dispatch journey has been run.
+- Browser-level role testing and a real corridor test remain required before production operational claims.
