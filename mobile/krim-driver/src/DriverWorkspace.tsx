@@ -28,6 +28,7 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   finally{setActionBusy(false);}
  };
  const selected=assignments.find(a=>a.id===selectedId)??null,profile=profiles[0]??null;
+ const profileVerified=profile?.verification_status.toLowerCase()==="verified"||profile?.verification_status.toLowerCase()==="approved";
  const active=assignments.filter(a=>!["delivered","cancelled","completed"].includes(a.status.toLowerCase()));
  const startLocationSharing=()=>{
   if(!selected||selected.status!=="in_transit"||!profileVerified||!supabase||trackingBusy)return;
@@ -42,7 +43,7 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
      setTrackingMode(mode);setTrackingAssignmentId(selected.id);
      setNotice(mode==="background"?"Trip location sharing is active in the background. The device shows an ongoing location notification.":"Foreground-only location sharing is active. Keep KRIM Driver open; background permission was not granted.");
     }catch(e){
-     await supabase.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});
+     try{await supabase.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});}catch{}
      setTrackingMode("off");setTrackingAssignmentId(null);
      setError(e instanceof Error?e.message:"Trip location sharing could not be started. Check permissions and retry.");
     }finally{setTrackingBusy(false);}
@@ -58,12 +59,11 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   if(!trackingAssignmentId)return;
   const tracked=assignments.find(a=>a.id===trackingAssignmentId);
   if(tracked&&tracked.status.toLowerCase()!=="in_transit"){
-   void stopTripTracking().finally(()=>{setTrackingMode("off");setTrackingAssignmentId(null);setNotice("Trip status changed. Location sharing has been stopped.");});
+   void stopTripTracking().catch(()=>{}).finally(()=>{setTrackingMode("off");setTrackingAssignmentId(null);setNotice("Trip status changed. Location sharing has been stopped.");});
   }
  },[assignments,trackingAssignmentId]);
  const selectedEvents=useMemo(()=>events.filter(e=>e.assignment_id===selectedId),[events,selectedId]);
  const selectedEvidence=useMemo(()=>evidence.filter(e=>e.assignment_id===selectedId),[evidence,selectedId]);
- const profileVerified=profile?.verification_status.toLowerCase()==="verified"||profile?.verification_status.toLowerCase()==="approved";
  const uploadDeliveryEvidence=async()=>{
   if(!supabase||!selected||selected.status!=="in_transit"||actionBusy)return;
   setError("");setNotice("");
