@@ -118,12 +118,13 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   };
 
   useEffect(() => {
-    if (tab !== "Track" || !trackingShipment || !supabase) return;
+    const client = supabase;
+    if (tab !== "Track" || !trackingShipment || !client) return;
     let mounted = true;
     const refreshTracking = async () => {
       if (AppState.currentState !== "active") return;
       try {
-        const result = await loadShipmentTracking(supabase, trackingShipment);
+        const result = await loadShipmentTracking(client, trackingShipment);
         if (mounted) setTracking(result as Tracking);
       } catch {
         // Keep the last successful result visible; the next refresh can recover.
