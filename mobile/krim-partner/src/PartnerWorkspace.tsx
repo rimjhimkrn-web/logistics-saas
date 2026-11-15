@@ -46,7 +46,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
    });
    if(rpcError)throw rpcError;
    setResponseReason("");
-   setNotice(accept?"Assignment accepted. Capacity is committed; the shipment remains quoted until the customer accepts the linked quote. Dispatch is still subject to separate readiness checks.":"Assignment declined. KRIM operations has been notified.");
+   setNotice(accept?"Assignment accepted. KRIM recorded the shipment-capacity commitment; reserve verified operating capacity before dispatch. The shipment remains quoted until the customer accepts the linked quote.":"Assignment declined. KRIM operations has been notified.");
    await refreshData();
   }catch(e){setError(e instanceof Error?e.message:"Assignment response failed. Refresh and verify its current status.");}
   finally{setActionBusy(false);}
