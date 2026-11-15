@@ -37,6 +37,7 @@ const required = [
   "supabase/migrations/20261115103000_customer_multi_shipment_partner_quote_list.sql",
   "supabase/migrations/20261115104500_remove_redundant_customer_quote_list_wrapper.sql",
   "supabase/migrations/20261115105000_preserve_active_operations_membership_scope.sql",
+  "supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
@@ -1108,6 +1109,14 @@ if (customerRepository.includes("krim_customer_list_partner_quotes_multi")) {
 }
 const partnerReadScopeMigration = existsSync("supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql")
   ? readFileSync("supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql", "utf8") : "";
+const partnerPolicyGrantMigration = existsSync("supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql")
+  ? readFileSync("supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql", "utf8") : "";
+if (!/GRANT EXECUTE[\\s\\S]*private\\.krim_partner_capability_covers_shipment[\\s\\S]*TO authenticated/i.test(partnerPolicyGrantMigration)) {
+  failures.push("Partner RLS capability helper must be executable by authenticated policy readers.");
+}
+if (/TO (PUBLIC|anon)/i.test(partnerPolicyGrantMigration)) {
+  failures.push("Partner RLS capability helper must not be granted to anonymous users or PUBLIC.");
+}
 for (const token of ["partner_account_mode = 'registered_business'", "private.krim_partner_compliance_is_current", "private.krim_partner_capability_covers_shipment"]) {
   if (!partnerReadScopeMigration.includes(token)) failures.push("Partner opportunity read-scope migration is missing the current eligibility gate: " + token);
 }
