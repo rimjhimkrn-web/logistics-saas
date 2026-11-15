@@ -1185,6 +1185,10 @@ const partnerCapabilityAdminPage = existsSync("app/platform-admin/partner-capabi
 const partnerCapabilitySubmissionPage = existsSync("public/partner/services-capabilities.html") ? readFileSync("public/partner/services-capabilities.html", "utf8") : "";
 const specialistCapabilityGuardMigration = existsSync("supabase/migrations/20261115172500_fail_closed_specialist_partner_capability_approvals.sql")
   ? readFileSync("supabase/migrations/20261115172500_fail_closed_specialist_partner_capability_approvals.sql", "utf8") : "";
+const futureCapacityReservationMigration = existsSync("supabase/migrations/20261115173000_reserve_future_capacity_by_overlapping_trip_window.sql")
+  ? readFileSync("supabase/migrations/20261115173000_reserve_future_capacity_by_overlapping_trip_window.sql", "utf8") : "";
+const capacityResourceLockMigration = existsSync("supabase/migrations/20261115173500_lock_resource_during_capacity_selection.sql")
+  ? readFileSync("supabase/migrations/20261115173500_lock_resource_during_capacity_selection.sql", "utf8") : "";
 const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
 const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
@@ -1220,6 +1224,15 @@ for (const token of ["hazardous_goods_capable", "refrigerated", "effective_until
 }
 if (!partnerCapabilityAdminPage.includes("approveBlocked") || !partnerCapabilityAdminPage.includes("Specialist approval held")) {
   failures.push("Partner capability admin UI must disable unsupported hazardous/cold-chain approvals.");
+}
+for (const token of ["planned_departure", "planned_arrival", "booking_window_start", "booking_window_end", "pg_catalog.pg_input_is_valid", "v_reserved_resource", "capacity_value-v_reserved", "resource_capacity-v_reserved_resource"]) {
+  if (!futureCapacityReservationMigration.includes(token)) failures.push("Future capacity reservation guard is missing interval-aware validation: " + token);
+}
+if (futureCapacityReservationMigration.includes("now()<v_from") || futureCapacityReservationMigration.includes("Capacity availability window is not currently active")) {
+  failures.push("Capacity reservation must not require the availability window to be active at booking time.");
+}
+if (!capacityResourceLockMigration.includes("for update of r, a skip locked")) {
+  failures.push("Capacity selection must lock the shared physical resource to serialize concurrent reservations.");
 }
 if (!partnerCapabilitySubmissionPage.includes("these specialist capabilities remain inactive") || !partnerCapabilitySubmissionPage.includes("jurisdiction-specific evidence")) {
   failures.push("Partner capability submission UI must disclose specialist capability restrictions.");
