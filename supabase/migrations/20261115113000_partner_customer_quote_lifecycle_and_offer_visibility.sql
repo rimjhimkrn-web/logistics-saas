@@ -636,7 +636,9 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.krim_customer_list_partner_quotes(p_shipment_id bigint)
+DROP FUNCTION IF EXISTS public.krim_customer_list_partner_quotes(bigint);
+
+CREATE OR REPLACE FUNCTION public.krim_customer_list_partner_quotes(p_shipment_ids bigint[])
  RETURNS TABLE(id bigint, opportunity_id bigint, shipment_id bigint, quote_number text, amount numeric, currency_code text, status text, submitted_at timestamp with time zone, valid_until timestamp with time zone, notes text, partner_name text, partner_legal_name text, partner_verified boolean, compliance_current boolean, capability_current boolean, eligible_now boolean)
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -644,24 +646,28 @@ CREATE OR REPLACE FUNCTION public.krim_customer_list_partner_quotes(p_shipment_i
 AS $function$
 DECLARE
   v_user_id uuid := auth.uid();
-  v_customer_org_id bigint;
+  v_requested_count integer;
+  v_accessible_count integer;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION USING errcode='28000', message='Authentication required';
   END IF;
-  IF p_shipment_id IS NULL OR p_shipment_id <= 0 THEN
-    RAISE EXCEPTION USING errcode='22023', message='A valid shipment reference is required';
+  IF p_shipment_ids IS NULL OR cardinality(p_shipment_ids)=0 OR cardinality(p_shipment_ids)>100
+     OR EXISTS (SELECT 1 FROM unnest(p_shipment_ids) AS x(id) WHERE x.id IS NULL OR x.id<=0) THEN
+    RAISE EXCEPTION USING errcode='22023', message='Provide between 1 and 100 valid shipment references';
+  END IF;
+  SELECT count(DISTINCT x.id)::integer INTO v_requested_count
+  FROM unnest(p_shipment_ids) AS x(id);
+  IF v_requested_count <> cardinality(p_shipment_ids) THEN
+    RAISE EXCEPTION USING errcode='22023', message='Shipment references must be unique';
   END IF;
 
-  SELECT s.customer_organization_id
-    INTO v_customer_org_id
-  FROM public.krim_shipments s
-  WHERE s.id=p_shipment_id
-  FOR KEY SHARE;
-
-  IF v_customer_org_id IS NULL
-     OR NOT private.krim_has_organization_access(v_user_id,v_customer_org_id) THEN
-    RAISE EXCEPTION USING errcode='42501', message='Shipment is not accessible in your active customer organization';
+  SELECT count(DISTINCT s.id)::integer INTO v_accessible_count
+  FROM unnest(p_shipment_ids) AS x(id)
+  JOIN public.krim_shipments s ON s.id=x.id
+  WHERE private.krim_has_organization_access(v_user_id,s.customer_organization_id);
+  IF v_accessible_count <> v_requested_count THEN
+    RAISE EXCEPTION USING errcode='42501', message='One or more shipments are not accessible in your active customer organizations';
   END IF;
 
   RETURN QUERY
@@ -683,7 +689,7 @@ BEGIN
       AND o.partner_verification_status IN ('verified','approved')
       AND o.partner_lifecycle_status IN ('active','verified')) AS partner_verified,
     private.krim_partner_compliance_is_current(o.id) AS compliance_current,
-    (private.krim_partner_capability_covers_shipment(o.id,p_shipment_id)
+    (private.krim_partner_capability_covers_shipment(o.id,q.shipment_id)
       AND EXISTS (
         SELECT 1
         FROM public.krim_partner_capabilities pc
@@ -698,7 +704,7 @@ BEGIN
       AND o.partner_verification_status IN ('verified','approved')
       AND o.partner_lifecycle_status IN ('active','verified')
       AND private.krim_partner_compliance_is_current(o.id)
-      AND private.krim_partner_capability_covers_shipment(o.id,p_shipment_id)
+      AND private.krim_partner_capability_covers_shipment(o.id,q.shipment_id)
       AND EXISTS (
         SELECT 1
         FROM public.krim_partner_capabilities pc
@@ -712,30 +718,14 @@ BEGIN
   JOIN public.krim_partner_opportunities po
     ON po.id=q.opportunity_id
    AND po.shipment_id=q.shipment_id
-   AND po.customer_organization_id=v_customer_org_id
   JOIN public.krim_organizations o ON o.id=q.partner_organization_id
-  WHERE q.shipment_id=p_shipment_id
+  WHERE q.shipment_id=ANY(p_shipment_ids)
     AND q.status IN ('submitted','under_review','shortlisted','accepted')
     AND (q.status='accepted' OR po.status='open')
-    AND (
-      q.status='accepted'
-      OR (
-        o.status='active'
-        AND o.partner_account_mode='registered_business'
-        AND o.partner_verification_status IN ('verified','approved')
-        AND o.partner_lifecycle_status IN ('active','verified')
-        AND private.krim_partner_compliance_is_current(o.id)
-        AND private.krim_partner_capability_covers_shipment(o.id,p_shipment_id)
-        AND EXISTS (
-          SELECT 1
-          FROM public.krim_partner_capabilities pc
-          WHERE pc.organization_id=o.id
-            AND pc.active IS TRUE
-            AND pc.verification_status='verified'
-            AND (pc.effective_from IS NULL OR pc.effective_from<=now())
-            AND (pc.effective_until IS NULL OR pc.effective_until>now())
-        )
-      )
+    AND EXISTS (
+      SELECT 1 FROM public.krim_shipments s
+      WHERE s.id=q.shipment_id
+        AND private.krim_has_organization_access(v_user_id,s.customer_organization_id)
     )
   ORDER BY q.submitted_at DESC NULLS LAST,q.id DESC;
 END;
