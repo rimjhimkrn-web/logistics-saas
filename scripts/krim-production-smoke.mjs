@@ -76,6 +76,22 @@ const required = [
 ];
 
 const failures = [];
+// Historic migration timestamp collisions are documented and must not be
+// renamed/replayed until the production ledger crosswalk is complete. Prevent
+// new collisions in the current release stream from adding to that risk.
+const currentReleaseMigrationFiles = readdirSync("supabase/migrations")
+  .filter((file) => /^20261115\\d{6}_.+\\.sql$/.test(file));
+const currentReleaseMigrationVersions = new Map();
+for (const file of currentReleaseMigrationFiles) {
+  const version = file.slice(0, 14);
+  currentReleaseMigrationVersions.set(version, [...(currentReleaseMigrationVersions.get(version) || []), file]);
+}
+const duplicateCurrentReleaseVersions = [...currentReleaseMigrationVersions.entries()]
+  .filter(([, files]) => files.length > 1);
+if (duplicateCurrentReleaseVersions.length) {
+  failures.push("New 15 November migration timestamp collisions must be resolved before release: " +
+    duplicateCurrentReleaseVersions.map(([version, files]) => version + " [" + files.join(", ") + "]").join("; "));
+}
 
 // Do not advertise retired Cashfree placeholders as active payment providers.
 // These files are deliberately fail-closed until real adapters and tests replace them.
