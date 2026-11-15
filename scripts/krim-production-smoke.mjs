@@ -48,6 +48,8 @@ const required = [
   "supabase/migrations/20261115220000_add_secure_shipment_leg_plan_creation_rpc.sql",
   "supabase/migrations/20261115230000_add_authorized_shipment_leg_plan_evaluation_rpc.sql",
   "supabase/migrations/20261115231500_add_atomic_shipment_leg_plan_activation_rpc.sql",
+  "supabase/migrations/20261115233000_remove_duplicate_shipment_leg_creation_audit_trigger.sql",
+  "supabase/migrations/20261115234000_enforce_contiguous_leg_planned_time_windows.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1376,6 +1378,29 @@ for (const token of [
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
 }
 
+// Shipment leg-plan evaluation must reject overlapping adjacent planned leg windows.
+const legPlanTimePath = "supabase/migrations/20261115234000_enforce_contiguous_leg_planned_time_windows.sql";
+const legPlanTimeMigration = existsSync(legPlanTimePath) ? readFileSync(legPlanTimePath, "utf8") : "";
+for (const token of [
+  "v_prev_arrival timestamptz",
+  "overlapping_leg_time_window",
+  "A leg cannot depart before the previous leg planned arrival",
+]) {
+  if (!legPlanTimeMigration.includes(token)) failures.push("Shipment leg planned-time continuity safeguard is missing: " + token);
+}
+
+// Shipment-leg creation must emit exactly one creation audit event per inserted leg.
+const legAuditFixPath = "supabase/migrations/20261115233000_remove_duplicate_shipment_leg_creation_audit_trigger.sql";
+const legAuditFixMigration = existsSync(legAuditFixPath) ? readFileSync(legAuditFixPath, "utf8") : "";
+for (const token of [
+  "DROP TRIGGER IF EXISTS trg_krim_shipment_leg_creation_audit",
+  "CREATE OR REPLACE FUNCTION public.krim_log_shipment_leg_creation()",
+  "SET search_path TO ''",
+  "pg_catalog.jsonb_build_object",
+]) {
+  if (!legAuditFixMigration.includes(token)) failures.push("Shipment-leg audit deduplication safeguard is missing: " + token);
+}
+
 // Shipment leg-plan activation must be atomic, idempotent, scoped and auditable.
 const legPlanActivationPath = "supabase/migrations/20261115231500_add_atomic_shipment_leg_plan_activation_rpc.sql";
 const legPlanActivationMigration = existsSync(legPlanActivationPath)
@@ -1473,6 +1498,18 @@ for (const script of routePlanningScripts) {
 
 if (routePlanningUi.includes("rows.map(x=>x=>")) {
   failures.push("Operations route-planning route register contains a broken nested row renderer.");
+}
+
+// Route-planning form must load only RLS-visible pre-execution shipments and call protected RPCs.
+for (const token of [
+  'from("krim_shipments")',
+  '.in("status",["draft","quoted","confirmed"])',
+  'from("krim_locations")',
+  'from("krim_transport_modes")',
+  'id="routePlanForm"',
+  'id="activatePlanBtn"',
+]) {
+  if (!routePlanningUi.includes(token)) failures.push("Route-planning form reference-data guard is missing: " + token);
 }
 
 // Shipment leg-plan creation must remain a narrow authenticated RPC; activation is a separate gated workflow.
