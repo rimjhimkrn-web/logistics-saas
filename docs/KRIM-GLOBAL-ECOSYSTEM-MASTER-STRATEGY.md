@@ -246,7 +246,9 @@ No UI toggle, database seed, country record, successful static test or AI-genera
 
 ## 11. Immediate execution priorities
 
-1. Create a capability-to-division and revenue-engine map for existing KRIM pages, backend entities, RPCs, Edge Functions and workflows.
+The first-pass map is recorded in [KRIM Ecosystem Capability Map — 16 November 2026](KRIM-ECOSYSTEM-CAPABILITY-MAP-2026-11-16.md). It is a high-level baseline, not an exhaustive traceability audit.
+
+1. Expand the capability map into per-page, per-database-object, per-RPC, per-Edge-Function and per-user-action traceability.
 2. Reconcile this map with the 45-page audit requirement and the existing 14-phase customer ecosystem blueprint; Page 46 remains gated until the audit exit criteria pass.
 3. Prioritize partner acquisition and one narrow, valuable business workflow for discovery/pilot.
 4. Define the first KRIM OS SaaS product around demonstrated recurring pain, not speculative feature breadth.
