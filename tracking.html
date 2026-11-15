@@ -205,8 +205,10 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                     map.className = "inline-flex text-xs font-bold underline text-emerald-900";
                     gps.append(map);
                     card.append(gps);
-                } else if (payload.gps_sharing_status === "active") {
-                    card.append(trackingText("p", "The driver's consented location-sharing session is active. KRIM is waiting for the first verified GPS update; device signal and network availability can affect timing.", "p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs text-sky-900"));
+                } else if (payload.gps_sharing_status === "starting") {
+                    card.append(trackingText("p", "The driver's consented GPS session has just started. KRIM is waiting for the first verified position; device signal and network availability can affect timing.", "p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs text-sky-900"));
+                } else if (payload.gps_sharing_status === "stale") {
+                    card.append(trackingText("p", "No recent verified GPS position is available. The device may be offline, location permission may have changed, or tracking may have stopped. Use the shipment milestones below and contact the contracting provider for an update.", "p-3 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-900"));
                 } else if (payload.gps_sharing_status === "inactive") {
                     card.append(trackingText("p", "No live GPS sharing session is active for this shipment. Verified shipment milestones remain available below.", "p-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-600"));
                 } else {
