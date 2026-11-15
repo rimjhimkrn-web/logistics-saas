@@ -33,6 +33,7 @@ This file is a release-gate checklist, not a declaration that every workspace or
 - [ ] Confirm KRIM's contractual role, fee model, GST treatment, invoicing, refund and liability with an Indian CA/lawyer.
 - [ ] Test Razorpay sandbox order, webhook signature, duplicate/replay, failure, refund and reconciliation flows.
 - [ ] Keep customer freight payments, KRIM referral/coordination income and future SaaS billing separate.
+- [ ] Reconcile five old unpaid and one old paid Razorpay order; confirm test/live mode, close any usable unpaid orders, and reconcile the paid record. Keep the freight-collection approval gate OFF for the partner-direct launch model.
 - [ ] Keep paid checkout disabled until merchant and tax/legal approval.
 
 ## P1 — Mobile release engineering
