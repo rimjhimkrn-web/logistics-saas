@@ -165,7 +165,7 @@ BEGIN
   INSERT INTO public.krim_shipment_leg_plan_events
     (plan_id,event_type,previous_status,new_status,actor_user_id,payload,event_time,created_at)
   VALUES
-    (p_plan_id,'plan_activated',v_plan.status,'active',v_user,
+    (p_plan_id,'plan_activated','draft','active',v_user,
      pg_catalog.jsonb_build_object('activation_id',v_activation.id,
        'activation_number',v_activation.activation_number,
        'legs_expected',v_plan.total_legs,'legs_created',v_created,
