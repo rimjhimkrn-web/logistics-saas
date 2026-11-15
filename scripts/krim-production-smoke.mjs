@@ -45,6 +45,7 @@ const required = [
   "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
   "supabase/migrations/20261115220000_add_secure_shipment_leg_plan_creation_rpc.sql",
   "supabase/migrations/20261115230000_add_authorized_shipment_leg_plan_evaluation_rpc.sql",
+  "supabase/migrations/20261115231500_add_atomic_shipment_leg_plan_activation_rpc.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1371,6 +1372,27 @@ for (const token of [
   'client.rpc("krim_customs_broker_license_submit"',
 ]) {
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
+}
+
+// Shipment leg-plan activation must be atomic, idempotent, scoped and auditable.
+const legPlanActivationPath = "supabase/migrations/20261115231500_add_atomic_shipment_leg_plan_activation_rpc.sql";
+const legPlanActivationMigration = existsSync(legPlanActivationPath)
+  ? readFileSync(legPlanActivationPath, "utf8") : "";
+for (const token of [
+  "CREATE UNIQUE INDEX IF NOT EXISTS uq_krim_leg_activation_request_key",
+  "CREATE OR REPLACE FUNCTION public.krim_activate_shipment_leg_plan",
+  "SET search_path TO ''",
+  "public.krim_has_permission(v_user,v_shipment.customer_organization_id,'shipment.update')",
+  "public.krim_evaluate_shipment_leg_plan(p_plan_id)",
+  "FOR UPDATE",
+  "Activation leg count mismatch; transaction aborted",
+  "activation_started",
+  "activation_completed",
+  "plan_activated",
+  "REVOKE ALL ON FUNCTION public.krim_activate_shipment_leg_plan",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legPlanActivationMigration.includes(token)) failures.push("Atomic shipment leg-plan activation safeguard is missing: " + token);
 }
 
 // Shipment leg-plan evaluation must remain read-only and enforce owning-customer permission.
