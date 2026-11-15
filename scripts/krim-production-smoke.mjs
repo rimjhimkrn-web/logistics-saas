@@ -44,6 +44,7 @@ const required = [
   ".github/workflows/krim-android-internal-apk.yml",
   "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
   "supabase/migrations/20261115220000_add_secure_shipment_leg_plan_creation_rpc.sql",
+  "supabase/migrations/20261115230000_add_authorized_shipment_leg_plan_evaluation_rpc.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1370,6 +1371,25 @@ for (const token of [
   'client.rpc("krim_customs_broker_license_submit"',
 ]) {
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
+}
+
+// Shipment leg-plan evaluation must remain read-only and enforce owning-customer permission.
+const legPlanEvaluationPath = "supabase/migrations/20261115230000_add_authorized_shipment_leg_plan_evaluation_rpc.sql";
+const legPlanEvaluationMigration = existsSync(legPlanEvaluationPath)
+  ? readFileSync(legPlanEvaluationPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_evaluate_shipment_leg_plan",
+  "SET search_path TO ''",
+  "public.krim_has_permission(v_user,v_shipment.customer_organization_id,'shipment.update')",
+  "route_disconnected",
+  "shipment_origin_mismatch",
+  "shipment_destination_mismatch",
+  "existing_leg_conflict",
+  "another_active_plan",
+  "REVOKE ALL ON FUNCTION public.krim_evaluate_shipment_leg_plan",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legPlanEvaluationMigration.includes(token)) failures.push("Shipment leg-plan evaluation safeguard is missing: " + token);
 }
 
 // Operations route-planning page must read scoped versioned plans and render rows correctly.
