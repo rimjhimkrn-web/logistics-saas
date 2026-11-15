@@ -11,19 +11,21 @@
 (async()=>{const $=id=>document.getElementById(id),db=window.KRIM_SUPABASE;function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function fail(s){$('moduleNotice').textContent=s;$('moduleNotice').className='notice warn';$('moduleStatus').textContent='Restricted';$('authState').textContent='ACCESS CHECK';$('records').innerHTML='<div class="row">No operational data exposed until access can be verified.</div>';}
 try{if(!db)throw Error('Supabase client is not configured.');const sr=await db.auth.getSession();if(sr.error)throw sr.error;const session=sr.data.session;if(!session){location.replace('../../auth/driver-signin.html');return;}const mr=await db.from('krim_organization_members').select('organization_id,role,status').eq('user_id',session.user.id).eq('status','active');if(mr.error)throw mr.error;const member=(mr.data||[]).find(x=>/^driver$/i.test(String(x.role||'').trim()));if(!member)throw Error('No active driver membership was found for this account.');const org=await db.from('krim_organizations').select('id,status,name').eq('id',member.organization_id).maybeSingle();if(org.error)throw org.error;if(!org.data||String(org.data.status).toLowerCase()!=='active')throw Error('Your driver organization is not active. Contact KRIM support.');$('authState').textContent='VERIFIED DRIVER SESSION';$('identity').textContent=session.user.email||session.user.id;$('org').textContent=org.data.name||org.data.id;$('moduleStatus').textContent='Available';
 const ar=await db.from('krim_driver_assignments').select('id,shipment_id,partner_assignment_id,assignment_number,status,pickup_location,delivery_location,scheduled_pickup_at,created_at').eq('user_id',session.user.id).order('created_at',{ascending:false}).limit(100);if(ar.error)throw ar.error;const rows=ar.data||[];$('assigned').textContent=rows.length;$('open').textContent=rows.filter(a=>!['delivered','cancelled'].includes(String(a.status||'').toLowerCase())).length;
-let events=[],trackingError='';const shipmentIds=[...new Set(rows.map(a=>a.shipment_id).filter(Boolean))];if(shipmentIds.length){const tr=await db.from('krim_tracking_events').select('id,shipment_id,event_type,event_time,location_id,source_type,source_reference,latitude,longitude').in('shipment_id',shipmentIds).order('event_time',{ascending:false}).limit(250);if(tr.error)trackingError=tr.error.message;else events=tr.data||[];}
+const profileResult=await db.from('krim_driver_profiles').select('verification_status').eq('user_id',session.user.id).eq('organization_id',member.organization_id).maybeSingle();if(profileResult.error)throw profileResult.error;if(!profileResult.data||!['verified','approved'].includes(String(profileResult.data.verification_status||'').toLowerCase()))throw Error('Driver identity verification must be completed before location sharing.');let events=[],trackingError='';const shipmentIds=[...new Set(rows.map(a=>a.shipment_id).filter(Boolean))];if(shipmentIds.length){const tr=await db.from('krim_tracking_events').select('id,shipment_id,event_type,event_time,location_id,source_type,source_reference,latitude,longitude').in('shipment_id',shipmentIds).order('event_time',{ascending:false}).limit(250);if(tr.error)trackingError=tr.error.message;else events=tr.data||[];}
 $('moduleNotice').textContent=rows.length?'Secure driver session verified. '+rows.length+' assigned trip(s) checked. Only tracking events visible under the current backend policy are displayed.':'Secure session and active driver membership verified. No assignments currently exist for this driver; no sample tracking points are shown.';
 $('records').innerHTML=rows.length?rows.map(a=>{const ev=events.filter(e=>String(e.shipment_id)===String(a.shipment_id));return '<article class="row"><strong>'+esc(a.assignment_number||'Driver assignment')+' · '+esc(String(a.status||'assigned').replaceAll('_',' '))+'</strong><small>'+esc(a.pickup_location||'Pickup pending')+' → '+esc(a.delivery_location||'Delivery pending')+'<br>Scheduled pickup: '+esc(a.scheduled_pickup_at?new Date(a.scheduled_pickup_at).toLocaleString():'Not scheduled')+'</small><div class="rows" style="margin-top:11px">'+(trackingError?'<div class="notice warn">Tracking events could not be read: '+esc(trackingError)+'</div>':ev.length?ev.map(e=>'<div class="row"><strong>'+esc(String(e.event_type||'Tracking event').replaceAll('_',' '))+' · '+esc(e.source_type||'Source not specified')+'</strong><small>'+esc(e.event_time?new Date(e.event_time).toLocaleString():'Time not recorded')+' · Location reference: '+esc(e.location_id??'Not set')+(e.latitude!=null&&e.longitude!=null?'<br>Recorded coordinates: '+esc(e.latitude)+', '+esc(e.longitude):'<br>No coordinates recorded')+(e.source_reference?'<br>Source reference: '+esc(e.source_reference):'')+'</small></div>').join(''):'<div class="notice">No tracking events are currently visible for this shipment. This may mean no authorized source has reported an event, or the backend access policy does not expose it to this driver.</div>')+'</div><div class="toolbar"><a class="btn" href="./module-06-shipment-milestones.html">Open trip execution →</a></div></article>';}).join(''):'<div class="row"><strong>Awaiting dispatcher</strong><small>No real assignments exist for this driver. Tracking will appear only after an authorized shipment assignment and event feed.</small></div>';
 
 const gpsSelect=$('gps-assignment'),gpsStart=$('gps-start'),gpsStop=$('gps-stop'),gpsStatus=$('gps-status'),gpsLatest=$('gps-latest');
-const eligible=rows.filter(a=>a.partner_assignment_id&&!['cancelled','rejected','completed','delivered','closed'].includes(String(a.status||'').toLowerCase()));
+const eligible=rows.filter(a=>a.partner_assignment_id&&String(a.status||'').toLowerCase()==='in_transit');
 gpsSelect.innerHTML='<option value="">Select an active assigned shipment</option>'+eligible.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.assignment_number||('Shipment '+a.shipment_id))+' · '+esc(a.pickup_location||'Pickup')+' → '+esc(a.delivery_location||'Delivery')+'</option>').join('');
 gpsStart.disabled=!eligible.length;
-let gpsWatch=null,wakeLock=null,lastSentAt=0;
+let gpsWatch=null,wakeLock=null,lastSentAt=0,trackingSessionId=null,trackingAssignmentId=null;
 function gpsMessage(message,warning=false){gpsStatus.textContent=message;gpsStatus.className=warning?'notice warn':'notice';}
 async function stopGps(message='GPS sharing stopped. No further location updates are being sent.',warning=false){
  if(gpsWatch!==null&&navigator.geolocation){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;}
  if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;}
+ if(trackingAssignmentId){const {error}=await db.functions.invoke('krim-driver-tracking-session',{body:{action:'stop',assignment_id:trackingAssignmentId}});if(error){gpsMessage('Device tracking stopped, but the server stop could not be confirmed. Reconnect and retry.',true);}}
+ trackingSessionId=null;trackingAssignmentId=null;
  gpsStart.disabled=!eligible.length;gpsStop.disabled=true;gpsSelect.disabled=false;gpsMessage(message,warning);
 }
 gpsStop.addEventListener('click',()=>stopGps());
@@ -32,18 +34,23 @@ gpsStart.addEventListener('click',async()=>{
  if(!assignmentId){gpsMessage('Select an assigned shipment first.',true);return;}
  if(!window.isSecureContext||!navigator.geolocation){gpsMessage('GPS requires HTTPS and a device browser with location support.',true);return;}
  if(gpsWatch!==null)return;
- gpsStart.disabled=true;gpsStop.disabled=false;gpsSelect.disabled=true;
- gpsMessage('Requesting device location permission. Approve the browser prompt to begin sharing…');
+ if(!window.confirm('KRIM Driver will share this device location with KRIM operations and authorized shipment viewers only for this in-transit shipment while this page remains open. You can stop sharing at any time. Continue?'))return;
+ gpsStart.disabled=true;gpsStop.disabled=true;gpsSelect.disabled=true;
+ gpsMessage('Recording your opt-in tracking session and requesting device location permission…');
+ const {data:consent,error:consentError}=await db.functions.invoke('krim-driver-tracking-session',{body:{action:'start',assignment_id:assignmentId,consent_version:'2026-11-15-v1',platform:'web'}});
+ if(consentError||!consent?.session_id){gpsSelect.disabled=false;gpsStart.disabled=!eligible.length;gpsMessage(consentError?.message||'KRIM could not record tracking consent.',true);return;}
+ trackingSessionId=consent.session_id;trackingAssignmentId=assignmentId;
  try{if(navigator.wakeLock?.request)wakeLock=await navigator.wakeLock.request('screen');}catch(_){}
+ gpsStop.disabled=false;
  gpsWatch=navigator.geolocation.watchPosition(async position=>{
    const p=position.coords,now=Date.now();
    gpsLatest.textContent='Accuracy ±'+Math.round(p.accuracy)+' m · '+new Date(position.timestamp).toLocaleString();
    if(now-lastSentAt<12000)return;
    lastSentAt=now;
    const {data,error}=await db.functions.invoke('krim-driver-gps-update',{body:{
-     assignment_id:assignmentId,latitude:p.latitude,longitude:p.longitude,
+     assignment_id:assignmentId,tracking_session_id:trackingSessionId,latitude:p.latitude,longitude:p.longitude,
      accuracy_m:p.accuracy,heading_degrees:p.heading,speed_mps:p.speed,
-     device_timestamp:position.timestamp
+     device_timestamp:position.timestamp,collection_method:'browser_geolocation',client_platform:'web'
    }});
    if(error){gpsMessage('GPS reading captured, but secure upload failed: '+(error.message||'Please retry.'),true);return;}
    if(data?.stored){gpsMessage('GPS sharing active · last position securely recorded at '+new Date(data.event.event_time).toLocaleTimeString()+'.');}
@@ -52,11 +59,11 @@ gpsStart.addEventListener('click',async()=>{
    else{gpsMessage('GPS sharing active · awaiting the next accepted position update.');}
  },err=>{
    const messages={1:'Location permission was denied. Enable location permission in your browser settings.',2:'Device location is unavailable. Check GPS/location services and try again.',3:'GPS request timed out. Move to an area with a clearer signal and retry.'};
-   stopGps(messages[err.code]||'Device location could not be read. GPS sharing stopped.',true);
+   void stopGps(messages[err.code]||'Device location could not be read. GPS sharing stopped.',true);
  },{enableHighAccuracy:true,maximumAge:10000,timeout:25000});
 },false);
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&gpsWatch!==null)stopGps('Sharing paused because this page is no longer visible. Reopen the page and start sharing again.');});
-window.addEventListener('pagehide',()=>{if(gpsWatch!==null)navigator.geolocation.clearWatch(gpsWatch);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&gpsWatch!==null)void stopGps('Sharing paused because this page is no longer visible. Reopen the page and start sharing again.');});
+window.addEventListener('pagehide',()=>{if(gpsWatch!==null)void stopGps('Tracking stopped because the page is closing.');});
 if(!eligible.length)gpsMessage('No eligible active shipment assignment is linked to this driver. GPS sharing will become available after dispatch assigns an active shipment.',true);
 }catch(e){console.error(e);fail(e.message||'Access could not be verified.');}
 $('signout').addEventListener('click',async()=>{try{if(db)await db.auth.signOut();}finally{location.replace('../../auth/login.html?role=driver');}});
