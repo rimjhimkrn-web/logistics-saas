@@ -21,10 +21,18 @@ permissions:
 
 concurrency:
   group: krim-android-apk-${{ github.event_name == 'workflow_dispatch' && inputs.app || 'all' }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
+  build-window-notice:
+    if: ${{ github.run_started_at < '2026-12-01T00:00:00Z' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain the temporary APK pause
+        run: echo "KRIM Android APK builds are paused until 1 December 2026. Source validation remains available."
+
   build:
+    if: ${{ github.run_started_at >= '2026-12-01T00:00:00Z' }}
     name: Build ${{ matrix.app }} Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 90
