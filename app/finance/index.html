@@ -20,12 +20,12 @@
 </head>
 <body class="krim-global-ui">
 
-<header class="nav"><div class="brand"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></div><div class="actions"><a class="btn" href="../../index.html">← Platform home</a><button class="btn" id="refresh" type="button">↻ Refresh data</button><button class="btn primary" id="signout" type="button">Sign out ↗</button></div></header>
+<header class="nav"><div class="brand"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></div><div class="actions"><a class="btn" href="../../index.html">← Platform home</a><button class="btn" id="refresh" type="button" disabled>↻ Refresh data</button><button class="btn primary" id="signout" type="button">Sign out ↗</button></div></header>
 <main class="wrap">
 <div class="crumb">Workspace / Finance &amp; Treasury / Overview</div>
 <section class="hero"><div class="eyebrow">FINANCIAL OPERATIONS · CONTROLLED ACCESS</div><h1>Clarity for every<br>financial movement.</h1><p>A controlled, read-only finance workspace for authorized invoice, payment and ledger records. Under KRIM’s current partner-direct launch model, customers pay the contracting logistics provider directly; KRIM does not collect freight funds, hold escrow, split settlements or execute partner payouts.</p><div class="pills"><a class="pill" href="#invoices">01 · Receivables</a><a class="pill" href="#payments">02 · Payments</a><a class="pill" href="#settlements">03 · Settlements</a><a class="pill" href="#ledger">04 · Revenue ledger</a><a class="pill" href="#controls">05 · Controls</a></div></section>
 <div class="notice" role="status" aria-live="polite"><div class="nicon">!</div><div><strong>Partner-direct model · no KRIM freight collection</strong><div>Historical payment and ledger records remain available for audit. Unmatched or unprocessed provider webhooks must be reconciled in Treasury Audit before any future payment provider is enabled. New freight checkout, escrow, automatic 10/90 allocation and partner payouts are disabled. Any separate KRIM referral/coordination fee requires a documented agreement, approved tax treatment and separate invoice.</div></div></div>
-<div class="notice" role="status" aria-live="polite"><div class="nicon">i</div><div><strong>Secure finance session</strong><div id="notice">Checking authentication and permitted finance records…</div></div></div>
+<div class="notice" role="status" aria-live="polite"><div class="nicon">i</div><div><strong>Secure finance session</strong><div id="identity" class="sub">Checking signed-in finance identity…</div><div id="notice">Checking authentication and permitted finance records…</div></div></div>
 <div class="sectionhead"><div><h2>Financial overview</h2><p>Live counts reflect records returned by the connected database, not sample figures.</p></div><span class="badge" id="dataBadge">VERIFYING DATA ACCESS</span></div>
 <section class="metrics"><article class="metric"><div class="metric-top"><span class="icon">▤</span><span class="badge">01</span></div><strong id="invoiceCount">—</strong><span>Invoices visible</span></article><article class="metric"><div class="metric-top"><span class="icon">₹</span><span class="badge">02</span></div><strong id="outstanding">—</strong><span>Outstanding balance · single currency only</span></article><article class="metric"><div class="metric-top"><span class="icon">↗</span><span class="badge">03</span></div><strong id="paymentCount">—</strong><span>Payment orders visible</span></article><article class="metric"><div class="metric-top"><span class="icon">⇄</span><span class="badge">04</span></div><strong id="settlementCount">—</strong><span>Settlement records visible</span></article></section>
 <div class="sectionhead"><div><h2>Finance operations</h2><p>Review records by function. Empty states and schema errors are shown explicitly.</p></div><span class="badge">SUPABASE · POLICY SCOPED</span></div>
@@ -43,20 +43,20 @@
 </main>
 <script>
 (async()=>{
-const $=id=>document.getElementById(id);const client=window.KRIM_SUPABASE;
+const $=id=>document.getElementById(id);const client=window.KRIM_SUPABASE;let financeAuthorized=false;
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function money(v,c){if(v===null||v===undefined||v==='')return'—';const n=Number(v);return Number.isFinite(n)?(c||'')+' '+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';}
 function date(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.valueOf())?'—':d.toLocaleDateString();}
 function table(rows,cols){if(!rows?.length)return'<div class="empty">No records are visible for this account, or this query returned no rows.</div>';return'<div class="tablewrap"><table><thead><tr>'+cols.map(c=>'<th>'+esc(c.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(c.render?c.render(r):r[c.key]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
 function fail(id,e){$(id).innerHTML='<div class="empty">Could not load this dataset under current permissions or schema: '+esc(e?.message||'Unavailable')+'</div>';}
 async function load(){
-if(!client){$('notice').textContent='Supabase client is not configured. Review config.js.';$('dataBadge').textContent='CONFIGURATION REQUIRED';return;}
+if(!client||!financeAuthorized){$('notice').textContent='Finance access is not currently authorized.';$('dataBadge').textContent='ACCESS DENIED';return;}
 $('notice').textContent='Refreshing finance records using the current authenticated session…';
 const [inv,set,pay,led]=await Promise.all([
 client.from('krim_invoices').select('id,invoice_number,status,currency_code,total_amount,paid_amount,outstanding_amount,due_date').order('created_at',{ascending:false}).limit(50),
 client.from('krim_settlements').select('id,settlement_number,status,currency_code,net_amount,settlement_date').order('created_at',{ascending:false}).limit(50),
 client.from('payment_orders').select('id,status,currency,amount_paise,created_at,payment_provider').order('created_at',{ascending:false}).limit(50),
-client.from('revenue_ledger').select('id,shipment_id,total_amount,platform_commission,partner_payout,currency,status,created_at').order('created_at',{ascending:false}).limit(50)
+client.rpc('krim_finance_list_revenue_ledger',{p_limit:50})
 ]);
 if(inv.error)fail('invoicesTable',inv.error);else{$('invoicesTable').innerHTML=table(inv.data,[{key:'invoice_number',label:'Invoice'},{key:'status',label:'Status'},{key:'total_amount',label:'Total',render:r=>money(r.total_amount,r.currency_code)},{key:'outstanding_amount',label:'Due',render:r=>money(r.outstanding_amount,r.currency_code)},{key:'due_date',label:'Due date',render:r=>date(r.due_date)}]);$('invoiceCount').textContent=inv.data.length;const currencies=[...new Set(inv.data.filter(x=>Number(x.outstanding_amount)>0).map(x=>x.currency_code).filter(Boolean))];$('outstanding').textContent=currencies.length===1?money(inv.data.reduce((a,x)=>a+Number(x.outstanding_amount||0),0),currencies[0]):currencies.length>1?'Multi-currency':'—';}
 if(set.error)fail('settlementsTable',set.error);else{$('settlementsTable').innerHTML=table(set.data,[{key:'settlement_number',label:'Settlement'},{key:'status',label:'Status'},{key:'net_amount',label:'Net amount',render:r=>money(r.net_amount,r.currency_code)},{key:'settlement_date',label:'Date',render:r=>date(r.settlement_date)}]);$('settlementCount').textContent=set.data.length;}
@@ -66,9 +66,25 @@ const errs=[inv.error,set.error,pay.error,led.error].filter(Boolean).length;
 $('notice').textContent=errs?('Signed in. '+errs+' finance dataset(s) could not be read under the current schema or access policies. Details are shown in each section. No financial writes were performed.'):'Signed in. Finance read requests completed. Returned rows remain filtered by existing Supabase row-level security; this is not a bank/provider reconciliation certification.';
 $('dataBadge').textContent=errs?'PARTIAL DATA ACCESS':'READ QUERIES COMPLETE';
 }
-try{if(!client){$('notice').textContent='Supabase client is not configured. Review config.js.';return;}const {data:{session},error}=await client.auth.getSession();if(error)throw error;if(!session){window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');return;}const membershipResult=await client.from('krim_organization_members').select('organization_id,krim_organizations(organization_type,status)').eq('user_id',session.user.id).eq('status','active');if(membershipResult.error)throw new Error('Finance membership could not be verified.');const hasFinanceAccess=(membershipResult.data||[]).some(m=>String(m.krim_organizations?.organization_type||'').toLowerCase()==='finance'&&String(m.krim_organizations?.status||'').toLowerCase()==='active');if(!hasFinanceAccess){$('notice').textContent='Finance access denied. Your account does not have active membership in a finance organization. A sign-in or direct URL does not grant finance access.';$('dataBadge').textContent='ACCESS DENIED';$('identity').textContent='Finance access not authorized';}else{$('identity').textContent=session.user.email||'AUTHORIZED FINANCE SESSION';await load();}}catch(e){$('notice').textContent='Session verification failed: '+esc(e.message||'Please sign in again.');console.error(e);}
-$('refresh').addEventListener('click',()=>load().catch(e=>{$('notice').textContent='Refresh failed: '+esc(e.message);}));
+$('refresh').addEventListener('click',()=>{if(financeAuthorized)load().catch(e=>{$('notice').textContent='Refresh failed: '+esc(e.message);});});
 $('signout').addEventListener('click',async()=>{await client?.auth.signOut();window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');});
+try{
+ if(!client){$('notice').textContent='Supabase client is not configured. Review config.js.';$('dataBadge').textContent='CONFIGURATION REQUIRED';return;}
+ const {data:{session},error}=await client.auth.getSession();
+ if(error)throw error;
+ if(!session){window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');return;}
+ const membershipResult=await client.from('krim_organization_members').select('organization_id,krim_organizations(organization_type,status)').eq('user_id',session.user.id).eq('status','active');
+ if(membershipResult.error)throw new Error('Finance membership could not be verified.');
+ const financeMemberships=(membershipResult.data||[]).filter(m=>String(m.krim_organizations?.organization_type||'').toLowerCase()==='finance'&&String(m.krim_organizations?.status||'').toLowerCase()==='active');
+ if(!financeMemberships.length){$('notice').textContent='Finance access denied. Your account does not have active membership in a finance organization.';$('dataBadge').textContent='ACCESS DENIED';$('identity').textContent='Finance access not authorized';return;}
+ const permissionResults=await Promise.all(financeMemberships.map(m=>client.rpc('krim_has_permission',{p_user_id:session.user.id,p_organization_id:m.organization_id,p_permission_code:'finance.view'})));
+ if(permissionResults.some(r=>r.error))throw new Error('Finance view permission could not be verified. Access remains blocked.');
+ if(!permissionResults.some(r=>r.data===true)){$('notice').textContent='Finance access denied. Your active finance membership does not include finance.view permission.';$('dataBadge').textContent='ACCESS DENIED';$('identity').textContent='Finance permission not authorized';return;}
+ financeAuthorized=true;
+ $('refresh').disabled=false;
+ $('identity').textContent=session.user.email||'AUTHORIZED FINANCE SESSION';
+ await load();
+}catch(e){financeAuthorized=false;$('refresh').disabled=true;$('notice').textContent='Session verification failed: '+esc(e.message||'Please sign in again.');$('dataBadge').textContent='VERIFICATION FAILED';console.error(e);}
 })();
 </script>
 <style id="krim-global-directory-link">.krim-global-directory-link{position:fixed;right:16px;bottom:16px;z-index:9999;background:#07152f;color:#fff!important;border:1px solid #55dbe8;border-radius:12px;padding:11px 14px;font:700 12px/1.2 system-ui,sans-serif;text-decoration:none;box-shadow:0 8px 24px #07152f33}.krim-global-directory-link:focus{outline:3px solid #55dbe8;outline-offset:3px}@media(max-width:480px){.krim-global-directory-link{right:10px;bottom:10px;padding:10px 12px}}</style><a class="krim-global-directory-link" href="../../public/global-workflows.html" aria-label="Open KRIM global workflow directory">Global Workspaces ↗</a>
