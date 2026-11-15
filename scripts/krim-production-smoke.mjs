@@ -1864,6 +1864,34 @@ for (const token of [
   if (!multiLegDispatchGuard.includes(token)) failures.push("Multi-leg shipment-wide dispatch guard is missing: " + token);
 }
 
+
+// Multi-leg custody must have a partner-to-partner acceptance record, private evidence and a later-leg dispatch gate.
+const custodyMigrationPath = "supabase/migrations/20261115141945_leg_to_leg_custody_transfer_and_acceptance_gate.sql";
+const custodyMigration = existsSync(custodyMigrationPath) ? readFileSync(custodyMigrationPath, "utf8") : "";
+for (const token of [
+  "CREATE TABLE public.krim_shipment_leg_custody_transfers",
+  "CREATE TABLE public.krim_shipment_leg_custody_transfer_events",
+  "ALTER TABLE public.krim_shipment_leg_custody_transfers ENABLE ROW LEVEL SECURITY",
+  "ALTER TABLE public.krim_shipment_leg_custody_transfer_events ENABLE ROW LEVEL SECURITY",
+  "CREATE OR REPLACE FUNCTION public.krim_create_leg_custody_transfer",
+  "private.krim_has_permission(v_user,v_from.partner_organization_id,'partner.manage')",
+  "a.status IN ('accepted','active')",
+  "b.status='confirmed' AND r.status='confirmed'",
+  "custody manifest must account for every shipment cargo line",
+  "o.bucket_id='krim-warehouse-evidence'",
+  "o.owner=v_user",
+  "CREATE OR REPLACE FUNCTION public.krim_respond_to_leg_custody_transfer",
+  "custody_transfer.accepted",
+  "custody_transfer.rejected",
+  "CREATE OR REPLACE FUNCTION private.krim_require_accepted_custody_before_next_leg_dispatch",
+  "Next route leg cannot enter transit until the immediately preceding leg custody transfer is accepted",
+  "CREATE TRIGGER trg_krim_require_accepted_custody_before_next_leg_dispatch",
+  "REVOKE ALL ON FUNCTION public.krim_create_leg_custody_transfer",
+  "REVOKE ALL ON FUNCTION public.krim_respond_to_leg_custody_transfer",
+]) {
+  if (!custodyMigration.includes(token)) failures.push("Leg custody transfer safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
