@@ -1845,6 +1845,25 @@ for (const token of [
   if (!exactLaneCapacityMigration.includes(token)) failures.push("Exact-route capacity guard is missing: " + token);
 }
 
+
+// Shipment-wide dispatch must fail closed while a multi-leg route plan is active.
+const multiLegDispatchGuardPath = "supabase/migrations/20261116016000_block_shipment_wide_dispatch_for_multileg.sql";
+const multiLegDispatchGuard = existsSync(multiLegDispatchGuardPath)
+  ? readFileSync(multiLegDispatchGuardPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION private.krim_block_shipment_wide_dispatch_for_multileg",
+  "SET search_path TO ''",
+  "p.status='active'",
+  "p.total_legs>1",
+  "Shipment-wide dispatch is disabled for active multi-leg plans",
+  "CREATE TRIGGER trg_krim_block_shipment_wide_dispatch_multileg",
+  "BEFORE UPDATE OF status ON public.krim_shipments",
+  "REVOKE ALL ON FUNCTION private.krim_block_shipment_wide_dispatch_for_multileg()",
+  "FROM PUBLIC, anon, authenticated, service_role",
+]) {
+  if (!multiLegDispatchGuard.includes(token)) failures.push("Multi-leg shipment-wide dispatch guard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
