@@ -120,3 +120,30 @@ Multi-leg planning/execution is **not operationally validated**. The schema and 
 - This is a concrete missing operational path, not merely a lack of sample data. Do not create direct table grants or expose a generic SECURITY DEFINER writer as a shortcut. Implement narrow authenticated RPCs with shipment ownership/operations permission checks, full route continuity validation, immutable plan snapshots, atomic activation and expected-vs-created count checks.
 
 The absence of an application write RPC and the absence of real partner/capacity data mean the multi-leg plan lifecycle is not release-ready even though the supporting schema exists.
+
+## Implementation update — secure draft plan creation
+
+A narrow production RPC has now been added:
+
+- `public.krim_create_shipment_leg_plan(bigint,jsonb,text,jsonb)`
+- Authenticated execution only; anon and PUBLIC execution revoked.
+- Requires the authenticated user to hold `shipment.update` for the shipment's owning customer organisation.
+- Locks the shipment and only accepts pre-execution shipment statuses.
+- Validates 1–20 legs, active location IDs, active transport modes, non-identical endpoints, route continuity, shipment origin/destination alignment, valid time windows, and paired positive capacity/unit inputs.
+- Stores a canonical planning snapshot and per-leg plan items.
+- Adds request idempotency key + SHA-256 request fingerprint; identical retry returns the existing plan, conflicting retry is rejected.
+- Creates an immutable event record for the draft plan.
+- Does not activate legs, alter shipment execution status, select a partner, reserve capacity, or dispatch anything.
+
+Live verification:
+- RPC exists with empty search_path.
+- anon EXECUTE=false; authenticated EXECUTE=true.
+- A simulated unrelated authenticated user was denied with the expected shipment permission error.
+- No test plan was inserted; production plan/item/activation counts remain zero.
+
+Still required before real use:
+- Test with a real authorised customer account and a controlled test shipment.
+- Add an explicit plan-read RPC/UI binding if not already present.
+- Implement separate plan evaluation and atomic activation, including compatibility with the automatic initial-leg trigger and existing one-leg shipments.
+- Verify idempotency under concurrent requests.
+- Do not mark multi-leg planning/execution production-ready yet.
