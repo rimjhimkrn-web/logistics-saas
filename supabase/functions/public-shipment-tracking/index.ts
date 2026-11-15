@@ -14,6 +14,11 @@ function respond(body: unknown, status = 200) {
   });
 }
 
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return respond({ error: "Method not allowed" }, 405);
@@ -45,9 +50,9 @@ Deno.serve(async (req: Request) => {
 
     const [{ data: eventRows }, { data: activeSessions, error: sessionsError }] = await Promise.all([
       db.from("krim_tracking_events").select("event_type,event_time,location_id")
-        .eq("shipment_id", shipment.id).neq("event_type", "gps_position")
+        .eq("shipment_id", shipment.id).neq("source_type", "gps").neq("event_type", "gps_position")
         .order("event_time", { ascending: false }).limit(10),
-      db.from("krim_driver_tracking_sessions").select("id,started_at,partner_assignment_id,driver_assignment_id")
+      db.from("krim_driver_tracking_sessions").select("id,started_at,partner_assignment_id,driver_assignment_id,shipment_leg_id,organization_id,user_id,platform,consent_notice_text,consent_notice_sha256")
         .eq("shipment_id", shipment.id).eq("status", "active")
         .order("started_at", { ascending: false }).limit(20),
     ]);
@@ -57,26 +62,52 @@ Deno.serve(async (req: Request) => {
     const sessionCandidates = sessionsError || terminalShipment ? [] : (activeSessions || []);
     const authorizedSessions = (await Promise.all(sessionCandidates.map(async (session) => {
       if (!session.partner_assignment_id || !session.driver_assignment_id) return null;
-      const [partnerResult, driverResult] = await Promise.all([
-        db.from("krim_shipment_partner_assignments").select("id,status")
+      const [partnerResult, driverResult, membershipResult, organizationResult, profileResult] = await Promise.all([
+        db.from("krim_shipment_partner_assignments").select("id,status,partner_organization_id,shipment_leg_id")
           .eq("id", session.partner_assignment_id).eq("shipment_id", shipment.id).maybeSingle(),
-        db.from("krim_driver_assignments").select("id,status")
+        db.from("krim_driver_assignments").select("id,status,user_id,organization_id,shipment_leg_id")
           .eq("id", session.driver_assignment_id).eq("shipment_id", shipment.id).maybeSingle(),
+        db.from("krim_organization_members").select("user_id")
+          .eq("organization_id", session.organization_id).eq("user_id", session.user_id)
+          .eq("role", "driver").eq("status", "active").maybeSingle(),
+        db.from("krim_organizations").select("id")
+          .eq("id", session.organization_id).eq("status", "active").maybeSingle(),
+        db.from("krim_driver_profiles").select("id,licence_number,verification_status")
+          .eq("user_id", session.user_id).eq("organization_id", session.organization_id).maybeSingle(),
       ]);
-      if (partnerResult.error || driverResult.error) {
-        console.error("Tracking assignment authorization lookup failed", partnerResult.error?.message || driverResult.error?.message);
+      const lookupError = partnerResult.error || driverResult.error || membershipResult.error || organizationResult.error || profileResult.error;
+      if (lookupError) {
+        console.error("Tracking assignment authorization lookup failed", lookupError.message);
         return null;
       }
-      const partnerActive = partnerResult.data && ["accepted", "active", "in_progress", "assigned"].includes(String(partnerResult.data.status || "").toLowerCase());
-      const driverInTransit = driverResult.data && String(driverResult.data.status || "").toLowerCase() === "in_transit";
-      return partnerActive && driverInTransit ? session : null;
+      const partnerActive = partnerResult.data
+        && partnerResult.data.partner_organization_id === session.organization_id
+        && partnerResult.data.shipment_leg_id === session.shipment_leg_id
+        && ["accepted", "active", "in_progress", "assigned"].includes(String(partnerResult.data.status || "").toLowerCase());
+      const driverInTransit = driverResult.data
+        && driverResult.data.user_id === session.user_id
+        && driverResult.data.organization_id === session.organization_id
+        && driverResult.data.shipment_leg_id === session.shipment_leg_id
+        && String(driverResult.data.status || "").toLowerCase() === "in_transit";
+      const driverVerified = profileResult.data
+        && ["verified", "approved"].includes(String(profileResult.data.verification_status || "").toLowerCase())
+        && Boolean(String(profileResult.data.licence_number || "").trim());
+      const consentText = String(session.consent_notice_text || "");
+      const consentHash = String(session.consent_notice_sha256 || "");
+      const consentValid = Boolean(consentText.trim())
+        && /^[0-9a-f]{64}$/.test(consentHash)
+        && await sha256Hex(consentText) === consentHash;
+      const membershipActive = Boolean(membershipResult.data && organizationResult.data);
+      const nativePlatform = session.platform === "android" || session.platform === "ios";
+      return partnerActive && driverInTransit && driverVerified && membershipActive && nativePlatform && consentValid ? session : null;
     }))).filter((session): session is NonNullable<typeof session> => session !== null);
     const gpsCandidates = authorizedSessions.length === 0 ? [] : await Promise.all(
       authorizedSessions.map(async (session) => {
         const { data, error } = await db.from("krim_tracking_events")
           .select("event_time,latitude,longitude,metadata")
-          .eq("shipment_id", shipment.id).eq("source_type", "gps")
+          .eq("shipment_id", shipment.id).eq("source_type", "gps").eq("event_type", "gps_position")
           .filter("metadata->>tracking_session_id", "eq", session.id)
+          .lte("event_time", new Date(Date.now() + 60000).toISOString())
           .not("latitude", "is", null).not("longitude", "is", null)
           .order("event_time", { ascending: false }).limit(1).maybeSingle();
         if (error) console.error("Session-scoped GPS position unavailable", error.message);
