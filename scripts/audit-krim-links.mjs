@@ -12,6 +12,7 @@ const IGNORE_DIRS = new Set([".git", "node_modules", ".github"]);
 const HTML_ATTRS = ["href", "src", "action", "formaction", "poster"];
 const errors = [];
 const brandFindings = [];
+const operationalRiskFindings = [];
 let htmlCount = 0;
 
 function walk(dir) {
@@ -73,6 +74,25 @@ function inspectHtml(file) {
   while ((legacyMark = legacyMarkPattern.exec(text))) {
     brandFindings.push({ source: rel(file), reason: "legacy text-only KRIM mark", snippet: legacyMark[0].slice(0, 160) });
   }
+  // High-confidence review signals for unconnected operational actions and claims.
+  // These are findings for human review, not automatic proof of a defect.
+  const isRedirect = /http-equiv=["']refresh["']|location\.replace\s*\(/i.test(text);
+  if (!isRedirect) {
+    const hasBackendSignal = /(?:\.from\s*\(|\.rpc\s*\(|functions\.invoke\s*\(|fetch\s*\(|XMLHttpRequest|supabaseClient)/i.test(text);
+    const successAlert = /alert\s*\(\s*["'][^"']*(?:successfully|saved successfully|issued successfully|submitted successfully|created successfully|approved successfully|transferred|released escrow|payout scheduled|invoice issued)/i;
+    if (successAlert.test(text) && !hasBackendSignal) {
+      operationalRiskFindings.push({ source: rel(file), category: "unconnected-success-alert", reason: "A success-style alert exists without a visible backend write/read signal." });
+    }
+    const unsupportedClaims = /(?:SOC\s*2\s*Type\s*II|SOC2|ISO\s*27001|PCI\s*DSS|HIPAA|dedicated hardware security modules|JPMorgan|Citibank|\bCiti\b|SEPA IBAN|automated ACH|immutable cryptographic|SHA-256 cryptographic|real-time bi-directional synchronization|Verra Verified Carbon|24\s*\/\s*7 support|escrow settlement|release escrow|automated partner payouts)/i;
+    if (unsupportedClaims.test(text) && !hasBackendSignal) {
+      operationalRiskFindings.push({ source: rel(file), category: "unsupported-operational-claim", reason: "High-risk infrastructure, compliance, payment or service claim appears without a visible backend signal." });
+    }
+    const financialPage = /(?:payment|payout|settlement|escrow|invoice|ledger|revenue|balance|disbursement|refund|freight audit)/i.test(file);
+    const hardcodedMoney = /(?:₹|\$|\bINR\s*)\s?[0-9][0-9,]*(?:\.[0-9]{1,2})?/i;
+    if (financialPage && hardcodedMoney.test(text) && !hasBackendSignal) {
+      operationalRiskFindings.push({ source: rel(file), category: "hardcoded-financial-data", reason: "A finance/payment page contains hardcoded monetary figures without a visible backend signal." });
+    }
+  }
   const tagPattern = /<(?:a|link|script|img|iframe|form|source|video|audio|button)\b[^>]*>/gi;
   let tag;
   while ((tag = tagPattern.exec(text))) {
@@ -132,6 +152,8 @@ console.log(JSON.stringify({
   broken_local_references: errors.length,
   findings: errors,
   legacy_brand_findings: brandFindings.length,
-  brand_findings: brandFindings
+  brand_findings: brandFindings,
+  operational_risk_findings: operationalRiskFindings.length,
+  operational_risk_details: operationalRiskFindings
 }, null, 2));
 process.exitCode = errors.length ? 1 : 0;
