@@ -366,7 +366,7 @@ for (const [file, html] of [
   if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
 }
 if (!/Partner-direct payments only/i.test(paymentReadiness) || !/KRIM does not currently collect freight charges/i.test(paymentReadiness)) failures.push("Payment guidance must clearly state partner-direct payment and that KRIM does not collect freight charges.");
-if (!/KRIM_PARTNER_DIRECT_ONLY\s*=\s*true/.test(secureCheckout) || !/KRIM checkout disabled/i.test(secureCheckout)) failures.push("Quote result must keep KRIM checkout disabled under the partner-direct launch model.");
+if (!/KRIM freight checkout is disabled/i.test(secureCheckout) || !/Partner-direct payments only/i.test(secureCheckout)) failures.push("Retired quote-result route must clearly redirect customers to partner-direct payment guidance.");
 if (/checkout\.razorpay\.com|new Razorpay|create-global-razorpay-order|verify-razorpay-payment/.test(secureCheckout)) failures.push("Quote result must not load or invoke a KRIM freight-payment gateway under the partner-direct model.");
 if (!/partner-direct|contracting logistics provider|pay the provider directly/i.test(secureCheckout)) failures.push("Quote result must explain that freight payment is arranged directly with the contracting provider.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
