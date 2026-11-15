@@ -362,3 +362,23 @@ Release gates still required:
 4. Run positive and negative tests with authorised partner and customer accounts before enabling the workflow.
 
 No production opportunity, quote, assignment, or shipment data was created or modified by this schema migration.
+
+
+## Leg-specific partner opportunity creation RPC (16 Nov 2026)
+
+Added `public.krim_create_leg_partner_opportunity(bigint,bigint,timestamptz)` as the first write operation for multi-leg partner sourcing.
+
+The authenticated RPC:
+- Requires access to the shipment's customer organisation plus `quote.create` and `shipment.update`.
+- Locks the shipment and exact shipment leg.
+- Allows only pre-execution shipment states.
+- Requires a plan-linked leg belonging to the shipment's active route plan.
+- Rechecks leg sequence, origin, destination and transport mode against the linked plan item.
+- Allows sourcing only for an unassigned planned leg.
+- Enforces a response deadline 1 hour to 30 days ahead (default 72 hours).
+- Returns an existing still-open opportunity for the same shipment+leg instead of creating a duplicate.
+- Creates an auditable leg-scoped opportunity without changing shipment status or creating an assignment.
+
+Security: SECURITY DEFINER with empty search_path; PUBLIC and anon EXECUTE revoked; authenticated EXECUTE granted with in-function organisation/permission checks.
+
+This is not yet a complete sourcing path. Partner quote submission, exact-leg capability checks at quote time, customer award, partner acceptance, capacity reservation and UI integration remain release gates. No production opportunities were created during implementation.
