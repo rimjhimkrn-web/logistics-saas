@@ -365,13 +365,14 @@ for (const [file, html] of [
   if (!html.includes("krim-global-interface.css")) failures.push(`Phase 5 page is missing the shared global stylesheet: ${file}`);
   if (!html.includes("krim-global-shell")) failures.push(`Phase 5 page is missing the shared global shell class: ${file}`);
 }
-if (!paymentReadiness.includes('public/quote-result.html') && !paymentReadiness.includes('quote-result.html')) failures.push("Payment readiness page must route eligible customers to the canonical secure checkout.");
-if (!/create-global-razorpay-order/.test(secureCheckout)) failures.push("Canonical checkout must use the server-created Razorpay order function.");
-if (!/verify-razorpay-payment/.test(secureCheckout)) failures.push("Canonical checkout must verify payment through the server function.");
-if (!/result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/.test(secureCheckout)) failures.push("Checkout must reject any browser result not confirmed paid by the server.");
+if (!/Partner-direct payments only/i.test(paymentReadiness) || !/KRIM does not currently collect freight charges/i.test(paymentReadiness)) failures.push("Payment guidance must clearly state partner-direct payment and that KRIM does not collect freight charges.");
+if (!/KRIM_PARTNER_DIRECT_ONLY\s*=\s*true/.test(secureCheckout) || !/KRIM checkout disabled/i.test(secureCheckout)) failures.push("Quote result must keep KRIM checkout disabled under the partner-direct launch model.");
+if (/checkout\.razorpay\.com|new Razorpay|create-global-razorpay-order|verify-razorpay-payment/.test(secureCheckout)) failures.push("Quote result must not load or invoke a KRIM freight-payment gateway under the partner-direct model.");
+if (!/partner-direct|contracting logistics provider|pay the provider directly/i.test(secureCheckout)) failures.push("Quote result must explain that freight payment is arranged directly with the contracting provider.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
 const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
-if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Shipment confirmation must require authenticated server-verified payment before confirming booking.");
+if (!/Historical KRIM payment workflow|historical KRIM-collected payment orders/i.test(shipmentConfirmation)) failures.push("Shipment confirmation must be clearly labelled as a historical KRIM-payment record page under the partner-direct launch model.");
+if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Historical shipment confirmation must require authenticated server-verified payment.");
 if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
@@ -382,6 +383,8 @@ for (const [label, source, pattern] of [
   ["order endpoint derives the amount from the accepted quote", orderFn, /Number\(quote\.amount\)/],
   ["order endpoint checks accepted partner assignment", orderFn, /assignment\.status\s*!==\s*["']accepted["']/],
   ["order endpoint enforces verified payment capability", orderFn, /krim_payment_capability_registry[\s\S]*?checkout_enabled/],
+  ["order endpoint requires freight-collection legal approval", orderFn, /KRIM_FREIGHT_COLLECTION_ENABLED[\s\S]*?KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION/],
+  ["verification blocks new freight collection under partner-direct model", verifyFn, /KRIM_FREIGHT_COLLECTION_ENABLED[\s\S]*?KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION/],
   ["verification checks HMAC signature", verifyFn, /generateHmacSha256[\s\S]*?razorpaySignature/],
   ["verification independently fetches provider payment", verifyFn, /api\.razorpay\.com\/v1\/payments/],
   ["verification requires captured status", verifyFn, /razorpayStatus\s*!==\s*["']captured["']/],
