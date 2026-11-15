@@ -959,7 +959,8 @@ if (adminRuntimeTruth.includes("ISO 27001 / SOC 2 Audit Logger: ONLINE") || admi
 if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIED") || productionRuntimeTruth.includes("All 18 Phases Locked")) failures.push("Production UI helper must not claim an unperformed release freeze/hash verification.");
 const treasuryRetiredRedirect = treasuryPageTruth.includes("url=../../app/finance/treasury-audit.html") && treasuryPageTruth.includes("static demonstration dashboard has been retired") && treasuryPageTruth.includes("location.replace(");
 if (!treasuryRetiredRedirect && (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED"))) failures.push("Treasury route must either disclose demo-only data or redirect to the authenticated live treasury audit workspace.");
-if (!revenuePageTruth.includes("No verified KRIM revenue data available") || !revenuePageTruth.includes("No reconciled paid invoices or subscription transactions are available yet")) failures.push("Revenue reports must show an honest empty state until reconciled subscription revenue exists.");
+const revenueRetiredRedirect = revenuePageTruth.includes("url=../../app/finance/financial-reporting.html") && revenuePageTruth.includes("legacy public finance interface has been retired") && revenuePageTruth.includes("location.replace(");
+if (!revenueRetiredRedirect && (!revenuePageTruth.includes("No verified KRIM revenue data available") || !revenuePageTruth.includes("No reconciled paid invoices or subscription transactions are available yet"))) failures.push("Revenue reports must either redirect to the authenticated finance workspace or show an honest empty state until reconciled subscription revenue exists.");
 
 // Additional Step 7 regression guards: these inspect source only and do not claim
 // that provider-signed integration tests or financial settlement have run.
