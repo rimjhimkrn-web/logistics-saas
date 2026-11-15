@@ -2,6 +2,14 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store","Content-Type":"application/json"};
 function reply(status:number,body:Record<string,unknown>){return new Response(JSON.stringify(body),{status,headers:cors});}
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CONSENT_NOTICE_VERSION = "2026-11-15-v1";
+const CONSENT_NOTICE_LANGUAGE = "en-IN";
+const CONSENT_NOTICE_APPROVED = false;
+const CONSENT_NOTICE_TEXT = "KRIM Driver location sharing (draft notice — GPS remains disabled): If and when KRIM enables this feature after publishing an approved GPS retention period, deletion process and legal-hold terms, this app will share this device location only for the shipment assignment selected by you and marked In Transit. Location may be visible to KRIM operations personnel and the customer/shipper authorized for that shipment. You may decline or stop sharing at any time. Android background sharing requires location permission and an ongoing location notification; if background permission is not granted, only foreground sharing can operate. Location can be delayed or interrupted by device, battery, GPS or network conditions. Do not use the phone while driving. KRIM location tracking is not emergency monitoring or safety-critical navigation. This draft notice is not approved for commercial use. GPS collection remains disabled until the approved notice and retention terms are published and the legal launch gate is opened.";
+async function sha256Hex(value:string):Promise<string>{
+ const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
+ return Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,"0")).join("");
+}
 const gpsLaunchApproved = Deno.env.get("KRIM_GPS_TRACKING_ENABLED") === "true"
  && Deno.env.get("KRIM_GPS_TRACKING_LEGAL_APPROVAL_VERSION") === "2026-11-15-v1";
 
@@ -19,7 +27,7 @@ Deno.serve(async(req:Request)=>{
  let body:Record<string,unknown>;try{body=await req.json()}catch{return reply(400,{error:"Invalid JSON body"})}
  const action=String(body.action||""),assignmentId=String(body.assignment_id||"");
  if(!["start","stop"].includes(action)||!UUID.test(assignmentId))return reply(400,{error:"A valid tracking action and driver assignment are required"});
- if(action==="start"&&!gpsLaunchApproved)return reply(503,{error:"Driver GPS sharing is paused until KRIM approves its location notice, retention schedule, deletion controls and launch review."});
+ if(action==="start"&&(!gpsLaunchApproved||!CONSENT_NOTICE_APPROVED))return reply(503,{error:"Driver GPS sharing is paused until KRIM approves the exact consent notice, retention schedule, deletion/legal-hold controls and launch review."});
  const admin=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
  const userId=authData.user.id;
  const {data:driver,error:driverError}=await admin.from("krim_driver_assignments")
@@ -52,22 +60,23 @@ Deno.serve(async(req:Request)=>{
  if(partnerError)return reply(500,{error:"Could not verify partner shipment assignment"});
  if(!partner||!["accepted","active","in_progress","assigned"].includes(String(partner.status).toLowerCase()))return reply(403,{error:"The linked partner shipment assignment is not active"});
  if(!driver.shipment_leg_id||String(driver.shipment_leg_id)!==String(partner.shipment_leg_id))return reply(403,{error:"Driver and partner assignment shipment legs do not match"});
- const {data:existing,error:existingError}=await admin.from("krim_driver_tracking_sessions").select("id,status,started_at")
+ const {data:existing,error:existingError}=await admin.from("krim_driver_tracking_sessions").select("id,status,started_at,consent_version,consent_notice_sha256")
   .eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
  if(existingError)return reply(500,{error:"Could not check existing tracking session"});
- if(existing)return reply(200,{success:true,started:true,session_id:existing.id,started_at:existing.started_at,already_active:true});
+ if(existing){if(existing.consent_version!==CONSENT_NOTICE_VERSION||existing.consent_notice_sha256!==consentHash)return reply(409,{error:"An active session uses a different consent notice. Stop it and review the current notice before starting again"});return reply(200,{success:true,started:true,session_id:existing.id,started_at:existing.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});}
  const platform=String(body.platform||"");
- if(!["android","ios","web"].includes(platform))return reply(400,{error:"A valid client platform is required"});
+ if(!["android","ios"].includes(platform))return reply(400,{error:"GPS sharing is available only through the KRIM Driver native app"});
  const consentVersion=String(body.consent_version||"");
- if(consentVersion!=="2026-11-15-v1")return reply(400,{error:"Please review and accept the current location-sharing notice"});
+ if(consentVersion!==CONSENT_NOTICE_VERSION)return reply(400,{error:"Please review and accept the current location-sharing notice"});
+ const consentHash=await sha256Hex(CONSENT_NOTICE_TEXT);
  const {data:created,error:createError}=await admin.from("krim_driver_tracking_sessions").insert({
   driver_assignment_id:assignmentId,partner_assignment_id:driver.partner_assignment_id,shipment_id:driver.shipment_id,
   shipment_leg_id:driver.shipment_leg_id||partner.shipment_leg_id||null,organization_id:driver.organization_id,user_id:userId,
-  consent_version:consentVersion,platform,status:"active"
+  consent_version:consentVersion,consent_notice_text:CONSENT_NOTICE_TEXT,consent_notice_sha256:consentHash,consent_language:CONSENT_NOTICE_LANGUAGE,platform,status:"active"
  }).select("id,started_at").single();
  if(createError){
-  const {data:retry}=await admin.from("krim_driver_tracking_sessions").select("id,started_at").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
-  if(retry)return reply(200,{success:true,started:true,session_id:retry.id,started_at:retry.started_at,already_active:true});
+  const {data:retry}=await admin.from("krim_driver_tracking_sessions").select("id,started_at,consent_version,consent_notice_sha256").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
+  if(retry&&retry.consent_version===CONSENT_NOTICE_VERSION&&retry.consent_notice_sha256===consentHash)return reply(200,{success:true,started:true,session_id:retry.id,started_at:retry.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});
   return reply(500,{error:"Tracking consent session could not be recorded"});
  }
  return reply(201,{success:true,started:true,session_id:created.id,started_at:created.started_at,already_active:false});
