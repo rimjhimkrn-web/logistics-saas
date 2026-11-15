@@ -244,3 +244,43 @@ These counts confirm that KRIM still has no evidenced live fulfilment network or
 - The installable Driver debug APK build was still running at the time of this update. No APK installation or physical-device GPS acceptance is claimed.
 
 **Updated release decision:** KRIM remains **NOT APPROVED FOR UNRESTRICTED COMMERCIAL OPERATIONS**. The next technical P0 is the legacy partner-award RPC state bypass after migration reconciliation. The next real-world P0 is onboarding and independently verifying one anchor operating partner on one approved India corridor. GPS, payment collection and public booking remain gated until their separate legal, operational and end-to-end acceptance criteria are met.
+
+
+## 12. Superseding verification delta — 15 November 2026, 07:18 UTC
+
+This addendum supersedes earlier status statements only where the newer observations below differ. It does not remove the migration-reconciliation, legal, partner-supply or end-to-end acceptance gates.
+
+### Read-only migration inventory comparison
+
+The latest metadata-only comparison returned 281 repository migration files and 443 production ledger rows: 72 exact version matches, 195 repository-only versions, 371 production-only versions, 218 descriptive names shared across the two inventories, 12 duplicate timestamp groups affecting 26 repository files, and zero duplicate production versions. Shared names do not prove SQL-body equivalence. The two narrowly scoped GPS migrations applied during this work are represented by matching repository files: `20261115070842_customer_tracking_gps_active_session_scope.sql` and `20261115071144_expire_idle_driver_tracking_sessions.sql`. **No further production DDL is authorized** until the full version/name/body crosswalk and live schema baseline are reviewed.
+
+### GPS privacy and customer/driver experience
+
+- Production `krim_get_shipment_tracking(text)` excludes GPS rows from the generic historical event list. It returns one latest position only while a matching active consent session exists and the driver profile/license, active driver membership, active organization, in-transit driver assignment, accepted partner assignment and shipment leg still match. Positions older than 15 minutes are not returned.
+- The deployed `public-shipment-tracking` Edge Function revalidates driver identity, membership, organization, profile/license, matching assignment/leg, native platform and archived consent-notice hash before returning a GPS position through a secure public tracking reference.
+- The customer mobile app displays position freshness, recorded time and accuracy, refreshes every 30 seconds while its tracking view is visible, and discloses that opening the OpenStreetMap link shares coordinates with that external map service.
+- The driver app stops local collection first, preserves a pending server-stop reference if the network cannot confirm the stop, and retries reconciliation when the app returns to the foreground.
+- The private inactivity-expiry function is scheduled every five minutes. A scheduled run is now evidenced as **succeeded** at 2026-11-15 07:15:00 UTC. It stops active sessions after 15 minutes without a GPS point; this is a session stop, not deletion of historical coordinates.
+- GPS remains fail-closed: native app and server legal-approval gates remain false. There are still zero GPS events and zero active GPS sessions. No location collection or physical-device GPS test is claimed.
+
+### Legacy partner-award path — frontend containment only
+
+- `public/operations/partner-selection-assignment.html` keeps offer review and existing assignment responses available, but disables new awards with an explicit warning.
+- `public/partner-selection-assignment.html` redirects to the canonical operations workspace instead of calling the legacy checkout-award RPC.
+- The production smoke script now scans client HTML/JS/TS source under `public`, `app` and `mobile` for direct calls to either legacy award RPC. The smoke check passed on commit `7624dd00b6ccae1e2ff22a6ce46fa1a881e2060b`.
+
+**This is frontend containment only.** `krim_award_partner_quote(bigint)` and `krim_award_partner_quote_for_checkout(bigint,timestamptz)` remain executable by `authenticated`. A caller can still invoke them directly. This remains a P0 backend state-integrity issue. Correct/retire these functions and remove authenticated grants only after the migration crosswalk and caller inventory are reviewed; do not apply ad-hoc SQL.
+
+### Mobile validation and internal builds
+
+- KRIM Partner, KRIM Customer and KRIM Driver passed dependency installation, Expo configuration, TypeScript validation and Android export on workflow run `43688821196`, source commit `34ab5b758de0ac45a9f2f50ca2ca1e245b7843b1`.
+- The KRIM Partner internal debug APK built successfully and was uploaded as artifact `14151313529`. Driver and Customer APK builds were still running at the time of this addendum.
+- These are internal debug builds, not production-signed Play Store releases. No physical-device installation, login, assignment, location-permission or live GPS acceptance test has been performed.
+
+### Operational and payment snapshot
+
+The latest read-only production counts remain: 14 organizations; zero verified partner organizations; one pending partner capability; zero approved capacity resources; zero approved rate cards; zero partner assignments; zero driver assignments; zero GPS events; zero active GPS sessions. The payment capability registry has 45 entries and zero enabled freight-checkout capabilities. The partner-direct model keeps KRIM freight collection disabled; Cashfree order creation is retired.
+
+### Current release decision
+
+KRIM remains **NOT APPROVED FOR UNRESTRICTED COMMERCIAL OPERATIONS**. The immediate technical P0 is the authenticated legacy partner-award RPC bypass after migration-history reconciliation. The immediate real-world P0 is onboarding and independently verifying one registered-business anchor partner, one approved India corridor, current capacity/rate evidence, and a named verified driver/vehicle. Legal review of the proprietorship marketplace model, GST treatment of referral/coordination fees, partner/customer contracts, liability/insurance, India-to-Tokyo data processing, privacy contact and GPS retention/deletion policy remains mandatory before commercial launch or GPS activation.
