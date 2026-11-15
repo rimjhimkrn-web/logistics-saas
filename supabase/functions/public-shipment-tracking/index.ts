@@ -65,7 +65,9 @@ Deno.serve(async (req: Request) => {
         return data;
       })
     );
-    const gpsRow = gpsCandidates.filter(Boolean).sort(
+    const gpsRow = gpsCandidates.filter(
+      (row): row is NonNullable<typeof row> => row !== null
+    ).sort(
       (a, b) => new Date(b.event_time).getTime() - new Date(a.event_time).getTime()
     )[0] || null;
     const locationIds = [...new Set([
