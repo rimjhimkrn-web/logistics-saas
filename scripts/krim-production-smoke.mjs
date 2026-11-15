@@ -1342,6 +1342,31 @@ const serverNoticeMatch = driverSessionFunction.match(/CONSENT_NOTICE_TEXT = ("(
 if (!appNoticeMatch || !serverNoticeMatch || appNoticeMatch[1] !== serverNoticeMatch[1]) failures.push("Driver app and server must present and archive the exact same versioned GPS consent notice.");
 if (!driverSessionFunction.includes("existing.consent_notice_sha256!==consentHash") || !driverSessionFunction.includes("existing.platform!==platform")) failures.push("Tracking-session idempotency must reject stale consent text or mismatched client platforms.");
 
+// Customs review hardening: independent licence review and live evidence revalidation.
+// These source guards do not claim that a real customs licence or document was reviewed.
+const customsReviewMigrationPath = "supabase/migrations/20261115174000_harden_customs_independent_review_and_evidence_revalidation.sql";
+const customsReviewMigration = existsSync(customsReviewMigrationPath) ? readFileSync(customsReviewMigrationPath, "utf8") : "";
+for (const token of [
+  "submitter cannot approve or reject their own evidence",
+  "Original private licence evidence is missing",
+  "Original private customs document is missing",
+  "expired customs document cannot be verified",
+  "cardinality(string_to_array(v_path,'/'))<>4",
+  "cardinality(string_to_array(v_path,'/'))<>5",
+  "aal2",
+]) {
+  if (!customsReviewMigration.includes(token)) failures.push("Customs review hardening migration is missing safeguard: " + token);
+}
+const customsWorkspaceSource = existsSync("app/customs/index.html") ? readFileSync("app/customs/index.html", "utf8") : "";
+for (const token of [
+  'path="customs-docs/"',
+  'path="customs/"',
+  'client.rpc("krim_customs_document_submit"',
+  'client.rpc("krim_customs_broker_license_submit"',
+]) {
+  if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
