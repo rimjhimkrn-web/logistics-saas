@@ -1060,6 +1060,36 @@ for (const token of ["auth.uid()", "aal2", "private.krim_has_permission", "krim_
   if (!podAdminMigration.includes(token)) failures.push("POD database authorization migration is missing control: " + token);
 }
 
+// Driver GPS is a privacy-sensitive capability: native-only, consent-archived,
+// assignment-scoped and deliberately disabled until legal/retention approval.
+const driverLocationSource = existsSync("mobile/krim-driver/src/lib/locationTracking.ts") ? readFileSync("mobile/krim-driver/src/lib/locationTracking.ts", "utf8") : "";
+const driverSessionFunction = existsSync("supabase/functions/krim-driver-tracking-session/index.ts") ? readFileSync("supabase/functions/krim-driver-tracking-session/index.ts", "utf8") : "";
+const driverGpsUpdateFunction = existsSync("supabase/functions/krim-driver-gps-update/index.ts") ? readFileSync("supabase/functions/krim-driver-gps-update/index.ts", "utf8") : "";
+const publicShipmentTracking = existsSync("supabase/functions/public-shipment-tracking/index.ts") ? readFileSync("supabase/functions/public-shipment-tracking/index.ts", "utf8") : "";
+const driverBrowserTracking = existsSync("app/driver/module-08-live-tracking.html") ? readFileSync("app/driver/module-08-live-tracking.html", "utf8") : "";
+const customerTrackingPage = existsSync("tracking.html") ? readFileSync("tracking.html", "utf8") : "";
+const gpsConsentMigration = existsSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql") ? readFileSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql", "utf8") : "";
+const gpsRetentionNotice = existsSync("public/legal/data-retention.html") ? readFileSync("public/legal/data-retention.html", "utf8") : "";
+const gpsPrivacyNotice = existsSync("privacy.html") ? readFileSync("privacy.html", "utf8") : "";
+for (const [label, source, tokens] of [
+  ["Driver app GPS privacy gate", driverLocationSource, ["DRIVER_GPS_LAUNCH_ENABLED = false", "DRIVER_GPS_CONSENT_NOTICE_APPROVED = false", "DRIVER_GPS_CONSENT_NOTICE_TEXT"]],
+  ["Driver consent-session server", driverSessionFunction, ["CONSENT_NOTICE_APPROVED = false", "consent_notice_text:CONSENT_NOTICE_TEXT", "consent_notice_sha256:consentHash", '["android","ios"]']],
+  ["GPS upload server", driverGpsUpdateFunction, ["CONSENT_NOTICE_APPROVED = false", "trackingSession.consent_notice_text!==CONSENT_NOTICE_TEXT", "trackingSession.consent_notice_sha256!==expectedConsentHash", "tracking_session_id:trackingSessionId"]],
+  ["Customer GPS privacy", publicShipmentTracking, ["krim_driver_tracking_sessions", 'filter("metadata->>tracking_session_id"', 'gps_sharing_status:', 'neq("event_type", "gps_position")']],
+  ["Driver browser tracking", driverBrowserTracking, ["read-only", "native-app only", "launch gate remains closed"]],
+  ["Customer tracking freshness", customerTrackingPage, ["gps_sharing_status", "pos.freshness", "setInterval", "30 seconds"]],
+  ["GPS consent archive migration", gpsConsentMigration, ["consent_notice_text", "consent_notice_sha256", "consent_language"]],
+  ["GPS retention disclosure", gpsRetentionNotice, ["GPS collection is disabled by both", "exact server-controlled notice text", "SHA-256 notice hash"]],
+  ["GPS privacy disclosure", gpsPrivacyNotice, ["No GPS location events are currently recorded", "GPS collection is disabled"]],
+]) {
+  for (const token of tokens) if (!source.includes(token)) failures.push(label + " is missing required safeguard: " + token);
+}
+if (/navigator\\.geolocation|gps-assignment|gps-start/.test(driverBrowserTracking)) failures.push("Driver browser workspace must not collect GPS; native KRIM Driver app is the only location source.");
+const appNoticeMatch = driverLocationSource.match(/DRIVER_GPS_CONSENT_NOTICE_TEXT = ("(?:\\\\.|[^"])*");/);
+const serverNoticeMatch = driverSessionFunction.match(/CONSENT_NOTICE_TEXT = ("(?:\\\\.|[^"])*");/);
+if (!appNoticeMatch || !serverNoticeMatch || appNoticeMatch[1] !== serverNoticeMatch[1]) failures.push("Driver app and server must present and archive the exact same versioned GPS consent notice.");
+if (!driverSessionFunction.includes("existing.consent_notice_sha256!==consentHash") || !driverSessionFunction.includes("existing.platform!==platform")) failures.push("Tracking-session idempotency must reject stale consent text or mismatched client platforms.");
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
