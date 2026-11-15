@@ -80,7 +80,13 @@ for (const file of htmlFiles) {
   const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient/i.test(html);
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
   const operational = /(?:dashboard|workspace|shipment|booking|quote|payment|invoice|tracking|warehouse|customs|finance|operations|partner|enterprise|driver|global-operations)/i.test(file);
-  const placeholder = /placeholder|coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase/i.test(html);
+  const visiblePageText = html
+    .replace(/<!--[\\s\\S]*?-->/g, " ")
+    .replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi, " ")
+    .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi, " ");
+  const placeholder = /\\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\\b/i.test(visiblePageText);
   if (operational && !hasSupabaseSignal) integrationCandidates.push(file);
   if (placeholder) placeholderPages.push(file);
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,backendReview:operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
