@@ -8,7 +8,7 @@ This file is a release-gate checklist, not a declaration that every workspace or
 - [ ] Reconcile the repository's SQL migrations with the live production migration ledger and schema before further production DDL.
 - [ ] Verify backup/restore and incident recovery.
 - [ ] Complete table-by-table RLS and function-by-function SECURITY DEFINER review.
-- [ ] Enable leaked-password protection in Supabase Auth.
+- [ ] Review leaked-password protection availability. Supabase currently documents it as Pro+; if KRIM remains on Free, defer upgrade and apply strong password policy, email verification, rate limits and MFA where available.
 - [ ] Test customer/partner/driver tenant isolation and unauthorized access denial.
 - [ ] Keep payment, booking, location and market activation fail-closed until their acceptance tests pass.
 
