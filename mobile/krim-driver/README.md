@@ -37,3 +37,9 @@ This is an internal operational preview, not a public production release.
 
 ## Automated validation
 The repository workflow `.github/workflows/krim-driver-mobile-validation.yml` checks Expo SDK package compatibility, TypeScript, native Android configuration and the Android JavaScript bundle on driver-app changes.
+
+## Internal Android debug build
+
+The repository workflow `KRIM mobile app validation` validates all three apps with committed lockfiles (`npm ci`) and then builds a free KRIM Driver debug APK for controlled device testing. The debug APK uses Android's debug signing key and is not a Play Store or EAS release. If a previously installed EAS-signed KRIM Driver preview cannot be updated because of a signing mismatch, do not uninstall it until any local test data is backed up; the debug build may need a separate package ID or a clean test device.
+
+GPS remains disabled by both app-side and server-side launch gates pending the approved retention schedule, deletion/legal-hold process and exact archived consent notice. Do not use the debug APK for commercial shipments.
