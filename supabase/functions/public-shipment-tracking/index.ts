@@ -43,16 +43,31 @@ Deno.serve(async (req: Request) => {
     }
     if (!shipment) return respond({ error: "No shipment was found for that secure tracking reference." }, 404);
 
-    const [{ data: eventRows }, { data: gpsRow, error: gpsError }] = await Promise.all([
+    const [{ data: eventRows }, { data: activeSessions, error: sessionsError }] = await Promise.all([
       db.from("krim_tracking_events").select("event_type,event_time,location_id")
-        .eq("shipment_id", shipment.id).order("event_time", { ascending: false }).limit(10),
-      db.from("krim_tracking_events").select("event_time,latitude,longitude,metadata")
-        .eq("shipment_id", shipment.id).eq("source_type", "gps")
-        .not("latitude", "is", null).not("longitude", "is", null)
-        .order("event_time", { ascending: false }).limit(1).maybeSingle(),
+        .eq("shipment_id", shipment.id).neq("event_type", "gps_position")
+        .order("event_time", { ascending: false }).limit(10),
+      db.from("krim_driver_tracking_sessions").select("id,started_at")
+        .eq("shipment_id", shipment.id).eq("status", "active")
+        .order("started_at", { ascending: false }).limit(20),
     ]);
-    if (gpsError) console.error("Latest GPS position unavailable", gpsError.message);
+    if (sessionsError) console.error("Active GPS consent sessions unavailable", sessionsError.message);
     const events = eventRows || [];
+    const gpsCandidates = sessionsError || !activeSessions?.length ? [] : await Promise.all(
+      activeSessions.map(async (session) => {
+        const { data, error } = await db.from("krim_tracking_events")
+          .select("event_time,latitude,longitude,metadata")
+          .eq("shipment_id", shipment.id).eq("source_type", "gps")
+          .filter("metadata->>tracking_session_id", "eq", session.id)
+          .not("latitude", "is", null).not("longitude", "is", null)
+          .order("event_time", { ascending: false }).limit(1).maybeSingle();
+        if (error) console.error("Session-scoped GPS position unavailable", error.message);
+        return data;
+      })
+    );
+    const gpsRow = gpsCandidates.filter(Boolean).sort(
+      (a, b) => new Date(b.event_time).getTime() - new Date(a.event_time).getTime()
+    )[0] || null;
     const locationIds = [...new Set([
       shipment.origin_location_id, shipment.destination_location_id,
       shipment.last_known_location_id, ...events.map((e) => e.location_id),
@@ -78,6 +93,7 @@ Deno.serve(async (req: Request) => {
       created_at: shipment.created_at,
       estimated_delivery_at: shipment.estimated_delivery_at,
       delivered_at: shipment.actual_delivery_at,
+      gps_sharing_status: sessionsError ? "unavailable" : activeSessions?.length ? "active" : "inactive",
       latest_position: gpsRow ? {
         latitude: Number(gpsRow.latitude),
         longitude: Number(gpsRow.longitude),
