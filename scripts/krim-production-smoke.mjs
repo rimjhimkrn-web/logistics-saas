@@ -1877,7 +1877,7 @@ for (const token of [
   "private.krim_has_permission(v_user,v_from.partner_organization_id,'partner.manage')",
   "a.status IN ('accepted','active')",
   "b.status='confirmed' AND r.status='confirmed'",
-  "custody manifest must account for every shipment cargo line",
+  "Custody manifest must account for every shipment cargo line",
   "o.bucket_id='krim-warehouse-evidence'",
   "o.owner=v_user",
   "CREATE OR REPLACE FUNCTION public.krim_respond_to_leg_custody_transfer",
