@@ -43,9 +43,15 @@ Deno.serve(async (req: Request) => {
     }
     if (!shipment) return respond({ error: "No shipment was found for that secure tracking reference." }, 404);
 
-    const { data: eventRows } = await db.from("krim_tracking_events")
-      .select("event_type,event_time,location_id")
-      .eq("shipment_id", shipment.id).order("event_time", { ascending: false }).limit(10);
+    const [{ data: eventRows }, { data: gpsRow, error: gpsError }] = await Promise.all([
+      db.from("krim_tracking_events").select("event_type,event_time,location_id")
+        .eq("shipment_id", shipment.id).order("event_time", { ascending: false }).limit(10),
+      db.from("krim_tracking_events").select("event_time,latitude,longitude,metadata")
+        .eq("shipment_id", shipment.id).eq("source_type", "gps")
+        .not("latitude", "is", null).not("longitude", "is", null)
+        .order("event_time", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    if (gpsError) console.error("Latest GPS position unavailable", gpsError.message);
     const events = eventRows || [];
     const locationIds = [...new Set([
       shipment.origin_location_id, shipment.destination_location_id,
@@ -72,6 +78,12 @@ Deno.serve(async (req: Request) => {
       created_at: shipment.created_at,
       estimated_delivery_at: shipment.estimated_delivery_at,
       delivered_at: shipment.actual_delivery_at,
+      latest_position: gpsRow ? {
+        latitude: Number(gpsRow.latitude),
+        longitude: Number(gpsRow.longitude),
+        recorded_at: gpsRow.event_time,
+        accuracy_m: gpsRow.metadata?.accuracy_m ?? null,
+      } : null,
       events: events.map((event) => ({
         event_type: event.event_type,
         event_time: event.event_time,
