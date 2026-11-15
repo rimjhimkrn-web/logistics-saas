@@ -362,7 +362,10 @@ if (existsSync(quoteReview)) {
 }
 if (existsSync(quoteComparison)) {
   const html = readFileSync(quoteComparison, "utf8");
-  if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC.");
+  if (!html.includes("krim_customer_list_partner_quotes")) failures.push("Quote comparison must load partner offers through the customer-scoped identity and eligibility RPC.");
+  if (!html.includes("krim_customer_prepare_partner_quote")) failures.push("Quote comparison must prepare a customer quote through the controlled partner-selection RPC.");
+  if (!html.includes("krim_accept_global_quote")) failures.push("Quote comparison must use the server-side quote acceptance RPC after provider acceptance.");
+  if (!html.includes("Awaiting partner acceptance") || !html.includes("Accept selected quote")) failures.push("Quote comparison must represent the provider-acceptance and customer-confirmation stages separately.");
   if (!/valid_until|valid until/i.test(html)) failures.push("Quote comparison must expose quote validity.");
   if (!/PREVIEW ONLY|Not a real quote|No live quotes|no quote/i.test(html)) failures.push("Quote comparison must distinguish empty/demo states from real customer offers.");
 }
