@@ -2,6 +2,9 @@
 Date: 11 November 2026
 Status: strategy and readiness baseline; not a claim of commercial launch readiness.
 
+## Strategic alignment
+This revenue plan is subordinate to the canonical [KRIM Global Logistics Ecosystem Master Strategy](KRIM-GLOBAL-ECOSYSTEM-MASTER-STRATEGY.md). Revenue decisions must support the four connected divisions—KRIM Marketplace, KRIM OS, KRIM Intelligence and KRIM Network—and the twelve revenue engines defined there. The ecosystem blueprint is the strategic north star; this document governs near-term commercial validation and safeguards.
+
 ## Objective
 Prove recurring, repeatable revenue from real paying businesses while preserving the long-term global logistics marketplace. KRIM must measure collected cash, recognised revenue, refunds, fees, operating costs, churn and contribution margin from reconciled records. Sign-ups, quotes, gross freight value and illustrative dashboard figures are not revenue.
 
