@@ -1112,10 +1112,10 @@ const partnerReadScopeMigration = existsSync("supabase/migrations/20261115101500
   ? readFileSync("supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql", "utf8") : "";
 const partnerPolicyGrantMigration = existsSync("supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql")
   ? readFileSync("supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql", "utf8") : "";
-if (!/GRANT EXECUTE[\\s\\S]*private\\.krim_partner_capability_covers_shipment[\\s\\S]*TO authenticated/i.test(partnerPolicyGrantMigration)) {
-  failures.push("Partner RLS capability helper must be executable by authenticated policy readers.");
+for (const token of ["GRANT EXECUTE", "private.krim_partner_capability_covers_shipment(bigint,bigint)", "TO authenticated"]) {
+  if (!partnerPolicyGrantMigration.includes(token)) failures.push("Partner RLS capability helper grant is missing: " + token);
 }
-if (/TO (PUBLIC|anon)/i.test(partnerPolicyGrantMigration)) {
+if (partnerPolicyGrantMigration.includes("TO anon") || partnerPolicyGrantMigration.includes("TO PUBLIC")) {
   failures.push("Partner RLS capability helper must not be granted to anonymous users or PUBLIC.");
 }
 const provisioningHardeningMigration = existsSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql")
