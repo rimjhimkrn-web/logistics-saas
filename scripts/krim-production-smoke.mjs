@@ -54,6 +54,10 @@ const required = [
   "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql",
   "supabase/migrations/20261115235500_block_shipment_wide_customer_quote_award_for_multi_leg.sql",
   "supabase/migrations/20261116000500_record_actual_previous_plan_status_on_activation.sql",
+  "supabase/migrations/20261116003000_add_leg_specific_partner_capability_evaluator.sql",
+  "supabase/migrations/20261116003500_use_exact_leg_capability_for_capacity_reservation.sql",
+  "supabase/migrations/20261116004000_use_exact_leg_capability_for_multi_leg_assignment_acceptance.sql",
+  "supabase/migrations/20261116005000_finalize_multi_leg_assignments_only_after_all_legs_committed.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1429,6 +1433,50 @@ for (const token of [
   "Shipment-wide partner awards are disabled",
 ]) {
   if (!legSourcingGuard.includes(token)) failures.push("Multi-leg leg-specific sourcing safety guard is missing: " + token);
+}
+
+// Exact-leg capability evaluation must be internal-only and fail closed on unknown weight.
+const legCapabilityPath = "supabase/migrations/20261116003000_add_leg_specific_partner_capability_evaluator.sql";
+const legCapabilityMigration = existsSync(legCapabilityPath) ? readFileSync(legCapabilityPath, "utf8") : "";
+for (const token of [
+  "private.krim_partner_capability_covers_shipment_leg",
+  "l.transport_mode_id",
+  "pc.coverage_country_id=origin.country_id",
+  "pc.coverage_country_id=destination.country_id",
+  "s.total_weight_kg IS NOT NULL",
+  "SET search_path TO ''",
+  "REVOKE ALL ON FUNCTION",
+]) {
+  if (!legCapabilityMigration.includes(token)) failures.push("Exact-leg partner capability safeguard is missing: " + token);
+}
+
+const legCapacityPath = "supabase/migrations/20261116003500_use_exact_leg_capability_for_capacity_reservation.sql";
+const legCapacityMigration = existsSync(legCapacityPath) ? readFileSync(legCapacityPath, "utf8") : "";
+if (!legCapacityMigration.includes("krim_partner_capability_covers_shipment_leg(v_assignment.partner_organization_id,v_leg.id)")) {
+  failures.push("Leg capacity reservation does not validate capability for the exact leg.");
+}
+
+const legAcceptancePath = "supabase/migrations/20261116004000_use_exact_leg_capability_for_multi_leg_assignment_acceptance.sql";
+const legAcceptanceMigration = existsSync(legAcceptancePath) ? readFileSync(legAcceptancePath, "utf8") : "";
+for (const token of [
+  "krim_respond_to_partner_assignment",
+  "p.total_legs>1",
+  "v_assignment.shipment_leg_id",
+  "krim_partner_capability_covers_shipment_leg",
+]) {
+  if (!legAcceptanceMigration.includes(token)) failures.push("Multi-leg partner acceptance capability guard is missing: " + token);
+}
+
+const legFinalizePath = "supabase/migrations/20261116005000_finalize_multi_leg_assignments_only_after_all_legs_committed.sql";
+const legFinalizeMigration = existsSync(legFinalizePath) ? readFileSync(legFinalizePath, "utf8") : "";
+for (const token of [
+  "krim_internal_finalize_partner_assignment",
+  "v_ready_legs=v_required_legs",
+  "shipment.partner_leg_assigned",
+  "source_and_confirm_remaining_legs",
+  "c.status='committed'",
+]) {
+  if (!legFinalizeMigration.includes(token)) failures.push("Multi-leg all-legs assignment finalization gate is missing: " + token);
 }
 
 // Shipment-leg creation must emit exactly one creation audit event per inserted leg.
