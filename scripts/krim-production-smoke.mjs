@@ -1404,6 +1404,18 @@ for (const token of [
   if (!legCustomerAwardMigration.includes(token)) failures.push("Multi-leg customer quote award safeguard is missing: " + token);
 }
 
+// Shipment-wide quote conflict checks must gate multi-leg activation only, and retain schedule continuity.
+const legPlanCommercialGatePath = "supabase/migrations/20261115234500_block_multi_leg_activation_during_shipment_wide_quotes.sql";
+const legPlanCommercialGate = existsSync(legPlanCommercialGatePath) ? readFileSync(legPlanCommercialGatePath, "utf8") : "";
+for (const token of [
+  "v_plan.total_legs>1 AND (",
+  "commercial_quote_flow_active",
+  "overlapping_leg_time_window",
+  "v_prev_arrival:=v_item.planned_arrival_at",
+]) {
+  if (!legPlanCommercialGate.includes(token)) failures.push("Multi-leg commercial/schedule evaluation gate is missing: " + token);
+}
+
 // Multi-leg plans must not flow into legacy shipment-wide partner quote/award paths.
 const legSourcingGuardPath = "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql";
 const legSourcingGuard = existsSync(legSourcingGuardPath) ? readFileSync(legSourcingGuardPath, "utf8") : "";
