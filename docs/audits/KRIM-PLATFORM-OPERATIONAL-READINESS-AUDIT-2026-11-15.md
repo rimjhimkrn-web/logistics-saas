@@ -80,7 +80,9 @@ The repository contains 272 SQL migration files, while the production migration 
 - Customer, Partner and Driver Expo apps are present.
 - The mobile validation workflow runs a three-app matrix and checks Expo compatibility/configuration, TypeScript and Android export.
 - The internal APK workflow uses EAS and requires the repository's `EXPO_TOKEN` secret. An EAS build may consume hosted build quota; do not trigger a new cloud build without checking the available plan/quota.
-- App-local `package-lock.json` files were not found in the current repository snapshot. The validation workflow uses `npm install`, not a committed lockfile plus `npm ci`. Builds are therefore not yet fully reproducible.
+- Committed `package-lock.json` files now exist for all three apps, and the validation workflow uses `npm ci`.
+- On 15 November 2026, the Customer, Partner and Driver app jobs all passed dependency installation, Expo compatibility/configuration checks, TypeScript checks and Android exports. This is CI build evidence, not physical-device acceptance.
+- A GitHub Actions job is currently building an installable KRIM Driver Android debug APK using Gradle; this audit snapshot does not yet count that build as passed.
 - Prior mobile audit recorded owner-confirmed installation of preview APKs, but this audit did not re-test those devices.
 - Internal APK success is not public store approval or production acceptance.
 
