@@ -1983,7 +1983,7 @@ for (const token of [
 const dispatchReadinessPath = "supabase/migrations/20261115150526_align_dispatch_readiness_with_multileg_authorization.sql";
 const dispatchReadinessMigration = existsSync(dispatchReadinessPath) ? readFileSync(dispatchReadinessPath, "utf8") : "";
 for (const token of [
-  "CREATE OR REPLACE FUNCTION public.krim_operations_dispatch_readiness",
+  "create or replace function public.krim_operations_dispatch_readiness",
   "c.shipment_status not in('assigned','in_transit')",
   "c.exact_active_plan_item",
   "An accepted driver assignment bound to this exact leg and partner is required",
