@@ -44,7 +44,7 @@ begin
   v_partner:=v_leg.partner_organization_id;
  else
   if v_shipment.status<>'delivered' then raise exception 'Shipment-wide return is available only after delivery' using errcode='23514'; end if;
-  select l.partner_organization_id into v_partner from public.krim_shipment_legs l where l.shipment_id=p_shipment_id and l.partner_organization_id is not null order by l.sequence_number desc limit 1;
+  select l.partner_organization_id into v_partner from public.krim_shipment_legs l where l.shipment_id=p_shipment_id and l.partner_organization_id is not null order by l.leg_sequence desc limit 1;
   if v_partner is null then raise exception 'Delivered shipment has no identifiable final partner' using errcode='23514'; end if;
  end if;
  perform pg_advisory_xact_lock(hashtextextended('krim_return:'||v_shipment.customer_organization_id::text||':'||p_idempotency_key::text,0));
