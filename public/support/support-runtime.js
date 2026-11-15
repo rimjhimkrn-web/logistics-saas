@@ -84,7 +84,7 @@
     async function loadHistory(status) {
       const button = form.querySelector('button[type="submit"]');
       button.disabled = true;
-      say("Loading your secure ticket history…");
+      say("Loading your secure ticket history and customer-visible replies…");
       try {
         const session = await requireSession();
         if (!session) return;
@@ -102,20 +102,115 @@
         if (!rows.length) {
           root.textContent = "No support tickets found for this account and filter.";
         } else {
+          const ids = rows.map(ticket => ticket.id);
+          const { data: messageRows, error: messageError } = await client
+            .from("krim_support_ticket_messages")
+            .select("id,ticket_id,sender_user_id,message_type,body,created_at")
+            .in("ticket_id", ids)
+            .eq("is_internal", false)
+            .order("created_at", { ascending: true });
+          if (messageError) throw messageError;
+          const byTicket = new Map();
+          (messageRows || []).forEach(message => {
+            const list = byTicket.get(String(message.ticket_id)) || [];
+            list.push(message);
+            byTicket.set(String(message.ticket_id), list);
+          });
           rows.forEach(ticket => {
             const card = document.createElement("article");
-            card.style.cssText = "border:1px solid #dbe4ef;border-radius:12px;padding:14px;margin:12px 0;background:#fff";
+            card.style.cssText = "border:1px solid #dbe4ef;border-radius:14px;padding:16px;margin:14px 0;background:#fff";
             const heading = document.createElement("h3");
             heading.textContent = (ticket.ticket_number || ("Ticket #" + ticket.id)) + " · " + ticket.subject;
             const meta = document.createElement("p");
             meta.textContent = "Status: " + ticket.status + " · Priority: " + ticket.priority + " · Created: " + new Date(ticket.created_at).toLocaleString();
-            const body = document.createElement("p");
-            body.textContent = ticket.message;
-            card.append(heading, meta, body);
+            const issueTitle = document.createElement("strong");
+            issueTitle.textContent = "Original request";
+            const issue = document.createElement("p");
+            issue.textContent = ticket.message;
+            card.append(heading, meta, issueTitle, issue);
+
+            const threadTitle = document.createElement("h4");
+            threadTitle.textContent = "Conversation";
+            threadTitle.style.cssText = "margin:16px 0 8px;color:#0f2b46";
+            card.appendChild(threadTitle);
+            const messages = byTicket.get(String(ticket.id)) || [];
+            if (!messages.length) {
+              const empty = document.createElement("p");
+              empty.textContent = "No customer-visible response has been recorded yet.";
+              empty.style.color = "#64748b";
+              card.appendChild(empty);
+            } else {
+              messages.forEach(message => {
+                const item = document.createElement("div");
+                item.style.cssText = "border:1px solid #e2e8f0;border-radius:10px;padding:11px;margin:8px 0;background:#f8fafc";
+                const who = document.createElement("strong");
+                who.textContent = message.sender_user_id === session.user.id ? "You" : "KRIM Support";
+                const when = document.createElement("small");
+                when.textContent = " · " + new Date(message.created_at).toLocaleString();
+                const body = document.createElement("p");
+                body.textContent = message.body;
+                body.style.cssText = "margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere";
+                const label = document.createElement("div");
+                label.append(who, when);
+                item.append(label, body);
+                card.appendChild(item);
+              });
+            }
+
+            if (["open", "in_progress"].includes(String(ticket.status).toLowerCase())) {
+              const replyForm = document.createElement("form");
+              replyForm.style.cssText = "display:grid;gap:10px;margin-top:14px";
+              const label = document.createElement("label");
+              label.textContent = "Reply to KRIM Support";
+              label.style.fontWeight = "700";
+              const input = document.createElement("textarea");
+              input.required = true;
+              input.maxLength = 5000;
+              input.rows = 3;
+              input.placeholder = "Add relevant information or respond to the support team.";
+              input.style.cssText = "width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit";
+              label.appendChild(input);
+              const send = document.createElement("button");
+              send.type = "submit";
+              send.textContent = "Send reply";
+              const replyStatus = document.createElement("p");
+              replyStatus.setAttribute("role", "status");
+              replyStatus.setAttribute("aria-live", "polite");
+              replyForm.append(label, send, replyStatus);
+              replyForm.addEventListener("submit", async event => {
+                event.preventDefault();
+                const body = input.value.trim();
+                if (body.length < 2 || body.length > 5000) {
+                  replyStatus.textContent = "Reply must contain 2–5,000 characters.";
+                  return;
+                }
+                send.disabled = true;
+                replyStatus.textContent = "Sending your reply securely…";
+                try {
+                  const { data: reply, error: replyError } = await client.rpc("krim_customer_reply_support_ticket", {
+                    p_ticket_id: ticket.id,
+                    p_body: body
+                  });
+                  if (replyError) throw replyError;
+                  if (!reply?.success) throw new Error("KRIM did not confirm the reply.");
+                  await loadHistory(status);
+                  say("Your reply was saved to the ticket conversation.");
+                } catch (replyError) {
+                  replyStatus.textContent = "Reply was not confirmed: " + (replyError?.message || "Please retry.");
+                  send.disabled = false;
+                }
+              });
+              card.appendChild(replyForm);
+            } else {
+              const closed = document.createElement("p");
+              closed.textContent = "This ticket is " + ticket.status + ". Create a new ticket if you need help with a separate issue.";
+              closed.style.color = "#64748b";
+              card.appendChild(closed);
+            }
             root.appendChild(card);
           });
         }
-        say("Loaded " + rows.length + " ticket(s) from your authenticated KRIM account.");
+        say("Loaded " + rows.length + " ticket(s) and their customer-visible conversation history.");
       } catch (error) {
         say("Ticket history could not be loaded: " + (error?.message || "Unknown error"));
       } finally {
