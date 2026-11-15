@@ -5,6 +5,8 @@ import { Platform } from "react-native";
 import { supabase } from "./supabase";
 
 export const DRIVER_LOCATION_TASK = "KRIM_DRIVER_TRIP_LOCATION_V1";
+// Location collection remains disabled until retention, deletion and legal launch gates are approved.
+export const DRIVER_GPS_LAUNCH_ENABLED = false;
 const ASSIGNMENT_KEY = "krim.driver.tracking.assignment.v1";
 const SESSION_KEY = "krim.driver.tracking.session.v1";
 let foregroundSubscription: Location.LocationSubscription | null = null;
@@ -45,8 +47,8 @@ async function uploadLocation(location: LocationPayload, method: string) {
   });
   if (error) {
     const status = (error as any)?.context?.status;
-    if (status === 401 || status === 403 || status === 409) {
-      await stopLocalTracking();
+    if (status === 401 || status === 403 || status === 409 || status === 503) {
+      await stopTripTracking().catch(() => stopLocalTracking());
     }
     return false;
   }
@@ -74,6 +76,7 @@ if (!TaskManager.isTaskDefined(DRIVER_LOCATION_TASK)) {
 }
 
 export async function startTripTracking(assignmentId: string, trackingSessionId: string): Promise<TrackingMode> {
+  if (!DRIVER_GPS_LAUNCH_ENABLED) throw new Error("Live GPS sharing is temporarily paused while KRIM completes its location-retention, deletion and legal launch approvals.");
   if (!supabase) throw new Error("KRIM secure connection is not configured.");
   await stopLocalTracking();
   const foreground = await Location.requestForegroundPermissionsAsync();
@@ -136,6 +139,10 @@ export async function stopTripTracking(): Promise<void> {
 }
 
 export async function getTripTrackingStatus(): Promise<{ mode: TrackingMode | "off"; assignmentId: string | null }> {
+  if (!DRIVER_GPS_LAUNCH_ENABLED) {
+    await stopTripTracking().catch(() => stopLocalTracking());
+    return { mode: "off", assignmentId: null };
+  }
   const assignmentId = await SecureStore.getItemAsync(ASSIGNMENT_KEY);
   if (!assignmentId) return { mode: "off", assignmentId: null };
   try {
