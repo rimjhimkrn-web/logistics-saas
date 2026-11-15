@@ -3,7 +3,7 @@
 Expo + React Native Android/iOS foundation for the first KRIM mobile application.
 
 ## Included
-- Five-tab partner app shell: Overview, Opportunities, Shipments, Earnings and Profile.
+- Five-tab partner app shell: Overview, Opportunities, Shipments, Quotes and Profile.
 - Supabase email/password sign-in and password-reset request.
 - Session persistence using Expo SecureStore (chunked to respect per-item storage limits).
 - Existing KRIM partner onboarding hand-off.
