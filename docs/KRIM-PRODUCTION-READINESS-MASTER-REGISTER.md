@@ -220,3 +220,9 @@ Live migration `20261115151545_block_unallocated_multileg_finance_postings` adds
 Reason: legacy finance routines select a single completed assignment / shipment-wide quote and cannot safely represent several partner legs, customer-to-partner freight invoices, or KRIM's separate referral/coordination fee. The launch model is partner-direct: customer pays the logistics partner; KRIM separately invoices its agreed fee. Do not use platform invoice/payable routines to collect or settle freight.
 
 Live verification: all four triggers are installed. Current invoice, payable, revenue-allocation and shipment-revenue-item tables contain zero rows associated with active multi-leg plans. The database guard and repository smoke assertions are in place; a deliberate write-failure test was not run against real commercial data. Finance remains a release blocker for multi-leg commercial execution until a reviewed leg-level settlement/commission model is implemented.
+
+## Custody-transfer response audit correction (15 November 2026)
+
+Migration `20261115151811_correct_custody_transfer_response_audit_fields` adds `responded_by` and `responded_at` to custody-transfer records. The response RPC now records those fields for both acceptance and rejection, while `accepted_by` and `accepted_at` are populated only on acceptance. Rejection reason remains separately recorded. This corrects the prior semantic defect in which a rejecting actor was stored in fields named as acceptance metadata.
+
+The migration was applied to the live database, matching SQL was committed, and production smoke assertions were added. There were zero custody-transfer rows at migration time, so no historical rows required correction. No synthetic transfer was created and no positive handoff E2E test was claimed.
