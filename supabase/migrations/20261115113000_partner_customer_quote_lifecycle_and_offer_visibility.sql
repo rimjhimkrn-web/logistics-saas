@@ -685,6 +685,7 @@ BEGIN
     COALESCE(NULLIF(btrim(o.display_name),''),NULLIF(btrim(o.legal_name),''),'Verified logistics partner') AS partner_name,
     COALESCE(o.legal_name,'') AS partner_legal_name,
     (o.status='active'
+      AND lower(coalesce(o.organization_type_code, o.organization_type)) IN ('partner','carrier','forwarder','logistics_provider')
       AND o.partner_account_mode='registered_business'
       AND o.partner_verification_status IN ('verified','approved')
       AND o.partner_lifecycle_status IN ('active','verified')) AS partner_verified,
@@ -700,6 +701,7 @@ BEGIN
           AND (pc.effective_until IS NULL OR pc.effective_until>now())
       )) AS capability_current,
     (o.status='active'
+      AND lower(coalesce(o.organization_type_code, o.organization_type)) IN ('partner','carrier','forwarder','logistics_provider')
       AND o.partner_account_mode='registered_business'
       AND o.partner_verification_status IN ('verified','approved')
       AND o.partner_lifecycle_status IN ('active','verified')
@@ -724,7 +726,28 @@ BEGIN
   JOIN public.krim_organizations o ON o.id=q.partner_organization_id
   WHERE q.shipment_id=ANY(p_shipment_ids)
     AND q.status IN ('submitted','under_review','shortlisted','accepted')
-    AND (q.status='accepted' OR po.status='open')
+    AND (
+      q.status='accepted'
+      OR (
+        po.status='open'
+        AND o.status='active'
+        AND lower(coalesce(o.organization_type_code, o.organization_type)) IN ('partner','carrier','forwarder','logistics_provider')
+        AND o.partner_account_mode='registered_business'
+        AND o.partner_verification_status IN ('verified','approved')
+        AND o.partner_lifecycle_status IN ('active','verified')
+        AND private.krim_partner_compliance_is_current(o.id)
+        AND private.krim_partner_capability_covers_shipment(o.id,q.shipment_id)
+        AND EXISTS (
+          SELECT 1
+          FROM public.krim_partner_capabilities pc
+          WHERE pc.organization_id=o.id
+            AND pc.active IS TRUE
+            AND pc.verification_status='verified'
+            AND (pc.effective_from IS NULL OR pc.effective_from<=now())
+            AND (pc.effective_until IS NULL OR pc.effective_until>now())
+        )
+      )
+    )
     AND private.krim_has_organization_access(v_user_id,s.customer_organization_id)
   ORDER BY q.submitted_at DESC NULLS LAST,q.id DESC;
 END;
