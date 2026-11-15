@@ -89,14 +89,14 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="amountbody">
 <div class="amountbox"><div class="amountlabel">Total due for this quotation</div><div id="checkout-amount" class="amountvalue">—</div><div id="amount-caption" class="amountnote">Waiting for quote and assignment validation.</div></div>
 <div class="metalist">
-<div class="metarow"><span>Integrated provider</span><strong>Razorpay</strong></div>
-<div class="metarow"><span>Current checkout currency</span><strong>INR active · others gated</strong></div>
-<div class="metarow"><span>Order created by</span><strong>KRIM secure server</strong></div>
-<div class="metarow"><span>Payment completion</span><strong>Server verification required</strong></div>
+<div class="metarow"><span>Payment model</span><strong>Partner-direct</strong></div>
+<div class="metarow"><span>KRIM freight checkout</span><strong>Disabled</strong></div>
+<div class="metarow"><span>Freight payment recipient</span><strong>Contracting logistics partner</strong></div>
+
 </div>
-<button id="btn-pay-now" class="paybutton" disabled>Continue to secure payment <span aria-hidden="true">→</span></button>
-<p class="actionnote">If checkout closes or a result is unclear, check the original payment status before attempting another payment. KRIM never changes providers automatically.</p>
-<div id="payment-order-meta" class="footnote" aria-live="polite">No new payment order has been created.</div>
+<button id="btn-pay-now" class="paybutton" disabled>KRIM checkout disabled · pay partner directly</button>
+<p class="actionnote">KRIM does not collect freight charges or settle partner funds under the current launch model. Obtain verified payment instructions and an invoice directly from the contracting logistics provider.</p>
+<div id="payment-order-meta" class="footnote" aria-live="polite">No KRIM freight payment order will be created under the current partner-direct model.</div>
 </div></div>
 <div class="card">
 <div class="cardhead"><div><h2>Payment protection</h2><p>Three controls keep the transaction connected to the shipment.</p></div></div>
@@ -108,19 +108,20 @@ a:not(.btn){text-decoration-color:#06b6d470}
 </div>
 <div class="card">
 <div class="cardhead"><div><h2>Global payment network</h2><p>Built for expansion, enabled only when verified.</p></div></div>
-<div class="providerbanner"><strong>Currently integrated: Razorpay · India / INR</strong>Razorpay is the only checkout adapter currently integrated. Live merchant eligibility, settlement, refunds and end-to-end reconciliation are not yet fully verified, so this is not a launch-readiness claim. Other methods are roadmap entries only and cannot be selected or charged.</div><div class="market-picker"><label for="payment-market">Explore payment options by market</label><select id="payment-market"><option value="IN">India · INR</option><option value="US">United States · USD</option><option value="GB">United Kingdom · GBP</option><option value="DE">Germany · EUR</option><option value="AE">United Arab Emirates · AED</option><option value="SG">Singapore · SGD</option></select></div><div id="payment-market-currency-note" class="providerbanner" style="margin-top:9px">Market discovery only. KRIM will never convert your accepted quote automatically.</div><div id="global-payment-options" class="provider-grid" aria-live="polite" aria-label="Global payment provider availability"><div class="provider-option"><strong>Checking provider registry…</strong><small>Loading verified market capabilities from KRIM.</small></div></div>
-<div class="sidelinks"><a href="finance/payment-gateways.html">Payment architecture <span>↗</span></a><a href="finance/payment-methods.html">Country & method eligibility <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a></div>
+<div class="providerbanner"><strong>Current model: partner-direct payments</strong>Razorpay adapter code is present, but KRIM checkout, refunds and partner settlement are disabled. Merchant eligibility is unverified. No provider can be selected or charged through KRIM. Customers pay the contracting logistics provider directly.</div><div class="market-picker"><label for="payment-market">Explore payment options by market</label><select id="payment-market"><option value="IN">India · INR</option><option value="US">United States · USD</option><option value="GB">United Kingdom · GBP</option><option value="DE">Germany · EUR</option><option value="AE">United Arab Emirates · AED</option><option value="SG">Singapore · SGD</option></select></div><div id="payment-market-currency-note" class="providerbanner" style="margin-top:9px">Market discovery only. KRIM will never convert your accepted quote automatically.</div><div id="global-payment-options" class="provider-grid" aria-live="polite" aria-label="Global payment provider availability"><div class="provider-option"><strong>Checking provider registry…</strong><small>Loading verified market capabilities from KRIM.</small></div></div>
+<div class="sidelinks"><a href="shipper/payment-checkout.html">Partner-direct payment guidance <span>↗</span></a><a href="../terms.html#payment">Payment terms <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a></div>
 </div>
 </aside>
 </div>
 </main>
-<footer><div class="shell footinner"><span>KRIM Logistics · Secure payment and settlement workflow</span><span><a href="shipper/spot-approvals.html">Quote review</a> &nbsp;·&nbsp; <a href="../app/customer/index.html">Customer workspace</a></span></div></footer>
+<footer><div class="shell footinner"><span>KRIM Logistics · Partner-direct payment guidance</span><span><a href="shipper/spot-approvals.html">Quote review</a> &nbsp;·&nbsp; <a href="../app/customer/index.html">Customer workspace</a></span></div></footer>
 
 <script>
 (function(){
 "use strict";
 const client=window.KRIM_SUPABASE||window.supabaseClient;
 const byId=(id)=>document.getElementById(id);
+const KRIM_PARTNER_DIRECT_ONLY=true;
 let session=null,quote=null,shipment=null,assignment=null,canPay=false,paymentBusy=false;
 const params=new URLSearchParams(location.search);
 const shipmentParam=params.get("shipment_id");
@@ -131,7 +132,7 @@ const money=(currency,amount)=>String(currency||"").toUpperCase()+" "+Number(amo
 function message(text,type){const el=byId("checkout-feedback");el.className="feedback notice"+(type==="error"?" error":type==="success"?" success":"");el.textContent=text;}
 function gateway(text,state){byId("gateway-status").textContent="KRIM PAYMENT ORCHESTRATOR · "+text;byId("gateway-dot").style.background=state==="good"?"#34d399":state==="bad"?"#f87171":"#fbbf24";}
 function check(name,ok,text){const icon=byId("check-"+name);icon.textContent=ok?"✓":"!";icon.className="check-icon"+(ok?"":" pending");byId("check-"+name+"-text").textContent=text;}
-function setPayReady(ok){canPay=ok;byId("btn-pay-now").disabled=!ok||paymentBusy;}
+function setPayReady(ok){canPay=false;byId("btn-pay-now").disabled=true;}
 const marketCurrencies={IN:"INR",US:"USD",GB:"GBP",DE:"EUR",AE:"AED",SG:"SGD"};
 const providerNames={razorpay:"Razorpay",stripe:"Stripe",paypal:"PayPal",adyen:"Adyen",checkout_com:"Checkout.com",checkoutcom:"Checkout.com",bank_transfer:"Bank transfer",regional_wallet:"Regional wallet",regional_wallets:"Regional wallets"};
 async function loadGlobalPaymentOptions(){
@@ -205,9 +206,9 @@ async function init(){
  const foreignCurrencyReady=currency!=="INR"&&!!capability&&capability.enabled===true;
  const currencyReady=currency==="INR"||foreignCurrencyReady;
  const amountValid=Number.isFinite(Number(quote.amount))&&Number(quote.amount)>0&&currencyReady&&Math.round(Number(quote.amount)*currencyFactor(currency))>0;
- const amountMessage=amountValid?(currency==="INR"?"Positive quote total and current INR checkout confirmed.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
+ const amountMessage=amountValid?(currency==="INR"?"Quote amount is valid; KRIM freight checkout remains disabled under the partner-direct model.":"This currency has passed KRIM's configured payment capability checks."):(currency==="INR"?"The INR quote amount is invalid.":"This currency is not enabled in KRIM's verified payment capability registry; KRIM will not auto-convert it.");
  check("amount",amountValid,amountMessage);
- byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted KRIM quote; the existing INR checkout remains active.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
+ byId("amount-caption").textContent=currency==="INR"?"Amount comes from the accepted partner quote; payment is made directly to the contracting logistics provider.":foreignCurrencyReady?"Currency is enabled only after provider and settlement capability checks.":"International currency checkout is not enabled for "+(currency||"this currency")+". No automatic conversion will occur.";
  let assignmentOk=false;
  if(quote.partner_quote_id){
    const a=await client.from("krim_shipment_partner_assignments").select("id,status,partner_quote_id,partner_organization_id,assignment_number,accepted_at,capacity_binding_id,shipment_leg_id").eq("shipment_id",sid).eq("partner_quote_id",quote.partner_quote_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
@@ -232,11 +233,14 @@ async function init(){
  else if(!assignmentOk){message("Checkout is locked until the selected partner accepts the assignment and reserves matching verified capacity. No payment order has been created.","info");}
  else {message("Quote, shipment, currency, partner assignment and capacity reservation checks passed. Continue when you are ready to open Razorpay.","success");}
  byId("payment-order-meta").textContent="No new payment order has been created yet.";
- gateway(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"PRE-CHECKS PASSED":"AWAITING ELIGIBILITY",quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed?"good":"wait");
- setPayReady(quoteValid&&amountValid&&assignmentOk&&shipmentConfirmed);
+ gateway("PARTNER-DIRECT MODEL · KRIM CHECKOUT DISABLED","wait");
+ canPay=false;setPayReady(false);
+ byId("btn-pay-now").textContent="KRIM checkout disabled · pay partner directly";
+ byId("payment-order-meta").textContent="No KRIM freight payment order will be created under the current partner-direct model.";
+ message("KRIM does not collect freight charges or settle partner funds. Pay the contracting logistics provider directly after independently verifying its legal identity, quote, invoice and beneficiary details.","notice");
 }
 async function startPayment(){
- if(!canPay||paymentBusy||!quote||!session||!shipment)return;
+ if(KRIM_PARTNER_DIRECT_ONLY||!canPay||paymentBusy||!quote||!session||!shipment)return;
  paymentBusy=true;setPayReady(false);byId("btn-pay-now").textContent="Creating secure payment order…";
  check("order",false,"Requesting a server-created order bound to this accepted quote.");
  message("KRIM is validating the accepted quote, organization, shipment, partner offer and assignment before creating the payment order.","info");
