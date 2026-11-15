@@ -83,12 +83,12 @@ jobs:
           node <<'NODE'
           const fs = require("node:fs");
           const source = fs.readFileSync("../../config.js", "utf8");
-          const url = source.match(/const SUPABASE_URL\\s*=\\s*"([^"]+)"/)?.[1];
-          const key = source.match(/const SUPABASE_PUBLISHABLE_KEY\\s*=\\s*"([^"]+)"/s)?.[1];
+          const url = source.match(/const SUPABASE_URL\s*=\s*"([^"]+)"/)?.[1];
+          const key = source.match(/const SUPABASE_PUBLISHABLE_KEY\s*=\s*"([^"]+)"/s)?.[1];
           if (!url || !key || !key.startsWith("sb_publishable_")) {
             throw new Error("A valid public Supabase URL and publishable key must be configured in config.js.");
           }
-          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_SUPABASE_URL=${url}\\nEXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}\\n`);
+          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_SUPABASE_URL=${url}\nEXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}\n`);
           NODE
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
