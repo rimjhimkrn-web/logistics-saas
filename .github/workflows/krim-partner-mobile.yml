@@ -30,6 +30,13 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - name: Preserve generated dependency lockfile for reproducible CI
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-${{ matrix.app }}-package-lock
+          path: mobile/${{ matrix.app }}/package-lock.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Stage official KRIM master logo inside app bundle
         run: npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
       - name: Generate Expo icon PNG assets
