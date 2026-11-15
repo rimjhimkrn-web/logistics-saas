@@ -125,7 +125,7 @@ export async function loadCustomerQuotes(
   }
 
   const [offerResults, assignmentResult] = await Promise.all([
-    client.rpc("krim_customer_list_partner_quotes_multi", { p_shipment_ids: shipmentIds }),
+    client.rpc("krim_customer_list_partner_quotes", { p_shipment_ids: shipmentIds }),
     client.from("krim_shipment_partner_assignments")
       .select("id,shipment_id,partner_quote_id,status,created_at")
       .in("shipment_id", shipmentIds)
