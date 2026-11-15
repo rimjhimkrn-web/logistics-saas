@@ -1126,7 +1126,7 @@ const apkWorkflow = existsSync(".github/workflows/krim-android-internal-apk.yml"
 for (const token of ["build-window-guard", "build_allowed=false", "build_allowed=true", "date -u -d '2026-12-01T00:00:00Z'", "needs.build-window-guard.outputs.build_allowed == 'true'"]) {
   if (!apkWorkflow.includes(token)) failures.push("APK build pause guard is missing: " + token);
 }
-if (/github\\.run_started_at\\s*[<>]=/.test(apkWorkflow)) {
+if (apkWorkflow.includes("github.run_started_at >=") || apkWorkflow.includes("github.run_started_at <=")) {
   failures.push("APK build date gating must use an explicit timestamp comparison, not a string relational expression.");
 }
 const provisioningHardeningMigration = existsSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql")
