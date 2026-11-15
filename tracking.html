@@ -190,9 +190,12 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                     const pos = payload.latest_position;
                     const lat = Number(pos.latitude), lon = Number(pos.longitude);
                     const gps = document.createElement("div");
-                    gps.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-2";
-                    const freshness = String(pos.freshness || "stale").toUpperCase();
-                    gps.append(trackingText("strong", "Latest driver GPS position · " + freshness, "block text-emerald-900 text-sm"));
+                    const freshness = String(pos.freshness || "stale").toLowerCase();
+                    const isLive = freshness === "live" && payload.gps_sharing_status === "active";
+                    gps.className = isLive
+                        ? "p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-2"
+                        : "p-4 rounded-xl border border-amber-200 bg-amber-50 space-y-2";
+                    gps.append(trackingText("strong", "Driver GPS position · " + (isLive ? "LIVE" : freshness.toUpperCase()), isLive ? "block text-emerald-900 text-sm" : "block text-amber-900 text-sm"));
                     gps.append(trackingText("p", "Recorded: " + trackingDate(pos.recorded_at) + (pos.accuracy_m ? " · Accuracy ±" + Math.round(Number(pos.accuracy_m)) + " m" : ""), "text-xs text-emerald-800"));
                     gps.append(trackingText("p", "Coordinates: " + lat.toFixed(5) + ", " + lon.toFixed(5), "text-xs text-emerald-900 font-mono"));
                     const map = document.createElement("a");
@@ -202,8 +205,12 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                     map.className = "inline-flex text-xs font-bold underline text-emerald-900";
                     gps.append(map);
                     card.append(gps);
+                } else if (payload.gps_sharing_status === "active") {
+                    card.append(trackingText("p", "The driver's consented location-sharing session is active. KRIM is waiting for the first verified GPS update; device signal and network availability can affect timing.", "p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs text-sky-900"));
+                } else if (payload.gps_sharing_status === "inactive") {
+                    card.append(trackingText("p", "No live GPS sharing session is active for this shipment. Verified shipment milestones remain available below.", "p-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-600"));
                 } else {
-                    card.append(trackingText("p", "No driver GPS position has been shared for this shipment yet. The latest verified milestone information is shown below.", "text-xs text-slate-500"));
+                    card.append(trackingText("p", "GPS sharing status is temporarily unavailable. Verified shipment milestones remain available below.", "p-3 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-900"));
                 }
 
                 const refresh = document.createElement("button");
@@ -212,7 +219,7 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                 refresh.className = "px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold";
                 refresh.addEventListener("click", () => loadTracking(trackingNumber));
                 card.append(refresh);
-                card.append(trackingText("p", "This page checks for new shared positions every 30 seconds while it remains visible. GPS updates depend on the driver's opt-in foreground sharing session and device signal.", "text-xs text-slate-500"));
+                card.append(trackingText("p", "This page refreshes every 30 seconds while visible. GPS positions are displayed only while the driver's native-app consent session is active; location updates may be delayed or interrupted by device, battery, GPS or network conditions.", "text-xs text-slate-500"));
 
                 card.append(trackingText("h3", "Latest milestones", "font-bold text-sm pt-2"));
                 const list = document.createElement("ol");
