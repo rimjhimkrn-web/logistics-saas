@@ -64,8 +64,8 @@ $('quote-list').innerHTML=examples.map((q,i)=>'<article class="quote"><div class
 $('accept-selected').disabled=true;$('checkout-link').href='#';$('checkout-link').setAttribute('aria-disabled','true');$('checkout-link').style.opacity='.45';feedback('Preview mode is isolated from live pricing, shipment data and quote actions.','info');
 }
 function currentAward(){
-const activeQuotes=customerQuotes.filter(q=>q.partner_quote_id&&String(q.status||'').toLowerCase()==='accepted').sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
-for(const q of activeQuotes){const a=assignments.find(x=>Number(x.partner_quote_id)===Number(q.partner_quote_id));if(a&&['offered','accepted','active'].includes(String(a.status||'').toLowerCase()))return {quote:q,assignment:a};}
+const preparedQuotes=customerQuotes.filter(q=>q.partner_quote_id&&['sent','accepted'].includes(String(q.status||'').toLowerCase())).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+for(const q of preparedQuotes){const a=assignments.find(x=>Number(x.partner_quote_id)===Number(q.partner_quote_id));if(a&&['offered','accepted','active'].includes(String(a.status||'').toLowerCase()))return {quote:q,assignment:a};}
 return null;
 }
 function render(){
@@ -75,8 +75,10 @@ $('quote-count').textContent=openOffers.length+' offer'+(openOffers.length===1?'
 $('list-caption').textContent=openOffers.length?'Live partner-submitted offers for this shipment. Awarding one creates a partner assignment offer; dispatch remains separate.':'No currently eligible partner offers are visible for this shipment.';
 let html='';
 if(awarded){
-const a=awarded.assignment,q=awarded.quote,active=String(a.status).toLowerCase()==='active'&&String(shipment.status).toLowerCase()==='assigned';
-html+='<article class="quote selected"><div class="quote-top"><div class="quote-name"><span class="quote-icon">✓</span><div><h3>Selected partner offer · '+escapeHtml(q.partner_quote_id)+'</h3><div class="quote-sub">Customer award confirmed · customer quote #'+escapeHtml(q.id)+'</div></div></div><div class="amount"><strong>'+escapeHtml(money(q.amount,q.currency_code))+'</strong><small>'+escapeHtml(q.currency_code||'')+'</small></div></div><div class="quote-grid"><div class="fact"><small>Partner response</small><b>'+escapeHtml(String(a.status).replace(/_/g,' '))+'</b></div><div class="fact"><small>Shipment status</small><b>'+escapeHtml(shipment.status)+'</b></div><div class="fact"><small>Assignment reference</small><b>'+escapeHtml(a.assignment_number||('#'+a.id))+'</b></div></div><div class="quote-actions"><span class="pill '+(active?'good':'warn')+'">'+(active?'Partner accepted · shipment assigned':'Awaiting partner acceptance')+'</span><span class="quote-sub">'+(active?'The provider assignment is active. Confirm invoice, tax treatment and payment terms directly with the contracting provider.':'Your award is recorded. The provider must accept the assignment before KRIM can mark it assigned.')+'</span></div></article>';
+const a=awarded.assignment,q=awarded.quote,active=String(q.status).toLowerCase()==='accepted'&&String(a.status).toLowerCase()==='active'&&String(shipment.status).toLowerCase()==='assigned',providerAccepted=String(a.status).toLowerCase()==='accepted';
+const stage=active?'Partner accepted · shipment assigned':providerAccepted?'Provider accepted · customer confirmation pending':'Awaiting partner acceptance';
+const detail=active?'The provider assignment is active. Confirm invoice, tax treatment and payment terms directly with the contracting provider.':providerAccepted?'The provider has accepted. Review the exact quote and accept it to confirm the shipment; dispatch remains separate.':'Your selected offer has been sent to the provider for acceptance. The shipment remains unconfirmed until both parties complete their steps.';
+html+='<article class="quote selected"><div class="quote-top"><div class="quote-name"><span class="quote-icon">✓</span><div><h3>Selected partner offer · '+escapeHtml(q.partner_quote_id)+'</h3><div class="quote-sub">Customer quote #'+escapeHtml(q.id)+' · '+escapeHtml(String(q.status).toUpperCase())+'</div></div></div><div class="amount"><strong>'+escapeHtml(money(q.amount,q.currency_code))+'</strong><small>'+escapeHtml(q.currency_code||'')+'</small></div></div><div class="quote-grid"><div class="fact"><small>Partner response</small><b>'+escapeHtml(String(a.status).replace(/_/g,' '))+'</b></div><div class="fact"><small>Shipment status</small><b>'+escapeHtml(shipment.status)+'</b></div><div class="fact"><small>Assignment reference</small><b>'+escapeHtml(a.assignment_number||('#'+a.id))+'</b></div></div><div class="quote-actions"><span class="pill '+(active?'good':'warn')+'">'+stage+'</span><span class="quote-sub">'+detail+'</span></div></article>';
 }
 if(openOffers.length){
 html+=openOffers.map(o=>{
@@ -94,17 +96,20 @@ const awarded=currentAward();
 $('selection-label').textContent=awarded?'Partner offer #'+awarded.quote.partner_quote_id+' awarded':selected?'Offer '+(selected.quote_number||('#'+selected.id)):'None selected';
 $('accept-selected').disabled=true;$('checkout-link').href='#';$('checkout-link').setAttribute('aria-disabled','true');$('checkout-link').style.opacity='.45';
 if(awarded){
-const a=awarded.assignment,active=String(a.status).toLowerCase()==='active'&&String(shipment.status).toLowerCase()==='assigned';
-if(active){$('checkout-link').href=route('public/shipper/payment-checkout.html')+'?shipment_id='+encodeURIComponent(shipment.id)+'&quote_id='+encodeURIComponent(awarded.quote.id);$('checkout-link').removeAttribute('aria-disabled');$('checkout-link').style.opacity='1';actionFeedback('The provider accepted the assignment and KRIM recorded the shipment as assigned. Review the partner-direct guidance; KRIM does not collect freight payments. Confirm the provider invoice, tax treatment and payment terms directly.','success');}
-else actionFeedback('Your selected offer has been awarded. The partner assignment is still awaiting provider acceptance. No dispatch, delivery or payment completion is implied.','info');
+const a=awarded.assignment,q=awarded.quote,providerAccepted=String(a.status).toLowerCase()==='accepted',active=String(q.status).toLowerCase()==='accepted'&&String(a.status).toLowerCase()==='active'&&String(shipment.status).toLowerCase()==='assigned';
+if(active){$('accept-selected').disabled=true;$('accept-selected').textContent='Quote accepted · shipment assigned';$('checkout-link').href=route('public/shipper/payment-checkout.html')+'?shipment_id='+encodeURIComponent(shipment.id)+'&quote_id='+encodeURIComponent(q.id);$('checkout-link').removeAttribute('aria-disabled');$('checkout-link').style.opacity='1';actionFeedback('The provider accepted the assignment and KRIM finalized the shipment as assigned. Review the partner-direct guidance; KRIM does not collect freight payments. Confirm the provider invoice, tax treatment and payment terms directly.','success');}
+else if(String(q.status).toLowerCase()==='sent'&&providerAccepted&&String(shipment.status)==='quoted'&&!isExpired(q.valid_until)){$('accept-selected').disabled=false;$('accept-selected').textContent='Accept selected quote →';actionFeedback('The provider has accepted the assignment. Review the amount, currency and validity, then accept the customer quote to finalize assignment.','success');}
+else if(String(q.status).toLowerCase()==='sent'&&!providerAccepted){$('accept-selected').disabled=true;$('accept-selected').textContent='Awaiting partner acceptance';actionFeedback('Your selected offer has been sent to the provider. The shipment remains quoted until the provider accepts and you confirm the quote.','info');}
+else{ $('accept-selected').disabled=true;$('accept-selected').textContent='Quote workflow needs review';actionFeedback('The selected quote or assignment is expired or in an unexpected state. No dispatch or payment completion is implied; contact KRIM support before retrying.','error');}
 return;
 }
+$('accept-selected').textContent='Request provider acceptance →';
 if(!selected){actionFeedback('Select a live partner offer to review its amount, validity and award eligibility.','info');return;}
 const valid=['submitted','under_review','shortlisted'].includes(String(selected.status||'').toLowerCase())&&!isExpired(selected.valid_until)&&(!selected.valid_until||new Date(selected.valid_until).getTime()>Date.now()+60*60*1000)&&Number(selected.amount)>0;
 const shipmentEligible=String(shipment.status)==='quoted'||(String(shipment.status)==='confirmed'&&assignments.some(a=>String(a.status)==='rejected'));
 if(!valid){actionFeedback('This offer is expired, expires too soon, or is not in an awardable state. Refresh the offers before proceeding.','error');return;}
 if(!shipmentEligible){actionFeedback('This shipment is not in a state that can accept another partner offer. Current state: '+String(shipment.status||'unknown')+'.','error');return;}
-$('accept-selected').disabled=false;actionFeedback('Ready to award. KRIM will validate customer permissions, partner verification, compliance, capability, route coverage and offer validity on the server.','success');
+$('accept-selected').disabled=false;actionFeedback('Ready to request provider acceptance. KRIM will validate customer permissions, partner verification, compliance, capability, route coverage and offer validity on the server.','success');
 }
 async function loadRecords(){
 const [offerResult,quoteResult,assignmentResult]=await Promise.all([
@@ -136,17 +141,31 @@ await loadRecords();feedback('Shipment access verified. Partner-submitted offers
 };cfg.onerror=()=>feedback('KRIM public configuration could not be loaded. No records or actions are available.','error');document.head.appendChild(cfg);
 }
 $('accept-selected').addEventListener('click',async()=>{
-if(!selected||!client||!shipment||busy)return;
-const awarded=currentAward();if(awarded){actionFeedback('A partner offer is already awarded for this shipment.','info');return;}
-if(!confirm('Award partner offer '+(selected.quote_number||('#'+selected.id))+' for '+money(selected.amount,selected.currency_code)+'? The provider must still accept the assignment before the shipment can be assigned or dispatched.'))return;
+if(!client||!shipment||busy)return;
+const awarded=currentAward();
+if(awarded){
+const q=awarded.quote,a=awarded.assignment;
+if(String(q.status).toLowerCase()!=='sent'||String(a.status).toLowerCase()!=='accepted'||String(shipment.status)!=='quoted'||isExpired(q.valid_until)){actionFeedback('The provider assignment or customer quote is not ready for final acceptance. Refresh and review the current state.','error');return;}
+if(!confirm('Accept customer quote #'+q.id+' for '+money(q.amount,q.currency_code)+'? KRIM will confirm the quote and finalize the accepted partner assignment.'))return;
+busy=true;$('accept-selected').disabled=true;actionFeedback('KRIM is validating the quote and finalizing the accepted provider assignment…','info');
+try{
+const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:Number(q.id)});if(error)throw error;
+const result=Array.isArray(data)?data[0]:data;
+if(!result||Number(result.id)!==Number(q.id)||String(result.status)!=='accepted')throw new Error('KRIM did not confirm acceptance of this exact quote.');
+await loadRecords();render();actionFeedback('Customer quote accepted. KRIM finalized the partner assignment and shipment status. Freight payment remains directly between customer and contracting provider.','success');
+}catch(e){console.error(e);actionFeedback('Quote acceptance failed. '+(e&&e.message?e.message:'Server validation failed. Refresh and review the current state.'),'error');}
+finally{busy=false;updateSelection();}
+return;
+}
+if(!selected)return;
+if(!confirm('Select partner offer '+(selected.quote_number||('#'+selected.id))+' for '+money(selected.amount,selected.currency_code)+'? KRIM will create a customer quote and send the provider an assignment offer. You will accept the final quote after the provider accepts.'))return;
 busy=true;$('accept-selected').disabled=true;actionFeedback('KRIM is validating the offer, customer permissions, partner verification and route capability…','info');
 try{
-const {data,error}=await client.rpc('krim_award_partner_quote_for_checkout',{p_partner_quote_id:Number(selected.id)});if(error)throw error;
+const {data,error}=await client.rpc('krim_customer_prepare_partner_quote',{p_partner_quote_id:Number(selected.id)});if(error)throw error;
 const result=Array.isArray(data)?data[0]:data;
-if(!result||Number(result.shipment_id)!==Number(shipment.id)||Number(result.partner_quote_id)!==Number(selected.id)||String(result.status)!=='accepted')throw new Error('KRIM did not confirm the exact partner offer award. Refresh and check the shipment before retrying.');
-actionFeedback('Partner offer awarded successfully. KRIM recorded customer acceptance and sent an assignment offer to the provider. Waiting for provider acceptance; dispatch and payment are not complete.','success');
-selected=null;await loadRecords();render();
-}catch(e){console.error(e);actionFeedback('Partner offer was not awarded. '+(e&&e.message?e.message:'Server validation failed. Refresh and check the current shipment state.'),'error');}
+if(!result||Number(result.shipment_id)!==Number(shipment.id)||Number(result.partner_quote_id)!==Number(selected.id)||String(result.status)!=='sent')throw new Error('KRIM did not confirm the exact prepared customer quote. Refresh and check the shipment before retrying.');
+selected=null;await loadRecords();render();actionFeedback('Customer quote prepared and provider assignment offer sent. Await provider acceptance, then accept the customer quote to finalize assignment.','success');
+}catch(e){console.error(e);actionFeedback('Partner offer could not be prepared. '+(e&&e.message?e.message:'Server validation failed. Refresh and check the current shipment state.'),'error');}
 finally{busy=false;updateSelection();}
 });
 $('refresh-button').href=location.pathname+(location.search||'');
