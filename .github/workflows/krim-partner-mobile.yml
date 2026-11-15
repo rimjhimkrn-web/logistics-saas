@@ -14,6 +14,12 @@ on:
       - 'mobile/krim-driver/**'
       - '.github/workflows/krim-partner-mobile.yml'
   workflow_dispatch:
+
+# Prevent duplicate validation runs. APK jobs are intentionally paused until December 2026.
+concurrency:
+  group: krim-mobile-validation
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -45,86 +51,3 @@ jobs:
         env:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
-
-  build-internal-debug-apks:
-    name: Build installable ${{ matrix.app }} Android debug APK
-    needs: validate
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        app: [krim-partner, krim-customer, krim-driver]
-    defaults:
-      run:
-        working-directory: mobile/${{ matrix.app }}
-    steps:
-      - name: Check out validated source
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Install app dependencies
-        run: npm ci --no-audit --no-fund
-      - name: Stage KRIM brand assets
-        run: |
-          npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
-          npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/icon.png -f png resize 1024 1024 --fit contain --background '#071B35'
-          npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/adaptive-icon.png -f png resize 680 680 --fit contain --background '#071B35'
-          npx --yes sharp-cli -i assets/adaptive-icon.png -o assets/adaptive-icon.png -f png extend 172 172 172 172 --background '#071B35'
-      - name: Load public KRIM Supabase configuration for the internal APK
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const source = fs.readFileSync("../../config.js", "utf8");
-          const url = source.match(/const SUPABASE_URL\s*=\s*"([^"]+)"/)?.[1];
-          const key = source.match(/const SUPABASE_PUBLISHABLE_KEY\s*=\s*"([^"]+)"/s)?.[1];
-          if (!url || !key || !key.startsWith("sb_publishable_")) {
-            throw new Error("A valid public Supabase URL and publishable key must be configured in config.js.");
-          }
-          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_SUPABASE_URL=${url}\nEXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}\n`);
-          NODE
-      - name: Generate native Android project
-        run: npx expo prebuild --platform android --no-install
-      - name: Assemble installable debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-      - name: Verify Android location permissions are least-privilege
-        run: |
-          set -euo pipefail
-          MANIFEST=$(find android/app/build/intermediates -type f -name AndroidManifest.xml | grep -E 'merged_manifest|packaged' | head -n 1 || true)
-          test -n "$MANIFEST" || { echo "Merged Android manifest not found."; exit 1; }
-          echo "Checking $MANIFEST"
-          grep -nE 'uses-permission|foregroundServiceType' "$MANIFEST" || true
-          if [ "${{ matrix.app }}" = "krim-driver" ]; then
-            for permission in ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE_LOCATION POST_NOTIFICATIONS; do
-              grep -q "android.permission.$permission" "$MANIFEST" || { echo "Missing driver permission: $permission"; exit 1; }
-            done
-            LOCATION_LIBRARY_MANIFEST=node_modules/expo-location/android/src/main/AndroidManifest.xml
-            grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$LOCATION_LIBRARY_MANIFEST" || {
-              echo "Missing location foreground-service type in expo-location manifest"; exit 1;
-            }
-          else
-            if grep -qE 'android.permission.(ACCESS_BACKGROUND_LOCATION|FOREGROUND_SERVICE_LOCATION)' "$MANIFEST"; then
-              echo "Non-driver app must not request background location or location foreground-service permissions."
-              exit 1
-            fi
-          fi
-      - name: Upload KRIM internal APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: krim-${{ matrix.app }}-android-debug-apk
-          path: mobile/${{ matrix.app }}/android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
