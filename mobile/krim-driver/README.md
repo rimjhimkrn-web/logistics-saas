@@ -34,3 +34,6 @@ Run `npm install`, then `npm run typecheck` and `npx expo export --platform andr
 - Do not advertise guaranteed continuous tracking; location services are best-effort and device/OS/network dependent.
 
 This is an internal operational preview, not a public production release.
+
+## Automated validation
+The repository workflow `.github/workflows/krim-driver-mobile-validation.yml` checks Expo SDK package compatibility, TypeScript, native Android configuration and the Android JavaScript bundle on driver-app changes.
