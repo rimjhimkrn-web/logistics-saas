@@ -1,5 +1,81 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=../../app/partner/index.html"><title>api webhooks | KRIM Partner Workspace</title><script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";location.replace(b+"app/partner/index.html"+location.search+location.hash);})();</script>
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="API and webhook access information for the KRIM partner network.">
+<title>API & Webhooks | KRIM Logistics</title>
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
-</head><body><p>This legacy partner page has been retired because it did not provide a verified, database-backed workflow. Continue through the authenticated KRIM Partner Workspace.</p><p><a href="../../app/partner/index.html">Open Partner Workspace</a></p></body></html>
+<style id="krim-api-navigation">
+.skip{position:absolute;top:-60px;left:14px;z-index:2000;background:#fff;color:#09243d;padding:10px 14px;border-radius:6px}.skip:focus{top:10px}
+.bar{position:relative;z-index:1000;background:#fff;color:#09243d;border-bottom:1px solid #dce5ef;box-shadow:0 3px 16px rgba(7,26,53,.05)}
+.barin{width:100%;min-height:78px;padding:0 clamp(14px,3vw,36px);margin:0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar .brand{display:flex;align-items:center;min-width:0;color:#09243d}
+.menu-toggle{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:9px 14px;border:1px solid #09243d;border-radius:7px;background:#09243d;color:#fff;font-size:11px;font-weight:900;cursor:pointer;flex:0 0 auto}
+.menu-icon{display:grid;gap:4px;width:17px}.menu-icon i{display:block;width:17px;height:2px;border-radius:2px;background:#fff;transition:transform .18s ease,opacity .18s ease}
+.menu-toggle[aria-expanded="true"] .menu-icon i:first-child{transform:translateY(6px) rotate(45deg)}.menu-toggle[aria-expanded="true"] .menu-icon i:nth-child(2){opacity:0}.menu-toggle[aria-expanded="true"] .menu-icon i:last-child{transform:translateY(-6px) rotate(-45deg)}
+.krim-menu-panel{position:absolute;top:100%;left:0;width:100%;min-height:calc(100vh - 78px);max-height:calc(100vh - 78px);overflow-y:auto;overflow-x:hidden;padding:clamp(24px,5vw,54px) clamp(18px,6vw,80px);background:#071a35;box-shadow:0 22px 45px rgba(7,26,53,.24);z-index:1001}
+.krim-menu-panel[hidden]{display:none!important}.krim-menu-inner{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.krim-menu-inner>a{display:flex;align-items:center;min-height:58px;padding:14px 17px;border:1px solid #ffffff26;border-radius:8px;color:#fff;background:#ffffff0b;font-size:13px;font-weight:800;text-decoration:none;overflow-wrap:anywhere}
+.krim-menu-inner>a:hover{background:#ffffff18;border-color:#5ccfc2}
+.menu-toggle:focus-visible,.krim-menu-inner a:focus-visible{outline:3px solid #37b9c3;outline-offset:3px}
+@media(max-width:760px){.barin{min-height:70px;padding:6px 14px}.bar .brand{flex:1 1 auto;min-width:0;max-width:calc(100% - 88px);overflow:hidden}.bar .brand .krim-official-brand-logo{display:block!important;width:clamp(145px,56vw,220px)!important;height:auto!important;max-width:56vw!important;max-height:58px!important;object-fit:contain!important;object-position:left center!important}
+.krim-menu-panel{left:0;right:0;top:100%;width:100%;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px);max-height:calc(100vh - 70px);max-height:calc(100dvh - 70px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:18px 14px calc(24px + env(safe-area-inset-bottom))}
+.krim-menu-inner{width:100%;grid-template-columns:minmax(0,1fr);gap:9px}.krim-menu-inner>a{width:100%;min-width:0;min-height:50px;padding:12px 14px;font-size:12px}
+.wrap{width:100%;padding-left:15px;padding-right:15px}.hero .wrap{padding-top:24px;padding-bottom:24px}.page{padding-top:16px;padding-bottom:30px}.metrics{grid-template-columns:minmax(0,1fr)}.grid{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:minmax(0,1fr)}.body,.ph{padding:13px}.controls{width:100%}.controls input,.controls select{min-width:0;max-width:100%;flex:1 1 100%}.controls .btn{flex:1 1 auto}.tablewrap{max-width:100%}.footer .wrap{padding-left:15px;padding-right:15px}}
+@media(max-width:360px){.barin{padding-left:11px;padding-right:11px;gap:7px}.bar .brand{max-width:calc(100% - 80px)}.bar .brand .krim-official-brand-logo{width:clamp(138px,53vw,180px)!important;max-width:53vw!important}.menu-toggle{padding:8px 9px;font-size:10px}}
+html,body{max-width:100%;overflow-x:hidden}
+</style>
+<style id="krim-api-page-polish">
+:root{--navy:#09243d;--ink:#18324a;--muted:#62758a;--line:#dce5ed;--bg:#f5f8fb}
+body{background:#f5f8fb;color:#18324a}
+.wrap{width:min(1450px,100%);padding-left:clamp(18px,3.2vw,42px);padding-right:clamp(18px,3.2vw,42px)}
+.hero{background:linear-gradient(105deg,rgba(7,26,53,.97),rgba(9,36,61,.91) 58%,rgba(9,76,91,.83)),url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1800&q=80") center/cover}
+.hero .wrap{padding-top:36px;padding-bottom:34px}.eyebrow{color:#ffb36e}
+.hero h1{max-width:900px}.hero p{font-size:14px;line-height:1.75;max-width:820px}
+.page{padding-top:24px;padding-bottom:48px}.notice{border-left-color:#f47a24;line-height:1.7;padding:15px 17px}
+.metric,.panel,.tile{border-color:#e1e8ef;box-shadow:0 5px 18px rgba(9,36,61,.045)}
+.ph h2,.metric strong,.tile h3,.sidebox h3,td strong{color:#09243d}
+.btn.primary{background:#09243d;border-color:#09243d}
+@media(max-width:760px){.wrap{padding-left:16px;padding-right:16px}.hero .wrap{padding-top:27px;padding-bottom:27px}.page{padding-top:17px;padding-bottom:34px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr)}.body,.ph{padding:13px}.controls input,.controls select{min-width:0;max-width:100%;flex:1 1 100%}.tablewrap{max-width:100%}}
+@media(max-width:390px){.metrics{grid-template-columns:minmax(0,1fr)}}
+html,body{max-width:100%;overflow-x:hidden}
+</style>
+<style>
+body{min-height:100vh;display:flex;flex-direction:column}
+main{flex:1;width:min(980px,100%);margin:0 auto;padding:clamp(32px,7vw,76px) clamp(18px,4vw,42px)}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#c66b22}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.1;letter-spacing:-.04em;color:#09243d;margin:12px 0 16px}
+.lead{font-size:16px;line-height:1.75;color:#52677b;max-width:760px}
+.notice{margin:28px 0;padding:20px 22px;border:1px solid #dce5ed;border-left:4px solid #f47a24;border-radius:10px;background:#fff;line-height:1.7;color:#52677b}
+.notice strong{color:#09243d}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.action{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 17px;border-radius:7px;background:#09243d;color:#fff;font-size:12px;font-weight:850}
+.action.secondary{background:#fff;color:#09243d;border:1px solid #cbd7e2}
+footer{padding:20px clamp(18px,4vw,42px);border-top:1px solid #dce5ed;color:#64788c;font-size:11px}
+@media(max-width:600px){main{padding-top:34px}.lead{font-size:14px}.notice{padding:16px}.actions{display:grid}.action{width:100%}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar" id="krim-site-nav"><div class="barin">
+<a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><span class="mark" aria-hidden="true"></span></a>
+<button class="menu-toggle" id="krim-menu-toggle" type="button" aria-expanded="false" aria-controls="krim-menu-panel"><span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button>
+</div>
+<nav class="krim-menu-panel" id="krim-menu-panel" aria-label="Main navigation" hidden><div class="krim-menu-inner">
+<a href="../../index.html">KRIM Home</a><a href="../index.html">Partner workspace home</a><a href="accepted-loads.html">Shipments & accepted loads</a><a href="tracking-exceptions.html">Tracking & exceptions</a><a href="finance-settlements.html">Finance & settlements</a><a href="team-organization.html">Team & organisation</a><a href="integrations-automation.html">Integrations & automation</a><a href="security-audit.html">Security & audit</a><a href="api-webhooks.html" aria-current="page">API & webhooks</a><a href="partner-profile.html">Partner profile</a><a href="services-capabilities.html">Service capabilities</a><a href="capacity-resources.html">Capacity & resources</a><a href="partner-support.html">Partner support</a><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-agreement.html">Partner agreement</a><a href="../../contact.html">Contact KRIM</a><a href="../../auth/partner-signin.html">Partner sign in</a>
+</div></nav></header>
+<main id="main">
+<div class="eyebrow">Partner connectivity · API & webhook access</div>
+<h1>API & webhook access</h1>
+<p class="lead">KRIM is keeping external API credentials and webhook management behind verified, database-backed controls. This page does not expose credentials or offer unverified integration actions.</p>
+<section class="notice"><strong>Integration management is not currently available as a standalone partner workflow.</strong><br>The legacy API & Webhooks page has been retired while its access controls and operational workflow are being validated. Use the Integrations & Automation workspace to review currently available, organization-scoped integration records and dispatch evidence. That workspace is read-only and does not create endpoints, reveal secrets, rotate keys or replay events.</section>
+<div class="actions"><a class="action" href="integrations-automation.html">Open Integrations & Automation</a><a class="action secondary" href="../index.html">Return to Partner Workspace</a></div>
+</main>
+<footer><div>KRIM Logistics · Global Logistics Operating System · API access remains subject to verification, authorization and applicable agreements.</div></footer>
+<script>
+(()=>{const b=document.getElementById("krim-menu-toggle"),p=document.getElementById("krim-menu-panel");if(!b||!p)return;const close=()=>{b.setAttribute("aria-expanded","false");p.hidden=true};b.addEventListener("click",()=>{const open=b.getAttribute("aria-expanded")!=="true";b.setAttribute("aria-expanded",String(open));p.hidden=!open});p.addEventListener("click",e=>{if(e.target.closest("a"))close()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!p.hidden){close();b.focus()}});document.addEventListener("click",e=>{if(!p.hidden&&!e.target.closest("#krim-site-nav"))close()})})();
+</script>
+</body></html>
