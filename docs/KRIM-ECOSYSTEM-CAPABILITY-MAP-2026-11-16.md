@@ -180,6 +180,7 @@ This first-pass map is grounded in the following repository records and should b
 
 - [Batch 01 — Pages 43–45: Integrations & Automation, Partner Security & Audit Centre, API & Webhooks](audits/KRIM-ECOSYSTEM-TRACEABILITY-BATCH-01-PAGES-43-45-2026-11-16.md). This includes page-to-table/function mapping, live production metadata, RLS observations, mock/API claim risks and the Page 44 correction.
 - [Customer-to-Partner Operations Traceability — 16 November 2026](audits/KRIM-CUSTOMER-TO-PARTNER-OPERATIONS-TRACEABILITY-2026-11-16.md). This records the canonical end-to-end journey, live production counts, legacy state discrepancies, the P0 readiness false-positive and POD/dispatch/capacity gates.
+- [Supabase Migration Drift Audit — 16 November 2026](audits/KRIM-SUPABASE-MIGRATION-DRIFT-AUDIT-2026-11-16.md). This records the production/repository migration version mismatch and the mandatory no-DDL reconciliation gate.
 
 ## 10. Change log
 
