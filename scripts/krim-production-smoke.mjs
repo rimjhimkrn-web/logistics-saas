@@ -341,6 +341,8 @@ if (existsSync(quoteReview)) {
   if (!html.includes('rpc("krim_accept_global_quote"')) failures.push("Quote review must use the server-side quote acceptance RPC.");
   if (!html.includes("valid_until")) failures.push("Quote review must inspect quote validity before acceptance.");
   if (!html.includes("public/shipper/rate-calculator.html")) failures.push("Quote review must link back to the canonical quote desk.");
+  if (!html.includes("krim_shipment_partner_assignments") || !html.includes('assignment?.status==="accepted"')) failures.push("Quote review must verify the exact partner assignment is accepted before enabling customer acceptance or checkout.");
+  if (!html.includes("public/shipper/payment-checkout.html") || html.includes("public/quote-result.html")) failures.push("Accepted quotes must route to partner-direct payment guidance, not KRIM freight checkout.");
 }
 if (existsSync(quoteComparison)) {
   const html = readFileSync(quoteComparison, "utf8");
