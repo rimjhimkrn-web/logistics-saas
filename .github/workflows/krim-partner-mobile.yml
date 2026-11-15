@@ -46,16 +46,19 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
 
-
-  build-driver-debug-apk:
-    name: Build installable KRIM Driver Android debug APK
+  build-internal-debug-apks:
+    name: Build installable ${{ matrix.app }} Android debug APK
     needs: validate
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [krim-partner, krim-customer, krim-driver]
     defaults:
       run:
-        working-directory: mobile/krim-driver
+        working-directory: mobile/${{ matrix.app }}
     steps:
       - name: Check out validated source
         uses: actions/checkout@v4
@@ -70,7 +73,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install driver dependencies
+      - name: Install app dependencies
         run: npm ci --no-audit --no-fund
       - name: Stage KRIM brand assets
         run: |
@@ -97,37 +100,31 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-      - name: Verify merged Android location and notification manifest permissions
+      - name: Verify Android location permissions are least-privilege
         run: |
           set -euo pipefail
-          echo "Generated merged Android manifests:"
-          find android/app/build/intermediates -type f -name AndroidManifest.xml -print
           MANIFEST=$(find android/app/build/intermediates -type f -name AndroidManifest.xml | grep -E 'merged_manifest|packaged' | head -n 1 || true)
           test -n "$MANIFEST" || { echo "Merged Android manifest not found."; exit 1; }
           echo "Checking $MANIFEST"
           grep -nE 'uses-permission|foregroundServiceType' "$MANIFEST" || true
-          missing=0
-          for permission in ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE_LOCATION POST_NOTIFICATIONS; do
-            if grep -q "android.permission.$permission" "$MANIFEST"; then
-              echo "PASS: $permission"
-            else
-              echo "MISSING: $permission"
-              missing=1
-            fi
-          done
-          LOCATION_LIBRARY_MANIFEST=node_modules/expo-location/android/src/main/AndroidManifest.xml
-          if test -f "$LOCATION_LIBRARY_MANIFEST" && grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$LOCATION_LIBRARY_MANIFEST"; then
-            echo "PASS: expo-location declares its LocationTaskService as a location foreground service"
+          if [ "${{ matrix.app }}" = "krim-driver" ]; then
+            for permission in ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE_LOCATION POST_NOTIFICATIONS; do
+              grep -q "android.permission.$permission" "$MANIFEST" || { echo "Missing driver permission: $permission"; exit 1; }
+            done
+            LOCATION_LIBRARY_MANIFEST=node_modules/expo-location/android/src/main/AndroidManifest.xml
+            grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$LOCATION_LIBRARY_MANIFEST" || {
+              echo "Missing location foreground-service type in expo-location manifest"; exit 1;
+            }
           else
-            echo "MISSING: location foreground-service type in the expo-location dependency manifest"
-            test -f "$LOCATION_LIBRARY_MANIFEST" && cat "$LOCATION_LIBRARY_MANIFEST" || true
-            missing=1
+            if grep -qE 'android.permission.(ACCESS_BACKGROUND_LOCATION|FOREGROUND_SERVICE_LOCATION)' "$MANIFEST"; then
+              echo "Non-driver app must not request background location or location foreground-service permissions."
+              exit 1
+            fi
           fi
-          exit "$missing"
-      - name: Upload KRIM Driver debug APK
+      - name: Upload KRIM internal APK
         uses: actions/upload-artifact@v4
         with:
-          name: krim-driver-android-debug-apk
-          path: mobile/krim-driver/android/app/build/outputs/apk/debug/app-debug.apk
+          name: krim-${{ matrix.app }}-android-debug-apk
+          path: mobile/${{ matrix.app }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
