@@ -371,7 +371,7 @@ if (/checkout\.razorpay\.com|new Razorpay|create-global-razorpay-order|verify-ra
 if (!/partner-direct|contracting logistics provider|pay the provider directly/i.test(secureCheckout)) failures.push("Quote result must explain that freight payment is arranged directly with the contracting provider.");
 if (!/payment_order_id/.test(paymentVerification) || !/krim-payment-verification-status/.test(paymentVerification)) failures.push("Payment receipt must use authenticated server-side status verification.");
 const shipmentConfirmation = existsSync("public/shipment-confirmation.html") ? readFileSync("public/shipment-confirmation.html", "utf8") : "";
-if (!/Historical KRIM payment workflow|historical KRIM-collected payment orders/i.test(shipmentConfirmation)) failures.push("Shipment confirmation must be clearly labelled as a historical KRIM-payment record page under the partner-direct launch model.");
+if (!shipmentConfirmation.includes("partner_direct") || !shipmentConfirmation.includes("directStates") || !shipmentConfirmation.includes("orderId")) failures.push("Shipment confirmation must support partner-direct bookings without requiring a new KRIM freight-payment order.");
 if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.verified===true&&pay\.status===["']paid["']/.test(shipmentConfirmation)) failures.push("Historical shipment confirmation must require authenticated server-verified payment.");
 if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
@@ -957,7 +957,8 @@ const treasuryPageTruth = readFileSync("public/finance/treasury-dashboard.html",
 const revenuePageTruth = readFileSync("public/finance/revenue-reports.html", "utf8");
 if (adminRuntimeTruth.includes("ISO 27001 / SOC 2 Audit Logger: ONLINE") || adminRuntimeTruth.includes("SHA-256 Cryptographic Seals Active")) failures.push("Admin UI helper must not claim unverified SIEM/compliance/audit-sealing status.");
 if (productionRuntimeTruth.includes("Cryptographic SHA-256 Release Hash: VERIFIED") || productionRuntimeTruth.includes("All 18 Phases Locked")) failures.push("Production UI helper must not claim an unperformed release freeze/hash verification.");
-if (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED")) failures.push("Treasury dashboard must prominently disclose that balances are illustrative and not live-connected.");
+const treasuryRetiredRedirect = treasuryPageTruth.includes("url=../../app/finance/treasury-audit.html") && treasuryPageTruth.includes("static demonstration dashboard has been retired") && treasuryPageTruth.includes("location.replace(");
+if (!treasuryRetiredRedirect && (!treasuryPageTruth.includes("Demonstration data — not live treasury information") || !treasuryPageTruth.includes("DEMO DATA · NOT CONNECTED"))) failures.push("Treasury route must either disclose demo-only data or redirect to the authenticated live treasury audit workspace.");
 if (!revenuePageTruth.includes("No verified KRIM revenue data available") || !revenuePageTruth.includes("No reconciled paid invoices or subscription transactions are available yet")) failures.push("Revenue reports must show an honest empty state until reconciled subscription revenue exists.");
 
 // Additional Step 7 regression guards: these inspect source only and do not claim
