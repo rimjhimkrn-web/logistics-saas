@@ -1811,6 +1811,25 @@ for (const token of [
   if (!legStateGuardMigration.includes(token)) failures.push("Leg sourcing database guard is missing: " + token);
 }
 
+
+
+// Partner acceptance revalidates quote/opportunity/leg binding and current registered-business eligibility.
+const acceptanceGuardPath = "supabase/migrations/20261116014000_harden_exact_leg_partner_assignment_acceptance.sql";
+const acceptanceGuardMigration = existsSync(acceptanceGuardPath) ? readFileSync(acceptanceGuardPath, "utf8") : "";
+for (const token of [
+  "harden_exact_leg_partner_assignment_acceptance",
+  "v_quote.shipment_leg_id is distinct from v_assignment.shipment_leg_id",
+  "v_opportunity.shipment_leg_id is distinct from v_assignment.shipment_leg_id",
+  "v_opportunity.awarded_partner_organization_id is distinct from v_assignment.partner_organization_id",
+  "p.status='active'",
+  "l.status in ('planned','unassigned')",
+  "l.assignment_status in ('unassigned','planned','pending')",
+  "o.partner_account_mode='registered_business'",
+  "private.krim_partner_compliance_is_current",
+]) {
+  if (!acceptanceGuardMigration.includes(token)) failures.push("Partner acceptance guard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
