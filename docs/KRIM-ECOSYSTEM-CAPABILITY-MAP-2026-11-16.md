@@ -176,6 +176,10 @@ This first-pass map is grounded in the following repository records and should b
 - `docs/KRIM_CUSTOMER_ECOSYSTEM_14_PHASE_LOCKED_BLUEPRINT.md` — canonical customer journey and acceptance criteria.
 - `docs/architecture/global-market-activation.md` — market/service/corridor activation rules.
 
+## 9A. Detailed traceability batches
+
+- [Batch 01 — Pages 43–45: Integrations & Automation, Partner Security & Audit Centre, API & Webhooks](audits/KRIM-ECOSYSTEM-TRACEABILITY-BATCH-01-PAGES-43-45-2026-11-16.md). This includes page-to-table/function mapping, live production metadata, RLS observations, mock/API claim risks and the Page 44 correction.
+
 ## 10. Change log
 
 - 2026-11-16: First-pass division/revenue/user-journey map created from current repository inventory and recorded production audits. Per-page, per-RPC, per-Edge-Function and per-database-object traceability remains a subsequent audit task.
