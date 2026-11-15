@@ -1401,6 +1401,23 @@ for (const token of [
   if (!warehouseHandoverProofMigration.includes(token)) failures.push("Warehouse dispatch handover evidence guard is missing: " + token);
 }
 
+// Inventory pick retries must be idempotent before stock availability is re-evaluated.
+const warehousePickIntegrityPath = "supabase/migrations/20261115183000_warehouse_pick_replay_and_inventory_unit_integrity.sql";
+const warehousePickIntegrity = existsSync(warehousePickIntegrityPath)
+  ? readFileSync(warehousePickIntegrityPath, "utf8") : "";
+for (const token of [
+  "Pick idempotency replay anchor changed",
+  "replayed'',true,''task",
+  "inventory unit does not match this shipment-linked pick",
+  "Inventory unit does not match movement unit",
+  "v_inventory.unit_code<>coalesce",
+  "v_movement.notes<>coalesce(p_notes",
+  "uq_krim_wh_inventory_normalized_sku_lot",
+  "DROP INDEX IF EXISTS public.uq_krim_wh_movement_org_idempotency",
+]) {
+  if (!warehousePickIntegrity.includes(token)) failures.push("Warehouse pick/inventory integrity migration is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
