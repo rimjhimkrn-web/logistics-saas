@@ -221,3 +221,37 @@ The canonical customer shipment-details page now includes a read-only route-plan
 - Legacy unlinked shipment legs separately, without misrepresenting them as a versioned plan.
 
 The page uses existing shipment ownership checks and table RLS. It explicitly warns that a planned leg is not proof of partner acceptance, capacity commitment or dispatch. It does not expose GPS or infer live carrier state.
+
+## Implementation update — operational route-planning interface
+
+The operations route-planning page now has a controlled draft → validate → activate interface:
+- Shipment choices are loaded only from shipments visible through the signed-in user's existing RLS scope and pre-execution statuses.
+- Active location and transport-mode reference data populate each leg editor.
+- Supports 1–20 ordered legs, optional planned timestamps and paired capacity/unit inputs.
+- Draft creation calls the authenticated, ownership-checked plan RPC with a stable idempotency key.
+- Validation calls the read-only evaluation RPC.
+- Activation requires a separate explicit confirmation and calls the atomic activation RPC.
+- Network/permission failures are surfaced without claiming that a write succeeded.
+- The page distinguishes plan activation from partner assignment, capacity commitment and dispatch.
+
+No route plan was created from the operations page during this code change. Browser-level interaction with a real authorised customer/operations identity remains outstanding.
+
+## Additional integrity fix — duplicate leg creation audit trigger
+
+Live inspection found two AFTER INSERT triggers on `krim_shipment_legs` invoking the same `krim_log_shipment_leg_creation()` function. This generated two identical `shipment_leg_created` audit rows for one historical leg (IDs 5 and 6 for leg 1).
+
+Corrected:
+- Removed the redundant `trg_krim_shipment_leg_creation_audit` trigger.
+- Retained one creation-audit trigger.
+- Hardened the trigger function to an empty search_path and schema-qualified built-ins.
+- Kept historical audit rows intact; no audit records were deleted or rewritten.
+
+Live verification:
+- Exactly one shipment-leg creation trigger remains.
+- Trigger function remains SECURITY DEFINER with empty search_path.
+- Direct anon/authenticated execution is denied.
+- Historical duplicate rows remain visible as immutable history; future inserts should emit one event.
+
+## Additional integrity fix — adjacent leg schedule continuity
+
+The evaluation RPC now rejects a later leg whose planned departure is earlier than the previous leg's planned arrival (`overlapping_leg_time_window`). This repeats the creation-time check at activation time, so stale or changed plan items cannot bypass schedule continuity validation.
