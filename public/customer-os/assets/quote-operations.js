@@ -5,8 +5,8 @@ const $=id=>document.getElementById(id);
 const view=document.body.dataset.quoteView||'list';
 const quoteId=Number(new URLSearchParams(location.search).get('quote_id'));
 const shipmentIdParam=new URLSearchParams(location.search).get('shipment_id');
-let orgIds=[],quote=null,shipment=null;
-const PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false;
+let orgIds=[],quote=null,shipment=null,partnerAssignment=null,partnerAssignmentError=null;
+const PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = true;
 function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function money(amount,currency){const n=Number(amount);if(!Number.isFinite(n))return 'Price not recorded';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:String(currency||'INR').toUpperCase(),maximumFractionDigits:2}).format(n)}catch(_){return String(currency||'')+' '+n.toLocaleString()}}
@@ -40,29 +40,35 @@ async function loadDetail(){
  if(!q){say('Quote not found in your authorized customer organizations. No record outside your organization was displayed.','error');$('quote-actions').classList.add('hidden');return}
  quote=q;
  const {data:s,error:se}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,origin_place_label,destination_place_label,goods_description,requested_transport_mode,status').eq('id',Number(q.shipment_id)).in('customer_organization_id',orgIds).maybeSingle();if(se)throw se;shipment=s||null;
+ partnerAssignment=null;partnerAssignmentError=null;
+ if(q.partner_quote_id){const {data:pa,error:pae}=await client.from('krim_shipment_partner_assignments').select('id,status,partner_quote_id').eq('shipment_id',Number(q.shipment_id)).eq('partner_quote_id',Number(q.partner_quote_id)).maybeSingle();partnerAssignment=pa||null;partnerAssignmentError=pae||null;}
+ const partnerAccepted=!!partnerAssignment&&["accepted","active"].includes(String(partnerAssignment.status||"").toLowerCase());
  $('quote-fields').replaceChildren();
- field('Quote reference','#'+q.id);field('Quote status',String(q.status||'pending').replace(/_/g,' '));field('Quoted amount',money(q.amount,q.currency_code));field('Currency',String(q.currency_code||'Not recorded').toUpperCase());field('Valid until',date(q.valid_until));field('Created',date(q.created_at));field('Shipment reference',shipment?.shipment_number||('#'+q.shipment_id));field('Origin',shipment?.origin_place_label||'Not recorded');field('Destination',shipment?.destination_place_label||'Not recorded');field('Transport mode',shipment?.requested_transport_mode||'Not recorded');field('Cargo',shipment?.goods_description||'Not recorded');field('Shipment status',shipment?.status||'Not recorded');const snap=q.pricing_snapshot||{};field('Pricing source',snap.source==='approved_global_rate_card'?'Approved global KRIM rate card':snap.source||'Not recorded');field('Rate basis',snap.rate_type?(money(snap.rate_basis_amount,q.currency_code)+(snap.rate_type==='per_kg'?' per kg':' per shipment')):'Not recorded');field('Minimum charge',snap.minimum_charge!=null?money(snap.minimum_charge,q.currency_code):'Not recorded');field('Weight used',snap.shipment_weight_kg!=null?Number(snap.shipment_weight_kg).toLocaleString()+' kg':'Not recorded');field('Tax treatment',taxTreatment(snap.tax_treatment));
+ field('Quote reference','#'+q.id);field('Quote status',String(q.status||'pending').replace(/_/g,' '));field('Quoted amount',money(q.amount,q.currency_code));field('Currency',String(q.currency_code||'Not recorded').toUpperCase());field('Valid until',date(q.valid_until));field('Created',date(q.created_at));field('Shipment reference',shipment?.shipment_number||('#'+q.shipment_id));field('Origin',shipment?.origin_place_label||'Not recorded');field('Destination',shipment?.destination_place_label||'Not recorded');field('Transport mode',shipment?.requested_transport_mode||'Not recorded');field('Cargo',shipment?.goods_description||'Not recorded');field('Shipment status',shipment?.status||'Not recorded');field('Partner assignment',partnerAssignmentError?'Could not verify':partnerAssignment?String(partnerAssignment.status).replace(/_/g,' '):'Not yet created');const snap=q.pricing_snapshot||{};field('Pricing source',snap.source==='approved_global_rate_card'?'Approved global KRIM rate card':snap.source||'Not recorded');field('Rate basis',snap.rate_type?(money(snap.rate_basis_amount,q.currency_code)+(snap.rate_type==='per_kg'?' per kg':' per shipment')):'Not recorded');field('Minimum charge',snap.minimum_charge!=null?money(snap.minimum_charge,q.currency_code):'Not recorded');field('Weight used',snap.shipment_weight_kg!=null?Number(snap.shipment_weight_kg).toLocaleString()+' kg':'Not recorded');field('Tax treatment',taxTreatment(snap.tax_treatment));
  const accepted=String(q.status||'').toLowerCase()==='accepted',expired=q.valid_until&&new Date(q.valid_until).getTime()<=Date.now();
  $('accept-button').classList.toggle('hidden',view!=='acceptance');$('compare-link').href=path('public/shipper/quote-comparison.html')+'?shipment_id='+encodeURIComponent(q.shipment_id||'');$('detail-link').href=path('public/customer-os/quotes-pricing/quote-details.html')+'?quote_id='+encodeURIComponent(q.id);
  if(view==='acceptance'){
-  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment||!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED;
-  button.textContent=accepted?'Quote already accepted':expired?'Quote expired':!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED?'Acceptance temporarily paused':'Accept quote securely';
+  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment||!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED||!!partnerAssignmentError||!partnerAccepted;
+  button.textContent=accepted?'Quote already accepted':expired?'Quote expired':!partnerAccepted?'Awaiting partner acceptance':'Accept quote securely';
   if(!shipment)say('The linked shipment could not be verified inside your organization. Quote acceptance is blocked.','error');
-  else if(accepted)say('This quote is already marked accepted by the database. Booking, partner assignment and payment remain separate checks.');
+  else if(accepted)say('This quote is already accepted. Final operational booking readiness remains separate. Freight payment is arranged directly with the contracting provider; KRIM does not collect or verify it.');
   else if(expired)say('This quote has expired. KRIM will not attempt to accept an expired quote.','warn');
-  else if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED)say('Quote review is available, but new booking acceptance is temporarily paused. The live shipment-readiness policy still requires a KRIM payment record, while KRIM’s launch model does not collect freight charges. No booking has been confirmed; wait for the partner-direct readiness update.','warn');
-  else say('Review the amount, currency and validity before acceptance. KRIM revalidates eligibility on the server.','')
+  else if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED)say('Quote acceptance is paused pending the partner-direct launch gate.','warn');
+  else if(partnerAssignmentError)say('KRIM could not verify the partner assignment. Quote acceptance remains locked. Refresh or contact support.','warn');
+  else if(!partnerAccepted)say('The matching logistics partner has not accepted this assignment yet. Quote acceptance remains locked until the partner response is recorded.','warn');
+  else say('The partner assignment is accepted. KRIM will revalidate quote and shipment readiness on the server. Freight payment remains directly between the customer and provider.','')
  }else say('Quote and shipment records are scoped to your active customer organization. This view does not imply booking or payment completion.')
 }
 $('accept-button').addEventListener('click',async()=>{
  if(!quote||!shipment||!quoteId)return;
- if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED){say('Quote acceptance is temporarily paused until the live readiness policy supports partner-direct payment. No booking or payment was recorded.','warn');return;}
+ if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED){say('Quote acceptance is paused pending the partner-direct launch gate. No booking or payment was recorded.','warn');return;}
+ if(partnerAssignmentError||!partnerAssignment||!['accepted','active'].includes(String(partnerAssignment.status||'').toLowerCase())){say('The matching partner assignment is not accepted. No booking or payment was recorded.','warn');return;}
  if(!confirm('Accept quote #'+quote.id+' for '+money(quote.amount,quote.currency_code)+'? KRIM will validate quote eligibility and permissions on the server.'))return;
  const b=$('accept-button');b.disabled=true;b.textContent='Validating and accepting…';say('Waiting for KRIM server-side quote acceptance…');
  try{
   const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:Number(quote.id)});if(error)throw error;
   const result=Array.isArray(data)?data[0]:data;if(!result||Number(result.id)!==Number(quote.id))throw new Error('The server did not return the exact quote record.');if(String(result.status)==='expired'){quote.status='expired';b.disabled=true;b.textContent='Quote expired';say('KRIM confirmed that this quote has expired. It was not accepted. Request a fresh quote before proceeding.','warn');return;}if(String(result.status)!=='accepted')throw new Error('The server did not confirm acceptance of this exact quote.');
-  quote.status='accepted';b.textContent='Quote accepted ✓';say('KRIM confirmed quote acceptance. Partner assignment, final booking and payment still require their own verified states.');
+  quote.status='accepted';b.textContent='Quote accepted ✓';say('KRIM confirmed quote acceptance. Final operational readiness and dispatch remain separate. Freight payment is arranged directly with the contracting provider; KRIM does not collect or verify it.');
   const a=$('compare-link');a.textContent='Return to quote comparison →';a.href=path('public/shipper/quote-comparison.html')+'?shipment_id='+encodeURIComponent(quote.shipment_id);
  }catch(e){say((e&&e.message)||'Quote acceptance failed. Refresh and review the current quote status.','error');b.disabled=false;b.textContent='Accept quote securely'}
 });
