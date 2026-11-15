@@ -296,3 +296,24 @@ No historical shipment or audit record was modified. This closed-shipment incons
 A final bypass review also added a guard to `krim_award_partner_quote_for_checkout` before its existing-quote idempotent return. Thus a previously prepared shipment-wide customer quote cannot be replayed through that wrapper for a shipment with an active multi-leg plan.
 
 Activation audit records now use the plan's actual pre-activation status (rather than assuming every plan was `draft`), preserving accurate history if a controlled `ready` state is introduced later.
+
+## Inter-leg custody and warehouse handover audit
+
+The current warehouse `dispatch_handover` task is an outbound warehouse workflow, not a complete inter-leg custody-transfer protocol:
+- It requires a completed picking/packing task for the exact shipment and leg.
+- Its creation path currently requires the warehouse organisation to equal the leg's assigned partner organisation.
+- Completing the task only rechecks that same-leg picking is complete; it does not record an independent receiving organisation's acceptance of custody.
+- The schema has no dedicated public table for leg-to-leg handover or custody transfer.
+- `krim_partner_execution_events` currently has no `handover` event type.
+- A handover task therefore must not be treated as proof that the next carrier accepted the cargo.
+
+Required future custody workflow:
+1. Require two adjacent legs of the same shipment and validate previous destination equals next origin.
+2. Identify the releasing and receiving verified organisations and their authorised representatives.
+3. Record location, timestamp, cargo quantity/unit, package/handling-unit identifiers, seal references, visible condition, discrepancies and private evidence ownership.
+4. Require explicit receiver acceptance; rejection creates a controlled exception and prevents onward dispatch.
+5. Enforce one idempotent custody transfer per leg boundary and immutable event history.
+6. Block next-leg dispatch until custody acceptance and all applicable warehouse/customs releases are complete.
+7. Keep shipment-level status distinct from each leg's status; a single leg's handover must not mark the whole shipment delivered or assigned.
+
+Live data currently has zero warehouse tasks/facilities in this audit snapshot, so no real handover can be tested. The existing warehouse task is retained for its current outbound workflow; it is not being re-labelled as full custody transfer.
