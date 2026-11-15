@@ -188,12 +188,16 @@ Static source inspection and SQL metadata inspection do not certify browser runt
 
 ## 10A. Migration-history reconciliation gate
 
-A read-only comparison of inventory totals on 2026-11-16 found:
+A detailed read-only comparison is recorded in [KRIM Supabase Migration Drift Audit — 16 November 2026](KRIM-SUPABASE-MIGRATION-DRIFT-AUDIT-2026-11-16.md).
 
-- Production `supabase_migrations.schema_migrations`: 558 entries; latest version `20261115231834`.
-- Repository `supabase/migrations`: 363 SQL files; latest filename version `20261116028000`.
+- Production migration history: 558 unique versions; latest `20261115231834`.
+- Repository migration files: 363 files but only 348 unique timestamps; latest `20261116028000`.
+- Shared timestamps: 82.
+- 476 production versions have no matching repository file.
+- 266 repository timestamps are not present in production history.
+- 13 repository timestamp groups contain multiple files.
 
-The production database contains materially more migration-history entries than the repository currently carries, while the repository also has later timestamped migration files not reflected by the production latest version. A simple count or timestamp comparison is not sufficient to infer that schemas are equivalent. **Do not apply, replay, squash or baseline migrations until every production version and the repository migration bodies are reconciled.** Any P0 readiness or market-gate correction must wait for this controlled comparison and a schema/function dependency review.
+The production database contains materially more migration-history entries than the repository currently carries, while the repository also has later timestamped migration files not reflected by the production latest version. A simple count or timestamp comparison is not sufficient to infer schema equivalence. **Do not apply, replay, squash or baseline migrations until every production version and repository migration body is reconciled from trusted source artifacts.** Any P0 readiness or market-gate correction must wait for this controlled comparison and a schema/function dependency review.
 
 ## 11. Evidence boundaries
 
