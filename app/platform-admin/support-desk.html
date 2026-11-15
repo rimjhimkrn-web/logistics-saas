@@ -49,6 +49,12 @@ let tickets=[],selectedId=null;
 function esc(v){return String(v==null||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function say(t,k){$("alert").textContent=t;$("alert").className="alert show "+(k||"")}
 function date(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString()}
+function slaState(t){
+ const ack=t.first_responded_at?"Acknowledged "+date(t.first_responded_at):!t.first_response_due_at?"Ack target unavailable":(Date.now()>new Date(t.first_response_due_at).getTime()?"ACK OVERDUE · ":"ACK due · ")+date(t.first_response_due_at);
+ const terminal=["resolved","closed"].includes(String(t.status||"").toLowerCase());
+ const resolution=terminal?"Resolved "+date(t.resolved_at||t.closed_at):!t.resolution_due_at?"Resolution target unavailable":(Date.now()>new Date(t.resolution_due_at).getTime()?"RESOLUTION OVERDUE · ":"Resolution due · ")+date(t.resolution_due_at);
+ return {ack,resolution};
+}
 async function verify(){
  if(!client)throw new Error("Secure Supabase client unavailable.");
  const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error("Administrator sign-in required.");
@@ -62,7 +68,7 @@ async function loadQueue(){
  const {data,error}=await client.rpc("krim_admin_list_support_tickets",{p_status:$("filter").value||null,p_limit:100});
  if(error)throw error;tickets=Array.isArray(data?.items)?data.items:[];
  if(!tickets.length){$("queue").innerHTML='<div class="empty">No support tickets are currently stored for this filter. No sample cases are shown.</div>';return}
- $("queue").innerHTML=tickets.map(t=>'<button type="button" class="ticket '+(Number(t.id)===selectedId?'active':'')+'" data-id="'+esc(t.id)+'"><strong>'+esc(t.ticket_number||("Ticket #"+t.id))+' · '+esc(t.subject)+'</strong><div class="meta"><span class="pill">'+esc(t.status)+'</span><span class="pill">'+esc(t.priority)+'</span><span>'+esc(t.category)+'</span><span>'+esc(date(t.created_at))+'</span></div><div class="meta">'+esc(t.organization_name||"No organization label")+' · '+esc(t.user_email||"Email unavailable")+(t.shipment_number?" · "+esc(t.shipment_number):"")+'</div></button>').join("");
+ $("queue").innerHTML=tickets.map(t=>{const sla=slaState(t);return '<button type="button" class="ticket '+(Number(t.id)===selectedId?'active':'')+'" data-id="'+esc(t.id)+'"><strong>'+esc(t.ticket_number||("Ticket #"+t.id))+' · '+esc(t.subject)+'</strong><div class="meta"><span class="pill">'+esc(t.status)+'</span><span class="pill">'+esc(t.priority)+'</span><span>'+esc(t.category)+'</span><span>'+esc(date(t.created_at))+'</span></div><div class="meta">'+esc(t.organization_name||"No organization label")+' · '+esc(t.user_email||"Email unavailable")+(t.shipment_number||t.tracking_number?" · "+esc(t.shipment_number||t.tracking_number):"")+'</div><div class="meta"><span class="pill">'+esc(sla.ack)+'</span><span class="pill">'+esc(sla.resolution)+'</span></div></button>'}).join("");
  $("queue").querySelectorAll("[data-id]").forEach(b=>b.addEventListener("click",()=>openTicket(Number(b.dataset.id))));
 }
 async function openTicket(id){
@@ -70,7 +76,8 @@ async function openTicket(id){
  const {data,error}=await client.rpc("krim_admin_get_support_ticket_thread",{p_ticket_id:id});
  if(error)throw error;
  const t=data?.ticket;if(!t)throw new Error("Ticket detail was not returned.");
- $("ticket-head").innerHTML='<h2>'+esc(t.ticket_number||("Ticket #"+t.id))+' · '+esc(t.subject)+'</h2><div class="meta"><span class="pill">'+esc(t.status)+'</span><span class="pill">'+esc(t.priority)+'</span><span>'+esc(t.category)+'</span></div><p class="muted">'+esc(t.user_email||"Email unavailable")+' · '+esc(t.organization_name||"No organization label")+' · '+esc(t.shipment_number||"No shipment linked")+'</p><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">'+esc(t.message)+'</div><div class="meta">Created '+esc(date(t.created_at))+' · Updated '+esc(date(t.updated_at))+'</div>';
+ const sla=slaState(t);
+ $("ticket-head").innerHTML='<h2>'+esc(t.ticket_number||("Ticket #"+t.id))+' · '+esc(t.subject)+'</h2><div class="meta"><span class="pill">'+esc(t.status)+'</span><span class="pill">'+esc(t.priority)+'</span><span>'+esc(t.category)+'</span></div><p class="muted">'+esc(t.user_email||"Email unavailable")+' · '+esc(t.organization_name||"No organization label")+' · '+esc(t.shipment_number||t.tracking_number||"No shipment reference")+'</p><div style="font-size:12px;line-height:1.7;white-space:pre-wrap">'+esc(t.message)+'</div><div class="meta">Created '+esc(date(t.created_at))+' · Updated '+esc(date(t.updated_at))+'</div><div class="notice"><strong>Internal SLA targets (not a legal finding):</strong><br>'+esc(sla.ack)+'<br>'+esc(sla.resolution)+'</div>';
  const messages=Array.isArray(data.messages)?data.messages:[];
  $("thread").innerHTML=messages.length?messages.map(m=>'<article class="message '+(m.is_internal?'internal':'')+'"><strong>'+(m.is_internal?'INTERNAL NOTE':m.sender_user_id===t.user_id?'CUSTOMER':'KRIM SUPPORT')+' · '+esc(date(m.created_at))+'</strong><p>'+esc(m.body)+'</p></article>').join(""):'<div class="empty">No conversation messages yet. The original ticket description appears above.</div>';
  $("reply-form").hidden=false;$("status-form").hidden=false;$("new-status").value=t.status;$("new-priority").value=t.priority||"normal";$("status-reason").value="";
