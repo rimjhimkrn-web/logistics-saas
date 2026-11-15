@@ -2,6 +2,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store","Content-Type":"application/json"};
 function reply(status:number,body:Record<string,unknown>){return new Response(JSON.stringify(body),{status,headers:cors});}
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const gpsLaunchApproved = Deno.env.get("KRIM_GPS_TRACKING_ENABLED") === "true"
+ && Deno.env.get("KRIM_GPS_TRACKING_LEGAL_APPROVAL_VERSION") === "2026-11-15-v1";
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return reply(405,{error:"Method not allowed"});
@@ -16,6 +19,7 @@ Deno.serve(async(req:Request)=>{
  let body:Record<string,unknown>;try{body=await req.json()}catch{return reply(400,{error:"Invalid JSON body"})}
  const action=String(body.action||""),assignmentId=String(body.assignment_id||"");
  if(!["start","stop"].includes(action)||!UUID.test(assignmentId))return reply(400,{error:"A valid tracking action and driver assignment are required"});
+ if(action==="start"&&!gpsLaunchApproved)return reply(503,{error:"Driver GPS sharing is paused until KRIM approves its location notice, retention schedule, deletion controls and launch review."});
  const admin=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
  const userId=authData.user.id;
  const {data:driver,error:driverError}=await admin.from("krim_driver_assignments")
