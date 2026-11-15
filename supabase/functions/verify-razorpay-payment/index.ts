@@ -303,6 +303,19 @@ error:
 );
 }
 
+// Partner-direct launch model: block verification of any unpaid KRIM-collected
+// freight order unless the legal, tax and settlement approvals are deliberately enabled.
+// Idempotent retries for a payment already recorded as paid remain available for recovery.
+const freightCollectionApproved =
+  Deno.env.get("KRIM_FREIGHT_COLLECTION_ENABLED") === "true" &&
+  Deno.env.get("KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION") === "2026-11-15-v1";
+if (!freightCollectionApproved && paymentOrder.status !== "paid") {
+  return jsonResponse({
+    error: "KRIM freight collection is disabled. Customers must pay the contracting logistics provider directly under the current launch model.",
+    code: "KRIM_FREIGHT_COLLECTION_NOT_APPROVED",
+  }, 503);
+}
+
 // --------------------------------------------------
 // Global payment only
 
