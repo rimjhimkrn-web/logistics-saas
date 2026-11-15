@@ -83,6 +83,8 @@ Deno.serve(async (req: Request) => {
         longitude: Number(gpsRow.longitude),
         recorded_at: gpsRow.event_time,
         accuracy_m: gpsRow.metadata?.accuracy_m ?? null,
+        freshness: (Date.now() - new Date(gpsRow.event_time).getTime()) <= 120000 ? "live"
+          : (Date.now() - new Date(gpsRow.event_time).getTime()) <= 900000 ? "recent" : "stale",
       } : null,
       events: events.map((event) => ({
         event_type: event.event_type,
