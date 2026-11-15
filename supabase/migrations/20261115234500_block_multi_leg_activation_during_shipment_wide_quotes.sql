@@ -138,7 +138,8 @@ BEGIN
       'code','another_active_plan','message','Another route plan is already active for this shipment'));
   END IF;
 
-  IF EXISTS (
+  IF v_plan.total_legs>1 AND (
+    EXISTS (
     SELECT 1 FROM public.krim_partner_opportunities po
     WHERE po.shipment_id=v_plan.shipment_id
       AND po.status IN ('open','shortlisted','awarded')
@@ -153,7 +154,7 @@ BEGIN
     WHERE q.shipment_id=v_plan.shipment_id
       AND q.status IN ('draft','sent','accepted')
       AND (q.valid_until IS NULL OR q.valid_until>pg_catalog.now())
-  ) THEN
+  )) THEN
     v_issues := v_issues || pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
       'code','commercial_quote_flow_active',
       'message','Resolve any active shipment-wide partner opportunity or customer quote before activating a multi-leg plan. Leg-specific sourcing is not yet enabled.'));
