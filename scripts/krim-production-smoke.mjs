@@ -42,6 +42,7 @@ const required = [
   "auth/partner-signup.html",
   ".github/workflows/krim-android-internal-apk.yml",
   "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
+  "supabase/migrations/20261115220000_add_secure_shipment_leg_plan_creation_rpc.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1368,6 +1369,26 @@ for (const token of [
   'client.rpc("krim_customs_broker_license_submit"',
 ]) {
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
+}
+
+// Shipment leg-plan creation must remain a narrow authenticated RPC; activation is a separate gated workflow.
+const legPlanRpcMigrationPath = "supabase/migrations/20261115220000_add_secure_shipment_leg_plan_creation_rpc.sql";
+const legPlanRpcMigration = existsSync(legPlanRpcMigrationPath)
+  ? readFileSync(legPlanRpcMigrationPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_create_shipment_leg_plan",
+  "SET search_path TO ''",
+  "public.krim_has_permission(v_user,v_shipment.customer_organization_id,'shipment.update')",
+  "Route is disconnected",
+  "The first leg origin must match the shipment origin",
+  "The final leg destination must match the shipment destination",
+  "request_idempotency_key",
+  "request_fingerprint",
+  "extensions.digest",
+  "REVOKE ALL ON FUNCTION public.krim_create_shipment_leg_plan",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legPlanRpcMigration.includes(token)) failures.push("Secure shipment leg-plan creation safeguard is missing: " + token);
 }
 
 // Warehouse linked-task idempotency must compare the full operational payload on replay.
