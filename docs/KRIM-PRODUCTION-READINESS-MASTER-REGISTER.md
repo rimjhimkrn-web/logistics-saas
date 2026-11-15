@@ -206,3 +206,10 @@ Migration 20261115150526_align_dispatch_readiness_with_multileg_authorization re
 Live verification: function is SECURITY DEFINER with empty search_path; anonymous EXECUTE is false; authenticated EXECUTE is true. The function returned zero rows because there are no accepted/active partner assignments in the current live data. Therefore the function definition/ACL were verified, but no positive readiness case or real dispatch journey was exercised.
 
 Automated regression smoke checks now assert these readiness safeguards. Browser-based role testing and a real authorised dispatch journey remain open.
+## Leg-scoped POD and multi-leg completion (15 November 2026)
+
+Live migration 20261115150904_support_leg_scoped_delivery_pod_and_completion aligns delivery proof with the per-leg execution model. POD submission for an active multi-leg shipment no longer incorrectly requires the shipment aggregate status to be shipment-wide in_transit; it instead requires the shipment to remain in its active lifecycle, the exact leg to be in_transit, and the partner assignment to match the exact active plan item, sequence, endpoints and mode. Existing driver-owned private evidence and payload-idempotency checks are retained.
+
+After independent POD verification, multi-leg delivery authorization marks only that exact leg completed and its partner assignment completed. It keeps the overall shipment status unchanged while later plan legs remain, emits leg_delivered events, and marks the shipment delivered only when every planned item is materialized and completed/delivered. This preserves the custody-transfer prerequisite for the next partner. The legacy single-leg delivery path remains supported.
+
+Live database function definitions were re-read after migration; both functions remain SECURITY DEFINER with empty search_path. There are no real PODs, active multi-leg plans or driver journeys in production data, so no positive end-to-end journey was run. Automated smoke assertions were added; browser/admin review and real evidence-based execution remain pending.
