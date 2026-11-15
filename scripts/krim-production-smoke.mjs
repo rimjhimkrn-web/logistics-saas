@@ -179,12 +179,22 @@ if (existsSync(contactPath)) {
 }
 const supportPath = "public/support/ticket-desk.html";
 if (existsSync(supportPath)) {
-  const support = readFileSync(supportPath, "utf8");
-  if (support.includes("TKT-2026-9912") || support.includes("Global Supply Chain Corp") || support.includes("Creating New Support Ticket") || support.includes("Opening Ticket Resolution Workspace")) {
-    failures.push("Support desk contains fabricated ticket rows or fake action alerts.");
+  const legacySupport = readFileSync(supportPath, "utf8");
+  if (legacySupport.includes("TKT-2026-9912") || legacySupport.includes("Global Supply Chain Corp") || legacySupport.includes("Creating New Support Ticket") || legacySupport.includes("Opening Ticket Resolution Workspace")) {
+    failures.push("Legacy support route contains fabricated ticket rows or fake action alerts.");
   }
-  if (!support.includes("Live ticket register not connected")) {
-    failures.push("Support desk must disclose that the live ticket register is not connected.");
+  if (!legacySupport.includes('location.replace("create-ticket.html")')) {
+    failures.push("Retired support route must redirect to the canonical customer ticket workflow.");
+  }
+}
+const adminSupportPath = "app/platform-admin/support-desk.html";
+if (existsSync(adminSupportPath)) {
+  const adminSupport = readFileSync(adminSupportPath, "utf8");
+  for (const rpc of ["krim_admin_list_support_tickets", "krim_admin_get_support_ticket_thread", "krim_admin_reply_support_ticket", "krim_admin_transition_support_ticket"]) {
+    if (!adminSupport.includes(rpc)) failures.push("Privileged support desk is missing its live ticket RPC: " + rpc);
+  }
+  if (!adminSupport.includes("global-admin-control") || !adminSupport.includes("AAL2 VERIFIED")) {
+    failures.push("Privileged support desk must enforce the administrator MFA gateway.");
   }
 }
 
