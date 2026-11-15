@@ -1,9 +1,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store","Content-Type":"application/json"};
 function reply(status:number,body:Record<string,unknown>){return new Response(JSON.stringify(body),{status,headers:cors});}
+const gpsLaunchApproved = Deno.env.get("KRIM_GPS_TRACKING_ENABLED") === "true"
+ && Deno.env.get("KRIM_GPS_TRACKING_LEGAL_APPROVAL_VERSION") === "2026-11-15-v1";
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return reply(405,{error:"Method not allowed"});
+ if(!gpsLaunchApproved)return reply(503,{error:"Driver GPS uploads are paused until KRIM approves its location notice, retention schedule, deletion controls and launch review."});
  const authorization=req.headers.get("Authorization")||"";
  const token=authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : authorization.trim();
  if(!token)return reply(401,{error:"Authentication required"});
