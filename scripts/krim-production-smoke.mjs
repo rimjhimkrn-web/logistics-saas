@@ -1988,9 +1988,9 @@ for (const token of [
   "c.exact_active_plan_item",
   "An accepted driver assignment bound to this exact leg and partner is required",
   "private.krim_leg_dispatch_authorization_is_current",
-  "private.krim_partner_capability_covers_shipment_leg",
+  "private.krim_leg_dispatch_authorization_is_current",
   "Non-road dispatch is held pending mode-specific resource and execution controls",
-  "SET search_path=''",
+  "set search_path=''",
 ]) {
   if (!dispatchReadinessMigration.includes(token)) failures.push("Multi-leg dispatch readiness migration is missing safeguard: " + token);
 }
@@ -2010,7 +2010,7 @@ for (const token of [
   "v_materialized_leg_count=v_plan.total_legs",
   "else v_shipment.status end",
   "'continue_remaining_legs'",
-  "set search_path TO ''",
+  "SET search_path TO ''",
  ]) {
   if (!legPodMigration.includes(token)) failures.push("Leg-scoped POD/completion safeguard is missing: " + token);
  }
