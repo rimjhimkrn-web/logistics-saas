@@ -1181,6 +1181,10 @@ const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const driverWorkspacePage = existsSync("app/driver/index.html") ? readFileSync("app/driver/index.html", "utf8") : "";
 const driverVerificationAdminPage = existsSync("app/platform-admin/driver-verification.html") ? readFileSync("app/platform-admin/driver-verification.html", "utf8") : "";
+const partnerCapabilityAdminPage = existsSync("app/platform-admin/partner-capabilities.html") ? readFileSync("app/platform-admin/partner-capabilities.html", "utf8") : "";
+const partnerCapabilitySubmissionPage = existsSync("public/partner/services-capabilities.html") ? readFileSync("public/partner/services-capabilities.html", "utf8") : "";
+const specialistCapabilityGuardMigration = existsSync("supabase/migrations/20261115172500_fail_closed_specialist_partner_capability_approvals.sql")
+  ? readFileSync("supabase/migrations/20261115172500_fail_closed_specialist_partner_capability_approvals.sql", "utf8") : "";
 const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
 const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
@@ -1210,6 +1214,15 @@ for (const token of ['placeholder="goods_carriage"', 'value="tax_token"', 'value
 }
 for (const token of ["goods_carriage", "registration certificate", "valid insurance", "goods-carriage permit", "transport-vehicle fitness", "PUC", "tax certificate", "hazardous/dangerous-goods", "Rules 132–133"]) {
   if (!vehicleVerificationAdminPage.toLowerCase().includes(token.toLowerCase())) failures.push("Vehicle admin legal baseline guidance is missing: " + token);
+}
+for (const token of ["hazardous_goods_capable", "refrigerated", "effective_until", "max_weight_kg", "jurisdiction-specific safety evidence", "temperature-range"]) {
+  if (!specialistCapabilityGuardMigration.includes(token)) failures.push("Partner capability approval guard is missing: " + token);
+}
+if (!partnerCapabilityAdminPage.includes("approveBlocked") || !partnerCapabilityAdminPage.includes("Specialist approval held")) {
+  failures.push("Partner capability admin UI must disable unsupported hazardous/cold-chain approvals.");
+}
+if (!partnerCapabilitySubmissionPage.includes("these specialist capabilities remain inactive") || !partnerCapabilitySubmissionPage.includes("jurisdiction-specific evidence")) {
+  failures.push("Partner capability submission UI must disclose specialist capability restrictions.");
 }
 if (!driverProfileGuardMigration.toLowerCase().includes("new.verification_status := 'pending'") || !driverProfileGuardMigration.toLowerCase().includes("old.verification_status")) {
   failures.push("Driver profile guard must prevent self-approval and reset verification after licence changes.");
