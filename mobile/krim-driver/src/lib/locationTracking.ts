@@ -1,7 +1,7 @@
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { Platform, PermissionsAndroid } from "react-native";
 import { supabase } from "./supabase";
 
 export const DRIVER_LOCATION_TASK = "KRIM_DRIVER_TRIP_LOCATION_V1";
@@ -81,12 +81,30 @@ export async function startTripTracking(assignmentId: string, trackingSessionId:
   await stopLocalTracking();
   const foreground = await Location.requestForegroundPermissionsAsync();
   if (!foreground.granted) throw new Error("Location permission is required to share this assigned trip.");
-  const background = await Location.requestBackgroundPermissionsAsync();
+  let backgroundGranted = false;
+  if (Platform.OS === "android" && Number(Platform.Version) >= 33) {
+    const notificationPermission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      {
+        title: "KRIM trip tracking notification",
+        message: "Allow the ongoing notification so you can see when KRIM is sharing your trip location in the background.",
+        buttonPositive: "Allow",
+        buttonNegative: "Not now"
+      }
+    );
+    if (notificationPermission === PermissionsAndroid.RESULTS.GRANTED) {
+      const background = await Location.requestBackgroundPermissionsAsync();
+      backgroundGranted = background.granted;
+    }
+  } else {
+    const background = await Location.requestBackgroundPermissionsAsync();
+    backgroundGranted = background.granted;
+  }
   await SecureStore.setItemAsync(ASSIGNMENT_KEY, assignmentId);
   await SecureStore.setItemAsync(SESSION_KEY, trackingSessionId);
   try {
     const taskAvailable = await TaskManager.isAvailableAsync();
-    if (background.granted && taskAvailable) {
+    if (backgroundGranted && taskAvailable) {
       await Location.startLocationUpdatesAsync(DRIVER_LOCATION_TASK, {
         accuracy: Location.Accuracy.High,
         timeInterval: 15000,
