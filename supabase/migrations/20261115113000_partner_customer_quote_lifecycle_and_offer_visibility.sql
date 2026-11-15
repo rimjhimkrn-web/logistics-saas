@@ -293,7 +293,7 @@ CREATE OR REPLACE FUNCTION public.krim_submit_partner_quote(p_opportunity_id big
  RETURNS krim_partner_quotes
  LANGUAGE plpgsql
  SECURITY DEFINER
- SET search_path TO 'pg_catalog', 'public', 'auth', 'private'
+ SET search_path TO ''
 AS $function$
 DECLARE
   v_user_id uuid := auth.uid();
