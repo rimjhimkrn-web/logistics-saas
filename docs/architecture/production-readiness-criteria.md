@@ -35,8 +35,9 @@ This file is a release-gate checklist, not a declaration that every workspace or
 - [ ] Keep paid checkout disabled until merchant and tax/legal approval.
 
 ## P1 — Mobile release engineering
-- [ ] Commit lockfiles for Customer, Partner and Driver apps.
-- [ ] Use deterministic `npm ci` builds and pinned tool versions.
+- [x] Commit lockfiles for Customer, Partner and Driver apps.
+- [x] Use deterministic `npm ci` builds; all three app CI validation jobs passed on 15 November 2026.
+- [ ] Complete physical-device acceptance and pinned release-toolchain review.
 - [ ] Run typecheck, Expo compatibility/config checks and Android exports for all three apps.
 - [ ] Complete synthetic account and physical-device testing.
 - [ ] Separate internal APK preview from production AAB/store release and rollback.
