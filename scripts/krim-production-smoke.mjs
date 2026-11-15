@@ -1189,6 +1189,8 @@ const futureCapacityReservationMigration = existsSync("supabase/migrations/20261
   ? readFileSync("supabase/migrations/20261115173000_reserve_future_capacity_by_overlapping_trip_window.sql", "utf8") : "";
 const capacityResourceLockMigration = existsSync("supabase/migrations/20261115173500_lock_resource_during_capacity_selection.sql")
   ? readFileSync("supabase/migrations/20261115173500_lock_resource_during_capacity_selection.sql", "utf8") : "";
+const warehouseQualityEvidenceMigration = existsSync("supabase/migrations/20261115180000_revalidate_warehouse_inspection_evidence_at_quality_review.sql")
+  ? readFileSync("supabase/migrations/20261115180000_revalidate_warehouse_inspection_evidence_at_quality_review.sql", "utf8") : "";
 const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
 const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
@@ -1234,6 +1236,9 @@ if (!futureCapacityWindowReplacement || futureCapacityWindowReplacement.includes
 }
 if (!capacityResourceLockMigration.includes("for update of r, a skip locked")) {
   failures.push("Capacity selection must lock the shared physical resource to serialize concurrent reservations.");
+}
+for (const token of ["join storage.objects o", "o.owner=e.created_by", "e.created_by is distinct from v_user", "e.bucket_id='krim-warehouse-evidence'", "mimetype", "10485760"]) {
+  if (!warehouseQualityEvidenceMigration.includes(token)) failures.push("Warehouse QC evidence revalidation is missing safeguard: " + token);
 }
 if (!partnerCapabilitySubmissionPage.includes("these specialist capabilities remain inactive") || !partnerCapabilitySubmissionPage.includes("jurisdiction-specific evidence")) {
   failures.push("Partner capability submission UI must disclose specialist capability restrictions.");
