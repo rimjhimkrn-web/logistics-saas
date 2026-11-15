@@ -198,6 +198,23 @@ if (existsSync(adminSupportPath)) {
   }
 }
 
+const supportRuntimePath = "public/support/support-runtime.js";
+const supportSlaMigrationPath = "supabase/migrations/20261115082000_support_sla_targets_and_response_integrity.sql";
+if (existsSync(supportRuntimePath)) {
+  const supportRuntime = readFileSync(supportRuntimePath, "utf8");
+  if (!supportRuntime.includes("krim_support_ticket_messages") || !supportRuntime.includes("krim_customer_reply_support_ticket") || !supportRuntime.includes('eq("is_internal", false)')) {
+    failures.push("Customer ticket history must show only public replies and support secure customer responses.");
+  }
+}
+if (existsSync(supportSlaMigrationPath)) {
+  const supportSla = readFileSync(supportSlaMigrationPath, "utf8");
+  if (!supportSla.includes("48 hours") || !supportSla.includes("30 days") || !supportSla.includes("first_responded_at")) {
+    failures.push("Support SLA migration must record internal targets and preserve real first-response timestamps.");
+  }
+} else {
+  failures.push("Support SLA migration is missing.");
+}
+
 
 
 // Audit guard: the public E2E dashboard must never claim tests passed unless a real
