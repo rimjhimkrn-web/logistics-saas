@@ -30,9 +30,9 @@ Deno.serve(async(req:Request)=>{
  if(driverError)return reply(500,{error:"Could not verify driver assignment"});
  if(!driver||!driver.partner_assignment_id||!driver.shipment_id)return reply(403,{error:"No matching active driver assignment is available"});
  if(String(driver.status||"").toLowerCase()!=="in_transit")return reply(409,{error:"GPS updates are accepted only for a trip currently marked in transit"});
- const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status").eq("user_id",authData.user.id).eq("organization_id",driver.organization_id).maybeSingle();
+ const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status,licence_number").eq("user_id",authData.user.id).eq("organization_id",driver.organization_id).maybeSingle();
  if(profileError)return reply(500,{error:"Could not verify driver identity"});
- if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase()))return reply(403,{error:"Verified driver identity is required for GPS updates"});
+ if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase())||!String(profile.licence_number||"").trim())return reply(403,{error:"Verified driver identity and licence are required for GPS updates"});
  const {data:trackingSession,error:sessionError}=await admin.from("krim_driver_tracking_sessions").select("id,driver_assignment_id,partner_assignment_id,shipment_id,organization_id,user_id,status").eq("id",trackingSessionId).eq("driver_assignment_id",driver.id).eq("partner_assignment_id",driver.partner_assignment_id).eq("shipment_id",driver.shipment_id).eq("organization_id",driver.organization_id).eq("user_id",authData.user.id).eq("status","active").maybeSingle();
  if(sessionError)return reply(500,{error:"Could not verify tracking consent session"});
  if(!trackingSession)return reply(403,{error:"An active, consented tracking session is required before location updates are accepted"});
@@ -45,6 +45,7 @@ Deno.serve(async(req:Request)=>{
  const {data:partnerAssignment,error:partnerError}=await admin.from("krim_shipment_partner_assignments").select("id,shipment_id,shipment_leg_id,partner_organization_id,status").eq("id",driver.partner_assignment_id).eq("shipment_id",driver.shipment_id).eq("partner_organization_id",driver.organization_id).maybeSingle();
  if(partnerError)return reply(500,{error:"Could not verify shipment assignment"});
  if(!partnerAssignment||!["accepted","active","in_progress","assigned"].includes(String(partnerAssignment.status).toLowerCase()))return reply(403,{error:"The linked shipment assignment is not authorized for tracking"});
+ if(!driver.shipment_leg_id||String(driver.shipment_leg_id)!==String(partnerAssignment.shipment_leg_id))return reply(403,{error:"Driver and partner assignment shipment legs do not match"});
  const {data:latest,error:latestError}=await admin.from("krim_tracking_events").select("event_time,latitude,longitude").eq("assignment_id",driver.partner_assignment_id).eq("source_type","gps").order("event_time",{ascending:false}).limit(1).maybeSingle();
  if(latestError)return reply(500,{error:"Could not check tracking frequency"});
  if(latest){const elapsed=now-new Date(latest.event_time).getTime();const rad=(v:number)=>v*Math.PI/180;const dLat=rad(lat-Number(latest.latitude??lat)),dLon=rad(lon-Number(latest.longitude??lon));const a=Math.sin(dLat/2)**2+Math.cos(rad(lat))*Math.cos(rad(Number(latest.latitude??lat)))*Math.sin(dLon/2)**2;const distance=6371000*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(elapsed<15000)return reply(202,{accepted:true,stored:false,reason:"rate_limited",next_update_after_ms:15000-elapsed});if(distance<15&&elapsed<60000)return reply(202,{accepted:true,stored:false,reason:"stationary_filter"});}
