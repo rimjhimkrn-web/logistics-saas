@@ -6,6 +6,7 @@ const view=document.body.dataset.quoteView||'list';
 const quoteId=Number(new URLSearchParams(location.search).get('quote_id'));
 const shipmentIdParam=new URLSearchParams(location.search).get('shipment_id');
 let orgIds=[],quote=null,shipment=null;
+const PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false;
 function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function money(amount,currency){const n=Number(amount);if(!Number.isFinite(n))return 'Price not recorded';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:String(currency||'INR').toUpperCase(),maximumFractionDigits:2}).format(n)}catch(_){return String(currency||'')+' '+n.toLocaleString()}}
@@ -44,16 +45,18 @@ async function loadDetail(){
  const accepted=String(q.status||'').toLowerCase()==='accepted',expired=q.valid_until&&new Date(q.valid_until).getTime()<=Date.now();
  $('accept-button').classList.toggle('hidden',view!=='acceptance');$('compare-link').href=path('public/shipper/quote-comparison.html')+'?shipment_id='+encodeURIComponent(q.shipment_id||'');$('detail-link').href=path('public/customer-os/quotes-pricing/quote-details.html')+'?quote_id='+encodeURIComponent(q.id);
  if(view==='acceptance'){
-  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment;
-  button.textContent=accepted?'Quote already accepted':expired?'Quote expired':'Accept quote securely';
+  const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment||!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED;
+  button.textContent=accepted?'Quote already accepted':expired?'Quote expired':!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED?'Acceptance temporarily paused':'Accept quote securely';
   if(!shipment)say('The linked shipment could not be verified inside your organization. Quote acceptance is blocked.','error');
   else if(accepted)say('This quote is already marked accepted by the database. Booking, partner assignment and payment remain separate checks.');
   else if(expired)say('This quote has expired. KRIM will not attempt to accept an expired quote.','warn');
+  else if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED)say('Quote review is available, but new booking acceptance is temporarily paused. The live shipment-readiness policy still requires a KRIM payment record, while KRIM’s launch model does not collect freight charges. No booking has been confirmed; wait for the partner-direct readiness update.','warn');
   else say('Review the amount, currency and validity before acceptance. KRIM revalidates eligibility on the server.','')
  }else say('Quote and shipment records are scoped to your active customer organization. This view does not imply booking or payment completion.')
 }
 $('accept-button').addEventListener('click',async()=>{
  if(!quote||!shipment||!quoteId)return;
+ if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED){say('Quote acceptance is temporarily paused until the live readiness policy supports partner-direct payment. No booking or payment was recorded.','warn');return;}
  if(!confirm('Accept quote #'+quote.id+' for '+money(quote.amount,quote.currency_code)+'? KRIM will validate quote eligibility and permissions on the server.'))return;
  const b=$('accept-button');b.disabled=true;b.textContent='Validating and accepting…';say('Waiting for KRIM server-side quote acceptance…');
  try{
