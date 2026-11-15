@@ -1464,7 +1464,7 @@ for (const token of [
 ]) {
   if (!routePlanningUi.includes(token)) failures.push("Route-planning lifecycle UI safeguard is missing: " + token);
 }
-const routePlanningScripts = [...routePlanningUi.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+const routePlanningScripts = [...routePlanningUi.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map(match => match[1]).filter(script => script.trim());
 for (const script of routePlanningScripts) {
   try { new Function(script); }
