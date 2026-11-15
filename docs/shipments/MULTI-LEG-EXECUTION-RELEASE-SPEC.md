@@ -431,3 +431,17 @@ Legacy shipment-wide single-leg assignments are retained where no leg-scoped quo
 Updated `public.krim_partner_reserve_shipment_leg_capacity(bigint,timestamptz,timestamptz,text)` so an available resource is eligible only when its availability record references an active `krim_network_lanes` row whose origin, destination and transport mode exactly match the assigned shipment leg. The physical capacity resource's transport mode must also match the leg. This closes a route mismatch: previously, an availability row could match partner, mode, resource origin and time window without proving that its declared lane ended at the exact leg destination.
 
 The reservation still requires verified availability and resource evidence, valid booking windows, overlapping-time capacity checks, a matching assignment and partner membership, current compliance, and exact-leg capability. The change is fail-closed: no matching active route lane means no reservation. The current environment has no network-lane rows or capacity reservations, so no real reservation was created or claimed tested.
+
+
+## Dispatch safety update — shipment-wide multi-leg dispatch blocked
+
+Live review found that the internal dispatch worker still advances the shipment-level status to `dispatched` after handling one assignment/leg. Its existing readiness evaluator and capacity trigger provide useful gates, but a shipment-global transition is not a safe multi-leg execution primitive: it can make the shipment appear dispatched while later legs have not started, and the evaluator's driver count is not itself proof of an accepted driver assignment for every leg.
+
+A database-level fail-closed guard has therefore been added:
+- `private.krim_block_shipment_wide_dispatch_for_multileg()` blocks any shipment status transition to `dispatched` while an active route plan has more than one leg.
+- The guard runs as a BEFORE UPDATE trigger on `krim_shipments.status`, so it covers the legacy/internal dispatch RPC and other status writers.
+- The private trigger function uses an empty search_path and EXECUTE is revoked from PUBLIC, anon, authenticated and service_role; the trigger invokes it as the owning database role.
+- Single-leg shipment dispatch remains governed by the existing dispatch readiness and capacity controls.
+- No shipment or plan data was changed; live plan count remains zero.
+
+This is an intentional safety barrier, not completion of multi-leg dispatch. The next implementation must introduce a leg-scoped dispatch command and state, exact-leg driver/vehicle/capacity binding, custody handover acceptance between legs, and shipment-level aggregation only after the appropriate leg milestones. Do not enable multi-leg dispatch until those controls and real-participant end-to-end tests exist.
