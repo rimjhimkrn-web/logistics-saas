@@ -226,3 +226,9 @@ Live verification: all four triggers are installed. Current invoice, payable, re
 Migration `20261115151811_correct_custody_transfer_response_audit_fields` adds `responded_by` and `responded_at` to custody-transfer records. The response RPC now records those fields for both acceptance and rejection, while `accepted_by` and `accepted_at` are populated only on acceptance. Rejection reason remains separately recorded. This corrects the prior semantic defect in which a rejecting actor was stored in fields named as acceptance metadata.
 
 The migration was applied to the live database, matching SQL was committed, and production smoke assertions were added. There were zero custody-transfer rows at migration time, so no historical rows required correction. No synthetic transfer was created and no positive handoff E2E test was claimed.
+
+## Dispatch authorization replay safety (15 November 2026)
+
+Migration `20261115152002_reject_revoked_dispatch_authorization_replay` hardens `krim_authorize_leg_dispatch`: an idempotency key tied to a revoked authorization now fails closed rather than returning the revoked row as if it were usable. A replay of an authorization still marked active is returned only if `private.krim_leg_dispatch_authorization_is_current` confirms the exact active plan, assignment, partner, capacity reservation, compliance, capability and custody bindings remain current. The existing partial unique index permits a new authorization for a leg only after its previous authorization is revoked; a new idempotency key is required.
+
+Matching migration and regression assertions are committed. No live dispatch authorizations exist, so the change has been statically and structurally verified, not exercised against a real partner dispatch. Road driver/vehicle checks remain separately required by the authorization RPC and dispatch execution path.
