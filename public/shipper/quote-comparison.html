@@ -115,7 +115,7 @@ $('accept-selected').disabled=false;actionFeedback('Ready to request provider ac
 }
 async function loadRecords(){
 const [offerResult,quoteResult,assignmentResult]=await Promise.all([
-client.rpc('krim_customer_list_partner_quotes',{p_shipment_id:Number(shipment.id)}),
+client.rpc('krim_customer_list_partner_quotes',{p_shipment_ids:[Number(shipment.id)]}),
 client.from('krim_quotes').select('id,shipment_id,customer_organization_id,amount,currency_code,status,valid_until,partner_quote_id,created_at').eq('shipment_id',shipment.id).eq('customer_organization_id',shipment.customer_organization_id).order('created_at',{ascending:false}).limit(100),
 client.from('krim_shipment_partner_assignments').select('id,shipment_id,partner_quote_id,assignment_number,status,created_at').eq('shipment_id',shipment.id).order('created_at',{ascending:false}).limit(100)
 ]);
