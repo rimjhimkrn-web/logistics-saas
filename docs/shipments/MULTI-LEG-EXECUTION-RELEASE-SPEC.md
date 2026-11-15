@@ -255,3 +255,40 @@ Live verification:
 ## Additional integrity fix — adjacent leg schedule continuity
 
 The evaluation RPC now rejects a later leg whose planned departure is earlier than the previous leg's planned arrival (`overlapping_leg_time_window`). This repeats the creation-time check at activation time, so stale or changed plan items cannot bypass schedule continuity validation.
+
+## Partner sourcing integration audit — leg scope is not yet supported
+
+A deeper live function/schema review found a critical integration boundary:
+- `krim_partner_opportunities` and `krim_partner_quotes` are shipment-scoped; neither table has a `shipment_leg_id`.
+- `krim_award_partner_quote(bigint)` selects the first shipment leg and creates an assignment for that leg.
+- `krim_respond_to_partner_assignment` can update the linked leg, but the current commercial award path does not select a separate partner quote per plan item.
+- `krim_internal_finalize_partner_assignment` finalises the shipment-level status as `assigned` after one accepted assignment and capacity commitment. It is not a multi-leg orchestration engine.
+
+This means the existing quote/award path must not be reused to source a multi-leg route: it could award a shipment-wide quote to only the first leg and incorrectly imply full-route coverage.
+
+Fail-closed safeguards added:
+- Plan evaluation blocks activation while a live shipment-wide partner opportunity, partner quote, or customer quote exists.
+- Shipment-wide partner opportunity creation is blocked after a multi-leg plan becomes active.
+- Shipment-wide partner quote submission is blocked for active multi-leg plans.
+- Shipment-wide partner quote award is blocked for active multi-leg plans.
+- Existing single-leg flows remain unchanged.
+
+Live verification:
+- All three guards are present in the live function definitions.
+- Anonymous execution remains denied for the guarded public RPCs; the legacy award helper remains restricted to internal/service callers.
+- No active partner opportunities, partner quotes or partner assignments exist at the time of this review.
+- This is a deliberate safety block, not a completed leg-specific marketplace.
+
+Required next implementation:
+1. Add explicit `shipment_leg_id` scope to partner opportunities and partner quotes, with foreign keys and uniqueness/idempotency rules.
+2. Add leg-specific opportunity creation and capability checks for exact leg mode, route countries/regions, cargo and time window.
+3. Make quote submission, customer award and partner acceptance bind to the exact plan item and shipment leg.
+4. Add per-leg capacity commitment and driver/vehicle readiness.
+5. Keep shipment status separate from each leg's execution state; do not mark the whole shipment assigned or dispatched after only one leg is covered.
+6. Test partner rejection/expiry/re-award on one leg without changing other legs.
+
+## Historical shipment-leg anomaly — preserved for review
+
+The only current shipment-leg row belongs to a closed legacy shipment. Its row has `status='assigned'`, `assignment_status='unassigned'`, and a non-null partner organisation, while no corresponding row exists in `krim_shipment_partner_assignments`. Its historical audit stream also contains two identical `shipment_leg_created` events from the duplicate trigger that has now been removed.
+
+No historical shipment or audit record was modified. This closed-shipment inconsistency must be reconciled against original business records before any cleanup; it is excluded from new plan activation and is not treated as proof of a current active assignment.
