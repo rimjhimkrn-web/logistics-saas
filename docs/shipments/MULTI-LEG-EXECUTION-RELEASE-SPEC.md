@@ -340,3 +340,25 @@ Verification:
 
 Important limitation:
 The marketplace still lacks leg-scoped opportunity/quote creation and award. Current shipment-wide quote creation/submission/award remains deliberately blocked for active multi-leg plans. Therefore this is not yet a complete multi-leg carrier marketplace and no live leg assignments have been tested. The next work must add leg-scoped commercial sourcing and bind each award to the exact plan item, then verify driver/vehicle readiness and per-leg dispatch without prematurely advancing the shipment.
+
+
+## Leg-scoped partner sourcing schema foundation (16 Nov 2026)
+
+Added nullable `shipment_leg_id` foreign-key columns to partner opportunities and partner quotes, preserving existing single-leg records and legacy flows. Added partial indexes for exact-leg lookups.
+
+Database trigger validation now enforces:
+- A leg-scoped opportunity must reference a shipment leg belonging to the same shipment.
+- That leg must be linked to an item in the shipment's active route plan.
+- A partner quote must reference an opportunity for the same shipment.
+- The quote's leg scope must exactly equal its opportunity's leg scope.
+- A scoped quote cannot point to a non-plan-linked leg.
+
+The validation trigger functions use an empty search path and are not directly executable by PUBLIC, anon or authenticated roles. Existing RLS and table grants remain unchanged. This is an additive data-model foundation only: it does not yet create leg-specific opportunities, accept partner quotes, award them, or create assignments. The legacy shipment-wide sourcing gates remain in place for active multi-leg plans.
+
+Release gates still required:
+1. Implement narrow authenticated RPCs to create leg-specific opportunities and submit partner quotes with organisation, capability, compliance, cargo, schedule and capacity validation.
+2. Implement customer award and partner acceptance bound to the exact opportunity, quote, plan item and shipment leg.
+3. Enforce assignment/quote scope consistency, one active assignment per leg, and independent rejection/expiry/re-award.
+4. Run positive and negative tests with authorised partner and customer accounts before enabling the workflow.
+
+No production opportunity, quote, assignment, or shipment data was created or modified by this schema migration.
