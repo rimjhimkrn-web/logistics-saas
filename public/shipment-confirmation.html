@@ -76,7 +76,7 @@ const paidStates=new Set(["paid","verified","complete","completed","passed","cle
 const directStates=new Set(["partner_direct","not_required"]);
 const bookingStates=new Set(["confirmed","booking_confirmed","booked","operational_confirmed"]);
 function currencyMinorUnitExponent(currency){const code=String(currency||"").trim().toUpperCase();if(["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(code))return 0;if(["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(code))return 3;if(["CLF","UYW"].includes(code))return 4;return 2;}
-function safeInt(v){return /^\\d+$/.test(String(v||""))&&Number.isSafeInteger(Number(v))&&Number(v)>0}
+function safeInt(v){return /^\d+$/.test(String(v||""))&&Number.isSafeInteger(Number(v))&&Number(v)>0}
 function fmtDate(v){if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}
 function norm(v){return String(v||"").trim().toLowerCase().replace(/[ -]+/g,"_")}
 function mark(name,ok,detail){const row=[...$("checks").children].find(el=>el.querySelector("strong")?.textContent===name);if(!row)return;const icon=row.querySelector(".checkicon");icon.className="checkicon "+(ok===true?"good":ok===false?"bad":"");icon.textContent=ok===true?"✓":ok===false?"!":"…";row.querySelector("small").textContent=detail}
