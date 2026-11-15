@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { WebView, type WebViewMessageEvent } from "react-native-webview";
+import { ActivityIndicator, Image, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
@@ -34,9 +33,6 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [acceptingQuoteId, setAcceptingQuoteId] = useState<number | null>(null);
-  const [paymentQuoteId,setPaymentQuoteId]=useState<number|null>(null);
-  const [checkout,setCheckout]=useState<{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}|null>(null);
-  const [verifyingPayment,setVerifyingPayment]=useState(false);
 
   const refreshOrganizations = useCallback(async () => {
     if (!supabase) return;
@@ -92,39 +88,9 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
     } finally { setAcceptingQuoteId(null); }
   };
 
-  const startPayment=async(quote:CustomerQuote)=>{
-    if(!supabase||organizationId===null||paymentQuoteId!==null)return;
-    const shipment=shipments.find(x=>x.id===quote.shipment_id);
-    if(quote.status!=="accepted"||!shipment||shipment.status!=="confirmed"){
-      setError("Payment is available only after KRIM confirms the accepted quote, partner assignment and shipment.");return;
-    }
-    if(new Date(quote.valid_until).getTime()<=Date.now()){setError("This quote has expired. Request a fresh quote before payment.");return;}
-    setPaymentQuoteId(quote.id);setError("");setNotice("");
-    try{
-      const {data,error:functionError}=await supabase.functions.invoke("create-global-razorpay-order",{body:{krim_shipment_id:shipment.id,krim_quote_id:quote.id}});
-      if(functionError)throw new Error(functionError.message||"Secure checkout could not be started.");
-      if(!data?.success||!data?.key_id||!data?.razorpay_order_id||!Number.isSafeInteger(Number(data.amount_paise))||Number(data.amount_paise)<=0||String(data.currency)!=="INR")throw new Error(data?.error||"KRIM has not enabled a valid INR checkout for this shipment yet.");
-      setCheckout({keyId:String(data.key_id),orderId:String(data.razorpay_order_id),amount:Number(data.amount_paise),currency:String(data.currency),shipmentNumber:String(data.shipment_number||shipment.shipment_number),email:session.user.email||""});
-    }catch(e){setError(e instanceof Error?e.message:"Secure checkout is currently unavailable.");}
-    finally{setPaymentQuoteId(null);}
-  };
-
-  const handleCheckoutMessage=async(event:WebViewMessageEvent)=>{
-    let message:any;try{message=JSON.parse(event.nativeEvent.data);}catch{return;}
-    if(message?.type==="dismiss"){setCheckout(null);return;}
-    if(message?.type==="failed"){setCheckout(null);setError(String(message.message||"Razorpay reported that the payment did not complete."));return;}
-    if(message?.type!=="success"||verifyingPayment)return;
-    const paymentId=String(message.razorpay_payment_id||""),orderId=String(message.razorpay_order_id||""),signature=String(message.razorpay_signature||"");
-    if(!paymentId||!orderId||!signature){setCheckout(null);setError("The payment provider returned incomplete verification details. Do not retry until payment status is checked.");return;}
-    setVerifyingPayment(true);setError("");setNotice("Payment received by Razorpay. KRIM is verifying the signature and reconciling the transaction…");
-    try{
-      const {data,error:functionError}=await supabase!.functions.invoke("verify-razorpay-payment",{body:{razorpay_payment_id:paymentId,razorpay_order_id:orderId,razorpay_signature:signature}});
-      if(functionError)throw new Error(functionError.message||"Payment verification is pending. Check payment status before retrying.");
-      if(!data?.verified||data?.status!=="paid")throw new Error(data?.error||"Payment verification is not yet complete. Please contact KRIM support before paying again.");
-      setCheckout(null);setNotice("Payment verified and reconciled for shipment "+String(data.shipment_number||"")+".");
-      await refreshWorkspace();
-    }catch(e){setCheckout(null);setError(e instanceof Error?e.message:"Payment verification is pending. Please do not pay again until KRIM confirms the status.");}
-    finally{setVerifyingPayment(false);}
+  const openPartnerPaymentGuidance = () => {
+    void Linking.openURL("https://rimjhimkrn-web.github.io/logistics-saas/public/shipper/payment-checkout.html")
+      .catch(() => setError("Payment guidance could not be opened. Please use the KRIM website or contact support."));
   };
 
   const showTracking = async (shipmentNumber: string) => {
@@ -203,12 +169,13 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
 
         {tab === "Quotes" && <>
           <Header kicker="COMMERCIAL VISIBILITY" title="Quotes" sub="Amounts and currencies are displayed only from authorized KRIM quote records."/>
+          <View style={s.panel}><Text style={s.panelTitle}>Partner-direct payments</Text><Text style={s.body}>Customers pay the logistics provider they contract with. KRIM does not collect freight charges, hold escrow or settle partner funds. Verify the provider invoice and beneficiary details directly before paying.</Text><Action title="Read payment guidance" onPress={openPartnerPaymentGuidance} secondary/></View>
           {loadingData ? <ActivityIndicator color={blue}/> : quotes.length ? quotes.map((q) => <View key={q.id} style={s.panel}>
             <Text style={s.panelTitle}>Quote #{q.id}</Text>
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
             <Text style={s.tiny}>Shipment ID {q.shipment_id} · Status: {q.status}</Text>
             <Text style={s.tiny}>Valid until: {new Date(q.valid_until).toLocaleString()}</Text>
-            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted"&&shipments.find(x=>x.id===q.shipment_id)?.status==="confirmed" ? <Action title={paymentQuoteId===q.id?"Preparing secure checkout…":"Pay securely"} onPress={()=>void startPayment(q)} disabled={paymentQuoteId!==null||verifyingPayment}/> : q.status==="accepted" ? <Text style={s.tiny}>Payment unlocks after KRIM confirms the partner assignment and reserved capacity.</Text> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
+            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted" ? <><Text style={s.tiny}>Partner-direct payment: the contracting logistics provider issues its own invoice and receives freight payment directly from you. KRIM does not create or collect freight-payment orders or settle partner funds.</Text><Action title="Partner-direct payment guidance" onPress={openPartnerPaymentGuidance} secondary/></> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
           </View>) : <Empty title="No visible quotes" body="Confirmed quotes will appear here when available to your organization."/>}
         </>}
 
@@ -236,23 +203,13 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
           <View style={s.panel}><Text style={s.panelTitle}>KRIM</Text><Text style={s.body}>Knowledge · Reliability · Integration · Movement</Text><Text style={s.tiny}>Global-ready architecture · Market availability requires local partner and compliance verification.</Text></View>
         </>}
       </ScrollView>
-      <Modal visible={!!checkout} animationType="slide" onRequestClose={()=>setCheckout(null)}>
-        <View style={s.checkoutHeader}><View><Text style={s.checkoutTitle}>KRIM secure payment</Text><Text style={s.tiny}>{checkout?.shipmentNumber||"Shipment payment"}</Text></View><Pressable onPress={()=>setCheckout(null)} accessibilityRole="button"><Text style={s.checkoutClose}>Close ✕</Text></Pressable></View>
-        {checkout&&<WebView originWhitelist={["https://*","about:blank"]} source={{html:razorpayCheckoutHtml(checkout)}} javaScriptEnabled domStorageEnabled onMessage={handleCheckoutMessage} onShouldStartLoadWithRequest={request=>{const url=request.url;if(url==="about:blank"||url.startsWith("https://"))return true;if(/^(upi|intent|phonepe|paytm|tez|gpay):/i.test(url)){void Linking.openURL(url).catch(()=>setError("The selected payment app could not be opened."));return false;}return false;}} startInLoadingState renderLoading={()=><View style={s.checkoutLoading}><ActivityIndicator size="large" color={blue}/><Text style={s.muted}>Loading Razorpay checkout…</Text></View>}/>}
-      </Modal>
+
       <View style={s.nav}>{tabs.map((item) => <Pressable key={item} onPress={() => setTab(item)} accessibilityRole="tab" accessibilityState={{selected: tab === item}} style={s.navItem}>
         <Text style={[s.navIcon, tab === item && {color: blue}]}>{({Home:"⌂",Book:"+",Shipments:"▤",Quotes:"≋",Track:"◎",Account:"○"} as Record<Tab,string>)[item]}</Text>
         <Text style={[s.navLabel, tab === item && {color: blue}]}>{item}</Text>
       </Pressable>)}</View>
     </View>
   );
-}
-
-function razorpayCheckoutHtml(data:{keyId:string;orderId:string;amount:number;currency:string;shipmentNumber:string;email:string}){
-  const escapeHtml=(value:string)=>value.replace(/[&<>"\']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;"}[ch]||ch));
-  const json=(value:string)=>JSON.stringify(value).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026");
-  const key=json(data.keyId),order=json(data.orderId),currency=json(data.currency),description=json("Shipment "+data.shipmentNumber),email=json(data.email),amount=Number(data.amount),safeShipment=escapeHtml(data.shipmentNumber);
-  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta charset="utf-8"><title>KRIM secure checkout</title><style>body{font-family:Arial,sans-serif;background:#f3f6fa;color:#071a35;display:flex;min-height:90vh;align-items:center;justify-content:center;padding:20px;text-align:center}.box{background:white;border-radius:18px;padding:26px;box-shadow:0 12px 35px #071a3520;max-width:360px}button{background:#2366d9;color:white;border:0;border-radius:10px;padding:14px 24px;font-weight:700;font-size:16px}</style></head><body><div class="box"><h2>KRIM Logistics</h2><p>${safeShipment}</p><h3>${data.currency} ${(amount/100).toLocaleString("en-IN",{maximumFractionDigits:2})}</h3><p>Secure payment powered by Razorpay.</p><button id="pay">Continue to payment</button></div><script src="https://checkout.razorpay.com/v1/checkout.js"></script><script>const options={key:${key},amount:${amount},currency:${currency},name:"KRIM Logistics",description:${description},order_id:${order},prefill:{email:${email}},theme:{color:"#2366d9"},handler:function(r){window.ReactNativeWebView.postMessage(JSON.stringify({type:"success",razorpay_payment_id:r.razorpay_payment_id,razorpay_order_id:r.razorpay_order_id,razorpay_signature:r.razorpay_signature}));},modal:{ondismiss:function(){window.ReactNativeWebView.postMessage(JSON.stringify({type:"dismiss"}));}}};const checkout=new Razorpay(options);checkout.on("payment.failed",function(r){window.ReactNativeWebView.postMessage(JSON.stringify({type:"failed",message:r.error&&r.error.description||"Payment failed"}));});document.getElementById("pay").addEventListener("click",function(){checkout.open();});</script></body></html>`;
 }
 
 function Header({kicker,title,sub}:{kicker:string;title:string;sub:string}) { return <View style={s.header}><Text style={s.kicker}>{kicker}</Text><Text style={s.title}>{title}</Text><Text style={s.muted}>{sub}</Text></View>; }
@@ -264,7 +221,6 @@ function Action({title,onPress,secondary=false,disabled=false}:{title:string;onP
 
 const s = StyleSheet.create({
  safe:{flex:1,backgroundColor:"#F3F6FA"}, top:{backgroundColor:navy,paddingHorizontal:17,paddingVertical:14,flexDirection:"row",alignItems:"center",justifyContent:"space-between"},
- checkoutHeader:{paddingHorizontal:18,paddingVertical:16,backgroundColor:"#fff",borderBottomWidth:1,borderBottomColor:line,flexDirection:"row",alignItems:"center",justifyContent:"space-between"},checkoutTitle:{fontSize:18,fontWeight:"900",color:navy},checkoutClose:{fontSize:14,fontWeight:"900",color:blue},checkoutLoading:{flex:1,alignItems:"center",justifyContent:"center",gap:12},
  workspaceLogo:{width:190,height:50,maxWidth:"72%"},signed:{fontSize:14,fontWeight:"900",color:"#B9F2D7"},
  content:{padding:15,paddingBottom:28},info:{padding:12,borderRadius:11,backgroundColor:"#EAF2FF",marginBottom:12},infoText:{fontSize:14,lineHeight:16,color:"#234A7D"},
  errorBox:{padding:12,borderRadius:11,backgroundColor:"#FDECEC",marginBottom:12},errorText:{fontSize:14,lineHeight:16,color:"#9C2525"},
