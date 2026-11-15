@@ -191,7 +191,8 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                     const lat = Number(pos.latitude), lon = Number(pos.longitude);
                     const gps = document.createElement("div");
                     gps.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-2";
-                    gps.append(trackingText("strong", "Latest driver GPS position", "block text-emerald-900 text-sm"));
+                    const freshness = String(pos.freshness || "stale").toUpperCase();
+                    gps.append(trackingText("strong", "Latest driver GPS position · " + freshness, "block text-emerald-900 text-sm"));
                     gps.append(trackingText("p", "Recorded: " + trackingDate(pos.recorded_at) + (pos.accuracy_m ? " · Accuracy ±" + Math.round(Number(pos.accuracy_m)) + " m" : ""), "text-xs text-emerald-800"));
                     gps.append(trackingText("p", "Coordinates: " + lat.toFixed(5) + ", " + lon.toFixed(5), "text-xs text-emerald-900 font-mono"));
                     const map = document.createElement("a");
