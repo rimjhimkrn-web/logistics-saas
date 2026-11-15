@@ -376,6 +376,21 @@ if (!/krim-payment-verification-status/.test(shipmentConfirmation) || !/pay\.ver
 if (!/bookingStates/.test(shipmentConfirmation) || !/readinessOK/.test(shipmentConfirmation)) failures.push("Shipment confirmation must separately check booking status and operational readiness.");
 if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-8842/.test(legacyPaymentResult)) failures.push("Legacy payment-result page contains a fictional hard-coded payment success.");
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
+const financeAudit = existsSync("app/finance/treasury-audit.html") ? readFileSync("app/finance/treasury-audit.html", "utf8") : "";
+const webhookReconciliationMigration = existsSync("supabase/migrations/20261115085000_finance_webhook_reconciliation_readonly.sql") ? readFileSync("supabase/migrations/20261115085000_finance_webhook_reconciliation_readonly.sql", "utf8") : "";
+const partnerDirectReadinessMigration = existsSync("supabase/migrations/20261115090000_partner_direct_shipment_readiness.sql") ? readFileSync("supabase/migrations/20261115090000_partner_direct_shipment_readiness.sql", "utf8") : "";
+const legacyWebhooks = existsSync("public/finance/webhooks.html") ? readFileSync("public/finance/webhooks.html", "utf8") : "";
+const legacyEscrow = existsSync("public/billing/escrow-settlement.html") ? readFileSync("public/billing/escrow-settlement.html", "utf8") : "";
+const partnerSettlementPolicy = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
+const partnerSupport = existsSync("public/partner/partner-support.html") ? readFileSync("public/partner/partner-support.html", "utf8") : "";
+if (!financeAudit.includes("krim_finance_list_payment_webhook_events") || !financeAudit.includes("webhookRows")) failures.push("Treasury audit must display the authenticated webhook reconciliation queue.");
+if (!webhookReconciliationMigration.includes("aal2") || !webhookReconciliationMigration.includes("admin.platform") || webhookReconciliationMigration.includes("payload jsonb")) failures.push("Webhook reconciliation must be AAL2 platform-admin-only and must not expose raw payloads.");
+if (!partnerDirectReadinessMigration.includes("'partner_direct'") || partnerDirectReadinessMigration.includes("verified_payment_missing")) failures.push("Shipment readiness must not require KRIM-collected freight payment under the partner-direct model.");
+if (!legacyWebhooks.includes("app/finance/treasury-audit.html#webhooks") || legacyWebhooks.includes("14,892")) failures.push("Legacy public webhook dashboard must route to live authenticated reconciliation, not fictional event metrics.");
+if (!legacyEscrow.includes("shipper/payment-checkout.html") || /Release escrow|JPMorgan|Citi/.test(legacyEscrow)) failures.push("Legacy escrow simulator must be retired and must not claim escrow or bank integrations.");
+if (!partnerSettlementPolicy.includes("partner-direct") || !partnerSettlementPolicy.includes("does not currently collect freight charges") || partnerSettlementPolicy.includes("SETTLEMENT LEDGER: ACTIVE RECONCILIATION")) failures.push("Partner settlement page must accurately explain direct provider payment and no KRIM payout.");
+if (!partnerSupport.includes("create-ticket.html") || partnerSupport.includes("24/7")) failures.push("Partner support must route to the authenticated ticket system and avoid unsupported 24/7 claims.");
+
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
