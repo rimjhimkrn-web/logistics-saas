@@ -1167,6 +1167,24 @@ const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorksp
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
+const driverWorkspacePage = existsSync("app/driver/index.html") ? readFileSync("app/driver/index.html", "utf8") : "";
+const driverVerificationAdminPage = existsSync("app/platform-admin/driver-verification.html") ? readFileSync("app/platform-admin/driver-verification.html", "utf8") : "";
+const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
+  ? readFileSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql", "utf8") : "";
+const driverLicenceExpiryAdminMigration = existsSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql")
+  ? readFileSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql", "utf8") : "";
+for (const token of ["licence_expiry_date", "krim_admin_review_driver_document", "krim_admin_review_driver_verification", "krim_driver_accept_assignment", "krim_vehicle_driver_bind", "krim_internal_dispatch_assigned_shipment", "current_date"]) {
+  if (!driverLicenceExpiryMigration.includes(token)) failures.push("Driver licence expiry migration is missing operational enforcement: " + token);
+}
+for (const token of ['id="licenceExpiry"', "licence_expiry_date:licenceExpiry", "licence_expiry_date,verification_status"]) {
+  if (!driverWorkspacePage.includes(token)) failures.push("Driver workspace is missing licence expiry capture/persistence: " + token);
+}
+if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_with_expiry") || !driverVerificationAdminPage.includes("p.licence_expiry_date")) {
+  failures.push("Driver verification queue must display the expiry date to the authorized reviewer.");
+}
+for (const token of ["krim_admin_list_driver_verification_with_expiry", "licence_expiry_date", "aal2", "revoke all", "TO authenticated"]) {
+  if (!driverLicenceExpiryAdminMigration.toLowerCase().includes(token.toLowerCase())) failures.push("Driver expiry admin RPC migration is missing access/display control: " + token);
+}
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct payment guidance', 'does not create or collect freight-payment orders', 'openPartnerPaymentGuidance']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
