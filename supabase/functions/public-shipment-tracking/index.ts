@@ -122,7 +122,7 @@ Deno.serve(async (req: Request) => {
       estimated_delivery_at: shipment.estimated_delivery_at,
       delivered_at: shipment.actual_delivery_at,
       gps_sharing_status: gpsSharingStatus,
-      latest_position: !terminalShipment && authorizedSessions.length > 0 && gpsRow ? {
+      latest_position: !terminalShipment && authorizedSessions.length > 0 && gpsRow && gpsAgeMs !== null && gpsAgeMs >= -60000 && gpsAgeMs <= 900000 ? {
         latitude: Number(gpsRow.latitude),
         longitude: Number(gpsRow.longitude),
         recorded_at: gpsRow.event_time,
