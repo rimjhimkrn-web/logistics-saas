@@ -150,3 +150,36 @@ END;
 $function$;
 REVOKE ALL ON FUNCTION public.krim_warehouse_create_linked_handover_task(bigint,uuid,bigint,bigint,text,text,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.krim_warehouse_create_linked_handover_task(bigint,uuid,bigint,bigint,text,text,uuid) TO authenticated;
+
+
+-- Retire the former shipment-linked pick-task stock deduction path. The
+-- allocation pick RPC now owns the stock movement, preventing double deduction.
+CREATE OR REPLACE FUNCTION private.krim_block_legacy_shipment_pick_task_completion()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+BEGIN
+  IF NEW.task_type = 'picking_packing'
+     AND NEW.shipment_id IS NOT NULL
+     AND NEW.shipment_leg_id IS NOT NULL
+     AND NEW.status = 'completed'
+     AND OLD.status IS DISTINCT FROM NEW.status THEN
+    RAISE EXCEPTION 'Shipment-linked picking is allocation-controlled. Reserve and pick stock in the KRIM Shipment Inventory Allocation workspace; task-only stock deduction is disabled to prevent duplicate movements.'
+      USING errcode = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION private.krim_block_legacy_shipment_pick_task_completion() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS trg_krim_block_legacy_shipment_pick_task_completion
+ON public.krim_warehouse_tasks;
+
+CREATE TRIGGER trg_krim_block_legacy_shipment_pick_task_completion
+BEFORE UPDATE OF status
+ON public.krim_warehouse_tasks
+FOR EACH ROW
+EXECUTE FUNCTION private.krim_block_legacy_shipment_pick_task_completion();
