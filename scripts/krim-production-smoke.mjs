@@ -1370,6 +1370,22 @@ for (const token of [
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
 }
 
+// Warehouse linked-task idempotency must compare the full operational payload on replay.
+const warehouseLinkedTaskIdempotencyPath = "supabase/migrations/20261115182000_validate_full_payload_on_warehouse_linked_task_replay.sql";
+const warehouseLinkedTaskIdempotency = existsSync(warehouseLinkedTaskIdempotencyPath)
+  ? readFileSync(warehouseLinkedTaskIdempotencyPath, "utf8") : "";
+for (const token of [
+  "v_task.lot_code IS DISTINCT FROM nullif(btrim(p_lot_code),'')",
+  "v_task.item_description IS DISTINCT FROM nullif(btrim(p_item_description),'')",
+  "v_task.destination_location IS DISTINCT FROM nullif(btrim(p_destination_location),'')",
+  "v_task.source_location IS DISTINCT FROM nullif(btrim(p_source_location),'')",
+  "v_task.notes<>left(coalesce(p_notes,''),4000)",
+  "Linked goods receipt idempotency guard anchor changed",
+  "Linked pick task idempotency guard anchor changed",
+]) {
+  if (!warehouseLinkedTaskIdempotency.includes(token)) failures.push("Warehouse linked-task replay validation is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
