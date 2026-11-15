@@ -15,6 +15,8 @@ const required = [
   "app/warehouse/index.html",
   "app/operations/index.html",
   "app/operations/route-planning.html",
+  "public/customer-os/customer-services/shipment-details.html",
+  "public/customer-os/assets/shipment-operations.js",
   "public/operations/index.html",
   "config.js",
   "public/krim-global-operations.js",
@@ -1413,6 +1415,28 @@ for (const token of [
 ]) {
   if (!legPlanEvaluationMigration.includes(token)) failures.push("Shipment leg-plan evaluation safeguard is missing: " + token);
 }
+
+// Customer shipment details must show organisation-scoped route plans and compile its runtime script.
+const customerShipmentDetailsPath = "public/customer-os/customer-services/shipment-details.html";
+const customerShipmentDetails = existsSync(customerShipmentDetailsPath)
+  ? readFileSync(customerShipmentDetailsPath, "utf8") : "";
+const customerShipmentOpsPath = "public/customer-os/assets/shipment-operations.js";
+const customerShipmentOps = existsSync(customerShipmentOpsPath)
+  ? readFileSync(customerShipmentOpsPath, "utf8") : "";
+if (!customerShipmentDetails.includes('id="route-plan-records"')) {
+  failures.push("Customer shipment details route-plan container is missing.");
+}
+for (const token of [
+  "async function loadRoutePlan()",
+  "from('krim_shipment_leg_plans')",
+  "from('krim_shipment_leg_plan_items')",
+  "from('krim_shipment_legs')",
+  "if(view==='details'){renderDetails();await loadRoutePlan()}",
+]) {
+  if (!customerShipmentOps.includes(token)) failures.push("Customer shipment route-plan integration is missing: " + token);
+}
+try { new Function(customerShipmentOps); }
+catch (error) { failures.push("Customer shipment operations script has a syntax error: " + error.message); }
 
 // Operations route-planning page must read scoped versioned plans and render rows correctly.
 const routePlanningUiPath = "app/operations/route-planning.html";
