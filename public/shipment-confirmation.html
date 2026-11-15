@@ -75,6 +75,7 @@ const truthy=new Set(["ready","passed","clear","cleared","complete","completed",
 const paidStates=new Set(["paid","verified","complete","completed","passed","clear","cleared"]);
 const directStates=new Set(["partner_direct","not_required"]);
 const bookingStates=new Set(["confirmed","booking_confirmed","booked","operational_confirmed"]);
+function currencyMinorUnitExponent(currency){const code=String(currency||"").trim().toUpperCase();if(["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(code))return 0;if(["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(code))return 3;if(["CLF","UYW"].includes(code))return 4;return 2;}
 function safeInt(v){return /^\\d+$/.test(String(v||""))&&Number.isSafeInteger(Number(v))&&Number(v)>0}
 function fmtDate(v){if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}
 function norm(v){return String(v||"").trim().toLowerCase().replace(/[ -]+/g,"_")}
@@ -126,7 +127,7 @@ async function run(){
   if(pay&&Number(pay.customer_organization_id)!==Number(ship.customer_organization_id))throw new Error("Shipment organization does not match the legacy payment order.");
   $("shipment-ref").textContent=ship.shipment_number||("SHP-"+ship.id);$("shipment-state").textContent=ship.status||"Unknown";
   const trackingRef=ship.shipment_number||"";if(trackingRef)$("pickup-tracking-link").href="pickup-tracking.html?shipment="+encodeURIComponent(trackingRef);
-  const quoteOK=!!quote&&Number(quote.shipment_id)===Number(ship.id)&&["accepted","approved","confirmed"].includes(norm(quote.status))&&Number(quote.partner_quote_id)>0&&(!pay||(Math.round(Number(quote.amount)*(10**(String(quote.currency_code||"").toUpperCase()==="JPY"?0:2)))===Number(pay.amount_paise)&&String(quote.currency_code||"").toUpperCase()===String(pay.currency||"").toUpperCase()&&Number(quote.partner_quote_id)===Number(pay.partner_quote_id)));
+  const quoteOK=!!quote&&Number(quote.shipment_id)===Number(ship.id)&&["accepted","approved","confirmed"].includes(norm(quote.status))&&Number(quote.partner_quote_id)>0&&(!pay||(Math.round(Number(quote.amount)*(10**currencyMinorUnitExponent(quote.currency_code)))===Number(pay.amount_paise)&&String(quote.currency_code||"").toUpperCase()===String(pay.currency||"").toUpperCase()&&Number(quote.partner_quote_id)===Number(pay.partner_quote_id)));
   $("quote-state").textContent=quote?.status||"Not found";
   mark("Accepted quote",quoteOK,quoteOK?"Accepted quote is linked to this shipment and customer organization." : "Quote is missing, not accepted, or inconsistent with this shipment.");
   const assignment=assignments.find(a=>Number(a.partner_quote_id)===Number(quote?.partner_quote_id)&&["accepted","active","confirmed","assigned","booked"].includes(norm(a.status))&&a.accepted_at);
