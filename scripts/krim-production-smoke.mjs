@@ -52,6 +52,7 @@ const required = [
   "supabase/migrations/20261115234000_enforce_contiguous_leg_planned_time_windows.sql",
   "supabase/migrations/20261115234500_block_multi_leg_activation_during_shipment_wide_quotes.sql",
   "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql",
+  "supabase/migrations/20261115235500_block_shipment_wide_customer_quote_award_for_multi_leg.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1389,6 +1390,17 @@ for (const token of [
   "A leg cannot depart before the previous leg planned arrival",
 ]) {
   if (!legPlanTimeMigration.includes(token)) failures.push("Shipment leg planned-time continuity safeguard is missing: " + token);
+}
+
+// Legacy customer quote preparation must also block active multi-leg shipments before idempotent return.
+const legCustomerAwardPath = "supabase/migrations/20261115235500_block_shipment_wide_customer_quote_award_for_multi_leg.sql";
+const legCustomerAwardMigration = existsSync(legCustomerAwardPath) ? readFileSync(legCustomerAwardPath, "utf8") : "";
+for (const token of [
+  "krim_award_partner_quote_for_checkout",
+  "p.status='active' AND p.total_legs>1",
+  "Shipment-wide customer quote preparation is disabled",
+]) {
+  if (!legCustomerAwardMigration.includes(token)) failures.push("Multi-leg customer quote award safeguard is missing: " + token);
 }
 
 // Multi-leg plans must not flow into legacy shipment-wide partner quote/award paths.
