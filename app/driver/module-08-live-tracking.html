@@ -24,9 +24,10 @@ function gpsMessage(message,warning=false){gpsStatus.textContent=message;gpsStat
 async function stopGps(message='GPS sharing stopped. No further location updates are being sent.',warning=false){
  if(gpsWatch!==null&&navigator.geolocation){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;}
  if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;}
- if(trackingAssignmentId){const {error}=await db.functions.invoke('krim-driver-tracking-session',{body:{action:'stop',assignment_id:trackingAssignmentId}});if(error){gpsMessage('Device tracking stopped, but the server stop could not be confirmed. Reconnect and retry.',true);}}
+ let finalMessage=message,finalWarning=warning;
+ if(trackingAssignmentId){const {error}=await db.functions.invoke('krim-driver-tracking-session',{body:{action:'stop',assignment_id:trackingAssignmentId}});if(error){finalMessage='Device tracking stopped, but the server stop could not be confirmed. Reconnect and retry.';finalWarning=true;}}
  trackingSessionId=null;trackingAssignmentId=null;
- gpsStart.disabled=!eligible.length;gpsStop.disabled=true;gpsSelect.disabled=false;gpsMessage(message,warning);
+ gpsStart.disabled=!eligible.length;gpsStop.disabled=true;gpsSelect.disabled=false;gpsMessage(finalMessage,finalWarning);
 }
 gpsStop.addEventListener('click',()=>stopGps());
 gpsStart.addEventListener('click',async()=>{
