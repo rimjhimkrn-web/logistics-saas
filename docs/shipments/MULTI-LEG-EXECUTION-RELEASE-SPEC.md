@@ -408,3 +408,10 @@ The award RPC is customer-authorised (`quote.update` + `shipment.update`), locks
 On award it accepts only the selected quote, rejects competing quotes for that same opportunity+leg, marks that opportunity awarded, creates an `offered` assignment bound to the exact leg, and writes an audit event. It does not mark the leg assigned, reserve capacity, or dispatch. The unique partial index prevents two concurrent live/completed assignments from occupying one leg; historical rejected/cancelled/failed/expired offers remain possible.
 
 This does not yet complete partner acceptance or capacity reservation. No live assignments or shipment rows were created by the migration.
+
+
+## Exact unassigned-state and assignment-binding database guards (16 Nov 2026)
+
+Added a private trigger guard across leg-scoped opportunities, active partner quotes and offered partner assignments. It requires both leg lifecycle fields to remain in an unassigned/planned state when sourcing is opened or priced, and requires the exact leg to still match an item in the active route plan. Offered assignments additionally must reference an accepted quote and awarded opportunity with identical shipment, leg and partner identifiers.
+
+This database-level guard closes a permissive status-condition edge case in RPC validation and protects against direct table writes or future RPC regressions. The trigger function is SECURITY DEFINER with empty search_path and no execute grants to PUBLIC, anon or authenticated; it is invoked only by its table triggers.
