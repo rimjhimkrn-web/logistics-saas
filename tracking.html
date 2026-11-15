@@ -211,6 +211,8 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                     card.append(trackingText("p", "No recent verified GPS position is available. The device may be offline, location permission may have changed, or tracking may have stopped. Use the shipment milestones below and contact the contracting provider for an update.", "p-3 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-900"));
                 } else if (payload.gps_sharing_status === "inactive") {
                     card.append(trackingText("p", "No live GPS sharing session is active for this shipment. Verified shipment milestones remain available below.", "p-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-600"));
+                } else if (payload.gps_sharing_status === "completed") {
+                    card.append(trackingText("p", "GPS sharing has ended because the shipment is complete or closed. No live location is being displayed. Use the recorded shipment milestones and delivery confirmation below.", "p-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-600"));
                 } else {
                     card.append(trackingText("p", "GPS sharing status is temporarily unavailable. Verified shipment milestones remain available below.", "p-3 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-900"));
                 }
