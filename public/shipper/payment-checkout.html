@@ -42,7 +42,7 @@ menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')
 nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰';}));
 (function(){
  const params=new URLSearchParams(location.search),shipment=params.get('shipment_id'),quote=params.get('quote_id');
- if(/^\\d+$/.test(shipment||'')&&/^\\d+$/.test(quote||'')){
+ if(/^\d+$/.test(shipment||'')&&/^\d+$/.test(quote||'')){
   const link=document.getElementById('booking-status-link');
   link.href='../shipment-confirmation.html?shipment_id='+encodeURIComponent(shipment)+'&quote_id='+encodeURIComponent(quote);
   link.style.display='inline-flex';
