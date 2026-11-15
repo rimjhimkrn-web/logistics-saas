@@ -36,6 +36,10 @@ jobs:
         run: |
           npx --yes sharp-cli -i assets/icon.svg -o assets -f png resize 1024 1024
           npx --yes sharp-cli -i assets/adaptive-icon.svg -o assets -f png resize 1024 1024
+      - name: Check Expo SDK package compatibility
+        run: npx expo install --check
+      - name: Validate Expo configuration
+        run: npx expo config --type public --json > /tmp/krim-expo-config.json
       - run: npm run typecheck
       - run: npx expo export --platform android
         env:
