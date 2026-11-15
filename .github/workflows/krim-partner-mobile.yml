@@ -115,10 +115,12 @@ jobs:
               missing=1
             fi
           done
-          if grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$MANIFEST"; then
-            echo "PASS: location foreground-service type"
+          LOCATION_LIBRARY_MANIFEST=node_modules/expo-location/android/src/main/AndroidManifest.xml
+          if test -f "$LOCATION_LIBRARY_MANIFEST" && grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$LOCATION_LIBRARY_MANIFEST"; then
+            echo "PASS: expo-location declares its LocationTaskService as a location foreground service"
           else
-            echo "MISSING: location foreground-service type"
+            echo "MISSING: location foreground-service type in the expo-location dependency manifest"
+            test -f "$LOCATION_LIBRARY_MANIFEST" && cat "$LOCATION_LIBRARY_MANIFEST" || true
             missing=1
           fi
           exit "$missing"
