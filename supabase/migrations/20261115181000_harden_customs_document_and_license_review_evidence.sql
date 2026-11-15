@@ -2,6 +2,7 @@ do $migration$
 declare v_def text; v_old text; v_new text;
 begin
  v_def:=pg_get_functiondef('private.krim_customs_document_review(bigint,text,text,bigint)'::regprocedure);
+ if position('v_customs_country' in v_def)=0 then
  v_old:=$old$ v_path text; v_mime text; v_size bigint; v_issued date; v_expires date;$old$;
  v_new:=$new$ v_path text; v_mime text; v_size bigint; v_issued date; v_expires date; v_submitter_org bigint; v_issuing_country bigint; v_customs_country bigint;$new$;
  if position(v_old in v_def)=0 then raise exception 'Customs review declaration anchor not found'; end if;
@@ -43,12 +44,15 @@ begin
  if position(v_old in v_def)=0 then raise exception 'Customs review verification precondition anchor not found'; end if;
  v_def:=replace(v_def,v_old,v_new);
  execute v_def;
+ end if;
 
  v_def:=pg_get_functiondef('private.krim_customs_broker_license_review(bigint,text,text)'::regprocedure);
+ if position('Licence submitter cannot independently review' in v_def)=0 then
  v_old:=$old$ if v_status<>'pending_review' then raise exception 'License is not awaiting review'; end if;$old$;
  v_new:=$new$ if v_status<>'pending_review' then raise exception 'License is not awaiting review'; end if;
  if v_submitter=v_user then raise exception 'Licence submitter cannot independently review their own customs broker licence evidence'; end if;$new$;
  if position(v_old in v_def)=0 then raise exception 'Customs broker licence review state guard changed'; end if;
  execute replace(v_def,v_old,v_new);
+ end if;
 end;
 $migration$;
