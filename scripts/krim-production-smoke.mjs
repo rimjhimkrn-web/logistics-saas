@@ -1770,6 +1770,28 @@ for (const token of [
   if (!legQuoteMigration.includes(token)) failures.push("Leg-specific quote RPC safeguard is missing: " + token);
 }
 
+
+
+// Leg-specific award must atomically bind quote, opportunity, active route plan and one assignment per leg.
+const legAwardPath = "supabase/migrations/20261116012000_add_authorized_leg_partner_quote_award_rpc.sql";
+const legAwardMigration = existsSync(legAwardPath) ? readFileSync(legAwardPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_award_leg_partner_quote",
+  "SET search_path TO ''",
+  "private.krim_has_permission(v_user,v_opportunity.customer_organization_id,'quote.update')",
+  "private.krim_partner_compliance_is_current",
+  "private.krim_partner_capability_covers_shipment_leg",
+  "v_opportunity.shipment_leg_id IS DISTINCT FROM v_quote.shipment_leg_id",
+  "v_item.requirements IS DISTINCT FROM '{}'::jsonb",
+  "uq_krim_active_partner_assignment_per_leg",
+  "status IN ('offered','accepted','active','completed')",
+  "partner.leg_quote.awarded",
+  "REVOKE ALL ON FUNCTION public.krim_award_leg_partner_quote",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legAwardMigration.includes(token)) failures.push("Leg-specific quote award safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
