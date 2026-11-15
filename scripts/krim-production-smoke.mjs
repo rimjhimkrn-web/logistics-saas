@@ -378,7 +378,7 @@ if (/Payment Executed Successfully|€14,250\.00 EUR Transferred|TXN-2026-OCT-88
 if (!/location\.replace/.test(legacyPaymentResult) || !/payment-verification\.html/.test(legacyPaymentResult)) failures.push("Legacy payment-result page must redirect to canonical verified payment status.");
 const financeAudit = existsSync("app/finance/treasury-audit.html") ? readFileSync("app/finance/treasury-audit.html", "utf8") : "";
 const webhookReconciliationMigration = existsSync("supabase/migrations/20261115085000_finance_webhook_reconciliation_readonly.sql") ? readFileSync("supabase/migrations/20261115085000_finance_webhook_reconciliation_readonly.sql", "utf8") : "";
-const partnerDirectReadinessMigration = existsSync("supabase/migrations/20261115090000_partner_direct_shipment_readiness.sql") ? readFileSync("supabase/migrations/20261115090000_partner_direct_shipment_readiness.sql", "utf8") : "";
+const partnerDirectReadinessMigration = existsSync("supabase/migrations/20261115064238_partner_direct_shipment_readiness.sql") ? readFileSync("supabase/migrations/20261115064238_partner_direct_shipment_readiness.sql", "utf8") : "";
 const legacyWebhooks = existsSync("public/finance/webhooks.html") ? readFileSync("public/finance/webhooks.html", "utf8") : "";
 const legacyEscrow = existsSync("public/billing/escrow-settlement.html") ? readFileSync("public/billing/escrow-settlement.html", "utf8") : "";
 const partnerSettlementPolicy = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
