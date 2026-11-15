@@ -1177,6 +1177,8 @@ const driverProfileGuardMigration = existsSync("supabase/migrations/202611151710
   ? readFileSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql", "utf8") : "";
 const driverProfileGuardConsolidationMigration = existsSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql")
   ? readFileSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql", "utf8") : "";
+const driverLicenceEvidenceResetMigration = existsSync("supabase/migrations/20261115172000_reopen_driver_licence_evidence_after_detail_changes.sql")
+  ? readFileSync("supabase/migrations/20261115172000_reopen_driver_licence_evidence_after_detail_changes.sql", "utf8") : "";
 const driverMobileRepository = existsSync("mobile/krim-driver/src/lib/driverRepository.ts")
   ? readFileSync("mobile/krim-driver/src/lib/driverRepository.ts", "utf8") : "";
 
@@ -1194,6 +1196,9 @@ if (!driverProfileGuardMigration.toLowerCase().includes("new.verification_status
 }
 if (!driverProfileGuardConsolidationMigration.includes("new.licence_expiry_date is distinct from old.licence_expiry_date") || !driverProfileGuardConsolidationMigration.includes("drop trigger if exists trg_krim_guard_driver_profile_verification_updates")) {
   failures.push("Driver licence changes must use the existing canonical profile guard without a duplicate trigger.");
+}
+for (const token of ["driver.licence.details.changed", "review_status='pending'", "licence_front", "licence_back", "driver_profile_guard"]) {
+  if (!driverLicenceEvidenceResetMigration.includes(token)) failures.push("Driver licence detail changes must reopen and audit previously accepted licence evidence: " + token);
 }
 if (!driverWorkspacePage.includes("Licence expired · dispatch blocked") || !driverWorkspacePage.includes("Licence expiry missing · dispatch blocked")) {
   failures.push("Driver web workspace must disclose expired/missing licence state rather than showing stale verification.");
