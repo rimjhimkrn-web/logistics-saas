@@ -140,4 +140,14 @@ jobs:
             exit 0
           fi
           git commit -m "Add reproducible lockfiles for KRIM mobile apps"
-          git push
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Concurrent main-branch update detected; retrying lockfile commit ($attempt/8)."
+            sleep 3
+          done
+          echo "Could not push lockfiles after repeated concurrent updates."
+          exit 1
