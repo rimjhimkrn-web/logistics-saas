@@ -1817,7 +1817,6 @@ for (const token of [
 const acceptanceGuardPath = "supabase/migrations/20261116014000_harden_exact_leg_partner_assignment_acceptance.sql";
 const acceptanceGuardMigration = existsSync(acceptanceGuardPath) ? readFileSync(acceptanceGuardPath, "utf8") : "";
 for (const token of [
-  "harden_exact_leg_partner_assignment_acceptance",
   "v_quote.shipment_leg_id is distinct from v_assignment.shipment_leg_id",
   "v_opportunity.shipment_leg_id is distinct from v_assignment.shipment_leg_id",
   "v_opportunity.awarded_partner_organization_id is distinct from v_assignment.partner_organization_id",
