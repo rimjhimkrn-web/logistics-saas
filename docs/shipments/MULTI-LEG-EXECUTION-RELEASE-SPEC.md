@@ -397,3 +397,14 @@ Quote amount, currency, notes and validity are validated; validity cannot exceed
 Security: SECURITY DEFINER with empty search_path; PUBLIC and anon EXECUTE revoked; authenticated EXECUTE granted with in-function membership, organisation, permission and compliance checks.
 
 This is not yet an end-to-end sourcing release. Customer award must bind the exact opportunity/quote/leg, partner acceptance must preserve that binding, and capacity reservation must be proven for that leg. No production quote rows were created during implementation.
+
+
+## Leg-specific quote award and one-active-assignment-per-leg guard (16 Nov 2026)
+
+Added `public.krim_award_leg_partner_quote(bigint)` and a partial unique index on `shipment_leg_id` for assignment states `offered`, `accepted`, `active` and `completed`.
+
+The award RPC is customer-authorised (`quote.update` + `shipment.update`), locks the quote, opportunity, shipment, active route plan and exact leg, and verifies all shipment/opportunity/quote/leg identifiers agree. It revalidates the partner's registered-business eligibility, current compliance and exact-leg capability, rejects expired or ineligible quotes, and refuses special-requirement legs until their normalized evaluator exists.
+
+On award it accepts only the selected quote, rejects competing quotes for that same opportunity+leg, marks that opportunity awarded, creates an `offered` assignment bound to the exact leg, and writes an audit event. It does not mark the leg assigned, reserve capacity, or dispatch. The unique partial index prevents two concurrent live/completed assignments from occupying one leg; historical rejected/cancelled/failed/expired offers remain possible.
+
+This does not yet complete partner acceptance or capacity reservation. No live assignments or shipment rows were created by the migration.
