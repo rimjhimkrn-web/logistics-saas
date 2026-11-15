@@ -294,3 +294,5 @@ The only current shipment-leg row belongs to a closed legacy shipment. Its row h
 No historical shipment or audit record was modified. This closed-shipment inconsistency must be reconciled against original business records before any cleanup; it is excluded from new plan activation and is not treated as proof of a current active assignment.
 
 A final bypass review also added a guard to `krim_award_partner_quote_for_checkout` before its existing-quote idempotent return. Thus a previously prepared shipment-wide customer quote cannot be replayed through that wrapper for a shipment with an active multi-leg plan.
+
+Activation audit records now use the plan's actual pre-activation status (rather than assuming every plan was `draft`), preserving accurate history if a controlled `ready` state is introduced later.
