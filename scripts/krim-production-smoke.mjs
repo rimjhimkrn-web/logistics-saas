@@ -208,11 +208,20 @@ if (existsSync(supportRuntimePath)) {
 }
 if (existsSync(supportSlaMigrationPath)) {
   const supportSla = readFileSync(supportSlaMigrationPath, "utf8");
-  if (!supportSla.includes("48 hours") || !supportSla.includes("30 days") || !supportSla.includes("first_responded_at")) {
-    failures.push("Support SLA migration must record internal targets and preserve real first-response timestamps.");
+  if (!supportSla.includes("48 hours") || !supportSla.includes("30 days")) {
+    failures.push("Support SLA migration must record the internal response and resolution targets.");
   }
 } else {
   failures.push("Support SLA migration is missing.");
+}
+const supportConversationMigrationPath = "supabase/migrations/20261105080000_secure_support_ticket_conversation_and_admin_workflow.sql";
+if (existsSync(supportConversationMigrationPath)) {
+  const supportConversation = readFileSync(supportConversationMigrationPath, "utf8");
+  if (!supportConversation.includes("first_responded_at=case when not coalesce(p_internal,false) then coalesce(first_responded_at,now()) else first_responded_at end")) {
+    failures.push("Support reply workflow must preserve the first actual customer-visible response timestamp.");
+  }
+} else {
+  failures.push("Support conversation migration is missing.");
 }
 
 
