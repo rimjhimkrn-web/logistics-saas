@@ -211,3 +211,13 @@ Remaining release gates:
 - Confirm no trigger/child workflow duplicates initial legs on real shipment creation.
 - Continue partner offer, capacity reservation, leg handover, warehouse/customs and POD integration testing.
 - Multi-leg is not production-certified until those tests pass with real verified participants and evidence.
+
+## Customer visibility update
+
+The canonical customer shipment-details page now includes a read-only route-plan and transport-leg panel. It loads:
+- The customer's visible plan versions for the already-authorised shipment.
+- Plan-item route sequence and transport mode.
+- Actual shipment-leg status and partner-assignment status when a plan item is materialized.
+- Legacy unlinked shipment legs separately, without misrepresenting them as a versioned plan.
+
+The page uses existing shipment ownership checks and table RLS. It explicitly warns that a planned leg is not proof of partner acceptance, capacity commitment or dispatch. It does not expose GPS or infer live carrier state.
