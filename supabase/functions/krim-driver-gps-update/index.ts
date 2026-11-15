@@ -33,7 +33,11 @@ Deno.serve(async(req:Request)=>{
  const {data:driver,error:driverError}=await admin.from("krim_driver_assignments").select("id,user_id,organization_id,shipment_id,shipment_leg_id,partner_assignment_id,status").eq("id",assignmentId).eq("user_id",authData.user.id).maybeSingle();
  if(driverError)return reply(500,{error:"Could not verify driver assignment"});
  if(!driver||!driver.partner_assignment_id||!driver.shipment_id)return reply(403,{error:"No matching active driver assignment is available"});
- if(String(driver.status||"").toLowerCase()!=="in_transit")return reply(409,{error:"GPS updates are accepted only for a trip currently marked in transit"});
+ if(String(driver.status||"").toLowerCase()!=="in_transit"){
+  await admin.from("krim_driver_tracking_sessions").update({status:"stopped",stopped_at:new Date().toISOString(),stop_reason:"assignment_not_in_transit"})
+   .eq("id",trackingSessionId).eq("driver_assignment_id",driver.id).eq("user_id",authData.user.id).eq("status","active");
+  return reply(409,{error:"GPS updates are accepted only for a trip currently marked in transit"});
+ }
  const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status,licence_number").eq("user_id",authData.user.id).eq("organization_id",driver.organization_id).maybeSingle();
  if(profileError)return reply(500,{error:"Could not verify driver identity"});
  if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase())||!String(profile.licence_number||"").trim())return reply(403,{error:"Verified driver identity and licence are required for GPS updates"});
