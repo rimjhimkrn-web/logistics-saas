@@ -78,11 +78,20 @@ jobs:
           npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/icon.png -f png resize 1024 1024 --fit contain --background '#071B35'
           npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/adaptive-icon.png -f png resize 680 680 --fit contain --background '#071B35'
           npx --yes sharp-cli -i assets/adaptive-icon.png -o assets/adaptive-icon.png -f png extend 172 172 172 172 --background '#071B35'
+      - name: Load public KRIM Supabase configuration for the internal APK
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const source = fs.readFileSync("../../config.js", "utf8");
+          const url = source.match(/const SUPABASE_URL\\s*=\\s*"([^"]+)"/)?.[1];
+          const key = source.match(/const SUPABASE_PUBLISHABLE_KEY\\s*=\\s*"([^"]+)"/s)?.[1];
+          if (!url || !key || !key.startsWith("sb_publishable_")) {
+            throw new Error("A valid public Supabase URL and publishable key must be configured in config.js.");
+          }
+          fs.appendFileSync(process.env.GITHUB_ENV, `EXPO_PUBLIC_SUPABASE_URL=${url}\\nEXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}\\n`);
+          NODE
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
-          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
       - name: Verify Android location and notification manifest permissions
         run: |
           set -euo pipefail
