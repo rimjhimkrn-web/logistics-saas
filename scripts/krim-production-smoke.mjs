@@ -58,6 +58,7 @@ const required = [
   "supabase/migrations/20261116003500_use_exact_leg_capability_for_capacity_reservation.sql",
   "supabase/migrations/20261116004000_use_exact_leg_capability_for_multi_leg_assignment_acceptance.sql",
   "supabase/migrations/20261116005000_finalize_multi_leg_assignments_only_after_all_legs_committed.sql",
+  "supabase/migrations/20261116020000_allow_driver_acceptance_for_later_multileg_legs.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1864,6 +1865,30 @@ for (const token of [
   if (!multiLegDispatchGuard.includes(token)) failures.push("Multi-leg shipment-wide dispatch guard is missing: " + token);
 }
 
+
+
+
+// Driver acceptance for a later road leg must remain possible after the first leg moves
+// the overall shipment into transit, without weakening the exact-leg/driver/vehicle checks.
+const laterLegDriverAcceptancePath = "supabase/migrations/20261116020000_allow_driver_acceptance_for_later_multileg_legs.sql";
+const laterLegDriverAcceptance = existsSync(laterLegDriverAcceptancePath)
+  ? readFileSync(laterLegDriverAcceptancePath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_driver_accept_assignment",
+  "SET search_path TO ''",
+  "v_shipment.status='assigned'",
+  "v_shipment.status='in_transit'",
+  "p.status='active'",
+  "p.total_legs>1",
+  "l.leg_plan_item_id IS NOT NULL",
+  "v_leg.status='assigned'",
+  "d.document_type='licence_front'",
+  "d.document_type='licence_back'",
+  "v.verification_status='verified'",
+  "b.status='active'",
+]) {
+  if (!laterLegDriverAcceptance.includes(token)) failures.push("Later-leg driver acceptance guard is missing: " + token);
+}
 
 // Multi-leg custody must have a partner-to-partner acceptance record, private evidence and a later-leg dispatch gate.
 const custodyMigrationPath = "supabase/migrations/20261115141945_leg_to_leg_custody_transfer_and_acceptance_gate.sql";
