@@ -64,6 +64,7 @@ const required = [
   "supabase/migrations/20261115145000_guard_leg_dispatch_plan_partner_and_mode_readiness.sql",
   "supabase/migrations/20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql",
   "supabase/migrations/20261115150526_align_dispatch_readiness_with_multileg_authorization.sql",
+  "supabase/migrations/20261115150904_support_leg_scoped_delivery_pod_and_completion.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1993,6 +1994,26 @@ for (const token of [
 ]) {
   if (!dispatchReadinessMigration.includes(token)) failures.push("Multi-leg dispatch readiness migration is missing safeguard: " + token);
 }
+
+
+ // Multi-leg POD must complete an exact route leg without prematurely changing the shipment aggregate status.
+ const legPodPath = "supabase/migrations/20261115150904_support_leg_scoped_delivery_pod_and_completion.sql";
+ const legPodMigration = existsSync(legPodPath) ? readFileSync(legPodPath, "utf8") : "";
+ for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_internal_submit_delivery_pod",
+  "v_shipment.status not in('assigned','in_transit')",
+  "v_leg.status<>'in_transit'",
+  "POD leg, partner assignment and active route-plan item do not match",
+  "CREATE OR REPLACE FUNCTION public.krim_internal_authorize_delivery",
+  "set status='completed'",
+  "v_plan_item_count=v_plan.total_legs",
+  "v_materialized_leg_count=v_plan.total_legs",
+  "else v_shipment.status end",
+  "'continue_remaining_legs'",
+  "set search_path TO ''",
+ ]) {
+  if (!legPodMigration.includes(token)) failures.push("Leg-scoped POD/completion safeguard is missing: " + token);
+ }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
