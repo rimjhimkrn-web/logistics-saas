@@ -113,6 +113,12 @@ Required: generate and commit app-local lockfiles, switch CI to `npm ci`, pin bu
 
 The current lean referral/coordination model still needs a written agreement and CA review. Do not assume it is GST-exempt. Customers should contract with and pay the service partner directly if that remains the chosen model; KRIM must not accidentally imply it is the carrier or collect freight consideration contrary to its contracts and tax advice.
 
+### Partner-direct payment safety snapshot
+- The current customer payment guidance page states that customers contract with and pay the selected provider directly; KRIM does not collect freight charges or settle partner funds.
+- The Razorpay order-creation Edge Function has a fail-closed `KRIM_FREIGHT_COLLECTION_ENABLED=true` plus exact approval-version gate. The payment-verification function also blocks verification of unpaid KRIM-collected freight orders unless that approval gate is deliberately enabled; same-payment retries for already-paid legacy records remain available.
+- The production `payment_orders` table currently contains **5 legacy created/unpaid Razorpay orders** (created 25–26 September 2026; INR; total stored amount 14,000,000 paise) and **1 legacy paid order** (35,00,000 paise). None of these six rows is bound to a KRIM quote or partner quote. The table does not record the Razorpay test/live key mode for these legacy rows.
+- The five unpaid legacy orders must be reconciled in the Razorpay dashboard before public launch: establish test vs live mode, confirm whether any order links remain usable, and cancel/expire them with the provider if possible. Reconcile the one paid legacy order to its actual provider receipt and internal ledger. Do not enable KRIM freight collection as part of the initial partner-direct model.
+
 ## 7. Legal and privacy work requiring qualified review
 
 - India DPDP Act 2023 and DPDP Rules 2025 have staggered commencement dates. The Gazette notification dated 13 November 2025 schedules the main processing provisions for 18 months after publication (approximately 13 May 2027); other provisions commenced earlier or on the one-year date. Prepare now; obtain counsel's advice on the provisions already in force and the transition timeline.
