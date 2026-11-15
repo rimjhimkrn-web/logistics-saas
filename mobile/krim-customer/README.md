@@ -3,7 +3,7 @@
 Expo + React Native Android/iOS foundation for the KRIM shipper/customer experience.
 
 ## Included
-- Five-tab customer workspace: Home, Request, Track, Payments and Profile.
+- Six-tab customer workspace: Home, Book, Shipments, Quotes, Track and Account.
 - Supabase email/password sign-in and password-reset request.
 - Session persistence with Expo SecureStore.
 - Shipment request form preview; it does not submit until a verified backend RPC contract is integrated.
@@ -21,4 +21,4 @@ Never put a service-role key, database password, webhook secret or Razorpay secr
 From this folder: `npm install`, then `npx expo start`. Install Expo Go on Android and scan the QR code. Run `npm run typecheck` for TypeScript validation.
 
 ## Release gates
-Verify customer identity/org authorization, shipment creation RPC and RLS, quote retrieval, shipment tracking visibility, payment order creation and webhook-confirmed payment status before enabling any live action. Physical-device, accessibility, privacy and security tests are required before release. This is a development preview, not a production release.
+Verify customer identity/org authorization, shipment creation RPC and RLS, quote retrieval, shipment tracking visibility, partner-direct payment guidance, shipment tracking visibility and organization-scoped authorization. KRIM freight checkout and partner settlement are disabled under the current launch model. Physical-device, accessibility, privacy and security tests are required before release. This is a development preview, not a production release.
