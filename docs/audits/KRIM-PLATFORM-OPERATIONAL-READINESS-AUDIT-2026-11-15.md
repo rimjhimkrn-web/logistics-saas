@@ -75,6 +75,18 @@ The repository contains 272 SQL migration files, while the production migration 
 
 **Rule:** no further production DDL or bulk schema changes until the complete migration history is reconciled against the live schema, duplicate timestamps and applied versions are resolved, and a safe staging/restore plan exists. Keep using read-only audits and narrowly scoped Edge Function/source changes only where safe.
 
+## 5. Quote-to-assignment state integrity — P0 review blocker
+
+Live database inspection found a legacy but authenticated-executable award path:
+- `krim_award_partner_quote` creates a partner assignment with status `offered`, but also transitions the shipment to `confirmed` immediately.
+- `krim_award_partner_quote_for_checkout` calls that function and creates a customer quote already marked `accepted`, while the partner assignment is still only `offered`.
+- The canonical customer quote acceptance RPC `krim_accept_global_quote` correctly requires an accepted partner quote and matching accepted assignment before confirming a shipment.
+- The partner response RPC `krim_respond_to_partner_assignment` changes an offered assignment to accepted/rejected and commits capacity; the rejection trigger cancels the linked accepted customer quote. It does not itself transition the shipment to confirmed on partner acceptance.
+
+This leaves two different quote-award semantics in production. The current customer quote/bid HTML workflows reviewed call `krim_accept_global_quote`; no call to the two legacy award functions was found among the 38 quote/bid HTML pages inspected. However, both legacy award functions remain executable by authenticated users and can bypass the canonical state rule.
+
+**Required before public booking:** reconcile migration history, then either revoke the unused legacy award RPCs or correct the flow so a customer award creates an `offered` assignment and the shipment becomes `confirmed` only after the verified partner accepts that exact assignment. Add regression tests for offer, accept, reject, timeout, re-award and duplicate retries. Do not patch this through an untracked production SQL change while migration history remains unreconciled.
+
 ## 5. Mobile release engineering
 
 - Customer, Partner and Driver Expo apps are present.
