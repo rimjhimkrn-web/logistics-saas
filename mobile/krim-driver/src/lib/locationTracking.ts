@@ -123,13 +123,16 @@ export async function startTripTracking(assignmentId: string, trackingSessionId:
 export async function stopTripTracking(): Promise<void> {
   const assignmentId = await SecureStore.getItemAsync(ASSIGNMENT_KEY);
   await stopLocalTracking();
+  let stopError: unknown = null;
   if (supabase && assignmentId) {
-    await supabase.functions.invoke("krim-driver-tracking-session", {
+    const { error } = await supabase.functions.invoke("krim-driver-tracking-session", {
       body: { action: "stop", assignment_id: assignmentId }
     });
+    stopError = error;
   }
   await SecureStore.deleteItemAsync(ASSIGNMENT_KEY);
   await SecureStore.deleteItemAsync(SESSION_KEY);
+  if (stopError) throw stopError;
 }
 
 export async function getTripTrackingStatus(): Promise<{ mode: TrackingMode | "off"; assignmentId: string | null }> {
