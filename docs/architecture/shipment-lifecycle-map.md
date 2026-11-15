@@ -88,8 +88,8 @@ This snapshot was obtained through read-only production SQL. It is not a test ru
 
 | Object | Count / state |
 |---|---:|
-| Active KRIM markets / active countries | 6 / 6 (of 249 country catalogue records) |
-| Active partner-type organizations / verified eligible organizations | 2 / 0 |
+| Market catalogue active flags / operational activation controls | 6 / 6 blocked |
+| Market activation settings | 1 active, 5 inactive; control gate blocked |\n| Country packs / mandatory country controls | 249 research_pending / 4,482 pending |\n| Corridors / compliance dossiers | 7 draft / 0 dossiers |\n| Partner-type organizations / verified eligible organizations | 2 active / 0 |
 | Shipments | 18: 8 draft, 3 quoted, 6 confirmed, 1 closed |
 | Customer quotes | 7: 6 accepted and 1 sent; all 7 have no linked partner quote |
 | Partner opportunities | 3: 2 cancelled, 1 expired; 0 open |
