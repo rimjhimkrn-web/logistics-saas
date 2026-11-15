@@ -26,6 +26,10 @@ Copy `.env.example` to `.env` and set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLI
 
 Run `npm install`, then `npm run typecheck` and `npx expo export --platform android`. A development/internal build is required to test native background location; Expo Go on Android does not support the location foreground/background service.
 
+## Current release gate (15 November 2026)
+
+The public shipment-tracking endpoint now applies the same server-side GPS legal-approval gate as the driver session and GPS upload endpoints. When GPS is not approved and enabled, customers continue to receive shipment milestones but do not receive GPS positions, including previously recorded positions. Do not open the launch gate until the exact notice, retention/deletion/legal-hold process and legal approval version are approved, and physical-device tests pass.
+
 ## Required release verification
 - Test on physical Android devices from multiple manufacturers, including Android 13/14+, with precise and approximate permission, background permission allowed/denied, battery saver, screen locked, app swiped away, force-stop, network loss and recovery.
 - Verify start/stop consent rows, GPS event freshness, server authorization and customer visibility end-to-end using a real authorized test driver and shipment.
