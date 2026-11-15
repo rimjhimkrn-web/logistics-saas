@@ -110,3 +110,13 @@ All four inspected evidence sources currently contain zero rows: driver delivery
 ## Release decision
 
 Multi-leg planning/execution is **not operationally validated**. The schema and parts of the lifecycle exist, but there are no active plans/activations, no verified operating participants, and no POD evidence. GPS stays legally gated off.
+
+## Additional live database inspection (15 Nov 2026)
+
+- Plan, plan-item, activation, activation-event and plan-event tables all have RLS enabled.
+- Authenticated has SELECT only; authenticated INSERT and UPDATE are denied; anon SELECT is denied. No direct client-side table mutation path is available.
+- Plan items enforce unique (plan_id, leg_sequence) and a constrained status set. Plans enforce unique (shipment_id, plan_version) and constrained status. Activations enforce unique activation number and one activation per plan.
+- The live public/private function inventory contains no shipment-leg-plan create, validate, evaluate, or activation RPC. Existing functions are limited to initial-leg creation, leg assignment, capacity reservation, warehouse leg listing, validation/history triggers and market activation. Thus the plan/activation tables currently have no discovered application write API.
+- This is a concrete missing operational path, not merely a lack of sample data. Do not create direct table grants or expose a generic SECURITY DEFINER writer as a shortcut. Implement narrow authenticated RPCs with shipment ownership/operations permission checks, full route continuity validation, immutable plan snapshots, atomic activation and expected-vs-created count checks.
+
+The absence of an application write RPC and the absence of real partner/capacity data mean the multi-leg plan lifecycle is not release-ready even though the supporting schema exists.
