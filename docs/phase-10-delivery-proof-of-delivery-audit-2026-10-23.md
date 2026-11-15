@@ -43,7 +43,7 @@ Establish a single authoritative final-mile delivery journey for the assigned dr
 ## Changes in this audit batch
 - Establish the authenticated driver POD module as the canonical operational route.
 - Replace legacy sample-data delivery and POD pages with compatibility redirects to the authenticated driver module.
-- Current source has a real evidence upload and POD submission form; this supersedes the 2023-10-23 source finding that no form existed.
+- Current source has a real evidence upload and POD submission form; this supersedes the 2026-10-23 source finding that no form existed.
 - Added backend evidence checks and independent admin POD review controls.
 - Production currently has zero driver assignments, zero delivery evidence and zero POD records; no real E2E has been established.
 - Keep the current phase status honest: source implementation is not delivery acceptance.
