@@ -382,3 +382,18 @@ The authenticated RPC:
 Security: SECURITY DEFINER with empty search_path; PUBLIC and anon EXECUTE revoked; authenticated EXECUTE granted with in-function organisation/permission checks.
 
 This is not yet a complete sourcing path. Partner quote submission, exact-leg capability checks at quote time, customer award, partner acceptance, capacity reservation and UI integration remain release gates. No production opportunities were created during implementation.
+
+
+## Leg-specific partner quote submission RPC (16 Nov 2026)
+
+Added `public.krim_submit_leg_partner_quote(bigint,numeric,text,timestamptz,text)`.
+
+The RPC requires an active member of exactly one eligible registered-business partner organisation, `quote.create`, current partner compliance, active currency, a live leg-scoped opportunity, and a plan-linked leg in the active route plan. It rechecks exact leg sequence, endpoints and transport mode, then uses the existing private exact-leg capability evaluator for transport mode, both route countries and shipment weight.
+
+It rejects non-empty free-form leg requirements until a reviewed canonical requirement-to-capability evaluator exists. This is intentionally fail-closed: refrigerated, hazardous or other special cargo must not be priced by a partner whose corresponding capability cannot be proven from normalized requirements.
+
+Quote amount, currency, notes and validity are validated; validity cannot exceed the opportunity deadline. Updates reuse only the same partner's active quote for the same opportunity and exact leg. Every submission writes an audit event.
+
+Security: SECURITY DEFINER with empty search_path; PUBLIC and anon EXECUTE revoked; authenticated EXECUTE granted with in-function membership, organisation, permission and compliance checks.
+
+This is not yet an end-to-end sourcing release. Customer award must bind the exact opportunity/quote/leg, partner acceptance must preserve that binding, and capacity reservation must be proven for that leg. No production quote rows were created during implementation.
