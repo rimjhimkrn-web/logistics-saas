@@ -183,7 +183,7 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                 card.append(top);
                 card.append(trackingText("p", "Route: " + ([payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable"), "text-sm"));
                 if (payload.current_location) card.append(trackingText("p", "Last reported location: " + payload.current_location, "text-sm"));
-                card.append(trackingText("p", "Estimated delivery: " + trackingDate(payload.delivered_at || payload.estimated_delivery_at), "text-sm"));
+                card.append(trackingText("p", (payload.delivered_at ? "Delivered at: " : "Estimated delivery: ") + trackingDate(payload.delivered_at || payload.estimated_delivery_at), "text-sm"));
                 card.append(trackingText("p", "Shipment created: " + trackingDate(payload.created_at), "text-xs text-slate-500"));
 
                 if (payload.latest_position && Number.isFinite(Number(payload.latest_position.latitude)) && Number.isFinite(Number(payload.latest_position.longitude))) {
