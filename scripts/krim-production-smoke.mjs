@@ -1418,6 +1418,19 @@ for (const token of [
   if (!warehousePickIntegrity.includes(token)) failures.push("Warehouse pick/inventory integrity migration is missing: " + token);
 }
 
+// Warehouse transition retries must match the original transition outcome and notes.
+const warehouseTransitionReplayPath = "supabase/migrations/20261115183500_warehouse_task_transition_idempotency_payload_guard.sql";
+const warehouseTransitionReplay = existsSync(warehouseTransitionReplayPath)
+  ? readFileSync(warehouseTransitionReplayPath, "utf8") : "";
+for (const token of [
+  "v_prior_event public.krim_warehouse_task_events%rowtype",
+  "v_prior_event.new_status IS DISTINCT FROM p_new_status",
+  "Transition idempotency key was already used for a different status or note",
+  "v_prior_event.metadata->>'notes'",
+]) {
+  if (!warehouseTransitionReplay.includes(token)) failures.push("Warehouse transition replay validation is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
