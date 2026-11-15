@@ -1181,6 +1181,8 @@ const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const driverWorkspacePage = existsSync("app/driver/index.html") ? readFileSync("app/driver/index.html", "utf8") : "";
 const driverVerificationAdminPage = existsSync("app/platform-admin/driver-verification.html") ? readFileSync("app/platform-admin/driver-verification.html", "utf8") : "";
+const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
+const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
   ? readFileSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql", "utf8") : "";
 const driverLicenceExpiryAdminMigration = existsSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql")
@@ -1202,6 +1204,12 @@ for (const token of ['id="licenceExpiry"', "licence_expiry_date:licenceExpiry", 
 }
 if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_with_expiry") || !driverVerificationAdminPage.includes("p.licence_expiry_date")) {
   failures.push("Driver verification queue must display the expiry date to the authorized reviewer.");
+}
+for (const token of ['placeholder="goods_carriage"', 'value="tax_token"', 'value="emissions_certificate"']) {
+  if (!vehicleRegistryPage.includes(token)) failures.push("India goods vehicle registry is missing standardized evidence input: " + token);
+}
+for (const token of ["goods_carriage", "registration certificate", "valid insurance", "goods-carriage permit", "transport-vehicle fitness", "PUC", "tax certificate"]) {
+  if (!vehicleVerificationAdminPage.toLowerCase().includes(token.toLowerCase())) failures.push("Vehicle admin legal baseline guidance is missing: " + token);
 }
 if (!driverProfileGuardMigration.toLowerCase().includes("new.verification_status := 'pending'") || !driverProfileGuardMigration.toLowerCase().includes("old.verification_status")) {
   failures.push("Driver profile guard must prevent self-approval and reset verification after licence changes.");
