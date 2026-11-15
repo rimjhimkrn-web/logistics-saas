@@ -196,3 +196,51 @@ This addendum records changes made after the initial read-only snapshot. It does
 - A real pilot still requires one independently verified registered-business partner, a specific approved India corridor, current capability/capacity, an approved rate/quote, a named driver/vehicle, and an end-to-end acceptance test. No page count or static test can substitute for that operating evidence.
 
 **Updated acceptance boundary:** KRIM remains **NOT APPROVED FOR UNRESTRICTED COMMERCIAL OPERATIONS**. Booking, freight collection and GPS must remain fail-closed until their specific gates are approved and tested.
+
+
+## 11. Verification delta — later production checks on 15 November 2026
+
+This section supersedes only the specific status items noted below. It does not certify commercial readiness or waive the acceptance gates above.
+
+### Confirmed later backend changes
+
+- The production migration ledger now contains **443** entries while the repository contains **281** SQL migration files. The histories remain materially divergent. The later applied migrations do not establish a complete migration crosswalk. Continue to prohibit ad-hoc schema changes, migration replay, resets, squashing or marking migrations as applied until the production schema and migration history are reconciled.
+- The deployed `krim_internal_evaluate_shipment_readiness(bigint)` now records `payment_status='partner_direct'` for non-draft/requested shipments and `krim_freight_collection_required=false`. This removes the previously observed KRIM-paid-order dependency at the readiness-function source level. It has **not** been proven by a real end-to-end customer → accepted partner → dispatch transition.
+- The authenticated `krim_get_shipment_tracking(text)` RPC is present in production. It checks customer-organization or partner-assignment access; returns GPS only for a currently active consent session tied to a verified driver, active membership, in-transit driver assignment and matching partner shipment leg; and excludes GPS points from the generic event history.
+- The private idle-session expiry function is deployed and its pg_cron job is active on a five-minute schedule. It marks sessions stopped after 15 minutes without a GPS event (or after 15 minutes from session start when no first point was received). At this check, `cron.job_run_details` contained no recorded executions for this job; therefore the schedule is configured, but successful scheduled execution has not yet been evidenced.
+- GPS remains deliberately fail-closed: the native app and server-side approval constants are false, and the legal approval version is not authorized. No location data is collected while the gate remains closed.
+
+### Critical remaining shipment-state defect
+
+The deployed legacy functions `krim_award_partner_quote(bigint)` and `krim_award_partner_quote_for_checkout(bigint,timestamptz)` remain executable by the `authenticated` role. The first creates a partner assignment with status `offered` and, when the shipment is `quoted`, calls the privileged transition function to move the shipment to `confirmed` before the partner accepts. The second calls the first and inserts a customer quote already marked `accepted` while the partner assignment may still be `offered`.
+
+The canonical `krim_accept_global_quote` path now requires an accepted partner quote and matching accepted assignment, but that does **not** neutralize the separate legacy award RPCs. This is a P0 state-integrity bypass. The legacy functions must be retired or corrected and their authenticated grants removed after the migration crosswalk and caller inventory are independently reviewed. Do not attempt to patch this through an untracked production SQL change.
+
+### Updated production supply and tracking snapshot
+
+A later read-only check returned:
+
+| Measure | Current observation |
+|---|---:|
+| Organizations | 14 |
+| Verified partner organizations | 0 |
+| Partner capabilities | 1 pending |
+| Capacity resources | 0 |
+| Approved/active rate cards | 0 (one pricing rate-card draft) |
+| Accepted/active partner assignments | 0 |
+| Driver assignments | 0 |
+| GPS tracking events | 0 |
+| Active driver tracking sessions | 0 |
+| Data-retention policy rows | 0 |
+| Customer consent records | 0 |
+| User consent events | 0 |
+
+These counts confirm that KRIM still has no evidenced live fulfilment network or real GPS operation. Do not treat historical shipment/quote rows or active market catalogue flags as live service capacity.
+
+### Later code validation
+
+- Production smoke checks, static link audit and GitHub Pages deployment all passed on commit `46b30597e77884306715f257f9dff34ca2ce4582`.
+- The three Expo app validation jobs (Customer, Partner, Driver) passed on commit `f25b71171cf4cd6b3e993e8355d1634dfc828047`. This includes dependency installation, Expo configuration checks, TypeScript validation and Android export; it is not physical-device acceptance.
+- The installable Driver debug APK build was still running at the time of this update. No APK installation or physical-device GPS acceptance is claimed.
+
+**Updated release decision:** KRIM remains **NOT APPROVED FOR UNRESTRICTED COMMERCIAL OPERATIONS**. The next technical P0 is the legacy partner-award RPC state bypass after migration reconciliation. The next real-world P0 is onboarding and independently verifying one anchor operating partner on one approved India corridor. GPS, payment collection and public booking remain gated until their separate legal, operational and end-to-end acceptance criteria are met.
