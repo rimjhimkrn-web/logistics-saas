@@ -59,6 +59,10 @@ const required = [
   "supabase/migrations/20261116004000_use_exact_leg_capability_for_multi_leg_assignment_acceptance.sql",
   "supabase/migrations/20261116005000_finalize_multi_leg_assignments_only_after_all_legs_committed.sql",
   "supabase/migrations/20261116020000_allow_driver_acceptance_for_later_multileg_legs.sql",
+  "supabase/migrations/20261115144628_add_exact_leg_dispatch_authorization.sql",
+  "supabase/migrations/20261115144752_integrate_multileg_dispatch_authorization_with_driver_events.sql",
+  "supabase/migrations/20261115145000_guard_leg_dispatch_plan_partner_and_mode_readiness.sql",
+  "supabase/migrations/20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1915,6 +1919,61 @@ for (const token of [
   "REVOKE ALL ON FUNCTION public.krim_respond_to_leg_custody_transfer",
 ]) {
   if (!custodyMigration.includes(token)) failures.push("Leg custody transfer safeguard is missing: " + token);
+}
+
+// Multi-leg dispatch authorisation must be leg-scoped, permission-gated, capacity-bound,
+// revocable only before physical execution, and revalidated at driver pickup/transit.
+const legDispatchAuthPath = "supabase/migrations/20261115144628_add_exact_leg_dispatch_authorization.sql";
+const legDispatchDriverPath = "supabase/migrations/20261115144752_integrate_multileg_dispatch_authorization_with_driver_events.sql";
+const legDispatchGuardPath = "supabase/migrations/20261115145000_guard_leg_dispatch_plan_partner_and_mode_readiness.sql";
+const legDispatchRevokePath = "supabase/migrations/20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql";
+const legDispatchAuth = existsSync(legDispatchAuthPath) ? readFileSync(legDispatchAuthPath, "utf8") : "";
+const legDispatchDriver = existsSync(legDispatchDriverPath) ? readFileSync(legDispatchDriverPath, "utf8") : "";
+const legDispatchGuard = existsSync(legDispatchGuardPath) ? readFileSync(legDispatchGuardPath, "utf8") : "";
+const legDispatchRevoke = existsSync(legDispatchRevokePath) ? readFileSync(legDispatchRevokePath, "utf8") : "";
+for (const token of [
+  "CREATE TABLE IF NOT EXISTS public.krim_shipment_leg_dispatch_authorizations",
+  "ALTER TABLE public.krim_shipment_leg_dispatch_authorizations ENABLE ROW LEVEL SECURITY",
+  "public.krim_authorize_leg_dispatch",
+  "shipment.dispatch",
+  "b.status='confirmed'",
+  "r.status='confirmed'",
+  "private.krim_partner_capability_covers_shipment_leg",
+  "Accepted custody transfer from the immediately preceding leg is required",
+  "REVOKE ALL ON FUNCTION public.krim_authorize_leg_dispatch",
+]) {
+  if (!legDispatchAuth.includes(token)) failures.push("Exact-leg dispatch authorisation migration is missing safeguard: " + token);
+}
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_driver_record_trip_event",
+  "private.krim_leg_dispatch_authorization_is_current",
+  "v_is_active_multileg",
+  "IF NOT v_is_active_multileg",
+  "leg_dispatch_authorization_required",
+]) {
+  if (!legDispatchDriver.includes(token)) failures.push("Driver trip-event multi-leg integration is missing safeguard: " + token);
+}
+for (const token of [
+  "private.krim_guard_leg_dispatch_authorization",
+  "p.status='active' and p.total_legs>1",
+  "private.krim_partner_compliance_is_current",
+  "private.krim_partner_capability_covers_shipment_leg",
+  "Non-road dispatch is held",
+  "REVOKE ALL ON FUNCTION private.krim_guard_leg_dispatch_authorization",
+]) {
+  if (!legDispatchGuard.includes(token)) failures.push("Leg dispatch partner/plan/mode guard is missing safeguard: " + token);
+}
+for (const token of [
+  "CREATE UNIQUE INDEX IF NOT EXISTS uq_krim_active_leg_dispatch_authorization",
+  "private.krim_leg_dispatch_authorization_is_current",
+  "public.krim_revoke_leg_dispatch_authorization",
+  "revoked_by=v_user",
+  "Dispatch authorization cannot be revoked after pickup or transit has been recorded",
+  "cr.status='confirmed'",
+  "private.krim_partner_compliance_is_current",
+  "private.krim_partner_capability_covers_shipment_leg",
+]) {
+  if (!legDispatchRevoke.includes(token)) failures.push("Dispatch revocation/execution revalidation is missing safeguard: " + token);
 }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
