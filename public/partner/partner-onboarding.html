@@ -722,12 +722,12 @@ body>footer{padding:26px 18px!important}
 
         const { data: organizations, error: organizationError } = await onboardingClient
           .from("krim_organizations")
-          .select("id, organization_type, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+          .select("id, organization_type, organization_type_code, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
         const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
         const partnerOrganizations = (organizations || []).filter(org =>
-          acceptedPartnerTypes.includes(String(org.organization_type || "").toLowerCase())
+          acceptedPartnerTypes.includes(String(org.organization_type_code || org.organization_type || "").toLowerCase())
         );
         if (partnerOrganizations.length > 1) {
           throw new Error("Your account has multiple partner organizations. Onboarding is paused to prevent documents or verification details being attached to the wrong organization. Contact KRIM support to establish the correct organization context.");
