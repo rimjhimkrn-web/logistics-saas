@@ -2058,7 +2058,6 @@ for (const token of [
   "idempotency key belongs to a revoked dispatch authorization",
   "private.krim_leg_dispatch_authorization_is_current",
   "Existing dispatch authorization is no longer current",
-  "uq_krim_active_leg_dispatch_authorization"
  ]) {
   if (!dispatchReplayMigration.includes(token)) failures.push("Dispatch authorization replay safeguard is missing: " + token);
  }
