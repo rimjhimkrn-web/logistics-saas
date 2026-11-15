@@ -1191,6 +1191,8 @@ const capacityResourceLockMigration = existsSync("supabase/migrations/2026111517
   ? readFileSync("supabase/migrations/20261115173500_lock_resource_during_capacity_selection.sql", "utf8") : "";
 const warehouseQualityEvidenceMigration = existsSync("supabase/migrations/20261115180000_revalidate_warehouse_inspection_evidence_at_quality_review.sql")
   ? readFileSync("supabase/migrations/20261115180000_revalidate_warehouse_inspection_evidence_at_quality_review.sql", "utf8") : "";
+const warehouseQualitySingleDecisionMigration = existsSync("supabase/migrations/20261115180500_prevent_duplicate_warehouse_quality_decisions.sql")
+  ? readFileSync("supabase/migrations/20261115180500_prevent_duplicate_warehouse_quality_decisions.sql", "utf8") : "";
 const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
 const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
@@ -1239,6 +1241,9 @@ if (!capacityResourceLockMigration.includes("for update of r, a skip locked")) {
 }
 for (const token of ["join storage.objects o", "o.owner=e.created_by", "e.created_by is distinct from v_user", "e.bucket_id='krim-warehouse-evidence'", "mimetype", "10485760"]) {
   if (!warehouseQualityEvidenceMigration.includes(token)) failures.push("Warehouse QC evidence revalidation is missing safeguard: " + token);
+}
+for (const token of ["inventory.quality_reviewed", "already has a final quality decision", "separately authorised reinspection task"]) {
+  if (!warehouseQualitySingleDecisionMigration.includes(token)) failures.push("Warehouse QC duplicate-decision guard is missing: " + token);
 }
 if (!partnerCapabilitySubmissionPage.includes("these specialist capabilities remain inactive") || !partnerCapabilitySubmissionPage.includes("jurisdiction-specific evidence")) {
   failures.push("Partner capability submission UI must disclose specialist capability restrictions.");
