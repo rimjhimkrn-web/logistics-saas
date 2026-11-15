@@ -113,6 +113,22 @@ Changes:
 
 No schema, RLS policy, permission, secret, Edge Function or production data was changed.
 
+## 5A. Developer preview safety corrections
+
+The related developer pages were corrected to remove unsupported live-production representations and false action feedback:
+
+- `public/developer/api-key-management.html`: key issuance and revoke actions disabled; fake production/sandbox key prefixes and timestamps removed; encryption claims marked unverified; no production key is represented as issued.
+- `public/developer/webhooks-management.html`: endpoint setup, secret-copy and test-ping actions disabled; sample endpoint and signing secret removed; delivery success metric removed; HMAC approach labelled unverified/not enabled.
+- `public/developer/api-docs.html`: API v2.4 live-production and OpenAPI/GraphQL live-spec claims removed; endpoint base URL and bearer credential removed; request execution disabled; sample response clearly marked illustrative.
+
+Commits:
+- API key page: `85143583291038e59edbde9810fca4a78eb3337b`
+- Webhook page: `61186e36baf2d4fbc7c431ba62d9d11bcbcb6812`
+- API reference page: `b30a472851842bb1e59b9d2e66c1c04b59303393`
+- Remaining duplicate mock revoke action disabled: `f0d9a9ba19cb4de9317948c0cee3e63361c50614`
+
+Repository source re-check confirmed that the three pages no longer contain the former sample API key prefixes, webhook signing-secret literal, false live delivery metric, live-production label or alert-based fake success/revocation actions. Automated workflow checks for the final commit are still required.
+
 ## 6. Test and deployment status
 
 For the prior capability-map documentation commit `c3af3cf28d2e3be4d5d23d3318a34d289473bdce`:
