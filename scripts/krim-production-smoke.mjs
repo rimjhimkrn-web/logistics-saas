@@ -65,6 +65,7 @@ const required = [
   "supabase/migrations/20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql",
   "supabase/migrations/20261115150526_align_dispatch_readiness_with_multileg_authorization.sql",
   "supabase/migrations/20261115150904_support_leg_scoped_delivery_pod_and_completion.sql",
+  "supabase/migrations/20261115151545_block_unallocated_multileg_finance_postings.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -2013,6 +2014,23 @@ for (const token of [
   "SET search_path TO ''",
  ]) {
   if (!legPodMigration.includes(token)) failures.push("Leg-scoped POD/completion safeguard is missing: " + token);
+ }
+
+
+ // Finance posting is held for active multi-leg shipments until per-leg commercial allocation is implemented.
+ const multiLegFinancePath = "supabase/migrations/20261115151545_block_unallocated_multileg_finance_postings.sql";
+ const multiLegFinanceMigration = existsSync(multiLegFinancePath) ? readFileSync(multiLegFinancePath, "utf8") : "";
+ for (const token of [
+  "private.krim_block_unallocated_multileg_finance_write",
+  "Multi-leg shipment finance posting is held",
+  "public.krim_invoices",
+  "public.krim_partner_payables",
+  "public.krim_revenue_allocations",
+  "public.krim_shipment_revenue_items",
+  "set search_path=''",
+  "revoke all on function private.krim_block_unallocated_multileg_finance_write() from public,anon,authenticated,service_role",
+ ]) {
+  if (!multiLegFinanceMigration.includes(token)) failures.push("Multi-leg finance safety gate is missing: " + token);
  }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
