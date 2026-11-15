@@ -38,15 +38,16 @@ Deno.serve(async(req:Request)=>{
  const {data:organization,error:orgError}=await admin.from("krim_organizations").select("id,status").eq("id",driver.organization_id).maybeSingle();
  if(orgError)return reply(500,{error:"Could not verify operating organization"});
  if(!organization||String(organization.status).toLowerCase()!=="active")return reply(403,{error:"Driver organization is not active"});
- const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status").eq("user_id",userId).eq("organization_id",driver.organization_id).maybeSingle();
+ const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status,licence_number").eq("user_id",userId).eq("organization_id",driver.organization_id).maybeSingle();
  if(profileError)return reply(500,{error:"Could not verify driver identity"});
- if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase()))return reply(403,{error:"Verified driver identity is required before location sharing"});
+ if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase())||!String(profile.licence_number||"").trim())return reply(403,{error:"Verified driver identity and licence are required before location sharing"});
  if(String(driver.status).toLowerCase()!=="in_transit")return reply(409,{error:"Location sharing is available only after the trip is marked in transit"});
  const {data:partner,error:partnerError}=await admin.from("krim_shipment_partner_assignments")
   .select("id,shipment_id,shipment_leg_id,partner_organization_id,status")
   .eq("id",driver.partner_assignment_id).eq("shipment_id",driver.shipment_id).eq("partner_organization_id",driver.organization_id).maybeSingle();
  if(partnerError)return reply(500,{error:"Could not verify partner shipment assignment"});
  if(!partner||!["accepted","active","in_progress","assigned"].includes(String(partner.status).toLowerCase()))return reply(403,{error:"The linked partner shipment assignment is not active"});
+ if(!driver.shipment_leg_id||String(driver.shipment_leg_id)!==String(partner.shipment_leg_id))return reply(403,{error:"Driver and partner assignment shipment legs do not match"});
  const {data:existing,error:existingError}=await admin.from("krim_driver_tracking_sessions").select("id,status,started_at")
   .eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
  if(existingError)return reply(500,{error:"Could not check existing tracking session"});
