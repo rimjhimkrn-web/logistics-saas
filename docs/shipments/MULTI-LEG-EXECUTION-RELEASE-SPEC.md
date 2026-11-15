@@ -147,3 +147,34 @@ Still required before real use:
 - Implement separate plan evaluation and atomic activation, including compatibility with the automatic initial-leg trigger and existing one-leg shipments.
 - Verify idempotency under concurrent requests.
 - Do not mark multi-leg planning/execution production-ready yet.
+
+## Implementation update — authorized plan evaluation gate
+
+Added `public.krim_evaluate_shipment_leg_plan(bigint)` as a read-only activation gate.
+
+It checks:
+- The caller's `shipment.update` permission for the owning customer organisation.
+- Shipment remains in a pre-execution status.
+- Plan remains draft/ready and item count exactly matches the declared total (1–20).
+- Leg sequence continuity, active origin/destination locations and active transport modes.
+- Route continuity and exact shipment origin/destination alignment.
+- Per-leg planned time-window validity and capacity/unit pairing.
+- No other active route plan exists for the shipment.
+- Existing legacy leg records are preserved: activation is blocked unless the only existing leg is an unassigned, planned sequence-1 leg that exactly matches the first plan item. It is never silently deleted or rewritten.
+
+Security:
+- Empty search path.
+- `PUBLIC` and anon execution revoked.
+- Authenticated execution granted; ownership permission checked inside the RPC.
+- The RPC is read-only; it does not create, update, assign, reserve or dispatch legs.
+
+Live checks:
+- anon EXECUTE=false; authenticated EXECUTE=true; PUBLIC EXECUTE=false.
+- Empty search_path verified.
+- Fake user has no shipment.update permission for the test customer organisation.
+- A transaction-scoped unauthorised plan-creation attempt was rolled back; plan/item/activation counts remain zero.
+- No real plan exists yet, so a positive evaluation path cannot be demonstrated against genuine data.
+
+Release limitation:
+- Plan creation and read-only evaluation are now present, but atomic activation is still not implemented.
+- Do not treat a plan as active or execution-ready until activation, partner/capacity handoff, and a real controlled end-to-end test are complete.
