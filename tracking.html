@@ -148,6 +148,8 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
     <script>
         const KRIM_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
         const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+        let activeTrackingNumber = "";
+        let trackingRefreshTimer = null;
 
         function trackingText(tag, text, className) {
             const node = document.createElement(tag);
@@ -160,19 +162,15 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
             const date = new Date(value);
             return Number.isNaN(date.getTime()) ? "Not yet available" : date.toLocaleString();
         }
-        async function handleTrackingSearch(e) {
-            e.preventDefault();
-            const input = document.getElementById("tracking-input");
+        async function loadTracking(trackingNumber, quiet = false) {
             const container = document.getElementById("tracking-results-container");
-            const button = e.currentTarget.querySelector('button[type="submit"]');
-            const trackingNumber = input.value.trim().toUpperCase();
-            container.replaceChildren(trackingText("p", "Searching for this shipment reference…", "text-slate-500 text-center py-4"));
-            if (button) button.disabled = true;
+            if (!quiet) container.replaceChildren(trackingText("p", "Searching for this shipment reference…", "text-slate-500 text-center py-4"));
             try {
                 const response = await fetch(KRIM_SUPABASE_URL + "/functions/v1/public-shipment-tracking", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "apikey": KRIM_PUBLISHABLE_KEY },
-                    body: JSON.stringify({ tracking_number: trackingNumber })
+                    body: JSON.stringify({ tracking_number: trackingNumber }),
+                    cache: "no-store"
                 });
                 const payload = await response.json().catch(() => ({}));
                 if (!response.ok || !payload.success) throw new Error(payload.error || "Tracking could not be loaded.");
@@ -184,9 +182,37 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                 top.append(trackingText("span", String(payload.status || "unknown").replace(/[_-]+/g, " "), "px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-800"));
                 card.append(top);
                 card.append(trackingText("p", "Route: " + ([payload.origin, payload.destination].filter(Boolean).join(" → ") || "Route details unavailable"), "text-sm"));
-                if (payload.current_location) card.append(trackingText("p", "Current location: " + payload.current_location, "text-sm"));
+                if (payload.current_location) card.append(trackingText("p", "Last reported location: " + payload.current_location, "text-sm"));
                 card.append(trackingText("p", "Estimated delivery: " + trackingDate(payload.delivered_at || payload.estimated_delivery_at), "text-sm"));
                 card.append(trackingText("p", "Shipment created: " + trackingDate(payload.created_at), "text-xs text-slate-500"));
+
+                if (payload.latest_position && Number.isFinite(Number(payload.latest_position.latitude)) && Number.isFinite(Number(payload.latest_position.longitude))) {
+                    const pos = payload.latest_position;
+                    const lat = Number(pos.latitude), lon = Number(pos.longitude);
+                    const gps = document.createElement("div");
+                    gps.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50 space-y-2";
+                    gps.append(trackingText("strong", "Latest driver GPS position", "block text-emerald-900 text-sm"));
+                    gps.append(trackingText("p", "Recorded: " + trackingDate(pos.recorded_at) + (pos.accuracy_m ? " · Accuracy ±" + Math.round(Number(pos.accuracy_m)) + " m" : ""), "text-xs text-emerald-800"));
+                    gps.append(trackingText("p", "Coordinates: " + lat.toFixed(5) + ", " + lon.toFixed(5), "text-xs text-emerald-900 font-mono"));
+                    const map = document.createElement("a");
+                    map.href = "https://www.openstreetmap.org/?mlat=" + encodeURIComponent(lat) + "&mlon=" + encodeURIComponent(lon) + "#map=15/" + encodeURIComponent(lat) + "/" + encodeURIComponent(lon);
+                    map.target = "_blank"; map.rel = "noopener noreferrer";
+                    map.textContent = "View latest position on map ↗";
+                    map.className = "inline-flex text-xs font-bold underline text-emerald-900";
+                    gps.append(map);
+                    card.append(gps);
+                } else {
+                    card.append(trackingText("p", "No driver GPS position has been shared for this shipment yet. The latest verified milestone information is shown below.", "text-xs text-slate-500"));
+                }
+
+                const refresh = document.createElement("button");
+                refresh.type = "button";
+                refresh.textContent = "Refresh latest tracking";
+                refresh.className = "px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold";
+                refresh.addEventListener("click", () => loadTracking(trackingNumber));
+                card.append(refresh);
+                card.append(trackingText("p", "This page checks for new shared positions every 30 seconds while it remains visible. GPS updates depend on the driver's opt-in foreground sharing session and device signal.", "text-xs text-slate-500"));
+
                 card.append(trackingText("h3", "Latest milestones", "font-bold text-sm pt-2"));
                 const list = document.createElement("ol");
                 list.className = "space-y-3 text-sm";
@@ -202,12 +228,28 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
                 });
                 card.append(list);
                 container.replaceChildren(card);
+                return true;
             } catch (err) {
-                container.replaceChildren(trackingText("p", err.message || "Tracking failed. Please try again.", "p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-center font-semibold"));
-            } finally {
-                if (button) button.disabled = false;
+                if (!quiet) container.replaceChildren(trackingText("p", err.message || "Tracking failed. Please try again.", "p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-center font-semibold"));
+                return false;
             }
         }
+        async function handleTrackingSearch(e) {
+            e.preventDefault();
+            const input = document.getElementById("tracking-input");
+            const button = e.currentTarget.querySelector('button[type="submit"]');
+            activeTrackingNumber = input.value.trim().toUpperCase();
+            if (button) button.disabled = true;
+            if (trackingRefreshTimer) clearInterval(trackingRefreshTimer);
+            const ok = await loadTracking(activeTrackingNumber);
+            if (ok) trackingRefreshTimer = setInterval(() => {
+                if (document.visibilityState === "visible" && activeTrackingNumber) loadTracking(activeTrackingNumber, true);
+            }, 30000);
+            if (button) button.disabled = false;
+        }
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible" && activeTrackingNumber) loadTracking(activeTrackingNumber, true);
+        });
     </script>
 
 <script>(function(){const b=document.getElementById('krimTrackMenu'),n=document.getElementById('krimTrackNav');if(!b||!n)return;function close(){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Open main navigation');b.textContent='☰'}b.addEventListener('click',function(){const o=!n.classList.contains('open');n.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.setAttribute('aria-label',o?'Close main navigation':'Open main navigation');b.textContent=o?'×':'☰'});n.addEventListener('click',e=>{if(e.target.closest('a'))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});document.addEventListener('click',e=>{if(n.classList.contains('open')&&!n.contains(e.target)&&!b.contains(e.target))close()});window.addEventListener('resize',()=>{if(window.innerWidth>1100)close()})}());</script>
