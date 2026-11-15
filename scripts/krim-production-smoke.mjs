@@ -1747,6 +1747,29 @@ for (const token of [
   if (!legOpportunityMigration.includes(token)) failures.push("Leg-specific opportunity RPC safeguard is missing: " + token);
 }
 
+
+
+// Leg-specific quote submission must be tied to an authorised partner and the exact active plan leg.
+const legQuotePath = "supabase/migrations/20261116011000_add_authorized_leg_partner_quote_rpc.sql";
+const legQuoteMigration = existsSync(legQuotePath) ? readFileSync(legQuotePath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_submit_leg_partner_quote",
+  "SET search_path TO ''",
+  "v_partner_ids",
+  "private.krim_has_permission(v_user,v_partner_id,'quote.create')",
+  "private.krim_partner_compliance_is_current",
+  "private.krim_partner_capability_covers_shipment_leg",
+  "v_opportunity.shipment_leg_id",
+  "v_item.transport_mode_id IS DISTINCT FROM v_leg.transport_mode_id",
+  "v_item.requirements IS DISTINCT FROM '{}'::jsonb",
+  "shipment_leg_id",
+  "partner.leg_quote.submitted",
+  "REVOKE ALL ON FUNCTION public.krim_submit_leg_partner_quote",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legQuoteMigration.includes(token)) failures.push("Leg-specific quote RPC safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
