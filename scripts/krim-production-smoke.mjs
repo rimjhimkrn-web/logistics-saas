@@ -1881,7 +1881,7 @@ for (const token of [
   "p.status='active'",
   "p.total_legs>1",
   "l.leg_plan_item_id IS NOT NULL",
-  "v_leg.status='assigned'",
+  "status='assigned'",
   "d.document_type='licence_front'",
   "d.document_type='licence_back'",
   "v.verification_status='verified'",
