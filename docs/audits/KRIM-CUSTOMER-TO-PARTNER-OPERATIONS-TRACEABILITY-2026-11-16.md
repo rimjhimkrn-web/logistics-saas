@@ -49,6 +49,11 @@ There are also legacy-state inconsistencies that must be reconciled before the p
 
 | Production object | Current count |
 |---|---:|
+| Market catalogue rows with active flags / operational controls | 6 / 6 blocked |
+| Market activation settings | 1 active, 5 inactive; activation control gate blocked |
+| Country packs / mandatory country-pack controls | 249 research_pending / 4,482 pending |
+| Network corridors / compliance dossiers | 7 draft / 0 dossiers |
+| Partner-type organizations / verified eligible organizations | 2 active / 0 verified eligible |
 | `krim_shipments` | 18 |
 | `krim_quotes` | 7 |
 | `krim_partner_opportunities` | 3 |
