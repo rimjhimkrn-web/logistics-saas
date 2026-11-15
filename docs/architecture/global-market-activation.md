@@ -48,6 +48,23 @@ No catalogue or frontend setting may bypass the server-side activation gate. Act
 
 These figures are infrastructure/catalogue counts, not live coverage counts. They must not be presented as active partners, active routes, or worldwide service availability.
 
+## Current production control snapshot — 2026-11-16
+
+A fresh read-only production inspection confirms that catalogue flags must not be mistaken for operational activation:
+
+- Market catalogue: 6 rows have `is_active=true` and `status='active'`; this is only catalogue state.
+- `krim_market_activation_controls`: all 6 rows have `operational_status='blocked'`.
+- `krim_market_settings`: one active `market_activation` setting and five inactive settings; the separate operational control gate remains blocked.
+- Country operating packs: 249/249 remain `research_pending`; all 4,482 mandatory country-pack controls are `pending`.
+- Network corridors: 7/7 remain `draft`.
+- Corridor compliance dossiers: 0; corridor compliance control rows: 0.
+- Partner-type organizations: 2 active, but 0 meet current verified/approved + active lifecycle + compliant eligibility.
+- Verified active partner capabilities: 0; active rate cards: 0.
+
+**Operational conclusion:** zero markets/corridors are currently cleared for live shipment fulfilment. Do not advertise service availability from the `krim_markets.is_active` or `status` catalogue fields alone. The authoritative operational market gate and corridor dossier must pass.
+
+**Code-path review item:** the current production `krim_create_partner_opportunity` RPC checks active country/location/market catalogue fields but does not itself call `krim_internal_market_activation_gate` or validate an approved corridor dossier. The shipment-write triggers and tariff-quote RPC enforce stronger controls, but an existing legacy shipment can be passed to the opportunity RPC without changing its route fields. Before partner sourcing is enabled, make the opportunity RPC enforce the same operational market and corridor gates server-side and test legacy shipments in blocked markets. No bypass was exercised in this audit.
+
 ## Release and launch rule
 
 KRIM may describe itself as a **global-ready logistics platform** when its shared architecture supports international markets and its controls remain market-specific. Public service availability must be limited to combinations that are currently activated and supported by verified partners.
