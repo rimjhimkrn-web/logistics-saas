@@ -1792,6 +1792,25 @@ for (const token of [
   if (!legAwardMigration.includes(token)) failures.push("Leg-specific quote award safeguard is missing: " + token);
 }
 
+
+
+// Database triggers independently enforce exact unassigned leg state and quote/opportunity/assignment binding.
+const legStateGuardPath = "supabase/migrations/20261116013000_enforce_leg_sourcing_state_and_assignment_binding.sql";
+const legStateGuardMigration = existsSync(legStateGuardPath) ? readFileSync(legStateGuardPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION private.krim_guard_leg_sourcing_state",
+  "SET search_path TO ''",
+  "v_leg.status NOT IN ('planned','unassigned') OR v_leg.assignment_status NOT IN ('unassigned','planned','pending')",
+  "trg_krim_guard_leg_opportunity_state",
+  "trg_krim_guard_leg_quote_state",
+  "trg_krim_guard_leg_assignment_state",
+  "v_quote.shipment_leg_id IS DISTINCT FROM NEW.shipment_leg_id",
+  "v_opportunity.shipment_leg_id IS DISTINCT FROM NEW.shipment_leg_id",
+  "REVOKE ALL ON FUNCTION private.krim_guard_leg_sourcing_state() FROM PUBLIC, anon, authenticated",
+]) {
+  if (!legStateGuardMigration.includes(token)) failures.push("Leg sourcing database guard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
