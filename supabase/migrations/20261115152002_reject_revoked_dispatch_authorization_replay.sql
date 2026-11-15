@@ -1,0 +1,94 @@
+create or replace function public.krim_authorize_leg_dispatch(p_partner_assignment_id bigint,p_idempotency_key text)
+returns public.krim_shipment_leg_dispatch_authorizations
+language plpgsql security definer set search_path=''
+as $function$
+declare
+ v_user uuid:=auth.uid();
+ v_pa public.krim_shipment_partner_assignments%rowtype;
+ v_leg public.krim_shipment_legs%rowtype;
+ v_shipment public.krim_shipments%rowtype;
+ v_binding public.krim_capacity_leg_bindings%rowtype;
+ v_reservation public.krim_capacity_reservations%rowtype;
+ v_mode text;
+ v_driver_count integer:=0;
+ v_existing public.krim_shipment_leg_dispatch_authorizations%rowtype;
+ v_result public.krim_shipment_leg_dispatch_authorizations%rowtype;
+begin
+ if v_user is null then raise exception using errcode='28000',message='Authentication required'; end if;
+ if p_partner_assignment_id is null or nullif(btrim(p_idempotency_key),'') is null or length(p_idempotency_key)>160 then
+  raise exception using errcode='22023',message='A valid partner assignment and idempotency key are required';
+ end if;
+ select * into v_pa from public.krim_shipment_partner_assignments where id=p_partner_assignment_id for update;
+ if not found or v_pa.status not in ('accepted','active') or v_pa.shipment_leg_id is null then
+  raise exception using errcode='55000',message='An accepted exact-leg partner assignment is required';
+ end if;
+ if not public.krim_has_permission(v_user,v_pa.partner_organization_id,'shipment.dispatch') then
+  raise exception using errcode='42501',message='Partner dispatch permission is required';
+ end if;
+ select * into v_existing from public.krim_shipment_leg_dispatch_authorizations
+ where partner_organization_id=v_pa.partner_organization_id and idempotency_key=p_idempotency_key for update;
+ if found then
+  if v_existing.partner_assignment_id<>v_pa.id or v_existing.shipment_leg_id<>v_pa.shipment_leg_id then
+   raise exception using errcode='23505',message='Idempotency key was already used for a different leg';
+  end if;
+  if v_existing.status<>'authorized' then
+   raise exception using errcode='55000',message='This idempotency key belongs to a revoked dispatch authorization; use a new key after full readiness is revalidated';
+  end if;
+  if not private.krim_leg_dispatch_authorization_is_current(v_existing.shipment_id,v_existing.shipment_leg_id,v_existing.partner_assignment_id,v_existing.partner_organization_id) then
+   raise exception using errcode='55000',message='Existing dispatch authorization is no longer current; dispatch is blocked';
+  end if;
+  return v_existing;
+ end if;
+ select * into v_leg from public.krim_shipment_legs where id=v_pa.shipment_leg_id and shipment_id=v_pa.shipment_id for update;
+ if not found or v_leg.status<>'assigned' then
+  raise exception using errcode='55000',message='The exact shipment leg must be assigned and not yet dispatched';
+ end if;
+ select * into v_shipment from public.krim_shipments where id=v_pa.shipment_id for update;
+ if not found or v_shipment.status in ('delivered','closed','cancelled') then
+  raise exception using errcode='55000',message='Shipment is missing or terminal';
+ end if;
+ select b.* into v_binding from public.krim_capacity_leg_bindings b
+ where b.shipment_id=v_pa.shipment_id and b.shipment_leg_id=v_leg.id and b.status='confirmed'
+ order by b.id desc limit 1 for update;
+ if not found then raise exception using errcode='55000',message='Confirmed physical capacity binding for this exact leg is required'; end if;
+ select r.* into v_reservation from public.krim_capacity_reservations r
+ where r.id=v_binding.reservation_id and r.shipment_id=v_pa.shipment_id and r.shipment_leg_id=v_leg.id
+ and r.organization_id=v_pa.partner_organization_id and r.status='confirmed' for update;
+ if not found then raise exception using errcode='55000',message='Confirmed partner-owned physical capacity reservation is required'; end if;
+ select tm.code into v_mode from public.krim_transport_modes tm where tm.id=v_leg.transport_mode_id;
+ if v_mode='ROAD' then
+  select count(*)::integer into v_driver_count
+  from public.krim_driver_assignments da
+  join public.krim_driver_profiles dp on dp.user_id=da.user_id and dp.organization_id=da.organization_id
+  join public.krim_vehicles v on v.id=da.vehicle_id and v.organization_id=da.organization_id
+  join public.krim_vehicle_driver_bindings vb on vb.driver_user_id=da.user_id and vb.vehicle_id=da.vehicle_id and vb.organization_id=da.organization_id and vb.status='active'
+  join public.krim_organization_members m on m.user_id=da.user_id and m.organization_id=da.organization_id and lower(m.role)='driver' and lower(m.status)='active'
+  where da.partner_assignment_id=v_pa.id and da.shipment_id=v_pa.shipment_id and da.shipment_leg_id=v_leg.id
+   and da.organization_id=v_pa.partner_organization_id and da.status='accepted' and da.accepted_by=da.user_id and da.accepted_at is not null
+   and dp.verification_status in ('verified','approved') and dp.licence_expiry_date>=current_date
+   and v.verification_status='verified' and v.operational_status='active'
+   and exists(select 1 from public.krim_driver_verification_documents d where d.profile_id=dp.id and d.document_type='licence_front' and d.review_status='accepted')
+   and exists(select 1 from public.krim_driver_verification_documents d where d.profile_id=dp.id and d.document_type='licence_back' and d.review_status='accepted')
+   and not exists(select 1 from public.krim_vehicle_document_requirements req where req.registration_country_code=v.registration_country_code and lower(req.vehicle_category)=lower(v.vehicle_category) and req.is_required and not exists(select 1 from public.krim_vehicle_documents vd where vd.vehicle_id=v.id and vd.document_type=req.document_type and vd.review_status='approved' and (vd.expires_at is null or vd.expires_at>=current_date)));
+  if v_driver_count=0 then raise exception using errcode='55000',message='Road dispatch requires an accepted, verified driver, current licence, active verified vehicle binding and current mandatory vehicle documents'; end if;
+ end if;
+ if v_leg.leg_sequence>1 and not exists(
+  select 1 from public.krim_shipment_leg_custody_transfers ct
+  join public.krim_shipment_legs prev on prev.id=ct.from_leg_id
+  where ct.shipment_id=v_pa.shipment_id and ct.to_leg_id=v_leg.id and ct.status='accepted'
+   and prev.leg_sequence=v_leg.leg_sequence-1 and ct.receiving_organization_id=v_pa.partner_organization_id
+ ) then raise exception using errcode='55000',message='Accepted custody transfer from the immediately preceding leg is required'; end if;
+ insert into public.krim_shipment_leg_dispatch_authorizations
+ (shipment_id,shipment_leg_id,partner_assignment_id,partner_organization_id,capacity_binding_id,reservation_id,authorized_by,idempotency_key)
+ values(v_pa.shipment_id,v_leg.id,v_pa.id,v_pa.partner_organization_id,v_binding.id,v_reservation.id,v_user,btrim(p_idempotency_key))
+ returning * into v_result;
+ insert into public.krim_partner_execution_events
+ (assignment_id,shipment_id,shipment_leg_id,partner_organization_id,event_type,event_time,notes,metadata,created_by,created_at)
+ values(v_pa.id,v_pa.shipment_id,v_leg.id,v_pa.partner_organization_id,'leg_dispatch_authorized',now(),
+ 'Exact-leg dispatch authorized; physical departure must be recorded separately.',
+ jsonb_build_object('dispatch_authorization_id',v_result.id,'capacity_binding_id',v_binding.id,'reservation_id',v_reservation.id,'transport_mode',v_mode),v_user,now());
+ return v_result;
+end;
+$function$;
+revoke all on function public.krim_authorize_leg_dispatch(bigint,text) from public,anon;
+grant execute on function public.krim_authorize_leg_dispatch(bigint,text) to authenticated;
