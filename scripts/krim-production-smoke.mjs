@@ -53,6 +53,7 @@ const required = [
   "supabase/migrations/20261115234500_block_multi_leg_activation_during_shipment_wide_quotes.sql",
   "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql",
   "supabase/migrations/20261115235500_block_shipment_wide_customer_quote_award_for_multi_leg.sql",
+  "supabase/migrations/20261116000500_record_actual_previous_plan_status_on_activation.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1428,6 +1429,13 @@ for (const token of [
   "pg_catalog.jsonb_build_object",
 ]) {
   if (!legAuditFixMigration.includes(token)) failures.push("Shipment-leg audit deduplication safeguard is missing: " + token);
+}
+
+// Plan activation audit must capture the actual previous plan status.
+const legActivationAuditPath = "supabase/migrations/20261116000500_record_actual_previous_plan_status_on_activation.sql";
+const legActivationAudit = existsSync(legActivationAuditPath) ? readFileSync(legActivationAuditPath, "utf8") : "";
+if (!legActivationAudit.includes("p_plan_id,'plan_activated',v_plan.status,'active',v_user")) {
+  failures.push("Shipment plan activation audit does not preserve the actual previous plan status.");
 }
 
 // Shipment leg-plan activation must be atomic, idempotent, scoped and auditable.
