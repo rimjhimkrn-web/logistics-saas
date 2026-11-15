@@ -1228,8 +1228,9 @@ if (!partnerCapabilityAdminPage.includes("approveBlocked") || !partnerCapability
 for (const token of ["planned_departure", "planned_arrival", "booking_window_start", "booking_window_end", "pg_catalog.pg_input_is_valid", "v_reserved_resource", "capacity_value-v_reserved", "resource_capacity-v_reserved_resource"]) {
   if (!futureCapacityReservationMigration.includes(token)) failures.push("Future capacity reservation guard is missing interval-aware validation: " + token);
 }
-if (futureCapacityReservationMigration.includes("now()<v_from") || futureCapacityReservationMigration.includes("Capacity availability window is not currently active")) {
-  failures.push("Capacity reservation must not require the availability window to be active at booking time.");
+const futureCapacityWindowReplacement = futureCapacityReservationMigration.split("v_new := $new$begin")[1]?.split("$new$;")[0] || "";
+if (!futureCapacityWindowReplacement || futureCapacityWindowReplacement.includes("now()<v_from") || futureCapacityWindowReplacement.includes("Capacity availability window is not currently active")) {
+  failures.push("Capacity reservation must validate the planned shipment interval, not require the availability window to be active at booking time.");
 }
 if (!capacityResourceLockMigration.includes("for update of r, a skip locked")) {
   failures.push("Capacity selection must lock the shared physical resource to serialize concurrent reservations.");
