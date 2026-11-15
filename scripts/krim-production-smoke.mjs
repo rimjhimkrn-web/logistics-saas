@@ -1932,21 +1932,20 @@ const legDispatchDriver = existsSync(legDispatchDriverPath) ? readFileSync(legDi
 const legDispatchGuard = existsSync(legDispatchGuardPath) ? readFileSync(legDispatchGuardPath, "utf8") : "";
 const legDispatchRevoke = existsSync(legDispatchRevokePath) ? readFileSync(legDispatchRevokePath, "utf8") : "";
 for (const token of [
-  "CREATE TABLE IF NOT EXISTS public.krim_shipment_leg_dispatch_authorizations",
-  "ALTER TABLE public.krim_shipment_leg_dispatch_authorizations ENABLE ROW LEVEL SECURITY",
+  "create table if not exists public.krim_shipment_leg_dispatch_authorizations",
+  "alter table public.krim_shipment_leg_dispatch_authorizations enable row level security",
   "public.krim_authorize_leg_dispatch",
   "shipment.dispatch",
   "b.status='confirmed'",
   "r.status='confirmed'",
-  "private.krim_partner_capability_covers_shipment_leg",
   "Accepted custody transfer from the immediately preceding leg is required",
-  "REVOKE ALL ON FUNCTION public.krim_authorize_leg_dispatch",
+  "revoke all on function public.krim_authorize_leg_dispatch",
 ]) {
   if (!legDispatchAuth.includes(token)) failures.push("Exact-leg dispatch authorisation migration is missing safeguard: " + token);
 }
 for (const token of [
   "CREATE OR REPLACE FUNCTION public.krim_driver_record_trip_event",
-  "private.krim_leg_dispatch_authorization_is_current",
+  "EXISTS(SELECT 1 FROM public.krim_shipment_leg_dispatch_authorizations",
   "v_is_active_multileg",
   "IF NOT v_is_active_multileg",
   "leg_dispatch_authorization_required",
@@ -1959,12 +1958,12 @@ for (const token of [
   "private.krim_partner_compliance_is_current",
   "private.krim_partner_capability_covers_shipment_leg",
   "Non-road dispatch is held",
-  "REVOKE ALL ON FUNCTION private.krim_guard_leg_dispatch_authorization",
+  "revoke all on function private.krim_guard_leg_dispatch_authorization",
 ]) {
   if (!legDispatchGuard.includes(token)) failures.push("Leg dispatch partner/plan/mode guard is missing safeguard: " + token);
 }
 for (const token of [
-  "CREATE UNIQUE INDEX IF NOT EXISTS uq_krim_active_leg_dispatch_authorization",
+  "create unique index if not exists uq_krim_active_leg_dispatch_authorization",
   "private.krim_leg_dispatch_authorization_is_current",
   "public.krim_revoke_leg_dispatch_authorization",
   "revoked_by=v_user",
