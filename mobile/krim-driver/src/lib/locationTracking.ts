@@ -144,6 +144,12 @@ export async function startTripTracking(assignmentId: string, trackingSessionId:
   }
 }
 
+export async function queueTrackingStop(assignmentId: string): Promise<void> {
+  await stopLocalTracking();
+  await SecureStore.setItemAsync(ASSIGNMENT_KEY, assignmentId);
+  await SecureStore.deleteItemAsync(SESSION_KEY);
+}
+
 export async function stopTripTracking(): Promise<void> {
   const assignmentId = await SecureStore.getItemAsync(ASSIGNMENT_KEY);
   // Stop local collection first, even when the network is unavailable.
