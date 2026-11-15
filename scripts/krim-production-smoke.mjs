@@ -1089,6 +1089,8 @@ const driverSessionFunction = existsSync("supabase/functions/krim-driver-trackin
 const driverGpsUpdateFunction = existsSync("supabase/functions/krim-driver-gps-update/index.ts") ? readFileSync("supabase/functions/krim-driver-gps-update/index.ts", "utf8") : "";
 const publicShipmentTracking = existsSync("supabase/functions/public-shipment-tracking/index.ts") ? readFileSync("supabase/functions/public-shipment-tracking/index.ts", "utf8") : "";
 const driverBrowserTracking = existsSync("app/driver/module-08-live-tracking.html") ? readFileSync("app/driver/module-08-live-tracking.html", "utf8") : "";
+const driverMobileWorkspace = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx")
+  ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const customerTrackingPage = existsSync("tracking.html") ? readFileSync("tracking.html", "utf8") : "";
 const gpsConsentMigration = existsSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql") ? readFileSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql", "utf8") : "";
 const gpsRetentionNotice = existsSync("public/legal/data-retention.html") ? readFileSync("public/legal/data-retention.html", "utf8") : "";
@@ -1103,6 +1105,8 @@ for (const [label, source, tokens] of [
   ["GPS upload server", driverGpsUpdateFunction, ["CONSENT_NOTICE_APPROVED = false", "trackingSession.consent_notice_text!==CONSENT_NOTICE_TEXT", "trackingSession.consent_notice_sha256!==expectedConsentHash", "tracking_session_id:trackingSessionId"]],
   ["Customer GPS privacy", publicShipmentTracking, ["krim_driver_tracking_sessions", 'filter("metadata->>tracking_session_id"', 'gps_sharing_status:', 'neq("event_type", "gps_position")']],
   ["Driver browser tracking", driverBrowserTracking, ["read-only", "native-app only", "launch gate remains closed"]],
+  ["Driver stop retry lifecycle", driverLocationSource, ["queueTrackingStop", "serverStopPending", "if (error) throw error"]],
+  ["Driver reconnect reconciliation", driverMobileWorkspace, ["AppState.addEventListener", "Retry server stop"]],
   ["Customer tracking freshness", customerTrackingPage, ["gps_sharing_status", "pos.freshness", "starting", "stale", "setInterval", "30 seconds"]],
   ["GPS consent archive migration", gpsConsentMigration, ["consent_notice_text", "consent_notice_sha256", "consent_language"]],
   ["GPS retention disclosure", gpsRetentionNotice, ["GPS collection is disabled by both", "exact server-controlled notice text", "SHA-256 notice hash"]],
