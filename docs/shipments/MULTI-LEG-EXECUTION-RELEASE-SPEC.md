@@ -415,3 +415,12 @@ This does not yet complete partner acceptance or capacity reservation. No live a
 Added a private trigger guard across leg-scoped opportunities, active partner quotes and offered partner assignments. It requires both leg lifecycle fields to remain in an unassigned/planned state when sourcing is opened or priced, and requires the exact leg to still match an item in the active route plan. Offered assignments additionally must reference an accepted quote and awarded opportunity with identical shipment, leg and partner identifiers.
 
 This database-level guard closes a permissive status-condition edge case in RPC validation and protects against direct table writes or future RPC regressions. The trigger function is SECURITY DEFINER with empty search_path and no execute grants to PUBLIC, anon or authenticated; it is invoked only by its table triggers.
+
+
+## Exact-leg partner acceptance hardening (16 Nov 2026)
+
+Hardened `public.krim_respond_to_partner_assignment(bigint,boolean,text)` for commercial leg-scoped assignments.
+
+On acceptance, the function now verifies the assignment's quote matches the same shipment and partner. For active multi-leg plans it additionally requires the quote and awarded opportunity to bind the exact same shipment leg and partner, and verifies that leg still matches an item in the active route plan and remains unassigned. Leg-scoped single-leg awards receive the same quote/opportunity binding checks. Partner eligibility is rechecked at acceptance: active organisation, registered-business account mode, approved verification/lifecycle/compliance states, and current compliance evidence. Existing exact-leg capability and quote-expiry checks remain in place.
+
+Legacy shipment-wide single-leg assignments are retained where no leg-scoped quote and no active multi-leg plan are involved. No production assignments were accepted or changed during this migration. A real acceptance/capacity/dispatch journey remains untested because there are no verified commercial partners, active capacity resources, vehicles or drivers.
