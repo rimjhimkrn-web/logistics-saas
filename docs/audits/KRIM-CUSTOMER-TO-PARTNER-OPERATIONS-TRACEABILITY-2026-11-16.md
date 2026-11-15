@@ -11,7 +11,9 @@ The core customer-to-partner workflow has substantial backend controls and canon
 
 - No active open partner opportunities.
 - No partner quotes.
-- Six KRIM markets and six countries are active, but no verified active partner capability exists in the production dataset.
+- The market catalogue has six rows with active flags, but all six `krim_market_activation_controls` rows are `blocked`; five market settings are inactive and one is active, yet the market-control gate is not passed.
+- All 249 country operating packs remain `research_pending`; all 4,482 mandatory country-pack controls are `pending`.
+- Seven network corridors are `draft`; there are zero corridor compliance dossiers and zero corridor compliance control records.
 - Two partner-type organizations are active, but zero meet the verified/approved + active lifecycle + compliant eligibility test.
 - No active rate card.
 - No partner assignments or capacity resources.
@@ -106,7 +108,15 @@ The six legacy confirmed shipments have no accepted partner assignment, yet thei
 
 **No production DDL was executed.** The production migration history is known to be ahead of the repository at points; reconcile schema/migration history and current function dependencies before preparing or applying a correction migration.
 
-## 5. Capacity model distinction
+## 5. Additional P0 gate gap — partner opportunity creation
+
+The current production `krim_create_partner_opportunity` routine checks active country/location/market catalogue flags but does not call `krim_internal_market_activation_gate`, `private.krim_market_country_operational` or validate an approved corridor compliance dossier. The current shipment-write triggers do enforce operational market activation and an active, approved, mode-matched corridor dossier when shipment origin/destination/mode fields are written. However, an existing legacy shipment can be passed to the opportunity RPC without changing those fields, so the RPC's own check is weaker than the current shipment creation gate.
+
+By contrast, `krim_create_tariff_quote` calls `krim_internal_market_activation_gate` for both origin and destination and requires a current evidence-backed approved rate card. This is an inconsistent control boundary.
+
+No currently open opportunity exists, and no bypass was exercised. This is a code-path risk, not evidence of a successful bypass. Before enabling partner sourcing, update the opportunity RPC to enforce both market activation gates and the exact corridor dossier/compliance requirements server-side, then test a legacy shipment in a blocked market, an active approved corridor, expired control evidence and mismatched transport mode. Do not rely on frontend disabling.
+
+## 6. Capacity model distinction
 
 Two concepts must not be conflated:
 
@@ -115,7 +125,7 @@ Two concepts must not be conflated:
 
 The current exact-leg dispatch authorization checks the second set and additional readiness gates. The legacy shipment-wide `krim_dispatch_shipment` routine checks the older commitment and compliance/capability controls. These two dispatch paths need ongoing reconciliation and a single authoritative release contract. No current production capacity resource or reservation exists.
 
-## 6. Partner-direct commercial boundary
+## 7. Partner-direct commercial boundary
 
 The production readiness function records `partner_direct` as the payment collection model. It is explicitly not payment received or settled.
 
@@ -125,7 +135,7 @@ The production readiness function records `partner_direct` as the payment collec
 - The presence of a confirmed shipment or partner-direct readiness value must never be displayed as paid, settled or revenue.
 - Keep payment checkout and refund provider execution disabled unless a separate approved commercial/legal/payment design authorizes them.
 
-## 7. Code correction completed in this audit
+## 8. Code correction completed in this audit
 
 Commit: `18f2835c956fcbe545465c6da5a9deca58894a00`
 
@@ -137,7 +147,7 @@ File: `public/shipper/spot-approvals.html`
 
 No database rows, schema, RPCs, RLS policies, secrets or payment settings were changed.
 
-## 8. Verification and acceptance status
+## 9. Verification and acceptance status
 
 **Source checks completed in this audit:**
 - Canonical customer shipment form calls the idempotent shipment RPC.
@@ -160,17 +170,18 @@ No database rows, schema, RPCs, RLS policies, secrets or payment settings were c
 
 Static source inspection and SQL metadata inspection do not certify browser runtime, physical logistics performance or a real shipment.
 
-## 9. Remediation sequence
+## 10. Remediation sequence
 
-1. **P0 — Readiness false-positive correction:** reconcile production migration history, update the readiness evaluator in a controlled migration, add regression tests, then re-evaluate legacy readiness records.
-2. **P0 — Legacy record triage:** inspect the six confirmed shipments and one orphan assigned leg through authorized operational review; determine whether they are test/legacy records, valid historical commitments or records requiring correction. Do not rewrite automatically.
-3. **P0 — First real partner supply cell:** obtain one registered business partner, verify organization and documents, approve one exact transport capability/service area, register a real capacity resource and availability.
-4. **P0 — First controlled customer journey:** one authorized test shipment through open opportunity → real partner quote → customer preparation → provider acceptance → physical capacity reservation → customer quote acceptance → dispatch authorization → driver acceptance → milestones → POD → independent verification.
-5. **P1 — Multi-leg proof:** create and evaluate a real route plan, activate atomically, test per-leg partner/capacity/custody and final delivery. Keep multi-leg shipment-wide sourcing blocked until leg-specific sourcing is proven.
-6. **P1 — Finance closure:** preserve partner-direct payment separation and prove invoice/fee/reconciliation records without collecting freight funds.
-7. **P1 — Update phase audit docs:** keep the Phase 10 audit aligned with the current driver POD source and ensure the 14-phase acceptance blueprint remains the authority.
+1. **P0 — Market/corridor sourcing gate correction:** make partner opportunity creation enforce the same market operational gate and approved corridor dossier required by shipment creation and tariff quoting; add legacy-shipment bypass tests.
+2. **P0 — Readiness false-positive correction:** reconcile production migration history, update the readiness evaluator in a controlled migration, add regression tests, then re-evaluate legacy readiness records.
+3. **P0 — Legacy record triage:** inspect the six confirmed shipments and one orphan assigned leg through authorized operational review; determine whether they are test/legacy records, valid historical commitments or records requiring correction. Do not rewrite automatically.
+4. **P0 — First real partner supply cell:** obtain one registered business partner, verify organization and documents, approve one exact transport capability/service area, register a real capacity resource and availability.
+5. **P0 — First controlled customer journey:** one authorized test shipment through open opportunity → real partner quote → customer preparation → provider acceptance → physical capacity reservation → customer quote acceptance → dispatch authorization → driver acceptance → milestones → POD → independent verification.
+6. **P1 — Multi-leg proof:** create and evaluate a real route plan, activate atomically, test per-leg partner/capacity/custody and final delivery. Keep multi-leg shipment-wide sourcing blocked until leg-specific sourcing is proven.
+7. **P1 — Finance closure:** preserve partner-direct payment separation and prove invoice/fee/reconciliation records without collecting freight funds.
+8. **P1 — Update phase audit docs:** keep the Phase 10 audit aligned with the current driver POD source and ensure the 14-phase acceptance blueprint remains the authority.
 
-## 10. Evidence boundaries
+## 11. Evidence boundaries
 
 - Live SQL queries were read-only.
 - No production data was inserted, updated or deleted.
