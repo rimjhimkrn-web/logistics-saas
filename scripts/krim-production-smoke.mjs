@@ -548,12 +548,11 @@ for (const duplicateAlias of ["public/customer-os/customer-services/shipment-cre
 }
 
 const checkout = existsSync("public/quote-result.html") ? readFileSync("public/quote-result.html", "utf8") : "";
-for (const [label, pattern] of [
-  ["server-created Razorpay order", /create-global-razorpay-order/],
-  ["server-side payment verification", /verify-razorpay-payment/],
-  ["payment verification result guard", /result\.success\s*!==\s*true[\s\S]*?result\.verified\s*!==\s*true[\s\S]*?result\.status\s*!==\s*["']paid["']/],
-]) {
-  if (!pattern.test(checkout)) failures.push(`Checkout guard missing: ${label}`);
+if (!/KRIM freight checkout is disabled/i.test(checkout) || !/Partner-direct payments only/i.test(checkout) || !/payment-checkout\.html/.test(checkout)) {
+  failures.push("Legacy quote-result route must redirect to partner-direct payment guidance.");
+}
+if (/new Razorpay|checkout\.razorpay\.com|create-global-razorpay-order|verify-razorpay-payment/.test(checkout)) {
+  failures.push("Legacy quote-result route must not load or invoke a KRIM freight payment gateway.");
 }
 
 const razorpayOrder = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
@@ -562,6 +561,8 @@ for (const [label, source, pattern] of [
   ["Razorpay order endpoint requires authenticated user", razorpayOrder, /auth\.getUser\(token\)/],
   ["Razorpay order checks the accepted quote", razorpayOrder, /accepted quote/i],
   ["Razorpay order verifies partner assignment", razorpayOrder, /assignment\.status/],
+  ["Razorpay order requires explicit freight-collection approval", razorpayOrder, /KRIM_FREIGHT_COLLECTION_ENABLED[\s\S]*?KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION/],
+  ["Razorpay verification requires explicit freight-collection approval", razorpayVerify, /KRIM_FREIGHT_COLLECTION_ENABLED[\s\S]*?KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION/],
   ["Razorpay verification checks the provider signature", razorpayVerify, /generateHmacSha256[\s\S]*?razorpaySignature/],
   ["Razorpay verification checks accepted quote and partner assignment", razorpayVerify, /(?=[\s\S]*accepted customer quote)(?=[\s\S]*accepted partner assignment)/i],
 ]) {
