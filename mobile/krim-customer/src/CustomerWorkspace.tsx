@@ -72,7 +72,11 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
         loadCustomerQuotes(supabase, organizationId),
       ]);
       setShipments(shipmentRows);
-      setQuotes(quoteRows);
+      const shipmentStatusById = new Map(shipmentRows.map((row) => [row.id, row.status]));
+      setQuotes(quoteRows.map((quote) => ({
+        ...quote,
+        shipment_status: shipmentStatusById.get(quote.shipment_id) ?? quote.shipment_status,
+      })));
     } catch {
       setError("Some workspace data could not be loaded. Access remains protected by KRIM authorization policies.");
     } finally {
@@ -88,7 +92,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
     try {
       const { error: rpcError } = await supabase.rpc("krim_accept_global_quote", { p_quote_id: quoteId });
       if (rpcError) throw rpcError;
-      setNotice("Quote accepted. Your shipment is moving to the confirmation workflow.");
+      setNotice("Quote accepted. KRIM finalized the accepted provider assignment and marked the shipment assigned. Dispatch and verified capacity reservation remain separate.");
       await refreshWorkspace();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Quote could not be accepted. Refresh and check its current status.");
@@ -200,9 +204,15 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
           {loadingData ? <ActivityIndicator color={blue}/> : quotes.length ? quotes.map((q) => <View key={q.id} style={s.panel}>
             <Text style={s.panelTitle}>Quote #{q.id}</Text>
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
-            <Text style={s.tiny}>Shipment ID {q.shipment_id} · Status: {q.status}</Text>
+            <Text style={s.tiny}>Shipment ID {q.shipment_id} · Quote: {q.status} · Shipment: {q.shipment_status ?? "not refreshed"}</Text>
+            {q.partner_name ? <Text style={s.tiny}>Provider: {q.partner_name}{q.partner_legal_name ? " · Contracting entity: " + q.partner_legal_name : ""}</Text> : <Text style={s.tiny}>Provider identity is not linked to this quote.</Text>}
             <Text style={s.tiny}>Valid until: {new Date(q.valid_until).toLocaleString()}</Text>
-            {q.status === "sent" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> : q.status==="accepted" ? <><Text style={s.tiny}>Partner-direct payment: the contracting logistics provider issues its own invoice and receives freight payment directly from you. KRIM does not create or collect freight-payment orders or settle partner funds.</Text><Action title="Partner-direct payment guidance" onPress={openPartnerPaymentGuidance} secondary/></> : <Text style={s.tiny}>This quote is not currently available for acceptance.</Text>}
+            {q.status === "sent" && q.partner_assignment_status === "accepted" && q.partner_eligible_now && q.shipment_status === "quoted" && new Date(q.valid_until).getTime() > Date.now() ? <Action title={acceptingQuoteId === q.id ? "Accepting…" : "Accept quote"} onPress={() => void acceptQuote(q.id)} /> :
+             q.status === "sent" && q.partner_assignment_status === "offered" ? <Text style={s.tiny}>Awaiting provider acceptance. You can accept the customer quote after the provider accepts the assignment.</Text> :
+             q.status === "sent" && q.partner_assignment_status === "accepted" && !q.partner_eligible_now ? <Text style={s.tiny}>Provider verification, compliance or capability is no longer current. Do not accept or pay; contact KRIM operations.</Text> :
+             q.status === "accepted" && q.partner_assignment_status === "active" && q.shipment_status === "assigned" && q.partner_eligible_now ? <><Text style={s.tiny}>Provider assignment is active. Confirm the provider invoice, tax treatment and beneficiary details directly. KRIM does not collect freight payments or settle partner funds.</Text><Action title="Partner-direct payment guidance" onPress={openPartnerPaymentGuidance} secondary/></> :
+             q.status === "accepted" ? <Text style={s.tiny}>Quote accepted, but final partner assignment or current eligibility could not be confirmed. Do not arrange dispatch or payment until KRIM operations resolves the status.</Text> :
+             <Text style={s.tiny}>This quote is not currently available for acceptance. Confirm provider acceptance, shipment status and quote validity before proceeding.</Text>}
           </View>) : <Empty title="No visible quotes" body="Confirmed quotes will appear here when available to your organization."/>}
         </>}
 
