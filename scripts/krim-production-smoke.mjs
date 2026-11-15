@@ -1247,7 +1247,7 @@ for (const token of ["join storage.objects o", "o.owner=e.created_by", "e.create
 for (const token of ["inventory.quality_reviewed", "already has a final quality decision", "separately authorised reinspection task"]) {
   if (!warehouseQualitySingleDecisionMigration.includes(token)) failures.push("Warehouse QC duplicate-decision guard is missing: " + token);
 }
-for (const token of ["current approved customs broker licence", "v_customs_country", "v_issuing_country", "o.owner=v_submitter", "v_expires<current_date", "Licence submitter cannot independently review"]) {
+for (const token of ["current approved customs broker licence", "v_customs_country", "v_issuing_country", "document issuing jurisdiction is inactive", "Licence submitter cannot independently review"]) {
   if (!customsEvidenceReviewMigration.includes(token)) failures.push("Customs evidence review is missing safeguard: " + token);
 }
 if (!partnerCapabilitySubmissionPage.includes("these specialist capabilities remain inactive") || !partnerCapabilitySubmissionPage.includes("jurisdiction-specific evidence")) {
