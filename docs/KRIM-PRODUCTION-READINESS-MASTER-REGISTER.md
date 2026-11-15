@@ -1,0 +1,170 @@
+# KRIM Global Logistics OS — Production Readiness Master Register
+
+Last reviewed: 2026-11-15  
+Repository: `rimjhimkrn-web/logistics-saas`  
+Production Supabase project: `ebltviniygljwwseplph`
+
+## Purpose
+
+This register is the single release-control record for completing KRIM as an integrated logistics operating system. A page is not considered operational merely because it exists, loads, or passes a static link check.
+
+## Release-state definitions
+
+- **Implemented** — the code/database workflow exists.
+- **Deployed** — the intended version is present in the target environment.
+- **Tested** — the relevant automated or controlled test passed.
+- **Operationally validated** — a genuine authorised user journey completed with real participants and evidence.
+- **Blocked** — a legal, security, data, integration, or real-world prerequisite is missing.
+
+Do not promote a workstream to operationally validated without end-to-end evidence.
+
+## Global release gates
+
+| Gate | Current evidence / state | Release requirement |
+|---|---|---|
+| Real partner network | 0 eligible registered-business partner organisations in latest recorded audit | At least one independently verified partner per enabled service/corridor |
+| Partner capabilities | 0 active verified capabilities in latest recorded audit | Approved capability, current compliance, valid service area and evidence |
+| Drivers | 0 driver profiles in latest recorded audit | Verified driver, current licence details and accepted evidence |
+| Vehicles | 0 vehicles and 0 vehicle-document requirement rows in latest recorded audit | Jurisdiction/category requirements legally reviewed; vehicle and documents independently verified |
+| Capacity | 0 resources, availability rows, active reservations and bindings in latest recorded audit | Real resource, availability, booking and concurrency tests |
+| Warehouse | Latest direct production count: 0 warehouse tasks and 0 inventory rows | Real facility, receipt, QC, stock, allocation, movement, transfer, return and dispatch journey |
+| Customs | Latest recorded audit: 0 customs cases; prior audit showed no active approved jurisdiction requirements | Legal review and approval of jurisdiction-specific rules; verified broker and real authority evidence |
+| Shipment execution | Prior production audit: 6 confirmed shipments without partner assignments; no verified partner capacity | Partner acceptance, capacity commitment, driver acceptance, dispatch, trip events and delivery proof |
+| GPS | Legal consent and launch gates disabled | Approved privacy notice, legal approval, native-app consent and physical-device testing |
+| Freight payments | Hard-blocked under partner-direct commercial model | Separate legal/tax/settlement approval before any change; customer freight remains payable to contracting partner |
+| Notifications | Scheduled retry worker exists; no successful delivery evidence in outbox at prior audit | Provider configuration and actual authorised delivery test; HTTP 200 alone is not delivery proof |
+| Finance | Several finance pages are templates / browser-side validation only | Real ledger-backed invoices, receivables/payables and referral-fee accounting with tax-reviewed documents |
+| Security | Latest advisor snapshot: 26 RLS-without-policy informational findings, 130 generic authenticated SECURITY DEFINER warnings, leaked-password protection warning | Review each finding; retain least privilege; enable auth protection if supported and approved |
+| Existing pages | Static audit: 867 product HTML pages, 0 broken local references; runtime and permissions not comprehensively tested | Page/workspace regression matrix and browser/mobile role-based testing |
+
+## Workstream register
+
+### A. Customer and shipment lifecycle
+**State: Partially implemented; end-to-end blocked.**
+
+Required release journey:
+1. Customer signup and organisation provisioning.
+2. Shipment request with validated origin, destination, cargo, dimensions, mode and service constraints.
+3. Quote discovery from eligible partners only.
+4. Customer selection and commercial acceptance.
+5. Partner assignment offer and explicit partner acceptance.
+6. Capacity commitment for the planned time window.
+7. Driver and vehicle assignment with current evidence.
+8. Authorised dispatch and trip execution.
+9. Exception handling and customer notifications.
+10. Delivery confirmation with independently verifiable proof.
+11. Dispute/claim and financial reconciliation.
+
+Release blockers: no eligible partners, verified capabilities, capacity resources, drivers or vehicles. Confirmed customer shipments must not be represented as partner-accepted, assigned, dispatched or delivered.
+
+### B. Partner onboarding and execution
+**State: Guardrails implemented; no verified operating partner.**
+
+Required: registered-business onboarding, ownership evidence, organisation compliance, capability evidence, service areas, capacity resources, availability, quote submission, assignment acceptance, execution events, compliance renewal and suspension.
+
+Hazardous-goods and refrigerated capabilities remain fail-closed until specialist jurisdiction-specific evidence and review workflows exist.
+
+### C. Driver and vehicle
+**State: Verification safeguards implemented; real onboarding untested.**
+
+Driver licence front/back and identity documents are required; licence expiry is enforced; changes to licence details reopen evidence review. Vehicle verification requires private evidence ownership and applicable requirements.
+
+Vehicle legal requirements must not be guessed or activated from a generic checklist. Configure requirements only after jurisdiction and vehicle-category legal review. GPS remains disabled pending consent/legal approval and physical device tests.
+
+### D. Warehouse
+**State: Core controls implemented; transfer/return workflow gaps identified; no live operational data.**
+
+Existing safeguards include QC separation of duties, receipt evidence, inventory write restrictions, idempotency, unit consistency, aggregate-lot quality evidence, task replay checks and dispatch-proof storage ownership checks.
+
+Outstanding:
+- Explicit stock reservation/allocation workflow.
+- Bin/location-aware stock movements.
+- Atomic inter-facility and intra-facility transfers with source/destination validation.
+- Returns intake, quarantine, inspection, disposition and restocking/refund linkage.
+- Partial picks, short picks, damaged stock and cancellation/reversal paths.
+- Concurrency and deadlock tests using controlled fixtures.
+- Real operator/browser tests.
+
+Do not enable transfer/return movement labels as a shortcut. Implement them as complete authorised workflows with atomic balance changes, evidence, audit events and idempotency.
+
+### E. Customs
+**State: Security and legal fail-closed controls implemented; jurisdiction rules not approved and no cases/brokers.**
+
+Required:
+- Legal-reviewed import/export requirements per country, customs territory, procedure and cargo category.
+- Broker licence verification by jurisdiction and validity.
+- Declaration/document versioning and evidence provenance.
+- Submission receipt/reference from the relevant authority.
+- Query/hold/examination/assessment/duty-payment/release/rejection lifecycle as applicable.
+- Explicit authority-issued release evidence before marking clearance complete.
+- Revalidation on expiry or legal-rule change.
+
+Never present a research checklist as legal advice or approved jurisdiction rules.
+
+### F. Finance and commercial model
+**State: Partially implemented; several pages are templates; freight collection disabled.**
+
+Initial partner-direct model:
+- Customer contracts with and pays the logistics partner directly.
+- Partner invoices customer for freight.
+- KRIM invoices partner separately for an agreed referral/technology/coordination service, where contractually and tax-valid.
+- KRIM does not collect freight or pay out partner freight funds.
+- Razorpay may only be considered for KRIM's own fees/subscriptions after merchant, tax and invoice configuration is reviewed.
+- GST/ECO/TCS treatment requires a written CA opinion; do not assume exemption.
+
+Outstanding: referral-fee accrual/reconciliation, invoices, receivables/payables, refunds limited to KRIM's own supplies, tax reporting and finance close.
+
+### G. Control Tower, enterprise and administration
+**State: Mixed implementation; role-based runtime coverage incomplete.**
+
+Required: tenant isolation, scoped operational views, event timeline, SLA clocks, exception ownership/escalation, auditable overrides, enterprise locations and permissions, admin AAL2 controls, incident review and operational reporting.
+
+### H. APIs, webhooks and integrations
+**State: API/Webhooks page exists; integration validation incomplete.**
+
+Required: API authentication and scopes, idempotency, replay protection, signature verification, rate limits, schema/version policy, webhook retries/dead-letter handling, observability, secret rotation and documented partner integration tests.
+
+### I. Notifications
+**State: Scheduled workers deployed; actual provider delivery not yet evidenced.**
+
+Test Telegram with an explicitly authorised founder test. Keep Resend/domain sending setup as the final notification integration step. Track provider message IDs and ambiguous timeout outcomes; avoid blind retries that can duplicate external messages.
+
+## Existing release constraints
+
+- Keep Page 46 paused until the existing 45 workspaces have a documented regression/release result.
+- Defer Android APK builds until December 2026 due to the current build quota pause.
+- Do not enable GPS collection until legal consent and native-device validation gates pass.
+- Do not reactivate Cashfree or platform freight collection.
+- Do not enable payouts, automated freight settlement or refund execution under the partner-direct model.
+- Do not seed customs or vehicle legal requirements without jurisdiction-specific authoritative review.
+- Do not claim production readiness based solely on static audits, SQL definition inspection, or successful deployment.
+
+## Required regression evidence for every workspace
+
+For each route/workspace record:
+1. Canonical route and owner role.
+2. Authentication and organisation-membership requirements.
+3. RLS and RPC permission checks.
+4. Primary success path.
+5. Invalid-input and permission-denied paths.
+6. Duplicate-submit/idempotency path.
+7. Concurrent-update path where relevant.
+8. Expiry, cancellation, rejection and recovery paths.
+9. Mobile viewport and keyboard behaviour.
+10. Audit/event/notification side effects.
+11. Browser runtime result and deployment SHA.
+
+## Exit criteria for production candidate
+
+KRIM may be called a **production candidate for a specifically named corridor and service**, not universally production-ready, only when:
+- A real partner, capability, capacity resource, driver and vehicle are verified for that corridor.
+- Customer-to-partner booking and acceptance succeeds.
+- Dispatch and trip execution succeed with correct authorisation.
+- Delivery proof is independently verified.
+- Exceptions, cancellation and retry paths are tested.
+- Commercial invoices and money flows match the approved partner-direct model.
+- Security, RLS and regression checks pass for all involved roles.
+- Legal requirements and privacy notices for that corridor are approved.
+- Monitoring, support ownership and recovery procedures are in place.
+
+Global availability must be enabled country-by-country and service-by-service after equivalent validation.
