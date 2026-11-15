@@ -1,5 +1,6 @@
 -- Expire stale partner assignment offers, customer quotes and partner opportunities.
 -- This prevents stale awards from holding capacity or appearing as live service offers.
+-- Retire the obsolete direct-invitation path: assignments now require a customer-selected partner quote.
 
 CREATE OR REPLACE FUNCTION private.krim_internal_expire_partner_assignment_offers(p_batch_size integer DEFAULT 100)
  RETURNS integer
@@ -226,6 +227,23 @@ BEGIN
   RETURN v_count;
 END;
 $function$;
+
+CREATE OR REPLACE FUNCTION public.krim_internal_create_partner_invitations(p_match_run_id bigint)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+BEGIN
+  RAISE EXCEPTION USING errcode='0A000',
+    message='Legacy direct partner invitations are retired. Partners must submit verified quotes to open opportunities; customer selection, provider acceptance and customer quote acceptance create the assignment.';
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.krim_internal_create_partner_invitations(bigint) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.krim_internal_create_partner_invitations(bigint) TO service_role;
+COMMENT ON FUNCTION public.krim_internal_create_partner_invitations(bigint) IS
+  'Retired legacy flow. Partner assignments must be created only from customer-selected, verified partner quotes.';
 
 REVOKE ALL ON FUNCTION private.krim_internal_expire_partner_assignment_offers(integer) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION private.krim_internal_expire_partner_assignment_offers(integer) TO service_role;
