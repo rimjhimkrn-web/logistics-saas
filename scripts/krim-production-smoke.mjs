@@ -42,6 +42,10 @@ const required = [
   "auth/partner-signup.html",
   ".github/workflows/krim-android-internal-apk.yml",
   "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
+  "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
+  "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
+  ".github/workflows/krim-partner-mobile.yml",
+  "mobile/krim-customer/src/CustomerWorkspace.tsx",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
@@ -370,6 +374,18 @@ if (existsSync(quoteReview)) {
   if (!html.includes("krim_shipment_partner_assignments") || !html.includes('assignment?.status==="accepted"')) failures.push("Quote review must verify the exact partner assignment is accepted before enabling customer acceptance or checkout.");
   if (!html.includes("public/shipper/payment-checkout.html") || html.includes("public/quote-result.html")) failures.push("Accepted quotes must route to partner-direct payment guidance, not KRIM freight checkout.");
 }
+// Keep APK assembly paused until December while retaining source validation.
+const mobileValidationWorkflow = readFileSync(".github/workflows/krim-partner-mobile.yml", "utf8");
+const internalApkWorkflow = readFileSync(".github/workflows/krim-android-internal-apk.yml", "utf8");
+if (mobileValidationWorkflow.includes("build-internal-debug-apks")) failures.push("Mobile validation must not assemble APKs while the build pause is active.");
+if (!mobileValidationWorkflow.includes("cancel-in-progress: true")) failures.push("Mobile validation should cancel superseded validation runs.");
+if (!internalApkWorkflow.includes("2026-12-01T00:00:00Z")) failures.push("Manual APK builds must remain date-guarded until December 2026.");
+const customerMobileRepository = readFileSync("mobile/krim-customer/src/lib/customerRepository.ts", "utf8");
+const customerMobileWorkspace = readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8");
+if (!customerMobileRepository.includes("krim_customer_list_partner_quotes")) failures.push("Customer mobile must load partner identity through the scoped partner-offer RPC.");
+if (!customerMobileWorkspace.includes('partner_assignment_status === "accepted"')) failures.push("Customer mobile must wait for provider acceptance before enabling quote acceptance.");
+if (!customerMobileWorkspace.includes('shipment_status === "assigned"')) failures.push("Customer mobile must wait for an assigned shipment before showing partner-direct payment guidance.");
+
 if (existsSync(quoteComparison)) {
   const html = readFileSync(quoteComparison, "utf8");
   if (!html.includes("krim_customer_list_partner_quotes")) failures.push("Quote comparison must load partner offers through the customer-scoped identity and eligibility RPC.");
