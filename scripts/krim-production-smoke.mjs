@@ -1088,7 +1088,7 @@ for (const [label, source, tokens] of [
   ["GPS upload server", driverGpsUpdateFunction, ["CONSENT_NOTICE_APPROVED = false", "trackingSession.consent_notice_text!==CONSENT_NOTICE_TEXT", "trackingSession.consent_notice_sha256!==expectedConsentHash", "tracking_session_id:trackingSessionId"]],
   ["Customer GPS privacy", publicShipmentTracking, ["krim_driver_tracking_sessions", 'filter("metadata->>tracking_session_id"', 'gps_sharing_status:', 'neq("event_type", "gps_position")']],
   ["Driver browser tracking", driverBrowserTracking, ["read-only", "native-app only", "launch gate remains closed"]],
-  ["Customer tracking freshness", customerTrackingPage, ["gps_sharing_status", "pos.freshness", "setInterval", "30 seconds"]],
+  ["Customer tracking freshness", customerTrackingPage, ["gps_sharing_status", "pos.freshness", "starting", "stale", "setInterval", "30 seconds"]],
   ["GPS consent archive migration", gpsConsentMigration, ["consent_notice_text", "consent_notice_sha256", "consent_language"]],
   ["GPS retention disclosure", gpsRetentionNotice, ["GPS collection is disabled by both", "exact server-controlled notice text", "SHA-256 notice hash"]],
   ["GPS privacy disclosure", gpsPrivacyNotice, ["No GPS location events are currently recorded", "GPS collection is disabled"]],
