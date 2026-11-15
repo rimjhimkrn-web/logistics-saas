@@ -92,12 +92,19 @@ jobs:
           NODE
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
-      - name: Verify Android location and notification manifest permissions
+      - name: Assemble installable debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Verify merged Android location and notification manifest permissions
         run: |
           set -euo pipefail
-          MANIFEST=android/app/src/main/AndroidManifest.xml
-          test -f "$MANIFEST" || { echo "Generated Android manifest is missing."; find android -name AndroidManifest.xml -print; exit 1; }
-          echo "Generated location-related manifest declarations:"
+          echo "Generated merged Android manifests:"
+          find android/app/build/intermediates -type f -name AndroidManifest.xml -print
+          MANIFEST=$(find android/app/build/intermediates -type f -name AndroidManifest.xml | grep -E 'merged_manifest|packaged' | head -n 1 || true)
+          test -n "$MANIFEST" || { echo "Merged Android manifest not found."; exit 1; }
+          echo "Checking $MANIFEST"
           grep -nE 'uses-permission|foregroundServiceType' "$MANIFEST" || true
           missing=0
           for permission in ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE_LOCATION POST_NOTIFICATIONS; do
@@ -115,11 +122,6 @@ jobs:
             missing=1
           fi
           exit "$missing"
-      - name: Assemble installable debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
       - name: Upload KRIM Driver debug APK
         uses: actions/upload-artifact@v4
         with:
