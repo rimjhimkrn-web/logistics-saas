@@ -1724,6 +1724,29 @@ for (const token of [
   if (!legSourcingSchema.includes(token)) failures.push("Leg-scoped partner sourcing schema safeguard is missing: " + token);
 }
 
+
+
+// Leg-specific opportunity creation must be narrowly authorised and bound to an active plan item.
+const legOpportunityPath = "supabase/migrations/20261116010000_add_authorized_leg_partner_opportunity_rpc.sql";
+const legOpportunityMigration = existsSync(legOpportunityPath) ? readFileSync(legOpportunityPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_create_leg_partner_opportunity",
+  "SET search_path TO ''",
+  "private.krim_has_organization_access",
+  "private.krim_has_permission(v_user,v_shipment.customer_organization_id,'quote.create')",
+  "private.krim_has_permission(v_user,v_shipment.customer_organization_id,'shipment.update')",
+  "v_leg.leg_plan_item_id",
+  "v_item.origin_location_id IS DISTINCT FROM v_leg.origin_location_id",
+  "v_item.destination_location_id IS DISTINCT FROM v_leg.destination_location_id",
+  "v_item.transport_mode_id IS DISTINCT FROM v_leg.transport_mode_id",
+  "shipment_leg_id",
+  "partner.leg_opportunity.created",
+  "REVOKE ALL ON FUNCTION public.krim_create_leg_partner_opportunity",
+  "FROM PUBLIC, anon",
+]) {
+  if (!legOpportunityMigration.includes(token)) failures.push("Leg-specific opportunity RPC safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
