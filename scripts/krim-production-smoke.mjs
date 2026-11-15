@@ -2033,6 +2033,22 @@ for (const token of [
   if (!multiLegFinanceMigration.includes(token)) failures.push("Multi-leg finance safety gate is missing: " + token);
  }
 
+
+ // Custody transfer response audit distinguishes acceptance from rejection.
+ const custodyAuditPath = "supabase/migrations/20261115151811_correct_custody_transfer_response_audit_fields.sql";
+ const custodyAuditMigration = existsSync(custodyAuditPath) ? readFileSync(custodyAuditPath, "utf8") : "";
+ for (const token of [
+  "responded_by uuid references auth.users(id)",
+  "responded_at timestamptz",
+  "responded_by=v_user,responded_at=now()",
+  "accepted_by=v_user,accepted_at=now()",
+  "status='rejected',responded_by=v_user,responded_at=now()",
+  "security definer",
+  "set search_path=''"
+ ]) {
+  if (!custodyAuditMigration.includes(token)) failures.push("Custody response audit safeguard is missing: " + token);
+ }
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
