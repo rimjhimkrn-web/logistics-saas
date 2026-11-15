@@ -50,6 +50,8 @@ const required = [
   "supabase/migrations/20261115231500_add_atomic_shipment_leg_plan_activation_rpc.sql",
   "supabase/migrations/20261115233000_remove_duplicate_shipment_leg_creation_audit_trigger.sql",
   "supabase/migrations/20261115234000_enforce_contiguous_leg_planned_time_windows.sql",
+  "supabase/migrations/20261115234500_block_multi_leg_activation_during_shipment_wide_quotes.sql",
+  "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1387,6 +1389,21 @@ for (const token of [
   "A leg cannot depart before the previous leg planned arrival",
 ]) {
   if (!legPlanTimeMigration.includes(token)) failures.push("Shipment leg planned-time continuity safeguard is missing: " + token);
+}
+
+// Multi-leg plans must not flow into legacy shipment-wide partner quote/award paths.
+const legSourcingGuardPath = "supabase/migrations/20261115235000_fail_closed_shipment_wide_sourcing_for_multi_leg_plans.sql";
+const legSourcingGuard = existsSync(legSourcingGuardPath) ? readFileSync(legSourcingGuardPath, "utf8") : "";
+for (const token of [
+  "krim_create_partner_opportunity",
+  "krim_submit_partner_quote",
+  "krim_award_partner_quote",
+  "p.status='active' AND p.total_legs>1",
+  "Shipment-wide partner sourcing is disabled",
+  "Shipment-wide partner quotes are disabled",
+  "Shipment-wide partner awards are disabled",
+]) {
+  if (!legSourcingGuard.includes(token)) failures.push("Multi-leg leg-specific sourcing safety guard is missing: " + token);
 }
 
 // Shipment-leg creation must emit exactly one creation audit event per inserted leg.
