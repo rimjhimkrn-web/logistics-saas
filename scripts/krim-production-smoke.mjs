@@ -1193,8 +1193,11 @@ const warehouseQualityEvidenceMigration = existsSync("supabase/migrations/202611
   ? readFileSync("supabase/migrations/20261115180000_revalidate_warehouse_inspection_evidence_at_quality_review.sql", "utf8") : "";
 const warehouseQualitySingleDecisionMigration = existsSync("supabase/migrations/20261115180500_prevent_duplicate_warehouse_quality_decisions.sql")
   ? readFileSync("supabase/migrations/20261115180500_prevent_duplicate_warehouse_quality_decisions.sql", "utf8") : "";
-const customsEvidenceReviewMigration = existsSync("supabase/migrations/20261115181000_harden_customs_document_and_license_review_evidence.sql")
-  ? readFileSync("supabase/migrations/20261115181000_harden_customs_document_and_license_review_evidence.sql", "utf8") : "";
+const customsEvidenceReviewMigration = [
+  "supabase/migrations/20261115181000_harden_customs_document_and_license_review_evidence.sql",
+  "supabase/migrations/20261115174000_harden_customs_independent_review_and_evidence_revalidation.sql",
+  "supabase/migrations/20261115181500_customs_document_review_jurisdiction_evidence_and_expiry.sql",
+].filter(existsSync).map((file) => readFileSync(file, "utf8")).join("\\n");
 const vehicleRegistryPage = existsSync("app/partner/vehicle-registry.html") ? readFileSync("app/partner/vehicle-registry.html", "utf8") : "";
 const vehicleVerificationAdminPage = existsSync("app/admin/vehicle-verification.html") ? readFileSync("app/admin/vehicle-verification.html", "utf8") : "";
 const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql")
