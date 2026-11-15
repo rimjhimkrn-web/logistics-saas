@@ -63,6 +63,7 @@ const required = [
   "supabase/migrations/20261115144752_integrate_multileg_dispatch_authorization_with_driver_events.sql",
   "supabase/migrations/20261115145000_guard_leg_dispatch_plan_partner_and_mode_readiness.sql",
   "supabase/migrations/20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql",
+  "supabase/migrations/20261115150526_align_dispatch_readiness_with_multileg_authorization.sql",
   "supabase/migrations/20261115113000_partner_customer_quote_lifecycle_and_offer_visibility.sql",
   "supabase/migrations/20261115120000_partner_assignment_and_opportunity_expiry.sql",
   ".github/workflows/krim-partner-mobile.yml",
@@ -1973,6 +1974,24 @@ for (const token of [
   "private.krim_partner_capability_covers_shipment_leg",
 ]) {
   if (!legDispatchRevoke.includes(token)) failures.push("Dispatch revocation/execution revalidation is missing safeguard: " + token);
+}
+
+
+// Dispatch readiness must model exact active multi-leg plans, accepted driver binding,
+// current authorisation/capacity/custody and exact-leg capability without shipment-wide status assumptions.
+const dispatchReadinessPath = "supabase/migrations/20261115150526_align_dispatch_readiness_with_multileg_authorization.sql";
+const dispatchReadinessMigration = existsSync(dispatchReadinessPath) ? readFileSync(dispatchReadinessPath, "utf8") : "";
+for (const token of [
+  "CREATE OR REPLACE FUNCTION public.krim_operations_dispatch_readiness",
+  "c.shipment_status not in('assigned','in_transit')",
+  "c.exact_active_plan_item",
+  "An accepted driver assignment bound to this exact leg and partner is required",
+  "private.krim_leg_dispatch_authorization_is_current",
+  "private.krim_partner_capability_covers_shipment_leg",
+  "Non-road dispatch is held pending mode-specific resource and execution controls",
+  "SET search_path=''",
+]) {
+  if (!dispatchReadinessMigration.includes(token)) failures.push("Multi-leg dispatch readiness migration is missing safeguard: " + token);
 }
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
