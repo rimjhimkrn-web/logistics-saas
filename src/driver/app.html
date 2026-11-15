@@ -234,10 +234,7 @@
         </div>
       </div>
 
-      <div class="status-pill">
-        <div class="pulse-dot"></div>
-        GPS ONLINE
-      </div>
+      <div class="status-pill" role="status" aria-label="GPS tracking not connected">GPS NOT CONNECTED</div>
     </div>
 
     <!-- MAIN BODY -->
@@ -274,7 +271,7 @@
             </div>
           </div>
 
-          <button class="btn-action btn-cyan" onclick="updateStatus('In-Transit Highway')">📍 Ping Current Location</button>
+          <a class="btn-action btn-cyan" href="../../app/driver/module-08-live-tracking.html" style="display:block;text-align:center;text-decoration:none">Open secure tracking status</a>
           <button class="btn-action btn-emerald" onclick="switchView('pod')">📸 Arrived & Upload POD</button>
         </div>
       </div>
@@ -288,7 +285,7 @@
           <div class="pod-upload-box" onclick="triggerCamera()">
             <div style="font-size: 2rem; margin-bottom: 6px;">📷</div>
             <div style="font-size: 0.88rem; font-weight: 700;">Take Photo / Select File</div>
-            <div style="font-size: 0.72rem; color: var(--krim-text-muted); margin-top: 4px;">GPS location and timestamp will auto-embed</div>
+            <div style="font-size: 0.72rem; color: var(--krim-text-muted); margin-top: 4px;">Location is not attached. Submit evidence only through the verified delivery workflow.</div>
           </div>
 
           <button class="btn-action btn-emerald" onclick="submitPOD()">Submit Verified POD</button>
@@ -345,17 +342,8 @@
       document.getElementById(`nav-${tab}`).classList.add('active');
     }
 
-    function updateStatus(statusMsg) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          alert(`GPS Ping Sent: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)} — Status: ${statusMsg}`);
-        }, () => {
-          alert(`Telemetry Ping Sent — Status: ${statusMsg}`);
-        });
-      } else {
-        alert(`Telemetry Ping Sent — Status: ${statusMsg}`);
-      }
-    }
+    // Deliberately no browser geolocation shortcut: production tracking must use
+    // the authenticated, consent-gated native tracking session and server endpoint.
 
     function triggerCamera() {
       alert("Opening camera capture interface...");
