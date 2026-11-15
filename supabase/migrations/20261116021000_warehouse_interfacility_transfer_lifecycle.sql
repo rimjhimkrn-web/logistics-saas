@@ -81,7 +81,11 @@ begin
   where id=p_inventory_id and organization_id=p_organization_id and facility_id=p_source_facility_id for update;
  if not found then raise exception 'Source inventory balance not found in source facility' using errcode='P0002'; end if;
  if v_source.quality_status<>'released' then raise exception 'Only released inventory may be transferred' using errcode='23514'; end if;
- if v_source.quantity<p_quantity then raise exception 'Insufficient source stock' using errcode='23514'; end if;
+ if v_source.quantity<p_quantity then raise exception 'Insufficient source stock or invalid unit' using errcode='23514'; end if;
+ if not exists(select 1 from public.krim_warehouse_facilities f where f.id=p_source_facility_id and f.organization_id=p_organization_id and f.status='active' and f.review_status='approved')
+  or not exists(select 1 from public.krim_warehouse_facilities f where f.id=p_destination_facility_id and f.organization_id=p_organization_id and f.status='active' and f.review_status='approved') then
+  raise exception 'Both facilities must remain active and approved' using errcode='23514';
+ end if;
  insert into public.krim_warehouse_transfers(organization_id,source_facility_id,destination_facility_id,source_inventory_id,
   sku,item_description,lot_code,quantity,unit_code,reference_code,notes,idempotency_key,dispatched_by)
  values(p_organization_id,p_source_facility_id,p_destination_facility_id,p_inventory_id,
@@ -91,7 +95,7 @@ begin
   where id=v_source.id returning * into v_source;
  insert into public.krim_warehouse_inventory_movements(organization_id,facility_id,inventory_id,movement_type,quantity_delta,
   reference_type,reference_id,notes,created_by,idempotency_key)
- values(p_organization_id,p_source_facility_id,v_source.id,'transfer',-p_quantity,'warehouse_transfer',v_transfer.id::text,v_notes,v_user,gen_random_uuid());
+ values(p_organization_id,p_source_facility_id,v_source.id,'transfer',-p_quantity,'warehouse_transfer',v_transfer.id::text,v_notes,v_user,p_idempotency_key);
  insert into public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata)
  values(v_user,p_organization_id,'warehouse.transfer.dispatched','warehouse_transfer',v_transfer.id::text,'rpc',
   jsonb_build_object('source_facility_id',p_source_facility_id,'destination_facility_id',p_destination_facility_id,
@@ -147,7 +151,7 @@ begin
  insert into public.krim_warehouse_inventory_movements(organization_id,facility_id,inventory_id,movement_type,quantity_delta,
   reference_type,reference_id,notes,created_by,idempotency_key)
  values(v_transfer.organization_id,v_transfer.destination_facility_id,v_destination.id,'transfer',v_transfer.quantity,
-  'warehouse_transfer',v_transfer.id::text,v_notes,v_user,gen_random_uuid());
+  'warehouse_transfer',v_transfer.id::text,v_notes,v_user,p_idempotency_key);
  insert into public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata)
  values(v_user,v_transfer.organization_id,'warehouse.transfer.received','warehouse_transfer',v_transfer.id::text,'rpc',
   jsonb_build_object('destination_facility_id',v_transfer.destination_facility_id,'destination_inventory_id',v_destination.id,
