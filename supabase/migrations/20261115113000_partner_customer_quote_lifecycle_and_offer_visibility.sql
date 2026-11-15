@@ -718,15 +718,14 @@ BEGIN
   JOIN public.krim_partner_opportunities po
     ON po.id=q.opportunity_id
    AND po.shipment_id=q.shipment_id
+  JOIN public.krim_shipments s
+    ON s.id=q.shipment_id
+   AND s.customer_organization_id=po.customer_organization_id
   JOIN public.krim_organizations o ON o.id=q.partner_organization_id
   WHERE q.shipment_id=ANY(p_shipment_ids)
     AND q.status IN ('submitted','under_review','shortlisted','accepted')
     AND (q.status='accepted' OR po.status='open')
-    AND EXISTS (
-      SELECT 1 FROM public.krim_shipments s
-      WHERE s.id=q.shipment_id
-        AND private.krim_has_organization_access(v_user_id,s.customer_organization_id)
-    )
+    AND private.krim_has_organization_access(v_user_id,s.customer_organization_id)
   ORDER BY q.submitted_at DESC NULLS LAST,q.id DESC;
 END;
 $function$;
