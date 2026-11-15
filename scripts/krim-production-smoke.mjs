@@ -80,7 +80,7 @@ const failures = [];
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
 // new collisions in the current release stream from adding to that risk.
 const currentReleaseMigrationFiles = readdirSync("supabase/migrations")
-  .filter((file) => /^20261115\\d{6}_.+\\.sql$/.test(file));
+  .filter((file) => file.startsWith("20261115") && file.endsWith(".sql") && [...file.slice(0, 14)].length === 14 && [...file.slice(0, 14)].every((char) => char >= "0" && char <= "9"));
 const currentReleaseMigrationVersions = new Map();
 for (const file of currentReleaseMigrationFiles) {
   const version = file.slice(0, 14);
