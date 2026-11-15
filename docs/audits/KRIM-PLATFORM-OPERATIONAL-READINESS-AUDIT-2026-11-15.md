@@ -46,6 +46,9 @@ The current production snapshot shows no verified partner organization, no activ
 - Both the native app source gate and the server-side Edge Function gate currently keep GPS collection disabled pending approval. The server requires `KRIM_GPS_TRACKING_ENABLED=true` and the exact approved legal version `2026-11-15-v1`. **Do not set these flags yet.**
 - Production has 0 driver assignments, 0 tracking sessions and 0 GPS events, so a real driver-to-customer GPS test is not possible yet.
 
+### Retention and consent evidence check
+The production schema includes `krim_data_retention_policies`, `krim_customer_consents`, `krim_user_consent_events` and `krim_driver_tracking_sessions`, but the retention-policy table currently has **0 rows**, customer-consent records are **0**, user-consent events are **0**, and driver tracking sessions are **0**. The only consent-like GPS record structure currently available is the per-trip tracking session with a consent version and timestamps. No public/private SQL function with a retention, erasure or purge name was found in the inspected public function catalogue. The presence of a policy table is not an approved retention schedule or an automated deletion control.
+
 ### Required before GPS launch
 1. Approve the exact purpose, who can view a driver's location, the trip-only scope, consent language and how consent can be withdrawn.
 2. Approve a retention period and deletion/erasure workflow, including exceptions for disputes, claims, tax/legal holds and incident investigations.
