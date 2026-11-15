@@ -1,9 +1,9 @@
 import React,{useCallback,useEffect,useMemo,useRef,useState} from "react";
-import {ActivityIndicator,Alert,Image,Platform,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
+import {ActivityIndicator,Alert,AppState,Image,Platform,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type {Session} from "@supabase/supabase-js";
 import {supabase} from "./lib/supabase";
-import {DRIVER_GPS_LAUNCH_ENABLED,DRIVER_GPS_CONSENT_NOTICE_APPROVED,DRIVER_GPS_CONSENT_NOTICE_TEXT,DRIVER_GPS_CONSENT_NOTICE_VERSION,getTripTrackingStatus,startTripTracking,stopTripTracking} from "./lib/locationTracking";
+import {DRIVER_GPS_LAUNCH_ENABLED,DRIVER_GPS_CONSENT_NOTICE_APPROVED,DRIVER_GPS_CONSENT_NOTICE_TEXT,DRIVER_GPS_CONSENT_NOTICE_VERSION,getTripTrackingStatus,queueTrackingStop,startTripTracking,stopTripTracking} from "./lib/locationTracking";
 import {loadDriverProfiles,loadDriverAssignments,loadDriverTripEvents,loadDriverDeliveryEvidence,type DriverProfile,type DriverAssignment,type DriverTripEvent,type DriverDeliveryEvidence} from "./lib/driverRepository";
 type Tab="Today"|"Tasks"|"Proof"|"Safety"|"Profile";
 const tabs:Tab[]=["Today","Tasks","Proof","Safety","Profile"],navy="#071A35",blue="#2366D9",teal="#078B83",muted="#687A90",line="#E0E7F0";
@@ -11,11 +11,24 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
  const [tab,setTab]=useState<Tab>("Today"),[profiles,setProfiles]=useState<DriverProfile[]>([]),[assignments,setAssignments]=useState<DriverAssignment[]>([]),[events,setEvents]=useState<DriverTripEvent[]>([]),[loading,setLoading]=useState(true),[refreshing,setRefreshing]=useState(false),[error,setError]=useState(""),[selectedId,setSelectedId]=useState<string|null>(null);
  const [notice,setNotice]=useState(""),[actionBusy,setActionBusy]=useState(false),[exceptionNotes,setExceptionNotes]=useState("");
  const [evidence,setEvidence]=useState<DriverDeliveryEvidence[]>([]),[recipientName,setRecipientName]=useState(""),[recipientRole,setRecipientRole]=useState("");
- const [trackingMode,setTrackingMode]=useState<"off"|"background"|"foreground">("off"),[trackingAssignmentId,setTrackingAssignmentId]=useState<string|null>(null),[trackingBusy,setTrackingBusy]=useState(false);
+ const [trackingMode,setTrackingMode]=useState<"off"|"background"|"foreground">("off"),[trackingAssignmentId,setTrackingAssignmentId]=useState<string|null>(null),[trackingBusy,setTrackingBusy]=useState(false),[trackingStopPending,setTrackingStopPending]=useState(false);
  const refreshRequest=useRef(0);
  const refresh=useCallback(async()=>{if(!supabase)return;const requestId=++refreshRequest.current;setRefreshing(true);setError("");try{const [p,a]=await Promise.all([loadDriverProfiles(supabase,session.user.id),loadDriverAssignments(supabase,session.user.id)]);const [tripEvents,deliveryEvidence]=await Promise.all([loadDriverTripEvents(supabase,a.map(x=>x.id)),loadDriverDeliveryEvidence(supabase,session.user.id,a.map(x=>x.id))]);if(requestId!==refreshRequest.current)return;setProfiles(p);setAssignments(a);setEvents(tripEvents);setEvidence(deliveryEvidence);setSelectedId(current=>a.some(x=>x.id===current)?current:(a[0]?.id??null));}catch{if(requestId===refreshRequest.current)setError("Driver records could not be loaded. Please refresh and try again.");}finally{if(requestId===refreshRequest.current){setRefreshing(false);setLoading(false);}}},[session.user.id]);
  useEffect(()=>{void refresh();},[refresh]);
- useEffect(()=>{void getTripTrackingStatus().then(state=>{setTrackingMode(state.mode);setTrackingAssignmentId(state.assignmentId);}).catch(()=>{});},[]);
+ useEffect(()=>{
+  let mounted=true;
+  const reconcile=async()=>{
+   try{
+    const state=await getTripTrackingStatus();
+    if(!mounted)return;
+    setTrackingMode(state.mode);setTrackingAssignmentId(state.assignmentId);setTrackingStopPending(state.serverStopPending);
+    if(state.serverStopPending)setNotice("Device location collection is stopped. KRIM is waiting to confirm the server-side stop; reconnect and retry before starting another trip.");
+   }catch{}
+  };
+  void reconcile();
+  const subscription=AppState.addEventListener("change",next=>{if(next==="active")void reconcile();});
+  return()=>{mounted=false;subscription.remove();};
+ },[]);
  const runDriverAction=async(rpcName:string,args:Record<string,unknown>,successMessage:string)=>{
   if(!supabase||actionBusy)return;
   setActionBusy(true);setError("");setNotice("");
@@ -42,26 +55,29 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
      const {data,error:sessionError}=await client.functions.invoke("krim-driver-tracking-session",{body:{action:"start",assignment_id:selected.id,consent_version:DRIVER_GPS_CONSENT_NOTICE_VERSION,platform:Platform.OS}});
      if(sessionError||!data?.session_id)throw sessionError||new Error("KRIM could not record your tracking consent.");
      const mode=await startTripTracking(selected.id,String(data.session_id));
-     setTrackingMode(mode);setTrackingAssignmentId(selected.id);
+     setTrackingMode(mode);setTrackingAssignmentId(selected.id);setTrackingStopPending(false);
      setNotice(mode==="background"?"Trip location sharing is active in the background. The device shows an ongoing location notification.":"Foreground-only location sharing is active. Keep KRIM Driver open; background permission was not granted.");
     }catch(e){
-     try{await client.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});}catch{}
-     setTrackingMode("off");setTrackingAssignmentId(null);
+     let serverStopConfirmed=false;
+     try{const stopped=await client.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});serverStopConfirmed=!stopped.error;}catch{}
+     setTrackingMode("off");
+     if(serverStopConfirmed){setTrackingAssignmentId(null);setTrackingStopPending(false);}
+     else{await queueTrackingStop(selected.id);setTrackingAssignmentId(selected.id);setTrackingStopPending(true);}
      setError(e instanceof Error?e.message:"Trip location sharing could not be started. Check permissions and retry.");
     }finally{setTrackingBusy(false);}
    })()}]);
  };
  const stopLocationSharing=async()=>{
   if(trackingBusy)return;setTrackingBusy(true);
-  try{await stopTripTracking();setTrackingMode("off");setTrackingAssignmentId(null);setNotice("Location sharing stopped. KRIM will receive no further GPS updates from this device for the trip.");}
-  catch(e){setError("Device tracking has stopped, but KRIM could not confirm the server-side stop because of a connection problem. Reconnect and retry.");}
+  try{await stopTripTracking();setTrackingMode("off");setTrackingAssignmentId(null);setTrackingStopPending(false);setNotice("Location sharing stopped. KRIM will receive no further GPS updates from this device for the trip.");}
+  catch(e){setTrackingMode("off");setTrackingStopPending(true);setError("Device location collection has stopped, but KRIM could not confirm the server-side stop. Your app will retain the pending stop and retry when you reconnect.");}
   finally{setTrackingBusy(false);}
  };
  useEffect(()=>{
   if(!trackingAssignmentId)return;
   const tracked=assignments.find(a=>a.id===trackingAssignmentId);
   if(tracked&&tracked.status.toLowerCase()!=="in_transit"){
-   void stopTripTracking().catch(()=>{}).finally(()=>{setTrackingMode("off");setTrackingAssignmentId(null);setNotice("Trip status changed. Location sharing has been stopped.");});
+   void stopTripTracking().then(()=>{setTrackingMode("off");setTrackingAssignmentId(null);setTrackingStopPending(false);setNotice("Trip status changed. Location sharing has been stopped.");}).catch(()=>{setTrackingMode("off");setTrackingStopPending(true);setNotice("Trip status changed and device collection stopped. Server-side stop confirmation is pending; reconnect and retry.");});
   }
  },[assignments,trackingAssignmentId]);
  const selectedEvents=useMemo(()=>events.filter(e=>e.assignment_id===selectedId),[events,selectedId]);
@@ -112,7 +128,7 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   await runDriverAction("krim_driver_submit_delivery_pod",{p_driver_assignment_id:selected.id,p_received_by_name:recipientName.trim(),p_received_by_role:recipientRole.trim()||null,p_signature_reference:null},"Proof of delivery submitted. Shipment completion remains pending independent KRIM verification.");
  };
  return <View style={s.safe}><View style={s.top}><Image source={require("../assets/krim-master-logo.png")} style={s.workspaceLogo} resizeMode="contain" accessibilityLabel="KRIM Logistics" /><Text style={s.secure}>● SECURE SESSION</Text></View><ScrollView contentContainerStyle={s.content}>
- <View style={s.banner}><Text style={s.bannerText}>LIVE DATA · ASSIGNMENT ACCEPTANCE & TRIP MILESTONES</Text></View>{!!notice&&<View style={s.success}><Text style={s.successText}>{notice}</Text></View>}{!!error&&<View style={s.error}><Text style={s.errorText}>{error}</Text></View>}{actionBusy&&<View style={s.busy}><ActivityIndicator color={blue}/><Text style={s.muted}>Updating secure trip record…</Text></View>}
+ <View style={s.banner}><Text style={s.bannerText}>LIVE DATA · ASSIGNMENT ACCEPTANCE & TRIP MILESTONES</Text></View>{!!notice&&<View style={s.success}><Text style={s.successText}>{notice}</Text></View>}{trackingStopPending&&<View style={s.error}><Text style={s.errorText}>Location collection is OFF on this device, but the server has not confirmed the stop. Do not start another trip until this is resolved.</Text><Action title={trackingBusy?"Retrying…":"Retry server stop"} secondary disabled={trackingBusy} onPress={()=>void stopLocationSharing()}/></View>}{!!error&&<View style={s.error}><Text style={s.errorText}>{error}</Text></View>}{actionBusy&&<View style={s.busy}><ActivityIndicator color={blue}/><Text style={s.muted}>Updating secure trip record…</Text></View>}
  {tab==="Today"&&<><Header kicker="DRIVER CONTROL CENTRE" title={profile?.full_name?("Hello, "+profile.full_name.split(" ")[0]+"."):"Your field workspace"} sub="Your assigned work and safety readiness, sourced from KRIM."/><View style={s.metrics}><Metric label="Active assignments" value={String(active.length)} detail="Your authorized records"/><Metric label="Trip events" value={String(events.length)} detail="Recorded by KRIM"/></View><View style={s.panel}><Text style={s.panelTitle}>Driver verification</Text><Status label="Identity status" value={profile?.verification_status||"Profile not found"} good={!!profileVerified}/><Text style={s.tiny}>{profile?.company_name||"Partner organization not linked in profile"}</Text>{!profile&&<Text style={s.muted}>No driver profile is visible for this account. Contact your authorized partner administrator.</Text>}</View><View style={s.panel}><Text style={s.panelTitle}>Active assignments</Text>{loading||refreshing?<ActivityIndicator color={blue}/>:active.slice(0,3).length?active.slice(0,3).map(a=><AssignmentRow key={a.id} item={a} onPress={()=>{setSelectedId(a.id);setTab("Tasks");}}/>):<Text style={s.muted}>No active assignments are currently visible for your account.</Text>}<Action title="View all tasks" onPress={()=>setTab("Tasks")} secondary/></View><View style={s.panel}><Text style={s.panelTitle}>Safety reminder</Text><Bullet text="Never interact with the app while driving; stop in a safe place first."/><Bullet text="Follow dispatcher instructions and report route or cargo discrepancies."/><Bullet text="GPS collection is currently disabled by KRIM’s legal launch gate. No location is collected until the approved notice, retention period, deletion process and legal-hold controls are published."/></View></>}
  {tab==="Tasks"&&<><Header kicker="AUTHORIZED DISPATCH" title="My assignments" sub="Only your own driver records are displayed under KRIM row-level security."/>{loading?<ActivityIndicator color={blue}/>:assignments.length?assignments.map(a=><AssignmentRow key={a.id} item={a} onPress={()=>setSelectedId(a.id)} selected={selectedId===a.id}/>):<Empty title="No assignments available" body="Your dispatcher must create and authorize an assignment for your driver account before a job appears here."/>}{selected&&<View style={s.panel}><Text style={s.kicker}>SELECTED ASSIGNMENT</Text><Text style={s.panelTitle}>{selected.assignment_number}</Text><Status label="Assignment status" value={selected.status} good={["accepted","in_progress","active","in_transit"].includes(selected.status.toLowerCase())}/><Text style={s.section}>Pickup</Text><Text style={s.body}>{selected.pickup_location}</Text><Text style={s.tiny}>{selected.scheduled_pickup_at?new Date(selected.scheduled_pickup_at).toLocaleString():"Schedule not specified"}</Text><Text style={s.section}>Delivery</Text><Text style={s.body}>{selected.delivery_location}</Text><Text style={s.tiny}>{selected.scheduled_delivery_at?new Date(selected.scheduled_delivery_at).toLocaleString():"Schedule not specified"}</Text>{selected.status==="assigned"&&<Action title="Accept assignment" disabled={actionBusy} onPress={()=>Alert.alert("Accept this assignment?","Confirm only if you are the assigned driver and are ready to take responsibility for this trip.",[{text:"Cancel",style:"cancel"},{text:"Accept assignment",onPress:()=>void runDriverAction("krim_driver_accept_assignment",{p_assignment_id:selected.id},"Assignment accepted. Complete pickup readiness before departure.")}])}/>}
 {selected.status==="accepted"&&<Action title="Confirm pickup" disabled={actionBusy} onPress={()=>void runDriverAction("krim_driver_record_trip_event",{p_assignment_id:selected.id,p_event_type:"pickup",p_notes:"Pickup confirmed by assigned driver."},"Pickup milestone recorded.")}/>}
