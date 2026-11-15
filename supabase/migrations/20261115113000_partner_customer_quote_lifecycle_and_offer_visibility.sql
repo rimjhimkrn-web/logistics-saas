@@ -731,8 +731,8 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.krim_customer_list_partner_quotes(p_shipment_id bigint) FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.krim_customer_list_partner_quotes(p_shipment_id bigint) TO authenticated;
+REVOKE ALL ON FUNCTION public.krim_customer_list_partner_quotes(bigint[]) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.krim_customer_list_partner_quotes(bigint[]) TO authenticated;
 REVOKE ALL ON FUNCTION public.krim_respond_to_partner_assignment(p_assignment_id bigint, p_accept boolean, p_reason text) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.krim_respond_to_partner_assignment(p_assignment_id bigint, p_accept boolean, p_reason text) TO authenticated, service_role;
 REVOKE ALL ON FUNCTION public.krim_accept_global_quote(p_quote_id bigint) FROM PUBLIC, anon, authenticated, service_role;
