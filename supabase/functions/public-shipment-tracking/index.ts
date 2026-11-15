@@ -47,14 +47,32 @@ Deno.serve(async (req: Request) => {
       db.from("krim_tracking_events").select("event_type,event_time,location_id")
         .eq("shipment_id", shipment.id).neq("event_type", "gps_position")
         .order("event_time", { ascending: false }).limit(10),
-      db.from("krim_driver_tracking_sessions").select("id,started_at")
+      db.from("krim_driver_tracking_sessions").select("id,started_at,partner_assignment_id,driver_assignment_id")
         .eq("shipment_id", shipment.id).eq("status", "active")
         .order("started_at", { ascending: false }).limit(20),
     ]);
     if (sessionsError) console.error("Active GPS consent sessions unavailable", sessionsError.message);
     const events = eventRows || [];
-    const gpsCandidates = sessionsError || !activeSessions?.length ? [] : await Promise.all(
-      activeSessions.map(async (session) => {
+    const terminalShipment = ["delivered", "cancelled", "closed", "completed"].includes(String(shipment.status || "").toLowerCase());
+    const sessionCandidates = sessionsError || terminalShipment ? [] : (activeSessions || []);
+    const authorizedSessions = (await Promise.all(sessionCandidates.map(async (session) => {
+      if (!session.partner_assignment_id || !session.driver_assignment_id) return null;
+      const [partnerResult, driverResult] = await Promise.all([
+        db.from("krim_shipment_partner_assignments").select("id,status")
+          .eq("id", session.partner_assignment_id).eq("shipment_id", shipment.id).maybeSingle(),
+        db.from("krim_driver_assignments").select("id,status")
+          .eq("id", session.driver_assignment_id).eq("shipment_id", shipment.id).maybeSingle(),
+      ]);
+      if (partnerResult.error || driverResult.error) {
+        console.error("Tracking assignment authorization lookup failed", partnerResult.error?.message || driverResult.error?.message);
+        return null;
+      }
+      const partnerActive = partnerResult.data && ["accepted", "active", "in_progress", "assigned"].includes(String(partnerResult.data.status || "").toLowerCase());
+      const driverInTransit = driverResult.data && String(driverResult.data.status || "").toLowerCase() === "in_transit";
+      return partnerActive && driverInTransit ? session : null;
+    }))).filter((session): session is NonNullable<typeof session> => session !== null);
+    const gpsCandidates = authorizedSessions.length === 0 ? [] : await Promise.all(
+      authorizedSessions.map(async (session) => {
         const { data, error } = await db.from("krim_tracking_events")
           .select("event_time,latitude,longitude,metadata")
           .eq("shipment_id", shipment.id).eq("source_type", "gps")
@@ -71,9 +89,10 @@ Deno.serve(async (req: Request) => {
       (a, b) => new Date(b.event_time).getTime() - new Date(a.event_time).getTime()
     )[0] || null;
     const gpsAgeMs = gpsRow ? Date.now() - new Date(gpsRow.event_time).getTime() : null;
-    const sessionAgeMs = activeSessions?.[0] ? Date.now() - new Date(activeSessions[0].started_at).getTime() : null;
+    const sessionAgeMs = authorizedSessions[0] ? Date.now() - new Date(authorizedSessions[0].started_at).getTime() : null;
     const gpsSharingStatus = sessionsError ? "unavailable"
-      : !activeSessions?.length ? "inactive"
+      : terminalShipment ? "completed"
+      : !authorizedSessions.length ? "inactive"
       : gpsAgeMs === null ? (sessionAgeMs !== null && sessionAgeMs <= 120000 ? "starting" : "stale")
       : gpsAgeMs <= 120000 ? "active"
       : gpsAgeMs <= 900000 ? "delayed" : "stale";
@@ -103,7 +122,7 @@ Deno.serve(async (req: Request) => {
       estimated_delivery_at: shipment.estimated_delivery_at,
       delivered_at: shipment.actual_delivery_at,
       gps_sharing_status: gpsSharingStatus,
-      latest_position: gpsRow ? {
+      latest_position: !terminalShipment && authorizedSessions.length > 0 && gpsRow ? {
         latitude: Number(gpsRow.latitude),
         longitude: Number(gpsRow.longitude),
         recorded_at: gpsRow.event_time,
