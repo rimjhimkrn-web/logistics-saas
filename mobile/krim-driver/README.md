@@ -7,7 +7,7 @@ Expo SDK 54 / React Native driver workspace connected to the KRIM Supabase produ
 - Driver profile, assignment, trip-event and private proof-of-delivery workflows.
 - Assignment-scoped GPS sharing for verified drivers, only after the server confirms an in-transit assignment.
 - Explicit in-app consent before location permissions are requested.
-- Android background location through the OS location foreground service and its persistent notification when the driver grants both foreground and background permission.
+- Android background-location implementation through the OS location foreground service and persistent notification when permission is granted; currently paused by a source-level launch gate pending retention, deletion and legal approval.
 - Foreground-only fallback when background permission is not granted.
 - GPS uploads require an authenticated session, verified driver profile, active organization membership, active partner shipment assignment and an active server-recorded consent session.
 - Driver stop control records a server-side stop event; assignment state changes away from in-transit stop local tracking on the next refresh.
@@ -15,7 +15,7 @@ Expo SDK 54 / React Native driver workspace connected to the KRIM Supabase produ
 - No service-role key or production secret is bundled in the app.
 
 ## Location privacy and safety
-Tracking is OFF by default. It is started only by the assigned driver for a verified, in-transit shipment after a clear consent notice. The app requests foreground permission first and then background permission. If background access is declined, the app offers foreground-only tracking while the app remains open. Android displays an ongoing location-sharing foreground-service notification when background tracking is active.
+Tracking is OFF by default and currently held behind both app-side and server-side launch gates. It must not be enabled for commercial shipments until KRIM approves a category-specific retention schedule, deletion/legal-hold process and final location notice. When enabled, it is started only by the assigned driver for a verified, in-transit shipment after a clear consent notice. The app requests foreground permission first and then background permission. If background access is declined, the app offers foreground-only tracking while the app remains open. Android displays an ongoing location-sharing foreground-service notification when background tracking is active.
 
 Drivers can stop sharing at any time. KRIM must not use this feature for employee surveillance outside assigned work, emergency response, or safety-critical navigation. Device shutdown, force-stop, battery restrictions, poor GPS signal, offline periods and OS/vendor behavior can interrupt location updates. Customer views must show the server timestamp and freshness state; never imply a live position when data is stale.
 
