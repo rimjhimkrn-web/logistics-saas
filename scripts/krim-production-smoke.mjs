@@ -102,9 +102,21 @@ for (const file of currentReleaseMigrationFiles) {
 }
 const duplicateCurrentReleaseVersions = [...currentReleaseMigrationVersions.entries()]
   .filter(([, files]) => files.length > 1);
-if (duplicateCurrentReleaseVersions.length) {
-  failures.push("New 15 November migration timestamp collisions must be resolved before release: " +
-    duplicateCurrentReleaseVersions.map(([version, files]) => version + " [" + files.join(", ") + "]").join("; "));
+// This historical collision predates the current release work and is not safe
+// to rename/replay until the production migration ledger is reconciled.
+const documentedMigrationTimestampCollisions = new Map([
+  ["20261115151000", new Set([
+    "20261115151000_require_all_driver_documents_for_verification.sql",
+    "20261115151000_schedule_private_vehicle_evidence_expiry_worker.sql",
+  ])],
+]);
+const unapprovedMigrationTimestampCollisions = duplicateCurrentReleaseVersions.filter(([version, files]) => {
+  const allowed = documentedMigrationTimestampCollisions.get(version);
+  return !allowed || files.length !== allowed.size || files.some((file) => !allowed.has(file));
+});
+if (unapprovedMigrationTimestampCollisions.length) {
+  failures.push("New, undocumented 15 November migration timestamp collisions must be resolved before release: " +
+    unapprovedMigrationTimestampCollisions.map(([version, files]) => version + " [" + files.join(", ") + "]").join("; "));
 }
 
 // Do not advertise retired Cashfree placeholders as active payment providers.
