@@ -31,19 +31,20 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
  const profileVerified=profile?.verification_status.toLowerCase()==="verified"||profile?.verification_status.toLowerCase()==="approved";
  const active=assignments.filter(a=>!["delivered","cancelled","completed"].includes(a.status.toLowerCase()));
  const startLocationSharing=()=>{
-  if(!selected||selected.status!=="in_transit"||!profileVerified||!supabase||trackingBusy)return;
+  const client=supabase;
+  if(!selected||selected.status!=="in_transit"||!profileVerified||!client||trackingBusy)return;
   Alert.alert("Share location for this trip?",
    "KRIM Driver will share this device's location with KRIM operations and authorized shipment viewers only for this assigned trip. Sharing may continue while the app is in the background and an ongoing Android notification will be shown. It stops when you stop sharing, the trip leaves in-transit status, or the app session ends. You can decline or stop sharing at any time. Never use the phone while driving.",
    [{text:"Not now",style:"cancel"},{text:"Agree and continue",onPress:()=>void (async()=>{
     setTrackingBusy(true);setError("");setNotice("");
     try{
-     const {data,error:sessionError}=await supabase.functions.invoke("krim-driver-tracking-session",{body:{action:"start",assignment_id:selected.id,consent_version:"2026-11-15-v1",platform:Platform.OS}});
+     const {data,error:sessionError}=await client.functions.invoke("krim-driver-tracking-session",{body:{action:"start",assignment_id:selected.id,consent_version:"2026-11-15-v1",platform:Platform.OS}});
      if(sessionError||!data?.session_id)throw sessionError||new Error("KRIM could not record your tracking consent.");
      const mode=await startTripTracking(selected.id,String(data.session_id));
      setTrackingMode(mode);setTrackingAssignmentId(selected.id);
      setNotice(mode==="background"?"Trip location sharing is active in the background. The device shows an ongoing location notification.":"Foreground-only location sharing is active. Keep KRIM Driver open; background permission was not granted.");
     }catch(e){
-     try{await supabase.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});}catch{}
+     try{await client.functions.invoke("krim-driver-tracking-session",{body:{action:"stop",assignment_id:selected.id}});}catch{}
      setTrackingMode("off");setTrackingAssignmentId(null);
      setError(e instanceof Error?e.message:"Trip location sharing could not be started. Check permissions and retry.");
     }finally{setTrackingBusy(false);}
