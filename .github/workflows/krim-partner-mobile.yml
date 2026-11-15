@@ -14,9 +14,6 @@ on:
       - 'mobile/krim-driver/**'
       - '.github/workflows/krim-partner-mobile.yml'
   workflow_dispatch:
-permissions:
-  contents: write
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -32,14 +29,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - name: Preserve generated dependency lockfile for reproducible CI
-        uses: actions/upload-artifact@v4
-        with:
-          name: krim-${{ matrix.app }}-package-lock
-          path: mobile/${{ matrix.app }}/package-lock.json
-          if-no-files-found: error
-          retention-days: 7
+      - run: npm ci --no-audit --no-fund
       - name: Stage official KRIM master logo inside app bundle
         run: npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
       - name: Generate Expo icon PNG assets
@@ -81,7 +71,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Install driver dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Stage KRIM brand assets
         run: |
           npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
@@ -112,42 +102,3 @@ jobs:
           path: mobile/krim-driver/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
-
-  commit-lockfiles:
-    if: github.event_name != 'pull_request'
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download all generated app lockfiles
-        uses: actions/download-artifact@v4
-        with:
-          pattern: krim-*-package-lock
-          path: package-locks
-      - name: Commit reproducible dependency lockfiles
-        run: |
-          set -euo pipefail
-          cp package-locks/krim-krim-driver-package-lock/package-lock.json mobile/krim-driver/package-lock.json
-          cp package-locks/krim-krim-customer-package-lock/package-lock.json mobile/krim-customer/package-lock.json
-          cp package-locks/krim-krim-partner-package-lock/package-lock.json mobile/krim-partner/package-lock.json
-          git fetch origin main
-          git rebase origin/main
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mobile/krim-driver/package-lock.json mobile/krim-customer/package-lock.json mobile/krim-partner/package-lock.json
-          if git diff --cached --quiet; then
-            echo "Lockfiles are already current."
-            exit 0
-          fi
-          git commit -m "Add reproducible lockfiles for KRIM mobile apps"
-          for attempt in 1 2 3 4 5 6 7 8; do
-            git fetch origin main
-            git rebase origin/main
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            echo "Concurrent main-branch update detected; retrying lockfile commit ($attempt/8)."
-            sleep 3
-          done
-          echo "Could not push lockfiles after repeated concurrent updates."
-          exit 1
