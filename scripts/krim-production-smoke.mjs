@@ -1444,6 +1444,33 @@ const routePlanningUi = existsSync(routePlanningUiPath) ? readFileSync(routePlan
 for (const token of ['from("krim_shipment_leg_plans")','from("krim_shipment_leg_plan_items")','id="planRows"','id="planState"']) {
   if (!routePlanningUi.includes(token)) failures.push("Operations route-planning plan register integration is missing: " + token);
 }
+// Route planning page must expose the complete guarded draft -> evaluate -> activate journey.
+for (const token of [
+  'id="routePlanForm"',
+  'id="plannerShipment"',
+  'id="legBuilder"',
+  'id="addPlanLeg"',
+  'id="createPlanBtn"',
+  'id="evaluatePlanBtn"',
+  'id="activatePlanBtn"',
+  'id="newPlanBtn"',
+  'c.rpc("krim_create_shipment_leg_plan"',
+  'c.rpc("krim_evaluate_shipment_leg_plan"',
+  'c.rpc("krim_activate_shipment_leg_plan"',
+  'if(!confirm("Activate this route plan?',
+  'shipment.update',
+  'No plan can be created.',
+  'does not assign partners, reserve capacity or dispatch cargo',
+]) {
+  if (!routePlanningUi.includes(token)) failures.push("Route-planning lifecycle UI safeguard is missing: " + token);
+}
+const routePlanningScripts = [...routePlanningUi.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+  .map(match => match[1]).filter(script => script.trim());
+for (const script of routePlanningScripts) {
+  try { new Function(script); }
+  catch (error) { failures.push("Route-planning inline script has a syntax error: " + error.message); }
+}
+
 if (routePlanningUi.includes("rows.map(x=>x=>")) {
   failures.push("Operations route-planning route register contains a broken nested row renderer.");
 }
