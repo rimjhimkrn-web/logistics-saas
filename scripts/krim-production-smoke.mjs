@@ -536,10 +536,23 @@ const allHtmlFiles = listHtmlFiles(".").filter((p) =>
 // Legacy quote-award RPCs remain a backend retirement blocker. Keep every site
 // page away from these authenticated legacy entry points while the migration
 // history is reconciled and the grants are safely retired.
-const legacyAwardRpcCallers = listHtmlFiles(".").filter((file) => {
-  const source = readFileSync(file, "utf8");
-  return /\.rpc\(\s*["']krim_award_partner_quote(?:_for_checkout)?["']/i.test(source);
-});
+function listClientSourceFiles(root) {
+  if (!existsSync(root)) return [];
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const file = join(root, entry.name);
+    if (entry.isDirectory()) {
+      if (["node_modules", ".expo", "android", "ios", "dist", "build"].includes(entry.name)) return [];
+      return listClientSourceFiles(file);
+    }
+    return /\.(?:html|js|jsx|ts|tsx|mjs|cjs)$/i.test(entry.name) ? [file] : [];
+  });
+}
+const legacyAwardRpcCallers = ["public", "app", "mobile"]
+  .flatMap((root) => listClientSourceFiles(root))
+  .filter((file) => {
+    const source = readFileSync(file, "utf8");
+    return /\.rpc\(\s*["']krim_award_partner_quote(?:_for_checkout)?["']/i.test(source);
+  });
 if (legacyAwardRpcCallers.length) {
   failures.push("Legacy partner-award RPCs must not be called from UI pages: " + legacyAwardRpcCallers.join(", "));
 }
