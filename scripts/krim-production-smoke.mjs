@@ -38,6 +38,7 @@ const required = [
   "supabase/migrations/20261115104500_remove_redundant_customer_quote_list_wrapper.sql",
   "supabase/migrations/20261115105000_preserve_active_operations_membership_scope.sql",
   "supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql",
+  "supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
@@ -1116,6 +1117,14 @@ if (!/GRANT EXECUTE[\\s\\S]*private\\.krim_partner_capability_covers_shipment[\\
 }
 if (/TO (PUBLIC|anon)/i.test(partnerPolicyGrantMigration)) {
   failures.push("Partner RLS capability helper must not be granted to anonymous users or PUBLIC.");
+}
+const provisioningHardeningMigration = existsSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql")
+  ? readFileSync("supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql", "utf8") : "";
+if ((provisioningHardeningMigration.match(/SET search_path TO ''/g) || []).length !== 2) {
+  failures.push("Customer and partner organization provisioning must both use an empty SECURITY DEFINER search path.");
+}
+if (!provisioningHardeningMigration.includes("organization_type_code, o.organization_type")) {
+  failures.push("Partner provisioning must resolve supported partner organization type codes without creating duplicates.");
 }
 for (const token of ["partner_account_mode = 'registered_business'", "private.krim_partner_compliance_is_current", "private.krim_partner_capability_covers_shipment"]) {
   if (!partnerReadScopeMigration.includes(token)) failures.push("Partner opportunity read-scope migration is missing the current eligibility gate: " + token);
