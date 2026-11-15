@@ -34,6 +34,12 @@ export type CustomerQuote = {
   valid_until: string;
   status: string;
   created_at: string;
+  partner_quote_id: number | null;
+  partner_name: string | null;
+  partner_legal_name: string | null;
+  partner_assignment_status: string | null;
+  partner_eligible_now: boolean;
+  shipment_status: string | null;
 };
 
 const ORGANIZATION_FIELDS =
@@ -41,7 +47,7 @@ const ORGANIZATION_FIELDS =
 const SHIPMENT_FIELDS =
   "id,shipment_number,customer_organization_id,status,origin_place_label,destination_place_label,goods_description,total_weight_kg,requested_transport_mode,estimated_delivery_at,actual_delivery_at,created_at";
 const QUOTE_FIELDS =
-  "id,shipment_id,amount,currency_code,valid_until,status,created_at";
+  "id,shipment_id,amount,currency_code,valid_until,status,created_at,partner_quote_id";
 
 export async function loadCustomerOrganizations(
   client: SupabaseClient,
@@ -104,7 +110,57 @@ export async function loadCustomerQuotes(
     .limit(100);
 
   if (error) throw error;
-  return (data ?? []) as CustomerQuote[];
+  const quotes = data ?? [];
+  const shipmentIds = [...new Set(quotes.filter((q) => q.partner_quote_id != null).map((q) => Number(q.shipment_id)).filter(Number.isSafeInteger))];
+  if (!shipmentIds.length) {
+    return quotes.map((q) => ({
+      ...q,
+      partner_quote_id: q.partner_quote_id == null ? null : Number(q.partner_quote_id),
+      partner_name: null,
+      partner_legal_name: null,
+      partner_assignment_status: null,
+      partner_eligible_now: false,
+      shipment_status: null,
+    })) as CustomerQuote[];
+  }
+
+  const [offerResults, assignmentResult] = await Promise.all([
+    Promise.all(shipmentIds.map((shipmentId) => client.rpc("krim_customer_list_partner_quotes", { p_shipment_id: shipmentId }))),
+    client.from("krim_shipment_partner_assignments")
+      .select("id,shipment_id,partner_quote_id,status,created_at")
+      .in("shipment_id", shipmentIds)
+      .order("created_at", { ascending: false }),
+  ]);
+  for (const result of offerResults) if (result.error) throw result.error;
+  if (assignmentResult.error) throw assignmentResult.error;
+
+  const offerById = new Map<number, Record<string, unknown>>();
+  for (const result of offerResults) {
+    for (const offer of (result.data ?? []) as Array<Record<string, unknown>>) {
+      offerById.set(Number(offer.id), offer);
+    }
+  }
+  const assignmentByQuoteId = new Map<number, string>();
+  for (const assignment of assignmentResult.data ?? []) {
+    const quoteId = Number(assignment.partner_quote_id);
+    if (Number.isSafeInteger(quoteId) && !assignmentByQuoteId.has(quoteId)) {
+      assignmentByQuoteId.set(quoteId, String(assignment.status ?? ""));
+    }
+  }
+
+  return quotes.map((q) => {
+    const partnerQuoteId = q.partner_quote_id == null ? null : Number(q.partner_quote_id);
+    const offer = partnerQuoteId == null ? undefined : offerById.get(partnerQuoteId);
+    return {
+      ...q,
+      partner_quote_id: partnerQuoteId,
+      partner_name: typeof offer?.partner_name === "string" ? offer.partner_name : null,
+      partner_legal_name: typeof offer?.partner_legal_name === "string" ? offer.partner_legal_name : null,
+      partner_assignment_status: partnerQuoteId == null ? null : assignmentByQuoteId.get(partnerQuoteId) ?? null,
+      partner_eligible_now: offer?.eligible_now === true,
+      shipment_status: null,
+    };
+  }) as CustomerQuote[];
 }
 
 export async function loadShipmentTracking(
