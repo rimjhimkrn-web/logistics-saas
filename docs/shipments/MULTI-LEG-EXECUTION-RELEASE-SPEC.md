@@ -317,3 +317,26 @@ Required future custody workflow:
 7. Keep shipment-level status distinct from each leg's status; a single leg's handover must not mark the whole shipment delivered or assigned.
 
 Live data currently has zero warehouse tasks/facilities in this audit snapshot, so no real handover can be tested. The existing warehouse task is retained for its current outbound workflow; it is not being re-labelled as full custody transfer.
+
+## Leg-specific partner capability and partial assignment finalisation
+
+Additional database safeguards now prepare the execution layer for separate carriers on separate legs:
+
+- Added internal-only `private.krim_partner_capability_covers_shipment_leg(organization_id, shipment_leg_id)`.
+- The helper evaluates the exact leg's active transport mode, active origin/destination locations and countries, verified partner capability coverage for both endpoints, effective dates, region scope and shipment weight limit.
+- Unknown/non-positive shipment weight fails closed; KRIM must not match a carrier against an unverified cargo weight.
+- Capacity reservation now checks the exact assigned leg rather than the shipment's legacy single-mode/full-route fields.
+- Partner acceptance on an active multi-leg plan checks capability against the exact leg; legacy single-leg assignments retain the existing whole-shipment check.
+- The internal assignment finalizer now activates a multi-leg assignment individually and keeps the shipment in `confirmed` while other plan legs remain uncovered.
+- The shipment can move to `assigned` only when every plan item has a matching leg, an active/completed assignment for the exact partner, and a committed capacity commitment.
+- Each partial leg assignment emits a `shipment.partner_leg_assigned` audit event; whole-shipment assignment is recorded only after the all-legs gate passes.
+
+Verification:
+- All four function-definition safeguards are present in live Postgres.
+- The exact-leg helper uses an empty search path and cannot be executed by anon or authenticated directly.
+- The internal finalizer remains unavailable to anon/authenticated callers.
+- The partner acceptance RPC remains authenticated-only.
+- Health advisor currently reports no findings.
+
+Important limitation:
+The marketplace still lacks leg-scoped opportunity/quote creation and award. Current shipment-wide quote creation/submission/award remains deliberately blocked for active multi-leg plans. Therefore this is not yet a complete multi-leg carrier marketplace and no live leg assignments have been tested. The next work must add leg-scoped commercial sourcing and bind each award to the exact plan item, then verify driver/vehicle readiness and per-leg dispatch without prematurely advancing the shipment.
