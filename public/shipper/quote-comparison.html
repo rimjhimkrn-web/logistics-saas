@@ -119,6 +119,12 @@ client.from('krim_shipment_partner_assignments').select('id,shipment_id,partner_
 ]);
 if(offerResult.error)throw offerResult.error;if(quoteResult.error)throw quoteResult.error;if(assignmentResult.error)throw assignmentResult.error;
 offers=offerResult.data||[];customerQuotes=quoteResult.data||[];assignments=assignmentResult.data||[];
+const shipmentState=await client.from('krim_shipments').select('status').eq('id',shipment.id).eq('customer_organization_id',shipment.customer_organization_id).maybeSingle();
+if(shipmentState.error)throw shipmentState.error;
+if(!shipmentState.data)throw new Error('Shipment state could not be revalidated inside your customer organization.');
+shipment.status=shipmentState.data.status;
+$('shipment-status').textContent=String(shipment.status||'unknown').replace(/_/g,' ');
+$('shipment-status').className='pill '+(['confirmed','assigned','dispatched','in_transit','delivered'].includes(String(shipment.status))?'good':'warn');
 }
 async function load(){
 if(!sid||!/^\d+$/.test(sid)){feedback('A valid numeric shipment_id is required. Open this page from your shipment or quote workflow.','error');showEmpty('Shipment reference required','No live shipment or quote data has been loaded.');$('session-label').textContent='Shipment reference missing';return;}
