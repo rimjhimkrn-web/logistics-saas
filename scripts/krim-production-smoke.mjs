@@ -1189,7 +1189,7 @@ for (const token of ['id="licenceExpiry"', "licence_expiry_date:licenceExpiry", 
 if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_with_expiry") || !driverVerificationAdminPage.includes("p.licence_expiry_date")) {
   failures.push("Driver verification queue must display the expiry date to the authorized reviewer.");
 }
-if (!driverProfileGuardMigration.includes("NEW.verification_status := 'pending'") || !driverProfileGuardMigration.includes("OLD.verification_status")) {
+if (!driverProfileGuardMigration.toLowerCase().includes("new.verification_status := 'pending'") || !driverProfileGuardMigration.toLowerCase().includes("old.verification_status")) {
   failures.push("Driver profile guard must prevent self-approval and reset verification after licence changes.");
 }
 if (!driverProfileGuardConsolidationMigration.includes("new.licence_expiry_date is distinct from old.licence_expiry_date") || !driverProfileGuardConsolidationMigration.includes("drop trigger if exists trg_krim_guard_driver_profile_verification_updates")) {
