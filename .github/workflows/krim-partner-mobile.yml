@@ -14,6 +14,9 @@ on:
       - 'mobile/krim-driver/**'
       - '.github/workflows/krim-partner-mobile.yml'
   workflow_dispatch:
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -52,3 +55,30 @@ jobs:
         env:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
+
+  commit-lockfiles:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all generated app lockfiles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: krim-*-package-lock
+          path: package-locks
+      - name: Commit reproducible dependency lockfiles
+        run: |
+          set -euo pipefail
+          cp package-locks/krim-krim-driver-package-lock/package-lock.json mobile/krim-driver/package-lock.json
+          cp package-locks/krim-krim-customer-package-lock/package-lock.json mobile/krim-customer/package-lock.json
+          cp package-locks/krim-krim-partner-package-lock/package-lock.json mobile/krim-partner/package-lock.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile/krim-driver/package-lock.json mobile/krim-customer/package-lock.json mobile/krim-partner/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lockfiles are already current."
+            exit 0
+          fi
+          git commit -m "Add reproducible lockfiles for KRIM mobile apps"
+          git push
