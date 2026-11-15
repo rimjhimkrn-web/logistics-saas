@@ -32,6 +32,11 @@ const required = [
   "public/shipper/coverage-review.html",
   "app/customer/index.html",
   "platform/krim-supabase.js",
+  "mobile/krim-customer/src/lib/customerRepository.ts",
+  "supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql",
+  "supabase/migrations/20261115103000_customer_multi_shipment_partner_quote_list.sql",
+  "supabase/migrations/20261115104500_remove_redundant_customer_quote_list_wrapper.sql",
+  "supabase/migrations/20261115105000_preserve_active_operations_membership_scope.sql",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
@@ -1094,6 +1099,18 @@ for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_
 // These checks ensure all three mobile clients call the secured workflow contracts;
 // they do not simulate authenticated users or claim a live shipment was executed.
 const customerMobile = existsSync("mobile/krim-customer/src/CustomerWorkspace.tsx") ? readFileSync("mobile/krim-customer/src/CustomerWorkspace.tsx", "utf8") : "";
+const customerRepository = existsSync("mobile/krim-customer/src/lib/customerRepository.ts") ? readFileSync("mobile/krim-customer/src/lib/customerRepository.ts", "utf8") : "";
+if (!customerRepository.includes('client.rpc("krim_customer_list_partner_quotes", { p_shipment_ids: shipmentIds })')) {
+  failures.push("Customer mobile quote enrichment must use the canonical multi-shipment RPC argument contract.");
+}
+if (customerRepository.includes("krim_customer_list_partner_quotes_multi")) {
+  failures.push("Customer mobile must not introduce a duplicate quote-list RPC wrapper.");
+}
+const partnerReadScopeMigration = existsSync("supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql")
+  ? readFileSync("supabase/migrations/20261115101500_tighten_partner_opportunity_and_shipment_read_scope.sql", "utf8") : "";
+for (const token of ["partner_account_mode = 'registered_business'", "private.krim_partner_compliance_is_current", "private.krim_partner_capability_covers_shipment"]) {
+  if (!partnerReadScopeMigration.includes(token)) failures.push("Partner opportunity read-scope migration is missing the current eligibility gate: " + token);
+}
 const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorkspace.tsx") ? readFileSync("mobile/krim-partner/src/PartnerWorkspace.tsx", "utf8") : "";
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
