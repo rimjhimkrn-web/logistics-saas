@@ -16,6 +16,7 @@ This file is a release-gate checklist, not a declaration that every workspace or
 - [ ] Verify at least one real operating partner with evidence, capability, route, current capacity and operational contact.
 - [ ] Approve a route-specific rate/quote and contract terms.
 - [ ] Test customer enquiry → partner match → partner quote → customer acceptance → partner acceptance.
+- [ ] Resolve legacy quote-award RPCs that can mark a shipment confirmed while the linked partner assignment is only offered; confirmation must follow verified partner acceptance.
 - [ ] Test dispatch → verified driver/vehicle → in-transit milestones → exceptions → POD → independent verification.
 - [ ] Test customer visibility and support/escalation.
 - [ ] Do not claim route coverage or confirmed service without provider acceptance.
