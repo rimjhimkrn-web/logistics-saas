@@ -532,6 +532,17 @@ const allHtmlFiles = listHtmlFiles(".").filter((p) =>
   p.startsWith("public/shipper/") || p.startsWith("public/shipments/") ||
   p.startsWith("public/quotes/") || p.startsWith("public/finance/") || p === "public/admin/customer-ecosystem-os.html"
 );
+
+// Legacy quote-award RPCs remain a backend retirement blocker. Keep every site
+// page away from these authenticated legacy entry points while the migration
+// history is reconciled and the grants are safely retired.
+const legacyAwardRpcCallers = listHtmlFiles(".").filter((file) => {
+  const source = readFileSync(file, "utf8");
+  return /\.rpc\(\s*["']krim_award_partner_quote(?:_for_checkout)?["']/i.test(source);
+});
+if (legacyAwardRpcCallers.length) {
+  failures.push("Legacy partner-award RPCs must not be called from UI pages: " + legacyAwardRpcCallers.join(", "));
+}
 let checkedAllSiteLinks = 0;
 for (const file of allHtmlFiles) {
   const html = readFileSync(file, "utf8");
