@@ -292,3 +292,5 @@ Required next implementation:
 The only current shipment-leg row belongs to a closed legacy shipment. Its row has `status='assigned'`, `assignment_status='unassigned'`, and a non-null partner organisation, while no corresponding row exists in `krim_shipment_partner_assignments`. Its historical audit stream also contains two identical `shipment_leg_created` events from the duplicate trigger that has now been removed.
 
 No historical shipment or audit record was modified. This closed-shipment inconsistency must be reconciled against original business records before any cleanup; it is excluded from new plan activation and is not treated as proof of a current active assignment.
+
+A final bypass review also added a guard to `krim_award_partner_quote_for_checkout` before its existing-quote idempotent return. Thus a previously prepared shipment-wide customer quote cannot be replayed through that wrapper for a shipment with an active multi-leg plan.
