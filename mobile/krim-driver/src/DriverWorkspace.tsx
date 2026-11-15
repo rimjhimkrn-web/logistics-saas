@@ -34,7 +34,7 @@ export default function DriverWorkspace({session,onSignOut}:{session:Session;onS
   const client=supabase;
   if(!selected||selected.status!=="in_transit"||!profileVerified||!client||trackingBusy)return;
   Alert.alert("Share location for this trip?",
-   "KRIM Driver will share this device's location with KRIM operations and authorized shipment viewers only for this assigned trip. Sharing may continue while the app is in the background and an ongoing Android notification will be shown. It stops when you stop sharing, the trip leaves in-transit status, or the app session ends. You can decline or stop sharing at any time. Never use the phone while driving.",
+   "KRIM Driver will share this device's location with KRIM operations and authorized shipment viewers only for this assigned trip. Sharing may continue while the app is in the background and an ongoing Android notification will be shown. It stops when you stop sharing, the trip leaves in-transit status, or you sign out/terminate the app; force-stop and device settings can interrupt it. You can decline or stop sharing at any time. Never use the phone while driving.",
    [{text:"Not now",style:"cancel"},{text:"Agree and continue",onPress:()=>void (async()=>{
     setTrackingBusy(true);setError("");setNotice("");
     try{
