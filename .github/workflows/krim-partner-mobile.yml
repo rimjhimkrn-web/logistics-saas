@@ -85,11 +85,27 @@ jobs:
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: validation-placeholder
       - name: Verify Android location and notification manifest permissions
         run: |
+          set -euo pipefail
           MANIFEST=android/app/src/main/AndroidManifest.xml
-          grep -q 'android.permission.ACCESS_BACKGROUND_LOCATION' "$MANIFEST"
-          grep -q 'android.permission.FOREGROUND_SERVICE_LOCATION' "$MANIFEST"
-          grep -q 'android.permission.POST_NOTIFICATIONS' "$MANIFEST"
-          grep -q 'foregroundServiceType="location"' "$MANIFEST"
+          test -f "$MANIFEST" || { echo "Generated Android manifest is missing."; find android -name AndroidManifest.xml -print; exit 1; }
+          echo "Generated location-related manifest declarations:"
+          grep -nE 'uses-permission|foregroundServiceType' "$MANIFEST" || true
+          missing=0
+          for permission in ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE_LOCATION POST_NOTIFICATIONS; do
+            if grep -q "android.permission.$permission" "$MANIFEST"; then
+              echo "PASS: $permission"
+            else
+              echo "MISSING: $permission"
+              missing=1
+            fi
+          done
+          if grep -Eq 'android:foregroundServiceType="location"|foregroundServiceType="location"' "$MANIFEST"; then
+            echo "PASS: location foreground-service type"
+          else
+            echo "MISSING: location foreground-service type"
+            missing=1
+          fi
+          exit "$missing"
       - name: Assemble installable debug APK
         run: |
           cd android
