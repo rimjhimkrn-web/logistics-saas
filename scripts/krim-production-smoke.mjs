@@ -1030,7 +1030,7 @@ const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerReposit
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 for (const [label, source, tokens] of [
-  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'create-global-razorpay-order', 'verify-razorpay-payment', 'react-native-webview', 'shipment.status!=="confirmed"', 'loadCustomerShipments', 'loadCustomerQuotes']],
+  ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct payment guidance', 'does not create or collect freight-payment orders', 'openPartnerPaymentGuidance']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
   ["Driver mobile", driverMobile, ['krim_driver_accept_assignment', 'krim_driver_record_trip_event', 'krim_driver_submit_delivery_pod', 'krim-driver-evidence', 'image/jpeg', 'image/png', 'image/webp']],
 ]) {
@@ -1040,6 +1040,10 @@ for (const [label, source, tokens] of [
 if (partnerMobile && (!partnerMobile.includes("organizations.length!==1") || !partnerMobile.includes("activeCaps===0") || !partnerMobile.includes('selected?.partner_account_mode!=="registered_business"'))) {
   failures.push("Partner quote submission must remain gated to one unambiguous registered, verified and capable organization.");
 }
+if (/Razorpay|create-global-razorpay-order|verify-razorpay-payment|react-native-webview|WebView/.test(customerMobile)) failures.push("Customer mobile must not expose KRIM freight checkout under the partner-direct model.");
+const customerPackage = existsSync("mobile/krim-customer/package.json") ? readFileSync("mobile/krim-customer/package.json", "utf8") : "";
+if (customerPackage.includes("react-native-webview")) failures.push("Customer mobile must not bundle the retired payment WebView.");
+
 const podAdminSource = existsSync("app/platform-admin/delivery-pod-verification.html") ? readFileSync("app/platform-admin/delivery-pod-verification.html", "utf8") : "";
 const platformAdminNavigation = existsSync("app/platform-admin/index.html") ? readFileSync("app/platform-admin/index.html", "utf8") : "";
 for (const token of ["krim_admin_list_delivery_pods", "krim_admin_review_delivery_pod", "AAL2", "PRIVATE"]) {
