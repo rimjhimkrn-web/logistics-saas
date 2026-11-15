@@ -40,6 +40,20 @@ return jsonResponse(
 );
 }
 
+// KRIM's current launch model is partner-direct freight payment. This endpoint
+// creates a full-quote order on KRIM's Razorpay merchant account, so it remains
+// locked until the legal/tax/payment model and partner settlement route are
+// expressly approved. The two server secrets must be set deliberately.
+const freightCollectionApproved =
+  Deno.env.get("KRIM_FREIGHT_COLLECTION_ENABLED") === "true" &&
+  Deno.env.get("KRIM_FREIGHT_COLLECTION_APPROVAL_VERSION") === "2026-11-15-v1";
+if (!freightCollectionApproved) {
+  return jsonResponse({
+    error: "KRIM freight collection is disabled. Customers must pay the contracting logistics provider directly under the current launch model. Platform collection requires separate legal, tax and settlement approval.",
+    code: "KRIM_FREIGHT_COLLECTION_NOT_APPROVED",
+  }, 503);
+}
+
 try {
 // --------------------------------------------------
 // Environment
