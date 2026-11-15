@@ -4,8 +4,8 @@ import type {Session} from "@supabase/supabase-js";
 import {supabase} from "./lib/supabase";
 import {loadPartnerOrganizations,loadPartnerCapabilities,loadPartnerOpportunities,loadPartnerQuotes,loadPartnerAssignments,type PartnerOrganization,type PartnerCapability,type PartnerOpportunity,type PartnerQuote,type PartnerAssignment} from "./lib/partnerRepository";
 
-type Tab="Overview"|"Opportunities"|"Shipments"|"Earnings"|"Profile";
-const tabs:Tab[]=["Overview","Opportunities","Shipments","Earnings","Profile"];
+type Tab="Overview"|"Opportunities"|"Shipments"|"Quotes"|"Profile";
+const tabs:Tab[]=["Overview","Opportunities","Shipments","Quotes","Profile"];
 const navy="#071A35",blue="#2366D9",teal="#078B83",muted="#687A90",line="#E0E7F0";
 const onboarding="https://rimjhimkrn-web.github.io/logistics-saas/public/partner/partner-onboarding.html";
 export default function PartnerWorkspace({session,onSignOut}:{session:Session;onSignOut:()=>void}){
@@ -80,7 +80,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
    {tab==="Shipments"&&<><Header kicker="EXECUTION CONTROL" title="Assignments & shipments" sub="Commercial assignments linked to your partner organization."/>
     {loading?<ActivityIndicator color={blue}/>:assignments.length?assignments.map(a=><View key={a.id} style={s.panel}><Text style={s.panelTitle}>{a.assignment_number}</Text><Text style={s.amount}>{a.status.toUpperCase()}</Text><Text style={s.tiny}>Shipment reference ID: {a.shipment_id}</Text><Text style={s.tiny}>Offered: {new Date(a.offered_at).toLocaleString()}</Text><Text style={s.tiny}>Response deadline: {a.response_deadline?new Date(a.response_deadline).toLocaleString():"Not specified"}</Text>{a.status==="offered"&&<><TextInput value={responseReason} onChangeText={setResponseReason} placeholder="Reason if declining (required)" maxLength={500} style={s.input}/><Action title="Accept assignment" disabled={actionBusy} onPress={()=>Alert.alert("Accept this assignment?","Your organization will be responsible for executing this confirmed shipment.",[{text:"Cancel",style:"cancel"},{text:"Accept assignment",onPress:()=>void respondToAssignment(a.id,true)}])}/><Action title="Decline assignment" secondary disabled={actionBusy||responseReason.trim().length<3} onPress={()=>void respondToAssignment(a.id,false)}/></>}</View>):<Empty title="No assignments" body="No assignment records are currently visible for this partner organization."/>}
    </>}
-   {tab==="Earnings"&&<><Header kicker="PARTNER FINANCE" title="Quotes & financial activity" sub="Your organization's submitted quote records. This is not a payout or withdrawable-balance statement."/>
+   {tab==="Quotes"&&<><Header kicker="PARTNER QUOTE ACTIVITY" title="Submitted quotes" sub="Your organization's quote records. KRIM does not calculate earnings or a withdrawable balance."/><View style={s.panel}><Text style={s.panelTitle}>Partner-direct payments</Text><Text style={s.body}>Customers pay the contracting logistics provider directly using the provider's invoice and payment instructions. KRIM does not collect freight funds, hold escrow or settle partner payouts. Your organization is responsible for invoices, receipts, driver pay and subcontractors.</Text></View>
     {loading?<ActivityIndicator color={blue}/>:quotes.length?quotes.map(q=><View key={q.id} style={s.panel}><Text style={s.panelTitle}>{q.quote_number}</Text><Text style={s.amount}>{Number(q.amount).toLocaleString(undefined,{maximumFractionDigits:2})} {q.currency_code}</Text><Text style={s.tiny}>Opportunity #{q.opportunity_id} · {q.status}</Text><Text style={s.tiny}>Valid until {new Date(q.valid_until).toLocaleString()}</Text></View>):<Empty title="No submitted quotes" body="Quotes submitted by this organization will appear here. No earnings or payout amounts are estimated."/>}
    </>}
    {tab==="Profile"&&<><Header kicker="PARTNER ACCOUNT" title="Organization profile" sub={session.user.email||"Authenticated KRIM account"}/>
@@ -88,7 +88,7 @@ export default function PartnerWorkspace({session,onSignOut}:{session:Session;on
     <View style={s.panel}><Text style={s.panelTitle}>Account actions</Text><Action title="Open partner onboarding" onPress={()=>{void import("react-native").then(({Linking})=>Linking.openURL(onboarding));}} secondary/><Action title="View software plans & free evaluation" onPress={()=>{void import("react-native").then(({Linking})=>Linking.openURL("https://rimjhimkrn-web.github.io/logistics-saas/plans.html"));}} secondary/><Action title="Refresh data" onPress={()=>{void refreshOrganizations();void refreshData();}} secondary/><Action title="Sign out securely" onPress={onSignOut}/></View>
    </>}
   </ScrollView>
-  <View style={s.nav}>{tabs.map(t=><Pressable key={t} onPress={()=>setTab(t)} accessibilityRole="tab" accessibilityState={{selected:tab===t}} style={s.navItem}><Text style={[s.navIcon,tab===t&&{color:blue}]}>{({Overview:"⌂",Opportunities:"◇",Shipments:"▣",Earnings:"₹",Profile:"○"} as Record<Tab,string>)[t]}</Text><Text style={[s.navLabel,tab===t&&{color:blue}]}>{t}</Text></Pressable>)}</View>
+  <View style={s.nav}>{tabs.map(t=><Pressable key={t} onPress={()=>setTab(t)} accessibilityRole="tab" accessibilityState={{selected:tab===t}} style={s.navItem}><Text style={[s.navIcon,tab===t&&{color:blue}]}>{({Overview:"⌂",Opportunities:"◇",Shipments:"▣",Quotes:"≋",Profile:"○"} as Record<Tab,string>)[t]}</Text><Text style={[s.navLabel,tab===t&&{color:blue}]}>{t}</Text></Pressable>)}</View>
  </View>;
 }
 function Header({kicker,title,sub}:{kicker:string;title:string;sub:string}){return <View style={s.header}><Text style={s.kicker}>{kicker}</Text><Text style={s.title}>{title}</Text><Text style={s.muted}>{sub}</Text></View>}
