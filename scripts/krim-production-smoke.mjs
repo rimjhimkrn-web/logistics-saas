@@ -383,6 +383,8 @@ const legacyWebhooks = existsSync("public/finance/webhooks.html") ? readFileSync
 const legacyEscrow = existsSync("public/billing/escrow-settlement.html") ? readFileSync("public/billing/escrow-settlement.html", "utf8") : "";
 const partnerSettlementPolicy = existsSync("public/partner/settlements.html") ? readFileSync("public/partner/settlements.html", "utf8") : "";
 const partnerSupport = existsSync("public/partner/partner-support.html") ? readFileSync("public/partner/partner-support.html", "utf8") : "";
+const quoteOperations = existsSync("public/customer-os/assets/quote-operations.js") ? readFileSync("public/customer-os/assets/quote-operations.js", "utf8") : "";
+const spotApprovals = existsSync("public/shipper/spot-approvals.html") ? readFileSync("public/shipper/spot-approvals.html", "utf8") : "";
 if (!financeAudit.includes("krim_finance_list_payment_webhook_events") || !financeAudit.includes("webhookRows")) failures.push("Treasury audit must display the authenticated webhook reconciliation queue.");
 if (!webhookReconciliationMigration.includes("aal2") || !webhookReconciliationMigration.includes("admin.platform") || webhookReconciliationMigration.includes("payload jsonb")) failures.push("Webhook reconciliation must be AAL2 platform-admin-only and must not expose raw payloads.");
 if (!partnerDirectReadinessMigration.includes("'partner_direct'") || partnerDirectReadinessMigration.includes("verified_payment_missing")) failures.push("Shipment readiness must not require KRIM-collected freight payment under the partner-direct model.");
@@ -391,6 +393,7 @@ if (!legacyWebhooks.includes("app/finance/treasury-audit.html#webhooks") || lega
 if (!legacyEscrow.includes("shipper/payment-checkout.html") || /Release escrow|JPMorgan|Citi/.test(legacyEscrow)) failures.push("Legacy escrow simulator must be retired and must not claim escrow or bank integrations.");
 if (!partnerSettlementPolicy.includes("partner-direct") || !partnerSettlementPolicy.includes("does not currently collect freight charges") || partnerSettlementPolicy.includes("SETTLEMENT LEDGER: ACTIVE RECONCILIATION")) failures.push("Partner settlement page must accurately explain direct provider payment and no KRIM payout.");
 if (!partnerSupport.includes("create-ticket.html") || partnerSupport.includes("24/7")) failures.push("Partner support must route to the authenticated ticket system and avoid unsupported 24/7 claims.");
+if (!quoteOperations.includes("PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false") || !spotApprovals.includes("PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false")) failures.push("Customer quote acceptance must remain fail-closed until the partner-direct readiness migration is deployed and verified.");
 
 const refundExecution = existsSync("supabase/functions/execute-razorpay-refund/index.ts") ? readFileSync("supabase/functions/execute-razorpay-refund/index.ts", "utf8") : "";
 if (!refundExecution.includes("KRIM_LEGACY_REFUND_EXECUTION_ENABLED") || !refundExecution.includes("KRIM_LEGACY_REFUND_APPROVAL_VERSION") || !refundExecution.includes("KRIM_REFUND_EXECUTION_NOT_APPROVED")) failures.push("New KRIM refund execution must remain disabled until separately approved under the partner-direct model.");
