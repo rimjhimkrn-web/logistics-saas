@@ -391,6 +391,8 @@ if (!legacyEscrow.includes("shipper/payment-checkout.html") || /Release escrow|J
 if (!partnerSettlementPolicy.includes("partner-direct") || !partnerSettlementPolicy.includes("does not currently collect freight charges") || partnerSettlementPolicy.includes("SETTLEMENT LEDGER: ACTIVE RECONCILIATION")) failures.push("Partner settlement page must accurately explain direct provider payment and no KRIM payout.");
 if (!partnerSupport.includes("create-ticket.html") || partnerSupport.includes("24/7")) failures.push("Partner support must route to the authenticated ticket system and avoid unsupported 24/7 claims.");
 
+const refundExecution = existsSync("supabase/functions/execute-razorpay-refund/index.ts") ? readFileSync("supabase/functions/execute-razorpay-refund/index.ts", "utf8") : "";
+if (!refundExecution.includes("KRIM_LEGACY_REFUND_EXECUTION_ENABLED") || !refundExecution.includes("KRIM_LEGACY_REFUND_APPROVAL_VERSION") || !refundExecution.includes("KRIM_REFUND_EXECUTION_NOT_APPROVED")) failures.push("New KRIM refund execution must remain disabled until separately approved under the partner-direct model.");
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
