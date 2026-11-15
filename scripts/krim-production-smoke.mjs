@@ -1511,7 +1511,7 @@ for (const token of [
   'c.rpc("krim_create_shipment_leg_plan"',
   'c.rpc("krim_evaluate_shipment_leg_plan"',
   'c.rpc("krim_activate_shipment_leg_plan"',
-  'if(!confirm("Activate this route plan?',
+  '!confirm("Activate this route plan?',
   'shipment.update',
   'No plan can be created.',
   'does not assign partners, reserve capacity or dispatch cargo',
