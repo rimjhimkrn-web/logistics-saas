@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, AppState, Image, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
@@ -14,7 +14,14 @@ import {
 } from "./lib/customerRepository";
 
 type Props = { session: Session; onSignOut: () => void };
-type Tracking = { shipment?: Record<string, unknown>; events?: Array<Record<string, unknown>>; milestones?: Array<Record<string, unknown>> };
+type TrackingPosition = { latitude: number; longitude: number; recorded_at: string; accuracy_m?: number | null; freshness?: "live" | "recent" | "stale" };
+type Tracking = {
+  shipment?: Record<string, unknown>;
+  events?: Array<Record<string, unknown>>;
+  milestones?: Array<Record<string, unknown>>;
+  gps_sharing_status?: string;
+  latest_position?: TrackingPosition | null;
+};
 
 const navy = "#071A35", blue = "#2366D9", teal = "#078B83", muted = "#687A90", line = "#E0E7F0";
 const tabs = ["Home", "Book", "Shipments", "Quotes", "Track", "Account"] as const;
@@ -110,6 +117,25 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (tab !== "Track" || !trackingShipment || !supabase) return;
+    let mounted = true;
+    const refreshTracking = async () => {
+      if (AppState.currentState !== "active") return;
+      try {
+        const result = await loadShipmentTracking(supabase, trackingShipment);
+        if (mounted) setTracking(result as Tracking);
+      } catch {
+        // Keep the last successful result visible; the next refresh can recover.
+      }
+    };
+    const timer = setInterval(() => { void refreshTracking(); }, 30000);
+    const appState = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshTracking();
+    });
+    return () => { mounted = false; clearInterval(timer); appState.remove(); };
+  }, [tab, trackingShipment]);
+
   const selectedOrganization = organizations.find((x) => x.id === organizationId);
   const openQuotes = quotes.filter((q) => q.status === "sent" && new Date(q.valid_until).getTime() > Date.now()).length;
 
@@ -185,6 +211,25 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
             <Text style={s.panelTitle}>Tracking: {trackingShipment}</Text>
             {loadingData ? <ActivityIndicator color={blue}/> : tracking ? <>
               <Text style={s.body}>{String(tracking.shipment?.status || "Status unavailable")}</Text>
+              {tracking.latest_position ? <View style={s.panel}>
+                <Text style={s.panelTitle}>Driver location · {tracking.latest_position.freshness === "live" && tracking.gps_sharing_status === "active" ? "LIVE" : "RECENT"}</Text>
+                <Text style={s.tiny}>Recorded: {new Date(tracking.latest_position.recorded_at).toLocaleString()} · Accuracy ±{tracking.latest_position.accuracy_m == null ? "—" : Math.round(Number(tracking.latest_position.accuracy_m)) + " m"}</Text>
+                <Text style={s.tiny}>Coordinates: {Number(tracking.latest_position.latitude).toFixed(5)}, {Number(tracking.latest_position.longitude).toFixed(5)}</Text>
+                <Pressable accessibilityRole="link" onPress={() => {
+                  const lat = Number(tracking.latest_position?.latitude), lon = Number(tracking.latest_position?.longitude);
+                  void Linking.openURL("https://www.openstreetmap.org/?mlat=" + encodeURIComponent(lat) + "&mlon=" + encodeURIComponent(lon) + "#map=15/" + encodeURIComponent(lat) + "/" + encodeURIComponent(lon))
+                    .catch(() => setError("The map could not be opened. The tracking coordinates remain available above."));
+                }}><Text style={{color:blue,fontWeight:"900",marginTop:9}}>Open map · shares coordinates with OpenStreetMap ↗</Text></Pressable>
+                <Text style={s.tiny}>Location may be delayed or interrupted by device, battery, GPS or network conditions. It is not emergency or safety-critical navigation.</Text>
+              </View> : <Text style={s.muted}>{tracking.gps_sharing_status === "starting"
+                ? "The driver's consented GPS session has started. Waiting for the first verified position."
+                : tracking.gps_sharing_status === "stale" || tracking.gps_sharing_status === "delayed"
+                  ? "No sufficiently recent GPS position is available. Use the verified shipment milestones below."
+                  : tracking.gps_sharing_status === "completed"
+                    ? "GPS sharing has ended because the shipment is complete or closed."
+                    : tracking.gps_sharing_status === "unavailable"
+                      ? "GPS status is temporarily unavailable. Verified milestones remain available."
+                      : "No live GPS sharing session is active. Verified shipment milestones remain available."}</Text>}
               {(tracking.events || []).map((event, i) => <Bullet key={String(event.id ?? i)} text={String(event.event_type || "Shipment event") + " · " + (event.event_time ? new Date(String(event.event_time)).toLocaleString() : "Time not provided")}/>)}
               {(tracking.milestones || []).map((m, i) => <Bullet key={String(m.id ?? "m"+i)} text={String(m.milestone_type || "Milestone") + " · " + String(m.status || "Status unavailable")}/>)}
               {!tracking.events?.length && !tracking.milestones?.length && <Text style={s.muted}>No execution events have been recorded yet.</Text>}
