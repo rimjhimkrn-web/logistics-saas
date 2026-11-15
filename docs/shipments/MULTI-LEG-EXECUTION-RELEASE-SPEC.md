@@ -493,3 +493,11 @@ Release limitations:
 - Non-road dispatch remains blocked pending mode-specific resource and evidence workflows.
 - The live environment has no accepted leg-specific partner assignments, active route plans, confirmed physical reservations, verified drivers or vehicles; therefore no positive end-to-end dispatch journey has been run.
 - Browser-level role testing and a real corridor test remain required before production operational claims.
+
+## Dispatch-readiness evaluator alignment (15 November 2026)
+
+Migration 20261115150526_align_dispatch_readiness_with_multileg_authorization replaces the readiness evaluator without changing its return contract or caller permissions. It now recognises the active multi-leg shipment lifecycle (assigned/in_transit) instead of requiring every shipment to remain shipment-wide assigned; validates exact active plan-item/leg/partner-assignment binding; uses exact-leg capability evaluation for multi-leg and retains the shipment-level capability evaluator for legacy single-leg; and reports blockers for missing accepted driver assignment, current exact-leg dispatch authorization, confirmed physical capacity and accepted custody. It keeps non-road dispatch fail-closed and retains the warehouse handover and ROAD driver/vehicle checks.
+
+Live verification: function is SECURITY DEFINER with empty search_path; anonymous EXECUTE is false; authenticated EXECUTE is true. The function returned zero rows because there are no accepted/active partner assignments in the current live data. Therefore the function definition/ACL were verified, but no positive readiness case or real dispatch journey was exercised.
+
+Automated regression smoke checks now assert these readiness safeguards. Browser-based role testing and a real authorised dispatch journey remain open.
