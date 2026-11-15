@@ -73,13 +73,13 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div id="checkout-feedback" class="feedback notice" role="status" aria-live="polite">Checking your quote, shipment and payment eligibility…</div>
 </div>
 <div class="card">
-<div class="cardhead"><div><h2>Required security checks</h2><p>Checkout stays locked unless every required condition passes, including confirmed partner capacity reservation.</p></div><span class="pill">Live validation</span></div>
+<div class="cardhead"><div><h2>Required security checks</h2><p>Review the accepted quote and verified partner assignment. KRIM freight checkout is disabled; customers pay the contracting logistics provider directly.</p></div><span class="pill">Live validation</span></div>
 <div class="check-list">
 <div class="check-row"><span class="check-icon pending" id="check-session">…</span><span><strong>Customer authentication</strong><br><span id="check-session-text">Checking your sign-in…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-quote">…</span><span><strong>Accepted and unexpired quote</strong><br><span id="check-quote-text">Loading quote from KRIM…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-assignment">…</span><span><strong>Partner assignment accepted</strong><br><span id="check-assignment-text">Checking assignment and shipment linkage…</span></span></div>
 <div class="check-row"><span class="check-icon pending" id="check-amount">…</span><span><strong>Amount and currency</strong><br><span id="check-amount-text">Waiting for the authoritative quote</span></span></div>
-<div class="check-row"><span class="check-icon pending" id="check-order">…</span><span><strong>Server-created payment order</strong><br><span id="check-order-text">An order is created only after you continue</span></span></div>
+<div class="check-row"><span class="check-icon pending" id="check-order">…</span><span><strong>KRIM freight checkout</strong><br><span id="check-order-text">No KRIM payment order is created under the current partner-direct model.</span></span></div>
 </div>
 </div>
 </section>
@@ -102,12 +102,12 @@ a:not(.btn){text-decoration-color:#06b6d470}
 <div class="cardhead"><div><h2>Payment protection</h2><p>Three controls keep the transaction connected to the shipment.</p></div></div>
 <div class="archlist">
 <div class="archrow"><span class="archnum">01</span><span><strong>Exact quote binding</strong><small>The selected quote ID is passed to the server. KRIM checks the accepted quote and shipment together.</small></span></div>
-<div class="archrow"><span class="archnum">02</span><span><strong>Verified provider response</strong><small>Opening or closing Razorpay does not mark a shipment as paid.</small></span></div>
+<div class="archrow"><span class="archnum">02</span><span><strong>Provider-issued payment receipt</strong><small>The logistics provider confirms receipt directly; KRIM does not collect or settle the freight payment.</small></span></div>
 <div class="archrow"><span class="archnum">03</span><span><strong>No blind retry</strong><small>An unknown result must be reconciled before another charge is attempted.</small></span></div>
 </div>
 </div>
 <div class="card">
-<div class="cardhead"><div><h2>Global payment network</h2><p>Built for expansion, enabled only when verified.</p></div></div>
+<div class="cardhead"><div><h2>Future payment capabilities</h2><p>Provider adapters remain disabled until merchant, legal, settlement, refund and reconciliation requirements are verified.</p></div></div>
 <div class="providerbanner"><strong>Current model: partner-direct payments</strong>Razorpay adapter code is present, but KRIM checkout, refunds and partner settlement are disabled. Merchant eligibility is unverified. No provider can be selected or charged through KRIM. Customers pay the contracting logistics provider directly.</div><div class="market-picker"><label for="payment-market">Explore payment options by market</label><select id="payment-market"><option value="IN">India · INR</option><option value="US">United States · USD</option><option value="GB">United Kingdom · GBP</option><option value="DE">Germany · EUR</option><option value="AE">United Arab Emirates · AED</option><option value="SG">Singapore · SGD</option></select></div><div id="payment-market-currency-note" class="providerbanner" style="margin-top:9px">Market discovery only. KRIM will never convert your accepted quote automatically.</div><div id="global-payment-options" class="provider-grid" aria-live="polite" aria-label="Global payment provider availability"><div class="provider-option"><strong>Checking provider registry…</strong><small>Loading verified market capabilities from KRIM.</small></div></div>
 <div class="sidelinks"><a href="shipper/payment-checkout.html">Partner-direct payment guidance <span>↗</span></a><a href="../terms.html#payment">Payment terms <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a></div>
 </div>
@@ -243,7 +243,7 @@ async function startPayment(){
  if(KRIM_PARTNER_DIRECT_ONLY||!canPay||paymentBusy||!quote||!session||!shipment)return;
  paymentBusy=true;setPayReady(false);byId("btn-pay-now").textContent="Creating secure payment order…";
  check("order",false,"Requesting a server-created order bound to this accepted quote.");
- message("KRIM is validating the accepted quote, organization, shipment, partner offer and assignment before creating the payment order.","info");
+ message("KRIM freight checkout is disabled. Pay the contracting provider directly after checking its invoice and verified payment instructions.","info");
  try{
    const {data:order,error}=await client.functions.invoke("create-global-razorpay-order",{body:{krim_shipment_id:Number(shipment.id),krim_quote_id:Number(quote.id)}});
    if(error)throw new Error(error.message||"Secure order request failed.");
