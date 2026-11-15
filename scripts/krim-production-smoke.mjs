@@ -1175,6 +1175,8 @@ const driverLicenceExpiryAdminMigration = existsSync("supabase/migrations/202611
   ? readFileSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql", "utf8") : "";
 const driverProfileGuardMigration = existsSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql")
   ? readFileSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql", "utf8") : "";
+const driverProfileGuardConsolidationMigration = existsSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql")
+  ? readFileSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql", "utf8") : "";
 const driverMobileRepository = existsSync("mobile/krim-driver/src/lib/driverRepository.ts")
   ? readFileSync("mobile/krim-driver/src/lib/driverRepository.ts", "utf8") : "";
 
@@ -1189,6 +1191,12 @@ if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_w
 }
 if (!driverProfileGuardMigration.includes("NEW.verification_status := 'pending'") || !driverProfileGuardMigration.includes("OLD.verification_status")) {
   failures.push("Driver profile guard must prevent self-approval and reset verification after licence changes.");
+}
+if (!driverProfileGuardConsolidationMigration.includes("new.licence_expiry_date is distinct from old.licence_expiry_date") || !driverProfileGuardConsolidationMigration.includes("drop trigger if exists trg_krim_guard_driver_profile_verification_updates")) {
+  failures.push("Driver licence changes must use the existing canonical profile guard without a duplicate trigger.");
+}
+if (!driverWorkspacePage.includes("Licence expired · dispatch blocked") || !driverWorkspacePage.includes("Licence expiry missing · dispatch blocked")) {
+  failures.push("Driver web workspace must disclose expired/missing licence state rather than showing stale verification.");
 }
 if (!driverMobileRepository.includes("licence_expiry_date") || !driverMobile.includes("licenceCurrent") || !driverMobile.includes("Licence expiry missing")) {
   failures.push("Native driver workspace must reflect licence validity before displaying operational readiness.");
