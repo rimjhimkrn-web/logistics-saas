@@ -17,6 +17,7 @@ DECLARE
   v_prev_destination bigint;
   v_first_origin bigint;
   v_last_destination bigint;
+  v_prev_arrival timestamptz;
   v_issues jsonb := '[]'::jsonb;
   v_first_item public.krim_shipment_leg_plan_items%ROWTYPE;
   v_leg public.krim_shipment_legs%ROWTYPE;
@@ -104,6 +105,13 @@ BEGIN
         'code','invalid_leg_time_window','message','Planned arrival must be later than departure',
         'leg_sequence',v_item.leg_sequence));
     END IF;
+    IF v_item.planned_departure_at IS NOT NULL AND v_prev_arrival IS NOT NULL
+       AND v_item.planned_departure_at<v_prev_arrival THEN
+      v_issues := v_issues || pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
+        'code','overlapping_leg_time_window','message','A leg cannot depart before the previous leg planned arrival',
+        'leg_sequence',v_item.leg_sequence));
+    END IF;
+    v_prev_arrival:=v_item.planned_arrival_at;
     IF (v_item.required_capacity IS NOT NULL AND
         (v_item.required_capacity<=0 OR v_item.capacity_unit IS NULL))
        OR (v_item.required_capacity IS NULL AND v_item.capacity_unit IS NOT NULL) THEN
@@ -128,6 +136,27 @@ BEGIN
   IF v_active_other>0 THEN
     v_issues := v_issues || pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
       'code','another_active_plan','message','Another route plan is already active for this shipment'));
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.krim_partner_opportunities po
+    WHERE po.shipment_id=v_plan.shipment_id
+      AND po.status IN ('open','shortlisted','awarded')
+      AND (po.response_deadline IS NULL OR po.response_deadline>pg_catalog.now())
+  ) OR EXISTS (
+    SELECT 1 FROM public.krim_partner_quotes pq
+    WHERE pq.shipment_id=v_plan.shipment_id
+      AND pq.status IN ('submitted','under_review','shortlisted','accepted')
+      AND (pq.valid_until IS NULL OR pq.valid_until>pg_catalog.now())
+  ) OR EXISTS (
+    SELECT 1 FROM public.krim_quotes q
+    WHERE q.shipment_id=v_plan.shipment_id
+      AND q.status IN ('draft','sent','accepted')
+      AND (q.valid_until IS NULL OR q.valid_until>pg_catalog.now())
+  ) THEN
+    v_issues := v_issues || pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
+      'code','commercial_quote_flow_active',
+      'message','Resolve any active shipment-wide partner opportunity or customer quote before activating a multi-leg plan. Leg-specific sourcing is not yet enabled.'));
   END IF;
 
   SELECT count(*)::integer INTO v_existing_count
