@@ -24,15 +24,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-window-guard:
+    name: Check APK build window
+    runs-on: ubuntu-latest
+    outputs:
+      build_allowed: ${{ steps.window.outputs.build_allowed }}
+    steps:
+      - name: Compare run timestamp with the December release window
+        id: window
+        env:
+          RUN_STARTED_AT: ${{ github.run_started_at }}
+        shell: bash
+        run: |
+          cutoff_epoch="$(date -u -d '2026-12-01T00:00:00Z' +%s)"
+          run_epoch="$(date -u -d "$RUN_STARTED_AT" +%s)"
+          if [[ "$run_epoch" -lt "$cutoff_epoch" ]]; then
+            echo "build_allowed=false" >> "$GITHUB_OUTPUT"
+            echo "KRIM Android APK builds are paused until 1 December 2026."
+          else
+            echo "build_allowed=true" >> "$GITHUB_OUTPUT"
+            echo "APK build window is open."
+          fi
+
   build-window-notice:
-    if: ${{ github.run_started_at < '2026-12-01T00:00:00Z' }}
+    needs: build-window-guard
+    if: ${{ needs.build-window-guard.outputs.build_allowed != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Explain the temporary APK pause
         run: echo "KRIM Android APK builds are paused until 1 December 2026. Source validation remains available."
 
   build:
-    if: ${{ github.run_started_at >= '2026-12-01T00:00:00Z' }}
+    needs: build-window-guard
+    if: ${{ needs.build-window-guard.outputs.build_allowed == 'true' }}
     name: Build ${{ matrix.app }} Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 90
