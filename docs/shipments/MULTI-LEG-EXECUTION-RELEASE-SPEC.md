@@ -178,3 +178,36 @@ Live checks:
 Release limitation:
 - Plan creation and read-only evaluation are now present, but atomic activation is still not implemented.
 - Do not treat a plan as active or execution-ready until activation, partner/capacity handoff, and a real controlled end-to-end test are complete.
+
+## Implementation update — atomic activation RPC
+
+Added `public.krim_activate_shipment_leg_plan(bigint,text)`.
+
+Activation behavior:
+- Locks the shipment row and plan row to serialize competing activation attempts.
+- Requires the caller to hold `shipment.update` for the owning customer organisation.
+- Re-runs the read-only evaluation gate while locks are held.
+- Uses a per-shipment idempotency key with a unique index; identical completed retries return the original activation result, while key reuse for another plan is rejected.
+- Enforces one activation per plan.
+- Materializes every plan item as a shipment leg in one database transaction.
+- Reuses an existing initial leg only when it is the exact unassigned/planned first-leg match; it is linked to the plan item without deleting or rewriting route history.
+- Creates remaining legs with planned/unassigned state and preserves plan-item linkage.
+- Verifies the exact expected-versus-materialized leg count.
+- Records activation start/completion and plan activation events with the leg-to-plan-item mapping.
+- Any exception or count mismatch aborts the transaction, so partial leg materialization is rolled back.
+- Does not select partners, reserve capacity, dispatch, collect freight, or advance shipment status.
+
+Live verification:
+- Function created successfully and has empty search_path.
+- anon/PUBLIC EXECUTE=false; authenticated EXECUTE=true.
+- Unique per-shipment activation idempotency index exists.
+- A transaction-scoped synthetic plan fixture was used only to test unrelated-user denial for both evaluation and activation; transaction rolled back.
+- Production counts after test: 0 plans, 0 plan items, 0 activations; existing shipment-leg count unchanged at 1.
+- No successful activation was attempted because there is no genuine authorised draft plan and no authorised customer test account was used.
+
+Remaining release gates:
+- Verify the activation happy path with a controlled, authorised customer-owned test shipment and a genuine route plan.
+- Verify identical retries and conflicting-key retries against a test plan.
+- Confirm no trigger/child workflow duplicates initial legs on real shipment creation.
+- Continue partner offer, capacity reservation, leg handover, warehouse/customs and POD integration testing.
+- Multi-leg is not production-certified until those tests pass with real verified participants and evidence.
