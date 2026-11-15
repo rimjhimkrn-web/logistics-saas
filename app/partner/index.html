@@ -38,10 +38,23 @@ footer{width:min(1180px,calc(100% - 40px));margin:0 auto;padding:18px 0 26px;bor
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+
+<style id="krim-partner-gateway-navigation">
+.krim-partner-gateway-header{position:sticky!important;top:0!important;z-index:1000!important;width:100%!important;min-height:82px!important;padding:0 max(24px,calc((100vw - 1180px)/2))!important;background:#fff!important;border-bottom:1px solid #dce5f0!important;box-shadow:0 5px 20px rgba(9,36,61,.055)!important}
+.krim-partner-gateway-header .brand{min-width:0}
+.krim-partner-gateway-header .brand img{display:block;width:250px!important;height:70px!important;max-width:min(68vw,250px)!important;object-fit:contain!important;object-position:left center!important}
+.krim-partner-menu-button{display:grid!important;place-items:center!important;width:46px!important;height:46px!important;flex:0 0 46px!important;margin-left:auto!important;border:1px solid #d3dfe8!important;border-radius:11px!important;background:#fff!important;color:#09243d!important;cursor:pointer!important}
+.krim-partner-menu-button svg{width:21px;height:21px}
+.krim-partner-menu{position:fixed!important;top:82px!important;left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;max-height:calc(100dvh - 82px)!important;overflow-y:auto!important;box-sizing:border-box!important;padding:14px max(24px,calc((100vw - 1180px)/2)) 22px!important;background:#fff!important;border-top:1px solid #dce5f0!important;border-bottom:1px solid #dce5f0!important;box-shadow:0 18px 36px rgba(9,36,61,.13)!important;z-index:1100!important}
+.krim-partner-menu:not([hidden]){display:flex!important;flex-direction:column!important}
+.krim-partner-menu a{display:block!important;width:100%!important;padding:13px 5px!important;border:0!important;border-bottom:1px solid #edf1f5!important;background:#fff!important;color:#344e64!important;font-size:13px!important;font-weight:750!important;text-decoration:none!important}
+.krim-partner-menu a:hover{color:#1762c4!important;background:#f7faff!important}
+@media(max-width:640px){.krim-partner-gateway-header{width:100%!important;min-height:70px!important;padding:0 14px!important}.krim-partner-gateway-header .brand img{width:218px!important;height:60px!important;max-width:calc(100vw - 88px)!important}.krim-partner-menu{top:70px!important;max-height:calc(100dvh - 70px)!important;padding:12px 20px 20px!important}}
+</style>
 </head>
 <body class="krim-global-shell">
 <a class="skip" href="#main">Skip to gateway status</a>
-<header><a class="brand" href="../../index.html"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><span class="head-label">Secure partner access</span></header>
+<header class="krim-partner-gateway-header"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><button class="krim-partner-menu-button" id="partnerGatewayMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="partnerGatewayNavigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><nav class="krim-partner-menu" id="partnerGatewayNavigation" aria-label="Partner navigation" hidden><a href="../../index.html">KRIM Home</a><a href="../../auth/partner-signin.html">Partner sign in</a><a href="../../public/partner/partner-onboarding.html">Partner onboarding</a><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-with-us.html">Partner with KRIM</a><a href="../../contact.html">Contact KRIM</a></nav></header>
 <main id="main">
 <div class="notice" role="status"><strong>Pre-launch control:</strong> Development/test mode is non-commercial. Live commercial operations are disabled until the complete ecosystem review, partner verification, market readiness and controlled launch approval are complete. A sign-in alone does not enable bidding, assignments, capacity commitments, shipments or payments.</div>
 <section class="gateway" role="status" aria-live="polite" aria-atomic="true">
@@ -90,6 +103,19 @@ redirect("app/partner/"+routes[mode]+"/index.html");
 }catch(e){console.error("Partner workspace gateway check failed",e);state("Workspace could not be opened",e?.message||"Refresh the page and sign in again.","If the issue continues, contact KRIM support. No access decision has been assumed.");$("signin").hidden=false}
 }
 boot();
+})();
+</script>
+
+<script id="krim-partner-gateway-menu-script">
+(function(){
+ const button=document.getElementById("partnerGatewayMenuButton");
+ const menu=document.getElementById("partnerGatewayNavigation");
+ if(!button||!menu)return;
+ const close=()=>{menu.hidden=true;button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu");};
+ button.addEventListener("click",()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");});
+ document.addEventListener("click",e=>{if(!menu.hidden&&!menu.contains(e.target)&&!button.contains(e.target))close();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+ menu.addEventListener("click",e=>{if(e.target.closest("a"))close();});
 })();
 </script>
 </body>
