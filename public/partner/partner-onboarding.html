@@ -89,6 +89,18 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+<style id="krim-onboarding-unified-navigation">
+body>header{min-height:72px!important;height:72px!important;padding:8px max(20px,calc((100vw - 1180px)/2))!important;box-sizing:border-box!important}
+body>header>div:first-child{min-width:0!important;gap:14px!important}
+body>header>div:first-child>div,body>header>div:first-child>span{display:none!important}
+.krim-menu-button{display:grid!important;place-items:center!important;flex:0 0 46px!important;width:46px!important;height:46px!important;margin-left:auto!important;border:1px solid #ffffff55!important;border-radius:10px!important;background:#ffffff0d!important;color:#fff!important;cursor:pointer!important}
+.krim-menu-button svg{width:22px;height:22px}
+.krim-unified-menu{position:fixed!important;top:72px!important;left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;max-height:calc(100dvh - 72px)!important;overflow-y:auto!important;box-sizing:border-box!important;padding:18px max(24px,calc((100vw - 1180px)/2)) 24px!important;background:#07182d!important;border-top:1px solid #ffffff24!important;box-shadow:0 18px 36px #07152f55!important;z-index:120!important}
+.krim-unified-menu:not([hidden]){display:flex!important;flex-direction:column!important;gap:0!important}
+.krim-unified-menu a{display:block!important;padding:15px 4px!important;border-bottom:1px solid #ffffff20!important;color:#fff!important;font:700 13px/1.4 Inter,system-ui,sans-serif!important;text-decoration:none!important}
+.krim-unified-menu a:hover{color:#7ddff0!important}
+@media(max-width:640px){body>header{padding:8px 16px!important}body>header img{width:190px!important;height:52px!important}}
+</style>
 </head>
 <body><a class="skip" href="#main">Skip to partner verification</a>
 
@@ -102,12 +114,17 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
       <span class="text-xs font-bold text-slate-400">Partner Onboarding & Verification</span>
     </div>
 
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="../../app/partner/index.html?release=partner-workspace-v3" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← Partner Workspace
-      </a>
-    </div>
+    <button id="krimMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="krimUnifiedMenu" class="krim-menu-button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
   </header>
+  <nav id="krimUnifiedMenu" class="krim-unified-menu" aria-label="Partner navigation" hidden>
+    <a href="../../app/partner/index.html?release=partner-workspace-v3">Partner workspace</a>
+    <a href="../../partner-standards.html">Partner standards</a>
+    <a href="../../partner-agreement.html">Partner agreement framework</a>
+    <a href="../../contact.html">Contact KRIM</a>
+    <a href="../../auth/partner-signin.html">Partner sign in</a>
+  </nav>
 
   <!-- ==================== MAIN ONBOARDING WORKFLOW ==================== -->
   <main id="main" class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-mono text-xs">
@@ -712,6 +729,9 @@ body>footer>div{width:min(1160px,100%)!important;gap:12px!important;flex-wrap:wr
 
     initializePartnerOnboarding();
   </script>
+<script id="krim-onboarding-menu-script">
+(()=>{const b=document.getElementById("krimMenuButton"),m=document.getElementById("krimUnifiedMenu");if(!b||!m)return;const close=()=>{m.hidden=true;b.setAttribute("aria-expanded","false");b.setAttribute("aria-label","Open navigation menu")};b.addEventListener("click",()=>{const open=b.getAttribute("aria-expanded")!=="true";m.hidden=!open;b.setAttribute("aria-expanded",String(open));b.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu")});m.addEventListener("click",e=>{if(e.target.closest("a"))close()});document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});document.addEventListener("click",e=>{if(!b.contains(e.target)&&!m.contains(e.target))close()})})();
+</script>
 </body>
           </html>
           
