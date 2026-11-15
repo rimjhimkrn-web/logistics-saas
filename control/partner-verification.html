@@ -61,7 +61,7 @@ async function addDocuments(card,row){
 }
 async function decide(row,decision,textarea,buttons){
  const reason=textarea.value.trim();
- if(decision==="rejected"&&reason.length<5){message("A rejection reason of at least 5 characters is required.","error");textarea.focus();return}
+ if(decision==="approved"&&reason.length<10){message("An approval evidence-review note of at least 10 characters is required.","error");textarea.focus();return} if(decision==="rejected"&&reason.length<5){message("A rejection reason of at least 5 characters is required.","error");textarea.focus();return}
  const prompt=decision==="approved"?"Approve this partner after verifying the business and supporting documents?":"Reject this partner verification case and restrict partner access?";
  if(!window.confirm(prompt))return;
  buttons.forEach(b=>b.disabled=true);
@@ -97,7 +97,7 @@ async function renderCase(row){
  if(!documentsVerified)card.append(node("div","Approval is disabled until every submitted verification document is available in private storage.","notice error"));
  if(["open","in_review","pending_information"].includes(row.case_status)){
    const review=node("div",null,"review");
-   review.append(node("label","Review notes (required for rejection)"));
+   review.append(node("label","Review notes (10+ characters for approval; 5+ for rejection)"));
    const textarea=node("textarea");textarea.maxLength=1000;textarea.placeholder="Record what was checked, any discrepancies, and the decision rationale.";review.append(textarea);
    const actions=node("div",null,"actions");
    const reject=node("button","Reject & restrict","btn danger");reject.type="button";
@@ -126,7 +126,7 @@ async function loadQueue(){
    document.getElementById("approved-count").textContent=rows.filter(r=>r.case_status==="approved").length;
    document.getElementById("rejected-count").textContent=rows.filter(r=>r.case_status==="rejected").length;
    if(!rows.length){queue.append(node("div","No partner verification cases have been submitted yet.","empty"));message("Administrator access confirmed. The queue is empty.");return}
-   message("Administrator access confirmed. Showing up to 100 recent verification cases.");
+   message("Administrator access confirmed. Showing up to 50 recent verification cases.");
    const cards=await Promise.all(rows.map(row=>renderCase(row)));cards.forEach(card=>queue.append(card))
  }catch(error){
    const msg=error&&error.message?error.message:"Unable to load verification queue.";
