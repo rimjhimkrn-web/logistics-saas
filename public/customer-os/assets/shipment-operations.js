@@ -43,6 +43,52 @@ function renderDetails(){
  [['Timeline','public/customer-os/customer-services/shipment-timeline.html'],['Tracking','public/customer-os/customer-services/tracking-map.html'],['Pickup & custody','public/pickup-tracking.html'],['Quote comparison','public/shipper/quote-comparison.html']].forEach(([label,url])=>{const a=node('a','btn',label+' →');a.href=path(url)+(url.includes('pickup-tracking')?'?shipment='+encodeURIComponent(shipment.shipment_number||''):'?shipment_id='+encodeURIComponent(shipment.id));$('actions').appendChild(a)});
  say('Shipment ownership verified. Quote, partner assignment, payment and delivery evidence are separate lifecycle records.')
 }
+async function loadRoutePlan(){
+ const root=$('route-plan-records');if(!root||!shipment)return;
+ root.replaceChildren();
+ const [planResult,legResult]=await Promise.all([
+  client.from('krim_shipment_leg_plans').select('id,plan_version,status,total_legs,created_at,activated_at').eq('shipment_id',shipment.id).order('plan_version',{ascending:false}).limit(10),
+  client.from('krim_shipment_legs').select('id,leg_sequence,origin_location_id,destination_location_id,transport_mode_id,status,assignment_status,leg_plan_item_id,planned_departure,planned_arrival').eq('shipment_id',shipment.id).order('leg_sequence',{ascending:true})
+ ]);
+ if(planResult.error){root.appendChild(node('div','empty','Route-plan register is unavailable under current permissions. No route state is inferred.'));return}
+ const plans=planResult.data||[],legs=legResult.error?[]:(legResult.data||[]);
+ const planIds=plans.map(p=>p.id);
+ let items=[],itemError=null;
+ if(planIds.length){const r=await client.from('krim_shipment_leg_plan_items').select('id,plan_id,leg_sequence,origin_location_id,destination_location_id,transport_mode_id,status,planned_departure_at,planned_arrival_at').in('plan_id',planIds).order('leg_sequence',{ascending:true});items=r.data||[];itemError=r.error}
+ const locationIds=[...new Set([...items.flatMap(i=>[Number(i.origin_location_id),Number(i.destination_location_id)]),...legs.flatMap(l=>[Number(l.origin_location_id),Number(l.destination_location_id)])].filter(Number.isSafeInteger))];
+ const modeIds=[...new Set([...items.map(i=>Number(i.transport_mode_id)),...legs.map(l=>Number(l.transport_mode_id))].filter(Number.isSafeInteger))];
+ const [locationResult,modeResult]=await Promise.all([
+  locationIds.length?client.from('krim_locations').select('id,city,state_region,region,location_code').in('id',locationIds):Promise.resolve({data:[],error:null}),
+  modeIds.length?client.from('krim_transport_modes').select('id,code,name').in('id',modeIds):Promise.resolve({data:[],error:null})
+ ]);
+ const locations=new Map((locationResult.data||[]).map(x=>[Number(x.id),[x.city,x.state_region||x.region,x.location_code].filter(Boolean).join(', ')]));
+ const modes=new Map((modeResult.data||[]).map(x=>[Number(x.id),x.name||x.code||('Mode '+x.id)]));
+ const place=id=>locations.get(Number(id))||('Location #'+id);
+ const mode=id=>modes.get(Number(id))||('Mode #'+id);
+ if(!plans.length&&!legs.length){root.appendChild(node('div','empty','No route plan or transport legs have been recorded for this shipment.'));return}
+ plans.forEach(plan=>{
+  const card=node('article','event'),top=node('div','event-top');
+  top.append(node('strong','', 'Route plan v'+plan.plan_version+' · '+String(plan.status||'unknown').replace(/_/g,' ')),node('span','time',date(plan.activated_at||plan.created_at)));
+  card.appendChild(top);
+  const planItems=items.filter(i=>Number(i.plan_id)===Number(plan.id));
+  if(itemError){card.appendChild(node('p','event-meta','Plan items are unavailable under current permissions.'))}
+  else if(!planItems.length){card.appendChild(node('p','event-meta','No leg items are recorded in this plan.'))}
+  else planItems.forEach(item=>{
+   const line=node('p','event-meta','Leg '+item.leg_sequence+': '+place(item.origin_location_id)+' → '+place(item.destination_location_id)+' · '+mode(item.transport_mode_id)+' · plan item '+String(item.status||'planned').replace(/_/g,' '));
+   card.appendChild(line);
+   const actual=legs.find(l=>Number(l.leg_plan_item_id)===Number(item.id));
+   if(actual)card.appendChild(node('p','event-meta','Execution: '+String(actual.status||'unknown').replace(/_/g,' ')+' · partner assignment: '+String(actual.assignment_status||'unassigned').replace(/_/g,' ')));
+  });
+  root.appendChild(card);
+ });
+ const unlinked=legs.filter(l=>!l.leg_plan_item_id);
+ if(unlinked.length){
+  const card=node('article','event');card.appendChild(node('strong','','Existing shipment legs'));
+  unlinked.forEach(l=>card.appendChild(node('p','event-meta','Leg '+l.leg_sequence+': '+place(l.origin_location_id)+' → '+place(l.destination_location_id)+' · '+mode(l.transport_mode_id)+' · '+String(l.status||'unknown').replace(/_/g,' ')+' · assignment '+String(l.assignment_status||'unassigned').replace(/_/g,' '))));
+  root.appendChild(card);
+ }
+ if(legResult.error||locationResult.error||modeResult.error){root.appendChild(node('p','event-meta','Some leg execution or location/mode details could not be loaded. Only authorised records are shown.'))}
+}
 function renderEvents(rows,emptyText){
  const root=$('events');root.replaceChildren();
  if(!rows.length){root.appendChild(node('div','empty',emptyText));return}
@@ -85,7 +131,7 @@ async function init(){
  $('timeline-link').href=path('public/customer-os/customer-services/shipment-timeline.html')+'?shipment_id='+encodeURIComponent(shipmentId||'');
  $('tracking-link').href=path('public/customer-os/customer-services/tracking-map.html')+'?shipment_id='+encodeURIComponent(shipmentId||'');
  if(!await access())return;await loadUserPreferences();if(!await loadShipment())return;
- if(view==='details')renderDetails();else if(view==='timeline')await loadTimeline();else await loadTracking()
+ if(view==='details'){renderDetails();await loadRoutePlan()}else if(view==='timeline')await loadTimeline();else await loadTracking()
 }
 init().catch(e=>{console.error(e);$('title').textContent='Unable to load shipment';say((e&&e.message)||'Shipment data could not be loaded. No operational state was assumed.','error')});
 })();
