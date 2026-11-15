@@ -5,7 +5,7 @@ Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return reply(405,{error:"Method not allowed"});
  const authorization=req.headers.get("Authorization")||"";
- const token=authorization.replace(/^Bearer\\s+/i,"").trim();
+ const token=authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : authorization.trim();
  if(!token)return reply(401,{error:"Authentication required"});
  const url=Deno.env.get("SUPABASE_URL")!;
  const publishableKey=Deno.env.get("SUPABASE_ANON_KEY")||Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
