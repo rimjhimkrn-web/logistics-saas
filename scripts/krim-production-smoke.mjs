@@ -1705,6 +1705,25 @@ for (const token of [
   if (!warehouseReceiptQc.includes(token)) failures.push("Warehouse aggregate-lot quality review safeguard is missing: " + token);
 }
 
+
+
+// Leg-scoped partner sourcing schema must bind opportunity and quote scope exactly.
+const legSourcingSchemaPath = "supabase/migrations/20261116002000_add_leg_scoped_partner_sourcing_schema.sql";
+const legSourcingSchema = existsSync(legSourcingSchemaPath) ? readFileSync(legSourcingSchemaPath, "utf8") : "";
+for (const token of [
+  "ADD COLUMN IF NOT EXISTS shipment_leg_id bigint",
+  "REFERENCES public.krim_shipment_legs(id) ON DELETE RESTRICT",
+  "private.krim_validate_leg_scoped_partner_opportunity",
+  "private.krim_validate_leg_scoped_partner_quote",
+  "p.status='active'",
+  "NEW.shipment_leg_id IS DISTINCT FROM v_opportunity.shipment_leg_id",
+  "SET search_path TO ''",
+  "REVOKE ALL ON FUNCTION private.krim_validate_leg_scoped_partner_opportunity()",
+  "REVOKE ALL ON FUNCTION private.krim_validate_leg_scoped_partner_quote()",
+]) {
+  if (!legSourcingSchema.includes(token)) failures.push("Leg-scoped partner sourcing schema safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
