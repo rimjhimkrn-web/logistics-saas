@@ -186,6 +186,15 @@ Static source inspection and SQL metadata inspection do not certify browser runt
 7. **P1 — Finance closure:** preserve partner-direct payment separation and prove invoice/fee/reconciliation records without collecting freight funds.
 8. **P1 — Update phase audit docs:** keep the Phase 10 audit aligned with the current driver POD source and ensure the 14-phase acceptance blueprint remains the authority.
 
+## 10A. Migration-history reconciliation gate
+
+A read-only comparison of inventory totals on 2026-11-16 found:
+
+- Production `supabase_migrations.schema_migrations`: 558 entries; latest version `20261115231834`.
+- Repository `supabase/migrations`: 363 SQL files; latest filename version `20261116028000`.
+
+The production database contains materially more migration-history entries than the repository currently carries, while the repository also has later timestamped migration files not reflected by the production latest version. A simple count or timestamp comparison is not sufficient to infer that schemas are equivalent. **Do not apply, replay, squash or baseline migrations until every production version and the repository migration bodies are reconciled.** Any P0 readiness or market-gate correction must wait for this controlled comparison and a schema/function dependency review.
+
 ## 11. Evidence boundaries
 
 - Live SQL queries were read-only.
