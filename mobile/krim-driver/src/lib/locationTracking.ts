@@ -5,7 +5,10 @@ import { Platform, PermissionsAndroid } from "react-native";
 import { supabase } from "./supabase";
 
 export const DRIVER_LOCATION_TASK = "KRIM_DRIVER_TRIP_LOCATION_V1";
-// Location collection remains disabled until retention, deletion and legal launch gates are approved.
+export const DRIVER_GPS_CONSENT_NOTICE_VERSION = "2026-11-15-v1";
+export const DRIVER_GPS_CONSENT_NOTICE_APPROVED = false;
+export const DRIVER_GPS_CONSENT_NOTICE_TEXT = "KRIM Driver location sharing (draft notice — GPS remains disabled): If and when KRIM enables this feature after publishing an approved GPS retention period, deletion process and legal-hold terms, this app will share this device location only for the shipment assignment selected by you and marked In Transit. Location may be visible to KRIM operations personnel and the customer/shipper authorized for that shipment. You may decline or stop sharing at any time. Android background sharing requires location permission and an ongoing location notification; if background permission is not granted, only foreground sharing can operate. Location can be delayed or interrupted by device, battery, GPS or network conditions. Do not use the phone while driving. KRIM location tracking is not emergency monitoring or safety-critical navigation. This draft notice is not approved for commercial use. GPS collection remains disabled until the approved notice and retention terms are published and the legal launch gate is opened.";
+// Keep both independent gates closed until the approved notice, retention schedule and deletion controls are signed off.
 export const DRIVER_GPS_LAUNCH_ENABLED = false;
 const ASSIGNMENT_KEY = "krim.driver.tracking.assignment.v1";
 const SESSION_KEY = "krim.driver.tracking.session.v1";
