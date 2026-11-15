@@ -33,6 +33,12 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Stage KRIM brand assets
+        run: |
+          npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
+          npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/icon.png -f png resize 1024 1024 --fit contain --background '#071B35'
+          npx --yes sharp-cli -i ../../assets/krim-icon.svg -o assets/adaptive-icon.png -f png resize 680 680 --fit contain --background '#071B35'
+          npx --yes sharp-cli -i assets/adaptive-icon.png -o assets/adaptive-icon.png -f png extend 172 172 172 172 --background '#071B35'
       - name: Check Expo SDK package compatibility
         run: npx expo install --check
       - name: TypeScript validation
