@@ -1386,6 +1386,21 @@ for (const token of [
   if (!warehouseLinkedTaskIdempotency.includes(token)) failures.push("Warehouse linked-task replay validation is missing: " + token);
 }
 
+// Warehouse handover completion must revalidate the actual private dispatch-proof object.
+const warehouseHandoverProofMigrationPath = "supabase/migrations/20261115182500_revalidate_private_dispatch_proof_before_warehouse_handover.sql";
+const warehouseHandoverProofMigration = existsSync(warehouseHandoverProofMigrationPath)
+  ? readFileSync(warehouseHandoverProofMigrationPath, "utf8") : "";
+for (const token of [
+  "e.evidence_type='dispatch_proof'",
+  "o.owner=e.created_by",
+  "e.bucket_id='krim-warehouse-evidence'",
+  "cardinality(string_to_array(e.storage_path,'/'))=3",
+  "pg_catalog.pg_input_is_valid",
+  "current private, uploader-owned dispatch proof",
+]) {
+  if (!warehouseHandoverProofMigration.includes(token)) failures.push("Warehouse dispatch handover evidence guard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
