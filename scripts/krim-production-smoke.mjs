@@ -39,6 +39,8 @@ const required = [
   "supabase/migrations/20261115105000_preserve_active_operations_membership_scope.sql",
   "supabase/migrations/20261115110000_grant_partner_capability_policy_helper_to_authenticated.sql",
   "supabase/migrations/20261115111500_harden_customer_and_partner_organization_provisioning.sql",
+  "auth/partner-signup.html",
+  "supabase/migrations/20261115112000_align_individual_partner_service_categories.sql",
   "supabase/migrations/20261018193607_implement_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019100000_restore_rate_card_backed_tariff_quotes.sql",
   "supabase/migrations/20261019000100_fail_closed_tariff_quotes_without_approved_rate_cards.sql",
@@ -1125,6 +1127,13 @@ if ((provisioningHardeningMigration.match(/SET search_path TO ''/g) || []).lengt
 }
 if (!provisioningHardeningMigration.includes("organization_type_code, o.organization_type")) {
   failures.push("Partner provisioning must resolve supported partner organization type codes without creating duplicates.");
+}
+const partnerSignupPage = existsSync("auth/partner-signup.html") ? readFileSync("auth/partner-signup.html", "utf8") : "";
+const individualPartnerCategoryMigration = existsSync("supabase/migrations/20261115112000_align_individual_partner_service_categories.sql")
+  ? readFileSync("supabase/migrations/20261115112000_align_individual_partner_service_categories.sql", "utf8") : "";
+for (const category of ["road_transport","rail_freight","air_cargo","ocean_freight","multimodal","freight_forwarding","warehouse","customs_support","last_mile","cross_border","other"]) {
+  if (!partnerSignupPage.includes('value="' + category + '"')) failures.push("Partner registration selector is missing service category: " + category);
+  if (!individualPartnerCategoryMigration.includes("'" + category + "'")) failures.push("Individual partner interest backend does not accept service category: " + category);
 }
 for (const token of ["partner_account_mode = 'registered_business'", "private.krim_partner_compliance_is_current", "private.krim_partner_capability_covers_shipment"]) {
   if (!partnerReadScopeMigration.includes(token)) failures.push("Partner opportunity read-scope migration is missing the current eligibility gate: " + token);
