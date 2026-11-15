@@ -14,6 +14,7 @@ const required = [
   "app/customs/index.html",
   "app/warehouse/index.html",
   "app/operations/index.html",
+  "app/operations/route-planning.html",
   "public/operations/index.html",
   "config.js",
   "public/krim-global-operations.js",
@@ -1369,6 +1370,16 @@ for (const token of [
   'client.rpc("krim_customs_broker_license_submit"',
 ]) {
   if (!customsWorkspaceSource.includes(token)) failures.push("Customs evidence upload path/RPC contract is missing: " + token);
+}
+
+// Operations route-planning page must read scoped versioned plans and render rows correctly.
+const routePlanningUiPath = "app/operations/route-planning.html";
+const routePlanningUi = existsSync(routePlanningUiPath) ? readFileSync(routePlanningUiPath, "utf8") : "";
+for (const token of ['from("krim_shipment_leg_plans")','from("krim_shipment_leg_plan_items")','id="planRows"','id="planState"']) {
+  if (!routePlanningUi.includes(token)) failures.push("Operations route-planning plan register integration is missing: " + token);
+}
+if (routePlanningUi.includes("rows.map(x=>x=>")) {
+  failures.push("Operations route-planning route register contains a broken nested row renderer.");
 }
 
 // Shipment leg-plan creation must remain a narrow authenticated RPC; activation is a separate gated workflow.
