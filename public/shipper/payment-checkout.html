@@ -14,6 +14,9 @@ main{padding:46px 0 70px}.eyebrow{font-size:11px;letter-spacing:.16em;text-trans
 footer{background:var(--navy);color:#c4d3de;padding:26px 0;font-size:12px}.foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}.foot a{color:#fff}
 @media(max-width:760px){.head{height:68px}.menu{display:block}nav{display:none;position:absolute;top:68px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 20px 18px;box-shadow:0 14px 24px #071b2d18;flex-direction:column;align-items:stretch}nav.open{display:flex}nav a{padding:10px 0;border-bottom:1px solid #edf2f6}main{padding:32px 0 52px}.lead{font-size:14px}.grid{grid-template-columns:1fr}.card{padding:18px}}
 </style>
+<link rel="stylesheet" href="../../core/krim-global-interface.css">
+<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
+<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 <link rel="stylesheet" href="../../assets/css/krim-global-interface.css">
 </head>
 <body class="krim-global-shell krim-global-ui">
@@ -30,8 +33,20 @@ footer{background:var(--navy);color:#c4d3de;padding:26px 0;font-size:12px}.foot{
 <section class="card"><h2>Payment issue or suspected fraud?</h2><p>Stop before transferring funds if the beneficiary, amount, quote or provider identity does not match. Use a secure support ticket for an existing case, or contact KRIM through the public enquiry channel. Do not submit card numbers, passwords, OTPs or banking credentials in a support ticket.</p><p><a href="../support/create-ticket.html">Create a secure support ticket</a> · <a href="../support/ticket-history.html">View ticket history</a></p></section>
 <section class="card"><h2>What this page does not do</h2><ul><li>It does not create a payment order or mark a shipment as paid.</li><li>It does not verify a provider's bank account or guarantee its performance.</li><li>It does not offer escrow, split settlement, partner payouts or automatic refunds.</li><li>It does not promise payment-method availability in any country or currency.</li></ul></section>
 </div>
-<div class="actions"><a class="btn" href="../../app/customer/index.html">Return to customer workspace</a><a class="btn secondary" href="../../terms.html#payment">Read payment terms</a><a class="btn secondary" href="../../contact.html">Contact KRIM</a></div>
+<div class="actions"><a class="btn" id="booking-status-link" href="../shipment-confirmation.html" style="display:none">Review booking status &amp; operational readiness</a><a class="btn" href="../../app/customer/index.html">Return to customer workspace</a><a class="btn secondary" href="../../terms.html#payment">Read payment terms</a><a class="btn secondary" href="../../contact.html">Contact KRIM</a></div>
 </main>
 <footer><div class="wrap foot"><span>© 2026 KRIM Logistics · Global Logistics Operating System</span><span><a href="../../privacy.html">Privacy</a> · <a href="../../terms.html">Terms</a> · <a href="../../grievance.html">Grievance</a></span></div></footer>
-<script>const menu=document.getElementById('menu'),nav=document.getElementById('nav');menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');nav.classList.toggle('open',open);menu.textContent=open?'×':'☰';});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰';}));</script>
+<script>
+const menu=document.getElementById('menu'),nav=document.getElementById('nav');
+menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');nav.classList.toggle('open',open);menu.textContent=open?'×':'☰';});
+nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰';}));
+(function(){
+ const params=new URLSearchParams(location.search),shipment=params.get('shipment_id'),quote=params.get('quote_id');
+ if(/^\\d+$/.test(shipment||'')&&/^\\d+$/.test(quote||'')){
+  const link=document.getElementById('booking-status-link');
+  link.href='../shipment-confirmation.html?shipment_id='+encodeURIComponent(shipment)+'&quote_id='+encodeURIComponent(quote);
+  link.style.display='inline-flex';
+ }
+}());
+</script>
 </body></html>
