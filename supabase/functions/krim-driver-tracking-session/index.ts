@@ -60,23 +60,26 @@ Deno.serve(async(req:Request)=>{
  if(partnerError)return reply(500,{error:"Could not verify partner shipment assignment"});
  if(!partner||!["accepted","active","in_progress","assigned"].includes(String(partner.status).toLowerCase()))return reply(403,{error:"The linked partner shipment assignment is not active"});
  if(!driver.shipment_leg_id||String(driver.shipment_leg_id)!==String(partner.shipment_leg_id))return reply(403,{error:"Driver and partner assignment shipment legs do not match"});
- const {data:existing,error:existingError}=await admin.from("krim_driver_tracking_sessions").select("id,status,started_at,consent_version,consent_notice_sha256")
-  .eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
- if(existingError)return reply(500,{error:"Could not check existing tracking session"});
- if(existing){if(existing.consent_version!==CONSENT_NOTICE_VERSION||existing.consent_notice_sha256!==consentHash)return reply(409,{error:"An active session uses a different consent notice. Stop it and review the current notice before starting again"});return reply(200,{success:true,started:true,session_id:existing.id,started_at:existing.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});}
  const platform=String(body.platform||"");
  if(!["android","ios"].includes(platform))return reply(400,{error:"GPS sharing is available only through the KRIM Driver native app"});
  const consentVersion=String(body.consent_version||"");
  if(consentVersion!==CONSENT_NOTICE_VERSION)return reply(400,{error:"Please review and accept the current location-sharing notice"});
  const consentHash=await sha256Hex(CONSENT_NOTICE_TEXT);
+ const {data:existing,error:existingError}=await admin.from("krim_driver_tracking_sessions").select("id,status,started_at,platform,consent_version,consent_notice_sha256")
+  .eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
+ if(existingError)return reply(500,{error:"Could not check existing tracking session"});
+ if(existing){
+  if(existing.platform!==platform||existing.consent_version!==CONSENT_NOTICE_VERSION||existing.consent_notice_sha256!==consentHash)return reply(409,{error:"An active session uses a different platform or consent notice. Stop it and review the current notice before starting again"});
+  return reply(200,{success:true,started:true,session_id:existing.id,started_at:existing.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});
+ }
  const {data:created,error:createError}=await admin.from("krim_driver_tracking_sessions").insert({
   driver_assignment_id:assignmentId,partner_assignment_id:driver.partner_assignment_id,shipment_id:driver.shipment_id,
   shipment_leg_id:driver.shipment_leg_id||partner.shipment_leg_id||null,organization_id:driver.organization_id,user_id:userId,
   consent_version:consentVersion,consent_notice_text:CONSENT_NOTICE_TEXT,consent_notice_sha256:consentHash,consent_language:CONSENT_NOTICE_LANGUAGE,platform,status:"active"
  }).select("id,started_at").single();
  if(createError){
-  const {data:retry}=await admin.from("krim_driver_tracking_sessions").select("id,started_at,consent_version,consent_notice_sha256").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
-  if(retry&&retry.consent_version===CONSENT_NOTICE_VERSION&&retry.consent_notice_sha256===consentHash)return reply(200,{success:true,started:true,session_id:retry.id,started_at:retry.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});
+  const {data:retry}=await admin.from("krim_driver_tracking_sessions").select("id,started_at,platform,consent_version,consent_notice_sha256").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
+  if(retry){if(retry.platform===platform&&retry.consent_version===CONSENT_NOTICE_VERSION&&retry.consent_notice_sha256===consentHash)return reply(200,{success:true,started:true,session_id:retry.id,started_at:retry.started_at,already_active:true,consent_notice_version:CONSENT_NOTICE_VERSION,consent_notice_sha256:consentHash});return reply(409,{error:"A different active consent session already exists; stop it and review the current notice"});}
   return reply(500,{error:"Tracking consent session could not be recorded"});
  }
  return reply(201,{success:true,started:true,session_id:created.id,started_at:created.started_at,already_active:false});
