@@ -75,10 +75,10 @@ async function loadBids(){
   if(memberError)throw memberError;
   const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
   if(!ids.length){count.textContent="Partner organization required";message("This account has no active organization membership. If you just registered, partner organization setup or activation may still be pending.");empty("Your account must be linked to an active organization before organization-scoped bids can be retrieved.");return;}
-  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,status").in("id",ids);
+  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",ids);
   if(orgError)throw orgError;
-  const partnerIds=(orgs||[]).filter(o=>["partner","carrier","forwarder"].includes(String(o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active").map(o=>Number(o.id));
-  if(!partnerIds.length){count.textContent="Partner access required";message("No active partner, carrier, or forwarder organization is linked to this account.");empty("Use partner registration if you have not registered yet, or contact support to activate your existing partner organization.");return;}
+  const partnerIds=(orgs||[]).filter(o=>["partner","carrier","forwarder","logistics_provider"].includes(String(o.organization_type_code||o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active").map(o=>Number(o.id));
+  if(!partnerIds.length){count.textContent="Partner access required";message("No active partner, carrier, forwarder, or logistics-provider organization is linked to this account.");empty("Use partner registration if you have not registered yet, or contact support to activate your existing partner organization.");return;}
   const {data:quotes,error:quoteError}=await client.from("krim_partner_quotes").select("id,opportunity_id,shipment_id,quote_number,amount,currency_code,status,submitted_at,valid_until,notes").in("partner_organization_id",partnerIds).order("submitted_at",{ascending:false}).limit(100);
   if(quoteError)throw quoteError;
   const rows=quotes||[];count.textContent=rows.length+" bid record"+(rows.length===1?"":"s");
