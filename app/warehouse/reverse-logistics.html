@@ -51,7 +51,7 @@ const c=window.KRIM_SUPABASE||window.supabaseClient,$=id=>document.getElementByI
 let user=null,orgIds=[],orgs=[],facilities=[],inventory=[],transfers=[],returns=[],receipts=[];
 const esc=v=>String(v??"—").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
 const uuid=()=>crypto.randomUUID();
-function stableIdem(scope,payload){const raw=JSON.stringify(payload);const encoded=btoa(unescape(encodeURIComponent(raw))).replace(/[^a-zA-Z0-9]/g,"").slice(0,150);const key="krim.wh.idem."+user.id+"."+scope+"."+encoded;let value=localStorage.getItem(key);if(!value){value=uuid();localStorage.setItem(key,value)}return {value,key}}
+function stableIdem(scope,payload){const raw=JSON.stringify(payload);let h=14695981039346656037n;for(let i=0;i<raw.length;i++){h^=BigInt(raw.charCodeAt(i));h=BigInt.asUintN(64,h*1099511628211n)}const key="krim.wh.idem."+user.id+"."+scope+"."+h.toString(16);let value=localStorage.getItem(key);if(!value){value=uuid();localStorage.setItem(key,value)}return {value,key}}
 function clearIdem(token){if(token?.key)localStorage.removeItem(token.key)}
 const say=(id,msg)=>$(id).textContent=msg;
 function opt(rows,label,value){return '<option value="">'+label+'</option>'+rows.map(x=>'<option value="'+esc(x[value])+'">'+esc(x.label)+'</option>').join("")}
