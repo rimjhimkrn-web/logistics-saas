@@ -1111,7 +1111,7 @@ for (const [label, source, tokens] of [
   ["GPS consent archive migration", gpsConsentMigration, ["consent_notice_text", "consent_notice_sha256", "consent_language"]],
   ["GPS retention disclosure", gpsRetentionNotice, ["GPS collection is disabled by both", "exact server-controlled notice text", "SHA-256 notice hash"]],
   ["GPS privacy disclosure", gpsPrivacyNotice, ["No GPS location events are currently recorded", "GPS collection is disabled"]],
-  ["Authenticated customer GPS scope", customerTrackingGpsMigration, ["krim_driver_tracking_sessions", "d.status='in_transit'", "m.status='active'", "dp.licence_number", "gps_sharing_status", "latest_position", "source_type IS DISTINCT FROM 'gps'"]],
+  ["Authenticated customer GPS scope", customerTrackingGpsMigration, ["krim_driver_tracking_sessions", "d.status='in_transit'", "m.status='active'", "dp.licence_number", "gps_sharing_status", "latest_position", "source_type <> 'gps'"]],
   ["Customer mobile GPS experience", customerMobileTracking, ["gps_sharing_status", "latest_position", "Open map", "30000", "shares coordinates with OpenStreetMap"]],
 ]) {
   for (const token of tokens) if (!source.includes(token)) failures.push(label + " is missing required safeguard: " + token);
