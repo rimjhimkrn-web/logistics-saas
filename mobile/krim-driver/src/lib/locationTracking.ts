@@ -146,32 +146,53 @@ export async function startTripTracking(assignmentId: string, trackingSessionId:
 
 export async function stopTripTracking(): Promise<void> {
   const assignmentId = await SecureStore.getItemAsync(ASSIGNMENT_KEY);
+  // Stop local collection first, even when the network is unavailable.
   await stopLocalTracking();
-  let stopError: unknown = null;
-  if (supabase && assignmentId) {
+  if (assignmentId) {
+    if (!supabase) throw new Error("The device stopped collecting location, but KRIM could not confirm the server-side stop. Reconnect and retry.");
     const { error } = await supabase.functions.invoke("krim-driver-tracking-session", {
       body: { action: "stop", assignment_id: assignmentId }
     });
-    stopError = error;
+    // Preserve the pending assignment/session identifiers on failure so the app
+    // can retry the server-side stop after connectivity or authentication returns.
+    if (error) throw error;
   }
   await SecureStore.deleteItemAsync(ASSIGNMENT_KEY);
   await SecureStore.deleteItemAsync(SESSION_KEY);
-  if (stopError) throw stopError;
 }
 
-export async function getTripTrackingStatus(): Promise<{ mode: TrackingMode | "off"; assignmentId: string | null }> {
-  if (!DRIVER_GPS_LAUNCH_ENABLED) {
-    await stopTripTracking().catch(() => stopLocalTracking());
-    return { mode: "off", assignmentId: null };
-  }
+export type DriverTrackingStatus = {
+  mode: TrackingMode | "off";
+  assignmentId: string | null;
+  serverStopPending: boolean;
+};
+
+export async function getTripTrackingStatus(): Promise<DriverTrackingStatus> {
   const assignmentId = await SecureStore.getItemAsync(ASSIGNMENT_KEY);
-  if (!assignmentId) return { mode: "off", assignmentId: null };
+  if (!DRIVER_GPS_LAUNCH_ENABLED) {
+    try {
+      await stopTripTracking();
+      return { mode: "off", assignmentId: null, serverStopPending: false };
+    } catch {
+      await stopLocalTracking();
+      return {
+        mode: "off",
+        assignmentId: await SecureStore.getItemAsync(ASSIGNMENT_KEY),
+        serverStopPending: Boolean(assignmentId)
+      };
+    }
+  }
+  if (!assignmentId) return { mode: "off", assignmentId: null, serverStopPending: false };
   try {
     if (await Location.hasStartedLocationUpdatesAsync(DRIVER_LOCATION_TASK)) {
-      return { mode: "background", assignmentId };
+      return { mode: "background", assignmentId, serverStopPending: false };
     }
   } catch { /* Continue to foreground-state check. */ }
-  if (foregroundSubscription) return { mode: "foreground", assignmentId };
-  await stopTripTracking();
-  return { mode: "off", assignmentId: null };
+  if (foregroundSubscription) return { mode: "foreground", assignmentId, serverStopPending: false };
+  try {
+    await stopTripTracking();
+    return { mode: "off", assignmentId: null, serverStopPending: false };
+  } catch {
+    return { mode: "off", assignmentId, serverStopPending: true };
+  }
 }
