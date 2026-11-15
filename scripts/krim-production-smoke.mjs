@@ -1208,7 +1208,7 @@ if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_w
 for (const token of ['placeholder="goods_carriage"', 'value="tax_token"', 'value="emissions_certificate"']) {
   if (!vehicleRegistryPage.includes(token)) failures.push("India goods vehicle registry is missing standardized evidence input: " + token);
 }
-for (const token of ["goods_carriage", "registration certificate", "valid insurance", "goods-carriage permit", "transport-vehicle fitness", "PUC", "tax certificate"]) {
+for (const token of ["goods_carriage", "registration certificate", "valid insurance", "goods-carriage permit", "transport-vehicle fitness", "PUC", "tax certificate", "hazardous/dangerous-goods", "Rules 132–133"]) {
   if (!vehicleVerificationAdminPage.toLowerCase().includes(token.toLowerCase())) failures.push("Vehicle admin legal baseline guidance is missing: " + token);
 }
 if (!driverProfileGuardMigration.toLowerCase().includes("new.verification_status := 'pending'") || !driverProfileGuardMigration.toLowerCase().includes("old.verification_status")) {
