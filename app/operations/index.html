@@ -105,7 +105,7 @@ body>.announcement{display:none!important}
    }
    $('warehouseBadge').textContent=[transferRes.error,returnRes.error].some(Boolean)?'PARTIAL / RESTRICTED':'QUERIES COMPLETE';
    $('warehouseHealth').textContent='Transfer query: '+(transferRes.error?'unavailable — '+transferRes.error.message:transferRows.length+' visible row(s)')+'. Return query: '+(returnRes.error?'unavailable — '+returnRes.error.message:returnRows.length+' visible row(s)')+'. These are permission-scoped results, not global network counts.';
-   $('dataBadge').textContent=[shipRes.error,excRes.error,eventRes.error,snapshotRes.error].some(Boolean)?'PARTIAL DATA ACCESS':'DATA QUERIES COMPLETE';
+   $('dataBadge').textContent=[shipRes.error,excRes.error,eventRes.error,snapshotRes.error,transferRes.error,returnRes.error].some(Boolean)?'PARTIAL DATA ACCESS':'DATA QUERIES COMPLETE';
    $('noticeTitle').textContent=[shipRes.error,excRes.error,eventRes.error].some(Boolean)?'Workspace loaded with data-access warnings':'Operations command is ready';
    $('notice').textContent='Session verified. Results reflect only records returned by Supabase and your current database policies. Counts are not estimates of the entire global network.';
    $('lastUpdated').textContent='Last refreshed '+new Date().toLocaleTimeString();
