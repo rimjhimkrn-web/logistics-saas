@@ -1093,6 +1093,8 @@ const driverMobileWorkspace = existsSync("mobile/krim-driver/src/DriverWorkspace
   ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const customerTrackingPage = existsSync("tracking.html") ? readFileSync("tracking.html", "utf8") : "";
 const gpsConsentMigration = existsSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql") ? readFileSync("supabase/migrations/20261115065006_driver_tracking_consent_notice_archive.sql", "utf8") : "";
+const gpsIdleExpiryMigration = existsSync("supabase/migrations/20261115071144_expire_idle_driver_tracking_sessions.sql")
+  ? readFileSync("supabase/migrations/20261115071144_expire_idle_driver_tracking_sessions.sql", "utf8") : "";
 const gpsRetentionNotice = existsSync("public/legal/data-retention.html") ? readFileSync("public/legal/data-retention.html", "utf8") : "";
 const gpsPrivacyNotice = existsSync("privacy.html") ? readFileSync("privacy.html", "utf8") : "";
 const customerTrackingGpsMigration = existsSync("supabase/migrations/20261115070842_customer_tracking_gps_active_session_scope.sql")
@@ -1109,6 +1111,7 @@ for (const [label, source, tokens] of [
   ["Driver reconnect reconciliation", driverMobileWorkspace, ["AppState.addEventListener", "Retry server stop"]],
   ["Customer tracking freshness", customerTrackingPage, ["gps_sharing_status", "pos.freshness", "starting", "stale", "setInterval", "30 seconds"]],
   ["GPS consent archive migration", gpsConsentMigration, ["consent_notice_text", "consent_notice_sha256", "consent_language"]],
+  ["GPS idle-session expiry", gpsIdleExpiryMigration, ["krim_internal_expire_stale_driver_tracking_sessions", "interval '15 minutes'", "inactivity_timeout", "*/5 * * * *"]],
   ["GPS retention disclosure", gpsRetentionNotice, ["GPS collection is disabled by both", "exact server-controlled notice text", "SHA-256 notice hash"]],
   ["GPS privacy disclosure", gpsPrivacyNotice, ["No GPS location events are currently recorded", "GPS collection is disabled"]],
   ["Authenticated customer GPS scope", customerTrackingGpsMigration, ["krim_driver_tracking_sessions", "d.status='in_transit'", "m.status='active'", "dp.licence_number", "gps_sharing_status", "latest_position", "source_type <> 'gps'"]],
