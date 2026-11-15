@@ -1,142 +1,37 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Data Retention, Archival & Purge Schedule</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              indigo: '#6366f1'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_4 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071b2d">
+<title>Data Retention & Deletion Notice | KRIM Logistics</title>
+<meta name="description" content="Interim KRIM Logistics notice explaining current data retention controls, shipment GPS records, deletion requests and implementation limits.">
+<link rel="canonical" href="https://rimjhimkrn-web.github.io/logistics-saas/public/legal/data-retention.html">
+<style>
+:root{--navy:#071b2d;--blue:#087db8;--cyan:#55d2ef;--ink:#183247;--muted:#607487;--line:#dce7ee;--pale:#f3f8fb}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:Arial,sans-serif;line-height:1.75;background:#fff}a{color:var(--blue);text-underline-offset:3px}.wrap{width:min(1040px,calc(100% - 36px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:#fffffff5;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.head{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand img{display:block;width:220px;max-width:55vw;height:58px;object-fit:contain;object-position:left center}.nav{display:flex;gap:18px;align-items:center}.nav a{font-size:12px;font-weight:700;text-decoration:none;color:#42586a}.menu{display:none;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:22px;width:44px;height:44px}
+main{padding:48px 0 70px}.eyebrow{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}h1,h2{font-family:Arial,sans-serif;color:var(--navy);line-height:1.2}h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.04em;margin:12px 0}h2{font-size:21px;margin:0 0 10px}.lead{font-size:16px;color:#526b7e;max-width:800px}.updated{font-size:12px;color:var(--muted)}
+.alert{margin:24px 0;padding:18px 20px;border:1px solid #efcf85;border-left:4px solid #d99a22;border-radius:10px;background:#fff9e9;color:#6a501c;font-size:13px}
+section{padding:24px 0;border-top:1px solid var(--line)}p,li{font-size:14px;color:#526b7e}ul{padding-left:22px}li{padding:4px 0}.pill{display:inline-block;padding:5px 10px;border-radius:30px;background:#edf6fb;color:#17668e;font-size:11px;font-weight:800}
+footer{background:var(--navy);color:#c4d3de;padding:28px 0;font-size:12px}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.foot a{color:#fff}
+@media(max-width:760px){.head{height:68px}.menu{display:block}.nav{display:none;position:absolute;top:68px;left:0;right:0;padding:12px 22px 18px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 14px 24px #071b2d18;flex-direction:column;align-items:stretch}.nav.open{display:flex}.nav a{padding:10px 0;border-bottom:1px solid #edf2f6}main{padding:34px 0 54px}.lead{font-size:14px}}
+</style>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / NAVIGATION ==================== -->
-  <header class="bg-[#040814]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        
-        <!-- Logo -->
-        <a href="/logistics-saas/index.html" class="flex items-center space-x-3">
-          <div class="w-9 h-9 bg-indigo-500 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg shadow-lg shadow-indigo-500/20">K</div>
-          <div class="flex flex-col">
-            <span class="font-extrabold text-white text-base tracking-wide leading-none">KRIM OS</span>
-            <span class="text-[10px] font-mono text-indigo-400 mt-1 uppercase tracking-widest leading-none">Data Retention</span>
-          </div>
-        </a>
-
-        <!-- Navigation Links -->
-        <nav class="hidden md:flex items-center space-x-8 text-xs font-mono">
-          <a href="/logistics-saas/index.html" class="text-slate-400 hover:text-white transition-colors">Home</a>
-          <a href="/logistics-saas/public/legal/privacy.html" class="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
-          <a href="/logistics-saas/public/legal/ai-policy.html" class="text-slate-400 hover:text-white transition-colors">AI Policy</a>
-          <a href="/logistics-saas/public/legal/data-retention.html" class="text-indigo-400 font-bold border-b-2 border-indigo-400 pb-1">Data Retention</a>
-          <a href="/logistics-saas/public/legal/cookie-policy.html" class="text-slate-400 hover:text-white transition-colors">Cookies</a>
-          <a href="/logistics-saas/contact.html" class="text-slate-400 hover:text-white transition-colors">Support Desk</a>
-        </nav>
-
-        <!-- Right Quick Actions -->
-        <div class="flex items-center space-x-4">
-          <a href="/logistics-saas/auth/login.html" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-white rounded-xl transition-all">
-            Portal Login
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN CONTENT ==================== -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-
-    <!-- HERO SECTION -->
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-      <div class="absolute -right-16 -top-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="max-w-3xl space-y-3">
-        <span class="text-[11px] font-mono text-indigo-400 uppercase tracking-widest block font-bold">Records Governance & Cryptographic Erasure Schedule</span>
-        <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">Data Retention & Record Archival Policy</h1>
-        <p class="text-xs sm:text-sm text-slate-400 font-mono leading-relaxed">Effective Date: October 1, 2026. Statutory retention periods, automated cold-storage archiving schedules, and NIST 800-88 compliant data destruction protocols across KRIM OS database clusters.</p>
-      </div>
-    </section>
-
-    <!-- LEGAL DOCUMENT CONTENT -->
-    <article class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-10 space-y-8 font-mono text-xs leading-relaxed text-slate-300">
-
-      <!-- SECTION 1 -->
-      <section class="space-y-3">
-        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
-          <span class="text-indigo-400">01.</span> Statutory Retention Schedules
-        </h2>
-        <p>To comply with international maritime law, customs audit mandates (US CBP, EU Customs Union), and global tax compliance frameworks, operational records are maintained according to strict timelines:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-          <div class="p-3 bg-[#040814] rounded-lg border border-slate-800 space-y-1">
-            <span class="text-white font-bold block">Bills of Lading & Customs Filings</span>
-            <span class="text-indigo-400 text-[11px] font-bold">7 Years Retention</span>
-            <p class="text-slate-400 text-[10px]">Mandated by international maritime and customs tax laws.</p>
-          </div>
-          <div class="p-3 bg-[#040814] rounded-lg border border-slate-800 space-y-1">
-            <span class="text-white font-bold block">Real-Time Telemetry & Raw GPS Feeds</span>
-            <span class="text-indigo-400 text-[11px] font-bold">90 Days Active Storage</span>
-            <p class="text-slate-400 text-[10px]">Aggregated into historical transit benchmarks prior to raw purge.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 2 -->
-      <section class="space-y-3">
-        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
-          <span class="text-indigo-400">02.</span> Automated Cold-Storage Archiving
-        </h2>
-        <p>After 365 days of inactivity, live shipment records are automatically compressed, encrypted with AES-256 keys, and moved to immutable, write-once-read-many (WORM) cold storage vaults.</p>
-      </section>
-
-      <!-- SECTION 3 -->
-      <section class="space-y-3">
-        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
-          <span class="text-indigo-400">03.</span> Cryptographic Data Erasure (NIST 800-88)
-        </h2>
-        <p>Upon expiration of statutory retention windows or formal receipt of a valid GDPR/CCPA erasure directive, data is cryptographically rendered unrecoverable using NIST 800-88 compliant multi-pass key destruction.</p>
-      </section>
-
-    </article>
-
-  </main>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-8 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center space-x-3">
-        <div class="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-xs">K</div>
-        <span class="font-extrabold text-white text-xs font-mono">KRIM LOGISTICS OS</span>
-      </div>
-      <p class="text-[10px] font-mono text-slate-600">© 2026 KRIM System Technologies Ltd. Records Governance Office.</p>
-    </div>
-  </footer>
-
-  <!-- ==================== SCRIPT & RUNTIME ==================== -->
-  <script type="module" src="/logistics-saas/platform/krim-config.js"></script>
-  <script type="module" src="/logistics-saas/js/public/public-runtime.js"></script>
-</body>
-</html>
+<body>
+<header><div class="wrap head"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg" alt="KRIM Logistics — Global Logistics Operating System"></a><button class="menu" id="menu" aria-label="Open navigation" aria-expanded="false">☰</button><nav class="nav" id="nav"><a href="../../privacy.html">Privacy Notice</a><a href="../../terms.html">Terms</a><a href="../../contact.html">Contact</a><a href="../../tracking.html">Track a shipment</a></nav></div></header>
+<main class="wrap">
+<p class="eyebrow">Records governance · interim notice</p>
+<h1>Data Retention & Deletion</h1>
+<p class="lead">This page describes the retention controls currently verified for KRIM Logistics. It is deliberately limited: a retention period or deletion certification is not promised unless the corresponding technical and legal control is implemented and tested.</p>
+<p class="updated">Reviewed 15 November 2026 · Read with the <a href="../../privacy.html">KRIM Privacy Notice</a>.</p>
+<div class="alert"><strong>Important implementation status:</strong> KRIM has not yet approved a complete category-by-category statutory retention matrix or verified automated archival and purge jobs. Do not rely on older statements on this page about 90-day GPS purging, 365-day cold storage, WORM archives, AES-256 custom vaults or NIST 800-88 erasure. Those claims are withdrawn unless and until separately evidenced.</div>
+<section><h2>1. Information currently handled</h2><ul><li>Enquiry, contact and account records.</li><li>Shipment, quote, assignment, milestone and exception records.</li><li>Partner onboarding, capability, verification and compliance records.</li><li>Delivery evidence, documents and proof-of-delivery review records.</li><li>Payment, refund, reconciliation and audit references.</li><li>Opt-in driver GPS points and separate driver tracking-session consent records, when an eligible driver starts location sharing for an in-transit assignment.</li></ul></section>
+<section><h2>2. Driver GPS and consent records</h2><p>Location sharing is OFF by default. A GPS point is accepted only when the authenticated driver is verified, has active membership in the operating organisation, is linked to the shipment assignment, the driver assignment is marked <span class="pill">in transit</span>, and an active server-side consent session exists.</p><p>GPS records include coordinates, server timestamp, device-reported accuracy and shipment/assignment references. A separate consent-session record stores the driver, organisation, assignment, consent-notice version, platform, start time and stop state. The driver can stop sharing; native background updates require explicit device permission and an ongoing operating-system location notification. Browser tracking is foreground-only.</p><p>Location can be delayed or interrupted by device shutdown, force-stop, permission changes, battery restrictions, poor GPS signal or network loss. KRIM does not promise uninterrupted or safety-critical tracking. Customer-facing views must show the timestamp and whether the latest position is live, recent or stale.</p></section>
+<section><h2>3. Retention periods and legal holds</h2><p>Final retention periods for enquiries, accounts, shipment records, financial records, compliance documents, proof of delivery, security logs and GPS data remain to be approved against the actual legal, tax, transport, contractual and dispute requirements applicable to KRIM and each operating corridor.</p><p>Until the schedule and corresponding automated controls are approved and tested, users should not assume that a fixed number of days applies or that data is automatically deleted at the end of a stated period. Records may need to be preserved for a lawful claim, audit, tax obligation, investigation or legal hold. Any exception should be limited, documented and access-controlled.</p></section>
+<section><h2>4. Storage and safeguards</h2><p>KRIM uses its configured Supabase project for database records and server-side functions, together with GitHub Pages for public static pages. Actual database region, backup retention, processor terms, cross-border processing and service-provider controls must be checked against the live account configuration and provider agreements.</p><p>KRIM uses authenticated server-side functions and row-level access controls for the tracking workflow. This is not an independent security certification and does not imply a custom immutable archive, cryptographic erasure system or a particular encryption standard beyond controls verified from the provider and deployment configuration.</p></section>
+<section><h2>5. Requests and contact</h2><p>For an access, correction, deletion or retention question, use the <a href="../../contact.html">KRIM Contact page</a> and select “Privacy or data request”. KRIM may need to verify identity or authority and may retain information where a valid legal, contractual, safety, tax or dispute obligation applies.</p></section>
+<section><h2>6. Required before public commercial rollout</h2><ul><li>Approve a retention schedule by data category and operating jurisdiction with qualified Indian legal and tax advisers.</li><li>Implement and test GPS expiry, legal-hold, deletion and audit workflows before enabling live GPS at scale.</li><li>Verify Supabase region, backups, provider contracts and any international transfers.</li><li>Publish the confirmed legal operator, privacy/grievance contact and response process.</li><li>Complete platform-store declarations and privacy disclosures for any background-location app release.</li></ul><p>This interim notice is not legal advice and does not certify compliance with the Digital Personal Data Protection Act, 2023, its Rules or any other law. Those requirements and commencement dates must be assessed for the relevant activity and launch date.</p></section>
+</main>
+<footer><div class="wrap foot"><span>© 2026 KRIM Logistics · Global Logistics Operating System</span><span><a href="../../privacy.html">Privacy</a> · <a href="../../terms.html">Terms</a> · <a href="../../contact.html">Contact</a></span></div></footer>
+<script>const m=document.getElementById('menu'),n=document.getElementById('nav');m.addEventListener('click',()=>{const open=m.getAttribute('aria-expanded')!=='true';m.setAttribute('aria-expanded',String(open));m.setAttribute('aria-label',open?'Close navigation':'Open navigation');n.classList.toggle('open',open);m.textContent=open?'×':'☰';});n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{n.classList.remove('open');m.setAttribute('aria-expanded','false');m.textContent='☰';}));</script>
+</body></html>
