@@ -410,6 +410,15 @@ if (!enterpriseAuditLegacy.includes("app/enterprise/institutional-memory.html") 
 if (!enterpriseErpLegacy.includes("app/enterprise/integrations.html") || enterpriseErpLegacy.includes("Real-time bi-directional synchronization")) failures.push("Legacy ERP integration simulator must not claim unverified SAP/Oracle synchronization.");
 if (!enterpriseFinance.includes("partner-direct model") || !enterpriseFinance.includes("does not collect freight funds")) failures.push("Enterprise finance module must explain partner-direct payment and no KRIM freight collection.");
 
+const customerInvoiceRegister = existsSync("public/shipper/invoices.html") ? readFileSync("public/shipper/invoices.html", "utf8") : "";
+const customerRefundGuidance = existsSync("public/customer-os/customer-services/refunds.html") ? readFileSync("public/customer-os/customer-services/refunds.html", "utf8") : "";
+const customerClaims = existsSync("public/customer-os/customer-services/claims.html") ? readFileSync("public/customer-os/customer-services/claims.html", "utf8") : "";
+const customerInvoiceScope = existsSync("public/customer-os/customer-services/invoices.html") ? readFileSync("public/customer-os/customer-services/invoices.html", "utf8") : "";
+if (!customerInvoiceRegister.includes("partner-direct model") || /revenue_ledger|platform_commission|partner_payout|Ledger Records/.test(customerInvoiceRegister)) failures.push("Customer finance must not expose internal commission or partner payout ledger fields.");
+if (!customerRefundGuidance.includes("does not currently collect freight charges") || customerRefundGuidance.includes("submit a refund request")) failures.push("Customer refund page must explain provider-direct refunds and must not simulate an automated refund request.");
+if (!customerClaims.includes("does not promise or fund freight compensation")) failures.push("Customer claims page must not imply KRIM guarantees or funds provider compensation.");
+if (!customerInvoiceScope.includes("external invoice may not appear") && !customerInvoiceScope.includes("external invoices may not appear")) failures.push("Customer invoice register must distinguish provider-issued invoices from KRIM records.");
+
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
