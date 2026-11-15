@@ -86,7 +86,7 @@ for (const file of htmlFiles) {
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi, " ");
-  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\b/i.test(visiblePageText);
+  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
   if (operational && !hasSupabaseSignal) integrationCandidates.push(file);
   if (placeholder) placeholderPages.push(file);
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,backendReview:operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
