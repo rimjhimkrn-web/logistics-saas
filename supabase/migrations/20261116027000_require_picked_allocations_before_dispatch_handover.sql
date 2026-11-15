@@ -16,6 +16,22 @@ BEGIN
         USING errcode = '23514';
     END IF;
 
+    -- The reservation RPC locks this shipment row before inserting reservations.
+    -- Serialising here prevents a new reservation racing with handover creation/completion.
+    PERFORM 1
+    FROM public.krim_shipments s
+    WHERE s.id = NEW.shipment_id
+    FOR UPDATE;
+
+    -- Lock all existing allocations while evaluating the final picked state.
+    PERFORM 1
+    FROM public.krim_warehouse_shipment_allocations a
+    WHERE a.organization_id = NEW.organization_id
+      AND a.facility_id = NEW.facility_id
+      AND a.shipment_id = NEW.shipment_id
+      AND a.shipment_leg_id = NEW.shipment_leg_id
+    FOR UPDATE;
+
     IF NOT EXISTS (
       SELECT 1
       FROM public.krim_warehouse_shipment_allocations a
