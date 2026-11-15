@@ -11,7 +11,8 @@ The core customer-to-partner workflow has substantial backend controls and canon
 
 - No active open partner opportunities.
 - No partner quotes.
-- No verified active partner capability.
+- Six KRIM markets and six countries are active, but no verified active partner capability exists in the production dataset.
+- Two partner-type organizations are active, but zero meet the verified/approved + active lifecycle + compliant eligibility test.
 - No active rate card.
 - No partner assignments or capacity resources.
 - No driver assignments, dispatch authorizations, custody transfers or POD records.
