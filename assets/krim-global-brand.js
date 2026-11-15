@@ -22,18 +22,18 @@
     }
     if(target){
       if(target.tagName==="IMG"){
-        target.src=base;target.alt="KRIM Logistics — Global Logistics Operating System";target.classList.add("krim-official-brand-logo");
+        target.src=base;target.alt="KRIM Logistics";target.classList.add("krim-official-brand-logo");
       }else{
         var replacement=document.createElement("img");
         replacement.src=base;
-        replacement.alt="KRIM Logistics — Global Logistics Operating System";
+        replacement.alt="KRIM Logistics";
         replacement.className="krim-official-brand-logo";
         target.replaceWith(replacement);
       }
     }else{
       var bar=document.createElement("div");bar.className="krim-global-brandbar";
       var link=document.createElement("a");link.className="krim-global-brand-link";link.href="/logistics-saas/";link.setAttribute("aria-label","KRIM Logistics home");
-      var img=document.createElement("img");img.src=base;img.alt="KRIM Logistics — Global Logistics Operating System";img.className="krim-official-brand-logo";link.appendChild(img);bar.appendChild(link);
+      var img=document.createElement("img");img.src=base;img.alt="KRIM Logistics";img.className="krim-official-brand-logo";link.appendChild(img);bar.appendChild(link);
       var body=document.body;
       if(header){header.insertBefore(link,header.firstChild);link.className="krim-global-brand-link";link.style.cssText="display:inline-flex;align-items:center;padding:6px 14px;max-width:100%;";}
       else if(body){body.insertBefore(bar,body.firstChild);}
