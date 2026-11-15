@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#059669">
-<meta name="description" content="KRIM Logistics operational shipment confirmation. Confirm booking only after payment, quote, partner and readiness checks pass.">
-<title>KRIM Logistics | Shipment Confirmation</title>
+<meta name="description" content="Verify KRIM shipment booking, accepted partner quote, partner assignment and operational readiness. Freight payment is handled directly with the contracting provider.">
+<title>KRIM Logistics | Booking Confirmation & Readiness</title>
 <link rel="manifest" href="../manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
@@ -38,7 +38,7 @@ a:not(.btn){text-decoration-color:#22c55e70}
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 </head>
 <body class="krim-global-shell krim-global-ui">
-<div class="topline"><div class="shell topinner"><span><i class="dot"></i><strong id="top-status">KRIM OPERATIONAL BOOKING · INITIALIZING</strong></span><span id="session-status">AUTHENTICATED STATUS CHECK</span></div></div>
+<div class="topline"><div class="shell topinner"><span><i class="dot"></i><strong id="top-status">KRIM PARTNER-DIRECT BOOKING · INITIALIZING</strong></span><span id="session-status">AUTHENTICATED STATUS CHECK</span></div></div>
 <header><div class="shell nav"><a class="brand" href="index.html" aria-label="KRIM Logistics home"><img src="../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:220px;height:58px;max-width:100%;object-fit:contain"></a><div class="navlinks"><a class="btn" href="payment-verification.html">← Historical payment verification</a><a class="btn" href="shipper/payment-checkout.html">Partner-direct payment guidance</a><a class="btn" id="pickup-tracking-link" href="pickup-tracking.html">Pickup & tracking →</a><a class="btn dark" href="../app/customer/index.html">Customer workspace ↗</a></div></div></header>
 <main class="shell">
 <div class="crumb"><span>Customer journey</span><span>›</span><span>Operations</span><span>›</span><strong>Shipment confirmation</strong></div>
@@ -49,13 +49,13 @@ a:not(.btn){text-decoration-color:#22c55e70}
 <div id="overall-result" class="statusbox"><div class="statussymbol">…</div><div><strong id="overall-title">Preparing secure checks</strong><p id="overall-copy">Verifying your session, payment evidence and booking records with KRIM.</p></div></div>
 <div class="checks" id="checks">
 <div class="check"><span class="checkicon">…</span><div><strong>Authenticated customer</strong><small>Awaiting verification.</small></div></div>
-<div class="check"><span class="checkicon">…</span><div><strong>Payment verified</strong><small>Awaiting verification.</small></div></div>
+<div class="check"><span class="checkicon">…</span><div><strong>Freight payment model</strong><small>Awaiting verification.</small></div></div>
 <div class="check"><span class="checkicon">…</span><div><strong>Accepted quote</strong><small>Awaiting verification.</small></div></div>
 <div class="check"><span class="checkicon">…</span><div><strong>Partner assignment</strong><small>Awaiting verification.</small></div></div>
 <div class="check"><span class="checkicon">…</span><div><strong>Operational readiness</strong><small>Awaiting verification.</small></div></div>
 <div class="check"><span class="checkicon">…</span><div><strong>Booking state</strong><small>Awaiting verification.</small></div></div>
 </div><div class="actions"><button class="btn dark" id="refresh" type="button">Refresh checks ↻</button><a class="btn" href="shipper/spot-approvals.html">Review quotation</a></div></div>
-<div class="card"><div class="head"><div><h2>Shipment record</h2><p class="sub">Details below are populated from KRIM records; no sample shipment or fabricated status is displayed.</p></div><span class="tag">Live record</span></div><div class="details"><div class="detail"><label>Shipment reference</label><strong id="shipment-ref">Not provided</strong></div><div class="detail"><label>Shipment status</label><strong id="shipment-state">Not checked</strong></div><div class="detail"><label>Quote reference</label><strong id="quote-ref">Not provided</strong></div><div class="detail"><label>Quote status</label><strong id="quote-state">Not checked</strong></div><div class="detail"><label>Payment order</label><strong id="payment-ref">Not provided</strong></div><div class="detail"><label>Payment status</label><strong id="payment-state">Not checked</strong></div><div class="detail"><label>Partner assignment</label><strong id="partner-state">Not checked</strong></div><div class="detail"><label>Last checked</label><strong id="checked-at">Not checked</strong></div></div></div>
+<div class="card"><div class="head"><div><h2>Shipment record</h2><p class="sub">Details below are populated from KRIM records; no sample shipment or fabricated status is displayed.</p></div><span class="tag">Live record</span></div><div class="details"><div class="detail"><label>Shipment reference</label><strong id="shipment-ref">Not provided</strong></div><div class="detail"><label>Shipment status</label><strong id="shipment-state">Not checked</strong></div><div class="detail"><label>Quote reference</label><strong id="quote-ref">Not provided</strong></div><div class="detail"><label>Quote status</label><strong id="quote-state">Not checked</strong></div><div class="detail"><label>Freight payment handling</label><strong id="payment-ref">Not provided</strong></div><div class="detail"><label>Payment verification</label><strong id="payment-state">Not checked</strong></div><div class="detail"><label>Partner assignment</label><strong id="partner-state">Not checked</strong></div><div class="detail"><label>Last checked</label><strong id="checked-at">Not checked</strong></div></div></div>
 </section><aside>
 <div class="card"><div class="head"><div><h2>Confirmation gates</h2><p class="sub">These checks protect customers, partners and KRIM's operating ledger.</p></div></div><div class="checks"><div class="check"><span class="checkicon good">01</span><div><strong>Identity & organization</strong><small>Current user must belong to the shipment's customer organization.</small></div></div><div class="check"><span class="checkicon good">02</span><div><strong>Payment reconciliation</strong><small>Server-verified paid order and matching completed financial transaction.</small></div></div><div class="check"><span class="checkicon good">03</span><div><strong>Commercial commitment</strong><small>Accepted quote must match the shipment and payment amount/currency.</small></div></div><div class="check"><span class="checkicon good">04</span><div><strong>Execution readiness</strong><small>Partner assignment and any required readiness gates must be satisfied.</small></div></div></div><div class="note"><strong>Important</strong>This page does not create or change booking status. If a required gate is missing or unavailable, KRIM keeps the booking unconfirmed and explains what needs review.</div></div>
 <div class="card"><div class="head"><div><h2>Next actions</h2><p class="sub">Continue from verified KRIM records.</p></div></div><div class="links"><a href="payment-verification.html">Payment verification <span>↗</span></a><a href="shipper/spot-approvals.html">Quote review <span>↗</span></a><a href="../app/customer/index.html">Customer workspace <span>↗</span></a><a href="finance/payment-gateways.html">Payment architecture <span>↗</span></a></div></div>
@@ -72,36 +72,47 @@ const shipmentId=p.get("shipment_id")||"";
 const quoteId=p.get("quote_id")||"";
 let busy=false;
 const truthy=new Set(["ready","passed","clear","cleared","complete","completed","approved","active","accepted","confirmed","booked","booking_confirmed","operational_ready","ready_for_execution"]);
+const paidStates=new Set(["paid","verified","complete","completed","passed","clear","cleared"]);
+const directStates=new Set(["partner_direct","not_required"]);
 const bookingStates=new Set(["confirmed","booking_confirmed","booked","operational_confirmed"]);
-function currencyMinorUnitExponent(currency){const code=String(currency||"").trim().toUpperCase();if(["BIF","CLP","DJF","GNF","ISK","JPY","KMF","KRW","PYG","RWF","UGX","UYI","VND","VUV","XAF","XOF","XPF"].includes(code))return 0;if(["BHD","IQD","JOD","KWD","LYD","OMR","TND"].includes(code))return 3;if(["CLF","UYW"].includes(code))return 4;return 2;}
-function safeInt(v){return /^\d+$/.test(String(v||""))&&Number.isSafeInteger(Number(v))&&Number(v)>0}
+function safeInt(v){return /^\\d+$/.test(String(v||""))&&Number.isSafeInteger(Number(v))&&Number(v)>0}
 function fmtDate(v){if(!v)return "Not recorded";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}
 function norm(v){return String(v||"").trim().toLowerCase().replace(/[ -]+/g,"_")}
 function mark(name,ok,detail){const row=[...$("checks").children].find(el=>el.querySelector("strong")?.textContent===name);if(!row)return;const icon=row.querySelector(".checkicon");icon.className="checkicon "+(ok===true?"good":ok===false?"bad":"");icon.textContent=ok===true?"✓":ok===false?"!":"…";row.querySelector("small").textContent=detail}
 function result(title,copy,kind){const b=$("overall-result");b.className="statusbox"+(kind?" "+kind:"");b.querySelector(".statussymbol").textContent=kind==="good"?"✓":kind==="bad"?"×":kind==="warn"?"!":"…";$("overall-title").textContent=title;$("overall-copy").textContent=copy;$("overall-tag").className="tag"+(kind==="good"?" good":kind==="bad"?" bad":"");$("overall-tag").textContent=kind==="good"?"Confirmed":kind==="bad"?"Blocked":kind==="warn"?"Action required":"Checking"}
-function login(){const next=location.pathname+location.search;location.href="auth/login.html?next="+encodeURIComponent(next)}
-function failAll(message){mark("Authenticated customer",false,message);mark("Payment verified",false,"Could not establish authoritative payment verification.");mark("Accepted quote",false,"Quote record was not validated.");mark("Partner assignment",false,"Partner assignment was not validated.");mark("Operational readiness",false,"Readiness could not be verified.");mark("Booking state",false,"Booking remains unconfirmed.");result("Booking not confirmed",message+" No operational confirmation has been assumed.","bad")}
+function login(){const next=location.pathname+location.search;location.href="../auth/login.html?next="+encodeURIComponent(next)}
+function failAll(message){mark("Authenticated customer",false,message);mark("Freight payment model",null,"Not evaluated because customer or shipment access could not be verified.");mark("Accepted quote",false,"Quote record was not validated.");mark("Partner assignment",false,"Partner assignment was not validated.");mark("Operational readiness",false,"Readiness could not be verified.");mark("Booking state",false,"Booking remains unconfirmed.");result("Booking not confirmed",message+" No operational confirmation has been assumed.","bad")}
 async function run(){
  if(busy)return;busy=true;$("refresh").disabled=true;
  try{
   if(!client){failAll("KRIM's secure client is unavailable. Reload after checking connectivity.");return}
-  if(!orderId||orderId.length>100||!safeInt(shipmentId)||!safeInt(quoteId)){result("Booking references required","Open this page from Payment Verification with the payment-order, shipment and quote references. No booking confirmation is inferred.","warn");$("top-status").textContent="BOOKING REFERENCES REQUIRED";return}
+  if(!safeInt(shipmentId)||!safeInt(quoteId)||orderId.length>100){result("Booking references required","Open this page from the accepted partner quote with valid shipment and quote references. A legacy payment-order reference is optional; new freight payments are partner-direct.","warn");$("top-status").textContent="BOOKING REFERENCES REQUIRED";return}
   const {data:sd,error:se}=await client.auth.getSession();const session=sd&&sd.session;
-  if(se||!session){result("Sign in required","Sign in with the customer account that owns this shipment to review the booking status.","warn");$("top-status").textContent="AUTHENTICATION REQUIRED";login();return}
+  if(se||!session){result("Sign in required","Sign in with the customer account that owns this shipment to review booking and readiness.","warn");$("top-status").textContent="AUTHENTICATION REQUIRED";login();return}
   $("session-status").textContent="SIGNED IN · "+(session.user.email||"CUSTOMER ACCOUNT");
-  $("shipment-ref").textContent="SHP-"+shipmentId;$("quote-ref").textContent="QT-"+quoteId;$("payment-ref").textContent=orderId;
+  $("shipment-ref").textContent="SHP-"+shipmentId;$("quote-ref").textContent="QT-"+quoteId;
   $("top-status").textContent="VERIFYING SERVER RECORDS";
-  const vr=await client.functions.invoke("krim-payment-verification-status",{body:{payment_order_id:orderId,shipment_id:Number(shipmentId),quote_id:Number(quoteId)}});
-  if(vr.error||!vr.data||vr.data.success!==true)throw new Error(vr.data?.error||vr.error?.message||"KRIM payment verification could not be completed.");
-  const pay=vr.data;const paymentOK=pay.verified===true&&pay.status==="paid";
-  $("payment-state").textContent=pay.status||"Unknown";
-  mark("Authenticated customer",true,"Signed in. Payment server also validates customer organization access.");
-  mark("Payment verified",paymentOK,paymentOK?"Server confirms paid order and matching completed financial transaction.":"Payment is not fully verified. Do not pay again until the original order is reconciled.");
-  if(!paymentOK)throw Object.assign(new Error("Payment is not fully verified by KRIM. Operational booking cannot be confirmed."),{gate:"payment"});
+
+  let pay=null;
+  if(orderId){
+    $("payment-ref").textContent=orderId;
+    const vr=await client.functions.invoke("krim-payment-verification-status",{body:{payment_order_id:orderId,shipment_id:Number(shipmentId),quote_id:Number(quoteId)}});
+    if(vr.error||!vr.data||vr.data.success!==true)throw new Error(vr.data?.error||vr.error?.message||"Legacy KRIM payment verification could not be completed.");
+    pay=vr.data;
+    const paymentOK=pay.verified===true&&pay.status==="paid";
+    $("payment-state").textContent=pay.status||"Unknown";
+    mark("Freight payment model",paymentOK,paymentOK?"Legacy KRIM payment order is verified by the server.":"Legacy payment is not verified. Do not pay again until the original transaction is reconciled.");
+    if(!paymentOK)throw Object.assign(new Error("The legacy KRIM payment order is not verified. The booking cannot be confirmed from this payment reference."),{gate:"payment"});
+  }else{
+    $("payment-ref").textContent="Partner-direct · no KRIM order";
+    $("payment-state").textContent="Not collected or verified by KRIM";
+    mark("Freight payment model",true,"Partner-direct model: the customer contracts with and pays the logistics provider directly. KRIM does not collect or verify freight payment.");
+  }
+
   const [sr,qr,ar,gr,er]=await Promise.all([
     client.from("krim_shipments").select("id,shipment_number,customer_organization_id,status").eq("id",Number(shipmentId)).maybeSingle(),
     client.from("krim_quotes").select("id,shipment_id,customer_organization_id,amount,currency_code,status,partner_quote_id").eq("id",Number(quoteId)).eq("shipment_id",Number(shipmentId)).maybeSingle(),
-    client.from("krim_shipment_partner_assignments").select("id,shipment_id,partner_organization_id,partner_quote_id,status,accepted_at").eq("shipment_id",Number(shipmentId)).order("created_at",{ascending:false}).limit(10),
+    client.from("krim_shipment_partner_assignments").select("id,shipment_id,partner_organization_id,partner_quote_id,status,accepted_at").eq("shipment_id",Number(shipmentId)).order("created_at",{ascending:false}).limit(20),
     client.from("krim_shipment_readiness_gates").select("shipment_id,status,payment_status,compliance_status,document_status,partner_status,blocking_reasons,enforcement_required,checked_at").eq("shipment_id",Number(shipmentId)).order("checked_at",{ascending:false}).limit(1),
     client.from("krim_shipment_execution_readiness").select("shipment_id,status,capacity_status,partner_status,compliance_status,documentation_status,commercial_status,overall_result,blocking_reasons,evaluated_at").eq("shipment_id",Number(shipmentId)).order("evaluated_at",{ascending:false}).limit(1)
   ]);
@@ -110,25 +121,42 @@ async function run(){
   if(ar.error)throw new Error("Partner assignment record could not be verified under your account permissions.");
   if(gr.error&&er.error)throw new Error("Operational readiness records are unavailable; booking remains unconfirmed.");
   const ship=sr.data,quote=qr.data,assignments=ar.data||[],gate=(gr.data||[])[0]||null,exec=(er.data||[])[0]||null;
-  if(!ship||Number(ship.customer_organization_id)!==Number(pay.customer_organization_id||ship.customer_organization_id))throw new Error("Shipment is missing or its customer organization does not match the payment order.");
-  $("shipment-ref").textContent=ship.shipment_number||("SHP-"+ship.id);$("shipment-state").textContent=ship.status||"Unknown";const trackingRef=ship.shipment_number||"";if(trackingRef)$("pickup-tracking-link").href="pickup-tracking.html?shipment="+encodeURIComponent(trackingRef);
-  const quoteOK=!!quote&&Number(quote.shipment_id)===Number(ship.id)&&Number(quote.customer_organization_id)===Number(ship.customer_organization_id)&&["accepted","approved","confirmed"].includes(norm(quote.status))&&Math.round(Number(quote.amount)*(10**currencyMinorUnitExponent(quote.currency_code)))===Number(pay.amount_paise)&&String(quote.currency_code||"").toUpperCase()===String(pay.currency||"").toUpperCase()&&Number(quote.partner_quote_id)===Number(pay.partner_quote_id);
+  if(!ship)throw new Error("Shipment is not available to this customer account.");
+  if(Number(quote?.customer_organization_id)!==Number(ship.customer_organization_id))throw new Error("Shipment and accepted quote do not belong to the same customer organization.");
+  if(pay&&Number(pay.customer_organization_id)!==Number(ship.customer_organization_id))throw new Error("Shipment organization does not match the legacy payment order.");
+  $("shipment-ref").textContent=ship.shipment_number||("SHP-"+ship.id);$("shipment-state").textContent=ship.status||"Unknown";
+  const trackingRef=ship.shipment_number||"";if(trackingRef)$("pickup-tracking-link").href="pickup-tracking.html?shipment="+encodeURIComponent(trackingRef);
+  const quoteOK=!!quote&&Number(quote.shipment_id)===Number(ship.id)&&["accepted","approved","confirmed"].includes(norm(quote.status))&&Number(quote.partner_quote_id)>0&&(!pay||(Math.round(Number(quote.amount)*(10**(String(quote.currency_code||"").toUpperCase()==="JPY"?0:2)))===Number(pay.amount_paise)&&String(quote.currency_code||"").toUpperCase()===String(pay.currency||"").toUpperCase()&&Number(quote.partner_quote_id)===Number(pay.partner_quote_id)));
   $("quote-state").textContent=quote?.status||"Not found";
-  mark("Accepted quote",quoteOK,quoteOK?"Accepted quote matches shipment, customer organization, payment amount and currency.":"Quote is missing, not accepted, or inconsistent with the verified payment order.");
+  mark("Accepted quote",quoteOK,quoteOK?"Accepted quote is linked to this shipment and customer organization." : "Quote is missing, not accepted, or inconsistent with this shipment.");
   const assignment=assignments.find(a=>Number(a.partner_quote_id)===Number(quote?.partner_quote_id)&&["accepted","active","confirmed","assigned","booked"].includes(norm(a.status))&&a.accepted_at);
   $("partner-state").textContent=assignment?assignment.status:(assignments[0]?.status||"No accepted assignment");
   const partnerOK=!!assignment&&Number(assignment.shipment_id)===Number(ship.id);
-  mark("Partner assignment",partnerOK,partnerOK?"A matching partner assignment is accepted and linked to the quote.":"No matching accepted partner assignment was found.");
-  const gateOK=!!gate&&(!gate.enforcement_required||["ready","passed","clear","cleared","complete","completed","approved"].includes(norm(gate.status)))&&["paid","verified","complete","completed","passed","clear","cleared"].includes(norm(gate.payment_status))&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(gate.compliance_status))&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(gate.document_status))&&["ready","passed","clear","cleared","complete","completed","approved","accepted","active","confirmed"].includes(norm(gate.partner_status))&&!(Array.isArray(gate.blocking_reasons)&&gate.blocking_reasons.length);
+  mark("Partner assignment",partnerOK,partnerOK?"A matching partner assignment is accepted and linked to the selected quote.":"No matching accepted partner assignment was found.");
+
+  const gatePaymentOK=orderId?paidStates.has(norm(gate?.payment_status)):directStates.has(norm(gate?.payment_status));
+  const gateOK=!!gate&&(!gate.enforcement_required||truthy.has(norm(gate.status)))&&gatePaymentOK&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(gate.compliance_status))&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(gate.document_status))&&["ready","passed","clear","cleared","complete","completed","approved","accepted","active","confirmed","not_required"].includes(norm(gate.partner_status))&&!(Array.isArray(gate.blocking_reasons)&&gate.blocking_reasons.length);
   const execOK=!!exec&&["ready","passed","clear","cleared","complete","completed","approved","operational_ready","ready_for_execution"].includes(norm(exec.overall_result))&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(exec.compliance_status))&&["ready","passed","clear","cleared","complete","completed","approved","not_required"].includes(norm(exec.documentation_status))&&["ready","passed","clear","cleared","complete","completed","approved"].includes(norm(exec.commercial_status))&&!(Array.isArray(exec.blocking_reasons)&&exec.blocking_reasons.length);
   const readinessOK=gateOK&&execOK;
   mark("Operational readiness",readinessOK,readinessOK?"Readiness gate and execution-readiness evaluation both pass with no blocking reasons.":"Required readiness records are missing, pending, or contain unresolved blockers.");
   const bookingOK=bookingStates.has(norm(ship.status));
-  mark("Booking state",bookingOK,bookingOK?"KRIM shipment record already reflects an operationally confirmed booking.":"Shipment status is "+String(ship.status||"unknown")+"; this page will not change it.");
+  mark("Booking state",bookingOK,bookingOK?"KRIM shipment record reflects a confirmed booking status.":"Shipment status is "+String(ship.status||"unknown")+"; this page will not change it.");
   $("checked-at").textContent=fmtDate(new Date().toISOString());
-  if(quoteOK&&partnerOK&&readinessOK&&bookingOK){result("Operational booking confirmed","KRIM records show verified payment, accepted quote, partner acceptance, passed readiness gates and an operationally confirmed shipment status.","good");$("top-status").textContent="OPERATIONAL BOOKING CONFIRMED"}
-  else{const pending=[];if(!quoteOK)pending.push("accepted quote");if(!partnerOK)pending.push("partner assignment");if(!readinessOK)pending.push("operational readiness");if(!bookingOK)pending.push("booking status transition");result("Booking is not yet confirmed","Outstanding requirement(s): "+pending.join(", ")+". The booking remains unconfirmed until the authorized KRIM workflow resolves each requirement.","warn");$("top-status").textContent="BOOKING REQUIRES ACTION"}
- }catch(e){if(e.gate==="payment"){mark("Accepted quote",null,"Not evaluated because payment verification failed.");mark("Partner assignment",null,"Not evaluated because payment verification failed.");mark("Operational readiness",null,"Not evaluated because payment verification failed.");mark("Booking state",false,"Booking remains unconfirmed.");result("Booking not confirmed",e.message,"warn");$("top-status").textContent="PAYMENT GATE NOT PASSED"}else{result("Confirmation checks need review",(e&&e.message?e.message:"Unexpected error")+" Booking remains unconfirmed; retry after records or access are corrected.","bad");$("top-status").textContent="BOOKING CHECK NEEDS REVIEW"}}
+  if(quoteOK&&partnerOK&&readinessOK&&bookingOK){
+    result("Shipment booking confirmed","KRIM records show an accepted quote, accepted partner assignment and passed operational readiness. Freight payment is handled directly with the contracting provider and is not collected or verified by KRIM.","good");
+    $("top-status").textContent="SHIPMENT BOOKING CONFIRMED";
+  }else if(quoteOK&&partnerOK&&bookingOK){
+    result("Booking record confirmed · readiness pending","The quote, partner assignment and shipment booking status are confirmed, but operational readiness still has outstanding blockers. Dispatch must remain blocked until the authorized workflow resolves them.","warn");
+    $("top-status").textContent="EXECUTION READINESS PENDING";
+  }else{
+    const pending=[];if(!quoteOK)pending.push("accepted quote");if(!partnerOK)pending.push("partner assignment");if(!readinessOK)pending.push("operational readiness");if(!bookingOK)pending.push("booking status transition");
+    result("Booking is not yet confirmed","Outstanding requirement(s): "+pending.join(", ")+". KRIM will not change shipment status from this read-only confirmation page.","warn");
+    $("top-status").textContent="BOOKING REQUIRES ACTION";
+  }
+ }catch(e){
+  if(e.gate==="payment"){mark("Accepted quote",null,"Not evaluated because legacy payment verification failed.");mark("Partner assignment",null,"Not evaluated because legacy payment verification failed.");mark("Operational readiness",null,"Not evaluated because legacy payment verification failed.");mark("Booking state",false,"Booking remains unconfirmed.");result("Booking not confirmed",e.message,"warn");$("top-status").textContent="LEGACY PAYMENT NOT VERIFIED";}
+  else{result("Confirmation checks need review",(e&&e.message?e.message:"Unexpected error")+" Booking remains unconfirmed; retry after records or access are corrected.","bad");$("top-status").textContent="BOOKING CHECK NEEDS REVIEW";}
+ }
  finally{busy=false;$("refresh").disabled=false}
 }
 $("refresh").addEventListener("click",run);run();
