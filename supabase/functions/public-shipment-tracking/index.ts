@@ -70,6 +70,13 @@ Deno.serve(async (req: Request) => {
     ).sort(
       (a, b) => new Date(b.event_time).getTime() - new Date(a.event_time).getTime()
     )[0] || null;
+    const gpsAgeMs = gpsRow ? Date.now() - new Date(gpsRow.event_time).getTime() : null;
+    const sessionAgeMs = activeSessions?.[0] ? Date.now() - new Date(activeSessions[0].started_at).getTime() : null;
+    const gpsSharingStatus = sessionsError ? "unavailable"
+      : !activeSessions?.length ? "inactive"
+      : gpsAgeMs === null ? (sessionAgeMs !== null && sessionAgeMs <= 120000 ? "starting" : "stale")
+      : gpsAgeMs <= 120000 ? "active"
+      : gpsAgeMs <= 900000 ? "delayed" : "stale";
     const locationIds = [...new Set([
       shipment.origin_location_id, shipment.destination_location_id,
       shipment.last_known_location_id, ...events.map((e) => e.location_id),
@@ -95,7 +102,7 @@ Deno.serve(async (req: Request) => {
       created_at: shipment.created_at,
       estimated_delivery_at: shipment.estimated_delivery_at,
       delivered_at: shipment.actual_delivery_at,
-      gps_sharing_status: sessionsError ? "unavailable" : activeSessions?.length ? "active" : "inactive",
+      gps_sharing_status: gpsSharingStatus,
       latest_position: gpsRow ? {
         latitude: Number(gpsRow.latitude),
         longitude: Number(gpsRow.longitude),
