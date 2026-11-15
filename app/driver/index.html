@@ -101,7 +101,7 @@ async function loadProfile(){
    if(!created.error)profile=created.data;else console.warn('Driver profile will need manual save:',created.error.message);
   }
  }
- $('fullName').value=profile.full_name||'';countrySelect.value=profile.country_code||'';$('phone').value=profile.phone||'';$('company').value=profile.company_name||'';$('licence').value=profile.licence_number||'';$('licenceExpiry').value=profile.licence_expiry_date||'';$('verification').textContent=profile.verification_status||'Pending';await loadVerificationDocs();
+ $('fullName').value=profile.full_name||'';countrySelect.value=profile.country_code||'';$('phone').value=profile.phone||'';$('company').value=profile.company_name||'';$('licence').value=profile.licence_number||'';$('licenceExpiry').value=profile.licence_expiry_date||'';const licenceCurrent=!!profile.licence_expiry_date&&profile.licence_expiry_date>new Date().toISOString().slice(0,10);const verificationLabel=(profile.verification_status==='verified'||profile.verification_status==='approved')&&!licenceCurrent?(profile.licence_expiry_date?'Licence expired · dispatch blocked':'Licence expiry missing · dispatch blocked'):(profile.verification_status||'Pending');$('verification').textContent=verificationLabel;await loadVerificationDocs();
 }
 async function loadVerificationDocs(){
  if(!profile?.id){$('verificationDocuments').innerHTML='<div class="empty">Save your driver profile before uploading documents.</div>';return;}
