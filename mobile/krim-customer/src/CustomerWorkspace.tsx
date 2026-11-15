@@ -200,7 +200,7 @@ export default function CustomerWorkspace({ session, onSignOut }: Props) {
 
         {tab === "Quotes" && <>
           <Header kicker="COMMERCIAL VISIBILITY" title="Quotes" sub="Amounts and currencies are displayed only from authorized KRIM quote records."/>
-          <View style={s.panel}><Text style={s.panelTitle}>Partner-direct payments</Text><Text style={s.body}>Customers pay the logistics provider they contract with. KRIM does not collect freight charges, hold escrow or settle partner funds. Verify the provider invoice and beneficiary details directly before paying.</Text><Action title="Read payment guidance" onPress={openPartnerPaymentGuidance} secondary/></View>
+          <View style={s.panel}><Text style={s.panelTitle}>Partner-direct payments</Text><Text style={s.body}>Customers pay the logistics provider they contract with. KRIM does not create or collect freight-payment orders, collect freight charges, hold escrow or settle partner funds. Verify the provider invoice and beneficiary details directly before paying.</Text><Action title="Read payment guidance" onPress={openPartnerPaymentGuidance} secondary/></View>
           {loadingData ? <ActivityIndicator color={blue}/> : quotes.length ? quotes.map((q) => <View key={q.id} style={s.panel}>
             <Text style={s.panelTitle}>Quote #{q.id}</Text>
             <Text style={s.amount}>{Number(q.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} {q.currency_code}</Text>
