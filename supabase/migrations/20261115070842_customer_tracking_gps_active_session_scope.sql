@@ -101,7 +101,7 @@ BEGIN
     'events',coalesce((
       SELECT jsonb_agg(jsonb_build_object('id',e.id,'event_type',e.event_type,'event_time',e.event_time,'source_type',e.source_type) ORDER BY e.event_time DESC)
       FROM (SELECT * FROM public.krim_tracking_events WHERE shipment_id=v_shipment.id
-        AND source_type IS DISTINCT FROM 'gps' AND event_type<>'gps_position'
+        AND source_type <> 'gps' AND event_type<>'gps_position'
         ORDER BY event_time DESC LIMIT 100) e
     ),'[]'::jsonb),
     'milestones',coalesce((
