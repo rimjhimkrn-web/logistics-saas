@@ -5,6 +5,9 @@ declare
   v_new text;
 begin
   v_def := pg_get_functiondef('public.krim_warehouse_review_inventory_quality(uuid,uuid,text,text)'::regprocedure);
+  if position('join storage.objects o' in v_def)>0 then
+    return;
+  end if;
   v_old := $old$ if not exists(
   select 1 from public.krim_warehouse_evidence e
   where e.task_id=v_task.id and e.evidence_type='inspection_report'
