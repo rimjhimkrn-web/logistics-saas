@@ -124,21 +124,19 @@ export async function loadCustomerQuotes(
     })) as CustomerQuote[];
   }
 
-  const [offerResults, assignmentResult] = await Promise.all([
-    Promise.all(shipmentIds.map((shipmentId) => client.rpc("krim_customer_list_partner_quotes", { p_shipment_id: shipmentId }))),
+  const [offerResult, assignmentResult] = await Promise.all([
+    client.rpc("krim_customer_list_partner_quotes", { p_shipment_ids: shipmentIds }),
     client.from("krim_shipment_partner_assignments")
       .select("id,shipment_id,partner_quote_id,status,created_at")
       .in("shipment_id", shipmentIds)
       .order("created_at", { ascending: false }),
   ]);
-  for (const result of offerResults) if (result.error) throw result.error;
+  if (offerResult.error) throw offerResult.error;
   if (assignmentResult.error) throw assignmentResult.error;
 
   const offerById = new Map<number, Record<string, unknown>>();
-  for (const result of offerResults) {
-    for (const offer of (result.data ?? []) as Array<Record<string, unknown>>) {
-      offerById.set(Number(offer.id), offer);
-    }
+  for (const offer of (offerResult.data ?? []) as Array<Record<string, unknown>>) {
+    offerById.set(Number(offer.id), offer);
   }
   const assignmentByQuoteId = new Map<number, string>();
   for (const assignment of assignmentResult.data ?? []) {
