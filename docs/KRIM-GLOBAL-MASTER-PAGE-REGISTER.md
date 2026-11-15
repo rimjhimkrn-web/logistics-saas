@@ -1,14 +1,14 @@
 # KRIM Global Logistics — Master Page Register (Repository Inventory)
 
-**Audit date:** 2026-10-24  
+**Audit date:** 2026-11-16
 **Repository:** `rimjhimkrn-web/logistics-saas`  
 **Branch:** `main`  
-**Inventory tree commit:** `ac0b74a1cfc281691be074d356ee237cc163b15d`  
+**Inventory tree commit:** `ad82731174daf76b0f7cd56473d558e48830b097`  
 **Purpose:** Establish a factual inventory before changing routes or deleting pages.
 
 ## Important status
 
-This is a **repository file inventory**, not proof that every page is published, linked correctly, functional, secure, or production-ready. No page has been deleted by this inventory. The current tree contains **805 HTML files outside `node_modules/`** and **6 HTML files inside `node_modules/`** (vendor files excluded from the product-page inventory). The total repository tree contains 1305 entries and was not truncated.
+This is a **repository file inventory**, not proof that every page is published, linked correctly, functional, secure, or production-ready. No page has been deleted by this inventory. The current tree contains **869 HTML files outside `node_modules/`** and **6 HTML files inside `node_modules/`** (vendor files excluded from the product-page inventory). The total repository tree contains 1916 entries and was not truncated. This refresh includes the new canonical warehouse reverse-logistics workspace at `app/warehouse/reverse-logistics.html`.
 
 The repository has several parallel page families (root-level pages, `public/`, `app/`, `workspaces/`, and `src/`). These are **potential overlap zones**, not automatically confirmed duplicates. Before deleting anything, verify GitHub Pages publishing source, incoming links, redirects, scripts, role behavior, and backend dependencies.
 
@@ -29,27 +29,27 @@ This is the intended logical flow. Actual page-to-page navigation is **not yet c
 
 | Repository path family | HTML files |
 |---|---:|
-| `(repository root)` | 18 |
-| `app` | 72 |
+| `(repository root)` | 36 |
+| `app` | 112 |
 | `auth` | 38 |
 | `control` | 1 |
 | `docs` | 1 |
 | `domains` | 13 |
 | `legal` | 2 |
-| `partner` | 2 |
+| `partner` | 3 |
 | `platform` | 1 |
-| `public` | 642 |
+| `public` | 647 |
 | `src` | 11 |
 | `templates` | 1 |
 | `workspaces` | 3 |
-| **Total product/repository HTML files (excluding node_modules)** | **805** |
-| Excluded vendor HTML files under `node_modules/` | 6 |
+| **Total product/repository HTML files (excluding node_modules)** | **869** |
+| Excluded vendor HTML files under `node_modules/` | **6** |
 
 ## Filename overlap review
 
-Same basenames are useful audit signals, but do not by themselves prove duplication. The following groups need link/dependency review before any retirement:
+Same basenames are useful audit signals, but do not by themselves prove duplication. These groups need link/dependency review before any retirement:
 
-- **index.html** (18 files): `app/customer/index.html`, `app/customs/index.html`, `app/driver/index.html`, `app/enterprise/index.html`, `app/field/index.html`, `app/finance/index.html`, `app/index.html`, `app/operations/index.html`, `app/partner/index.html`, `app/platform-admin/index.html`, `app/warehouse/index.html`, `docs/legal/index.html`, `index.html`, `public/customer-os/customer-services/index.html`, `public/customer-os/index.html`, `public/customer/index.html`, `public/index.html`, `public/operations/index.html`
+- **index.html** (28 files): `app/customer/index.html`, `app/customs/index.html`, `app/driver/index.html`, `app/enterprise/index.html`, `app/field/index.html`, `app/finance/index.html`, `app/index.html`, `app/operations/index.html`, `app/partner/business/index.html`, `app/partner/carrier/index.html`, `app/partner/customs/index.html`, `app/partner/development/index.html`, `app/partner/first-mile/index.html`, `app/partner/forwarder/index.html`, `app/partner/index.html`, `app/partner/individual/index.html`, `app/partner/last-mile/index.html`, `app/partner/multimodal/index.html`, `app/partner/specialist/index.html`, `app/platform-admin/index.html`, `app/warehouse/index.html`, `docs/legal/index.html`, `index.html`, `public/customer-os/customer-services/index.html`, `public/customer-os/index.html`, `public/customer/index.html`, `public/index.html`, `public/operations/index.html`
 - **analytics.html** (5 files): `app/enterprise/analytics.html`, `domains/analytics.html`, `public/customer-os/customer-services/analytics.html`, `public/customer/analytics.html`, `public/warehouse/analytics.html`
 - **claims.html** (4 files): `domains/claims.html`, `public/customer-os/customer-services/claims.html`, `public/customer/claims.html`, `public/legal/claims.html`
 - **dashboard.html** (4 files): `app/enterprise/dashboard.html`, `dashboard.html`, `public/app/carrier/dashboard.html`, `public/app/shipper/dashboard.html`
@@ -73,11 +73,13 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - **tracking.html** (3 files): `domains/tracking.html`, `public/tracking.html`, `tracking.html`
 - **verification.html** (3 files): `partner/verification.html`, `public/customer-os/customer-services/verification.html`, `public/customer/verification.html`
 - **about.html** (2 files): `about.html`, `public/about.html`
+- **active-shipments.html** (2 files): `app/partner/carrier/active-shipments.html`, `public/shipper/active-shipments.html`
 - **address-book.html** (2 files): `public/customer-os/customer-services/address-book.html`, `public/customer/address-book.html`
 - **approval-workflows.html** (2 files): `public/customer-os/customer-services/approval-workflows.html`, `public/customer/approval-workflows.html`
 - **audit-logs.html** (2 files): `public/finance/audit-logs.html`, `public/partner/audit-logs.html`
 - **booking-confirmation.html** (2 files): `public/customer-os/customer-services/booking-confirmation.html`, `public/customer/booking-confirmation.html`
 - **capacity-planning.html** (2 files): `app/operations/capacity-planning.html`, `public/operations/capacity-planning.html`
+- **capacity-resources.html** (2 files): `app/platform-admin/capacity-resources.html`, `public/partner/capacity-resources.html`
 - **cargo-profiles.html** (2 files): `public/customer-os/customer-services/cargo-profiles.html`, `public/customer/cargo-profiles.html`
 - **carrier-payables.html** (2 files): `public/billing/carrier-payables.html`, `public/finance/carrier-payables.html`
 - **company-profile.html** (2 files): `public/customer-os/customer-services/company-profile.html`, `public/customer/company-profile.html`
@@ -101,12 +103,15 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - **login.html** (2 files): `auth/login.html`, `public/driver/login.html`
 - **notifications.html** (2 files): `public/app/notifications.html`, `public/warehouse/notifications.html`
 - **operations-reports.html** (2 files): `app/operations/operations-reports.html`, `public/operations/operations-reports.html`
+- **partner-onboarding.html** (2 files): `partner/partner-onboarding.html`, `public/partner/partner-onboarding.html`
 - **partner-selection-assignment.html** (2 files): `public/operations/partner-selection-assignment.html`, `public/partner-selection-assignment.html`
 - **partner-terms.html** (2 files): `legal/partner-terms.html`, `public/legal/partner-terms.html`
+- **partner-verification.html** (2 files): `app/platform-admin/partner-verification.html`, `control/partner-verification.html`
 - **partner-workspace.html** (2 files): `partner/partner-workspace.html`, `workspaces/partner-workspace.html`
 - **partners.html** (2 files): `domains/partners.html`, `public/partners.html`
 - **payment-disputes.html** (2 files): `public/partner/payment-disputes.html`, `public/support/payment-disputes.html`
 - **payment-verification.html** (2 files): `public/finance/payment-verification.html`, `public/payment-verification.html`
+- **performance-quality.html** (2 files): `app/partner/carrier/performance-quality.html`, `public/partner/performance-quality.html`
 - **pod-capture.html** (2 files): `public/customer-os/customer-services/pod-capture.html`, `public/customer/pod-capture.html`
 - **pod-download.html** (2 files): `public/customer-os/customer-services/pod-download.html`, `public/customer/pod-download.html`
 - **pod-submission.html** (2 files): `public/driver/pod-submission.html`, `public/partner/pod-submission.html`
@@ -126,10 +131,12 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - **reports.html** (2 files): `public/customer-os/customer-services/reports.html`, `public/customer/reports.html`
 - **reset-password.html** (2 files): `app/reset-password.html`, `auth/reset-password.html`
 - **returns.html** (2 files): `public/customer-os/customer-services/returns.html`, `public/customer/returns.html`
+- **reverse-logistics.html** (2 files): `app/warehouse/reverse-logistics.html`, `public/global-operations/reverse-logistics.html`
 - **route-planning.html** (2 files): `app/operations/route-planning.html`, `public/shipments/route-planning.html`
 - **saved-routes.html** (2 files): `public/customer-os/customer-services/saved-routes.html`, `public/customer/saved-routes.html`
 - **security-audit.html** (2 files): `app/partner/security-audit.html`, `public/partner/security-audit.html`
 - **settlement.html** (2 files): `public/customer-os/customer-services/settlement.html`, `public/customer/settlement.html`
+- **shipment-claims.html** (2 files): `public/support/shipment-claims.html`, `shipment-claims.html`
 - **shipment-create.html** (2 files): `public/customer/shipment-create.html`, `public/shipments/shipment-create.html`
 - **shipment-timeline.html** (2 files): `public/customer-os/customer-services/shipment-timeline.html`, `public/customer/shipment-timeline.html`
 - **shipments.html** (2 files): `app/enterprise/shipments.html`, `domains/shipments.html`
@@ -144,29 +151,49 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 
 ## Full HTML file inventory
 
-### (repository root) (18)
+### (repository root) (36)
 
 - `about.html`
+- `accessibility.html`
 - `admin-control-center.html`
 - `admin-login.html`
+- `admin-rate-governance.html`
+- `admin-saas-pilots.html`
 - `admin.html`
+- `apps.html`
 - `contact.html`
+- `cookies.html`
 - `dashboard.html`
+- `faq.html`
 - `financial-management.html`
 - `forgot-password.html`
 - `global-markets.html`
+- `grievance.html`
 - `home-v2.html`
 - `index.html`
+- `legal-notice.html`
 - `network.html`
+- `partner-agreement.html`
+- `partner-standards.html`
+- `partner-with-us.html`
+- `plans.html`
 - `platform.html`
 - `portal.html`
 - `privacy.html`
+- `prohibited-restricted-cargo.html`
 - `refund.html`
+- `service-disclaimer.html`
+- `shipment-claims.html`
+- `shipment-preparation.html`
+- `shipment-tracking-policy.html`
+- `shipping-delivery.html`
 - `terms.html`
 - `tracking.html`
 
-### app (72)
+### app (112)
 
+- `app/admin/vehicle-verification.html`
+- `app/customer/customs-documents.html`
 - `app/customer/index.html`
 - `app/customs/index.html`
 - `app/driver/index.html`
@@ -231,14 +258,52 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `app/operations/shipment-control.html`
 - `app/operations/tracking-activity.html`
 - `app/operations/warehouse-coordination.html`
+- `app/partner/business/index.html`
+- `app/partner/carrier/active-shipments.html`
+- `app/partner/carrier/exception-reporting.html`
+- `app/partner/carrier/index.html`
+- `app/partner/carrier/milestone-updates.html`
+- `app/partner/carrier/performance-quality.html`
+- `app/partner/customs/index.html`
+- `app/partner/development/index.html`
+- `app/partner/driver-vehicle-assignment.html`
+- `app/partner/first-mile/index.html`
+- `app/partner/forwarder/index.html`
 - `app/partner/index.html`
+- `app/partner/individual/index.html`
 - `app/partner/integrations-automation.html`
+- `app/partner/last-mile/index.html`
+- `app/partner/multimodal/index.html`
 - `app/partner/security-audit.html`
+- `app/partner/specialist/index.html`
+- `app/partner/vehicle-registry.html`
+- `app/platform-admin/capacity-resources.html`
+- `app/platform-admin/claims-review.html`
+- `app/platform-admin/commercial-pricing.html`
+- `app/platform-admin/corridor-compliance.html`
+- `app/platform-admin/country-packs.html`
+- `app/platform-admin/customs-broker-review.html`
+- `app/platform-admin/delivery-pod-verification.html`
+- `app/platform-admin/driver-verification.html`
+- `app/platform-admin/global-country-market-management.html`
 - `app/platform-admin/index.html`
+- `app/platform-admin/market-activation.html`
+- `app/platform-admin/market-readiness.html`
+- `app/platform-admin/network-lanes.html`
+- `app/platform-admin/partner-capabilities.html`
+- `app/platform-admin/partner-compliance.html`
+- `app/platform-admin/partner-service-areas.html`
+- `app/platform-admin/partner-verification.html`
+- `app/platform-admin/regulatory-sources.html`
+- `app/platform-admin/support-desk.html`
+- `app/platform-admin/warehouse-facilities.html`
+- `app/platform-admin/warehouse-operations.html`
 - `app/register.html`
 - `app/reset-password.html`
 - `app/sign-in.html`
+- `app/warehouse/allocation.html`
 - `app/warehouse/index.html`
+- `app/warehouse/reverse-logistics.html`
 
 ### auth (38)
 
@@ -310,8 +375,9 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `legal/customer-terms.html`
 - `legal/partner-terms.html`
 
-### partner (2)
+### partner (3)
 
+- `partner/partner-onboarding.html`
 - `partner/partner-workspace.html`
 - `partner/verification.html`
 
@@ -319,7 +385,7 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 
 - `platform/krim-platform-shell.html`
 
-### public (642)
+### public (647)
 
 - `public/404.html`
 - `public/about.html`
@@ -690,12 +756,14 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `public/growth/customer-conversion.html`
 - `public/growth/customer-retention.html`
 - `public/growth/discovery-workbench.html`
+- `public/growth/enquiry-management.html`
 - `public/growth/intelligence-analytics.html`
 - `public/growth/multi-market-governance.html`
 - `public/growth/network-gap-analyzer.html`
 - `public/growth/onboarding-tracker.html`
 - `public/growth/partner-activation.html`
 - `public/growth/partner-intelligence.html`
+- `public/growth/partner-network.html`
 - `public/growth/partner-outreach.html`
 - `public/growth/prospect-registry.html`
 - `public/growth/prospect-review.html`
@@ -707,6 +775,7 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `public/index.html`
 - `public/industries.html`
 - `public/knowledge.html`
+- `public/krim-global-advertisement.html`
 - `public/legal/acceptable-use.html`
 - `public/legal/ai-policy.html`
 - `public/legal/claims.html`
@@ -763,6 +832,7 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `public/partner/capacity-calendar.html`
 - `public/partner/capacity-resources.html`
 - `public/partner/commercial-rates.html`
+- `public/partner/compliance-evidence.html`
 - `public/partner/compliance-status.html`
 - `public/partner/contract-management.html`
 - `public/partner/delivery-confirmation.html`
@@ -771,7 +841,7 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `public/partner/dispatch-execution.html`
 - `public/partner/document-upload.html`
 - `public/partner/documents-delivery-evidence.html`
-- `public/partner/driver-management.html`
+- `public/partner/driver-invitations.html`
 - `public/partner/earnings.html`
 - `public/partner/escrow-ledger.html`
 - `public/partner/export-center.html`
@@ -881,6 +951,7 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `public/shipper/coverage-review.html`
 - `public/shipper/epod-vault.html`
 - `public/shipper/invoices.html`
+- `public/shipper/partner-bid-status.html`
 - `public/shipper/payment-checkout.html`
 - `public/shipper/quote-comparison.html`
 - `public/shipper/rate-calculator.html`
@@ -987,37 +1058,3 @@ Same basenames are useful audit signals, but do not by themselves prove duplicat
 - `workspaces/customer-workspace.html`
 - `workspaces/operations-workspace.html`
 - `workspaces/partner-workspace.html`
-
-## Integration work started — 2026-10-24
-
-The canonical route registry is now available in `config.js` as `window.KRIM_ROUTES`, with `window.krimRoute(name, query)` for root-aware URLs. `auth/login.html` uses the registry for the eight standard workspaces while retaining membership and MFA checks.
-
-- Integration status: [KRIM end-to-end integration status](KRIM-END-TO-END-INTEGRATION-STATUS.md)
-- Static local-link audit: `scripts/audit-krim-links.mjs`
-- Automated GitHub Actions audit: `.github/workflows/krim-static-link-audit.yml`
-
-This is the first integration batch only. The registry does not magically connect every existing HTML page, and the automated audit has not yet produced a verified report. Continue page-by-page migration and backend transaction testing; do not delete legacy routes until their dependencies are checked.
-
-## Required next audit steps
-
-- [ ] Confirm GitHub Pages publishing source and live URL mapping for root files vs `public/`.
-- [ ] Parse every product HTML file for local links, form actions, script and stylesheet references.
-- [ ] Check each internal target exists and flag broken links / likely 404s.
-- [ ] Identify canonical pages for each user journey and mark legacy aliases/redirects.
-- [ ] Inspect repeated functions across root, `public/`, `app/`, `src/`, and `workspaces/`.
-- [ ] Verify links from the homepage and each role entry into the correct workspace.
-- [ ] Test high-risk workflows: authentication/RBAC, quote acceptance, payment verification, assignment, milestone persistence, delivery evidence, finance reconciliation.
-- [ ] Only after dependencies and live routes are understood, prepare a separate safe-removal/redirect plan.
-- [ ] Attach automated and browser test evidence before changing a status to verified.
-
-## Status definitions
-
-- **Inventoried:** File is present in the selected Git tree.
-- **Route-mapped:** Live URL and publishing root are confirmed.
-- **Link-checked:** Local references and targets were inspected.
-- **Function-tested:** User action was exercised and expected persisted result confirmed.
-- **Security-tested:** Role and tenant isolation were tested with appropriate non-privileged identities.
-- **Verified:** Required tests passed and evidence is recorded.
-- **Legacy candidate:** Possible overlap identified; not safe to delete until dependencies are checked.
-
-**Safety rule:** Never delete a page solely because its filename or displayed title resembles another page. Preserve the approved canonical Customer Shipment Dashboard and other already-approved journeys; investigate bad duplicate interfaces and legacy routes before changing them.
