@@ -83,7 +83,7 @@ Important: opportunity visibility depends on backend row-level security and orga
 7. Confirm no background location permission or tracking is active.
 8. Sign out.
 
-Important: assignment acceptance, trip-event writes, live location, and POD upload are disabled in the current app release. Do not use real shipments or driver data for this test.
+Important: the native app source contains assignment-scoped GPS and Android background-location code, but live GPS is currently held behind a source-level launch gate pending approved retention/deletion controls and legal review. Real-device background tests and all operational end-to-end tests remain outstanding. Do not use real shipments or driver data for this test.
 
 ## Cross-app negative tests
 - Sign out of one role and sign in with another role; confirm old role data is not retained.
