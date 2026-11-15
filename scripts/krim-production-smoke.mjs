@@ -397,6 +397,17 @@ if (!quoteOperations.includes("PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false
 
 const refundExecution = existsSync("supabase/functions/execute-razorpay-refund/index.ts") ? readFileSync("supabase/functions/execute-razorpay-refund/index.ts", "utf8") : "";
 if (!refundExecution.includes("KRIM_LEGACY_REFUND_EXECUTION_ENABLED") || !refundExecution.includes("KRIM_LEGACY_REFUND_APPROVAL_VERSION") || !refundExecution.includes("KRIM_REFUND_EXECUTION_NOT_APPROVED")) failures.push("New KRIM refund execution must remain disabled until separately approved under the partner-direct model.");
+const enterpriseSummaryLegacy = existsSync("public/enterprise/enterprise-summary.html") ? readFileSync("public/enterprise/enterprise-summary.html", "utf8") : "";
+const enterpriseOverviewLegacy = existsSync("public/enterprise/enterprise-overview.html") ? readFileSync("public/enterprise/enterprise-overview.html", "utf8") : "";
+const enterpriseAuditLegacy = existsSync("public/enterprise/enterprise-audit-log.html") ? readFileSync("public/enterprise/enterprise-audit-log.html", "utf8") : "";
+const enterpriseErpLegacy = existsSync("public/enterprise/erp-integrations.html") ? readFileSync("public/enterprise/erp-integrations.html", "utf8") : "";
+const enterpriseFinance = existsSync("app/enterprise/finance.html") ? readFileSync("app/enterprise/finance.html", "utf8") : "";
+if (!enterpriseSummaryLegacy.includes("app/enterprise/dashboard.html") || enterpriseSummaryLegacy.includes("Ready for Production Deployment") || enterpriseSummaryLegacy.includes("successfully built and verified all 35")) failures.push("Legacy enterprise summary must not claim production readiness; route to authenticated dashboard.");
+if (!enterpriseOverviewLegacy.includes("app/enterprise/dashboard.html") || enterpriseOverviewLegacy.includes("SOC 2 Type II") || enterpriseOverviewLegacy.includes("dedicated hardware security modules")) failures.push("Legacy enterprise VPC/SOC2 overview must be retired and must not claim unverified infrastructure.");
+if (!enterpriseAuditLegacy.includes("app/enterprise/institutional-memory.html") || enterpriseAuditLegacy.includes("SHA-256 cryptographic signature hashes")) failures.push("Legacy enterprise audit simulator must not claim immutable cryptographic execution logs.");
+if (!enterpriseErpLegacy.includes("app/enterprise/integrations.html") || enterpriseErpLegacy.includes("Real-time bi-directional synchronization")) failures.push("Legacy ERP integration simulator must not claim unverified SAP/Oracle synchronization.");
+if (!enterpriseFinance.includes("partner-direct model") || !enterpriseFinance.includes("does not collect freight funds")) failures.push("Enterprise finance module must explain partner-direct payment and no KRIM freight collection.");
+
 const orderFn = existsSync("supabase/functions/create-global-razorpay-order/index.ts") ? readFileSync("supabase/functions/create-global-razorpay-order/index.ts", "utf8") : "";
 const verifyFn = existsSync("supabase/functions/verify-razorpay-payment/index.ts") ? readFileSync("supabase/functions/verify-razorpay-payment/index.ts", "utf8") : "";
 for (const [label, source, pattern] of [
