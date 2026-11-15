@@ -2049,6 +2049,20 @@ for (const token of [
   if (!custodyAuditMigration.includes(token)) failures.push("Custody response audit safeguard is missing: " + token);
  }
 
+
+ // A revoked dispatch authorization cannot be returned as an active idempotent replay.
+ const dispatchReplayPath = "supabase/migrations/20261115152002_reject_revoked_dispatch_authorization_replay.sql";
+ const dispatchReplayMigration = existsSync(dispatchReplayPath) ? readFileSync(dispatchReplayPath, "utf8") : "";
+ for (const token of [
+  "v_existing.status<>'authorized'",
+  "idempotency key belongs to a revoked dispatch authorization",
+  "private.krim_leg_dispatch_authorization_is_current",
+  "Existing dispatch authorization is no longer current",
+  "uq_krim_active_leg_dispatch_authorization"
+ ]) {
+  if (!dispatchReplayMigration.includes(token)) failures.push("Dispatch authorization replay safeguard is missing: " + token);
+ }
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
