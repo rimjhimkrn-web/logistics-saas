@@ -1431,6 +1431,21 @@ for (const token of [
   if (!warehouseTransitionReplay.includes(token)) failures.push("Warehouse transition replay validation is missing: " + token);
 }
 
+// Aggregated SKU/lot balances cannot be released until every contributing receipt has independent evidence.
+const warehouseReceiptQcPath = "supabase/migrations/20261115184000_warehouse_quality_review_all_receipt_contributors.sql";
+const warehouseReceiptQc = existsSync(warehouseReceiptQcPath)
+  ? readFileSync(warehouseReceiptQcPath, "utf8") : "";
+for (const token of [
+  "Every receipt contributing to this SKU/lot balance",
+  "receipt_task.created_by=v_user",
+  "receipt_task.completed_by=v_user",
+  "e.evidence_type='inspection_report'",
+  "m.inventory_id=v_inventory.id AND m.movement_type='receipt'",
+  "receipt_task.status<>'completed'",
+]) {
+  if (!warehouseReceiptQc.includes(token)) failures.push("Warehouse aggregate-lot quality review safeguard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
