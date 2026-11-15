@@ -1829,6 +1829,22 @@ for (const token of [
   if (!acceptanceGuardMigration.includes(token)) failures.push("Partner acceptance guard is missing: " + token);
 }
 
+
+
+// Capacity reservations must match a verified resource and an active exact-origin/destination/mode network lane.
+const exactLaneCapacityPath = "supabase/migrations/20261116015000_require_exact_route_lane_for_capacity_reservation.sql";
+const exactLaneCapacityMigration = existsSync(exactLaneCapacityPath) ? readFileSync(exactLaneCapacityPath, "utf8") : "";
+for (const token of [
+  "krim_network_lanes nl",
+  "nl.origin_location_id=v_leg.origin_location_id",
+  "nl.destination_location_id=v_leg.destination_location_id",
+  "nl.transport_mode_id=v_leg.transport_mode_id",
+  "nl.status='active'",
+  "r.transport_mode_id=v_leg.transport_mode_id",
+]) {
+  if (!exactLaneCapacityMigration.includes(token)) failures.push("Exact-route capacity guard is missing: " + token);
+}
+
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
   console.error(failures.map((f) => `FAIL: ${f}`).join("\n"));
