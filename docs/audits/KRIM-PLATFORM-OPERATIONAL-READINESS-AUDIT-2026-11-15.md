@@ -274,7 +274,7 @@ The latest metadata-only comparison returned 281 repository migration files and 
 ### Mobile validation and internal builds
 
 - KRIM Partner, KRIM Customer and KRIM Driver passed dependency installation, Expo configuration, TypeScript validation and Android export on workflow run `43688821196`, source commit `34ab5b758de0ac45a9f2f50ca2ca1e245b7843b1`.
-- The KRIM Partner internal debug APK built successfully and was uploaded as artifact `14151313529`. Driver and Customer APK builds were still running at the time of this addendum.
+- All three internal Android debug APK builds completed successfully. Artifacts: Partner `14151313529`, Driver `14151661517`, Customer `14151817130`. The workflow also verified driver-only background-location permissions and checked that customer/partner apps do not request those permissions. Artifacts are retained for 14 days from build.
 - These are internal debug builds, not production-signed Play Store releases. No physical-device installation, login, assignment, location-permission or live GPS acceptance test has been performed.
 
 ### Operational and payment snapshot
