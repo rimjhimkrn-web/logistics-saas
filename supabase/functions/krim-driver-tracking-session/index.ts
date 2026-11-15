@@ -23,6 +23,14 @@ Deno.serve(async(req:Request)=>{
   .eq("id",assignmentId).eq("user_id",userId).maybeSingle();
  if(driverError)return reply(500,{error:"Could not verify driver assignment"});
  if(!driver||!driver.shipment_id||!driver.partner_assignment_id)return reply(403,{error:"No linked shipment assignment is available"});
+ if(action==="stop"){
+  const {data:active,error:activeError}=await admin.from("krim_driver_tracking_sessions").select("id").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
+  if(activeError)return reply(500,{error:"Could not locate active tracking session"});
+  if(!active)return reply(200,{success:true,stopped:false,message:"No active tracking session exists"});
+  const {error:updateError}=await admin.from("krim_driver_tracking_sessions").update({status:"stopped",stopped_at:new Date().toISOString(),stop_reason:"driver_stopped"}).eq("id",active.id).eq("user_id",userId).eq("status","active");
+  if(updateError)return reply(500,{error:"Tracking session could not be stopped"});
+  return reply(200,{success:true,stopped:true,session_id:active.id});
+ }
  const {data:membership,error:membershipError}=await admin.from("krim_organization_members")
   .select("organization_id").eq("organization_id",driver.organization_id).eq("user_id",userId).eq("role","driver").eq("status","active").maybeSingle();
  if(membershipError)return reply(500,{error:"Could not verify active driver membership"});
@@ -33,14 +41,6 @@ Deno.serve(async(req:Request)=>{
  const {data:profile,error:profileError}=await admin.from("krim_driver_profiles").select("id,verification_status").eq("user_id",userId).eq("organization_id",driver.organization_id).maybeSingle();
  if(profileError)return reply(500,{error:"Could not verify driver identity"});
  if(!profile||!["verified","approved"].includes(String(profile.verification_status).toLowerCase()))return reply(403,{error:"Verified driver identity is required before location sharing"});
- if(action==="stop"){
-  const {data:active,error:activeError}=await admin.from("krim_driver_tracking_sessions").select("id").eq("driver_assignment_id",assignmentId).eq("user_id",userId).eq("status","active").maybeSingle();
-  if(activeError)return reply(500,{error:"Could not locate active tracking session"});
-  if(!active)return reply(200,{success:true,stopped:false,message:"No active tracking session exists"});
-  const {error:updateError}=await admin.from("krim_driver_tracking_sessions").update({status:"stopped",stopped_at:new Date().toISOString(),stop_reason:"driver_stopped"}).eq("id",active.id).eq("user_id",userId).eq("status","active");
-  if(updateError)return reply(500,{error:"Tracking session could not be stopped"});
-  return reply(200,{success:true,stopped:true,session_id:active.id});
- }
  if(String(driver.status).toLowerCase()!=="in_transit")return reply(409,{error:"Location sharing is available only after the trip is marked in transit"});
  const {data:partner,error:partnerError}=await admin.from("krim_shipment_partner_assignments")
   .select("id,shipment_id,shipment_leg_id,partner_organization_id,status")
