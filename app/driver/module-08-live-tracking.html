@@ -21,10 +21,10 @@ gpsSelect.innerHTML='<option value="">Select an active assigned shipment</option
 gpsStart.disabled=!eligible.length;
 let gpsWatch=null,wakeLock=null,lastSentAt=0;
 function gpsMessage(message,warning=false){gpsStatus.textContent=message;gpsStatus.className=warning?'notice warn':'notice';}
-async function stopGps(message='GPS sharing stopped. No further location updates are being sent.'){
+async function stopGps(message='GPS sharing stopped. No further location updates are being sent.',warning=false){
  if(gpsWatch!==null&&navigator.geolocation){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;}
  if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;}
- gpsStart.disabled=!eligible.length;gpsStop.disabled=true;gpsSelect.disabled=false;gpsMessage(message);
+ gpsStart.disabled=!eligible.length;gpsStop.disabled=true;gpsSelect.disabled=false;gpsMessage(message,warning);
 }
 gpsStop.addEventListener('click',()=>stopGps());
 gpsStart.addEventListener('click',async()=>{
