@@ -1,9 +1,9 @@
 import type {SupabaseClient} from "@supabase/supabase-js";
-export type DriverProfile={id:string;organization_id:number;full_name:string;country_code:string;phone:string;company_name:string;verification_status:string;onboarding_mode:string};
+export type DriverProfile={id:string;organization_id:number;full_name:string;country_code:string;phone:string;company_name:string;verification_status:string;licence_expiry_date:string|null;onboarding_mode:string};
 export type DriverAssignment={id:string;organization_id:number;shipment_id:number|null;shipment_dispatch_id:number|null;assignment_number:string;status:string;pickup_location:string;delivery_location:string;scheduled_pickup_at:string|null;scheduled_delivery_at:string|null;partner_assignment_id:number|null;shipment_leg_id:number|null;accepted_at:string|null;vehicle_id:string|null;created_at:string};
 export type DriverTripEvent={id:string;assignment_id:string;event_type:string;notes:string;created_at:string};
 export async function loadDriverProfiles(client:SupabaseClient,userId:string):Promise<DriverProfile[]>{
- const {data,error}=await client.from("krim_driver_profiles").select("id,organization_id,full_name,country_code,phone,company_name,verification_status,onboarding_mode").eq("user_id",userId).limit(20);
+ const {data,error}=await client.from("krim_driver_profiles").select("id,organization_id,full_name,country_code,phone,company_name,verification_status,licence_expiry_date,onboarding_mode").eq("user_id",userId).limit(20);
  if(error)throw error;return (data??[]) as DriverProfile[];
 }
 export async function loadDriverAssignments(client:SupabaseClient,userId:string):Promise<DriverAssignment[]>{
