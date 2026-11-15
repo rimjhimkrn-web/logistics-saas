@@ -168,3 +168,34 @@ KRIM may be called a **production candidate for a specifically named corridor an
 - Monitoring, support ownership and recovery procedures are in place.
 
 Global availability must be enabled country-by-country and service-by-service after equivalent validation.
+
+## 15 November 2026 — multi-leg dispatch execution update
+
+The multi-leg execution foundation now includes the following deployed database controls:
+
+- Exact-leg dispatch authorisation records, separate from physical pickup and departure.
+- Dispatch authorisation requires an accepted exact-leg partner assignment, shipment.dispatch permission, an assigned leg, a confirmed physical capacity binding and its partner-owned confirmed reservation.
+- Road authorisation requires an accepted driver assignment, active driver membership, verified driver/current licence evidence, an active verified vehicle, active driver-vehicle binding and current mandatory vehicle documents.
+- An insert guard requires an active multi-leg route plan and an exact matching plan item, partner, current registered-business verification/compliance and exact-leg capability.
+- Driver pickup and transit events require an active exact-leg dispatch authorisation for multi-leg road legs. Shipment-level status remains unchanged while individual multi-leg legs move in transit. The ordinary single-leg path remains preserved.
+- Dispatch authorisation can be revoked with a reason before pickup/transit. Only one active authorisation per leg is permitted; prior revoked records are retained.
+- Driver pickup/transit revalidates the current plan item, assignment, partner compliance, capability, capacity binding/reservation and accepted custody.
+- Non-road dispatch is deliberately held until mode-specific verified resource and execution controls are implemented.
+
+Repository migration files are aligned to the actual production migration versions:
+- 20261115144628_add_exact_leg_dispatch_authorization.sql
+- 20261115144752_integrate_multileg_dispatch_authorization_with_driver_events.sql
+- 20261115145000_guard_leg_dispatch_plan_partner_and_mode_readiness.sql
+- 20261115145401_add_dispatch_revocation_and_revalidate_at_driver_execution.sql
+
+The latest KRIM production smoke workflow and static local-link audit passed on commit b4e9397e2cd716634c963abc3fe4f45d8e9c8041; GitHub Pages deployment also succeeded. The smoke test is static regression evidence, not a live transaction or browser end-to-end test.
+
+Current operational data remains empty for this path: zero active multi-leg plans, zero accepted leg-specific partner assignments, zero dispatch authorisations and zero driver trip events. No synthetic operational data was inserted. Positive end-to-end testing still requires real verified partners, exact capabilities, active lanes, confirmed physical reservations, drivers, vehicles and private evidence.
+
+Latest Supabase advisor snapshot: no health findings; 29 RLS-enabled/no-policy informational findings; 140 generic authenticated SECURITY DEFINER warnings; leaked-password protection remains disabled. These findings require individual risk triage; do not blanket-add policies or revoke legitimate RPCs. The dispatch authorization table intentionally has no direct client table grants and is accessed through narrowly scoped RPCs.
+
+### Page-sequence handoff note
+
+The API & Webhooks workspace (public/partner/api-webhooks.html, identified as Page 45 in the active 103-page review sequence) remains an informational/read-only integration-access page. It does not expose API credentials or claim that endpoint creation, key rotation, secret display or webhook replay are available. The latest repository static link audit reported no broken literal local references. This is not proof of browser/RBAC/runtime behavior.
+
+Page 46 may proceed as the next page in the UI review sequence, but the overall platform must not be described as globally production-ready. The remaining release blockers in this register—real partner/capacity/driver operations, non-road resource controls, warehouse transfer/returns, customs legal approvals, finance/tax workflows, notification delivery and role-based browser testing—remain open.
