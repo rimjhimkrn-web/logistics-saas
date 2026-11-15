@@ -75,7 +75,7 @@ if(!list.length){$("quote-list").innerHTML='<div class="empty"><strong>No matchi
 $("quote-list").innerHTML=list.map(q=>{const selected=Number(q.id)===Number(selectedId);return '<button type="button" class="quote-item'+(selected?' selected':'')+'" data-quote-id="'+Number(q.id)+'" aria-pressed="'+selected+'"><div class="quote-item-top"><span class="quote-ref">Quote #'+esc(q.id)+'</span><span class="pill '+stateClass(q)+'">'+esc(statusLabel(q))+'</span></div><div class="quote-sub">Shipment #'+esc(q.shipment_id)+' · Created '+esc(dateText(q.created_at))+'</div><div class="quote-item-bottom"><span class="quote-money">'+esc(money(q))+'</span><span class="tiny-note">Valid to '+esc(dateText(q.valid_until))+'</span></div></button>';}).join("");
 $("quote-list").querySelectorAll("[data-quote-id]").forEach(b=>b.addEventListener("click",()=>selectQuote(Number(b.dataset.quoteId),true)));
 }
-const PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = false;
+const PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED = true;
 function detailHtml(q,assignment){
 const expired=isExpired(q),status=visibleStatus(q),partnerReady=!!q.partner_quote_id&&!assignment?.error&&assignment?.status==="accepted",canAccept=q.status==="sent"&&!expired&&partnerReady&&PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED;
 let notice="",action="";
