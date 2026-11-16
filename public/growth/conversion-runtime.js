@@ -1,10 +1,10 @@
 /**
- * KRIM OS — Customer Conversion & Partner Outreach Runtime
- * Phase 3: Automated Partner Outreach & Customer Acquisition Conversion
- * 
- * Drives automated messaging cadences, instant quotation matching, and booking conversions.
+ * KRIM customer conversion readiness preview.
+ *
+ * This module intentionally performs no automated outreach, serviceability
+ * matching, quotation generation or booking. Those operations require verified
+ * partner, corridor, pricing and authorization data in the production workflows.
  */
-
 class ConversionRuntime {
   constructor() {
     this.initialized = false;
@@ -12,21 +12,16 @@ class ConversionRuntime {
 
   init() {
     if (this.initialized) return;
-    console.log("⚡ [KRIM Conversion Runtime] Initializing Partner Outreach & Customer Conversion Engine...");
-    this.verifyConversionRules();
     this.initialized = true;
-    console.log("✅ [KRIM Conversion Runtime] Conversion & Outreach Engine Active.");
-  }
-
-  verifyConversionRules() {
-    console.log("🎯 [Conversion Engine] Active: Strict PIN serviceability and verified capacity matching enforced before quote generation.");
+    document.documentElement.dataset.krimConversionRuntime = "readiness-preview";
+    console.info("[KRIM] Customer conversion readiness preview loaded. No live matching, quote generation, outreach or booking was performed.");
   }
 }
 
 export const conversionRuntime = new ConversionRuntime();
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => conversionRuntime.init());
+  document.addEventListener("DOMContentLoaded", () => conversionRuntime.init(), { once: true });
 } else {
   conversionRuntime.init();
 }
