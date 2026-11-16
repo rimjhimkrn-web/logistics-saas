@@ -1590,13 +1590,17 @@ for (const token of [
   'id="newPlanBtn"',
   'c.rpc("krim_create_shipment_leg_plan"',
   'c.rpc("krim_evaluate_shipment_leg_plan"',
-  'c.rpc("krim_activate_shipment_leg_plan"',
-  '!confirm("Activate this route plan?',
+  'id="activatePlanBtn" disabled',
+  'Activation is unavailable pending global corridor and compliance gate verification.',
   'shipment.update',
   'No plan can be created.',
   'does not assign partners, reserve capacity or dispatch cargo',
 ]) {
   if (!routePlanningUi.includes(token)) failures.push("Route-planning lifecycle UI safeguard is missing: " + token);
+}
+if (routePlanningUi.includes('c.rpc("krim_activate_shipment_leg_plan"') ||
+    routePlanningUi.includes('!confirm("Activate this route plan?')) {
+  failures.push("Route-plan activation must remain blocked in the UI until global market/corridor/customs/compliance backend gates are verified.");
 }
 const routePlanningScripts = [...routePlanningUi.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map(match => match[1]).filter(script => script.trim());
