@@ -88,6 +88,9 @@ footer{text-align:center;color:#64748b;font-size:12px}
    if(challengeResult.error)throw challengeResult.error;
    const verifyResult=await client.auth.mfa.verify({factorId:factor.id,challengeId:challengeResult.data.id,code});
    if(verifyResult.error)throw verifyResult.error;
+   const assuranceResult=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+   if(assuranceResult.error)throw assuranceResult.error;
+   if(assuranceResult.data?.currentLevel!=="aal2")throw new Error("The authenticator code was accepted, but the session has not reached the required AAL2 security level. Sign in again or contact KRIM support.");
    sessionStorage.removeItem("KRIM_MFA_FACTOR_ID");
    show("MFA verified. Opening your workspace…",true);
    form.hidden=true;
