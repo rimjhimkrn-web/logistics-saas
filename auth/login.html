@@ -321,6 +321,11 @@
       challengeId = challenge.id;
       const { error: verifyError } = await client.auth.mfa.verify({ factorId, challengeId, code });
       if (verifyError) throw verifyError;
+      const assuranceResult = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceResult.error) throw assuranceResult.error;
+      if (assuranceResult.data?.currentLevel !== "aal2") {
+        throw new Error("The authenticator code was accepted, but the session has not reached the required AAL2 security level. Sign in again or contact KRIM support.");
+      }
       const sessionResult = await client.auth.getSession();
       if (sessionResult.error) throw sessionResult.error;
       if (!sessionResult.data?.session) throw new Error("MFA was verified but the browser session is unavailable. Please sign in again.");
