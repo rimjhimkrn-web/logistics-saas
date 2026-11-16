@@ -1051,3 +1051,60 @@ The trigger helper `public.set_payment_updated_at()` is SECURITY INVOKER and has
 ### Release decision
 
 The finance backend remains **NO-GO for live-money use**. Frontend containment does not secure callable RPCs. The authenticated EXECUTE grants on private refund SECURITY DEFINER functions and the unscoped revenue-list RPC are priority backend blockers. Do not patch production until authoritative migration bodies and dependency/caller graph have been recovered and reconciled.
+
+
+## 27. Edge Functions, service-role paths, Razorpay webhook and payment lifecycle
+
+### Deployed Edge Function inventory
+
+The production project currently lists 21 active Edge Functions. Payment-related functions include:
+- `razorpay-webhook` (v28, JWT verification disabled, as expected for a provider webhook that authenticates by signature);
+- `create-global-razorpay-order` (v25, JWT verification enabled);
+- `verify-razorpay-payment` (v25, JWT verification enabled);
+- `execute-razorpay-refund` (v7, JWT verification enabled);
+- legacy `create-razorpay-order` and `process-payment--` (both return HTTP 410 retired responses);
+- legacy Cashfree create/verify/webhook functions (all return HTTP 410 retired responses; Cashfree webhook has JWT verification disabled but performs no payment processing).
+
+Other public/no-JWT functions exist for tracking, contact inquiry and notification retry. They are outside this focused finance pass and need their own abuse/rate-limit/authentication review. Active deployment status is not evidence that a provider integration is enabled for real transactions.
+
+### Razorpay webhook positive controls
+
+The deployed `razorpay-webhook` source (v28) was inspected:
+- Requires POST, configured webhook secret, `x-razorpay-signature` and `x-razorpay-event-id`.
+- Verifies HMAC-SHA256 over the raw request body using constant-time byte comparison.
+- Explicitly allowlists payment and refund event types.
+- Stores events before processing, recognizes already-processed duplicates and leaves failed processing retryable.
+- Does not treat `payment.authorized` as paid.
+- For captured/order-paid events, matches the server-stored Razorpay order, amount, currency, payment ID and captured status; conditionally transitions payment order and invokes the service-role-only captured-payment reconciliation RPC.
+- Does not acknowledge a captured event as processed until finance reconciliation returns a transaction ID.
+- Refund webhook verifies Razorpay signature, INR amount, original payment ID, approved request amount and provider refund ID conflicts; then records the provider outcome and a finance transaction with an idempotency anchor.
+
+### Webhook/payment lifecycle risks requiring remediation or proof
+
+1. Event insertion and business processing are separate database requests, not one atomic transaction. A concurrent duplicate insert returns retryable 409 while the first event may be processing; this is safer than false success but requires provider retry behavior and a recovery worker/alert for stuck unprocessed events.
+2. Captured-payment webhook transitions `payment_orders.status` to `paid` before calling finance reconciliation. It returns 500 and leaves the webhook retryable if finance posting fails, which supports recovery, but there is an interim paid-without-finance state. The UI and shipment activation must never treat the payment as fully reconciled solely from that intermediate status.
+3. `payment.failed` records an attempt failure while deliberately keeping the order open for retry; ensure the UI distinguishes a failed attempt from a failed/closed order.
+4. Refund webhook event handling uses service-role direct table updates and inserts. Provider signature plus exact amount/payment checks are good controls, but this path still needs transactionally atomic state transition, duplicate/concurrency tests, monotonic refund-state rules and an explicit mapping of refund events to request/payment/ledger.
+5. Refund event processing marks request status and payment order status in separate calls before writing/reconciling the refund financial transaction. A partial failure can leave mixed states; retry/reconciliation behavior must be tested for every failure point.
+6. Refund correlation uses request ID in Razorpay notes when valid, otherwise previously stored provider refund ID. Do not accept a refund solely because a provider event is signed; require exact request binding and original payment binding for every event.
+7. The refund Edge Function can initiate a Razorpay refund only when two explicit approval secrets match. It uses the authenticated user session and database claim RPC, exact INR amount and a stable idempotency key; ambiguous provider responses remain pending for manual reconciliation. However, the claim RPC's authenticated EXECUTE exposure and the reviewer-tenant defect remain critical, so the refund execution approval switch must stay disabled.
+8. The order-creation function has JWT verification enabled and independently validates the user token. It also checks a two-part freight-collection approval switch and currently returns HTTP 503 while that approval is absent. It binds the order to customer organization, accepted quote, partner assignment and confirmed capacity checks. The merchant-eligibility registry and partner-direct business model still prevent treating this as approved freight collection.
+9. Payment verification has JWT verification enabled, authenticates the caller and verifies Razorpay signature and provider payment details against the server-stored order. It checks quote/partner assignment/capacity binding and repeats an explicit freight-collection approval check. This is useful defense in depth, but do not activate freight collection under the partner-direct model.
+10. Legacy Cashfree endpoints are functionally retired with HTTP 410, but remain deployed and visible. Remove only after migration/dependency review and after proving no production client, webhook registration or historical reconciliation depends on them.
+
+### Provider and merchant posture
+
+Provider registry findings remain unchanged: India INR Razorpay integration is marked implemented, but checkout is disabled, merchant eligibility is unverified and settlement support is false. Other providers are disabled. The deployed create-order endpoint also fails closed unless explicit freight collection approval secrets are set. This does not establish that Razorpay live collection is enabled or that KRIM may legally collect partner freight funds.
+
+### Required next controls
+
+- Add a durable webhook inbox state machine with lease/claim, attempts, last error, dead-letter/escalation and replay-safe recovery; avoid concurrent duplicate processors.
+- Make payment/refund state changes and corresponding finance transaction/outbox records atomic where possible.
+- Require shipment activation and customer-facing paid confirmation to depend on verified captured payment plus successful canonical finance reconciliation, not only `payment_orders.status='paid'`.
+- Add monotonic state transition guards; prevent refund failed/created events from regressing a processed refund.
+- Add integration tests for invalid signature, missing event ID, duplicate delivery, concurrent delivery, stale unprocessed event, amount/currency/payment/order mismatch, authorization-only event, failed attempt followed by captured retry, conflicting payment IDs, finance RPC failure, refund duplicate, refund conflict and partial failures.
+- Verify webhook secrets and provider dashboard configuration without disclosing secret values; rotate any exposed or suspect secret.
+- Review Edge Function logs and alerting for stuck unprocessed events and finance reconciliation failures.
+- Keep freight collection and refund execution disabled until legal, merchant, tax, tenant authorization and end-to-end lifecycle gates are satisfied.
+
+No Edge Function was deployed or changed. No secrets were read or modified, no payment/refund RPC was invoked, and no provider transaction or database row was changed during this inspection.
