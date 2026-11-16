@@ -45,9 +45,9 @@ async function init(){
  if(!orgIds.length)throw Error('No active partner/dispatch membership was found for this account.');
  const or=await db.from('krim_organizations').select('id,organization_type,organization_type_code,status,partner_verification_status,partner_compliance_status,partner_lifecycle_status').in('id',orgIds);
  if(or.error)throw or.error;
- const valid=(or.data||[]).filter(o=>['partner','carrier','forwarder','logistics_provider'].includes(String(o.organization_type_code||o.organization_type||'').toLowerCase())&&String(o.status||'').toLowerCase()==='active'&&['verified','approved'].includes(String(o.partner_verification_status||'').toLowerCase())&&['clear','compliant','approved','verified','not_required','not_applicable'].includes(String(o.partner_compliance_status||'').toLowerCase())&&['active','verified'].includes(String(o.partner_lifecycle_status||'').toLowerCase()));
- orgIds=valid.map(o=>Number(o.id));
- if(!orgIds.length)throw Error('Dispatch is locked until your partner organization is verified and active.');
+ const valid=(or.data||[]).filter(o=>['partner','carrier','forwarder','logistics_provider'].includes(String(o.organization_type_code||o.organization_type||'').toLowerCase())&&String(o.status||'').toLowerCase()==='active'&&['verified','approved'].includes(String(o.partner_verification_status||'').toLowerCase())&&String(o.partner_compliance_status||'').toLowerCase()==='compliant'&&String(o.partner_lifecycle_status||'').toLowerCase()==='active');
+ if(valid.length!==1)throw Error(valid.length>1?'Multiple eligible partner organizations are linked to this account. Driver assignment is paused to prevent cross-organization access.':'Dispatch is locked until one partner organization has verified identity, active lifecycle and explicit compliant status.');
+ orgIds=[Number(valid[0].id)];
  await loadAssignments();
 }
 async function loadAssignments(){
