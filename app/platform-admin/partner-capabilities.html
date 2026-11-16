@@ -69,7 +69,7 @@ function render(){
 }
 async function load(){
  $("content").innerHTML='<div class="empty">Loading pending capabilities…</div>';
- try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;items=Array.isArray(data?.items)?data.items:[];incompleteCount=Number(data?.incomplete_count||0);render();setState(items.length+" REVIEW-READY"+(incompleteCount?" · "+incompleteCount+" HELD":"") ,"good")}
+ try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;if(!data||!Array.isArray(data.items)||!Number.isInteger(data.incomplete_count)||data.incomplete_count<0)throw new Error("Capability review returned an invalid response shape. No cases were rendered and no decision is enabled.");items=data.items;incompleteCount=data.incomplete_count;render();setState(items.length+" REVIEW-READY"+(incompleteCount?" · "+incompleteCount+" HELD":"") ,"good")}
  catch(e){items=[];$("content").innerHTML='<div class="empty">'+esc(e.message||"Queue unavailable")+'</div>';setState("QUEUE UNAVAILABLE","bad");$("status").textContent="No review decision was submitted."}
 }
 async function review(id,decision){
