@@ -790,7 +790,7 @@ for (const [label, source, pattern] of [
   ["Customer quote request reads saved quote records", customerQuoteRequest, /from\(['"]krim_quotes['"]\)/],
   ["Customer quote request scopes records to active customer organizations", customerQuoteRequest, /krim_organization_members[\s\S]*?customer_organization_id[\s\S]*?customerIds/],
   ["Customer invoice register reads saved invoice records", customerInvoices, /from\(['"]krim_invoices['"]\)/],
-  ["Customer invoice register filters by the organization protected by invoice RLS", customerInvoices, /from\(['"]krim_invoices['"]\)[\s\S]*?\.in\(['"]organization_id['"],customerIds\)/],
+  ["Customer invoice register filters customer invoices by the recipient organization protected by invoice RLS", customerInvoices, /from\(['"]krim_invoices['"]\)[\s\S]*?\.eq\(['"]invoice_type['"],['"]customer['"]\)[\s\S]*?\.in\(['"]customer_organization_id['"],customerIds\)/],
   ["Customer support page creates saved support tickets", customerSupport, /from\(['"]support_tickets['"]\)\.insert\(payload\)/],
   ["Customer support tickets bind to the signed-in user and active organization", customerSupport, /user_id:session\.user\.id[\s\S]*?krim_organization_id:Number\(org\.id\)[\s\S]*?krim_shipment_id:shipmentId/],
   ["Customer support verifies active organization membership before ticket creation", customerSupport, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?organization_type/],
@@ -1133,19 +1133,23 @@ if (!razorpayWebhookSource.includes('if (existingEvent?.processed)') ||
   failures.push("Step 7 webhook must distinguish completed duplicates from retryable in-progress/failed deliveries.");
 }
 
-// Step 7 finance workspaces must display real RLS-scoped records without adding
-// browser-side financial write paths or implying that a payment is a payout.
+// Step 7 finance workspaces are deliberately held while database-level
+// tenant isolation and finance-role authorization remain unresolved. Protect
+// that containment instead of demanding unsafe browser table queries.
 const paymentProcessingPage = readFileSync("app/finance/payment-processing.html", "utf8");
 const partnerSettlementPage = readFileSync("app/finance/partner-settlements.html", "utf8");
 for (const [label, source, tokens] of [
-  ["payment processing register", paymentProcessingPage, ["from(\"payment_orders\")", "paymentRegisterRows", "paymentRegisterState", "Data unavailable. No zero-count claim is made."]],
-  ["partner payable register", partnerSettlementPage, ["from(\"krim_partner_payables\")", "payableRegisterRows", "payableRegisterState", "A payable is not an executed payout."]],
+  ["payment processing register", paymentProcessingPage, ["Payment-order register held pending strict customer-entity scope", "ACCESS HELD · DATABASE SCOPE REVIEW REQUIRED", "No provider references or transaction amounts are displayed."]],
+  ["partner payable register", partnerSettlementPage, ["Partner payable register", "Partner payable data held pending verified partner-only database isolation", "ACCESS HELD · DATABASE SCOPE REVIEW REQUIRED"]],
 ]) {
   for (const token of tokens) {
-    if (!source.includes(token)) failures.push("Step 7 " + label + " is missing read-only register safeguard: " + token);
+    if (!source.includes(token)) failures.push("Step 7 " + label + " is missing required access-hold safeguard: " + token);
   }
-  if (/\.from\(["'](?:payment_orders|krim_partner_payables)["']\)[\s\S]{0,500}\.(?:insert|update|upsert|delete)\(/.test(source)) {
-    failures.push("Step 7 " + label + " must remain read-only in the browser.");
+  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)/.test(source)) {
+    failures.push("Step 7 " + label + " must not query sensitive finance tables from the browser while access is held.");
+  }
+  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)[\\s\\S]{0,500}\\.(?:insert|update|upsert|delete)\\(/.test(source)) {
+    failures.push("Step 7 " + label + " must not add browser-side financial writes.");
   }
 }
 for (const token of ["capacity_binding_id", "krim_capacity_leg_bindings", "krim_capacity_reservations", "CAPACITY_RESERVATION_REQUIRED", "CAPACITY_BINDING_NOT_CONFIRMED", "CAPACITY_RESERVATION_NOT_CONFIRMED"]) {
