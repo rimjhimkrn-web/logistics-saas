@@ -1363,3 +1363,37 @@ Do not mistake public web traffic, registered accounts, shipment GMV, partner fr
 **The acquisition funnel is technically present but commercially unproven.** The next revenue-enabling work should be a founder-led, low-cost pilot with one verified partner and a small number of qualified shippers. The system must support and evidence that journey, but actual partner verification, agreement signatures, customer consent, tax advice, service delivery and fee collection require real-world action and cannot be simulated or marked complete by code.
 
 No outbound message, email, WhatsApp, phone call, partner approval, customer booking or payment was performed during this review.
+
+
+## Section 33 — Production smoke-test repair and CI verification
+
+**Date:** 16 November 2026. This work changed the repository's automated regression checks only; no production database, financial records, access policy or payment provider state was changed.
+
+### Failure identified
+
+GitHub Actions run `43790462597` failed because the smoke script still expected:
+- Customer invoice filtering through `organization_id`, while the hardened customer invoice page correctly filters `invoice_type='customer'` and the recipient's `customer_organization_id`.
+- Live browser-side `payment_orders` and `krim_partner_payables` register queries and their row containers, despite both pages having intentionally been put on an access hold because database tenant isolation and finance-role authorization are not yet safe.
+
+Those assertions were stale and contradicted the current containment decisions. Restoring the queries to make CI green would have reintroduced risk.
+
+### Corrective change
+
+Updated `scripts/krim-production-smoke.mjs` to:
+- Assert the customer invoice register is filtered by customer invoice type and the active customer recipient organization.
+- Assert the payment-processing page remains held and does not query sensitive payment-order rows in the browser.
+- Assert the partner-settlement page remains held pending partner-only database isolation and does not query sensitive payable rows in the browser.
+- Retain checks that no browser-side finance writes are introduced.
+
+The first test edit exposed a JavaScript regular-expression escaping error; this was corrected in a follow-up commit and the workflow rerun.
+
+### Verification
+
+- Corrected smoke-test commit: `5535d48dd598de69586a410386da210984c9806c`.
+- GitHub Actions production smoke run `43790675240`: **SUCCESS**.
+- Both critical workflow validation and repository-wide static audit steps completed successfully in that run.
+- Static link audit and GitHub Pages deployment for the same commit were still running at the time of this section's update; they must be checked separately before claiming deployment verification.
+
+### Decision
+
+The smoke suite now validates the safe access-hold state rather than requiring unsafe finance data exposure. This is a regression-test correction, **not** a declaration that finance authorization, customer invoice database RLS, partner payable isolation, or live money movement is fixed. Those remain blocked pending migration reconciliation and security remediation.
