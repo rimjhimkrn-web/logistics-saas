@@ -509,6 +509,12 @@ body>footer{padding:26px 18px!important}
           <p id="partner-status-guidance" class="text-xs leading-6 text-slate-300">Your status will appear after your secure partner organization is loaded. Selecting a pathway does not approve commercial operations.</p>
         </section>
         <div id="onboarding-feedback" class="text-sm" role="status" aria-live="polite"></div>
+        <section id="capability-next-step" hidden aria-live="polite" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-slate-800">
+          <strong class="block text-sm text-blue-950">Next stage: service capability evidence</strong>
+          <p class="mt-2 text-xs leading-6 text-slate-700">Your business verification packet is only an application receipt. KRIM must first complete independent identity and compliance review. Once the organization is verified and compliant, use Services &amp; Capabilities to submit separate evidence for each transport mode and service. Each capability remains inactive until an independent reviewer approves it; country, corridor, service-area and capacity gates still apply.</p>
+          <a href="services-capabilities.html" class="inline-flex mt-3 rounded-lg bg-blue-700 px-4 py-2 text-xs font-bold text-white">Review Services &amp; Capabilities →</a>
+          <a href="../../app/partner/index.html?release=partner-workspace-v3" class="inline-flex mt-3 ml-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-900">Return to Partner Workspace</a>
+        </section>
 
         <!-- SUBMIT ACTION -->
         <div class="pt-4 flex items-center justify-between border-t border-slate-800">
@@ -866,6 +872,7 @@ body>footer{padding:26px 18px!important}
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
         onboardingMessage("Business verification packet submitted. This is an application receipt only—not approval or permission to accept shipments. KRIM must complete independent identity and compliance review, then separately review evidence for each service capability and confirm applicable country/corridor activation before any commercial eligibility can be established.", "success");
+        document.getElementById("capability-next-step").hidden = false;
         uploadedDocumentPaths = [];
         button.textContent = "Verification Packet Submitted";
       } catch (error) {
