@@ -105,7 +105,7 @@ async function receiveReturn(id){
  for(let i=0;i<manifest.length;i++){
   const m=manifest[i];
   const quantityText=m&&((typeof m.quantity==="number"||typeof m.quantity==="string")?String(m.quantity).trim():"");
-  const quantityValid=/^(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(quantityText)&&Number.isFinite(Number(quantityText))&&Number(quantityText)>0;
+  const quantityValid=/^(?:\d+(?:\\.\d*)?|\\.\d+)$/.test(quantityText)&&Number.isFinite(Number(quantityText))&&Number(quantityText)>0;
   if(!m||typeof m!=="object"||Array.isArray(m)||typeof m.description!=="string"||!m.description.trim()||m.description.trim().length>240||typeof m.unit!=="string"||!m.unit.trim()||m.unit.trim().length>20||!quantityValid)
    return alert("Physical receipt is blocked: manifest line "+(i+1)+" must contain plain-text description and unit plus a finite positive decimal quantity. No receipt was submitted.");
  }
