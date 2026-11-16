@@ -1599,3 +1599,42 @@ This means there is no live partner-assigned shipment, driver execution or verif
 - Do not interpret the six confirmed shipments as completed jobs or revenue.
 - These checks do not clear the migration-history mismatch, finance tenant-scope defects, or production schema-recovery gate. No production DDL, grants, policies, triggers, postings or payment settings were changed.
 
+
+## Section 39 — Legacy payment-to-margin trigger chain (active trigger inventory)
+
+**Date:** 16 November 2026. Production inspection was read-only. No rows or database objects were changed.
+
+### Trigger chain confirmed
+
+The live database has an enabled, non-internal trigger:
+
+`public.payments.payment_financial_trigger` — AFTER INSERT OR UPDATE OF status — executes `public.create_financial_after_payment()`.
+
+The function is SECURITY DEFINER. When `NEW.status = 'paid'`, it inserts a row into `public.shipment_financials` using:
+
+- `shipment_id = NEW.shipment_id`
+- `customer_amount = NEW.amount`
+- `partner_cost = 0`
+- `status = 'paid'`
+- `customer_payment_status = 'paid'`
+- `paid_at = COALESCE(NEW.paid_at, now())`
+
+The `shipment_financials` table has a second live trigger, `trg_calculate_shipment_margin`, BEFORE INSERT OR UPDATE OF customer_amount, partner_cost, executing `calculate_shipment_margin()`. That function sets `platform_margin = customer_amount - partner_cost` whenever both values are non-null.
+
+### Why this is a material financial integrity risk
+
+This creates a legacy path where a paid row in the generic `payments` table can be translated into a shipment financial row with zero partner cost, causing the full customer amount to appear as platform margin. Under KRIM's partner-direct commercial model, customer freight paid directly to the carrier is not KRIM platform revenue or margin.
+
+The trigger chain is not the same as the newer Razorpay checkout gate. It is a separate legacy table/function path and must be independently classified. The existence of a closed freight collection gate does not prove that this legacy trigger is unreachable.
+
+### Required safe treatment
+
+1. Do not create, update, replay or manually mark payment rows as paid to test this path in production.
+2. Trace every writer to `public.payments` (frontend, Edge Functions, RPCs, webhooks, service-role jobs and imports) and determine whether any active client or backend path can still insert/update it.
+3. Reconcile existing `shipment_financials` rows against actual provider/bank evidence and partner cost documentation; quarantine rows whose gross payment or margin is not attributable to KRIM.
+4. Design a replacement in staging using a separately identified KRIM service-fee transaction domain. A partner freight receipt must never populate KRIM revenue or platform margin.
+5. Only after the full schema lineage is recovered should a reviewed forward-only migration remove/retire this trigger path, repair grants/writers and preserve required audit evidence.
+
+### Release decision
+
+This is a **high-priority legacy finance-path blocker**. No trigger, function, grant, payment row or financial record was changed in production. Do not activate automated revenue, margin, refund or payout reporting until this chain is contained and reconciled.
