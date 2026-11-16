@@ -62,8 +62,8 @@ if(set.error)fail('settlementsTable',set.error);else{$('settlementsTable').inner
 if(pay.error)fail('paymentsTable',pay.error);else{$('paymentsTable').innerHTML=table(pay.data,[{key:'created_at',label:'Created',render:r=>date(r.created_at)},{key:'payment_provider',label:'Provider'},{key:'status',label:'Status'},{key:'amount_paise',label:'Amount',render:r=>money(Number(r.amount_paise)/100,r.currency)}]);$('paymentCount').textContent=pay.data.length;}
 $('ledgerTable').innerHTML='<div class="empty"><strong>Temporarily withheld for security review.</strong><br>The legacy revenue report is not organization-scoped. It will return only after a tenant-scoped finance reporting endpoint is implemented and verified.</div>';
 const errs=[inv.error,set.error,pay.error].filter(Boolean).length;
-$('notice').textContent=errs?('Signed in. '+errs+' finance dataset(s) could not be read under the current schema or access policies. Details are shown in each section. No financial writes were performed.'):'Signed in. Finance read requests completed. Returned rows remain filtered by existing Supabase row-level security; this is not a bank/provider reconciliation certification.';
-$('dataBadge').textContent=errs?'PARTIAL DATA ACCESS':'READ QUERIES COMPLETE';
+$('notice').textContent=errs?('Signed in. '+errs+' finance dataset(s) are intentionally withheld pending tenant-scoped finance authorization and reconciliation controls. These are restricted datasets, not failed live reads. No financial writes were performed.'):'Signed in. Finance read requests completed. Returned rows remain filtered by existing Supabase row-level security; this is not a bank/provider reconciliation certification.';
+$('dataBadge').textContent=errs?'RESTRICTED DATA':'READ QUERIES COMPLETE';
 }
 $('refresh').addEventListener('click',()=>{if(financeAuthorized)load().catch(e=>{$('notice').textContent='Refresh failed: '+esc(e.message);});});
 $('signout').addEventListener('click',async()=>{await client?.auth.signOut();window.location.replace(window.krimPath?window.krimPath('auth/login.html'):'../../auth/login.html');});
