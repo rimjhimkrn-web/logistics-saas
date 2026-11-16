@@ -34,3 +34,15 @@
 9. Mobile and desktop tests; CI and deployed GitHub Pages verification.
 
 **Closure rule:** do not mark authentication CLOSED — VERIFIED until all mandatory staging tests pass and the Auth configuration is independently confirmed. Continue to revalidate account, role, membership, MFA and session state on sensitive operations.
+
+## Latest automated verification addendum
+**Final code/test commit:** `7262e343b45e4393f631c1b86fba2ef9d702da26` (smoke-test assertion updated to match the hardened callback routing).
+- KRIM production smoke checks: **PASSED** (run 43944374720).
+- KRIM static link audit: **PASSED** (run 43944374592).
+- GitHub Pages build/deployment: **PASSED** (run 43944373104).
+- The earlier smoke failures were stale test expectations that still required the callback to provision an organization directly. The assertion now checks role-checked callback routing. No security guard was weakened to make the test pass.
+
+## Staging environment requirement
+The linked Supabase project is the production project. No separate isolated staging project was found. A Supabase development branch is available as a paid option at **US$0.01344/hour**. It must be explicitly approved before creation; production authentication tests remain prohibited. Once approved, use the branch for isolated end-to-end authentication tests and delete it after evidence is captured if no longer needed.
+
+**Current classification:** frontend/code safety work and automated CI checks are complete for this patch set; the full authentication journey remains **NOT CLOSED — staging E2E and backend security verification outstanding**.
