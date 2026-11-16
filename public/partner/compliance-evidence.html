@@ -147,14 +147,7 @@ $("evidence-form").addEventListener("submit",async e=>{
  }catch(err){
   console.error("Partner compliance evidence submission failed",err);
   if(!rpcAttempted&&uploaded.length){
-   try{
-    const {error:cleanupError}=await db.storage.from("krim-partner-verification").remove(uploaded);
-    if(cleanupError)throw cleanupError;
-    status($("submit-state"),"Upload failed before the compliance submission was attempted. Partial private uploads were removed; no review request was submitted. You may safely retry.",true);
-   }catch(cleanupError){
-    console.error("Compliance evidence partial-upload cleanup was not confirmed",cleanupError);
-    status($("submit-state"),"Upload failed before submission. Some private files may remain and cleanup was not confirmed. Contact KRIM support before retrying.",true);
-   }
+   status($("submit-state"),"Upload failed before submission. Partial private evidence files may remain because automatic applicant deletion is not authorized by the current Storage policy. No review request was submitted. Contact KRIM support before retrying.",true);
   }else if(rpcAttempted&&!rpcConfirmed){
    status($("submit-state"),"The submission response was not confirmed. Do not retry yet. Ask KRIM support to check the compliance evidence register; uploaded files are retained privately for reconciliation.",true);
   }else{
