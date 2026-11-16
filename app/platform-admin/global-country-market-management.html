@@ -51,7 +51,7 @@
   const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;
   if(assurance.currentLevel!=="aal2")throw new Error("AAL2 multi-factor authentication is required to access governance workspaces.");
   const {data:metrics,error:metricsError}=await db.rpc("krim_admin_global_country_foundation_overview");if(metricsError)throw metricsError;if(!metrics)throw new Error("Global foundation metrics are unavailable.");
-  const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value);};
+  const put=(id,value)=>{const el=document.getElementById(id);if(!el)return;if(typeof value==="number"&&!Number.isFinite(value))throw new Error("Market foundation metrics contain a non-finite value; dashboard display withheld.");if(value===null||value===undefined)throw new Error("Market foundation metrics are incomplete; dashboard display withheld.");el.textContent=String(value);};
   put("stat-countries",metrics.countries);put("stat-phone",metrics.countries_with_phone_code+"/"+metrics.countries);
   put("stat-timezones",metrics.countries_with_timezones+"/"+metrics.countries);put("stat-currencies",metrics.currency_codes);
   put("stat-markets",metrics.markets_operationally_active+"/"+metrics.market_catalogue_entries);
