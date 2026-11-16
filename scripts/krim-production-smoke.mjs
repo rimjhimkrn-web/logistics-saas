@@ -782,7 +782,7 @@ for (const [label, source, pattern] of [
   ["onboarding supports the three explicit partner pathways", partnerOnboarding, /development_test[\s\S]*individual_interest[\s\S]*registered_business/i],
   ["onboarding saves account mode through the backend RPC", partnerOnboarding, /rpc\(['"]krim_set_partner_account_mode['"]/],
   ["partner bid page requires verified eligible organization", partnerBid, /partner_verification_status[\s\S]*partner_lifecycle_status[\s\S]*partner_compliance_status/i],
-  ["customer booking uses the secure shipment creation RPC or an explicit fail-closed pause", booking, /rpc\(['"]krim_create_global_shipment['"]|Booking is paused[\s\S]*?e\.preventDefault\(\)[\s\S]*?message\(/],
+  ["customer booking uses the secure shipment creation RPC or an explicit fail-closed pause", booking, /rpc\(['"]krim_create_global_shipment['"]|e\.preventDefault\(\)[\s\S]*?Booking is paused[\s\S]*?message\(/],
   ["customer booking rejects identical origin and destination", booking, /originId\s*===\s*destinationId/],
   ["Customer OS shipment list reads live shipment records", customerShipmentList, /from\(['"]krim_shipments['"]\)/],
   ["Customer OS shipment list is scoped to active organization membership", customerShipmentList, /krim_organization_members[\s\S]*?status[\s\S]*?active[\s\S]*?customerIds/],
