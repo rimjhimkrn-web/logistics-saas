@@ -742,13 +742,12 @@ body>footer{padding:26px 18px!important}
         const verification = String(partnerOrg.partner_verification_status || "not_started").toLowerCase();
         const compliance = String(partnerOrg.partner_compliance_status || "not_started").toLowerCase();
         const lifecycle = String(partnerOrg.partner_lifecycle_status || "not_applicable").toLowerCase();
-        const commercialReady = partnerOrg.partner_account_mode === "registered_business" && ["verified", "approved"].includes(verification) && ["active", "verified"].includes(lifecycle) && ["clear", "compliant", "approved", "verified", "not_required", "not_applicable"].includes(compliance);
-        document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Verification decision recorded" : verification === "pending" ? "Your submission is awaiting review" : "Complete your partner verification";
+        document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Business identity decision recorded" : verification === "pending" ? "Business identity awaiting review" : "Complete business identity review";
         document.getElementById("partner-status-mode").textContent = statusLabel(partnerOrg.partner_account_mode || "pathway not selected");
         document.getElementById("partner-status-verification").textContent = statusLabel(verification);
         document.getElementById("partner-status-compliance").textContent = statusLabel(compliance);
-        document.getElementById("partner-status-access").textContent = commercialReady ? "Eligible — subject to approved service capabilities" : "Restricted";
-        document.getElementById("partner-status-guidance").textContent = commercialReady ? "Your organisation has passed the recorded organisation and compliance gates. Each service capability and service area still requires separate evidence and approval before it can be offered through KRIM." : verification === "pending" ? "KRIM is reviewing your submitted information. Do not submit duplicate documents. Commercial operations remain locked until verification, compliance and service capability approvals are complete." : "Choose the correct partner pathway and submit the required evidence. Development and individual-interest pathways do not receive commercial access."; 
+        document.getElementById("partner-status-access").textContent = "Not established — separate approvals required";
+        document.getElementById("partner-status-guidance").textContent = "These are organization-level status fields only. They do not establish commercial eligibility or bookability. KRIM must separately review each service capability and its evidence, applicable country and corridor activation, shipment-specific compliance/customs controls, and assignment/capacity before any service can be offered. Development and individual-interest pathways have no commercial access."; 
         onboardingMessage("Secure session verified. Your documents will be associated only with the verified active partner organization.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
@@ -866,7 +865,7 @@ body>footer{padding:26px 18px!important}
         });
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
-        onboardingMessage("Verification packet submitted successfully. Your status is pending human compliance review; partner access remains restricted until approval.", "success");
+        onboardingMessage("Business verification packet submitted. This is an application receipt only—not approval or permission to accept shipments. KRIM must complete independent identity and compliance review, then separately review evidence for each service capability and confirm applicable country/corridor activation before any commercial eligibility can be established.", "success");
         uploadedDocumentPaths = [];
         button.textContent = "Verification Packet Submitted";
       } catch (error) {
