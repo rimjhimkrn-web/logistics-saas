@@ -65,7 +65,7 @@ function render(){
 }
 async function load(){
  $("cases").innerHTML='<div class="empty">Loading verification cases…</div>';
- try{const {data,error}=await client.rpc("krim_admin_list_partner_verification_cases");if(error)throw error;cases=Array.isArray(data)?data:[];render();$("status").textContent="Loaded "+cases.length+" verification case(s).";setAccess("MFA VERIFIED",false)}
+ try{const {data,error}=await client.rpc("krim_admin_list_partner_verification_cases");if(error)throw error;if(!Array.isArray(data))throw new Error("Verification queue returned an invalid response shape. No cases were rendered and no decision is enabled.");cases=data;render();$("status").textContent="Loaded "+cases.length+" verification case(s).";setAccess("MFA VERIFIED",false)}
  catch(e){cases=[];$("cases").innerHTML='<div class="empty">'+esc(e.message||"Verification queue unavailable")+'</div>';$("status").textContent="No decision was submitted.";setAccess("QUEUE UNAVAILABLE",true)}
 }
 async function openDocument(caseId,index){
