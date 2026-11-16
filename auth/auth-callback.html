@@ -107,7 +107,7 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
     const mfa=await client.auth.mfa.getAuthenticatorAssuranceLevel();
     if(mfa.error) throw mfa.error;
     if(mfa.data&&mfa.data.nextLevel==="aal2"&&mfa.data.currentLevel!=="aal2"){
-      location.replace(base+"/auth/mfa-challenge.html");
+      location.replace(base+"/auth/mfa-challenge.html?returnTo="+encodeURIComponent(destination));
       return;
     }
     status.textContent="Identity verified. Opening your KRIM workspace…";
