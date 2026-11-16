@@ -112,7 +112,7 @@ $("refresh").addEventListener("click",()=>boot());
 $("organization").addEventListener("change",()=>{const o=orgs.find(x=>String(x.id)===$("organization").value);if(o)status($("org-state"),"Selected: "+(o.display_name||o.legal_name)+" · Country/jurisdiction is taken from the verified organization record.",false);});
 $("evidence-form").addEventListener("submit",async e=>{
  e.preventDefault();const button=$("submit");button.disabled=true;
- const uploaded=[];let submission=[];
+ const uploaded=[];let submission=[];let rpcAttempted=false;let rpcConfirmed=false;
  try{
   if(!user)throw Error("Sign in again before submitting.");
   const org=orgs.find(x=>String(x.id)===$("organization").value);if(!org)throw Error("Select an eligible registered-business organization.");
@@ -130,22 +130,39 @@ $("evidence-form").addEventListener("submit",async e=>{
    const ext=file.type==="application/pdf"?"pdf":file.type==="image/png"?"png":"jpg";
    const path=org.id+"/"+user.id+"/compliance-"+code+"-"+crypto.randomUUID()+"."+ext;
    status($("submit-state"),"Uploading "+labels[code]+"…",false);
-   const {data,error}=await db.storage.from("krim-partner-verification").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+   const {error}=await db.storage.from("krim-partner-verification").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
    if(error)throw error;
    uploaded.push(path);
    submission.push({check_code:code,submission_status:"uploaded",object_path:path,file_name:file.name.slice(0,255),mime_type:file.type,file_size:file.size});
   }
   status($("submit-state"),"Registering evidence and declarations with KRIM…",false);
+  rpcAttempted=true;
   const {data,error}=await db.rpc("krim_partner_submit_compliance_evidence",{p_organization_id:org.id,p_documents:submission,p_declaration:declaration});
   if(error)throw error;
+  if(data?.success!==true||data.evidence_count!==4||data.status!=="submitted"||data.commercial_activation!==false)throw Error("The database did not return a confirmed four-category pending submission.");
+  rpcConfirmed=true;
   status($("submit-state"),"Submitted successfully. Reference organization #"+org.id+" · "+data.evidence_count+" categories · status: "+data.status+". KRIM review is still required; commercial access remains disabled.",false);
   $("declaration").value="";
   document.querySelectorAll(".doc").forEach(card=>{card.querySelector("[data-mode]").value="uploaded";syncMode(card);card.querySelector("[data-file]").value="";card.querySelector("[data-reason]").value="";});
  }catch(err){
-  const detail=uploaded.length?" Some files were uploaded to private storage but the submission record was not completed; those files remain private. Retry after checking the error.":"";
-  status($("submit-state"),"Submission not completed: "+(err.message||"Unexpected error.")+detail,true);
+  console.error("Partner compliance evidence submission failed",err);
+  if(!rpcAttempted&&uploaded.length){
+   try{
+    const {error:cleanupError}=await db.storage.from("krim-partner-verification").remove(uploaded);
+    if(cleanupError)throw cleanupError;
+    status($("submit-state"),"Upload failed before the compliance submission was attempted. Partial private uploads were removed; no review request was submitted. You may safely retry.",true);
+   }catch(cleanupError){
+    console.error("Compliance evidence partial-upload cleanup was not confirmed",cleanupError);
+    status($("submit-state"),"Upload failed before submission. Some private files may remain and cleanup was not confirmed. Contact KRIM support before retrying.",true);
+   }
+  }else if(rpcAttempted&&!rpcConfirmed){
+   status($("submit-state"),"The submission response was not confirmed. Do not retry yet. Ask KRIM support to check the compliance evidence register; uploaded files are retained privately for reconciliation.",true);
+  }else{
+   status($("submit-state"),"Submission outcome needs review. Do not retry until KRIM confirms whether the evidence packet was registered.",true);
+  }
  }finally{button.disabled=false;}
 });
+
 boot();
 })();
 </script>
