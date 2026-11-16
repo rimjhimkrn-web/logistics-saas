@@ -139,3 +139,17 @@ Do not create default commission percentages or tax rates. Fee values and recogn
 ## Release posture
 
 Finance integration remains **NO-GO for live-money production use**. This review found meaningful foundations and a high-priority access-control gap; it did not change production or prove a successful end-to-end financial transaction. Continue with read-only dependency mapping and staged design until the blockers above are closed.
+
+
+## 8. Frontend-to-backend connectivity check
+
+A direct source scan of all 12 authenticated finance pages found:
+- `app/finance/index.html` calls `krim_finance_list_revenue_ledger` (legacy `revenue_ledger`) and `krim_has_permission`.
+- `app/finance/refunds-disputes.html` calls refund submission and review RPCs.
+- `app/finance/treasury-audit.html` calls the finance webhook-event listing RPC.
+- The other nine pages (accounts payable, accounts receivable, invoicing, financial reporting, multi-currency, partner settlements, payment processing, revenue/commission, and tax compliance) currently use a session/active-membership check and client-side review-preparation forms; the scanned files contained no direct financial RPC or Edge Function invocation and no direct read from the canonical invoice/ledger/payable tables.
+- The review forms explicitly say they do not save or execute a financial action. They are operational guidance/preparation shells, not live finance modules.
+
+This is a major product-integration gap: twelve navigable modules exist, but most are not connected to their intended data/workflows. The finance home also presents legacy revenue-ledger data rather than a consolidated canonical financial view.
+
+Implementation order should be: fix least-privilege access and org scope first; then wire read-only invoice/receivable/payable/ledger views with server-side authorization; then implement the first KRIM-only fee invoice and reconciliation flow. Do not convert preparation forms into write forms until the backend contract and negative authorization tests exist.
