@@ -65,11 +65,11 @@
     <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
       <div class="space-y-2">
         <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[9px] font-bold rounded uppercase">Global Customs Direct Electronic Data Interchange</span>
-          <span class="text-slate-500 text-[10px]">Gateways: EU ICS2 • US CBP ACE • India ICEGATE</span>
+          <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[9px] font-bold rounded uppercase">Customs workflow preparation · external integrations not connected</span>
+          <span class="text-slate-500 text-[10px]">Reference authorities: EU ICS2 • US CBP ACE • India ICEGATE (no live connection established)</span>
         </div>
         <h1 class="text-2xl font-extrabold text-white">Single-Window Customs & Trade Coordination</h1>
-        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Coordinate customs declarations, commercial invoices, permits, duty assessments and agency responses through the applicable national single-window process. Filing and release are not assumed until confirmed.</p>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-2xl">Prepare shipment-linked customs information for an authorized broker or competent authority. KRIM does not currently demonstrate a live ICEGATE, ACE, ICS2 or other government gateway connection; filing, duty payment and release must be confirmed directly with the relevant authority or licensed professional.</p>
       </div>
 
       <div class="flex items-center gap-3 shrink-0 text-xs">
@@ -82,6 +82,7 @@
       </div>
     </section>
 
+    <div class="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200 text-xs leading-relaxed"><strong class="block mb-1">Integration and authority boundary</strong>This page is a preparation interface only. The gateway cards below contain no live authority status, filing, duty assessment or clearance data. Use the authenticated Customs &amp; Trade Workspace for KRIM-recorded documents and broker workflow. A customs authority or appropriately licensed broker remains the source of official filing and release decisions.</div>
     <!-- CUSTOMS FILING STATUS GRID -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
 
@@ -90,19 +91,19 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div class="flex items-center space-x-2">
             <span class="text-base">🇺🇸</span>
-            <span class="font-bold text-white text-sm">US CBP ACE Gateway</span>
+            <span class="font-bold text-white text-sm">US CBP ACE — reference only</span>
           </div>
-          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">CONNECTED</span>
+          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">NOT CONNECTED</span>
         </div>
 
         <div class="space-y-2 text-[11px] text-slate-300">
-          <div class="flex justify-between"><span class="text-slate-500">ISF-10 Filing Status:</span><span class="text-emerald-400 font-bold">RELEASED (ACE-9912)</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">New York JFK (4701)</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Duty Assessed:</span><span class="text-white font-bold">$1,240.50 USD</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">ISF-10 Filing Status:</span><span class="text-emerald-400 font-bold">No verified filing status</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">Not recorded</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Duty Assessed:</span><span class="text-white font-bold">No verified assessment</span></div>
         </div>
 
-        <button onclick="alert('Transmitting ISF-10 Electronic Entry Packet to US CBP ACE...')" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 font-bold rounded-xl transition-all">
-          Submit ISF Entry Packet →
+        <button disabled aria-disabled="true" title="No authority gateway integration is connected" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-blue-400 font-bold rounded-xl transition-all">
+          Authority filing unavailable
         </button>
       </div>
 
@@ -111,19 +112,19 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div class="flex items-center space-x-2">
             <span class="text-base">🇪🇺</span>
-            <span class="font-bold text-white text-sm">EU ICS2 / Import Control</span>
+            <span class="font-bold text-white text-sm">EU ICS2 — reference only</span>
           </div>
-          <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">HOLD_INSPECTION</span>
+          <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-bold rounded">No verified status</span>
         </div>
 
         <div class="space-y-2 text-[11px] text-slate-300">
-          <div class="flex justify-between"><span class="text-slate-500">ENS Declaration:</span><span class="text-amber-400 font-bold">ENS-NLRTM-8812</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">Rotterdam Terminal</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">VAT / Import Duty:</span><span class="text-white font-bold">€3,420.00 EUR</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">ENS Declaration:</span><span class="text-amber-400 font-bold">No verified declaration reference</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">Not recorded</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">VAT / Import Duty:</span><span class="text-white font-bold">No verified assessment</span></div>
         </div>
 
-        <a href="/logistics-saas/public/operations/exception-desk.html" class="w-full block py-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold text-center rounded-xl hover:bg-amber-500 hover:text-slate-950 transition-all">
-          Resolve Customs Hold →
+        <a href="/logistics-saas/app/customs/index.html" class="w-full block py-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold text-center rounded-xl hover:bg-amber-500 hover:text-slate-950 transition-all">
+          No live hold record
         </a>
       </div>
 
@@ -132,19 +133,19 @@
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <div class="flex items-center space-x-2">
             <span class="text-base">🇮🇳</span>
-            <span class="font-bold text-white text-sm">India ICEGATE Portal</span>
+            <span class="font-bold text-white text-sm">India ICEGATE — reference only</span>
           </div>
-          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">CLEARED</span>
+          <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded">NOT VERIFIED</span>
         </div>
 
         <div class="space-y-2 text-[11px] text-slate-300">
-          <div class="flex justify-between"><span class="text-slate-500">Bill of Entry (BOE):</span><span class="text-emerald-400 font-bold">BOE-JNPT-9910</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">Nhava Sheva (INBOM1)</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">IGST & Basic Duty:</span><span class="text-white font-bold">₹142,500.00 INR</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Bill of Entry (BOE):</span><span class="text-emerald-400 font-bold">No verified declaration reference</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Port of Entry:</span><span class="text-white font-bold">Not recorded</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">IGST & Basic Duty:</span><span class="text-white font-bold">No verified assessment</span></div>
         </div>
 
-        <button onclick="alert('Certificate download is not connected to a verified customs authority or document endpoint. No certificate was downloaded.')" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-emerald-400 font-bold rounded-xl transition-all">
-          Download OOC Certificate →
+        <button disabled aria-disabled="true" title="No verified certificate endpoint is connected" class="w-full py-2 bg-slate-900 border border-slate-800 hover:border-blue-500/50 text-emerald-400 font-bold rounded-xl transition-all">
+          Certificate endpoint unavailable
         </button>
       </div>
 
