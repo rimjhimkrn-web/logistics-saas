@@ -1164,3 +1164,58 @@ No scheduled job directly posts invoices, ledger entries, partner payouts or rev
 8. Confirm notification retry worker delivery, authentication, retry bounds, secret rotation and dead-letter behavior. Do not expose Vault values in logs or audit output.
 
 No triggers, cron jobs, schedules, notification records, payment records, financial rows or secrets were changed. No scheduled job was manually invoked. No production DDL or financial RPC was executed during this audit.
+
+
+## 29. End-to-end commercial and finance journey assessment
+
+### Workflow stages and current evidence
+
+| Stage | Implementation evidence | Production assessment |
+|---|---|---|
+| Shipment creation | `krim_create_global_shipment` checks customer organization membership, `shipment.create`, active origin/destination and distinct locations | Implemented with authorization and route validation; broader country/service compliance gates still need full workflow tests |
+| Partner quote / capability | Partner quote and capability tables plus capability-coverage checks exist | Not demonstrated operationally: current partner quote table has no active records in observed counts; verified partner coverage/capacity is not established |
+| Customer quote | `krim_create_global_quote` requires customer org access and `quote.create`; validates draft shipment and amount/currency/expiry | Function exists; customer quote data alone is not proof of a partner-backed offer |
+| Quote acceptance | `krim_accept_global_quote` now requires matching accepted partner quote, accepted assignment, active verified partner, verified current capability and route coverage before confirming/finalizing | Current guard is strong in inspected function, but historical data predates this control |
+| Assignment / capacity | Assignment finalization and capacity reservation routines enforce shipment-leg, partner, route, mode, capability and resource availability checks | No current partner assignment or capacity reservation rows were observed; real execution is not proven |
+| Customer freight payment | Razorpay order creation/verification require explicit two-part freight-collection approval and currently fail closed; provider registry checkout disabled and merchant eligibility unverified | Disabled / no-go under partner-direct model |
+| Payment confirmation | Webhook validates signature, provider event, order, amount, currency and payment ID, then invokes finance reconciliation | Technical controls exist; one completed financial transaction and one paid legacy payment order observed, but no evidence of a valid live commercial transaction end-to-end |
+| Partner service delivery | Delivery gates require accepted assignment and independently verified POD before internal invoice/payable creation | No complete assignment/delivery/POD commercial journey observed |
+| Customer invoice / partner payable | Internal routines are service_role-only and require delivery/quote/assignment/POD; multi-leg finance guard blocks unresolved allocations | Tables have zero invoice and payable rows; no operating AR/AP evidence |
+| KRIM fee recognition | Revenue allocation subsystem exists but no active rules, runs, allocations or shipment revenue items; current recognition function targets full customer invoice amount | Not operational and business-model misaligned; freight invoice is not KRIM referral-fee revenue |
+| Accounting / reporting | COA, posting functions and ledger exist, but no journal transactions/entries, and configuration is in verification org rather than proven legal operating entity | Not operationally validated; no P&L, balance sheet, cash flow or profit claims |
+| Treasury / payout | Treasury controls absent; provider settlement unsupported; partner payouts not proven | Disabled / no-go; KRIM should not custody or settle partner freight funds |
+
+### Observed production data snapshot
+
+- Shipments: 18 total — 8 draft, 3 quoted, 6 confirmed, 1 closed.
+- Customer quotes: 7 total — 6 accepted and 1 sent.
+- All six accepted quotes inspected have `partner_quote_id IS NULL`; none has a matching accepted partner quote or accepted partner assignment. Their shipments are already marked confirmed. This is historical/orphaned state relative to the stricter current acceptance function; do not treat them as verified partner-backed bookings or as evidence that the new guarded workflow works.
+- Partner quotes, partner assignments and capacity reservations: no rows observed.
+- Payment orders: 6 — 5 created, 1 paid.
+- Financial transactions: 1 completed.
+- Customer invoices, partner payables, revenue allocations, ledger transactions and ledger entries: zero.
+- The paid order/financial transaction have not been independently evidenced as a real commercial partner-direct referral-fee transaction. They must not be treated as proof of earned KRIM revenue or end-to-end operational success.
+
+### Critical end-to-end conclusions
+
+1. The system has substantial workflow code and database objects, but the real-world commercial journey is not proven by schema/function existence.
+2. The six historical accepted quotes are not backed by partner quotes or assignments. The current quote acceptance function contains the desired checks, but no current dataset demonstrates a successful run through them.
+3. Customer freight collection is disabled and incompatible with the initial partner-direct model. Do not enable it to make the journey appear complete.
+4. Delivery/POD-gated invoice/payable code is present, but zero invoice/payable records mean AR/AP execution has not been demonstrated.
+5. KRIM's own referral/coordination fee needs a separate contracted fee event, partner/customer legal entity, fee basis, earning trigger, tax treatment, invoice/receivable, receipt and ledger mapping. Do not derive KRIM revenue from partner freight invoice or shipment GMV.
+6. Existing accounting configuration is attached to a finance verification organization, while the period is attached to the platform organization. Legal entity and finance configuration must be reconciled before posting.
+7. No live end-to-end test was run: no shipment/quote/payment creation, no provider call, no assignment, no delivery, no invoice, no ledger posting and no financial mutation.
+
+### Release recommendation
+
+**NO-GO for live money movement, partner freight checkout, payouts and automated KRIM revenue/profit reporting.**
+
+A limited non-custodial marketplace pilot may be considered only after:
+- at least one real partner is legally verified, capability-verified and contracted;
+- customer and partner terms clearly define the contracting/payment parties and KRIM's separate fee;
+- CA/legal advice confirms GST, invoicing and intermediary treatment;
+- one controlled shipment journey is executed with partner-direct payment and evidence-backed delivery;
+- KRIM fee event, invoice/receivable, receipt and ledger are tested independently from freight GMV;
+- tenant isolation, permissions, webhook replay, refunds and operational support are independently tested.
+
+No production data was changed and no live workflow or payment was executed during this assessment.
