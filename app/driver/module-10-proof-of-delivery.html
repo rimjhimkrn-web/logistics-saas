@@ -30,13 +30,15 @@ const eligible=rows.filter(a=>String(a.status||'').toLowerCase()==='in_transit')
 const select=$('podAssignment');
 if(eligible.length){
  select.innerHTML='<option value="">Select your in-transit assignment</option>'+eligible.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.assignment_number||a.id)+' · '+esc(a.pickup_location||'Pickup pending')+' → '+esc(a.delivery_location||'Delivery pending')+'</option>').join('');
- ['podAssignment','podRecipient','podNotes','podFile','podSubmit'].forEach(id=>$(id).disabled=false);
- $('podResult').textContent='Select the trip, enter the recipient name and upload the actual signed delivery evidence. Uploading evidence does not itself mark the shipment delivered.';
+ $('podResult').textContent='POD submission is temporarily paused. A backend exact-shipment-leg evidence-binding correction and independent staging verification are required before this write path can safely reopen. Existing in-transit assignments remain visible; no evidence is uploaded or submitted from this page.';
 }else{
  $('podResult').textContent='No in-transit driver assignment is available. Evidence upload remains locked until an authorized dispatcher assigns a trip and the driver records pickup and transit.';
 }
 $('podForm').addEventListener('submit',async ev=>{
  ev.preventDefault();
+ $('podResult').textContent='POD submission is paused pending server-side exact-leg evidence-binding remediation. No file was uploaded and no POD record was created.';
+ $('podResult').className='notice warn';
+ return;
  const assignment=eligible.find(a=>String(a.id)===$('podAssignment').value);
  const recipient=$('podRecipient').value.trim();
  const notes=$('podNotes').value.trim();
