@@ -199,3 +199,91 @@ Before any new financial RPC is exposed:
 - use compensating reversal entries rather than editing posted entries.
 
 No production changes were made as part of this deeper verification.
+
+
+## 11. Cross-tenant financial data exposure review — critical findings
+
+A focused inspection of the actual RLS predicates and SECURITY DEFINER reporting RPCs found several additional risks. These are policy-level findings; authenticated-user exploitability still requires controlled staging tests with representative accounts.
+
+### CRITICAL — legacy revenue reporting RPC is not organization-scoped
+
+`krim_finance_list_revenue_ledger(integer)`:
+- permits a caller if they have `finance.view` in any active organization whose type is `finance`;
+- then returns rows from the entire legacy `revenue_ledger` table, with no organization/customer filter;
+- exposes total amount, platform commission, partner payout, currency and shipment reference.
+
+A finance user in one tenant may therefore receive another tenant's/global revenue records through this SECURITY DEFINER RPC. The current function should be treated as a cross-tenant exposure risk. Remove it from customer/partner-facing surfaces immediately through application routing/configuration if possible, while preserving forensic evidence; do not attempt an unreviewed production SQL change. The replacement must require an explicit organization scope, verify the caller's finance permission for that exact organization, and filter every returned record to that scope.
+
+### HIGH — refund requests/events have broad finance visibility
+
+RLS for `krim_refund_requests` and `krim_refund_request_events` grants visibility to any active member who has `finance.view` in any active organization. The predicate is not tied to the refund's owning/customer organization or the reviewer's authorized finance organization. This can expose refund amounts, reasons, provider refund IDs/status and review notes across tenants.
+
+Replace with two distinct scopes:
+- customer/partner participant access only to their own request and permitted event fields;
+- finance reviewer access only when the caller has an explicit finance role in the owning legal entity/platform finance organization and the request is within that organization's responsibility.
+
+### HIGH — partner payable policy may disclose partner economics to customers
+
+The `krim_partner_payables` read policy allows either:
+- membership in the payable's partner organization; OR
+- membership in the shipment's customer organization.
+
+The second branch exposes payable rows, including partner gross/net amounts, adjustments, approval/settlement timestamps and hold reason, to the customer organization. This is not appropriate by default: partner commercial terms and payout status are not automatically customer-visible. Customer views should expose only the customer's own invoice/approved customer-facing charges and explicitly shareable shipment status, never partner payable economics. Partner users should see only payables belonging to their own partner organization; finance reviewers need an explicit finance scope.
+
+### HIGH — invoice policy is permissive across multiple relationship columns
+
+The `krim_invoices` read policy accepts membership/finance.view through any of organization_id, customer_organization_id, supplier_organization_id, or partner_organization_id, plus a special finance-organization branch. The correct audience depends on invoice_type and issuer/recipient role. A single OR policy risks exposing supplier/partner/customer invoice details to parties who are related to the shipment but are not entitled to that invoice.
+
+Split invoice visibility by invoice type and party:
+- customer invoice: only the issuing KRIM legal entity finance team and the billed customer organization;
+- partner/supplier invoice: only the issuing partner/supplier and the billed legal entity/authorized finance team;
+- platform internal invoice: only platform finance/admin as legally appropriate.
+Do not infer invoice access from shipment participation alone.
+
+### HIGH — customer finance permission is broader than its intended product meaning
+
+The `customer_user` role currently has `finance.view`. That is not inherently unsafe if every query is correctly record-scoped, but it is too coarse as a global finance capability. Prefer distinct permissions such as customer.billing.view, partner.payables.view, finance.ledger.view, finance.reconciliation.view, finance.manage, and finance.refunds.review, each paired with strict organization and record scope. Do not grant customers platform-wide finance capabilities.
+
+### Other observations
+
+- `payment_orders` is scoped to the customer user or a finance-organization member; the finance branch is not explicitly bound to the payment order's customer organization. Review for cross-tenant visibility.
+- `payments` is currently scoped to `customer_id = auth.uid()`, which is a narrow user-owned read path.
+- `payment_webhook_events` denies authenticated direct access; its listing RPC requires AAL2 and `admin.platform` on organization 1 and returns masked provider references. This is a stronger control pattern, though the hard-coded organization ID should be replaced with a reviewed platform-entity setting once the entity model is resolved.
+- `krim_ledger_transactions` and `krim_ledger_entries` are read-only for authenticated clients in the inspected grants, but the current RLS helper grants organization-member read access. Confirm whether every member should see the full ledger; normally only finance roles should.
+- `shipment_financials` has authenticated table grants but explicit deny-all RLS policies for authenticated and anon. This is currently fail-closed at the row-policy layer; remove unnecessary client grants in the eventual reviewed migration.
+- `krim_invoice_payment_applications` denies authenticated and anon direct access and is service-role-only, which is an appropriate pattern for payment allocation internals.
+
+## 12. Remediation priority and verification plan
+
+P0 — stop broad legacy revenue report access:
+1. Remove/disable the legacy global revenue report from user navigation and client access paths pending a scoped replacement.
+2. Verify no customer/partner UI calls it and no public API route re-exports its result.
+3. Preserve logs and current function definition for incident review.
+
+P1 — close cross-tenant RLS scope gaps:
+1. Refund requests and events: scope finance reviewer to exact legal entity; participant access only to own records.
+2. Partner payables: remove customer-organization read branch; define partner and finance scopes.
+3. Invoices/payment orders: define issuer/recipient policy by invoice type and record ownership.
+4. Ledger: finance-only read access, organization scoped.
+
+P2 — permission model:
+1. Split generic `finance.view` into audience-specific billing and finance permissions.
+2. Retain `finance.manage` only for explicitly authorized finance managers/platform finance.
+3. Require AAL2 and independent reviewer for sensitive refund/payout/treasury actions.
+4. Enforce least privilege in both RLS and SECURITY DEFINER functions; RLS alone is not sufficient when RPCs bypass it.
+
+P3 — staging tests:
+- Customer A cannot read Customer B invoices, payment orders, refund requests, ledger or partner payables.
+- Customer cannot read partner payable amount, hold reason or payout state.
+- Partner A cannot read Partner B payables/invoices/refunds.
+- Partner cannot read customer invoices or platform revenue.
+- Finance manager of legal entity A cannot read legal entity B's ledger/revenue/refunds.
+- Finance manager cannot mutate chart, periods, posting rules, allocation policies or treasury rules without finance.manage and required second approval.
+- Platform admin access is explicitly scoped and audited.
+- Anonymous access denied.
+- SECURITY DEFINER RPCs tested separately because they can bypass table RLS.
+- Verify direct table grants, inherited role membership, views, RPCs, Edge Functions and exports.
+
+## Current incident posture
+
+No unauthorized access was demonstrated in this review, and no production data was changed. However, the global revenue RPC and broad refund/payable/invoice policies warrant a **P0/P1 security remediation before finance features are exposed to external customers or partners**. If these routes are currently available to external authenticated users, treat this as a potential data-exposure incident: preserve logs, restrict access through a safe reversible application control, and conduct a formal review before claiming containment.
