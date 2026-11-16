@@ -728,3 +728,75 @@ These labels are not proof that the current legal/tax model supports KRIM recogn
 7. Restrict rule/run/allocation writes to finance-authorized server-side routines; revoke broad authenticated direct writes after migration reconciliation; add maker-checker and negative tenant tests.
 8. Scope or retire the legacy revenue reporting RPC and reconcile its single historical row before any reporting migration.
 9. No production DDL, grants, rules, allocations, ledger postings, invoices, payments or provider actions were changed.
+
+
+## 22. Treasury, cash management and reconciliation review
+
+### Production data state
+
+Read-only counts:
+- `krim_treasury_control_rules`: 0
+- `krim_financial_transactions`: 1
+- `krim_ledger_transactions`: 0
+- `krim_ledger_entries`: 0
+- `krim_financial_reconciliation_exceptions`: 0
+- `krim_financial_reconciliation_exception_events`: 0
+- `payment_orders`: 6
+- `payments`: 4
+- `payment_webhook_events`: 10
+
+The one canonical financial transaction is a completed INR payment row for organization 1, classified as `direction='credit'` and `ownership_scope='company'`; it has no source_reference or idempotency_key. It is not proof of KRIM earned revenue, a reconciled bank deposit, or a verified available cash balance. No bank-account feed, statement import or bank reconciliation source was established in this review.
+
+### Treasury controls absent
+
+There are no treasury control rules. Yet the internal partner settlement authorization routine requires an active `partner_funds` control rule scoped to the shipment's customer organization. If the rule requires approval, it checks an approved financial approval request for matching amount/currency. This means the routine is currently fail-closed when no matching control rule exists; do not add a rule merely to make the workflow pass.
+
+The same routine changes a partner payable from approved to `scheduled`, stores a caller-provided execution reference and action fingerprint, and writes an audit event. This is **authorization/scheduling only**, not evidence that a bank or payout provider executed the transfer. It is a privileged service_role-only SECURITY DEFINER function. Under KRIM's initial partner-direct model, partner funds should not be held or paid out by KRIM at all; keep the entire partner payout/settlement path disabled unless a separately approved regulated/contractual operating model is adopted.
+
+### Partner payout reconciliation control
+
+`krim_internal_reconcile_partner_payout(bigint)` is service_role-only SECURITY DEFINER with an empty search_path. It requires payable status settled/paid, a provider reference in metadata and exactly one matching completed `krim_financial_transactions` row with:
+- transaction_type `partner_payout`;
+- direction debit;
+- ownership_scope `partner_funds`;
+- exact net amount and currency;
+- matching provider reference and source reference.
+
+This is a useful evidence gate, but the payable's status must not be advanced to settled based solely on the scheduling authorization. Reconciliation must consume independently verified provider/bank evidence, with authenticated bank statement or payout API provenance, exact beneficiary, amount, currency, date, fees and duplicate detection. A caller-supplied execution reference is not provider proof.
+
+### Financial transaction ownership and direct access
+
+`krim_financial_transactions` grants authenticated SELECT and its RLS policy permits any active member of the transaction's organization via `krim_has_organization_access`; it does not require a finance-specific permission. A regular organization member can therefore potentially read transaction amount, provider reference, direction, ownership scope and metadata for that organization. This is too broad for financial/provider metadata. Restrict to dedicated finance/reconciliation permissions and expose masked summaries where appropriate.
+
+`krim_treasury_control_rules` grants authenticated INSERT/UPDATE/DELETE and has an ALL-command RLS policy based only on organization membership, not finance.manage. This is a high-severity treasury integrity and separation-of-duties risk. Do not add rules through the client. Revoke direct authenticated writes and use narrowly scoped maker-checker server-side controls after migration recovery.
+
+Ledger tables remain service_role-write-only but authenticated SELECT is broader than a finance-role model, as described in section 19.
+
+### Reconciliation exception and run visibility
+
+The reconciliation runs, exceptions and exception-event tables have RLS enabled and finance/platform-admin read policies. The policies rely on generic `finance.view` or platform `admin.platform`; they do not yet distinguish dedicated reconciliation permission from generic finance visibility. The treasury page's UI only verifies active organization membership before querying the reconciliation run and exception registers. Although RLS remains the database enforcement layer, generic finance.view and cross-entity role design remain too broad for these sensitive details.
+
+Frontend containment: removed direct reads of `krim_financial_reconciliations` and `krim_financial_reconciliation_exceptions` from `app/finance/treasury-audit.html`; replaced both with explicit access holds pending dedicated `finance.reconciliation.view` authorization and legal-entity scope. Preserved the payment webhook listing RPC, which independently requires AAL2 and `admin.platform` on hard-coded organization 1. This webhook RPC is read-only and masks provider references; its hard-coded platform organization should be replaced only after the legal-entity/organization model is resolved.
+
+Commit: `e0ca37d3c749ade1ade923c958d20fba266f139c`. Fetched source verified: inline JavaScript syntax `ok`, old reconciliation table queries absent, both access holds present, webhook RPC retained.
+
+### Reconciliation function concerns
+
+Two overloaded `krim_internal_run_financial_reconciliation` functions exist:
+- no-argument version scans legacy paid payments and settled partner payables and inserts exceptions with `organization_id=NULL`, limiting useful tenant scoping;
+- bigint version attempts to detect missing ledger postings and partner payouts, but its partner/customer ownership joins and matching rules need a documented legal-entity model and comprehensive false-positive/false-negative tests.
+
+Both are service_role-only SECURITY DEFINER. They are not invoked in this audit. The reconciliation exception transition/update functions are also service_role-only; no authenticated mutation route was identified in the inspected ACL. Do not trigger reconciliation jobs until their scope, idempotency, source matching and exception ownership are verified.
+
+### Required remediation before treasury activation
+
+1. Confirm the legal entity and bank account owner; bind every account, transaction, period and reconciliation run to that entity.
+2. Under partner-direct model, disable KRIM partner-fund custody, partner payable settlement, payout execution and any customer funds-held liability workflow.
+3. Track only KRIM's own earned fee receivables and its own receipts; never classify partner freight receipts as KRIM cash or revenue.
+4. Implement read-only bank statement import/reconciliation with source provenance, duplicate detection, amount/currency/date/beneficiary matching, bank fees and exception review.
+5. Separate scheduled, submitted, provider-accepted, bank-confirmed, reconciled and failed payout states; never label scheduled as paid/settled.
+6. Require finance.manage plus maker-checker approval for treasury-rule changes; remove authenticated direct write grants after migration reconciliation.
+7. Restrict financial transaction reads to dedicated finance/reconciliation permissions and mask provider references/metadata for ordinary users.
+8. Add tenant-negative tests, duplicate statement-line tests, reversal/chargeback tests, bank mismatch tests and independent evidence tests.
+9. Keep Razorpay freight checkout and settlement disabled unless KRIM deliberately changes its model and completes legal/provider approval. A KRIM fee payment path is a separate product and requires verified merchant eligibility, contracts, tax treatment and lifecycle tests.
+10. No production DDL, grants, RLS, treasury rules, bank integrations, payouts, payments or reconciliation jobs were changed or executed.
