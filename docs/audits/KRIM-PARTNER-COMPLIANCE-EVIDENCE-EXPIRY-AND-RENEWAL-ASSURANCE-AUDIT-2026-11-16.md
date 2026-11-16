@@ -155,3 +155,26 @@ Never overwrite the prior evidence version. A renewal should create a new versio
 The production migration history remains unreconciled (558 production migration rows versus 363 repository SQL migration files, with substantial name/timestamp mismatches). Therefore no evidence schema, expiry trigger, review RPC or production policy changes were made.
 
 **NO-GO for claiming partner compliance, valid insurance, current permits, automated expiry monitoring or commercial readiness.** The current UI improvement only reduces orphaned partial uploads and duplicate-retry risk. KRIM still has zero compliance evidence/reviews and no approved operational partner capability in the last verified snapshot.
+
+
+## 8. Follow-up verification and corrective addendum — 16 November 2026
+
+A fresh live read-only review confirmed the Storage bucket is private with a 10 MiB limit and PDF/JPEG/PNG allowlist. It also confirmed that the current Storage DELETE policies in this bucket cover customs, claims, capacity and service-area evidence, but no policy authorizes an applicant to delete their own unregistered `{organization_id}/{user_id}/compliance-...` uploads.
+
+Accordingly, the compliance evidence page was corrected in commit `26739539307bf6c8b33cd499e13258f78fa3ec0f` so it does **not** attempt an unauthorized delete after partial upload. It explicitly warns that partial private files may remain and that the applicant should contact support before retrying. It continues to retain files when the RPC response is ambiguous.
+
+Fresh live counts:
+- compliance evidence rows: 0;
+- current evidence rows: 0;
+- compliance review rows: 0;
+- approved review rows: 0;
+- approved reviews whose validity date has passed: 0;
+- active verified registered-business partner organizations: 0.
+
+No compliance-specific expiry cron job was found. The existing partner assignment expiry job is unrelated.
+
+The live helper `private.krim_partner_compliance_is_current(bigint)` checks that the latest review is approved, has a non-null future `valid_until`, and the organization remains active, identity-verified and compliant. Live function-reference inspection found this helper is referenced by the following operational paths: capacity availability publication, dispatch authorization guards, driver assignment, partner quote award/listing/submission, dispatch, driver acceptance, capacity registration/reservation, service-area submission, capability submission, assignment response and operations dispatch readiness. This is positive request-time fail-closed coverage, but does not prove every UI badge, public directory, API or future workflow uses it.
+
+No scheduled process was found to update denormalized organization status or issue renewal reminders at the review expiry date. Because the helper checks the date at runtime, the partner should fail the helper even if the organization row still displays `compliant`; user interfaces and any unreviewed consumers must not rely on the denormalized field alone.
+
+**Correction to the earlier proposed recovery approach:** do not claim applicant-side cleanup is available under current policies. Any future cleanup must be an explicit least-privilege, auditable worker or staging-tested policy, and must delete only exact objects proven unreferenced. No production policy or worker was added.
