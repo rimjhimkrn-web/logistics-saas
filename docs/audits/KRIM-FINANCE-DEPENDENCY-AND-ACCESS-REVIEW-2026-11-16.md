@@ -1397,3 +1397,42 @@ The first test edit exposed a JavaScript regular-expression escaping error; this
 ### Decision
 
 The smoke suite now validates the safe access-hold state rather than requiring unsafe finance data exposure. This is a regression-test correction, **not** a declaration that finance authorization, customer invoice database RLS, partner payable isolation, or live money movement is fixed. Those remain blocked pending migration reconciliation and security remediation.
+
+
+## Section 34 — Automated financial-system foundation gate refresh
+
+**Date:** 16 November 2026. Read-only review; no production data, DDL, grants, policies, provider configuration or payment state changed.
+
+### Repository and deployment verification
+
+The automated financial architecture document and referral pilot playbook are committed. For architecture commit `8b4379c0fe5b239ab2dd7ed870df3d59d3a87779`, all three latest GitHub Actions workflows completed successfully:
+- Production smoke checks `43791571346`: **SUCCESS**.
+- Static link audit `43791571398`: **SUCCESS**.
+- GitHub Pages build/deployment `43791570998`: **SUCCESS**.
+
+These validate repository checks and Pages deployment only; they do not validate live accounting, payments, tax treatment or commercial revenue.
+
+### Current Supabase advisor snapshot
+
+Read-only Supabase advisors observed at 2026-11-16 02:21 UTC:
+- Security: 29 RLS-enabled tables without policies (INFO); 150 authenticated-executable SECURITY DEFINER function findings (WARN); leaked-password protection disabled (WARN).
+- The RLS-without-policy findings include private payment capability/provider/transaction tables. These need an intentional private-schema access model; do not add blanket policies merely to silence the linter.
+- The SECURITY DEFINER warnings include `krim_finance_list_payment_webhook_events` and `krim_finance_list_revenue_ledger`; the latter has already been identified as unscoped across finance organisations. These functions must remain unavailable to ordinary browser callers until reviewed and safely contained.
+- Performance advisors report one duplicate-index warning on shipment-leg activation idempotency indexes. Do not alter it as part of finance remediation without separate dependency analysis.
+- Health advisors returned no lints in this snapshot.
+
+Advisor counts are project-wide and do not mean every finding is exploitable; each function and table requires owner, grant, RLS, tenant-scope and intended-call-path review.
+
+### Schema export recovery prerequisite
+
+The repository workflow `.github/workflows/krim-schema-export.yml` is configured for manual dispatch and requires two repository secrets:
+- `KRIM_PRODUCTION_DB_URL`
+- `KRIM_SCHEMA_EXPORT_PASSPHRASE` (at least 24 characters)
+
+The workflow validates the database URI without printing credentials, dumps schema-only SQL, rejects executable data statements and likely credential patterns, encrypts the export, and uploads only the encrypted artifact with one-day retention. It uses Supabase CLI latest; the current Supabase CLI v3 behavior is documented in the Supabase changelog. No workflow-dispatch action is available in the connected GitHub toolset, and secret presence cannot be inspected from here. An authorized repository administrator must verify the two secrets exist and manually run **Actions → KRIM encrypted schema-only export → Run workflow**. Do not paste either secret or decrypted schema into chat or commit decrypted output.
+
+### Financial-system release gate
+
+The production finance implementation remains **NO-GO** for new automated postings, invoice issuance, refunds, freight checkout, revenue recognition or partner payouts. Next safe engineering work is recovery of exact production schema/migration sources and a private staging reconstruction. Only after that should we implement a separate KRIM-earned-revenue subledger, balanced journal posting, receivable/receipt matching, bank reconciliation, subscription billing and the legally reviewed tax configuration.
+
+The goal is a fully automated and legally compliant financial system, but software automation does not itself guarantee demand, recurring sales or profit. Each revenue product must have a real service, contract, transparent price, valid tax treatment, collection route, refund/credit route and tested accounting path before activation.
