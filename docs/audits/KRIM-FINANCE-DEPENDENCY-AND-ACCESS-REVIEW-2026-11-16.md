@@ -1108,3 +1108,59 @@ Provider registry findings remain unchanged: India INR Razorpay integration is m
 - Keep freight collection and refund execution disabled until legal, merchant, tax, tenant authorization and end-to-end lifecycle gates are satisfied.
 
 No Edge Function was deployed or changed. No secrets were read or modified, no payment/refund RPC was invoked, and no provider transaction or database row was changed during this inspection.
+
+
+## 28. Finance triggers, scheduled jobs, notifications and recovery
+
+### Finance/payment trigger inventory
+
+Read-only catalog inspection found:
+- `payment_orders`: `sync_krim_payment_transaction` AFTER INSERT/UPDATE; `notify_customer_payment_paid` AFTER UPDATE OF status; `sync_financial_after_payment` AFTER UPDATE OF status; and an updated_at trigger.
+- Legacy `payments`: `create_financial_after_payment` AFTER INSERT/UPDATE OF status.
+- `shipment_financials`: `calculate_shipment_margin` BEFORE INSERT/UPDATE OF customer_amount or partner_cost.
+- Invoice, partner payable, revenue allocation and shipment revenue-item tables: a shared BEFORE INSERT/UPDATE OF shipment_id guard rejects finance writes for active multi-leg shipments until leg-level commercial allocation is reconciled.
+
+### Critical legacy margin distortion
+
+The legacy `create_financial_after_payment` trigger inserts `shipment_financials` with:
+- `customer_amount = NEW.amount`
+- `partner_cost = 0`
+- `status = 'paid'`
+- `customer_payment_status = 'paid'`
+
+The margin trigger then calculates `platform_margin = customer_amount - partner_cost`. This can make a full customer freight payment appear as 100% platform margin, despite partner freight costs not being recorded. Under KRIM's partner-direct model, customer freight money is not KRIM revenue or margin. This legacy path must not be used for management accounts, profitability or revenue reporting. Any legacy rows created through it require source-by-source reconciliation and quarantine from analytics.
+
+### Duplicate/competing payment side effects
+
+The newer `payment_orders` AFTER INSERT/UPDATE trigger synchronizes a private canonical payment transaction row. Separate status triggers also create notifications and update legacy shipment_financials. In parallel, the Razorpay webhook directly updates payment_orders and separately invokes the canonical finance reconciliation RPC. This creates multiple side-effect paths with different timing and source-of-truth assumptions.
+
+The payment-order sync function preserves a paid canonical payment transaction against some later non-paid states, but other metadata/fields are still refreshed from the legacy order row. This needs adversarial regression tests for concurrent paid/failure/refund events and conflicting provider IDs.
+
+### Scheduled jobs
+
+Nine active `pg_cron` jobs were observed:
+- Every minute: workflow runtime batch processor.
+- Every five minutes: growth signals, inquiry follow-up reminders, exception escalations, capacity-hold expiry, notification retry worker HTTP call, stale driver-tracking expiry, partner-assignment offer expiry and vehicle-expiry refresh.
+
+No scheduled job directly posts invoices, ledger entries, partner payouts or revenue allocations in the inspected job list. The notification retry job calls the `krim-notification-retry-worker` Edge Function using a Vault secret. The secret value was not read. All nine jobs had recent `succeeded` records in the sampled run history at the time of inspection. This proves scheduler invocation success only; it does not prove that each batch processed all intended work or that the notification Edge Function delivered messages successfully.
+
+### Recovery and observability gaps
+
+- No finance-specific scheduled job was identified for stale payment webhook recovery, ledger reconciliation, unmatched provider payments, refund state repair, bank statement reconciliation or failed financial posting recovery.
+- Webhook events may remain unprocessed after partial failures; there is no identified dedicated scheduled replay/dead-letter job in the cron inventory.
+- Notification retry worker is scheduled, but downstream delivery outcomes, retry exhaustion and dead-letter handling require separate verification.
+- A successful cron row with `return_message='1 row'` is not evidence that the batch had pending work or that every event was processed.
+- Multi-step trigger side effects are transactionally coupled to their originating database statement, but webhook provider calls and subsequent RPC/table updates span multiple requests and are not one atomic transaction.
+
+### Required remediation and release boundary
+
+1. Deprecate the legacy `payments → shipment_financials` auto-margin trigger path from all live financial reporting; reconcile/quarantine any rows it generated. Do not interpret its platform_margin as KRIM earnings.
+2. Establish one canonical payment state machine and source-of-truth record; make legacy synchronization explicit, monotonic, idempotent and auditable.
+3. Remove or replace duplicate side effects only after migration recovery and caller/dependency mapping; do not make production DDL changes now.
+4. Add webhook inbox leases, retry counters, last error, dead-letter escalation and a scheduled recovery worker; keep payment captured status distinct from finance-reconciled status.
+5. Add finance reconciliation monitoring for provider payments, internal financial transactions, ledger posting, refunds and bank deposits; alert on stale mismatches.
+6. Make notifications derive from a canonical reconciled business event, not a raw status transition that may precede finance reconciliation.
+7. Add tests proving that customer freight amount less missing partner cost never produces KRIM margin/revenue; test duplicate triggers, retries, concurrent state changes, partial failures and replay.
+8. Confirm notification retry worker delivery, authentication, retry bounds, secret rotation and dead-letter behavior. Do not expose Vault values in logs or audit output.
+
+No triggers, cron jobs, schedules, notification records, payment records, financial rows or secrets were changed. No scheduled job was manually invoked. No production DDL or financial RPC was executed during this audit.
