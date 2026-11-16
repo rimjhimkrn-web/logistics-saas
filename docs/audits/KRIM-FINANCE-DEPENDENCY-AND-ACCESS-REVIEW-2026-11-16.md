@@ -1561,3 +1561,41 @@ A future referral-fee engine must not infer a commission from an enquiry, opport
 The referral income engine is **not yet operational**. Current production evidence shows no live public leads or customer referral rows, and no active awarded partner opportunity in the inspected table. No referral revenue, commission receivable, MRR or profit should be forecast as earned from these sources.
 
 Next safe build step is to specify and stage-test the referral attribution / contract / completion-evidence lifecycle separately from the freight payment and settlement domain. Do not add production records, invent partner agreements, or activate automated commission posting while migration reconciliation and finance access-control blockers remain unresolved.
+
+
+## Section 38 — Partner opportunity, delivery evidence and revenue-trigger trace
+
+**Date:** 16 November 2026. Production inspection was read-only. No rows or database objects were changed.
+
+### Live operational state
+
+The production snapshot returned:
+
+| Source | Status | Rows |
+|---|---:|---:|
+| Shipments | draft | 8 |
+| Shipments | quoted | 3 |
+| Shipments | confirmed | 6 |
+| Shipments | closed | 1 |
+| Partner shipment assignments | all statuses | 0 |
+| Driver assignments | all statuses | 0 |
+| Delivery POD records | all statuses | 0 |
+
+This means there is no live partner-assigned shipment, driver execution or verified delivery evidence in these operational tables at the time of inspection. A shipment in `confirmed` or `closed` state is not by itself proof of completed partner service, a KRIM fee entitlement, a collected KRIM receivable or earned profit.
+
+### Existing workflow controls confirmed from live function definitions
+
+1. `krim_create_partner_opportunity` requires an authenticated user with access to the customer organisation and `quote.create`; the shipment must be draft/quoted, have a transport mode, map to active countries and active KRIM markets, and not have an active multi-leg plan. It creates a sourcing opportunity, not proof that a partner is verified, contracted, accepted or capable.
+2. `krim_driver_submit_delivery_pod` requires the authenticated assigned driver, active driver membership, an in-transit driver assignment linked to an accepted/active partner assignment, and at least one private evidence object owned by that driver.
+3. `krim_admin_review_delivery_pod` requires AAL2 and platform-admin permission, rejects review by the submitting driver, and requires a private evidence object owned by the assigned driver before verification. This is a useful separation-of-duties control; it is not a substitute for testing all edge cases in staging.
+4. Internal POD verification and delivery authorization routines are not executable by `authenticated` or `anon` directly in the inspected grants. Keep them internal.
+5. `krim_internal_recognize_delivered_revenue` remains unsafe for KRIM's partner-direct referral model: it selects the customer freight invoice and passes the full invoice total to the revenue-allocation planner as the gross amount. That amount is not automatically KRIM revenue. Its existence or internal-only grant does not make it safe to invoke from a trigger, worker, webhook or service-role path.
+
+### Release decision and required correction
+
+- No partner assignment, driver assignment or delivery POD exists in the inspected live snapshot; therefore no current referral commission can be substantiated through this delivery chain.
+- Keep `krim_internal_recognize_delivered_revenue` and any dependent automated revenue path disabled/quarantined until redesigned around KRIM's separately contracted fee amount, not customer freight invoice gross.
+- The correct future event chain is: verified partner/capability + accepted agreement + unique attribution + partner job acceptance + independently verified completion evidence + contract-version fee calculation + KRIM service invoice/receivable + receipt/bank reconciliation + balanced journal.
+- Do not interpret the six confirmed shipments as completed jobs or revenue.
+- These checks do not clear the migration-history mismatch, finance tenant-scope defects, or production schema-recovery gate. No production DDL, grants, policies, triggers, postings or payment settings were changed.
+
