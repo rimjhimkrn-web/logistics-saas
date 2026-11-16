@@ -1321,3 +1321,45 @@ Previous branch-history research found only partial migration directories, not t
 Do not wait for a global platform rebuild to validate the lowest-risk revenue path. KRIM can prepare a non-custodial partner referral pilot in parallel: manually verify and contract one real logistics partner, publish only confirmed service scope, introduce qualified shippers, let customer and partner contract/pay directly, and invoice only KRIM's separately agreed earned referral fee after the contract's trigger is met. Do not advertise guaranteed coverage or collect partner freight funds. CA/legal confirmation of GST, intermediary and invoicing treatment remains a precondition to commercial invoicing.
 
 **Decision:** Migration reconciliation remains **BLOCKED / NOT COMPLETE**. Do not apply or mark migrations, baseline, squash, replay or run corrective production DDL based on this crosswalk.
+
+
+## Section 32 — Early revenue, partner acquisition and public enquiry funnel readiness
+
+**Scope:** Read-only inspection of the public partner onboarding page, public contact form, deployed inquiry Edge Function, inquiry/outbox/partner-opportunity records and the existing India-first partner prospect register. No contact was sent, no lead was inserted, no customer/partner was approved and no operational data was changed.
+
+### Funnel status observed
+
+- Public partner onboarding page offers the three intended paths: Development/Test, Individual/Independent and Registered Business. It correctly says selection does not grant commercial access.
+- The registered-business form submits legal identity, categories, category coverage and private document paths to the multi-category onboarding RPC. The previously documented evidence-metadata hand-off gap remains unresolved; do not rely on the form's success message as proof that every capability is reviewable.
+- Public contact form posts to the deployed `krim-public-contact-inquiry` Edge Function. The form requires privacy consent, includes a honeypot, reports API success/failure and does not claim a guaranteed response time.
+- The Edge Function is ACTIVE (version 20, JWT verification disabled as a public intake endpoint). Its inspected source validates request shape, consent, field lengths, honeypot, uses a Cloudflare-provided IP throttle, calls the database inquiry RPC, links the inquiry to a service request, and attempts founder Telegram notification through an outbox. This is not proof of a successful real submission or delivered notification.
+- `krim_public_contact_inquiries`: 0 rows.
+- `krim_inquiry_followups`: 0 rows.
+- `krim_notification_outbox`: 0 rows.
+- `krim_growth_opportunities`: 0 rows.
+- `krim_partner_opportunities`: 3 rows, all closed: 2 cancelled and 1 expired; no open partner opportunity remains.
+- The existing India-first prospect register contains six prioritised organisations, all explicitly labelled discovered/uncontacted/not verified, plus lower-confidence discovery leads. It is research only, not an active sales pipeline.
+- HubSpot was previously audited as sample-only (2 contacts, 1 company, 0 deals). No successful live sync or qualified commercial pipeline is established.
+
+### What this means for near-term income
+
+The public intake software exists, but there is currently no evidence of an operating lead-to-revenue funnel: no recorded public inquiries, no follow-up activity, no open partner opportunities, no verified/contracted partner, no accepted partner assignment and no earned KRIM referral-fee receivable.
+
+Do not mistake public web traffic, registered accounts, shipment GMV, partner freight charges or a submitted enquiry for KRIM income. The first measurable revenue milestone is a real, qualified customer introduction to a legally verified and contracted partner, followed by partner-direct service delivery and evidence that the separately agreed KRIM referral fee has been earned and paid.
+
+### Fastest responsible revenue path
+
+1. Focus the initial sales motion on a narrow set of Ranchi/Jharkhand ↔ Kolkata/Patna and intra-Jharkhand lanes, rather than claiming nationwide coverage before partner confirmation.
+2. Personally qualify and onboard one credible regional transport/3PL/warehouse partner. Verify legal identity, authorised signatory, permits, insurance, operating lanes, fleet/capacity and references.
+3. Sign a short written partner agreement before referring customers. It must identify the actual service provider and contracting party, scope, referral fee basis, exact earning trigger, invoicing/payment timing, cancellation/claim handling, liability, data/privacy and termination.
+4. Have a CA/legal professional confirm GST/intermediary and invoice treatment before issuing a commercial fee invoice or representing the model as tax-exempt.
+5. Qualify shipper enquiries manually; capture lane, commodity, dimensions/weight, pickup/delivery timing, service requirements and contact consent. Share only confirmed partner options and obtain explicit customer consent before referral.
+6. Customer and partner contract and pay each other directly for freight. KRIM invoices only its separately contracted earned referral/coordination fee; do not receive, hold or settle freight money.
+7. Track every stage with evidence: lead source → qualification → customer consent → partner match → partner acceptance → service completion → referral-fee trigger → KRIM invoice → bank receipt → accounting entry.
+8. Review conversion, fee per completed referral, collection days, partner repeat rate, customer repeat rate, support cost and contribution margin weekly. Do not spend on ads or subscriptions until organic/manual acquisition proves conversion and unit economics.
+
+### Release decision
+
+**The acquisition funnel is technically present but commercially unproven.** The next revenue-enabling work should be a founder-led, low-cost pilot with one verified partner and a small number of qualified shippers. The system must support and evidence that journey, but actual partner verification, agreement signatures, customer consent, tax advice, service delivery and fee collection require real-world action and cannot be simulated or marked complete by code.
+
+No outbound message, email, WhatsApp, phone call, partner approval, customer booking or payment was performed during this review.
