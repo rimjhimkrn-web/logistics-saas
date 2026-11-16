@@ -474,3 +474,53 @@ Those controls are useful, but because the review function currently accepts an 
 5. Restrict authenticated execution claim RPC to a trusted server-side worker or a narrowly scoped, fully verified reviewer flow. Validate wrapper and private function ACLs independently.
 6. Add direct SQL/PostgREST negative tests across unrelated finance orgs, customer orgs and partner orgs; test AAL1/AAL2, requester/reviewer separation, repeated claims, duplicate provider refunds, webhook success/failure and replay.
 7. No production RLS, grants or function changes were made. Migration-history divergence and unresolved legal-entity mapping still block safe production DDL.
+
+
+## 18. Payment-order and payment-history isolation review
+
+### Payment orders: HIGH cross-tenant exposure
+
+The authenticated SELECT policy on `payment_orders` allows:
+- the individual `customer_id = auth.uid()`; OR
+- membership in any active organization of type `finance` with generic `finance.view`.
+
+The finance branch is not bound to the payment order's `customer_organization_id`, shipment customer organization or designated legal finance entity. A finance user in one tenant could therefore read payment orders from unrelated customer organizations. The table contains amount, currency, status, Razorpay order/payment IDs, signature, failure reason, paid timestamp, shipment and quote references.
+
+Authenticated users have SELECT only; write privileges are service_role-only. The RLS read scope, not authenticated write access, is the problem.
+
+### Legacy payments: narrower direct policy
+
+The legacy `payments` SELECT policy is limited to `customer_id = auth.uid()`, and authenticated users have SELECT only. The customer payment-history page also filters by the signed-in user's customer_id and does not display full transaction references. This is a better baseline, although the legacy model must remain reconciled with the newer payment-order model to avoid inconsistent or duplicate history.
+
+### Finance transaction table: overly broad organization-member read
+
+`krim_financial_transactions` grants authenticated SELECT. Its RLS policy permits any active organization member with organization access to read rows whose `organization_id` matches that organization. It does not require a finance-specific role/permission. The table includes provider references and metadata, so ordinary operational/customer members should not automatically receive the full finance transaction record. Create audience-specific safe views/RPCs and reserve raw transaction detail for finance roles.
+
+### Webhook event storage and reconciliation
+
+- `payment_webhook_events` denies all direct authenticated access and grants table access only to service_role. This is the correct general pattern for raw webhook payloads.
+- `krim_finance_list_payment_webhook_events(boolean,integer)` is SECURITY DEFINER, requires AAL2 and `admin.platform` on hard-coded organization ID 1, returns masked event/order references and a bounded result set. It does not return raw payloads. Keep this platform-only; replace hard-coded org ID 1 only after platform/legal entity configuration is formally resolved.
+- `krim_internal_reconcile_razorpay_captured_payment(uuid,text)` is SECURITY DEFINER and service_role-only. It validates paid INR Razorpay order, exact payment ID, accepted quote, shipment/customer organization binding, accepted partner assignment and confirmed capacity reservation before inserting an idempotent financial transaction. This is a strong server-side control pattern; no reconciliation call was made during this audit.
+
+### Payment processing page containment committed
+
+`app/finance/payment-processing.html` previously queried up to 100 `payment_orders` across all rows visible to the broad finance RLS branch and displayed amount, provider, Razorpay order ID, payment ID and status.
+
+The direct payment-order query and table rendering were removed and replaced with an explicit access hold pending strict customer-entity scope and designated finance authorization.
+
+Commit: `3206a914d99771187a850bf78781082c3f8967f0`.
+
+### Customer-facing page review
+
+- `public/customer-os/customer-services/payment-history.html` filters legacy payments by the current session user's `customer_id`; it displays truncated transaction references only.
+- `public/shipper/payment-checkout.html` is guidance-only and clearly states partner-direct freight payment; it does not create orders or collect payment credentials.
+- The refunds page similarly filters customer paid orders by current session `customer_id`.
+
+### Required backend remediation
+
+1. Replace payment-order finance read branch with designated finance-entity scope plus explicit finance permission and ownership/issuer rules.
+2. Restrict raw `krim_financial_transactions` to finance roles; expose customer-safe own-payment status separately.
+3. Keep raw webhook payloads service-role-only; retain AAL2, platform-only masked reconciliation view.
+4. Add negative tenant tests for payment orders and financial transactions across customer A/B, partner A/B and finance entity A/B.
+5. Reconcile legacy `payments`, `payment_orders`, private `krim_payment_transactions` and `krim_financial_transactions` into one documented source-of-truth map before enabling further payment features.
+6. No production DDL, payment write, refund, payout, webhook processing or provider configuration was changed.
