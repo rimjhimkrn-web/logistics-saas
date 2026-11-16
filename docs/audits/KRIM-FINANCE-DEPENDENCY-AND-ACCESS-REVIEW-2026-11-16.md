@@ -1527,3 +1527,37 @@ The current public-schema definitions and effective role grants were inspected d
 ### Release decision
 
 This inspection confirms useful internal building blocks, but it does not establish a safe automated revenue lifecycle. **No production finance activation is authorised.** The critical tenant-scope RPC, ambiguous ledger overloads, legal-entity split and unreconciled migration history remain release blockers.
+
+
+## Section 37 — Revenue-source evidence and commercial funnel reality check
+
+**Date:** 16 November 2026. Production inspection was read-only. No customer or partner records were changed.
+
+### Live source tables inspected
+
+The current public schema contains three potentially relevant operational sources:
+
+- `krim_customer_referrals`: referral code, referrer/referred profile references, status, conversion timestamp and metadata. Current row count: **0**.
+- `krim_partner_opportunities`: shipment/customer-organisation opportunity, response deadline, awarded partner organisation, award/cancellation timestamps and service lane. Current row count: **3**; status distribution: **1 expired, 2 cancelled**. No active/awarded opportunity was evidenced in this snapshot.
+- `krim_public_contact_inquiries`: contact identity, organisation, message, source page and explicit privacy-consent fields. Current row count: **0**.
+
+The result is an important commercial distinction: the platform has some schema to support lead and partner opportunity workflows, but the current production snapshot contains no captured public contact enquiries, no customer referral records and no live partner opportunity evidence. These records cannot currently support a revenue forecast, commission accrual or proof of commercial demand.
+
+### What must happen before a referral can become billable
+
+A future referral-fee engine must not infer a commission from an enquiry, opportunity creation, quote, shipment value or partner award alone. At minimum it requires:
+
+1. A verified partner organisation and approved service capability for the requested lane/service.
+2. A written partner agreement accepted by the correct legal parties, including fee basis, trigger, exclusions, dispute window, payment terms, tax/invoice responsibility and termination.
+3. A unique referral attribution record with customer consent/notice and source evidence.
+4. Partner acceptance and a traceable service/job reference.
+5. Independent evidence that the contracted completion milestone occurred.
+6. Contract-specific fee calculation against a frozen rate/price version, with freight gross value kept separate from KRIM's own fee.
+7. Maker-checker approval for disputed/exception cases and an immutable audit trail.
+8. KRIM's own correctly classified invoice/receivable, payment receipt evidence, bank reconciliation and balanced journal after the legal/tax gate is cleared.
+
+### Commercial activation decision
+
+The referral income engine is **not yet operational**. Current production evidence shows no live public leads or customer referral rows, and no active awarded partner opportunity in the inspected table. No referral revenue, commission receivable, MRR or profit should be forecast as earned from these sources.
+
+Next safe build step is to specify and stage-test the referral attribution / contract / completion-evidence lifecycle separately from the freight payment and settlement domain. Do not add production records, invent partner agreements, or activate automated commission posting while migration reconciliation and finance access-control blockers remain unresolved.
