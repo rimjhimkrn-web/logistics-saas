@@ -104,8 +104,10 @@ async function receiveReturn(id){
  if(!Array.isArray(manifest)||manifest.length<1||manifest.length>100)return alert("Physical receipt is blocked: the authorised return must contain between 1 and 100 manifest lines. Contact an administrator to correct the return manifest; do not submit an empty receipt.");
  for(let i=0;i<manifest.length;i++){
   const m=manifest[i];
-  if(!m||!String(m.description||"").trim()||!String(m.unit||"").trim()||!Number.isFinite(Number(m.quantity))||Number(m.quantity)<=0)
-   return alert("Physical receipt is blocked: manifest line "+(i+1)+" has missing description/unit or an invalid quantity.");
+  const quantityText=m&&((typeof m.quantity==="number"||typeof m.quantity==="string")?String(m.quantity).trim():"");
+  const quantityValid=/^(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(quantityText)&&Number.isFinite(Number(quantityText))&&Number(quantityText)>0;
+  if(!m||typeof m!=="object"||Array.isArray(m)||typeof m.description!=="string"||!m.description.trim()||m.description.trim().length>240||typeof m.unit!=="string"||!m.unit.trim()||m.unit.trim().length>20||!quantityValid)
+   return alert("Physical receipt is blocked: manifest line "+(i+1)+" must contain plain-text description and unit plus a finite positive decimal quantity. No receipt was submitted.");
  }
  const chosen=prompt("Enter destination facility UUID:\n"+allowed.map(f=>f.facility_code+" · "+f.facility_name+" = "+f.id).join("\n"),allowed[0].id);
  if(!chosen||!allowed.some(f=>f.id===chosen))return alert("Select one of the listed approved facilities.");
