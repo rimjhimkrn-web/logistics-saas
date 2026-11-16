@@ -54,7 +54,7 @@ if(!client||!financeAuthorized){$('notice').textContent='Finance access is not c
 $('notice').textContent='Refreshing finance records using the current authenticated session…';
 const [inv,set,pay]=await Promise.all([
 Promise.resolve({data:[],error:{message:'Invoice register withheld pending invoice-type-specific legal-entity scope and finance authorization.'}}),
-client.from('krim_settlements').select('id,settlement_number,status,currency_code,net_amount,settlement_date').order('created_at',{ascending:false}).limit(50),
+Promise.resolve({data:[],error:{message:'Settlement register withheld pending strict finance-entity scoping and partner-direct operating-model review.'}}),
 Promise.resolve({data:[],error:{message:'Payment-order register withheld pending designated finance-entity scope.'}})
 ]);
 if(inv.error)fail('invoicesTable',inv.error);else{$('invoicesTable').innerHTML=table(inv.data,[{key:'invoice_number',label:'Invoice'},{key:'status',label:'Status'},{key:'total_amount',label:'Total',render:r=>money(r.total_amount,r.currency_code)},{key:'outstanding_amount',label:'Due',render:r=>money(r.outstanding_amount,r.currency_code)},{key:'due_date',label:'Due date',render:r=>date(r.due_date)}]);$('invoiceCount').textContent=inv.data.length;const currencies=[...new Set(inv.data.filter(x=>Number(x.outstanding_amount)>0).map(x=>x.currency_code).filter(Boolean))];$('outstanding').textContent=currencies.length===1?money(inv.data.reduce((a,x)=>a+Number(x.outstanding_amount||0),0),currencies[0]):currencies.length>1?'Multi-currency':'—';}
