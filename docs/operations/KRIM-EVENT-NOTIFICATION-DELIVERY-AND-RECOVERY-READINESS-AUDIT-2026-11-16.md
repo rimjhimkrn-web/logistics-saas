@@ -8,7 +8,7 @@
 
 The core event/workflow path has historical evidence of successful processing: 23 event rows are marked processed; 9 matching workflow dispatch rows exist; their linked workflow runs are completed and all 18 recorded run steps completed. This is useful evidence that a workflow path has executed before, but it is not an end-to-end proof of current scheduling, external delivery, or recovery.
 
-The notification and external webhook delivery layers have schema but no production activity in the inspected tables. All inspected notification outbox/delivery/retry, webhook endpoint/delivery, workflow queue lease/event, and dead-letter/replay tables have zero rows. No notification-specific Supabase Edge Function appears in the current repository's supabase/functions directory. Do not claim email, Telegram, SMS, push, or customer webhook delivery is operational based on these tables.
+The notification and external webhook delivery layers have schema but no production activity in the inspected tables. All inspected notification outbox/delivery/retry, webhook endpoint/delivery, workflow queue lease/event, and dead-letter/replay tables have zero rows. Correction from the follow-on scheduler audit: production has an ACTIVE Supabase Edge Function named krim-notification-retry-worker (version 14), and an active pg_cron job invokes it every five minutes. The worker is not present in the checked-in supabase/functions directory listing, but it is deployed in the Supabase project. This changes the architecture finding: a Telegram founder retry worker exists and is scheduled. It does not change the delivery-readiness verdict because the outbox/delivery tables are empty and no real message delivery was independently verified.
 
 No production rows were created, modified, replayed, or sent during this audit.
 
@@ -60,12 +60,12 @@ The function marks an event processed even when no trigger matched and zero disp
 ## 4. Notifications and external delivery
 The database has a notification outbox with recipient reference, channel, priority, content/payload, schedule, status, idempotency key, attempt count, next-attempt time, provider and provider-message ID. Delivery rows record provider, status, attempt count, next attempt, sent/delivered/failed timestamps, error and provider message ID. Retry events provide a history structure.
 
-However, all three tables are empty. Preferences are also empty. The current repository's Supabase Edge Function directory contains payment, tracking, AI, admin and public inquiry functions, but no dedicated notification sender/worker function was found in the directory listing. No live send, provider callback, retry, bounce/complaint, suppression, or delivery confirmation was tested.
+However, all three tables are empty. Preferences are also empty. Production inspection confirms a dedicated deployed function, krim-notification-retry-worker (ACTIVE, version 14, verify_jwt=false with its own cron-secret or platform-admin authorization), and an active five-minute cron job. It processes two founder-only Telegram queues: new customer inquiry alerts and due follow-up reminders. The checked-in repository directory listing did not include this deployed function, so deployment/source parity must be reconciled. No live message was confirmed by recipient, and no provider callback, bounce/complaint or suppression path was tested.
 
 **Conclusion:** the outbox schema is a foundation, not evidence of a functioning notification service. Founder Telegram/email alerts remain unverified until an authorized test event is queued and provider delivery is independently confirmed. No test notification was sent as part of this audit.
 
 Required before enabling:
-1. A server-side worker with secrets kept server-side; no provider keys in browser code.
+1. Reconcile the deployed worker source with version-controlled source; keep secrets server-side and no provider keys in browser code.
 2. Explicit channel/provider allowlist, recipient verification, user preference/consent and transactional-vs-marketing classification.
 3. Stable idempotency across enqueue, worker retries, provider timeouts and webhook callbacks.
 4. Bounded exponential backoff with jitter, retryable/permanent error classification, max attempts, quarantine/dead-letter and operator alerting.
@@ -133,6 +133,6 @@ No anonymous table grants appeared in the inspected grant results. This is a pos
 20. Sensitive payload fields: absent from client-readable logs and routine telemetry.
 
 ## 10. Scope and limitations
-This was a read-only schema, row-count, state, function-definition, grant and RLS-policy inspection plus a repository function-directory listing. It did not inspect provider dashboards/secrets, execute Edge Functions, invoke workers, inspect cron schedules, send test messages, simulate provider callbacks, replay dead letters, or run staging tests. It does not certify that scheduled infrastructure outside the inspected repository/database is absent. The migration-history reconciliation blocker remains in force: no production DDL or migration replay should be attempted until the canonical migration source is recovered and reconciled.
+This was a read-only schema, row-count, state, function-definition, grant and RLS-policy inspection plus a repository function-directory listing. A subsequent read-only scheduler audit inspected active pg_cron jobs, recent cron run history, the deployed notification Edge Function metadata/source, and only the existence/length (not value) of its Vault cron secret. It did not inspect provider dashboards or expose secrets, invoke workers manually, send test messages, simulate provider callbacks, replay dead letters, or run staging tests. It does not certify that scheduled infrastructure outside the inspected repository/database is absent. The migration-history reconciliation blocker remains in force: no production DDL or migration replay should be attempted until the canonical migration source is recovered and reconciled.
 
 **Decision:** keep customer-facing notifications, outbound customer webhooks and automatic recovery marked “not yet production-verified”. Continue with a safe worker/scheduler inventory and staging test design; do not activate real sends or replays during readiness work.
