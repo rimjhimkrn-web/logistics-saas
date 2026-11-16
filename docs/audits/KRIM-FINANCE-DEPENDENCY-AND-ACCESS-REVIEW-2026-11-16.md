@@ -305,3 +305,34 @@ Post-commit source verification confirmed:
 - three remaining read queries remain in place.
 
 This is **repository/source-level containment only**. It is not yet confirmed deployed to GitHub Pages, does not revoke the database RPC, and does not close the other RLS gaps. Verify the deployed page and restrict/replace the database RPC through a reviewed migration after migration-history recovery.
+
+
+## 14. Refund workflow RPC review and temporary frontend containment
+
+Additional inspection of the SECURITY DEFINER refund routines found:
+
+- `private.krim_refund_request_submit` checks that the payment order is paid, requires a full refund (partial refunds disabled), validates requester ownership by user or active customer-organization membership, and prevents duplicate requests/idempotency-key reuse. This is a useful baseline control.
+- `private.krim_refund_request_review` requires AAL2, a finance/platform/operations membership, `finance.manage` or `admin.platform`, a meaningful note, and prevents the requester from reviewing their own request.
+- However, the review routine does **not** verify that `p_finance_organization_id` is the organization responsible for the refund request or that the refund's customer/legal entity is within that finance organization's scope. A finance manager in one tenant could potentially review a request belonging to another tenant by supplying their own authorized finance organization ID. Treat this as a critical cross-tenant authorization flaw in the RPC itself, independent of the RLS issue. Direct authenticated RPC invocation remains possible until a reviewed database remediation revokes or replaces it.
+
+Temporary frontend containment committed in `app/finance/refunds-disputes.html`:
+- eligible paid payment orders are now restricted to `customer_id = current session user`;
+- refund request register is restricted to `customer_user_id = current session user`;
+- finance review desk is hidden pending a properly scoped reviewer workflow;
+- customer refund request submission remains available for the signed-in user's own paid orders.
+
+Repository commit: `a9b8cd638717bcaff62bf26f9e559624ff21f256`.
+
+Post-commit source verification confirmed the two user filters are present, the review desk is hidden, and the customer submission RPC remains connected. This is frontend containment only: the review RPC remains callable directly by authenticated users with its existing grants. It is not a database fix and deployment has not been verified.
+
+### Required database remediation for refund review
+
+The replacement review RPC must derive the permitted legal entity/platform scope from the request row and an approved relationship map, not trust a caller-supplied organization ID by itself. It must:
+1. lock and load the refund request;
+2. resolve the payment order and owning customer organization;
+3. verify the reviewer has the required permission in the exact authorized finance organization responsible for that legal entity;
+4. reject unrelated finance organizations even when the reviewer is otherwise a finance manager;
+5. preserve AAL2, maker-checker, audit event, idempotency and status-transition constraints;
+6. test cross-tenant denial with two independent finance tenants.
+
+Do not attempt this production DDL until the original migration history and organization/legal-entity mapping are reconciled.
