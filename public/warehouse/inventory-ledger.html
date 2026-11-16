@@ -10,6 +10,8 @@
  "use strict";
  const $=id=>document.getElementById(id),client=window.KRIM_SUPABASE;
  const cell=(tr,value,align)=>{const td=document.createElement("td");td.textContent=value==null?"—":String(value);td.style.padding="9px";td.style.borderBottom="1px solid var(--line)";if(align)td.style.textAlign=align;tr.appendChild(td);};
+ const fmtNumber=value=>{const n=Number(value);return Number.isFinite(n)?n.toLocaleString():"—";};
+ const fmtDate=value=>{if(!value)return"—";const d=new Date(value);return Number.isFinite(d.getTime())?d.toLocaleString():"Date unavailable";};
  const say=(title,msg)=>{$("noticeTitle").textContent=title;$("notice").textContent=msg;};
  const emptyRow=(body,colspan)=>{const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=colspan;td.textContent=body;td.style.padding="12px";tr.appendChild(td);return tr;};
  async function load(){
@@ -25,24 +27,25 @@
    client.from("krim_warehouse_inventory_movements").select("id,inventory_id,facility_id,movement_type,quantity_delta,reference_type,reference_id,notes,created_at").order("created_at",{ascending:false}).limit(200)
   ]);
   if(ie)throw ie;if(fe)throw fe;if(ve)throw ve;
-  const byId=new Map((facilityRows||[]).map(f=>[String(f.id),f]));
-  const inventoryById=new Map((items||[]).map(i=>[String(i.id),i]));
-  rowsRender(items||[],byId);
-  movesRender(moves||[],inventoryById,byId);
-  status.textContent="Loaded "+(items||[]).length+" inventory record(s) from the authorized database view.";
-  historyStatus.textContent="Loaded "+(moves||[]).length+" append-only movement record(s) from the authorized database view.";
-  $("dataBadge").textContent="LIVE READ · "+(items||[]).length+" STOCK RECORDS";
+  if(!Array.isArray(items)||!Array.isArray(facilityRows)||!Array.isArray(moves))throw Error("Inventory query returned an unexpected response. Data is withheld.");
+  const byId=new Map(facilityRows.map(f=>[String(f.id),f]));
+  const inventoryById=new Map(items.map(i=>[String(i.id),i]));
+  rowsRender(items,byId);
+  movesRender(moves,inventoryById,byId);
+  status.textContent="Loaded "+items.length+" inventory record(s) (latest 200 maximum) from the authorized database view.";
+  historyStatus.textContent="Loaded "+moves.length+" movement record(s) (latest 200 maximum) from the authorized database view.";
+  $("dataBadge").textContent="LIVE READ · "+items.length+" VISIBLE STOCK RECORDS";
   say("Read-only warehouse ledger","Data loaded through authenticated, row-scoped access. This screen cannot post stock changes; use controlled warehouse tasks.");
  }
  function rowsRender(items,byId){
   rows.replaceChildren();
   if(!items.length){rows.appendChild(emptyRow("No inventory records are currently visible to this account. This is a database result, not a fabricated zero.",5));return;}
-  items.forEach(item=>{const tr=document.createElement("tr"),f=byId.get(String(item.facility_id));cell(tr,f?f.facility_code+" — "+f.facility_name:item.facility_id);cell(tr,item.sku+(item.item_description?" · "+item.item_description:""));cell(tr,item.lot_code);cell(tr,Number(item.quantity).toLocaleString()+" "+(item.unit_code||"unit"),"right");cell(tr,item.quality_status);rows.appendChild(tr);});
+  items.forEach(item=>{const tr=document.createElement("tr"),f=byId.get(String(item.facility_id));cell(tr,f?f.facility_code+" — "+f.facility_name:item.facility_id);cell(tr,item.sku+(item.item_description?" · "+item.item_description:""));cell(tr,item.lot_code);cell(tr,fmtNumber(item.quantity)+" "+(item.unit_code||"unit"),"right");cell(tr,item.quality_status);rows.appendChild(tr);});
  }
  function movesRender(moves,inventoryById,byId){
   historyRows.replaceChildren();
   if(!moves.length){historyRows.appendChild(emptyRow("No movement records are currently visible to this account.",5));return;}
-  moves.forEach(m=>{const tr=document.createElement("tr"),item=inventoryById.get(String(m.inventory_id)),f=byId.get(String(m.facility_id));cell(tr,m.created_at?new Date(m.created_at).toISOString().replace("T"," ").replace("Z",""):"—");cell(tr,(item?item.sku:m.inventory_id)+(f?" · "+f.facility_code:""));cell(tr,m.movement_type);cell(tr,Number(m.quantity_delta).toLocaleString(),"right");cell(tr,[m.reference_type,m.reference_id].filter(Boolean).join(" · ")||"—");historyRows.appendChild(tr);});
+  moves.forEach(m=>{const tr=document.createElement("tr"),item=inventoryById.get(String(m.inventory_id)),f=byId.get(String(m.facility_id));cell(tr,fmtDate(m.created_at));cell(tr,(item?item.sku:m.inventory_id)+(f?" · "+f.facility_code:""));cell(tr,m.movement_type);cell(tr,fmtNumber(m.quantity_delta),"right");cell(tr,[m.reference_type,m.reference_id].filter(Boolean).join(" · ")||"—");historyRows.appendChild(tr);});
  }
  const status=$("inventoryLiveStatus"),rows=$("inventoryLiveRows"),historyRows=$("movementHistoryRows"),historyStatus=$("movementHistoryStatus");
  if(!client){status.textContent="Supabase client unavailable. Inventory was not loaded.";return;}
