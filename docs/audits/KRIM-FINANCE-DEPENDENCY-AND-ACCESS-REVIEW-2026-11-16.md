@@ -1436,3 +1436,59 @@ The workflow validates the database URI without printing credentials, dumps sche
 The production finance implementation remains **NO-GO** for new automated postings, invoice issuance, refunds, freight checkout, revenue recognition or partner payouts. Next safe engineering work is recovery of exact production schema/migration sources and a private staging reconstruction. Only after that should we implement a separate KRIM-earned-revenue subledger, balanced journal posting, receivable/receipt matching, bank reconciliation, subscription billing and the legally reviewed tax configuration.
 
 The goal is a fully automated and legally compliant financial system, but software automation does not itself guarantee demand, recurring sales or profit. Each revenue product must have a real service, contract, transparent price, valid tax treatment, collection route, refund/credit route and tested accounting path before activation.
+
+
+## Section 35 — Accounting foundation ownership and schema inspection
+
+**Date:** 16 November 2026. Production inspection was read-only. No financial records or database configuration were changed.
+
+### Confirmed organisation split
+
+Live `krim_organizations` records show:
+- Organisation 1: legal name **KRIM Logistics**, display name **KRIM Global Platform**, type `platform`, INR, active.
+- Organisation 21: legal/display name **KRIM Finance Journey Verification**, type `finance`, INR, active.
+
+The accounting foundation is split across these records:
+- 14 ledger accounts, 5 account mappings and 3 posting rules are assigned to organisation 21.
+- The single accounting period is assigned to organisation 1.
+- No ledger transactions were returned for either organisation in the grouped inventory.
+
+This is not a safe production accounting ownership model. Organisation 21 is explicitly labelled as a journey-verification organisation, not the confirmed legal proprietor entity. Organisation 1 is a platform record, not independently proven to be the correct accounting entity. Before any postings, the business owner, CA and technical owner must confirm the legal-entity model and a single canonical finance ownership mapping. Do not silently reassign these records.
+
+### Reusable structure versus release blockers
+
+Existing reusable schema components are present:
+- Ledger accounts and transaction/entry tables.
+- Account-role mappings and event posting rules.
+- Accounting periods.
+- Financial posting events and dead-letter queue.
+- Invoices, invoice items and payment applications.
+- Revenue allocation rules, runs and allocations.
+- Tax-rule configuration.
+- Payment capability registry and payment-order records.
+
+However, schema presence is not proof of a working accounting engine. The inspection confirms key design constraints:
+- Ledger entries carry debit/credit type and amount, but a transaction-level balanced-journal invariant must be demonstrated in the posting transaction, not assumed from columns.
+- Invoice records have seller organisation, customer/supplier organisation, type, status, currency, subtotal, tax, paid and outstanding amounts. Tax amount defaulting to zero is not a valid general tax determination.
+- Revenue allocation rules/runs exist, but previously audited recognition logic incorrectly treats partner freight invoice value as KRIM revenue. It remains quarantined.
+- Payment-order schema is shipment/customer-oriented and must not be repurposed for partner freight checkout under the non-custodial partner-direct launch model.
+- Legacy revenue ledger has no mandatory customer-organisation binding and is not an authoritative KRIM cash receipt or accounting ledger.
+- Partner payout tables are not authorised for production use; KRIM is not to collect or settle partner freight funds in the initial model.
+
+### Mandatory acceptance tests for the future finance engine
+
+Before enabling any revenue stream, staging tests must prove:
+1. One canonical legal entity and organisation binding for every financial document and journal.
+2. Every posted journal balances exactly per currency and cannot be edited after posting; corrections use linked reversals.
+3. Every billable event has an immutable contract/price/tax snapshot, unique idempotency key and verifiable evidence.
+4. Invoice totals, credit notes, receipts and payment applications reconcile exactly; duplicate provider events cannot duplicate cash or revenue.
+5. KRIM revenue is limited to its own contracted fee/subscription/licence/service—not customer freight value or partner gross receipts.
+6. Bank statement lines reconcile to verified receipts/refunds/fees with unresolved items visible.
+7. Tax codes and invoice fields are jurisdiction/product/date-specific and approved by a qualified tax professional before activation.
+8. Customer, partner and internal finance roles see only their permitted documents and balances.
+9. Refund, credit, cancellation, dispute and write-off paths are tested and auditable.
+10. No production rollout until migration history is reconciled and the same test suite passes in a rebuilt staging environment.
+
+### Current decision
+
+Phase 1 remains **blocked for production posting** by unresolved legal-entity ownership, migration drift and finance access-control findings. The correct next step remains secure schema recovery and staging reconstruction—not writing more finance rows or changing production accounting configuration.
