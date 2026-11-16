@@ -1492,3 +1492,38 @@ Before enabling any revenue stream, staging tests must prove:
 ### Current decision
 
 Phase 1 remains **blocked for production posting** by unresolved legal-entity ownership, migration drift and finance access-control findings. The correct next step remains secure schema recovery and staging reconstruction—not writing more finance rows or changing production accounting configuration.
+
+
+## Section 36 — Live finance RPC and payment-path verification
+
+**Date:** 16 November 2026. Live database inspection was read-only. No production data, grants, function definitions, payment configuration or money movement changed.
+
+### Live function inventory and grants
+
+The current public-schema definitions and effective role grants were inspected directly:
+
+| Function | Live security / grant result | Finding |
+|---|---|---|
+| `krim_finance_list_payment_webhook_events(boolean, integer)` | SECURITY DEFINER; executable by `authenticated`; not executable by `anon` | Function itself checks non-null `auth.uid()`, AAL2 and `admin.platform` permission for organisation 1. It returns a capped list of masked event/order references and reconciliation state. Treat as a platform-admin-only operational endpoint; retain AAL2 and test the platform permission binding before wider use. |
+| `krim_finance_list_revenue_ledger(integer)` | SECURITY DEFINER; executable by `authenticated`; not executable by `anon` | Critical tenant-scope defect remains. It checks whether the caller has `finance.view` in any active finance organisation, then reads the legacy revenue ledger without joining each row to that organisation or a customer/partner ownership binding. Do not expose or call this RPC from browser finance pages. |
+| `krim_internal_post_ledger_transaction(...)` — transaction number signature | SECURITY DEFINER; no authenticated/anon execute | Checks positive amount, distinct active debit/credit accounts in the requested organisation, currency equality, and an open accounting period; inserts a debit and credit entry and an audit event. This is a privileged internal routine, not an approved revenue automation API. Its idempotency key is the organisation + transaction number lookup; uniqueness/concurrency behavior and post-write balance invariant still require staging tests. |
+| `krim_internal_post_ledger_transaction(...)` — transaction reference signature | SECURITY DEFINER; no authenticated/anon execute | A second overload remains. It uses a different argument contract and references a different transaction schema shape. Do not call it or assume it is interchangeable with the transaction-number overload; resolve overload ownership and compatibility during migration reconstruction. |
+
+### Payment path boundary confirmed in repository
+
+- `create-global-razorpay-order` explicitly returns HTTP 503 unless both `KRIM_FREIGHT_COLLECTION_ENABLED=true` and approval version `2026-11-15-v1` are configured. It states that the customer must pay the contracting logistics provider directly under the current launch model. This gate must remain closed.
+- `verify-razorpay-payment` also blocks verification of unpaid KRIM-collected freight orders unless the same explicit approval gate is enabled. It permits idempotent recovery of orders already marked paid.
+- `razorpay-webhook` verifies the HMAC against the raw request body and requires the provider event ID. It records supported events before processing and returns a retryable conflict for a concurrent duplicate that has not yet been processed. The previously identified separation between event persistence, business-state updates and recovery of stuck unprocessed events remains a staging acceptance requirement.
+- These Razorpay functions are shipment/freight-oriented. They are not a SaaS recurring billing engine and must not be repurposed for subscriptions or KRIM service-fee collection without a separately designed billing domain and approval.
+
+### Immediate engineering decisions
+
+1. Keep the legacy revenue-ledger RPC out of all client call paths; its global read after an any-finance-org permission check is not tenant-safe.
+2. Preserve the webhook-event listing RPC as AAL2 + platform-admin only; test that permission checks use the intended canonical platform organisation.
+3. Treat both ledger-posting overloads as privileged internals. Do not invoke either from a client or scheduled job until schema lineage, legal-entity binding, unique idempotency and journal balancing have been demonstrated in staging.
+4. Keep KRIM freight collection, freight refunds and partner settlement disabled under the partner-direct model.
+5. Design KRIM's own fee/subscription billing as a separate source domain, with its own immutable commercial snapshot, payment attempts, webhook inbox, receivables, receipts, refunds/credit notes and accounting source references.
+
+### Release decision
+
+This inspection confirms useful internal building blocks, but it does not establish a safe automated revenue lifecycle. **No production finance activation is authorised.** The critical tenant-scope RPC, ambiguous ledger overloads, legal-entity split and unreconciled migration history remain release blockers.
