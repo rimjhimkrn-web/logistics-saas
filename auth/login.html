@@ -186,13 +186,39 @@
     const orgIds = [...new Set(memberships.map(m => m.organization_id).filter(id => id !== null && id !== undefined))];
     if (!orgIds.length) throw new Error("Your active membership is missing its organization link. Contact KRIM support.");
     const orgResult = await client.from("krim_organizations")
-      .select("id,organization_type,organization_type_code")
+      .select("id,organization_type,organization_type_code,partner_account_mode")
       .in("id", orgIds);
     if (orgResult.error) {
       console.error("KRIM organization lookup failed:", orgResult.error);
       throw new Error("Your membership exists, but KRIM could not verify its organization type. Reference: ORGANIZATION_LOOKUP_FAILED.");
     }
     const orgById = new Map((orgResult.data || []).map(org => [String(org.id), org]));
+
+    // Recover an interrupted partner signup safely. Email confirmation can create
+    // the organization before the account-mode RPC completes; a later sign-in
+    // finishes only that missing step. Existing organization modes are never overwritten.
+    if (metadataType === "partner") {
+      const savedMode = String(metadata.krim_partner_account_mode || "").trim().toLowerCase();
+      const savedProfile = metadata.krim_partner_profile && typeof metadata.krim_partner_profile === "object"
+        ? metadata.krim_partner_profile : {};
+      const partnerOrg = memberships
+        .map(m => orgById.get(String(m.organization_id)))
+        .find(org => org && ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"]
+          .includes(normalize(org.organization_type_code || org.organization_type)));
+      if (partnerOrg && !partnerOrg.partner_account_mode &&
+          ["registered_business", "individual_interest", "development_test"].includes(savedMode)) {
+        const modeResult = await client.rpc("krim_set_partner_account_mode", {
+          p_mode: savedMode,
+          p_profile: savedProfile
+        });
+        if (modeResult.error) {
+          console.error("KRIM partner pathway recovery failed:", modeResult.error);
+          throw new Error("Your partner account exists, but its selected onboarding pathway could not be completed. Commercial access remains locked. Retry sign-in or contact KRIM support. Reference: PARTNER_PATHWAY_RECOVERY_FAILED.");
+        }
+        partnerOrg.partner_account_mode = savedMode;
+      }
+    }
+
     const mapped = [...new Set(memberships.map(m => mapMembership(m, orgById.get(String(m.organization_id)))).filter(Boolean))];
     // Multi-service partner organisations can hold a verified WAREHOUSE capability
     // without changing their legal organisation type from "partner".
