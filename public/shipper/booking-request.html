@@ -319,12 +319,18 @@
       if(!marketIds.length) return false;
       const {data:markets,error:marketError}=await client.from("krim_markets").select("id").in("id",marketIds).eq("is_active",true).eq("status","active");
       if(marketError) throw marketError;
-      return !!(markets||[]).length;
+      const activeMarketIds=(markets||[]).map(row=>Number(row.id)).filter(Number.isSafeInteger);
+      if(!activeMarketIds.length) return false;
+      // A catalogue market marked active is not operational approval. Require
+      // the separate activation-control decision used by the database gate.
+      const {data:controls,error:controlError}=await client.from("krim_market_activation_controls").select("market_id").in("market_id",activeMarketIds).eq("operational_status","active");
+      if(controlError) throw controlError;
+      return !!(controls||[]).length;
     }
     try{
       const endpointsReady=await Promise.all([hasActiveMarket(originPlace),hasActiveMarket(destinationPlace)]);
       if(!endpointsReady.every(Boolean)){
-        showFeedback("This route is not yet mapped to an active KRIM market at both ends. Your shipment has NOT been created. Please contact KRIM for a manual route review while market coverage is being verified.","error");
+        showFeedback("One or both endpoint markets have not passed KRIM's operational activation control. Your shipment has NOT been created. Contact KRIM for a manual route review. Even when both endpoints are active, the database must still approve the exact corridor, transport mode and mandatory controls.","error");
         return;
       }
     }catch(preflightError){
