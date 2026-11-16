@@ -104,3 +104,46 @@ This function can therefore bypass the stronger physical reservation and authori
 Do not enable unrestricted dispatch until production migration history is reconciled, every dispatch-capable function and grant is inventoried, canonical function definitions and security properties are reviewed, the remediation is tested on staging, and end-to-end tests prove exact-leg authorization plus physical reservation are mandatory for every dispatch path.
 
 **Operational evidence context:** Earlier read-only audits found zero dispatch authorizations, zero driver assignments, zero trip events and zero confirmed custody transfers. No complete real dispatch journey has yet been demonstrated.
+
+
+## 2026-11-17 read-only structural and ACL revalidation
+
+The following additional production facts were confirmed after the initial specification. No data or schema was changed.
+
+### Function execution ACLs
+
+The inspected function ACLs are:
+
+| Function | SECURITY DEFINER | Explicit EXECUTE ACL |
+|---|---:|---|
+| `krim_authorize_leg_dispatch(bigint,text)` | yes | postgres, service_role, authenticated |
+| `krim_dispatch_shipment(bigint,text,jsonb)` | yes | postgres, service_role |
+| `krim_internal_dispatch_assigned_shipment(bigint)` | yes | postgres, service_role |
+| `krim_driver_record_trip_event(uuid,text,text)` | yes | postgres, service_role, authenticated |
+| `krim_driver_submit_delivery_pod(uuid,text,text,text)` | yes | postgres, service_role, authenticated |
+| `krim_internal_submit_delivery_pod(bigint,text,text,text,jsonb)` | yes | postgres, service_role |
+| `krim_admin_review_delivery_pod(bigint,text,text)` | yes | postgres, service_role, authenticated |
+
+The explicit ACL list does not show a PUBLIC grant, but final effective privilege analysis must still account for inherited roles, default ACLs, function overloads and callers. The authenticated dispatch authorization and trip-event functions remain direct API surfaces and must be tested for exact tenant and leg binding.
+
+### Relational constraints observed
+
+- `krim_driver_assignments` has a composite foreign key `(shipment_leg_id, shipment_id)` to `krim_shipment_legs(id, shipment_id)`, which correctly binds a driver assignment to a leg within its shipment.
+- Its `partner_assignment_id` is only a single-column foreign key to `krim_shipment_partner_assignments(id)`; there is no composite constraint proving that the referenced partner assignment has the same shipment, leg and organization as the driver assignment.
+- `krim_driver_assignments.organization_id`, `vehicle_id`, `user_id` and `partner_assignment_id` are independently referenced. Cross-row equality is currently dependent on RPC logic and must be enforced by a canonical validator/transactional write path.
+- `krim_vehicle_driver_bindings` has independent foreign keys to driver user, driver profile, vehicle and organization. The inspected constraints do not by themselves prove that all four references belong to the same organization/profile/user tuple.
+- `krim_capacity_leg_bindings` has independent shipment, leg and reservation foreign keys and a unique constraint on `shipment_leg_id`. The listed constraints do not prove that the reservation's shipment, leg and partner organization match the binding and partner assignment. The dispatch RPC performs some of these equality checks, but the schema does not fully encode the tuple.
+- `krim_shipment_partner_assignments` has a single-column capacity-binding FK; no listed composite constraint ties the assignment, binding, reservation, shipment, leg and partner organization together.
+
+### Required additional remediation
+
+1. Before adding constraints, run read-only orphan and cross-tenant mismatch inventories for every tuple above; do not assume existing rows are clean.
+2. Introduce one canonical private validator for the full tuple: partner assignment ↔ shipment ↔ exact leg ↔ organization ↔ driver assignment ↔ driver profile/user ↔ vehicle ↔ active vehicle-driver binding ↔ capacity binding ↔ reservation.
+3. Require the validator on all authenticated and privileged write paths, including assignment creation/acceptance, driver acceptance, vehicle binding/revocation, capacity binding, dispatch authorization, departure, trip events and POD review.
+4. After data cleanup and migration reconciliation, add suitable composite unique keys and composite foreign keys (or equivalent declarative constraints) so valid references cannot drift across tenants, shipments or legs. Constraint design must be based on actual column types and business cardinality; do not copy/paste speculative DDL.
+5. Recheck binding and driver/vehicle currentness at dispatch and departure under locks. Revoking a vehicle-driver binding or changing the assignment must invalidate any authorization that relied on the old binding.
+6. Test direct authenticated calls and service-role/internal paths separately. A frontend membership guard is not sufficient.
+
+### Current release decision
+
+**NO-GO for unrestricted partner dispatch or driver execution.** The stronger authorization RPC is not enough while weaker legacy/internal dispatch paths and incomplete relational tuple constraints remain. Existing frontend pauses remain mitigation only. This revalidation was read-only; no production DDL, grants, assignments, reservations, dispatches, milestones or POD records were changed.
