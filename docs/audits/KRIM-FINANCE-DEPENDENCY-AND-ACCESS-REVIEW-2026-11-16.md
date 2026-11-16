@@ -287,3 +287,21 @@ P3 — staging tests:
 ## Current incident posture
 
 No unauthorized access was demonstrated in this review, and no production data was changed. However, the global revenue RPC and broad refund/payable/invoice policies warrant a **P0/P1 security remediation before finance features are exposed to external customers or partners**. If these routes are currently available to external authenticated users, treat this as a potential data-exposure incident: preserve logs, restrict access through a safe reversible application control, and conduct a formal review before claiming containment.
+
+
+## 13. Immediate application-layer containment applied
+
+To reduce exposure while database remediation is pending, the finance command-centre frontend at `app/finance/index.html` was updated:
+- removed its call to the unscoped `krim_finance_list_revenue_ledger` SECURITY DEFINER RPC;
+- replaced the revenue table with a clear temporary security-review hold message;
+- removed the legacy revenue RPC from the page's concurrent data-load path;
+- retained the existing invoice, settlement and payment-order reads unchanged.
+
+Repository commit: `7fc4ea6a7c2b5427add9ab2dd94708348687fdaf`.
+
+Post-commit source verification confirmed:
+- legacy revenue RPC call absent from the page;
+- explicit temporary hold message present;
+- three remaining read queries remain in place.
+
+This is **repository/source-level containment only**. It is not yet confirmed deployed to GitHub Pages, does not revoke the database RPC, and does not close the other RLS gaps. Verify the deployed page and restrict/replace the database RPC through a reviewed migration after migration-history recovery.
