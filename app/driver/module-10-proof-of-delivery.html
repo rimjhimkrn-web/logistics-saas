@@ -48,7 +48,7 @@ $('podForm').addEventListener('submit',async ev=>{
  button.disabled=true;result.textContent='Uploading private evidence and registering its metadata…';result.className='notice';
  const ext=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','application/pdf':'pdf'})[file.type];
  const storagePath=session.user.id+'/'+assignment.id+'/'+crypto.randomUUID()+'.'+ext;
- let uploaded=false;
+ let uploaded=false,metadataRegistered=false;
  try{
   const upload=await db.storage.from('krim-driver-evidence').upload(storagePath,file,{cacheControl:'3600',upsert:false,contentType:file.type});
   if(upload.error)throw upload.error;
@@ -58,6 +58,7 @@ $('podForm').addEventListener('submit',async ev=>{
    storage_path:storagePath,original_file_name:file.name,content_type:file.type,file_size:file.size
   }).select('id').single();
   if(saved.error)throw saved.error;
+  metadataRegistered=true;
   const pod=await db.rpc('krim_driver_submit_delivery_pod',{
    p_driver_assignment_id:assignment.id,
    p_received_by_name:recipient,
@@ -71,11 +72,13 @@ $('podForm').addEventListener('submit',async ev=>{
   select.value='';
  }catch(err){
   console.error(err);
-  if(uploaded){
+  if(uploaded&&!metadataRegistered){
    const cleanup=await db.storage.from('krim-driver-evidence').remove([storagePath]);
    if(cleanup.error)console.error('Private evidence cleanup needs administrator review:',cleanup.error);
   }
-  result.textContent='Evidence was not fully registered: '+(err.message||'submission failed')+'. The system attempted to remove any unregistered upload. Do not report delivery as complete; if cleanup failed, contact operations before retrying.';
+  result.textContent=metadataRegistered
+   ? 'Evidence file and metadata are saved, but the POD submission step failed: '+(err.message||'submission failed')+'. The saved evidence has been retained for reconciliation. Do not retry with another upload or report delivery as complete; contact operations for review.'
+   : 'Evidence was not fully registered: '+(err.message||'submission failed')+'. The system attempted to remove the unregistered upload. Do not report delivery as complete; if cleanup failed, contact operations before retrying.';
   result.className='notice warn';
  }finally{button.disabled=false;}
 });
