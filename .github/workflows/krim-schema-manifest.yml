@@ -1,0 +1,206 @@
+name: KRIM sanitized production schema manifest
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "GitHub Actions run ID containing the encrypted schema export"
+        required: true
+        type: string
+      artifact_id:
+        description: "Encrypted schema artifact ID from that run"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Validate inputs and required secret
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          ARTIFACT_ID: ${{ inputs.artifact_id }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::Invalid source run ID"; exit 1; }
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]] || { echo "::error::Invalid artifact ID"; exit 1; }
+          [[ ${#EXPORT_PASSPHRASE} -ge 24 ]] || { echo "::error::Missing or too-short KRIM_SCHEMA_EXPORT_PASSPHRASE secret"; exit 1; }
+          echo "Input and secret-presence checks passed."
+
+      - name: Download only the selected private artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          ARTIFACT_ID: ${{ inputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p private-work output
+          gh api "repos/${GH_REPO}/actions/runs/${SOURCE_RUN_ID}/artifacts" --paginate > private-work/artifacts.json
+          python - <<'PY'
+          import json, os, sys
+          data=json.load(open("private-work/artifacts.json"))
+          aid=int(os.environ["ARTIFACT_ID"])
+          matches=[a for a in data.get("artifacts",[]) if a.get("id")==aid and a.get("name")=="krim-schema-export-encrypted" and not a.get("expired")]
+          if len(matches)!=1:
+              print("::error::Requested artifact is not a unique, unexpired KRIM encrypted schema artifact for the selected run.")
+              sys.exit(1)
+          print("Selected artifact metadata verified; archive bytes will remain private.")
+          PY
+          gh api "repos/${GH_REPO}/actions/artifacts/${ARTIFACT_ID}/zip" > private-work/export.zip
+          unzip -q private-work/export.zip -d private-work/archive
+          test -s private-work/archive/krim-schema-export.sql.enc
+          test -s private-work/archive/SHA256SUMS
+          (cd private-work/archive && sha256sum -c SHA256SUMS)
+
+      - name: Decrypt privately and build metadata-only inventory
+        shell: bash
+        env:
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          set +x
+          umask 077
+          trap 'rm -rf private-work' EXIT
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in private-work/archive/krim-schema-export.sql.enc \
+            -out private-work/schema.sql \
+            -pass env:EXPORT_PASSPHRASE
+          python - <<'PY'
+          import hashlib, json, re, sys
+          from pathlib import Path
+
+          source=Path("private-work/schema.sql").read_text(errors="strict")
+
+          # Never publish schema text, literals, defaults, function bodies or credentials.
+          credential_patterns=[
+              r"rzp_live_[A-Za-z0-9]{10,}", r"whsec_[A-Za-z0-9]{10,}",
+              r"sk_live_[A-Za-z0-9]{10,}", r"sb_secret_[A-Za-z0-9]{10,}",
+              r"postgres(?:ql)?://[^\s'\"]+:[^\s'\"]+@",
+              r"eyJhbGciOi[A-Za-z0-9._-]{20,}"
+          ]
+          for pattern in credential_patterns:
+              if re.search(pattern, source, re.I):
+                  print("::error::Potential credential material detected. No manifest will be published.")
+                  sys.exit(1)
+
+          def split_sql(sql):
+              parts=[]; start=0; i=0; n=len(sql); state="normal"; dollar=""
+              while i<n:
+                  if state=="normal":
+                      if sql.startswith("--",i): state="line"; i+=2; continue
+                      if sql.startswith("/*",i): state="block"; depth=1; i+=2; continue
+                      if sql[i]=="'": state="single"; i+=1; continue
+                      if sql[i]=='"': state="double"; i+=1; continue
+                      if sql[i]=="$":
+                          m=re.match(r"\$[A-Za-z_][A-Za-z_0-9]*\$|\$\$",sql[i:])
+                          if m: dollar=m.group(0); state="dollar"; i+=len(dollar); continue
+                      if sql[i]==";":
+                          part=sql[start:i+1].strip()
+                          if part: parts.append(part)
+                          start=i+1
+                      i+=1
+                  elif state=="line":
+                      if sql[i]=="\n": state="normal"
+                      i+=1
+                  elif state=="block":
+                      if sql.startswith("/*",i): depth+=1; i+=2
+                      elif sql.startswith("*/",i):
+                          depth-=1; i+=2
+                          if depth==0: state="normal"
+                      else: i+=1
+                  elif state=="single":
+                      if sql[i]=="'" and i+1<n and sql[i+1]=="'": i+=2
+                      elif sql[i]=="'": state="normal"; i+=1
+                      elif sql[i]=="\\" and i+1<n: i+=2
+                      else: i+=1
+                  elif state=="double":
+                      if sql[i]=='"' and i+1<n and sql[i+1]=='"': i+=2
+                      elif sql[i]=='"': state="normal"; i+=1
+                      else: i+=1
+                  elif state=="dollar":
+                      if sql.startswith(dollar,i): i+=len(dollar); state="normal"
+                      else: i+=1
+              tail=sql[start:].strip()
+              if tail: parts.append(tail)
+              return parts
+
+          def scrub_comments(s):
+              # Comments are removed before classification; object text itself is never emitted.
+              s=re.sub(r"/\*.*?\*/"," ",s,flags=re.S)
+              s=re.sub(r"--[^\n]*"," ",s)
+              return s.strip()
+
+          patterns=[
+              ("table",r"^CREATE\s+(?:UNLOGGED\s+|TEMP(?:ORARY)?\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?"),
+              ("view",r"^CREATE\s+(?:OR\s+REPLACE\s+)?(?:MATERIALIZED\s+)?VIEW\s+(?:IF\s+NOT\s+EXISTS\s+)?"),
+              ("function",r"^CREATE\s+(?:OR\s+REPLACE\s+)?(?:FUNCTION|PROCEDURE)\s+"),
+              ("index",r"^CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+NOT\s+EXISTS\s+)?"),
+              ("trigger",r"^CREATE\s+(?:CONSTRAINT\s+)?TRIGGER\s+"),
+              ("policy",r"^CREATE\s+POLICY\s+"),
+              ("type",r"^CREATE\s+TYPE\s+"),
+              ("sequence",r"^CREATE\s+(?:TEMPORARY\s+)?SEQUENCE\s+"),
+              ("schema",r"^CREATE\s+SCHEMA\s+"),
+              ("extension",r"^CREATE\s+EXTENSION\s+"),
+              ("enum/domain",r"^CREATE\s+DOMAIN\s+"),
+              ("alter",r"^ALTER\s+"),
+              ("grant",r"^(?:GRANT|REVOKE)\s+"),
+          ]
+          entries=[]
+          for raw in split_sql(source):
+              statement=scrub_comments(raw)
+              if not statement: continue
+              upper=re.sub(r"\s+"," ",statement).upper()
+              kind="other"
+              for label,pat in patterns:
+                  if re.match(pat,upper,re.I): kind=label; break
+              # Only the first token sequence (object identity) is retained, never SQL text.
+              identity=""
+              if kind in ("table","view","function","index","trigger","policy","type","sequence","schema","extension","enum/domain"):
+                  m=re.match(patterns[[x[0] for x in patterns].index(kind)][1]+r'("[^"]+"(?:\."[^"]+")?|[A-Za-z_][\w$]*(?:\.[A-Za-z_][\w$]*)?)',statement,re.I)
+                  if m: identity=m.group(1)
+              digest=hashlib.sha256(statement.encode()).hexdigest()
+              entries.append({"kind":kind,"identity":identity or "(not extracted)","statement_sha256":digest})
+          if not entries:
+              print("::error::No SQL statements were parsed; refusing to publish an empty manifest.")
+              sys.exit(1)
+          counts={}
+          for e in entries: counts[e["kind"]]=counts.get(e["kind"],0)+1
+          manifest={
+              "manifest_version":1,
+              "source":"encrypted production schema-only export",
+              "raw_sql_published":False,
+              "statement_count":len(entries),
+              "counts_by_statement_kind":dict(sorted(counts.items())),
+              "entries":entries
+          }
+          Path("output/krim-production-schema-manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
+          summary="KRIM sanitized schema inventory\nStatements parsed: "+str(len(entries))+"\n"+\n"".join(f"{k}: {v}" for k,v in sorted(counts.items()))
+          Path("output/summary.txt").write_text(summary+"\n")
+          print(summary)
+          PY
+
+      - name: Remove private material
+        if: always()
+        shell: bash
+        run: |
+          rm -rf private-work
+
+      - name: Upload sanitized manifest only
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-production-schema-manifest
+          path: |
+            output/krim-production-schema-manifest.json
+            output/summary.txt
+          if-no-files-found: error
+          retention-days: 1
