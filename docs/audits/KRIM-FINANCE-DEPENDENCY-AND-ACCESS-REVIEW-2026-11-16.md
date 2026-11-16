@@ -386,3 +386,45 @@ The internal customer-invoice creation function is SECURITY DEFINER and service-
 - Add a dedicated customer invoice read RPC or secure view with explicit organization argument validated against auth.uid membership and allowed customer role.
 - Separate supplier/partner invoices from customer invoices.
 - Test customer A/B, partner A/B and finance entity A/B with direct PostgREST table queries and all page/API routes.
+
+
+## 16. Partner payable isolation review and temporary UI containment
+
+### Database exposure confirmed
+
+The authenticated SELECT policy on `krim_partner_payables` currently allows a row when either:
+- the user has active organization access to `partner_organization_id`; OR
+- the user has active organization access to the shipment's `customer_organization_id`.
+
+The second branch exposes partner commercial economics to the customer organization. Fields on the table include gross amount, adjustments, net amount, payable status, eligible/approved/settled/payout timestamps and hold reason. This is a HIGH confidentiality issue; no evidence of exploitation was established.
+
+The table grants authenticated users SELECT only. INSERT/UPDATE/DELETE are not granted to authenticated; service_role has broad write grants. This is better than the previously reviewed finance configuration tables, but the SELECT RLS scope remains overbroad.
+
+### Finance workspace also lacked finance-role verification
+
+`app/finance/partner-settlements.html` checked only for an authenticated session and at least one active organization membership before querying the payable table. It did not verify a finance-specific permission or bind the user to a designated finance organization. As a result, the page could display rows permitted by the overly broad RLS policy to an ordinary customer member.
+
+### Temporary frontend containment committed
+
+The partner payable register was replaced with an explicit access-hold notice. Its direct `krim_partner_payables` query was removed from the page. The page no longer renders gross, adjustments, net, status or update timestamps.
+
+Commits:
+- Initial containment: `e4cfed595ecc730e8f9a11ba0070e8c7b1f5378f`
+- Follow-up try/catch syntax correction: `f59ebb2e1ff2ed0339019ec64bd0a1f5b835bcc3`
+
+Source verification confirms the hold notice is present and the direct payable table query is absent. Deployment and live-browser verification have not been performed.
+
+### Internal payable/settlement routines inspected
+
+The inspected `krim_internal_create_partner_payable*`, `krim_internal_prepare_partner_payable_approval`, `krim_internal_authorize_partner_settlement`, and `krim_internal_post_partner_settlement_to_ledger` routines are SECURITY DEFINER and have EXECUTE ACL for postgres and service_role only in the catalog output. They are not directly callable by ordinary authenticated users under those ACLs.
+
+The payable creation routines require delivered shipment, completed assignment, accepted partner quote and independently verified delivery POD. The authorization routine checks approved status and may require a treasury control rule and financial approval. However, it updates payable status to scheduled and records an execution reference; this is not evidence of an actual bank transfer or completed payout. Keep all payout/settlement actions disabled under KRIM's partner-direct model unless a separately approved, legally compliant KRIM-managed settlement product is deliberately introduced.
+
+### Required database remediation
+
+- Replace the customer-organization branch with partner-only visibility for partner payable detail.
+- Restrict partner payable read to authorized partner finance roles, not any active partner organization member.
+- Provide a separate customer-safe shipment financial status view only if required; never expose partner gross/net economics, adjustments, holds or payout timestamps.
+- Bind finance-wide visibility to a designated legal finance organization and dedicated finance permissions, with AAL2 for sensitive actions.
+- Add direct PostgREST negative tests: customer A must not read partner payable for shipment A; customer B must not read it; partner A may read only its own payable; partner B must not read partner A's payable; ordinary partner member without finance permission must not read detailed economics; unrelated finance tenant must not read it.
+- Do not modify production RLS or grants until migration history recovery/reconciliation and the legal-entity/organization mapping are complete.
