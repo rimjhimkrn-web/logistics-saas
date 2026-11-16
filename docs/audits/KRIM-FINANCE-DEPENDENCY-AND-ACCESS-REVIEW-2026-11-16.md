@@ -800,3 +800,77 @@ Both are service_role-only SECURITY DEFINER. They are not invoked in this audit.
 8. Add tenant-negative tests, duplicate statement-line tests, reversal/chargeback tests, bank mismatch tests and independent evidence tests.
 9. Keep Razorpay freight checkout and settlement disabled unless KRIM deliberately changes its model and completes legal/provider approval. A KRIM fee payment path is a separate product and requires verified merchant eligibility, contracts, tax treatment and lifecycle tests.
 10. No production DDL, grants, RLS, treasury rules, bank integrations, payouts, payments or reconciliation jobs were changed or executed.
+
+
+## 23. Financial approvals, refunds, disputes, chargebacks and fraud controls
+
+### Production data state
+
+Read-only counts:
+- Financial approval policies: 8
+- Financial approval requests: 0
+- Financial approval events: 0
+- Refund requests / events: 0 / 0
+- Dispute cases: 0
+- Legacy disputes: 0
+- Dispute decisions / appeals / evidence links / investigations: 0 / 0 / 0 / 0
+- Shipment risk records: 1
+
+The single shipment risk record is a medium-severity open delay risk. It is not a payment-fraud finding. No dedicated chargeback table or chargeback-specific lifecycle was found in the table-name inventory. No actual refund or dispute case exists in the inspected tables.
+
+### Financial approval policies: configured but not operationally verified
+
+Eight active global policies exist for payout, expense, payment, transfer, other, refund, distribution and founder compensation. Every row has:
+- `organization_id=NULL`;
+- `currency_code='*'`;
+- `require_founder_approval=true`;
+- `require_dual_control=false`;
+- zero auto-approval and founder limits.
+
+**Critical functional mismatch:** `krim_internal.evaluate_financial_approval` searches for a policy using `currency_code = upper(p_currency_code)`, not a wildcard-aware comparison. The configured `*` rows therefore do not match normal currency inputs such as INR. The function returns `approval_required / no_active_policy` without inserting an approval request or event. Partner-payable preparation interprets approval_required as a hold and places the payable under review, but no actionable approval request is created. This is fail-closed in that path, but it is not a functioning approval workflow.
+
+### Approval data permissions and workflow
+
+RLS on approval policies, requests and events uses organization membership only. Authenticated users also have direct INSERT/UPDATE/DELETE grants on all three tables. The ALL policies are not restricted to `finance.manage` or a dedicated policy-management permission. This permits ordinary organization members to alter approval policy/request/event data where their organization scope matches. Approval events should be append-only; direct client mutation is not appropriate.
+
+The approval request organization_id is nullable, while the RLS organization helper is invoked against it. Global policy rows have no organization, but generated approval requests are expected to receive an organization. This relationship needs a non-null, validated legal-entity owner before activation.
+
+The private service_role-only routines `approve_financial_request` and `consume_financial_approval` perform status, expiry, fingerprint and one-time-consumption checks. However, `approve_financial_request` accepts `p_approver_user_id` as an argument and does not itself verify that this user is the authenticated caller, holds finance.manage for the request's organization, is distinct from the requester, or satisfies a dual-control policy. It is executable only by service_role, so the calling Edge Function/server must enforce those checks; that server path and actor provenance were not validated in this review. The consume routine likewise trusts its service_role caller and does not independently bind the action to a legal entity or verify an authenticated actor.
+
+All eight policies set `require_dual_control=false`. Maker-checker separation is therefore not enforced by the configured policy rows. Do not treat founder_approval_required as equivalent to independent dual control.
+
+### Refund lifecycle
+
+The refund request submission path is restricted to the signed-in customer or an active member of the payment order's customer organization. It requires a positive amount, reason of at least 20 characters, an idempotency key, a paid order, and currently supports full refunds only. It prevents a second request for the same payment order. No partial refund support is enabled.
+
+The review function requires AAL2, finance.manage/admin.platform in an active finance/platform/operations organization, a meaningful review note, and separation from the requester. **Critical tenant-binding flaw remains:** it does not verify that the supplied reviewer organization is the responsible organization for the refund request's customer/payment entity. A finance manager in an unrelated tenant can potentially pass their own authorized organization ID and review another tenant's refund.
+
+The refund execution-claim routine further requires that the reviewer is the same user who approved, the reviewer remains an active finance member, the requester differs from reviewer, the payment order is paid INR Razorpay, and the requested amount exactly matches the full order. It creates an execution claim/idempotency snapshot and prevents a second provider refund if a provider refund ID already exists. It does not itself call Razorpay; downstream provider execution and webhook confirmation must be verified separately. The public wrapper is callable by authenticated users and delegates to the private SECURITY DEFINER function.
+
+Refund request and event SELECT RLS permits the customer, active members of the customer organization, and users with generic finance.view in any active organization. This is broader than responsible-entity finance scope. The refund page currently filters customer orders and requests to the signed-in user's own user ID and keeps the finance review panel hidden; this is frontend containment only. Direct RPC and database RLS risks remain. Existing review-panel UI is already marked temporarily unavailable; no additional frontend change was made in this step.
+
+Under KRIM's partner-direct model, freight refunds must be processed by the logistics provider that received the freight payment. KRIM's own refund workflow should apply only to payments actually received by KRIM for its own separately contracted fees/services, after merchant eligibility, contract and tax review.
+
+### Disputes and investigations
+
+Dispute case, legacy dispute, decision, appeal, evidence-link and investigation tables all have RLS enabled. Read policies allow the case's owning organization and claimant/respondent organizations to read case-related rows. This is broadly appropriate for party-facing case status and evidence they are entitled to see, but the investigations policy also exposes investigation findings/recommendations to claimant/respondent parties. Internal investigator notes, fraud signals, privileged legal advice, confidential partner submissions and internal risk assessments should not be exposed wholesale to both parties. Split internal investigation records from party-visible case summaries/evidence and use separate permissions.
+
+The inspected dispute tables have authenticated SELECT grants; their write grants are service_role-only. No dispute/chargeback lifecycle RPC or payment-network chargeback integration was identified in the inspected function/table inventory. The existence of case tables does not establish a working dispute-resolution process, evidence submission workflow, SLA clock, appeal process or provider chargeback response capability.
+
+### Fraud and risk
+
+The only identified `krim_shipment_risks` record is an open medium-severity delay risk. Its SELECT policy permits an active partner assigned to the shipment or an active member of the customer organization. No dedicated payment-fraud case table, fraud rules, velocity limits, device/IP risk controls, identity verification decisions, sanctions screening, chargeback ratios or fraud operations queue was established by this review. Do not market the platform as having automated payment fraud detection or chargeback protection.
+
+### Required remediation before activation
+
+1. Fix the approval policy currency match with explicit wildcard semantics and validate every supported currency; then test that a pending approval request and immutable event are actually created.
+2. Make approval policies organization/legal-entity-bound and non-null where required; remove authenticated direct writes to policy/request/event tables; expose narrowly scoped finance.manage workflows.
+3. Implement server-side actor verification for approval/rejection: authenticated identity, AAL2, same legal entity, requester/approver separation, dual-control and immutable actor audit.
+4. Require independent second-person approval for material payments/refunds/transfers and all changes to beneficiary/bank details; avoid self-approval and replay.
+5. Bind refund review to the payment order's customer legal entity and responsible KRIM finance entity. Enforce the binding inside the database function, not just the page.
+6. Narrow refund and event read policies to the customer/payment entity and responsible finance entity; do not let generic finance.view across unrelated tenants read refunds.
+7. Keep refund execution disabled until a complete provider lifecycle is tested: claim, provider request, timeout, retry, duplicate webhook, failed refund, reversal, partial/full balance and bank settlement confirmation.
+8. Split party-visible dispute data from internal investigations; restrict investigator findings, confidential evidence and legal notes to authorized internal roles.
+9. Build a genuine payment-provider chargeback ingestion and response workflow before claiming chargeback support; include evidence deadlines, representment, outcome, fee and ledger reconciliation.
+10. Treat fraud controls as a future risk program: identity verification, provider risk signals, velocity/abuse controls, account takeover monitoring, manual review, audit and escalation. Do not invent fraud scores or claim coverage.
+11. No approval, refund, dispute, chargeback, fraud or payment records were created or modified. No RPCs were invoked. No production DDL, grants, RLS or provider settings were changed.
