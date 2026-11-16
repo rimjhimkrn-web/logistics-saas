@@ -20,24 +20,41 @@
   <p class="text-xs text-slate-400 mt-1 font-mono">Revoking refresh tokens & clearing browser storage.</p>
 
   <script type="module">
-    import { supabase, AUTH_ROUTES } from './js/auth-core.js';
+    import { supabase, AUTH_ROUTES } from '../auth-core.js';
+
+    const heading = document.querySelector('h1');
+    const message = document.querySelector('p');
 
     async function executeGlobalSignOut() {
+      let globalRevoked = false;
       try {
-        // Revoke current session globally on Supabase server
-        await supabase.auth.signOut({ scope: 'global' });
+        const result = await supabase.auth.signOut({ scope: 'global' });
+        if (result.error) throw result.error;
+        globalRevoked = true;
       } catch (err) {
-        console.error("Signout error:", err);
+        console.error("KRIM global sign-out failed:", err);
+        // Best-effort local sign-out still removes this browser's Supabase session.
+        try {
+          const local = await supabase.auth.signOut({ scope: 'local' });
+          if (local.error) throw local.error;
+        } catch (localError) {
+          console.error("KRIM local sign-out also failed:", localError);
+          heading.textContent = "Session sign-out needs attention";
+          message.textContent = "The authentication service could not confirm session revocation. Close this browser tab on shared devices and retry sign-out when online. Do not assume other sessions have been revoked.";
+          return;
+        }
       } finally {
-        // Clear all client storage
-        localStorage.clear();
-        sessionStorage.clear();
-        // Redirect back to login gateway
-        window.location.href = AUTH_ROUTES.SIGN_IN;
+        sessionStorage.removeItem("KRIM_MFA_FACTOR_ID");
+        sessionStorage.removeItem("krim_driver_invite_token");
       }
+      heading.textContent = globalRevoked ? "Secure session terminated" : "This device signed out";
+      message.textContent = globalRevoked
+        ? "Your KRIM session was signed out across devices."
+        : "This browser was signed out, but global session revocation could not be confirmed.";
+      setTimeout(() => { window.location.replace(AUTH_ROUTES.SIGN_IN); }, 900);
     }
 
     executeGlobalSignOut();
-  </script>
+  </script>t>
 </body>
 </html>
