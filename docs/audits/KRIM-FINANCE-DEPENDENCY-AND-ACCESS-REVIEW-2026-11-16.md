@@ -950,3 +950,60 @@ For a referral-only transaction, the customer and partner contract and settle fr
 9. Keep settlement and legacy revenue dashboards held until legal-entity scope and role authorization are enforced server-side.
 10. Add reconciliation tests against independent source records, double-entry balance, period cut-off, duplicate fees, partial refunds, reversals, multi-currency FX, credit notes and partner/customer tenant isolation.
 11. No reporting rows, journals, revenue, expenses, forecasts, settlement records or financial values were created or modified in this audit. No production DDL, grants, RLS or accounting logic were changed.
+
+
+## 25. Finance permissions, organization isolation and security boundary review
+
+### Read-only production snapshot
+
+Organization memberships currently include:
+- Organization 1, **KRIM Global Platform** (platform): one active owner membership.
+- Organization 21, **KRIM Finance Journey Verification** (finance): one active manager membership.
+- Customer, partner, carrier, warehouse, customs, operations and enterprise organizations have separate active memberships in the current snapshot.
+
+Active role assignments include platform-admin and platform-superadmin assignments in organization 1, and a finance-manager assignment in organization 21. Customer and partner workspace assignments are scoped to their respective organizations. These counts describe the present database snapshot only; they do not prove identity verification, correct business authority, or safe future role provisioning.
+
+### Finance permission matrix
+
+The role-permission mapping currently grants:
+- `customer_user`: `finance.view`;
+- `finance_manager`: `finance.view`, `finance.manage`;
+- `organization_owner`: `finance.view`, `finance.manage`;
+- `organization_admin`: `finance.view`;
+- `platform_admin` and `platform_superadmin`: `finance.view`, `finance.manage`.
+
+The customer-user grant is a least-privilege concern. A generic `finance.view` permission must never imply access to platform revenue, general ledger, partner payables, treasury, other tenants' invoices, or internal reconciliation data. Customer access should be a separate entitlement for the customer's own invoices, payments and statements. Organization owner/admin finance visibility should also be narrowed to records and actions belonging to that organization's own legal entity.
+
+The finance-manager assignment observed in the database is in the finance verification organization, not proof of an appointed production finance officer for the KRIM legal entity. Platform owner/admin role assignments are not a substitute for a documented finance delegation and maker-checker design.
+
+### Confirmed RLS and direct-write boundary gaps
+
+The live policy/grant snapshot confirms:
+- Approval policies, requests and events: authenticated INSERT/UPDATE/DELETE grants plus membership-only ALL policies.
+- Treasury control rules: authenticated INSERT/UPDATE/DELETE grants plus membership-only ALL policy.
+- Ledger accounts: authenticated SELECT plus membership-only ALL policy, which is broader than read-only intent.
+- Invoices: broad SELECT branches for finance organizations and organization/customer/supplier/partner organization permissions.
+- Invoice items: SELECT inherited through invoice organization membership rather than invoice issuer/recipient authorization.
+- Partner payables: SELECT for partner organization **or** shipment customer organization, exposing partner payable amounts and settlement details to customer members.
+- Refund requests/events: customer participants plus generic `finance.view` membership across active organizations.
+- Ledger transactions and entries: membership-only SELECT rather than finance-specific access.
+- `payment_orders`: own-customer read plus finance-organization `finance.view` branch.
+- `revenue_ledger`: customer organization read plus finance-organization `finance.view` branch; the unscoped SECURITY DEFINER list RPC remains a separate critical risk.
+- `shipment_financials`: authenticated table grants exist, but RLS denies authenticated access in the inspected policy snapshot.
+
+This confirms that several controls depend on a broad permission or mere organization membership rather than a record-specific financial entitlement. The frontend holds previously applied are containment only; direct database policies, grants and callable RPCs remain authoritative.
+
+### Security posture and remediation order
+
+**Finance access remains NO-GO for live-money production use.** Prioritize in this order:
+
+1. Remove generic finance visibility from customer-facing role semantics; introduce distinct customer billing entitlements and finance-only permissions.
+2. Define the legal-entity ownership model for organizations 1 and 21 and establish explicit finance authority for the real KRIM entity.
+3. Replace membership-only read/write policies with record-level issuer, recipient, customer, partner and responsible-finance-entity checks.
+4. Revoke direct authenticated writes to approval, treasury, accounting configuration and revenue-allocation control surfaces after migration reconciliation; use narrow server-side commands with actor verification, maker-checker and immutable events.
+5. Restrict ledger, profitability, reconciliation, payable and refund reads to authorized finance/commercial scopes; customer and partner views must expose only their own contractual records.
+6. Audit every SECURITY DEFINER function, view, trigger and Edge Function for caller authorization, explicit organization binding, safe search_path, and EXECUTE grants to PUBLIC/anon/authenticated.
+7. Build staging negative tests for customer A versus customer B, partner A versus partner B, ordinary member versus finance manager, finance tenant A versus finance tenant B, owner/admin boundaries, inactive membership, revoked role, AAL2 and service-role actor provenance.
+8. Recover and reconcile authoritative production migration bodies before any DDL, grants, policy or function change.
+
+No user identities, memberships, roles, grants, policies, financial records or production functions were modified. No production DDL or financial RPC was executed in this review.
