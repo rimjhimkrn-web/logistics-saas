@@ -119,6 +119,9 @@ footer{text-align:center;color:#64748b;font-size:12px}
    if(challengeResult.error)throw challengeResult.error;
    const verifyResult=await client.auth.mfa.verify({factorId,challengeId:challengeResult.data.id,code});
    if(verifyResult.error)throw verifyResult.error;
+   const assuranceResult=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+   if(assuranceResult.error)throw assuranceResult.error;
+   if(assuranceResult.data?.currentLevel!=="aal2")throw new Error("The authenticator was verified, but the session has not reached the required AAL2 security level. Please retry or contact KRIM support.");
    sessionStorage.setItem("KRIM_MFA_FACTOR_ID",factorId);
    show("Authenticator enrolled successfully. MFA is now enabled for this account.",true);
    form.hidden=true;
