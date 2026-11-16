@@ -96,7 +96,7 @@ document.getElementById("service-area-form").addEventListener("submit",async e=>
   if(!data?.service_area_id||data.status!=="draft"||data.workflow_status!=="pending_review")throw new Error("Database did not confirm a pending draft request.");
   submissionConfirmed=true;requestId=data.service_area_id;
   say("Submitted. Request #"+requestId+" is pending independent review and is not active. Do not submit it again.");
-  form.reset();$("area-from").value=localDate(new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")+"-"+String(new Date().getDate()).padStart(2,"0"),false).toISOString().slice(0,10);
+  form.reset();const today=new Date();$("area-from").value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
   refreshScopeFields();
   try{
    const {data:rows,error:reloadError}=await client.from("krim_partner_service_areas").select("id,organization_id,country_id,market_id,location_id,coverage_type,service_type,transport_mode_id,status,effective_from,effective_until,metadata,created_at").eq("organization_id",org.id).order("created_at",{ascending:false});
