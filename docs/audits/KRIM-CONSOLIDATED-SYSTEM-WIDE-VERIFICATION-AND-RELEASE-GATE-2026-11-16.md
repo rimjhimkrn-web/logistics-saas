@@ -10,7 +10,7 @@ The current 58-page review sequence (Pages 46–103) has been completed under a 
 - Page 102 — Data Export & Reports: `caf6c40856bcaa823941266346238702f6518ae4`
 - Page 103 — Partner Availability & Capacity: `e0f6ecd1b5ba3904f5f26ae41bc7501e4428e223`
 
-The reported page-level smoke checks and static-link audits passed. The latest deployment attempts were cancelled by newer commits. At this verification snapshot, GitHub commit-status endpoints for both page commits returned `pending` with zero reported status contexts; this is not evidence of a successful final deployment. Recheck Actions and Pages deployment after the commit queue settles.
+The reported page-level smoke checks and static-link audits passed. The page commits' own legacy commit-status endpoints return `pending` with zero status contexts, but later descendant commit `6fea7c0e68dc0ffb3ace761e5d4b507c5dbaad14` has successful production smoke checks, static-link audit and Pages deployment (run IDs `43814864337`, `43814864378`, `43814864278`). This confirms the later main-branch snapshot deployed successfully; it does not replace page-specific functional testing.
 
 The application has broad feature coverage and a substantial Supabase schema, but production evidence does not yet demonstrate a verified operating logistics network. Existing rows, UI pages, RPCs, readiness flags and capability catalogues must not be represented as proof of operational service availability.
 
