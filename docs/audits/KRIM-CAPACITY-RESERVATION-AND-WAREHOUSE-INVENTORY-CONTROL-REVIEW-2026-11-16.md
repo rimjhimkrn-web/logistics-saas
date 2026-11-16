@@ -4,7 +4,7 @@
 Read-only inspection of live PostgreSQL function definitions and effective EXECUTE grants for authenticated users. No RPCs were invoked and no production data, schema, grants, or triggers were changed. This is a source-level control review, not a staging or concurrency test.
 
 ## CI verification
-For commit `cce0d15cd97e0dc8673801723dfd68cff3e8592c`, the GitHub Actions static-link audit, production smoke checks, and Pages deployment all completed successfully. These checks do not establish correctness of live business workflows.
+For commit `cce0d15cd97e0dc8673801723dfd68cff3e8592c`, the GitHub Actions static-link audit, production smoke checks, and Pages deployment all completed successfully. These checks do not establish correctness of live business workflows. The report commit's own checks were queued when this report was updated.
 
 ## Capacity reservation
 
@@ -54,6 +54,12 @@ For commit `cce0d15cd97e0dc8673801723dfd68cff3e8592c`, the GitHub Actions static
 - Transfer quality review requires received transfer, destination operator access, a reviewer different from both dispatcher and receiver, reason, idempotency key, and reviewer-owned private evidence in the designated bucket with allowed MIME types and a 10 MB size ceiling.
 - Final quality review is immutable against conflicting replay and only changes inventory still on hold.
 - Quality decision and audit evidence are recorded together.
+- Shipment allocation pick/release functions lock allocation and inventory records, restrict picking to released stock, and prevent releasing a picked allocation through the ordinary release path.
+
+### High-priority finding — warehouse transfer can consume stock already reserved for a shipment
+The inspected `krim_warehouse_reserve_shipment_inventory` function creates a reserved allocation without decrementing the inventory balance. The inspected `krim_warehouse_dispatch_transfer` function locks the source inventory row and checks its on-hand quantity, but does not subtract or reject outstanding `reserved` shipment allocations before decrementing stock and creating the transfer. This creates a source-level risk that a warehouse operator can transfer stock which is already committed to a shipment. A later pick may then fail for insufficient stock. This is a code-review finding, not a production exploit test.
+
+**Required correction before relying on cross-facility transfers:** in staging, define and test a single available-to-promise calculation that subtracts all active reserved allocations for the exact inventory balance, then enforce it atomically under the inventory row lock in every stock-decreasing path (transfer, pick, adjustment, write-off, and other movements). Ensure allocation reservation and stock movement serialize on the same inventory row. Add negative tests for transfer quantity equal to, below, and above unallocated stock, concurrent transfer/pick attempts, idempotent retries, and released allocations. Do not patch production until migration reconciliation and an approved staged migration exist.
 
 ### Follow-up verification still required
 - Run staging concurrency tests for two simultaneous allocations against the same inventory row, transfer receipt retries, and duplicate quality-review submissions.
@@ -61,16 +67,23 @@ For commit `cce0d15cd97e0dc8673801723dfd68cff3e8592c`, the GitHub Actions static
 - Confirm all warehouse task transitions and shipment allocation pick/release paths preserve exact facility, lot, unit, quantity, and quality-state linkage.
 - A receipt is not a quality release; a quality release is not proof of shipment dispatch or delivery.
 
+## Capacity registration controls
+- Base capacity registration requires active organisation membership and `partner.manage`, a partner-related organisation type, current compliance, active transport mode/location, and a currently verified capability covering the mode and location country.
+- Evidence must be 1–5 unique files in the submitting user's organisation folder in the private partner-verification bucket, with ownership checked.
+- New resources are created as `pending_review`; availability is created as `unavailable` with `pending_review` verification state. Partner-submitted data is therefore not immediately bookable.
+- The base function does not itself explicitly check every organisation lifecycle/account-mode/verification field checked later by dispatch and reservation; confirm the admin resource-review transition independently enforces these before making availability bookable.
+
 ## Security review queue
 - `krim_partner_register_capacity_resource_for_lane` is authenticated-callable SECURITY DEFINER with function search_path `pg_catalog, public`. This is not by itself proof of exploitability; review its dependency resolution and harden to an empty/controlled search path with fully qualified references when migration reconciliation permits.
-- The lane-specific registration wrapper checks an active lane matching origin and mode, then delegates to the base capacity registration function. Confirm the base function independently enforces organisation ownership, partner permission, evidence ownership and verification state.
+- The lane-specific registration wrapper checks an active lane matching origin and mode, then delegates to the base capacity registration function.
 - Continue reviewing authenticated SECURITY DEFINER functions and public-schema object shadowing risks. Do not change grants or definitions until the production/repository migration crosswalk is reconciled.
 
 ## Operational status
-The inspected functions contain meaningful access, verification, idempotency, locking, and audit controls. However, CI is not an end-to-end test; production has no verified operational partner and no confirmed capacity-backed booking. Do not represent KRIM as ready to dispatch real freight on the basis of this review.
+The inspected functions contain meaningful access, verification, idempotency, locking, and audit controls, but the reserved-stock/transfer interaction needs correction before relying on warehouse transfers for shipment-committed stock. CI is not an end-to-end test; production has no verified operational partner and no confirmed capacity-backed booking. Do not represent KRIM as ready to dispatch real freight on the basis of this review.
 
 ## Next actions
 1. Reconcile production migration history with repository migrations before any DDL or function hardening.
 2. Produce isolated staging fixtures and negative/concurrency test suites for capacity, driver, inventory and transfer flows.
-3. Verify storage policies and base capacity registration function.
-4. Validate real partner evidence and capacity before enabling customer-facing booking claims.
+3. Correct and test the available-to-promise control across all stock-decreasing warehouse paths.
+4. Verify storage policies and capacity resource-review transitions.
+5. Validate real partner evidence and capacity before enabling customer-facing booking claims.
