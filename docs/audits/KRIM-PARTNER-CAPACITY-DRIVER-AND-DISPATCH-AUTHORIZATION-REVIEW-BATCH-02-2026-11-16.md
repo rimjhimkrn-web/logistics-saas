@@ -5,7 +5,12 @@
 ## Executive summary
 The reviewed workflows contain meaningful safeguards: active partner membership and permissions for capacity registration/reservation, independent evidence review for capabilities and resources, verified driver/licence/vehicle checks, exact-leg capacity binding, and idempotent dispatch authorization.
 
-One high-priority integrity gap remains in the initial dispatch-authorization path: the function revalidates current partner compliance, route capability and handover only when reusing an existing idempotency key through a helper. The new-authorization path does not visibly call those same current-state checks. It verifies assignment, exact leg, confirmed reservation/binding, and (for road) driver/vehicle evidence, but may authorize dispatch after partner compliance/capability or warehouse handover has become stale. This requires a staging reproduction and safe remediation design after migration reconciliation.
+**Correction after trigger-chain inspection:** The initial review of `krim_authorize_leg_dispatch` alone suggested missing current-state checks on the new-authorization path. Inspection of the live BEFORE INSERT/UPDATE triggers on `krim_shipment_leg_dispatch_authorizations` shows that this concern is mitigated by database-enforced guards:
+- `krim_guard_leg_dispatch_authorization()` requires an active multi-leg route plan and exact plan-item/leg/partner/assignment match, current partner compliance, current verified capability covering the exact leg, and holds non-ROAD dispatch.
+- `krim_guard_dispatch_authorization()` requires a current exact-leg warehouse handover, picked stock allocations and private dispatch proof.
+- The current-state helper also verifies confirmed capacity binding/reservation, active partner assignment, compliance, capability, handover and accepted custody for later legs.
+
+Therefore, **the initial dispatch-current-state gap is not substantiated by the complete trigger chain**. The controls are stronger than the standalone RPC body indicates. Remaining work is staging validation of trigger ordering, revocation propagation and concurrency; no exploit was established.
 
 ## 1. Partner capability review
 Function: `krim_admin_review_partner_capability(bigint,text,text)`
@@ -58,10 +63,10 @@ Positive controls:
 
 Assessment: robust visible reservation controls. Verify cancellation/expiry/release behavior and concurrency under staging stress tests. The function confirms capacity; it does not itself constitute dispatch authorization.
 
-## 4. Dispatch authorization — high-priority gap
+## 4. Dispatch authorization and database trigger guards
 Function: `krim_authorize_leg_dispatch(bigint,text)`
 
-Positive controls on the new authorization path:
+Positive controls in the RPC:
 - Requires authenticated user and `shipment.dispatch` permission for the assigned partner organization.
 - Requires accepted/active exact-leg assignment, assigned leg and non-terminal shipment.
 - Locks assignment, leg, shipment, binding and reservation.
@@ -70,23 +75,20 @@ Positive controls on the new authorization path:
 - For later legs, requires accepted custody transfer from the immediately preceding leg.
 - Uses organization-scoped idempotency keys and records a partner execution event.
 
-**Gap:** the initial authorization path does not visibly call:
-- `private.krim_partner_compliance_is_current(...)`
-- `private.krim_partner_capability_covers_shipment_leg(...)`
-- `private.krim_dispatch_handover_is_current(...)`
-- `private.krim_leg_dispatch_authorization_is_current(...)`
+The RPC's body does not repeat every current-state check, but the live database enforces two BEFORE triggers on `krim_shipment_leg_dispatch_authorizations`:
+- `trg_krim_guard_leg_dispatch_authorization` calls `private.krim_guard_leg_dispatch_authorization()`. It requires an active multi-leg route plan, exact plan-item/leg/partner/assignment match, active verified registered-business partner with current compliance, current verified capability covering the exact leg, and holds non-ROAD dispatch pending mode-specific controls.
+- `trg_krim_dispatch_authorization_requires_warehouse_handover` calls `private.krim_guard_dispatch_authorization()`. It requires completed exact-leg warehouse handover, picked stock allocations and current private dispatch proof.
 
-The last helper does enforce current compliance, capability, dispatch handover, confirmed capacity, active exact-leg plan/assignment and accepted custody. However, the authorization function calls it only when returning an existing idempotent authorization. It does not visibly run the helper before inserting a new authorization.
+The helper `private.krim_leg_dispatch_authorization_is_current()` additionally checks active exact-leg plan/assignment, confirmed capacity binding/reservation, current compliance/capability, current handover and accepted custody on later legs. It is used when an existing idempotency authorization is reused.
 
-Consequently, a partner whose compliance/capability or handover state changes after capacity reservation may potentially receive a new dispatch authorization using a still-confirmed reservation. This is a **high-priority authorization consistency finding**, not yet a proven exploit. The helper may also have state prerequisites that require careful call ordering.
+**Revised assessment:** The initial suspected bypass is not substantiated after examining the full database trigger chain. Current compliance, capability and handover are enforced at insertion/update time by triggers, not solely by the RPC body. This is a positive defense-in-depth control. Remaining verification is to prove trigger behavior under concurrent changes, revocation and retries in staging.
 
 Required safe verification:
-1. In staging, reserve capacity for a valid assignment.
-2. Revoke/expire partner compliance or capability, or invalidate handover, before requesting first dispatch authorization.
-3. Confirm new authorization is rejected.
-4. Repeat with valid state and confirm successful authorization.
-5. Repeat with idempotency replay after revocation and confirm the existing authorization is rejected as stale.
-6. Verify all checks and authorization insert occur atomically under appropriate locks.
+1. In staging, reserve capacity for a valid assignment and confirm authorization succeeds only with current compliance/capability/handover.
+2. Revoke/expire compliance or capability, or invalidate handover, before requesting first authorization; confirm the trigger rejects it.
+3. Repeat with valid state and confirm success.
+4. Replay an existing idempotency key after revocation and confirm stale authorization is rejected.
+5. Verify all checks and authorization insert occur atomically under appropriate locks.
 
 No staging or production test was run here.
 
@@ -148,4 +150,4 @@ The read-only `krim_operations_dispatch_readiness()` definition returns blocker 
 6. Only after migration-history reconciliation and sanitized schema manifest, prepare a reviewed migration and deploy through the approved change process.
 
 ## 10. Release decision
-**NO-GO for unrestricted dispatch.** Partner capability, capacity, driver and vehicle controls show strong components, but the initial dispatch authorization path requires a staging-confirmed current-state gate. No production DDL, policy, grant, function or business record was changed. Finance remains deferred to the final phase.
+**NO-GO for unrestricted dispatch.** Partner capability, capacity, driver and vehicle controls show strong components, and the dispatch authorization table has current-state trigger guards. Staging validation, full end-to-end operational controls and other release gates remain incomplete. No production DDL, policy, grant, function or business record was changed. Finance remains deferred to the final phase.
