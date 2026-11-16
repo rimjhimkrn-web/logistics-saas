@@ -186,6 +186,8 @@ $('tripSearch').addEventListener('input',renderAssignments);
 $('selectedAssignment').addEventListener('change',async e=>{selectedId=e.target.value;renderAssignments();await loadEvents();await loadEvidence();$('proofAssignment').value=selectedId;$('submitProof').disabled=!currentAssignment()||['delivered','cancelled'].includes(currentAssignment().status);});
 $('proofAssignment').addEventListener('change',e=>{$('submitProof').disabled=!assignments.some(a=>a.id===e.target.value&&!['delivered','cancelled'].includes(a.status));});
 $('recordMilestone').addEventListener('click',async()=>{
+ msg('milestoneResult','Trip milestone recording is temporarily paused. The live backend still lacks mandatory exact-leg dispatch authorization and physical capacity-reservation binding on every single-leg and multi-leg path. No milestone was recorded.','warn');
+ return;
  const a=currentAssignment();if(!a){msg('milestoneResult','Choose one of your assigned trips first.','warn');return;}
  const type=$('milestone').value,notes=$('milestoneNotes').value.trim();
  if(type==='exception'&&notes.length<3){msg('milestoneResult','Describe the exception before submitting.','error');return;}
@@ -197,7 +199,10 @@ $('recordMilestone').addEventListener('click',async()=>{
  finally{b.disabled=!currentAssignment();b.textContent='Record milestone →';}
 });
 $('proofForm').addEventListener('submit',async e=>{
- e.preventDefault();const assignmentId=$('proofAssignment').value,a=assignments.find(x=>x.id===assignmentId),file=$('proofFile').files[0],recipient=$('recipient').value.trim(),notes=$('deliveryNotes').value.trim();
+ e.preventDefault();
+ msg('proofResult','Driver POD upload is temporarily paused pending server-side exact driver-assignment, partner-assignment, shipment-leg and evidence-object ownership enforcement. No file was uploaded and no POD was submitted.','warn');
+ return;
+ const assignmentId=$('proofAssignment').value,a=assignments.find(x=>x.id===assignmentId),file=$('proofFile').files[0],recipient=$('recipient').value.trim(),notes=$('deliveryNotes').value.trim();
  if(!a||!file||!recipient){msg('proofResult','Select an open assignment, recipient and evidence file.','error');return;}
  if(['delivered','cancelled'].includes(a.status)){msg('proofResult','This assignment is closed; new evidence cannot be added.','error');return;}
  const allowed=['image/jpeg','image/png','image/webp','application/pdf'];if(!allowed.includes(file.type)||file.size>10485760||file.size===0){msg('proofResult','Choose a JPG, PNG, WebP or PDF file up to 10 MB.','error');return;}
