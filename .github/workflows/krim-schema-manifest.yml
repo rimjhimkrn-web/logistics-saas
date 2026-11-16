@@ -57,10 +57,58 @@ jobs:
           print("Selected artifact metadata verified; archive bytes will remain private.")
           PY
           gh api "repos/${GH_REPO}/actions/artifacts/${ARTIFACT_ID}/zip" > private-work/export.zip
-          unzip -q private-work/export.zip -d private-work/archive
-          test -s private-work/archive/krim-schema-export.sql.enc
-          test -s private-work/archive/SHA256SUMS
-          (cd private-work/archive && sha256sum -c SHA256SUMS)
+          python - <<'PY'
+          import os, re, stat, sys, zipfile
+          from pathlib import Path
+
+          archive=Path("private-work/export.zip")
+          destination=Path("private-work/archive")
+          expected={"krim-schema-export.sql.enc","SHA256SUMS"}
+          max_member_bytes=100*1024*1024
+          try:
+              with zipfile.ZipFile(archive) as zf:
+                  members=zf.infolist()
+                  names=[m.filename for m in members]
+                  if len(members)!=2 or set(names)!=expected or len(set(names))!=len(names):
+                      raise ValueError("Artifact must contain exactly the two expected files.")
+                  destination.mkdir(mode=0o700,parents=True,exist_ok=True)
+                  for member in members:
+                      mode=(member.external_attr >> 16) & 0xFFFF
+                      if stat.S_ISLNK(mode) or member.is_dir():
+                          raise ValueError("Directories and symbolic links are not allowed.")
+                      if member.file_size<=0 or member.file_size>max_member_bytes:
+                          raise ValueError("Artifact member has an invalid uncompressed size.")
+                      if member.compress_size and member.file_size/member.compress_size>200:
+                          raise ValueError("Artifact member compression ratio is excessive.")
+                      target=destination/member.filename
+                      with zf.open(member) as src, target.open("xb") as dst:
+                          total=0
+                          while True:
+                              chunk=src.read(1024*1024)
+                              if not chunk: break
+                              total+=len(chunk)
+                              if total>max_member_bytes:
+                                  raise ValueError("Artifact member exceeded the extraction limit.")
+                              dst.write(chunk)
+                      if total!=member.file_size:
+                          raise ValueError("Artifact member size mismatch.")
+          except Exception as exc:
+              print(f"::error::Artifact archive validation failed: {exc}")
+              sys.exit(1)
+
+          checksum_file=destination/"SHA256SUMS"
+          checksum=checksum_file.read_text().strip()
+          if not re.fullmatch(r"[0-9a-fA-F]{64}  krim-schema-export\\.sql\\.enc",checksum):
+              print("::error::Checksum manifest has an unexpected format.")
+              sys.exit(1)
+          import hashlib
+          encrypted=destination/"krim-schema-export.sql.enc"
+          digest=hashlib.sha256(encrypted.read_bytes()).hexdigest()
+          if digest.lower()!=checksum[:64].lower():
+              print("::error::Encrypted schema artifact checksum mismatch.")
+              sys.exit(1)
+          print("Archive contents, extraction bounds and encrypted-file checksum verified.")
+          PY
 
       - name: Decrypt privately and build metadata-only inventory
         shell: bash
