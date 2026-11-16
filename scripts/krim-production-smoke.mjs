@@ -1145,10 +1145,10 @@ for (const [label, source, tokens] of [
   for (const token of tokens) {
     if (!source.includes(token)) failures.push("Step 7 " + label + " is missing required access-hold safeguard: " + token);
   }
-  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)/.test(source)) {
+  if (/\.from\(["'](?:payment_orders|krim_partner_payables)["']\)/.test(source)) {
     failures.push("Step 7 " + label + " must not query sensitive finance tables from the browser while access is held.");
   }
-  if (/\\.from\\(["'](?:payment_orders|krim_partner_payables)["']\\)[\\s\\S]{0,500}\\.(?:insert|update|upsert|delete)\\(/.test(source)) {
+  if (/\.from\(["'](?:payment_orders|krim_partner_payables)["']\)[\s\S]{0,500}\.(?:insert|update|upsert|delete)\(/.test(source)) {
     failures.push("Step 7 " + label + " must not add browser-side financial writes.");
   }
 }
