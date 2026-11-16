@@ -81,6 +81,9 @@ body>.announcement{display:none!important}
     client.from('krim_warehouse_transfers').select('id,reference_code,sku,quantity,unit_code,status,quality_status,dispatched_at,received_at,created_at').order('created_at',{ascending:false}).limit(20),
     client.from('krim_shipment_returns').select('id,shipment_id,shipment_leg_id,status,reason,requested_pickup_at,created_at').order('created_at',{ascending:false}).limit(20)
    ]);
+   const arrayChecks=[["shipments",shipRes],["exceptions",excRes],["tracking events",eventRes],["shipment snapshots",snapshotRes],["warehouse transfers",transferRes],["shipment returns",returnRes]];
+   for(const [label,result] of arrayChecks){if(!result.error&&!Array.isArray(result.data))throw new Error("Invalid "+label+" response shape. Data withheld.");}
+
    if(shipRes.error){shipmentRows=[];$('shipCount').textContent='—';$('activeCount').textContent='—';$('shipmentHealth').textContent='Query failed: '+shipRes.error.message;renderShipments([]);}
    else{shipmentRows=shipRes.data||[];$('shipCount').textContent=shipmentRows.length;$('activeCount').textContent=shipmentRows.filter(x=>/confirmed|active|transit|progress|booked|assigned|picked|dispatched/i.test(x.status||'')).length;$('shipmentHealth').textContent='Query succeeded; '+shipmentRows.length+' row(s) returned under current database policies.';renderShipments(shipmentRows);}
    if(excRes.error){exceptionRows=[];$('exceptionCount').textContent='—';$('exceptionHealth').textContent='Query failed: '+excRes.error.message;renderExceptions([]);}
