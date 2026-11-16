@@ -524,3 +524,73 @@ Commit: `3206a914d99771187a850bf78781082c3f8967f0`.
 4. Add negative tenant tests for payment orders and financial transactions across customer A/B, partner A/B and finance entity A/B.
 5. Reconcile legacy `payments`, `payment_orders`, private `krim_payment_transactions` and `krim_financial_transactions` into one documented source-of-truth map before enabling further payment features.
 6. No production DDL, payment write, refund, payout, webhook processing or provider configuration was changed.
+
+
+## 19. General ledger, journal entries and accounting-report review
+
+### Current data state and legal-entity binding
+
+Read-only production counts:
+- 14 ledger accounts
+- 0 ledger transactions
+- 0 ledger entries
+- 1 accounting period
+- 5 account mappings
+- 3 posting rules
+
+All 14 accounts, all five mappings and all three posting rules belong to organization 21, `KRIM Finance Journey Verification` (organization type `finance`). The only accounting period belongs to organization 1, `KRIM Global Platform` (legal name `KRIM Logistics`, organization type `platform`). Organization 21 is a separate verification tenant; it is not established as the user's legal operating entity. This mismatch means the accounting configuration is not a coherent production ledger for the KRIM legal entity. Do not move or duplicate accounts, rules or periods until the legal-entity and migration model is resolved.
+
+The three rules in organization 21 are:
+- `customer_payment`: active, debit bank / credit receivable.
+- `partner_settlement`: active, debit partner payable / credit partner funds.
+- `revenue_recognition`: suspended, debit receivable / credit revenue.
+
+No mapping/rule configuration exists for organization 1 in the inspected records. No journal posting was performed.
+
+### Ledger read exposure
+
+Authenticated SELECT is granted on `krim_ledger_accounts`, `krim_ledger_transactions` and `krim_ledger_entries`. Their RLS policies use only active organization access; they do not require a finance-specific permission or role. Any active member of the relevant organization can therefore read its chart of accounts, transaction metadata and journal-entry amounts. This is a least-privilege issue even though the current ledger has no posted transactions.
+
+The treasury/audit page checked only for membership in a finance, platform or operations organization before querying ledger counts and sampling up to 1,000 journal entries. It did not verify `finance.view` or bind the query to an explicitly authorized finance entity. The page has now been changed to withhold general-ledger counts and journal sampling pending backend scope and role remediation.
+
+Commit: `ea14cedebfbcb9db5ec57f5c9dee212b6006e076`.
+
+### Direct mutation exposure on accounting configuration
+
+Authenticated users have INSERT, UPDATE and DELETE table grants on:
+- `krim_accounting_account_mappings`
+- `krim_accounting_periods`
+- `krim_accounting_posting_rules`
+
+Their ALL-command RLS policies check only `private.krim_has_organization_access(auth.uid(), organization_id)`. That helper verifies active organization membership, not finance.manage or an accounting-specific permission. Any active member of the organization with these grants may therefore be able to alter account mappings, open/close periods or change posting rules. This is a HIGH integrity and separation-of-duties risk. Ledger accounts themselves are SELECT-only for authenticated users; ledger transactions and entries are service_role-write-only in the inspected grants.
+
+### Posting function and schema drift
+
+Two overloaded SECURITY DEFINER ledger-posting functions exist and are service_role-only:
+- Canonical candidate: `krim_internal_post_ledger_transaction(bigint,text,text,text,bigint,bigint,numeric,text,text,text)`. It validates positive amount, distinct active accounts, organization match, currency match and an open accounting period covering current_date; inserts a transaction, matching debit/credit entries and an audit event.
+- Legacy overload: `krim_internal_post_ledger_transaction(bigint,text,text,text,bigint,bigint,numeric,text,bigint,text)`. Its inspected body refers to `transaction_reference` and `source_id` columns that do not appear in the current `krim_ledger_transactions` column inventory (current schema exposes `transaction_number` and text `source_id`). Treat this overload as stale/schema-drifted and potentially runtime-failing; do not invoke it. Review all callers and drop/replace only through a reconciled migration after dependency analysis.
+
+The canonical event function `krim_internal_post_financial_event` is also service_role-only. It resolves an active event rule and account-role mappings, then calls the canonical text-source overload. It returns an awaiting-rule/mapping state when configuration is absent. Its current configuration is confined to organization 21, while the open period is organization 1; the mismatch means a coherent posting path for either entity is not established.
+
+### Double-entry integrity observations
+
+- The entry table has row-level checks for positive amount and debit/credit type, and foreign keys to transaction and account.
+- The canonical posting function inserts equal debit and credit values in one transaction, so its intended path creates a balanced two-line journal.
+- There is no inspected database constraint enforcing aggregate debit = aggregate credit for every posted transaction. Row-level checks cannot guarantee aggregate balance if another privileged write path inserts entries.
+- The transaction number unique constraint is global, not composite with organization_id. Review whether global uniqueness is intentional or whether transaction numbering should be tenant-scoped before introducing multiple legal entities.
+- No posted journal transactions or entries currently exist, so balance, reversal, period-close and audit-chain behavior have not been empirically tested.
+
+### Financial reporting status
+
+The financial reporting page is still review-preparation only and does not query the ledger. The finance dashboard's legacy revenue report remains withheld because its SECURITY DEFINER RPC is globally unscoped. Treasury/audit now withholds the ledger section; its separate AAL2 platform webhook reconciliation view remains a distinct read-only workflow. No financial reports should be described as operationally certified.
+
+### Required remediation before any ledger launch
+
+1. Confirm the legal entity and map it to one canonical organization; keep verification tenants separate.
+2. Recover and reconcile production migration history before changing grants, policies, functions or constraints.
+3. Revoke authenticated direct writes to accounting periods, mappings and posting rules; expose narrow finance.manage RPCs with approval separation and immutable audit history.
+4. Require finance.view (or more granular accounting permissions) for ledger reads, and scope every query to the authorized legal finance organization.
+5. Remove or repair the stale overload after all dependencies are identified; pin SECURITY DEFINER search_path safely and verify explicit EXECUTE grants.
+6. Add posting invariants, including transaction-level balanced debit/credit enforcement, source idempotency scoped correctly, immutable posted entries, reversals instead of edits/deletes, and closed-period protection.
+7. Test positive/negative cases across two organizations, non-finance members, finance.view, finance.manage, AAL levels, duplicate source IDs, concurrent posts, closed periods, currency mismatch, reversals and audit-event atomicity.
+8. No production DDL, grants, policy, function, period, mapping, journal or financial data was changed.
