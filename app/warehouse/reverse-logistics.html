@@ -95,7 +95,42 @@ async function loadReturns(){const {data,error}=await c.from("krim_shipment_retu
  document.querySelectorAll("[data-return-qc]").forEach(b=>b.onclick=()=>reviewReturn(b.dataset.returnQc));
 }
 async function respondReturn(id,accept){const reason=prompt(accept?"Optional authorisation note:":"Reason for declining this return (5+ characters):",accept?"Return authorised for physical inspection.":"Unable to authorise based on the submitted manifest.");if(reason===null)return;if(!accept&&reason.trim().length<5)return alert("A decline reason of at least 5 characters is required.");try{const {error}=await c.rpc("krim_respond_to_shipment_return",{p_return_id:id,p_accept:accept,p_reason:reason.trim()});if(error)throw error;await loadReturns()}catch(e){alert(e.message)}}
-async function receiveReturn(id){const r=returns.find(x=>x.id===id);if(!r)return;const allowed=facilities.filter(f=>Number(f.organization_id)===Number(r.partner_organization_id));if(!allowed.length)return alert("No active approved facility for this return's partner organisation is visible to this user.");const chosen=prompt("Enter destination facility UUID:\n"+allowed.map(f=>f.facility_code+" · "+f.facility_name+" = "+f.id).join("\n"),allowed[0].id);if(!chosen||!allowed.some(f=>f.id===chosen))return alert("Select one of the listed approved facilities.");const manifest=r.item_manifest||[];const items=[];for(let i=0;i<manifest.length;i++){const m=manifest[i];const sku=prompt("Manifest line "+(i+1)+": "+m.description+" · "+m.quantity+" "+m.unit+"\nEnter received SKU:", "RETURN-"+r.id.slice(0,8).toUpperCase()+"-"+(i+1));if(sku===null)return;const lot=prompt("Source lot code (optional):","");if(lot===null)return;items.push({manifest_index:i,quantity:m.quantity,unit:m.unit,description:m.description,sku:sku.trim(),source_lot_code:lot.trim()})}const notes=prompt("Physical receipt notes:","Returned goods received; all items placed on inspection hold.");if(notes===null)return;try{const payload={p_return_id:id,p_facility_id:chosen,p_received_items:items,p_notes:notes};const token=stableIdem("return-receive",payload);const {data,error}=await c.rpc("krim_receive_authorized_shipment_return",{...payload,p_idempotency_key:token.value});if(error)throw error;clearIdem(token);alert("Return physically received. All created inventory is on HOLD pending independent quality review. Receipt: "+data.receipt.id);await loadReturns()}catch(e){alert("Return receipt failed: "+e.message)}}
+async function receiveReturn(id){
+ const r=returns.find(x=>x.id===id);if(!r)return;
+ const allowed=facilities.filter(f=>Number(f.organization_id)===Number(r.partner_organization_id));
+ if(!allowed.length)return alert("No active approved facility for this return's partner organisation is visible to this user.");
+ const manifest=r.item_manifest;
+ if(!Array.isArray(manifest)||manifest.length<1||manifest.length>100)return alert("Physical receipt is blocked: the authorised return must contain between 1 and 100 manifest lines. Contact an administrator to correct the return manifest; do not submit an empty receipt.");
+ for(let i=0;i<manifest.length;i++){
+  const m=manifest[i];
+  if(!m||!String(m.description||"").trim()||!String(m.unit||"").trim()||!Number.isFinite(Number(m.quantity))||Number(m.quantity)<=0)
+   return alert("Physical receipt is blocked: manifest line "+(i+1)+" has missing description/unit or an invalid quantity.");
+ }
+ const chosen=prompt("Enter destination facility UUID:\n"+allowed.map(f=>f.facility_code+" · "+f.facility_name+" = "+f.id).join("\n"),allowed[0].id);
+ if(!chosen||!allowed.some(f=>f.id===chosen))return alert("Select one of the listed approved facilities.");
+ const items=[];
+ for(let i=0;i<manifest.length;i++){
+  const m=manifest[i];
+  const sku=prompt("Manifest line "+(i+1)+": "+m.description+" · "+m.quantity+" "+m.unit+"\nEnter received SKU:","RETURN-"+r.id.slice(0,8).toUpperCase()+"-"+(i+1));
+  if(sku===null)return;
+  if(!sku.trim()||sku.trim().length>100)return alert("Received SKU must contain 1–100 characters. No receipt was submitted.");
+  const lot=prompt("Source lot code (optional):","");
+  if(lot===null)return;
+  items.push({manifest_index:i,quantity:Number(m.quantity),unit:String(m.unit).trim(),description:String(m.description).trim(),sku:sku.trim(),source_lot_code:lot.trim()});
+ }
+ if(items.length!==manifest.length||new Set(items.map(x=>x.manifest_index)).size!==manifest.length)return alert("Receipt manifest validation failed. No receipt was submitted.");
+ const notes=prompt("Physical receipt notes:","Returned goods received; all items placed on inspection hold.");
+ if(notes===null)return;
+ try{
+  const payload={p_return_id:id,p_facility_id:chosen,p_received_items:items,p_notes:notes};
+  const token=stableIdem("return-receive",payload);
+  const {data,error}=await c.rpc("krim_receive_authorized_shipment_return",{...payload,p_idempotency_key:token.value});
+  if(error)throw error;
+  clearIdem(token);
+  alert("Return physically received. All created inventory is on HOLD pending independent quality review. Receipt: "+data.receipt.id);
+  await loadReturns();
+ }catch(e){alert("Return receipt failed: "+e.message)}
+}
 async function reviewReturn(receiptId){const receipt=receipts.find(x=>x.id===receiptId);if(!receipt)return;const {data:items,error}=await c.from("krim_shipment_return_receipt_items").select("manifest_index,sku,quantity,unit_code,item_description,inventory_id").eq("receipt_id",receiptId).order("manifest_index");if(error)return alert(error.message);const summary=(items||[]).map(x=>x.sku+" · "+x.quantity+" "+x.unit_code+" · "+x.item_description).join("\n");const decision=prompt("This decision applies to the WHOLE return receipt. Choose released, hold or rejected.\n\n"+summary,"hold");if(!["released","hold","rejected"].includes(decision))return alert("Decision must be released, hold or rejected.");const reason=prompt("Inspection reason (5–1,000 characters):","Independent inspection completed; evidence reviewed.");if(reason===null||reason.trim().length<5)return alert("A reason of at least 5 characters is required.");const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,application/pdf";input.onchange=async()=>{const file=input.files[0];if(!file)return;try{const path=await uploadEvidence(receipt.organization_id,file);const payload={p_receipt_id:receiptId,p_decision:decision,p_reason:reason.trim(),p_evidence_path:path};const token=stableIdem("return-quality",payload);const {error}=await c.rpc("krim_review_shipment_return_quality",{...payload,p_idempotency_key:token.value});if(error)throw error;clearIdem(token);alert("Return quality decision recorded for the whole receipt: "+decision+".");await loadReturns()}catch(e){alert("Return quality review failed: "+e.message)}};input.click()}
 init().catch(e=>{$("notice").className="notice";$("notice").textContent=e.message||"Warehouse access verification failed."});
 })();
