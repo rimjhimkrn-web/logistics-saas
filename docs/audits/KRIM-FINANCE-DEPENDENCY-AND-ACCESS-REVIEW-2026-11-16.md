@@ -658,3 +658,73 @@ Commit: `6832baec9829a914360ff66612f94067c11ec60d`.
 6. Keep partner payable gross/net economics partner-only and authorized finance-only; customer shipment participation must not grant payable access.
 7. Add negative tests for unrelated customer, supplier, partner and finance organizations, including invoice headers, items, billing profiles, terms, payment applications and payable data.
 8. No production DDL, grants, RLS, invoice, payment application, receivable, payable or tax record was changed.
+
+
+## 21. Revenue recognition, commission and allocation review
+
+### Production data state
+
+Read-only counts:
+- `krim_revenue_allocation_rules`: 0
+- `krim_revenue_allocation_runs`: 0
+- `krim_revenue_allocations`: 0
+- `krim_shipment_revenue_items`: 0
+- Legacy `revenue_ledger`: 1 row
+
+No active allocation rules or canonical allocation runs/allocations are configured. The single legacy revenue-ledger row is not evidence of a reconciled accounting balance and remains part of the legacy/canonical source-of-truth reconciliation.
+
+### Critical business-model mismatch: freight gross vs KRIM earned fee
+
+`krim_internal_recognize_delivered_revenue(bigint)` is a service_role-only SECURITY DEFINER function. It selects the latest `invoice_type='customer'` invoice for a delivered shipment, accepts invoice status issued/partially_paid/paid, and passes the invoice's full `total_amount` to `krim_internal.plan_revenue_allocation` with scope `customer_revenue`.
+
+That invoice represents the customer freight/service amount, not automatically KRIM's earned referral fee. Under KRIM's initial partner-direct model, the customer contracts with and pays the logistics partner directly; KRIM earns only the separately agreed referral fee when the contract-defined qualifying event is satisfied. Therefore the full customer freight invoice must never be treated as KRIM revenue or used as the base for KRIM commission allocations.
+
+Do not activate any customer_revenue allocation rule or invoke this recognition function for the initial partner-direct model until the revenue source is redesigned to consume an independently evidenced KRIM fee receivable/earned-fee event. The revenue scope and source must distinguish partner freight, KRIM referral fee, separately contracted coordination, and later subscription/software revenue.
+
+### Planner behavior and recognition semantics: HIGH
+
+`krim_internal.plan_revenue_allocation(bigint,bigint,bigint,numeric,text)` is SECURITY DEFINER and service_role-only. It:
+- selects active, effective rules matching organization/global scope, currency and `revenue_scope='customer_revenue'`;
+- computes percentage or fixed allocations;
+- inserts rows directly into `krim_revenue_allocations` with status `planned` and a policy snapshot;
+- uses a unique allocation reference with `ON CONFLICT DO NOTHING`.
+
+Despite the planner's name, it writes allocation rows. It does not create a corresponding `krim_revenue_allocation_runs` row or persist a run-level allocation snapshot in the inspected function.
+
+The delivered-revenue function then writes an audit event named `revenue.recognized` after receiving a plan with planned allocations, but does not itself post a journal entry. This risks conflating a planned allocation with recognized accounting revenue. Its idempotency check treats any existing matching allocation as already recognized, without distinguishing planned, approved, posted, reversed or cancelled allocation status. A later rule correction/re-run may therefore be silently treated as complete.
+
+### Rule integrity and approval controls
+
+The allocation rules, runs and allocations have authenticated ALL-command grants and organization-membership RLS policies, as previously recorded. Those policies rely on organization access rather than a finance-specific permission. Ordinary active members may therefore have direct write capability where the table grants permit it. This is not an acceptable control for percentage/fixed-fee rules or financial allocation records.
+
+The rule schema includes percentage/fixed amount, currency, approval flag, effective dates, rule code and revenue scope, but no active rules exist. Before use, require finance.manage, maker-checker approval for rule creation/change, immutable rule versions, effective dating, approved fee agreements, jurisdiction/tax mapping, caps and explicit eligible source types. Rule changes must not rewrite historical snapshots.
+
+### Legacy revenue reporting function remains unsafe
+
+`krim_finance_list_revenue_ledger(integer)` remains an authenticated SECURITY DEFINER function with a finance.view gate that checks membership in any finance organization, then selects the entire legacy `revenue_ledger` without organization/tenant scoping. It has an empty search_path and fully qualified object references, but that does not cure the missing tenant predicate. Frontend call was removed from the finance dashboard in an earlier containment commit; the database function itself remains callable under its current ACL and must be remediated after migration recovery.
+
+The legacy table RLS policy has a customer-organization branch and a finance-organization branch; the finance branch is not bound to a revenue record's responsible legal entity. Do not assume the table policy fixes the SECURITY DEFINER RPC's unscoped query.
+
+### Existing accounting mappings
+
+The 14 chart-of-account rows and five mappings belong to organization 21, the finance verification tenant, not the platform/legal entity organization 1. The chart includes both:
+- `4000 Freight and Logistics Service Revenue`
+- `4010 KRIM Platform Commission Revenue`
+
+These labels are not proof that the current legal/tax model supports KRIM recognizing partner freight revenue. The distinct commission account is a useful conceptual separation, but its actual entity, tax, fee contract, event trigger and posting rule remain unconfigured. Earlier inspection found revenue_recognition posting rule suspended and no mappings/rules for org 1. Do not move or copy org21 configuration into org1 without a legal-entity and migration decision.
+
+### Revenue recognition page status
+
+`app/finance/revenue-commission.html` and `app/finance/financial-reporting.html` currently only verify session and active organization membership and present review-preparation forms. They do not query allocation tables or invoke recognition functions. They are not live revenue accounting modules. No frontend change was needed in this step.
+
+### Required remediation before enabling any KRIM revenue recognition
+
+1. Define separate revenue event/source types for referral fee, coordination service, subscriptions, premium listings, SaaS/API, enterprise licensing, AI/analytics and integration services.
+2. For referral fees, require a signed partner agreement and versioned fee schedule, attributable referral record, contract-defined qualifying conversion/acceptance, evidence, cancellation/clawback window and collectible KRIM fee receivable. Do not use partner freight gross as the allocation base.
+3. Record a fee-specific source transaction with legal entity, counterparty, currency, tax determination, amount and idempotency key. Separate partner-direct freight money from KRIM money.
+4. Change planner to create auditable run records and immutable allocation snapshots; enforce approved rule versions, limits, deterministic rounding and reconciliation of allocation totals to the eligible fee base.
+5. Distinguish planned, approved, recognized, posted, reversed and cancelled states; idempotency must be status-aware and tied to source event + policy version.
+6. Post only through a verified balanced journal path after legal entity, chart, accounting period and posting mappings are aligned. Recognition and cash collection are distinct accounting events.
+7. Restrict rule/run/allocation writes to finance-authorized server-side routines; revoke broad authenticated direct writes after migration reconciliation; add maker-checker and negative tenant tests.
+8. Scope or retire the legacy revenue reporting RPC and reconcile its single historical row before any reporting migration.
+9. No production DDL, grants, rules, allocations, ledger postings, invoices, payments or provider actions were changed.
