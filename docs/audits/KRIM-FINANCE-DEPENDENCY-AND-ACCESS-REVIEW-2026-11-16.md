@@ -336,3 +336,53 @@ The replacement review RPC must derive the permitted legal entity/platform scope
 6. test cross-tenant denial with two independent finance tenants.
 
 Do not attempt this production DDL until the original migration history and organization/legal-entity mapping are reconciled.
+
+
+## 15. Customer invoice register: authorization and query-scope correction
+
+### Database finding
+
+The `krim_invoices` SELECT policy uses a broad OR across:
+- any active finance organization where the user has `finance.view`;
+- `organization_id`;
+- `customer_organization_id`;
+- `supplier_organization_id`;
+- `partner_organization_id`.
+
+The policy does not bind the allowed relationship column to `invoice_type`. This means a user authorized through one relationship can potentially read invoices belonging to a different commercial party/role. The related `krim_invoice_items` policy inherits access from `invoice.organization_id`, so it also depends on correcting the parent invoice visibility model.
+
+### Customer page correction committed
+
+Two customer invoice surfaces were tightened at the application query layer:
+
+1. `public/customer-os/customer-services/invoices.html`
+   - obtains the signed-in user's active organization memberships;
+   - resolves active organizations and only accepts customer/shipper/enterprise organization types;
+   - queries only `invoice_type = 'customer'`;
+   - filters by `customer_organization_id IN (the user's active customer organization IDs)`;
+   - no longer filters only on the generic `organization_id` field.
+
+   Commit: `25a9116a1600c025b8193c5a7d55bb6d31b6aa63`.
+
+2. `public/shipper/invoices.html`
+   - obtains active organization memberships for the signed-in user;
+   - queries only customer invoice records addressed to those organizations;
+   - filters legacy `payments` to `customer_id = current session user`, matching the existing own-payment RLS policy.
+
+   Commit: `2a9f587397e4a6739eea3ee152be98f28b39df2b`.
+
+### Important limitation
+
+These frontend filters reduce accidental exposure through these two pages, but they do not repair the broad database RLS policy. A caller can query Supabase directly, and other frontend/API routes may still use the table. No production DDL or grants were changed. The pages have not yet been verified on the deployed GitHub Pages site or tested with separate customer/partner/finance accounts.
+
+### Invoice workflow backend observation
+
+The internal customer-invoice creation function is SECURITY DEFINER and service-role-only by its inspected ACL. It requires delivered shipment status, an accepted quote, a completed partner assignment and independently verified delivery POD before issuing a customer invoice. It writes a customer invoice for the quote amount and currently sets tax_amount to zero. Do not treat this as a production-ready tax invoice: tax rules, legal supplier/issuer, place-of-supply, GST/VAT applicability, numbering, credit-note treatment and approved fee/tax configuration must be reviewed before enabling invoicing. This also reinforces that the customer freight invoice is not KRIM referral revenue under the partner-direct model.
+
+### Next required controls
+
+- Replace broad invoice RLS with invoice-type + issuer/recipient authorization.
+- Make invoice-item access inherit the exact authorized parent invoice scope.
+- Add a dedicated customer invoice read RPC or secure view with explicit organization argument validated against auth.uid membership and allowed customer role.
+- Separate supplier/partner invoices from customer invoices.
+- Test customer A/B, partner A/B and finance entity A/B with direct PostgREST table queries and all page/API routes.
