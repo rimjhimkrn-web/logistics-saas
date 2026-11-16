@@ -1638,3 +1638,50 @@ The trigger chain is not the same as the newer Razorpay checkout gate. It is a s
 ### Release decision
 
 This is a **high-priority legacy finance-path blocker**. No trigger, function, grant, payment row or financial record was changed in production. Do not activate automated revenue, margin, refund or payout reporting until this chain is contained and reconciled.
+
+
+## Section 40 — Legacy payments writer inventory and live-record reconciliation
+
+**Date:** 16 November 2026. Read-only production inspection; no payment or finance rows were changed.
+
+### Database writer inventory
+
+The inspected database function bodies contain two direct writers to `public.payments`:
+
+1. `krim_internal_prepare_payment_for_accepted_quote(bigint)` — SECURITY DEFINER, no direct EXECUTE for authenticated or anon. It inserts a pending payment for an accepted quote, with quote amount/currency and a quote-derived idempotency key.
+2. `krim_internal_authorize_shipment_after_payment(bigint,text)` — SECURITY DEFINER, no direct EXECUTE for authenticated or anon. It may update the payment's provider transaction reference and paid timestamp after validating a paid payment and accepted quote. It does not itself set status to paid in the inspected definition.
+
+The other identified routines primarily read/lock the payment row, apply it to invoices, post financial events or activate shipments. They are not direct payment table writers in the inspected function bodies.
+
+**Important limitation:** This is an inventory of stored SQL function bodies, not a complete repository-wide inventory of Edge Functions, external services, dynamic SQL, direct service-role calls, scheduled jobs or historical migrations. Those writers remain to be searched in source code and deployment configuration.
+
+### Effective table grants
+
+- `authenticated`: SELECT only on `public.payments`.
+- `service_role`: SELECT, INSERT, UPDATE and DELETE.
+- `anon`: no table grant shown.
+
+This narrows direct authenticated-client write access, but service-role credentials bypass normal user-level RLS and must be treated as privileged. The legacy trigger still fires for privileged inserts/updates that satisfy its event conditions.
+
+### Current aggregate record snapshot
+
+| Source | Status | Rows | Sum of amount/customer amount |
+|---|---|---:|---:|
+| `payments` | paid | 2 | 30,000.00 |
+| `payments` | pending | 2 | 30,000.00 |
+| `shipment_financials` | paid | 1 | 5,000.00 |
+
+The payments table query returned no currency code for these rows. These totals are therefore not safely comparable across currencies and are not evidence of cash received by KRIM. The two paid payment rows do not map one-to-one to the single paid shipment_financials row in the aggregate snapshot; the trigger uses `ON CONFLICT DO NOTHING`, so this difference needs row-level reconciliation using immutable provider/bank evidence and shipment linkage. Do not infer that the 30,000 was KRIM income, or that the 5,000 shipment-financial record is a valid margin or cash balance.
+
+### Required containment and next tests
+
+- Maintain a no-write rule for legacy `payments` and `shipment_financials` during this audit.
+- Trace all service-role writers in the deployed Edge Functions, frontend source, cron/worker configuration, webhook handlers and external integrations.
+- For each paid payment, reconcile provider transaction ID, provider settlement/bank statement, accepted quote, invoice, customer/partner contracting party, currency and shipment.
+- Reconcile each `shipment_financials` row to its originating payment and actual partner cost; quarantine unsupported margin calculations from profit reporting.
+- In staging, test duplicate paid updates, insert-as-paid, transaction-ID conflicts, currency mismatch, quote mismatch, retries, partial payments, multi-tenant boundaries and concurrent webhook deliveries.
+- Do not alter or disable this production trigger until schema lineage is recovered and a forward-only migration has been reviewed and validated.
+
+### Release decision
+
+The live snapshot confirms a narrow set of database-level writers and restricted authenticated table grants, but service-role access and legacy trigger execution remain material risks. **Legacy finance data is not approved for revenue/profit reporting or automated settlement.** No production DDL, grant, trigger, function or row was changed.
