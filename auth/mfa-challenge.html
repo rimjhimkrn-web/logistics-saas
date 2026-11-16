@@ -57,10 +57,15 @@ footer{text-align:center;color:#64748b;font-size:12px}
   feedback.style.background=ok?"#ecfdf5":"#fff1f2";
   feedback.style.color=ok?"#065f46":"#9f1239";
  }
- function destination(user){
-  const type=String(user.user_metadata?.krim_account_type||user.app_metadata?.krim_account_type||user.user_metadata?.account_type||"customer").toLowerCase();
-  const routes={customer:"../app/customer/index.html",partner:"../app/partner/index.html",enterprise:"../app/enterprise/index.html",driver:"../app/driver/index.html",warehouse:"../app/warehouse/index.html",customs:"../app/customs/index.html",finance:"../app/finance/index.html"};
-  return routes[type]||"../app/customer/index.html";
+ function destination(){
+  const requested=new URLSearchParams(location.search).get("returnTo")||"";
+  try{
+   const target=new URL(requested,location.href);
+   const allowed=/^\/logistics-saas\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname)
+    || /^\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname);
+   if(target.origin===location.origin&&allowed)return target.href;
+  }catch(_){}
+  return "../auth/login.html";
  }
  form.addEventListener("submit",async function(event){
   event.preventDefault();
@@ -86,7 +91,7 @@ footer{text-align:center;color:#64748b;font-size:12px}
    sessionStorage.removeItem("KRIM_MFA_FACTOR_ID");
    show("MFA verified. Opening your workspace…",true);
    form.hidden=true;
-   setTimeout(function(){location.replace(destination(session.user));},700);
+   setTimeout(function(){location.replace(destination());},700);
   }catch(error){
    show(error&&error.message?error.message:"MFA verification failed. Check the code and try again.",false);
    button.disabled=false;button.textContent="Verify and continue";
