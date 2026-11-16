@@ -108,3 +108,43 @@ The result is that a driver assignment for one leg could be used by the wrapper 
 Do not enable live POD verification or delivery completion until migration history is reconciled, function definitions/ACLs and all direct callers are inventoried, exact-leg binding is enforced in both wrapper and internal creator, and staging tests prove fabricated or cross-leg evidence cannot be accepted.
 
 **Evidence context:** Prior operational snapshot showed zero driver assignments and zero POD records. The control remains unproven end to end; no live POD has been submitted or verified.
+
+
+## 2026-11-17 read-only revalidation and additional findings
+
+The live definitions and relational constraints were re-read on 2026-11-17. No production writes were performed.
+
+### Confirmed wrapper defect remains live
+
+The current wrapper still selects the partner assignment using ID, shipment ID, partner organization and status, but omits equality on `shipment_leg_id`. It then returns the partner assignment leg in the response. Therefore the frontend pause remains necessary; the frontend pause does not protect direct authenticated RPC callers.
+
+### Internal creator is callable only by privileged roles, but still needs independent binding
+
+Current routine grants show:
+
+- `krim_driver_submit_delivery_pod`: EXECUTE for `authenticated`, `postgres`, `service_role`.
+- `krim_internal_submit_delivery_pod`: EXECUTE for `postgres`, `service_role` (no authenticated grant observed).
+- `krim_admin_review_delivery_pod`: EXECUTE for `authenticated`, `postgres`, `service_role`.
+
+The internal creator does verify that the partner assignment has a non-null exact shipment leg belonging to the same shipment and partner, and it checks the leg's lifecycle. It also has canonical retry comparison for recipient fields and the entire evidence metadata payload. However, it still trusts the supplied `driver_assignment_id` JSON value and evidence array shape; it does not resolve the driver assignment and independently compare its partner assignment, shipment, leg, organization and user to the POD being created. A privileged direct caller can therefore bypass the wrapper's missing relationship checks unless the internal routine is hardened.
+
+### Reviewer has a second serious mismatch
+
+The current reviewer checks AAL2, `admin.platform`, meaningful reason, no-self-review, and at least one evidence object owned by a driver associated with the POD's partner assignment. However, its evidence query joins only on `partner_assignment_id`; it does not compare the evidence driver's shipment ID, exact shipment leg, organization, or user to the POD tuple. On verification it invokes delivery authorization and then updates driver assignments using only `partner_assignment_id` and status, without exact-leg scoping. It uses `RETURNING` into scalar variables, so if more than one row matches, only one assignment identity is retained for the subsequent trip event. The reviewer must select exactly one driver assignment matching the POD's full shipment/leg/partner tuple, or explicitly reject ambiguous/multiple matches; then update only that exact row.
+
+### Relational constraints are insufficient for cross-table binding
+
+The live driver-assignment table has a composite FK `(shipment_leg_id, shipment_id) -> krim_shipment_legs(id, shipment_id)`, but the partner assignment relationship is only a single-column FK on `partner_assignment_id` with `ON DELETE SET NULL`. No composite FK ties `partner_assignment_id`, shipment, leg and organization together. The evidence table has independent FKs to driver assignment and user, but no composite ownership/leg relationship. The POD table's inspected constraints likewise do not provide this cross-table binding. Historical data must be audited before adding composite unique keys/FKs or triggers.
+
+### Revised implementation order
+
+1. Keep the driver-facing POD submission UI paused.
+2. Reconcile production migration history with repository SQL before preparing/deploying any DDL. This remains an outstanding release blocker.
+3. Build a single canonical private validator that accepts the authenticated driver identity and exact driver-assignment ID, resolves all rows from the database, and proves the complete tuple: driver assignment ID, partner assignment ID, shipment ID, shipment leg ID, partner organization ID, driver user ID, assignment status and leg status.
+4. Call that validator inside both the public wrapper and internal creator; never treat JSON metadata or a client-supplied evidence list as authority.
+5. Make evidence validation query the evidence table and `storage.objects` for each registered path, enforce exact bucket/owner/path/assignment/user binding, MIME allowlist and size limit, and persist immutable evidence object IDs in the POD payload.
+6. Harden reviewer to select exactly one driver assignment matching the POD's full tuple, prove each evidence object belongs to that exact assignment and driver, preserve AAL2/no-self-review, and update only that exact driver assignment.
+7. Add relational constraints only after a production mismatch/null inventory and a staging rehearsal. Avoid cascading `SET NULL` behavior that can detach an operational assignment from its commercial partner record without an explicit cancellation/reconciliation workflow.
+8. Stage-test forged direct calls, cross-leg/cross-driver evidence, ambiguous driver assignments, conflicting retries, concurrent submissions, reviewer isolation, and transaction rollback. Only then reopen the frontend action.
+
+**Current decision: NO-GO for live POD submission, verification or delivery completion.** The frontend pause is deployed as a temporary mitigation; backend correction remains pending and production DDL is still blocked by migration reconciliation.
