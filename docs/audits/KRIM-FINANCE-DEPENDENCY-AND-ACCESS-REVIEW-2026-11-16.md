@@ -1282,3 +1282,42 @@ Before a partner can become eligible for a real marketplace assignment, the cont
 10. End-to-end tests proving a partner cannot self-verify, self-approve, alter approved scope, bypass evidence requirements or receive assignments outside verified scope.
 
 No partner was approved, no capability was activated, no agreement was created, and no commercial or financial transaction was executed during this review.
+
+
+## Section 31 — Refreshed production migration crosswalk and source-recovery gate
+
+**Snapshot:** 16 November 2026. Read-only production migration listing plus complete recursive GitHub `main` tree comparison. No production schema, migration history or data was changed.
+
+### Refreshed exact-version inventory
+
+- Production migration history: 558 unique versions; latest 20261115231834.
+- Repository migration SQL files: 363; 348 unique 14-digit versions.
+- Exact timestamp overlap: 82 versions.
+- Production-only versions: 476.
+- Repository-only unique versions: 266.
+- Repository-only SQL files including files sharing timestamps: 281.
+- Duplicate repository timestamp groups: 13. The exact groups are retained in the repository tree; duplicate filenames at a shared timestamp have no intrinsically safe execution order.
+
+A full timestamp-level union crosswalk was committed as `docs/audits/KRIM-SUPABASE-MIGRATION-CROSSWALK-2026-11-16.csv`. It includes every unique version from either side, all matching repository paths/names, production names, file counts and a conservative status. **Version overlap is not SQL-body equivalence.** All body-equivalence values remain `not_assessed`.
+
+### Historical export recovery status
+
+The repository contains an encrypted schema-export workflow and a prior successful export record (workflow run `42619599274`, artifact `13676480195`). The recorded artifact expired on 10 November 2026, so it is not a presently usable recovery artifact. The workflow requires repository secrets `KRIM_PRODUCTION_DB_URL` and `KRIM_SCHEMA_EXPORT_PASSPHRASE`; secret values cannot be inspected through the available GitHub connector. No current encrypted artifact was downloaded or decrypted in this task.
+
+Previous branch-history research found only partial migration directories, not the complete historical source. The production migration ledger stores version/name metadata, not original SQL bodies. Consequently the authoritative SQL bodies for the 558 production entries remain unrecovered.
+
+### Correct next technical gate
+
+1. An authorized repository operator must confirm the two export secrets still exist and are current, then run the encrypted schema-only export workflow from its supported branch.
+2. Download the resulting encrypted artifact privately, verify its SHA-256 checksum, and decrypt only in a trusted local environment. Never place credentials, passphrases or decrypted SQL in chat or the public repository.
+3. Independently recover exact deployment SQL bodies from CI artifacts/backups where possible. A schema-only dump captures current object definitions but does not reconstruct the historical sequence or prove each migration's body.
+4. Compare schema dump against live catalog and build object-level inventory: types, tables, constraints, indexes, functions, triggers, views, policies, grants, extensions, storage buckets/policies and scheduled jobs.
+5. Reconcile duplicate timestamps and classify every historical source as exact, equivalent-under-another-version, superseded, manually applied, repository-only, production-only or unresolved.
+6. Reconstruct isolated staging from the reviewed current schema baseline; only then test forward-only remediation migrations and negative/positive integration tests.
+7. Obtain independent review before any production DDL or history repair.
+
+### Commercial priority while the migration gate is open
+
+Do not wait for a global platform rebuild to validate the lowest-risk revenue path. KRIM can prepare a non-custodial partner referral pilot in parallel: manually verify and contract one real logistics partner, publish only confirmed service scope, introduce qualified shippers, let customer and partner contract/pay directly, and invoice only KRIM's separately agreed earned referral fee after the contract's trigger is met. Do not advertise guaranteed coverage or collect partner freight funds. CA/legal confirmation of GST, intermediary and invoicing treatment remains a precondition to commercial invoicing.
+
+**Decision:** Migration reconciliation remains **BLOCKED / NOT COMPLETE**. Do not apply or mark migrations, baseline, squash, replay or run corrective production DDL based on this crosswalk.
