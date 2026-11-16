@@ -55,7 +55,7 @@ const statusBox=document.getElementById('status'),container=document.getElementB
 let records=[],currentPage=1;const pageSize=20;
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function message(t,kind){statusBox.textContent=t;statusBox.className='notice'+(kind?' '+kind:'')}
-function group(s){const v=String(s||'').toLowerCase().replace(/[ -]+/g,'_');if(/deliver|completed|closed/.test(v))return 'delivered';if(/exception|hold|failed|cancel|dispute|attention/.test(v))return 'attention';return 'active'}
+function group(s){const v=String(s||'').trim().toLowerCase().replace(/[ -]+/g,'_');if(v==='delivered'||v==='delivery_completed')return 'delivered';if(['draft','requested','request_received','submitted','quoted','confirmed','assigned','dispatched','in_transit','picked_up','out_for_delivery','awaiting_pickup','ready_for_pickup','loading','in_progress'].includes(v))return 'active';return 'attention'}
 function routeOf(id){return '../customer-services/shipment-details.html?shipment_id='+encodeURIComponent(id)}
 function render(){
  const q=search.value.trim().toLowerCase(),f=filter.value,sort=document.getElementById('sort-order').value;
