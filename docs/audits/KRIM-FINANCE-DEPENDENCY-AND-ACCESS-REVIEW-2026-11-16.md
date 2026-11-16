@@ -1007,3 +1007,47 @@ This confirms that several controls depend on a broad permission or mere organiz
 8. Recover and reconcile authoritative production migration bodies before any DDL, grants, policy or function change.
 
 No user identities, memberships, roles, grants, policies, financial records or production functions were modified. No production DDL or financial RPC was executed in this review.
+
+
+## 26. Finance SECURITY DEFINER functions, RPC grants and backend authorization
+
+### Catalog and ACL snapshot
+
+A read-only PostgreSQL catalog pass inspected matching finance/payment/refund/ledger/payout/revenue routines in `public` and `private`, including function security mode, per-function search_path, owner, ACL and effective EXECUTE for anon/authenticated/service_role.
+
+**Critical: private refund SECURITY DEFINER routines are executable by authenticated users.**
+- `private.krim_refund_request_submit(uuid,bigint,text,uuid)`: SECURITY DEFINER; authenticated EXECUTE granted.
+- `private.krim_refund_request_review(uuid,text,text,bigint)`: SECURITY DEFINER; authenticated EXECUTE granted.
+- `private.krim_claim_razorpay_refund_execution(uuid)`: SECURITY DEFINER; authenticated EXECUTE granted.
+
+These private routines are also exposed through public wrappers. Direct access to the private schema is not a safe authorization boundary when EXECUTE is granted. The routines perform internal checks, but the refund review's previously documented responsible-tenant binding flaw remains. The execution claim requires AAL2, prior reviewer identity, finance permission and paid INR Razorpay order, but its returned payload is only an execution claim, not a provider refund. Keep this entire refund execution path disabled until the tenant-binding defect and complete provider lifecycle are fixed and tested.
+
+### Other high-risk callable routines
+
+- `public.krim_finance_list_revenue_ledger(integer)`: SECURITY DEFINER, authenticated EXECUTE; checks finance.view in any active finance organization, then returns the entire legacy revenue ledger without organization filtering. This remains a direct cross-tenant exposure path even though the frontend call was removed.
+- `public.krim_finance_list_payment_webhook_events(boolean,integer)`: SECURITY DEFINER, authenticated EXECUTE; requires AAL2 and `admin.platform` in hardcoded organization 1, returns redacted event/order references and reconciliation status. It is an intentional privileged operator RPC but needs regression tests for role revocation, tenant boundary and metadata minimization.
+- `public.krim_claim_razorpay_refund_execution(uuid)`: authenticated EXECUTE wrapper delegates to the private SECURITY DEFINER claim routine.
+- `public.krim_refund_request_review(...)` and `public.krim_refund_request_submit(...)`: authenticated EXECUTE wrappers delegate to private SECURITY DEFINER routines. Their authorization depends on the callee checks; wrapper exposure is expected only if the customer/reviewer use cases are deliberately enabled.
+- `public.krim_internal_post_financial_event(...)`, both ledger-posting overloads, invoice/payable creation, payout/settlement, payment reconciliation and revenue-recognition routines were service_role-only in the inspected ACL snapshot. This is a useful execution boundary, but every Edge Function/service-role caller still needs independent actor, organization, source-record and idempotency validation.
+
+### Search path and routine configuration
+
+Most inspected SECURITY DEFINER functions explicitly set an empty or restricted search_path, which reduces object-shadowing risk. Several use `public, pg_temp`, `public, auth`, `public, krim_internal, pg_temp`, or `public`; these require a per-function review of every unqualified object reference and schema CREATE privileges. A restricted search_path alone does not fix missing tenant authorization or excessive EXECUTE grants.
+
+The trigger helper `public.set_payment_updated_at()` is SECURITY INVOKER and has broad EXECUTE ACL including anon/authenticated; it is a timestamp trigger helper, not itself a financial authorization API. Trigger-only routines should be inventoried separately from client-callable RPCs.
+
+### Required backend remediation
+
+1. Revoke authenticated EXECUTE on the three private refund SECURITY DEFINER routines; retain only the intended public entry points if and when their business workflows are enabled. Confirm schema USAGE and all inherited/default privileges during remediation.
+2. Remove or replace the legacy revenue-list RPC with an organization-scoped, finance-authorized API; do not rely on the page being hidden.
+3. Fix refund reviewer organization binding inside the private database routine before re-enabling the public wrapper. Bind the reviewer to the actual KRIM legal entity responsible for the KRIM fee payment; partner-direct freight refunds remain with the partner that collected freight.
+4. Keep payment webhook reconciliation restricted to explicitly authorized platform operators with AAL2; test cross-tenant and revoked-admin denial.
+5. Enumerate every Edge Function and backend service that holds service_role. Verify JWT/user authentication, actor provenance, finance.manage, AAL2 where required, legal-entity binding, source ownership, idempotency, replay protection, audit context and response data minimization before it invokes a privileged function.
+6. Review function ACLs against PUBLIC, anon, authenticated and service_role, including overloads and private-schema routines; verify no unintended default privileges or inherited role grants.
+7. Review SECURITY DEFINER function bodies for fixed search_path, schema-qualified references, safe dynamic SQL, row locking, transaction atomicity and safe error messages.
+8. Build staging tests that call public and private RPC endpoints directly, bypassing every frontend hold. Include unauthenticated, customer, partner, unrelated finance tenant, finance manager, platform admin, AAL1/AAL2, revoked role, duplicate/replay and service-role actor mismatch cases.
+9. No function grants, function bodies, Edge Functions, secrets, payment/refund states or production records were changed in this review. No RPC was invoked.
+
+### Release decision
+
+The finance backend remains **NO-GO for live-money use**. Frontend containment does not secure callable RPCs. The authenticated EXECUTE grants on private refund SECURITY DEFINER functions and the unscoped revenue-list RPC are priority backend blockers. Do not patch production until authoritative migration bodies and dependency/caller graph have been recovered and reconciled.
