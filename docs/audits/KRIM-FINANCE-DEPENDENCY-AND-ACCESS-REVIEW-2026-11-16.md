@@ -428,3 +428,49 @@ The payable creation routines require delivered shipment, completed assignment, 
 - Bind finance-wide visibility to a designated legal finance organization and dedicated finance permissions, with AAL2 for sensitive actions.
 - Add direct PostgREST negative tests: customer A must not read partner payable for shipment A; customer B must not read it; partner A may read only its own payable; partner B must not read partner A's payable; ordinary partner member without finance permission must not read detailed economics; unrelated finance tenant must not read it.
 - Do not modify production RLS or grants until migration history recovery/reconciliation and the legal-entity/organization mapping are complete.
+
+
+## 17. Refund and dispute isolation: expanded backend review
+
+### RLS exposure confirmed on both refund tables
+
+The SELECT policy on `krim_refund_requests` allows access when the caller is:
+- the `customer_user_id`;
+- an active member of the recorded customer organization; OR
+- an active member of any organization for which they have generic `finance.view`.
+
+The same cross-tenant finance-view branch exists on `krim_refund_request_events`. Event rows can contain reviewer notes, event notes, event metadata, actor identity and actor organization. The policy therefore exposes more than a basic status: it can reveal sensitive customer complaint/reason text, review rationale, payment references, provider refund identifiers/status, and internal investigation notes to finance-view users outside the responsible customer/legal finance scope.
+
+The `customer_user` role previously inspected includes generic `finance.view`. Therefore this is not safely mitigated by assuming only finance managers possess the permission. The page's own-user filter is only frontend containment; direct PostgREST reads remain governed by the broad RLS policy.
+
+### Refund request submission and review
+
+- Customer submission validates authentication, positive amount, reason length, paid payment order, full refund only, customer ownership or active customer-org membership, and idempotency/duplicate request checks.
+- The page now loads paid orders by `customer_id = current session user` and request rows by `customer_user_id = current session user`. Customer request submission remains connected.
+- The finance review desk is hidden in the committed page pending a correctly scoped reviewer workflow.
+- The review RPC requires AAL2, an active finance/platform/operations organization membership, `finance.manage` or `admin.platform`, a meaningful note, and prevents the requester reviewing their own request.
+- **Critical remaining flaw:** the review RPC does not verify that the supplied reviewer organization is the legally/operationally responsible finance entity for the request's customer organization/payment order. A finance manager in an unrelated organization could potentially review another tenant's request by supplying their own organization ID. The function is still executable by authenticated callers through its public wrapper. Do not expose or rely on this review workflow until corrected and tested.
+
+### Refund execution claim RPC
+
+The public `krim_claim_razorpay_refund_execution(uuid)` wrapper is executable by `authenticated` and calls a private SECURITY DEFINER function. The private function checks AAL2, that the caller is the recorded reviewer, that the caller has active finance/platform/operations membership and finance.manage/admin.platform permission in the recorded reviewer organization, that the requester differs from reviewer, that the request is approved/execution-pending, that no provider refund ID already exists, and that the payment order is a fully paid INR Razorpay order for the exact full amount.
+
+Those controls are useful, but because the review function currently accepts an unrelated finance organization, the execution claim chain inherits that reviewer-organization binding weakness. The claim function returns the payment/provider execution payload; it does not itself prove a provider refund was executed. Keep execution disabled until review-organization ownership is enforced and the provider call/webhook reconciliation path is independently audited.
+
+### Frontend and customer-facing model
+
+- `app/finance/refunds-disputes.html` has the finance review panel hidden with an explicit temporary-unavailability notice.
+- The customer refund request register is filtered to the signed-in user's own `customer_user_id`.
+- Paid payment-order choices are filtered to the signed-in user's own `customer_id`.
+- The page does not call the refund execution-claim RPC.
+- `public/customer-os/customer-services/refunds.html` is guidance-only and correctly explains that under the partner-direct model freight refunds are handled by the provider that received the payment; it does not submit or execute a refund.
+
+### Remediation requirements
+
+1. Replace generic `finance.view` access with strict audience-specific scope. Customers must see only their own requests and events; partner users must not see customer refund reasons/review notes unless legally necessary and explicitly authorized; finance reviewers must see only requests assigned to their responsible finance/legal entity.
+2. Derive the responsible finance organization from a trusted payment-order/customer-entity mapping inside the SECURITY DEFINER function. Do not trust a caller-supplied organization ID as the authority.
+3. Bind reviewer identity, AAL2, organization, permission and request ownership together in both review and execution functions.
+4. Consider removing direct authenticated SELECT from the raw event table and expose a purpose-built customer-safe event view/RPC. Keep internal reviewer notes separate from customer-visible status history.
+5. Restrict authenticated execution claim RPC to a trusted server-side worker or a narrowly scoped, fully verified reviewer flow. Validate wrapper and private function ACLs independently.
+6. Add direct SQL/PostgREST negative tests across unrelated finance orgs, customer orgs and partner orgs; test AAL1/AAL2, requester/reviewer separation, repeated claims, duplicate provider refunds, webhook success/failure and replay.
+7. No production RLS, grants or function changes were made. Migration-history divergence and unresolved legal-entity mapping still block safe production DDL.
