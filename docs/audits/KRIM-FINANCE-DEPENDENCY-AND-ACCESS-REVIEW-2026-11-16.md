@@ -594,3 +594,67 @@ The financial reporting page is still review-preparation only and does not query
 6. Add posting invariants, including transaction-level balanced debit/credit enforcement, source idempotency scoped correctly, immutable posted entries, reversals instead of edits/deletes, and closed-period protection.
 7. Test positive/negative cases across two organizations, non-finance members, finance.view, finance.manage, AAL levels, duplicate source IDs, concurrent posts, closed periods, currency mismatch, reversals and audit-event atomicity.
 8. No production DDL, grants, policy, function, period, mapping, journal or financial data was changed.
+
+
+## 20. Invoice, receivable and payable isolation review
+
+### Production data state
+
+Read-only counts returned zero for:
+- `krim_invoices`
+- `krim_invoice_items`
+- `krim_invoice_payment_applications`
+- `krim_partner_payables`
+- `krim_customer_billing_profiles`
+- `krim_payment_terms`
+
+There are no production invoice or payable balances to certify. Zero rows means the workflows have not yet been commercially exercised; it does not prove that the underlying controls are production-ready.
+
+### Invoice and invoice-item access: HIGH
+
+The `krim_invoices` SELECT policy has OR branches for any finance organization with `finance.view`, and for `finance.view` in each of `organization_id`, `customer_organization_id`, `supplier_organization_id` or `partner_organization_id`. It does not bind access to `invoice_type` and the user's exact issuer/recipient role. This is a cross-tenant and cross-party disclosure risk for invoice totals, paid/outstanding balances, notes, tax amounts and shipment references.
+
+The `krim_invoice_items` policy inherits access through membership/permission on the invoice's `organization_id`, not a customer-recipient or supplier-issuer relationship. A recipient can be entitled to see an invoice while failing this item policy if the invoice's organization_id is the issuer; conversely, an issuer organization member with finance.view may see item detail even where the person should not have access to the invoice as a whole. Align item visibility with the corrected parent invoice authorization.
+
+### Customer billing profiles and payment terms
+
+- `krim_customer_billing_profiles` SELECT is granted to authenticated users and the RLS policy allows any active member of the customer account's organization to read the full profile, including billing email, tax identifier, billing address location, delivery preferences and metadata. This is broader than a dedicated billing-role model; sensitive tax/contact fields should be limited to billing administrators and authorized finance users, with ordinary organization members receiving only necessary masked data.
+- `krim_payment_terms` SELECT is granted to authenticated users and policy allows any active member of the terms' organization. Credit days, payment method and commercial terms should be restricted to authorized billing/finance roles rather than every member.
+
+### Invoice payment applications
+
+Direct authenticated and anon access is denied; service_role is the only table-level reader/writer. The table has positive applied-amount validation, foreign keys to invoice/payment/organization, unique payment_id and organization-scoped idempotency key. These are useful baseline controls. The unique payment_id means one payment can only be applied once globally; confirm this is intended for the model before enabling split allocation or multi-invoice remittance. No application rows exist.
+
+### Receivable reconciliation function
+
+`krim_internal_reconcile_customer_receivable(bigint)` is SECURITY DEFINER and service_role-only. It requires a paid legacy `payments` row, a quote reference, finds a customer invoice by shipment and invoice_type, checks exact currency and exact payment/invoice total equality, then marks the invoice paid and writes an audit event. This is a narrow full-payment-only path; it does not use `krim_invoice_payment_applications`, does not support partial allocation, and the inspected body does not independently bind the payment's customer organization to the invoice's customer_organization_id. Do not treat it as a complete receivables reconciliation engine until customer ownership, duplicate/replay behavior, partial payment and concurrency are addressed.
+
+### Invoice creation and tax readiness
+
+The internal delivered-shipment invoice creator is SECURITY DEFINER and service_role-only. Its business gates include delivered shipment, accepted quote, completed partner assignment and independently verified delivery POD. However, the current creator sets `tax_amount = 0`. This must not be treated as a compliant tax invoice for India or other jurisdictions. Issuer legal identity, GST/VAT registration and applicability, place of supply, tax classification, invoice numbering, required particulars, credit notes and cross-border tax treatment remain unresolved. Also, customer freight invoices belong to the logistics supplier/partner relationship and must not be counted as KRIM referral revenue.
+
+### Finance dashboard containment
+
+`app/finance/index.html` had queried the first 50 invoices and payment orders after verifying a finance membership and generic `finance.view`. Because invoice RLS and payment-order finance scope are not tenant/party-bound, the dashboard could display unrelated invoice and payment amounts.
+
+The invoice and payment-order dashboard queries are now withheld with explicit source errors; the settlements dataset remains separately governed by its own existing RLS and was not altered in this step.
+
+Commit: `6832baec9829a914360ff66612f94067c11ec60d`.
+
+### Customer invoice surfaces and operational readiness
+
+- `public/customer-os/customer-services/invoices.html` filters customer invoices by the current user's active customer/shipper/enterprise organizations and `invoice_type='customer'`. This is frontend containment; the database policy remains broad. The item query path must also be checked against the corrected parent policy before relying on invoice line details.
+- `public/shipper/invoices.html` filters invoice records to the user's customer organizations and legacy payments to the signed-in user's customer_id.
+- Finance AP, AR and invoicing pages are review-preparation only: they check authentication/membership but do not read or write invoices/payables. They must not be represented as live accounting modules.
+- The partner payable finance register remains held from the previous review. Database RLS still permits shipment customer-organization members to read partner payable economics directly; the frontend hold does not repair direct PostgREST access.
+
+### Required remediation
+
+1. Replace invoice OR-branch access with explicit invoice-type/issuer/recipient authorization and organization-scoped finance permissions; apply identical parent authorization to invoice items.
+2. Restrict billing profiles and payment terms to billing/finance roles; expose masked safe fields to ordinary users.
+3. Keep payment applications service-role-only; implement atomic, idempotent application/reversal logic with amount/currency/ownership and overpayment checks before use.
+4. Bind receivable reconciliation to payment customer, invoice customer, issuer, shipment, quote and legal entity; support safe partial payments only if the commercial model requires them.
+5. Define jurisdiction-specific tax/legal invoice rules before issuing invoices; never default to zero tax as a substitute for tax determination.
+6. Keep partner payable gross/net economics partner-only and authorized finance-only; customer shipment participation must not grant payable access.
+7. Add negative tests for unrelated customer, supplier, partner and finance organizations, including invoice headers, items, billing profiles, terms, payment applications and payable data.
+8. No production DDL, grants, RLS, invoice, payment application, receivable, payable or tax record was changed.
