@@ -874,3 +874,79 @@ The only identified `krim_shipment_risks` record is an open medium-severity dela
 9. Build a genuine payment-provider chargeback ingestion and response workflow before claiming chargeback support; include evidence deadlines, representment, outcome, fee and ledger reconciliation.
 10. Treat fraud controls as a future risk program: identity verification, provider risk signals, velocity/abuse controls, account takeover monitoring, manual review, audit and escalation. Do not invent fraud scores or claim coverage.
 11. No approval, refund, dispute, chargeback, fraud or payment records were created or modified. No RPCs were invoked. No production DDL, grants, RLS or provider settings were changed.
+
+
+## 24. Financial reporting, management accounts and profitability accuracy
+
+### Production data state
+
+Read-only row counts:
+- `krim_shipment_profitability_snapshots`: 0
+- `krim_shipment_revenue_items`: 0
+- `krim_revenue_allocations`: 0
+- `krim_revenue_allocation_runs`: 0
+- legacy `revenue_ledger`: 1
+- `krim_metric_definitions`: 0
+- `krim_metric_aggregates`: 0
+- `krim_partner_performance_metrics`: 0
+- `krim_reliability_metrics`: 0
+- `krim_settlements`: 0
+
+There are no populated canonical shipment-profitability snapshots, fee-specific shipment revenue items, revenue allocation records/runs, or metric definitions/aggregates. There is no demonstrated live P&L, balance sheet, cash-flow statement, management-accounting pack, partner margin report or forecast based on reconciled source data.
+
+### Legacy revenue ledger: not authoritative
+
+The single legacy `revenue_ledger` row records:
+- total amount: INR 12,500;
+- platform commission: INR 1,250;
+- partner payout: INR 11,250;
+- status: reconciled;
+- customer_organization_id: NULL.
+
+This legacy row has no customer-organization binding and its status alone does not establish a real customer payment, bank settlement, valid partner contract, earned KRIM fee or accounting journal. The platform commission figure must not be presented as KRIM earned revenue, and the full shipment amount must not be counted as KRIM GMV or cash without independent source evidence. Treat this row as an unverified legacy sample, exclude it from financial statements and business-performance totals until reconciled to source documents and the agreed partner-direct fee model.
+
+The legacy revenue ledger SELECT policy allows customer-organization access or generic finance.view membership in any active finance organization; the previously identified SECURITY DEFINER listing RPC is also unscoped. Frontend listing was already removed and remains withheld. Database-side risks remain.
+
+### Profitability and revenue item access
+
+`krim_shipment_profitability_snapshots` and `krim_shipment_revenue_items` grant authenticated SELECT; RLS checks active organization membership only. They have no finance-specific permission requirement. If records are populated, non-finance members of an organization may read revenue, direct cost, gross profit, gross margin, contribution cost/profit, and source snapshots. These should be limited to explicitly authorized commercial/finance roles, with separate customer/partner views that reveal only their own entitled information.
+
+Revenue allocation runs and allocations retain organization-membership ALL-command RLS and authenticated direct write grants as recorded in section 21. This remains an integrity risk for reporting source data.
+
+### Metric system empty
+
+Metric definitions and aggregates are both empty. There is no active metric catalog defining calculation versions, event sources, units, aggregation methods or dimensional rules. Partner performance and reliability metrics are also empty. Therefore dashboard percentages, averages, rankings, service reliability and performance trend claims must not be represented as live measured KPIs unless sourced from independently verified operational events with documented denominators and freshness.
+
+### Financial reporting pages
+
+`app/finance/financial-reporting.html`, `app/finance/revenue-commission.html` and `app/finance/accounts-receivable.html` are preparation-only pages. They check session and active organization membership but explicitly state finance-specific authorization is not yet verified, do not query accounting/reporting data, and do not save form entries. They are not operational reporting systems.
+
+`app/finance/index.html` requires active finance-organization membership and `finance.view`. Invoice and payment-order registers remain explicitly withheld. It previously queried `krim_settlements`; that table's SELECT policy allows generic finance.view on a finance organization, the row's organization, or the partner organization. The finance dashboard did not bind the query to a single legal-entity/partner scope. Although the table currently has zero rows, this can expose settlement details from other accessible organizations when populated.
+
+Frontend containment: replaced the settlement query with an explicit access hold pending strict finance-entity scoping and partner-direct model review. No other financial data query was enabled. Commit: `8c3725cff055d6b1915494fe04152ad959fdd747`. Fetched source verified separately.
+
+### Accounting interpretation required
+
+KRIM must keep these separate in all reports:
+1. **Marketplace GMV / shipment value:** customer-to-partner freight value, reported as marketplace volume only where a qualifying completed transaction is evidenced; not KRIM revenue.
+2. **KRIM earned fee revenue:** separately contracted referral/coordination/software fees, recognized only when the applicable contractual performance obligation is satisfied and the amount is reliably measurable.
+3. **KRIM cash receipts:** cleared receipts into KRIM's own verified bank/merchant account, net of reversals/refunds/fees; not partner freight funds.
+4. **KRIM expenses and operating costs:** supported by supplier invoices, payroll/contractor records and other source documents.
+5. **Gross profit / contribution / operating profit / net profit:** calculated only after cost classification, accruals, tax treatment, refunds, chargebacks, FX and period close; do not use shipment freight gross value as the revenue denominator for KRIM's platform margin.
+6. **Enterprise value and projections:** forward-looking scenarios, never actual accounting results or guaranteed forecasts.
+
+For a referral-only transaction, the customer and partner contract and settle freight directly. KRIM records only its separately agreed fee receivable/revenue when earned under the contract, and its own fee receipt when cleared. A commission percentage in a legacy row is not sufficient evidence.
+
+### Required remediation before reporting activation
+
+1. Confirm the actual legal entity, accounting entity, bank ownership, tax registrations, functional currency and fiscal period.
+2. Retire or quarantine the unscoped legacy revenue ledger and reconcile its single sample row against source payment, partner agreement, shipment, bank and tax records before any migration into authoritative books.
+3. Establish a fee-specific source-of-truth event for each KRIM referral/coordination/SaaS fee, including contract, eligible outcome, rate/amount, currency, earned date, invoice/credit note, tax, payment and reversal lifecycle.
+4. Keep partner freight gross amounts, partner payables and KRIM fee income in separate ledgers and report dimensions.
+5. Build statements from balanced, posted journals only; include trial balance, P&L, balance sheet, cash-flow statement, AR/AP ageing and close controls.
+6. Add cost attribution and FX translation policy before calculating shipment-level gross/contribution margins; store immutable calculation version and source snapshot.
+7. Define a governed metric catalog with source events, denominator, timezone, aggregation, freshness, correction policy and calculation version; distinguish operational KPIs from accounting measures.
+8. Restrict profitability/revenue snapshot reads to finance/commercial permissions and tenant/entity-scoped APIs; remove membership-only access and direct writes after migration reconciliation.
+9. Keep settlement and legacy revenue dashboards held until legal-entity scope and role authorization are enforced server-side.
+10. Add reconciliation tests against independent source records, double-entry balance, period cut-off, duplicate fees, partial refunds, reversals, multi-currency FX, credit notes and partner/customer tenant isolation.
+11. No reporting rows, journals, revenue, expenses, forecasts, settlement records or financial values were created or modified in this audit. No production DDL, grants, RLS or accounting logic were changed.
