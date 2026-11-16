@@ -9,9 +9,9 @@ The connected GitHub actions interface available to this session can read runs a
 ## Run inputs
 Select **KRIM sanitized production schema manifest** in the repository Actions tab and choose **Run workflow** on the default branch. Enter:
 - `source_run_id`: `43793099331`
-- `artifact_id`: `14193475858`
+- `artifact_id`: `14198261776`
 
-These IDs refer to the existing `krim-schema-export-encrypted` artifact, which was last checked as unexpired and expires at `2026-11-17T02:37:47Z`.
+These IDs refer to the fresh `krim-schema-export-encrypted` artifact (3,374,219 bytes), checked unexpired on 16 November 2026; expiry `2026-11-17T04:45:52Z`. The original artifact ID `14193475858` is superseded for this run.
 
 ## Secret requirement
 The workflow reads the existing repository secret `KRIM_SCHEMA_EXPORT_PASSPHRASE`. Do not paste the passphrase into a workflow input, commit, issue, log or chat. Do not expose the raw SQL artifact.
@@ -27,4 +27,4 @@ The workflow checks artifact identity and expiry, verifies the encrypted-file ch
 This first pass is a metadata inventory and statement fingerprint list, not a full semantic equivalence proof. It does not connect to or modify the production database, execute SQL, or repair migration history. After the artifact is produced, compare its object inventory and hashes with the checked-in migration source and separately query live catalog definitions. Do not treat matching object names or hashes of dump statements as proof of migration equivalence.
 
 ## Current status
-The encrypted source artifact remains unexpired at the last check. The manifest workflow is committed but has not been dispatched from this session. No production database change was made.
+Fresh encrypted artifact `14198261776` is available and unexpired at the last check. Export job `133096086283` reports all steps completed successfully, including encrypted artifact upload. The run summary endpoint still returned `in_progress` when checked; the job-step completion and fresh artifact metadata are the available evidence. The manifest workflow is committed but has not been dispatched from this session. No production database change was made.
