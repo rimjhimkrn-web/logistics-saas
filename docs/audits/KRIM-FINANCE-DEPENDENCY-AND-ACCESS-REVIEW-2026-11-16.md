@@ -1219,3 +1219,66 @@ A limited non-custodial marketplace pilot may be considered only after:
 - tenant isolation, permissions, webhook replay, refunds and operational support are independently tested.
 
 No production data was changed and no live workflow or payment was executed during this assessment.
+
+
+## Section 30 — Partner onboarding, verification, capability approval and commercial activation
+
+**Scope:** Read-only production inspection of partner organization lifecycle, onboarding submissions, verification cases, capability evidence/review, service-area coverage, contracts, legacy partner records, RLS/table privileges and the relevant privileged RPCs. No production rows, policies, grants, functions, storage objects or provider settings were changed.
+
+### Observed production data
+
+- KRIM organizations: 14 total. Partner-facing organization types observed: two `partner` organizations and one `warehouse_operator`.
+- Of the two `partner` organizations:
+  - One is `development_test`, `verification_pending`, verification `pending`, compliance `pending`, onboarding `in_progress`.
+  - The other has no partner account mode, lifecycle `not_applicable`, verification/compliance/onboarding `not_started`.
+- The warehouse operator also has no partner account mode and partner lifecycle fields remain `not_applicable` / `not_started`.
+- `krim_organization_onboarding`: 0 rows.
+- `krim_partner_verification_cases`: 1 row; open, undecided, associated with the development/test partner. The case submitter is recorded.
+- `krim_partner_capabilities`: 1 row; pending and inactive, attached to a partner organization without a registered-business account mode. It has no evidence_paths array and no submitted_by metadata. The admin capability-list RPC classifies this as incomplete rather than reviewable.
+- `krim_partner_compliance_evidence`: 0 rows.
+- `krim_partner_compliance_reviews`: 0 rows.
+- `krim_partner_service_areas`: 0 rows.
+- `krim_service_contracts`: 0 rows.
+- Legacy `partners`: 10 rows, but legacy partner rows are not proof of current verified/contracted partner organizations. No completed mapping/activation evidence was established in this review.
+- The prior Section 29 observation remains: partner quotes, accepted partner assignments and capacity reservations are all zero.
+
+### Verification and capability control findings
+
+1. Partner verification decision RPC requires an authenticated platform administrator with AAL2, restricts approval to active registered-business logistics organizations, requires core registration/location fields and a private-storage registration document owned by the original submitter, and records an audit event.
+2. The verification-case trigger `private.krim_guard_partner_verification_independent_review` rejects a decision/status change when the case submitter is the actor. This closes the self-review path in the inspected verification RPC, despite the RPC body not containing a direct submitter-versus-reviewer check.
+3. Capability submission requires `partner.manage`, an active registered-business organization, current approved compliance, active transport mode and country, one to five private evidence files in the submitter's organization folder, and records the submitter/evidence paths.
+4. Capability approval requires AAL2 platform administrator permission, a pending capability, a different reviewer from the capability submitter, current organization compliance, active country/mode and evidence owned by the original submitter. It rejects hazardous-goods and refrigerated capabilities through the standard path pending specialist controls, and checks effective dates and weight bounds.
+5. The compliance-current gate requires an active registered-business organization, verified partner status, compliant partner status, approved/active lifecycle, and a latest approved compliance review with a future validity date. No such review/evidence rows currently exist, so capability submission/approval correctly remains blocked.
+6. The verification and capability admin RPCs are SECURITY DEFINER and executable by authenticated users, but their inspected bodies enforce AAL2 and `admin.platform`. Their SECURITY DEFINER status still makes these critical privileged endpoints part of the security regression test set.
+
+### Important onboarding workflow gap
+
+The multi-category onboarding wrapper `krim_submit_partner_onboarding_global_multi_v1` creates or updates pending capability rows for each selected service category, but the inserted/updated capability metadata in that wrapper contains category/coverage fields only; it does not attach the capability-specific `evidence_paths` and `submitted_by` metadata required by the capability review RPC and admin queue. The single observed pending capability likewise has no evidence metadata and is counted as incomplete. A separate capability submission routine does attach this evidence, but the current wrapper-generated pending row may collide with the duplicate-pending guard for a matching organization/mode/service/country/region. This multi-category onboarding path needs a designed, tested hand-off so every capability is reviewable and cannot be stranded in a pending-but-unreviewable state.
+
+### Access and commercial controls
+
+- RLS is enabled on the inspected core organization, onboarding, capability, verification, service-area, contract and legacy partner tables.
+- Compliance evidence and compliance review tables have RLS enabled and forced; authenticated users have no direct table privileges, which is a fail-closed posture. Their authorized submission/review path must be explicitly tested.
+- Organization onboarding, capability, verification case, service area and service contract tables have authenticated SELECT privileges with scoped SELECT policies; direct authenticated INSERT/UPDATE/DELETE are not granted on those core tables. The onboarding checklist table does permit authenticated direct writes under an organization-access / platform-admin ALL policy; its workflow and reviewer separation should be checked before relying on checklist completion as approval evidence.
+- Service contracts are visible to either contract party by organization membership, but there are no contract rows. Contract status, signature/acceptance evidence, signatory authority, fee schedule, commission/referral terms, jurisdiction, tax, term/termination and renewal enforcement have therefore not been operationally demonstrated.
+- Legacy `partners` and `partner_documents` tables coexist with the newer organization-based partner model. Keep legacy data out of matching, activation and financial eligibility unless its identity, organization mapping, verification and evidence are reconciled.
+- The latest global onboarding routine uses private storage paths scoped to the submitting user; its verification path should additionally be tested against storage ownership and policy enforcement. Do not treat a path-shaped filename alone as independent evidence validation.
+
+### Release conclusion
+
+**NO-GO for partner-backed commercial activation and production partner matching.** No partner organization is currently demonstrated as registered-business, verified, compliant, capability-approved, contracted and capacity-ready. The only open verification case belongs to a development/test account; the one capability row is incomplete and inactive; there are no compliance reviews/evidence, service areas or contracts.
+
+Before a partner can become eligible for a real marketplace assignment, the controlled journey must prove, in order:
+
+1. Registered-business organization and authorized representative.
+2. Submitted legal/business identity documents in private storage, with ownership and expiry checks.
+3. Independent platform verification decision and immutable audit evidence.
+4. Jurisdiction-specific compliance review with reviewer, scope, validity and expiry.
+5. Capability evidence for each service/mode/country/region and independent capability approval.
+6. Explicit service-area coverage and current operating status.
+7. Executed commercial agreement with clear customer/partner contracting party, KRIM referral/coordination fee, service scope, SLA, liability, insurance, tax and dispute terms.
+8. Resource/fleet/driver/warehouse readiness and dated capacity confirmation.
+9. Activation event tied to the verified organization, approved capabilities, contract and capacity; automatic suspension/expiry on stale documents, expired compliance, contract termination or capability withdrawal.
+10. End-to-end tests proving a partner cannot self-verify, self-approve, alter approved scope, bypass evidence requirements or receive assignments outside verified scope.
+
+No partner was approved, no capability was activated, no agreement was created, and no commercial or financial transaction was executed during this review.
