@@ -21,7 +21,7 @@ $new$;
   v_old_audit text := $old$  insert into public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,previous_state,new_state)
   values(v_user_id,v_org_id,'partner.onboarding.information_requested','partner_verification_case',p_case_id::text,'partner_onboarding',jsonb_build_object('request',v_request),v_old_state,v_new_state);
 $old$;
-  v_new_audit text := $new$  insert into public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,previous_state,new_state)
+  v_new_audit text := $newaudit$  insert into public.krim_audit_events(actor_user_id,organization_id,event_type,entity_type,entity_id,source,metadata,previous_state,new_state)
   values(v_user_id,v_org_id,'partner.onboarding.information_requested','partner_verification_case',p_case_id::text,'partner_onboarding',jsonb_build_object('request',v_request),v_old_state,v_new_state);
 
   if v_recipient_user_id is not null
@@ -32,7 +32,7 @@ $old$;
       'Additional information required for your KRIM partner application',
       v_request,'alert',false);
   end if;
-$ new_audit $;
+$newaudit$;
 begin
   select pg_get_functiondef('public.krim_admin_request_partner_verification_information(bigint,text)'::regprocedure)
     into v_definition;
