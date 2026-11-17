@@ -108,7 +108,7 @@ begin
 
   if p_success then
     update public.krim_notification_outbox
-    set status='sent',sent_at=clock_timestamp(),delivered_at=clock_timestamp(),
+    set status='sent',sent_at=clock_timestamp(),
         provider_message_id=left(nullif(coalesce(p_provider_message_id,''),''),160),
         last_error=null,next_attempt_at=null,
         metadata=coalesce(metadata,'{}'::jsonb) ||
@@ -116,7 +116,7 @@ begin
     where id=p_outbox_id;
 
     update public.krim_notification_deliveries
-    set status='sent',sent_at=clock_timestamp(),delivered_at=clock_timestamp(),
+    set status='sent',sent_at=clock_timestamp(),
         provider_message_id=left(nullif(coalesce(p_provider_message_id,''),''),160),
         last_error=null,next_attempt_at=null,updated_at=clock_timestamp()
     where id=p_delivery_id;
