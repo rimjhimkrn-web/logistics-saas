@@ -108,6 +108,23 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
 
+### E7. End-to-end partner eligibility gates
+
+- [ ] Confirm an organisation without active verified capability is excluded from matching and cannot submit/award quotes.
+- [ ] Confirm a verified capability alone, without an independently approved active service area, is excluded from matching.
+- [ ] Confirm service-area coverage must match the exact origin and destination location (country, active market or location scope), service type and transport mode.
+- [ ] Confirm inactive, rejected, pending, expired or not-yet-effective service areas do not contribute coverage.
+- [ ] Confirm a country with a non-approved or overdue operating pack cannot contribute matching coverage.
+- [ ] Confirm partner organisation must be active, registered-business, currently compliant and verified.
+- [ ] Confirm a partner must have verified available capacity on an active exact route lane and date, with reservations deducted.
+- [ ] Confirm expired capacity or a capacity reservation created after matching prevents a later award/assignment.
+- [ ] Confirm shipment-wide and leg-specific matching apply the same service-area and capability gates.
+- [ ] Confirm no-candidate results are explicit and do not create a partner quote, award or assignment.
+- [ ] Confirm positive matching with a real, independently approved partner, route, capability, evidence and capacity fixture.
+- [ ] Confirm negative cases for missing endpoint coverage, wrong mode, wrong service type, inactive country pack, insufficient weight, expired availability and over-reserved capacity.
+
+**Pass condition:** no partner is represented as eligible or awarded unless current compliance, verified capability, independently approved endpoint service areas, active operating-pack status and sufficient verified route capacity all agree.
+
 ### E6. Platform-admin service-area review workspace
 
 - [ ] Confirm unauthenticated users cannot see the protected queue or review controls.
