@@ -128,8 +128,21 @@ $("capacity-form").addEventListener("submit",async event=>{
   button.textContent="Registering resource…";
   const correctionId=Number($("capacity-correction-resource").value)||null;
   const rpcName=correctionId?"krim_partner_resubmit_rejected_capacity_resource":"krim_partner_register_capacity_resource_for_lane";
-  if(correctionId)args.p_resource_id=correctionId;
-  const {data:result,error}=await client.rpc(rpcName,args);
+  const rpcArgs=correctionId?{
+   p_resource_id:correctionId,
+   p_resource_type:args.p_resource_type,
+   p_resource_name:args.p_resource_name,
+   p_transport_mode_id:args.p_transport_mode_id,
+   p_location_id:args.p_location_id,
+   p_capacity_value:args.p_capacity_value,
+   p_capacity_unit:args.p_capacity_unit,
+   p_availability_type:args.p_availability_type,
+   p_available_from:args.p_available_from,
+   p_available_until:args.p_available_until,
+   p_document_paths:args.p_document_paths,
+   p_notes:args.p_notes
+  }:args;
+  const {data:result,error}=await client.rpc(rpcName,rpcArgs);
   if(error)throw error;
   if(!result?.resource_id||!result?.availability_id)throw new Error("The database did not confirm both resource and availability records.");
   registered=true;
