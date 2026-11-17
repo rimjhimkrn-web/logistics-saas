@@ -281,3 +281,16 @@ Do not merge PR #68 or deploy to Production until:
 | Reservation authorization | Authenticated execute granted; anon execute denied | Grant check passed |
 | Positive capacity reservation / concurrency / idempotency | Staging has no verified resource fixtures | Not end-to-end tested |
 | Release / expiry lifecycle | Existing terminal-status release trigger and expiry worker identified | Needs fixture-based lifecycle test |
+
+
+### E8 partner interface follow-up
+
+- [ ] Sign in as an eligible partner and load the Shipment & Job Management page.
+- [ ] Confirm assignment capacity state loads through `krim_partner_list_assignment_capacity_states` without direct table SELECT grants.
+- [ ] Confirm a confirmed binding + confirmed reservation displays as reserved.
+- [ ] Confirm released/expired binding or reservation is not displayed as currently reserved and the accepted assignment offers a new scheduling action.
+- [ ] Confirm a user from another organization cannot retrieve assignment capacity state by guessing assignment IDs.
+- [ ] Confirm a user with no active membership cannot retrieve assignment capacity state.
+- [ ] Confirm browser refresh preserves the authoritative binding/reservation state.
+
+**Implementation note:** the partner job page now reads capacity state through a SECURITY DEFINER RPC that checks active organization membership and limits results to supplied assignment IDs. Authenticated EXECUTE is granted; anon EXECUTE is denied. Direct SELECT on reservation tables remains denied.
