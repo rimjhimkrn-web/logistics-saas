@@ -127,8 +127,15 @@ jobs:
               print("::error::Credential-like material detected; staging import refused.")
               sys.exit(1)
 
-          # Supabase already creates the public schema in a new project.
-          lines = [line for line in sql.splitlines() if not re.match(r"^\s*CREATE\s+SCHEMA\s+(?:IF\s+NOT\s+EXISTS\s+)?public\s*;\s*$", line, re.I)]
+          # Supabase pre-creates managed schemas. Keep their ownership/ACLs intact:
+          # omit the redundant public schema creation and its managed graphql_public comment.
+          lines = []
+          for line in sql.splitlines():
+              if re.match(r"^\s*CREATE\s+SCHEMA\s+(?:IF\s+NOT\s+EXISTS\s+)?public\s*;\s*$", line, re.I):
+                  continue
+              if re.match(r"^\s*COMMENT\s+ON\s+SCHEMA\s+(?:\\"?graphql_public\\"?)\s+IS\s+.*;\s*$", line, re.I):
+                  continue
+              lines.append(line)
           Path("private-export/schema.sql").write_text("\n".join(lines) + "\n")
           print("Schema-only and credential checks passed; no row data will be imported.")
           PY
