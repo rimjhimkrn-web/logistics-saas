@@ -8,12 +8,12 @@ function boot(){
  const box=document.createElement("div");box.id="krim-language-control";box.innerHTML='<button type="button" id="krim-language-toggle" aria-label="Select language" aria-expanded="false" title="Language"><span aria-hidden="true">◎</span><span class="krim-language-word">Language</span></button><div id="krim-language-menu" hidden><label for="krim-language-select">Language</label><select id="krim-language-select" aria-label="Choose language">'+langs.map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join("")+'</select><span id="krim-language-note" role="status" aria-live="polite"></span></div>';
  const css=document.createElement("style");css.textContent=`
 #krim-language-control{position:relative;display:inline-flex;align-items:center;flex:0 0 auto;margin:0 8px;z-index:9999;font:600 13px system-ui}
-#krim-language-toggle{min-height:40px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;border:1px solid #c7d5e4;border-radius:10px;background:#071b31;color:#fff;box-shadow:0 3px 10px #071b3120;font-size:14px;line-height:1;cursor:pointer}
-#krim-language-toggle:hover{background:#174b78}
-#krim-language-menu{position:absolute;right:0;top:calc(100% + 8px);display:flex;flex-direction:column;gap:7px;min-width:190px;padding:12px;background:#fff;color:#10243d;border:1px solid #d7e1ec;border-radius:12px;box-shadow:0 10px 30px #071b3130}
+#krim-language-toggle{min-height:40px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;border:1px solid #c7d5e4;border-radius:10px;background:#fff;color:#176A9F;border-color:#B9DDF3;box-shadow:0 3px 10px rgba(22,105,159,.10);font-size:14px;line-height:1;cursor:pointer}
+#krim-language-toggle:hover{background:#EAF6FE;border-color:#80C4EA;color:#0876C9}
+#krim-language-menu{position:absolute;right:0;top:calc(100% + 8px);display:flex;flex-direction:column;gap:7px;min-width:190px;padding:12px;background:#fff;color:#10243d;border:1px solid #D6E9F7;border-radius:12px;box-shadow:0 10px 30px rgba(22,91,140,.15)}
 #krim-language-menu[hidden]{display:none}
-#krim-language-menu select{width:100%;min-height:42px;padding:7px 9px;border:1px solid #9fb3c8;border-radius:8px;background:#fff;color:#10243d;font:600 14px system-ui}
-#krim-language-note{font-size:11px;color:#26736d}
+#krim-language-menu select{width:100%;min-height:42px;padding:7px 9px;border:1px solid #9fb3c8;border-radius:8px;background:#fff;color:#164B78;border-color:#B9DDF3;font:600 14px system-ui}
+#krim-language-note{font-size:11px;color:#168FE0}
 #google_translate_element{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important}
 .goog-te-banner-frame{display:none!important}body{top:0!important}
 @media(max-width:960px){#krim-language-control{width:100%;display:flex;justify-content:flex-start;padding:10px 4px 4px;border-top:1px solid #edf1f5;margin:8px 0 0}#krim-language-toggle{min-height:44px;padding:0 14px}#krim-language-menu{left:4px;right:auto;min-width:min(240px,calc(100vw - 48px))}}
