@@ -507,6 +507,7 @@ body>footer{padding:26px 18px!important}
             <div class="rounded-xl border border-slate-700 p-3"><span class="block text-[9px] uppercase tracking-wider text-slate-400">Commercial access</span><strong id="partner-status-access" class="block mt-1 text-sm text-white">Not confirmed</strong></div>
           </div>
           <p id="partner-status-guidance" class="text-xs leading-6 text-slate-300">Your status will appear after your secure partner organization is loaded. Selecting a pathway does not approve commercial operations.</p>
+          <div id="partner-status-request" hidden class="mt-3 rounded-lg border border-amber-400/40 bg-amber-950/30 p-3 text-sm leading-6 text-amber-100" role="status"><strong class="block mb-1">Information requested by KRIM</strong></div>
         </section>
         <div id="onboarding-feedback" class="text-sm" role="status" aria-live="polite"></div>
         <section id="capability-next-step" hidden aria-live="polite" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-slate-800">
@@ -728,7 +729,7 @@ body>footer{padding:26px 18px!important}
 
         const { data: organizations, error: organizationError } = await onboardingClient
           .from("krim_organizations")
-          .select("id, organization_type, organization_type_code, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+          .select("id, organization_type, organization_type_code, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status, partner_onboarding_status, partner_review_notes")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
         const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
@@ -758,11 +759,21 @@ body>footer{padding:26px 18px!important}
         document.getElementById("partner-status-verification").textContent = statusLabel(verification);
         document.getElementById("partner-status-compliance").textContent = statusLabel(compliance);
         document.getElementById("partner-status-access").textContent = "Not established — separate approvals required";
-        document.getElementById("partner-status-guidance").textContent = reviewRejected
+        const informationRequested = String(partnerOrg.partner_onboarding_status || "").toLowerCase() === "needs_information";
+        document.getElementById("partner-status-guidance").textContent = informationRequested
+          ? "KRIM needs additional information before completing your business verification. Please review the request below, prepare the missing information/documents, and contact KRIM support to submit the corrected evidence. Your application remains open; commercial access is not enabled."
+          : reviewRejected
           ? "KRIM has recorded a negative verification or compliance decision. Commercial access is blocked. Contact KRIM support for the recorded outcome and to ask whether a corrected application can be submitted."
           : identityVerified
           ? "Your business identity has been verified, but this is not commercial approval. Compliance clearance, each service capability, applicable country/corridor activation, shipment-specific compliance/customs controls, and assignment/capacity must still be independently confirmed."
-          : "These are organization-level status fields only. Your business verification is awaiting review or has not yet been submitted. Commercial eligibility is not established. KRIM must separately review business identity, compliance, each service capability, applicable country/corridor activation, shipment-specific controls and capacity. Development and individual-interest pathways have no commercial access."; 
+          : "These are organization-level status fields only. Your business verification is awaiting review or has not yet been submitted. Commercial eligibility is not established. KRIM must separately review business identity, compliance, each service capability, applicable country/corridor activation, shipment-specific controls and capacity. Development and individual-interest pathways have no commercial access.";
+        if (informationRequested && partnerOrg.partner_review_notes) {
+          const requestBox = document.getElementById("partner-status-request");
+          if (requestBox) {
+            requestBox.hidden = false;
+            requestBox.textContent = String(partnerOrg.partner_review_notes);
+          }
+        } 
         onboardingMessage("Secure session verified. Your documents will be associated only with the verified active partner organization.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
