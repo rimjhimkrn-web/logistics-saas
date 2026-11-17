@@ -72,7 +72,7 @@ $new$;
 
   v_def := pg_get_functiondef('public.krim_internal_market_activation_gate(bigint)'::regprocedure);
   v_new := replace(v_def,'select upper(code) into v_country_code','select upper(iso2_code) into v_country_code');
-  if position(v_new_pack_source in v_new)=0 then
+  if position('and s.created_by<>s.reviewed_by' in v_new)=0 then
     if position(v_old_pack_source in v_new)=0 then
       raise exception 'Market gate country-pack source clause drifted; refusing unsafe patch';
     end if;
@@ -91,7 +91,7 @@ and s.review_status in ('source_checked','legal_reviewed')
         and s.created_by<>s.reviewed_by
         and (
 $new$;
-  if position(v_new_req_source in v_new)=0 then
+  if position('and s.created_by<>s.reviewed_by' in v_new)=0 then
     if position(v_old_req_source in v_new)=0 then
       raise exception 'Market requirement source clause drifted; refusing unsafe patch';
     end if;
