@@ -35,7 +35,7 @@ begin
             where m.user_id=auth.uid()
               and m.status='active'
               and o.status='active'
-              and m.organization_id=split_part(storage.objects.name,'/',1)::bigint
+              and m.organization_id=split_part(name,'/',1)::bigint
               and coalesce(o.organization_type_code,o.organization_type)
                 = any(array['partner','carrier','warehouse','forwarder','logistics_provider','warehouse_operator']::text[])
           )
@@ -64,7 +64,7 @@ begin
             where m.user_id=auth.uid()
               and m.status='active'
               and o.status='active'
-              and m.organization_id=split_part(storage.objects.name,'/',1)::bigint
+              and m.organization_id=split_part(name,'/',1)::bigint
               and coalesce(o.organization_type_code,o.organization_type)
                 = any(array['partner','carrier','warehouse','forwarder','logistics_provider','warehouse_operator']::text[])
           )
