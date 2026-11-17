@@ -42,11 +42,11 @@ begin
  if position('krim_partner_has_active_service_area_for_location' in v_definition)=0 then
   v_definition:=replace(v_definition,
    '      and o.partner_lifecycle_status = ''active''',
-   '      and o.status = ''active'''+
-   '      and o.partner_account_mode = ''registered_business'''+
-   '      and private.krim_partner_compliance_is_current(o.id)'+
-   '      and private.krim_partner_has_active_service_area_for_location(pc.organization_id, v_req.origin_location_id, v_mode_id)'+
-   '      and private.krim_partner_has_active_service_area_for_location(pc.organization_id, v_req.destination_location_id, v_mode_id)'+
+   '      and o.status = ''active'''||
+   '      and o.partner_account_mode = ''registered_business'''||
+   '      and private.krim_partner_compliance_is_current(o.id)'||
+   '      and private.krim_partner_has_active_service_area_for_location(pc.organization_id, v_req.origin_location_id, v_mode_id)'||
+   '      and private.krim_partner_has_active_service_area_for_location(pc.organization_id, v_req.destination_location_id, v_mode_id)'||
    '      and o.partner_lifecycle_status = ''active''');
   if position('krim_partner_has_active_service_area_for_location' in v_definition)=0 then
    raise exception 'Could not safely locate matching-run candidate filter';
