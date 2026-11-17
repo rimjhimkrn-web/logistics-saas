@@ -542,6 +542,7 @@ body>footer{padding:26px 18px!important}
     let onboardingSession = null;
     let onboardingOrganizationId = null;
     let uploadedDocumentPaths = [];
+    let individualInterestAlreadySubmitted = false;
 
     function onboardingMessage(message, type = "error") {
       const node = document.getElementById("onboarding-feedback");
@@ -701,12 +702,12 @@ body>footer{padding:26px 18px!important}
           businessFields.hidden = !registered;
           individualFields.hidden = !individual;
           businessFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !registered; });
-          individualFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !individual; });
+          individualFields.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !individual || individualInterestAlreadySubmitted; });
           document.getElementById("development-test-note").hidden = mode !== "development_test";
           document.getElementById("registered-business-steps").hidden = !registered;
           const button = document.querySelector("#partner-onboarding-form button[type=submit]");
-          button.disabled = !mode;
-          button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? "Save Independent Partner Interest →" : mode === "registered_business" ? "Submit Business Verification →" : "Choose a Partner Pathway →";
+          button.disabled = !mode || (mode === "individual_interest" && individualInterestAlreadySubmitted);
+          button.textContent = mode === "development_test" ? "Enable Development / Test Mode →" : mode === "individual_interest" ? (individualInterestAlreadySubmitted ? "Independent Partner Interest Already Submitted" : "Save Independent Partner Interest →") : mode === "registered_business" ? "Submit Business Verification →" : "Choose a Partner Pathway →";
         }
         document.getElementById("partner-account-mode").addEventListener("change", updatePartnerModeUI);
         document.querySelectorAll("[data-mode-card]").forEach(card => {
@@ -757,6 +758,7 @@ body>footer{padding:26px 18px!important}
           document.getElementById("individual-city").value = savedIndividual.city || "";
           document.getElementById("individual-service-category").value = savedIndividual.service_category || "road_transport";
           if (savedIndividual.submitted_at || savedIndividual.review_status) {
+            individualInterestAlreadySubmitted = true;
             document.querySelectorAll("#individual-interest-fields input, #individual-interest-fields select").forEach(control => { control.disabled = true; });
             const submitButton = document.querySelector("#partner-onboarding-form button[type=submit]");
             submitButton.disabled = true;
