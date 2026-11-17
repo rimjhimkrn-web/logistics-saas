@@ -127,12 +127,15 @@ jobs:
               print("::error::Credential-like material detected; staging import refused.")
               sys.exit(1)
 
-          # Preserve Supabase-managed schema ownership and ACLs; omit their metadata statements.
+          # Supabase owns managed schemas; comments are optional metadata and may require owner privileges.
+          # Remove COMMENT statements from the schema-only dump; retain all executable DDL and policies.
           lines = []
           for line in sql.splitlines():
               if re.match(r"^\s*CREATE\s+SCHEMA\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:public|graphql_public)\s*;\s*$", line, re.I):
                   continue
-              if re.match(r"^\s*(?:ALTER\s+SCHEMA\s+graphql_public\b|COMMENT\s+ON\s+SCHEMA\s+\b|GRANT\s+.*\s+ON\s+SCHEMA\s+graphql_public\b|REVOKE\s+.*\s+ON\s+SCHEMA\s+graphql_public\b)", line, re.I):
+              if re.match(r"^\s*COMMENT\s+ON\b", line, re.I):
+                  continue
+              if re.match(r"^\s*(?:ALTER\s+SCHEMA\s+graphql_public\b|GRANT\s+.*\s+ON\s+SCHEMA\s+graphql_public\b|REVOKE\s+.*\s+ON\s+SCHEMA\s+graphql_public\b)", line, re.I):
                   continue
               lines.append(line)
           Path("private-export/schema.sql").write_text("\n".join(lines) + "\n")
