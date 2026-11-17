@@ -328,3 +328,17 @@ Do not merge PR #68 or deploy to Production until:
 - [ ] Exercise retry after transient RPC failure and confirm next run safely processes remaining holds.
 
 **Current environment finding:** Staging has no `pg_cron` extension or cron.job relation. The worker source is prepared, but is not deployed or scheduled. A high-entropy `KRIM_CRON_SECRET` must be configured before deployment and scheduler activation.
+
+
+### E11. Dispatchable driver eligibility picker
+
+- [x] Dispatchable-driver RPC requires authenticated partner user with `shipment.dispatch` permission and accepted/active assignment.
+- [x] Driver picker requires active driver membership, verified profile, unexpired licence, accepted front/back licence evidence and accepted identity evidence.
+- [x] Driver picker requires active binding to a verified, operational vehicle with all required vehicle documents approved and unexpired.
+- [x] Drivers/vehicles already assigned to an open trip are excluded.
+- [x] RPC execute is denied to anon and granted to authenticated.
+- [ ] Verify eligible and ineligible rows with positive/negative Staging fixtures.
+- [ ] Browser-test dispatch form and manipulated selections.
+- [ ] Verify selected vehicle payload sufficiency; final assignment RPC performs the authoritative capacity check.
+
+**E11 implementation record:** Staging function definition replaced and grants verified. No eligible driver/vehicle fixtures are recorded; no positive picker or real driver handover test has been completed.
