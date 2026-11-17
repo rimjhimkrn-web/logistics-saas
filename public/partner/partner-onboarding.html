@@ -871,6 +871,9 @@ body>footer{padding:26px 18px!important}
         });
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
+        // The database has committed and now references these files. Never remove
+        // them in the error handler if the later status refresh has a read failure.
+        uploadedDocumentPaths = [];
         // Reflect the committed submission immediately; do not leave the pre-submit
         // organization status on screen until the partner manually reloads.
         const { data: refreshedOrg, error: refreshedOrgError } = await onboardingClient
@@ -892,7 +895,6 @@ body>footer{padding:26px 18px!important}
         document.getElementById("partner-status-guidance").textContent = "Your application has been saved. KRIM must independently review business identity and compliance, then separately approve each service capability and confirm applicable service areas and capacity. You cannot accept shipments or offer services until all required approvals are complete.";
         onboardingMessage("Business verification packet submitted successfully. This is an application receipt only—not approval or permission to accept shipments. Your current status is shown above.", "success");
         document.getElementById("capability-next-step").hidden = false;
-        uploadedDocumentPaths = [];
         button.textContent = "Verification Packet Submitted";
       } catch (error) {
         if (uploadedDocumentPaths.length) {
