@@ -728,7 +728,7 @@ body>footer{padding:26px 18px!important}
 
         const { data: organizations, error: organizationError } = await onboardingClient
           .from("krim_organizations")
-          .select("id, organization_type, organization_type_code, status, partner_account_mode, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
+          .select("id, organization_type, organization_type_code, status, partner_account_mode, partner_metadata, partner_verification_status, partner_lifecycle_status, partner_compliance_status")
           .in("id", organizationIds);
         if (organizationError) throw organizationError;
         const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
@@ -744,11 +744,31 @@ body>footer{padding:26px 18px!important}
           throw new Error("Your partner organization is not active. Verification submission is unavailable until its status is resolved by KRIM support.");
         }
         onboardingOrganizationId = Number(partnerOrg.id);
+        const savedMetadata = partnerOrg.partner_metadata && typeof partnerOrg.partner_metadata === "object" ? partnerOrg.partner_metadata : {};
+        const savedIndividual = savedMetadata.individual_profile && typeof savedMetadata.individual_profile === "object" ? savedMetadata.individual_profile : {};
+        const savedMode = String(partnerOrg.partner_account_mode || savedMetadata.account_mode || "").toLowerCase();
+        if (["development_test","individual_interest","registered_business"].includes(savedMode)) {
+          document.getElementById("partner-account-mode").value = savedMode;
+          updatePartnerModeUI();
+        }
+        if (savedMode === "individual_interest") {
+          document.getElementById("individual-display-name").value = savedIndividual.display_name || "";
+          document.getElementById("individual-country").value = savedIndividual.country_code || "IN";
+          document.getElementById("individual-city").value = savedIndividual.city || "";
+          document.getElementById("individual-service-category").value = savedIndividual.service_category || "road_transport";
+          if (savedIndividual.submitted_at || savedIndividual.review_status) {
+            document.querySelectorAll("#individual-interest-fields input, #individual-interest-fields select").forEach(control => { control.disabled = true; });
+            const submitButton = document.querySelector("#partner-onboarding-form button[type=submit]");
+            submitButton.disabled = true;
+            submitButton.textContent = "Independent Partner Interest Already Submitted";
+            onboardingMessage("Your individual-interest profile is already recorded. Its review status is preserved; please contact KRIM support if any submitted detail needs correction.", "success");
+          }
+        }
         const statusLabel = value => String(value || "not_started").split(/[_-]+/).map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : "").join(" ");
         const verification = String(partnerOrg.partner_verification_status || "not_started").toLowerCase();
         const compliance = String(partnerOrg.partner_compliance_status || "not_started").toLowerCase();
         const lifecycle = String(partnerOrg.partner_lifecycle_status || "not_applicable").toLowerCase();
-        document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Business identity decision recorded" : verification === "pending" ? "Business identity awaiting review" : "Complete business identity review";
+        document.getElementById("partner-verification-status-title").textContent = savedMode === "individual_interest" ? "Independent partner interest recorded" : savedMode === "development_test" ? "Development / test pathway" : verification === "verified" || verification === "approved" ? "Business identity decision recorded" : verification === "pending" ? "Business identity awaiting review" : "Complete business identity review";
         document.getElementById("partner-status-mode").textContent = statusLabel(partnerOrg.partner_account_mode || "pathway not selected");
         document.getElementById("partner-status-verification").textContent = statusLabel(verification);
         document.getElementById("partner-status-compliance").textContent = statusLabel(compliance);
