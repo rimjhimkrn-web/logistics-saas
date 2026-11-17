@@ -18,10 +18,10 @@
  <div class="controls"><input id="search" type="search" placeholder="Search page name or path…" autocomplete="off"><select id="group"><option value="">All sections</option></select></div>
  <div class="count" id="count">Loading page inventory…</div>
  <div class="directory" id="directory"><div class="empty">Checking secure owner authorization…</div></div>
- <div class="warning"><strong>Preview safety:</strong> visual previews do not run page scripts, submit forms, or execute business actions. Live pages continue to enforce their own login, role, MFA and server permissions. This hub never grants public or cross-role backend access.</div>
+ <div class="warning"><strong>Preview safety:</strong> previews are static and read-only: page scripts, forms, links and business actions are disabled. This hub does not open production workflows or grant public or cross-role backend access. Interactive staging tests will be enabled only after staging workflows are configured and verified.</div>
 </section>
 <section class="panel">
- <div class="previewhead"><div class="previewtitle"><strong id="selected-title">Select a page</strong><small id="selected-path">The preview will appear here.</small></div><div class="previewtools"><button class="btn primary" id="open-live" disabled>Open live page ↗</button></div></div>
+ <div class="previewhead"><div class="previewtitle"><strong id="selected-title">Select a page</strong><small id="selected-path">The preview will appear here.</small></div><div class="previewtools"><span class="badge">STATIC PREVIEW ONLY</span></div></div>
  <div class="viewports"><button data-size="desktop" class="active">Desktop</button><button data-size="tablet">Tablet</button><button data-size="mobile">Mobile</button></div>
  <div class="stage"><div class="framewrap" id="framewrap"><div class="empty" id="preview-empty">Choose any page from the directory to preview its interface.</div><iframe id="preview" title="Safe static page preview" sandbox="allow-same-origin" hidden></iframe></div></div>
 </section>
@@ -62,8 +62,6 @@
   selected=pages.find(p=>p.path===path);if(!selected)return;
   $("selected-title").textContent=selected.title;
   $("selected-path").textContent=selected.path;
-  $("open-live").disabled=false;
-  $("open-live").onclick=()=>window.open(base+"/"+selected.path,"_blank","noopener,noreferrer");
   $("preview-empty").hidden=false;$("preview-empty").textContent="Loading safe visual preview…";$("preview").hidden=true;
   render();
   try{
