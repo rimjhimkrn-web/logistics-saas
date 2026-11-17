@@ -53,49 +53,31 @@ $new$;
     execute v_new;
   end if;
 
-  v_old_pack_source := $old$
-and s.review_status in ('source_checked','legal_reviewed')
- and (c.expires_at is null or c.expires_at>now());
-$old$;
-  v_new_pack_source := $new$
-and s.jurisdiction_code in (v_country_code,'*')
- and s.review_status in ('source_checked','legal_reviewed')
- and (s.effective_from is null or s.effective_from<=current_date)
- and (s.effective_until is null or s.effective_until>=current_date)
- and s.created_by is not null and s.reviewed_by is not null
- and s.created_by<>s.reviewed_by
- and c.reviewed_by is not null
- and c.reviewed_by<>s.created_by
- and c.reviewed_by<>s.reviewed_by
- and (c.expires_at is null or c.expires_at>now());
-$new$;
-
   v_def := pg_get_functiondef('public.krim_internal_market_activation_gate(bigint)'::regprocedure);
   v_new := replace(v_def,'select upper(code) into v_country_code','select upper(iso2_code) into v_country_code');
-  if position('and s.created_by<>s.reviewed_by' in v_new)=0 then
-    if position(v_old_pack_source in v_new)=0 then
-      raise exception 'Market gate country-pack source clause drifted; refusing unsafe patch';
-    end if;
-    v_new := replace(v_new,v_old_pack_source,v_new_pack_source);
+
+  -- Apply the source-validity and independent-review requirements to both
+  -- the country-pack evidence query and mandatory market-source query.
+  if position('s.created_by<>s.reviewed_by' in v_new)=0 then
+    v_new := replace(
+      v_new,
+      'and s.review_status in (''source_checked'',''legal_reviewed'')',
+      'and s.jurisdiction_code in (v_country_code,''*'')' ||
+      ' and s.review_status in (''source_checked'',''legal_reviewed'')' ||
+      ' and (s.effective_from is null or s.effective_from<=current_date)' ||
+      ' and (s.effective_until is null or s.effective_until>=current_date)' ||
+      ' and s.created_by is not null and s.reviewed_by is not null and s.created_by<>s.reviewed_by'
+    );
+    v_new := replace(
+      v_new,
+      'and (c.expires_at is null or c.expires_at>now())',
+      'and c.reviewed_by is not null and c.reviewed_by<>s.created_by and c.reviewed_by<>s.reviewed_by' ||
+      ' and (c.expires_at is null or c.expires_at>now())'
+    );
   end if;
 
-  v_old_req_source := $old$
-and s.review_status in ('source_checked','legal_reviewed')
-        and (
-$old$;
-  v_new_req_source := $new$
-and s.review_status in ('source_checked','legal_reviewed')
-        and (s.effective_from is null or s.effective_from<=current_date)
-        and (s.effective_until is null or s.effective_until>=current_date)
-        and s.created_by is not null and s.reviewed_by is not null
-        and s.created_by<>s.reviewed_by
-        and (
-$new$;
-  if position('and s.created_by<>s.reviewed_by' in v_new)=0 then
-    if position(v_old_req_source in v_new)=0 then
-      raise exception 'Market requirement source clause drifted; refusing unsafe patch';
-    end if;
-    v_new := replace(v_new,v_old_req_source,v_new_req_source);
+  if v_new=v_def and position('s.created_by<>s.reviewed_by' in v_new)=0 then
+    raise exception 'Market readiness gate did not accept the independent-source patch';
   end if;
 
   if v_new=v_def then
