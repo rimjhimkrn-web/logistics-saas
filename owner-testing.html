@@ -30,8 +30,8 @@
 <script>
 (function(){
  "use strict";
- const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
- const SUPABASE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+ const SUPABASE_URL="https://qrpcivhdxobiaofppbkl.supabase.co";
+ const SUPABASE_KEY="sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
  const pathParts=location.pathname.split("/").filter(Boolean);
  const base=location.hostname.endsWith("github.io")?"/"+(pathParts[0]||"logistics-saas"):"";
  const authUrl=base+"/auth/krim-admin-access.html?reason=owner-testing-required";
@@ -43,7 +43,7 @@
   if(!client)throw new Error("Secure authentication client unavailable.");
   const {data,error}=await client.auth.getSession();
   if(error||!data.session)throw new Error("A verified KRIM platform administrator session is required.");
-  const {data:result,error:invokeError}=await client.functions.invoke("global-admin-control",{body:{action:"owner_testing_authorize"}});
+  const {data:result,error:invokeError}=await client.functions.invoke("owner-testing-authorize",{body:{}});
   if(invokeError||!result||result.ok!==true||result.data?.owner_testing!==true)throw new Error(result?.error||invokeError?.message||"Server owner authorization denied.");
   authorized=true;
   $("auth-state").textContent="Owner access verified · "+(data.session.user.email||"platform administrator");
