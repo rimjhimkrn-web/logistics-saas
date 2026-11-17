@@ -83,6 +83,13 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 - [ ] Confirm the service-coverage page refuses to silently select an organization when the signed-in user has multiple active partner organizations; the intended organization must be selected explicitly.
 - [ ] Confirm the service-coverage page lists only active partner organizations belonging to the signed-in user, requires an explicit choice when there are multiple, and remembers the choice for the current browser session.
 - [ ] Tamper with or retain a stale selected organization ID; confirm it is ignored unless that ID is still present in the user's active partner memberships, and the chooser is shown again.
+- [ ] Confirm capability registration is locked unless the selected organization is an active registered business with approved verification, active lifecycle and current compliance.
+- [ ] Confirm only active KRIM transport modes and countries can be selected; an inactive country such as India must not be selectable.
+- [ ] Submit one to five valid PDF/JPEG/PNG evidence files (maximum 10 MB each); confirm files are uploaded under the selected organization/user capability folder and the database RPC creates a pending, inactive capability.
+- [ ] Confirm capability submission rejects invalid service types, inactive country/mode IDs, invalid weight, malformed evidence paths, missing evidence objects, oversized details and duplicate pending capability requests.
+- [ ] Confirm an uncertain RPC response is not blindly retried; uploaded evidence is retained for reconciliation when the database outcome is unknown.
+- [ ] Confirm a successful submission appears in the selected organization's capability registry as pending and inactive, with evidence count and details saved.
+- [ ] Confirm another organization cannot read or manage the submitted capability or its private evidence.
 - [ ] In a separate test jurisdiction only, submit a test capability and service area with valid synthetic evidence.
 - [ ] Submit a verified resource and availability window.
 - [ ] Confirm unverified, expired, inactive, insufficient-capacity or mismatched-lane resources do not qualify.
