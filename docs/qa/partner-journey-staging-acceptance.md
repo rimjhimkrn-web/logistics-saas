@@ -108,6 +108,20 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
 
+### E4. Rejected capacity correction and resubmission
+
+- [ ] As the original submitting partner, confirm only your own rejected resources appear in the correction selector; another organisation member cannot resubmit a resource they did not submit.
+- [ ] Select a rejected resource and confirm its saved resource fields, availability window and original lane are loaded for correction.
+- [ ] Correct the requested fields, upload one to five replacement evidence files, and submit.
+- [ ] Confirm the same resource ID and linked availability ID are reused; no duplicate resource is created.
+- [ ] Confirm the resource returns to `pending_review` and availability remains `unavailable` until an independent administrator approves it.
+- [ ] Confirm the previous rejection decision, reason, reviewer and timestamp are retained in `resubmission_history`; the current review fields are cleared.
+- [ ] Confirm the audit log records `partner.capacity_resource.resubmitted`.
+- [ ] Confirm the RPC rejects another user's resource, a non-rejected resource, inactive membership, missing permission, non-compliant organisation, unverified capability, inactive/mismatched lane, invalid capacity/date and missing/foreign evidence.
+- [ ] Confirm a failed submission does not change the rejected resource or its prior review history.
+
+**Pass condition:** correction updates the original rejected record, preserves the prior decision history, and never makes the resource bookable before a fresh independent review.
+
 ### E3. Partner-facing capacity status and review feedback
 
 - [ ] Sign in as a partner with one active registered-business organization and confirm only that organization's resource, availability and commitment rows are visible.
