@@ -122,7 +122,7 @@
       } finally {
         busy = false;
         $("refresh").disabled = false;
-        if ($("connection-state").textContent === "Connected") $("mark-all").disabled = false;
+        if ($("connection-state").textContent === "Connected") $("mark-all").disabled = Number($("unread-count").textContent || 0) === 0;
       }
     }
     async function markRead(id,button) {
