@@ -160,7 +160,16 @@ try{
 const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:Number(q.id)});if(error)throw error;
 const result=Array.isArray(data)?data[0]:data;
 if(!result||Number(result.id)!==Number(q.id)||String(result.status)!=='accepted')throw new Error('KRIM did not confirm acceptance of this exact quote.');
-await loadRecords();render();actionFeedback('Customer quote accepted. KRIM finalized the partner assignment and shipment status. Freight payment remains directly between customer and contracting provider.','success');
+await loadRecords();
+const acceptedQuote=customerQuotes.find(row=>Number(row.id)===Number(q.id)&&String(row.status).toLowerCase()==='accepted');
+const finalizedAssignment=assignments.find(row=>Number(row.partner_quote_id)===Number(q.partner_quote_id)&&['active','completed'].includes(String(row.status).toLowerCase()));
+if(!acceptedQuote||!finalizedAssignment||String(shipment.status).toLowerCase()!=='assigned'){
+  render();
+  actionFeedback('The quote acceptance response was received, but KRIM could not independently confirm the accepted quote, active partner assignment and assigned shipment state together. Do not arrange dispatch yet. Refresh the shipment or contact KRIM operations for reconciliation.','error');
+}else{
+  render();
+  actionFeedback('Booking confirmed: customer quote accepted, partner assignment active and shipment marked assigned. Freight payment remains directly between customer and contracting provider. Next step: partner dispatch readiness.','success');
+}
 }catch(e){console.error(e);actionFeedback('Quote acceptance failed. '+(e&&e.message?e.message:'Server validation failed. Refresh and review the current state.'),'error');}
 finally{busy=false;updateSelection();}
 return;
