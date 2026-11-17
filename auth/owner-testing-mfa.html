@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#071426">
+<title>KRIM Staging Owner MFA | KRIM Logistics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:#061426;color:#f4f8ff;font:15px/1.6 system-ui,sans-serif}.card{width:min(520px,100%);padding:28px;border:1px solid #28435f;border-radius:18px;background:#102943}h1{font-size:26px;margin:8px 0}.muted{color:#a8bad0;font-size:13px}.eyebrow{color:#64dfeb;font-size:10px;font-weight:900;letter-spacing:.16em}.qr{display:grid;place-items:center;padding:15px;margin:18px 0;background:#fff;border-radius:12px;min-height:170px}.qr img{max-width:220px;max-height:220px}.secret{padding:12px;background:#07182a;border:1px solid #385572;border-radius:8px;word-break:break-all;font:13px monospace}.code{width:100%;padding:14px;border:1px solid #385572;border-radius:9px;background:#07182a;color:white;font-size:20px;letter-spacing:.3em;text-align:center}.btn{width:100%;padding:13px;margin-top:14px;border:0;border-radius:9px;background:#168fe0;color:white;font-weight:850;cursor:pointer}.btn:disabled{opacity:.5}#feedback{min-height:24px;font-size:12px;color:#ffb2b9}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="eyebrow">STAGING · OWNER SECURITY</div>
+<h1>Set up authenticator verification</h1>
+<p class="muted">KRIM staging requires multi-factor authentication before owner testing access is granted. Scan the QR code with your authenticator app, then verify the current six-digit code.</p>
+<div id="setup">
+<div class="qr"><img id="qr" alt="Authenticator setup QR code"></div>
+<p class="muted">If you cannot scan the QR code, enter this setup key manually:</p>
+<div class="secret" id="secret">Preparing secure setup…</div>
+<label for="code">6-digit authenticator code</label>
+<input class="code" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+<button class="btn" id="verify">Verify and secure account</button>
+</div>
+<div id="feedback" role="status" aria-live="polite"></div>
+</main>
+<script>
+(async()=>{
+ const URL="https://qrpcivhdxobiaofppbkl.supabase.co";
+ const KEY="sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
+ const client=window.supabase.createClient(URL,KEY);
+ const $=id=>document.getElementById(id);
+ const say=m=>$("feedback").textContent=m;
+ const base="/logistics-saas/";
+ try{
+  const {data:{session},error}=await client.auth.getSession();
+  if(error||!session){location.replace(base+"auth/krim-admin-access.html");return}
+  const {data:factors,error:factorError}=await client.auth.mfa.listFactors();
+  if(factorError)throw factorError;
+  const verified=(factors.totp||[]).find(f=>f.status==="verified");
+  if(verified){location.replace(base+"owner-testing.html");return}
+  const pending=(factors.totp||[]).find(f=>f.status==="unverified");
+  let factorId=pending?.id;
+  if(!pending){
+   const {data,error:enrollError}=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Staging Owner"});
+   if(enrollError)throw enrollError;
+   factorId=enroll.id;
+   $("qr").src=enroll.totp.qr_code;
+   $("secret").textContent=enroll.totp.secret;
+  }else{
+   $("qr").remove();
+   $("secret").textContent="A pending authenticator setup already exists. Use the authenticator app that started that setup.";
+  }
+  $("verify").addEventListener("click",async()=>{
+   const code=$("code").value.trim();
+   if(!/^\d{6}$/.test(code)){say("Enter the six-digit code.");return}
+   $("verify").disabled=true;say("Verifying authenticator…");
+   try{
+    const {data:challenge,error:challengeError}=await client.auth.mfa.challenge({factorId});
+    if(challengeError)throw challengeError;
+    const {error:verifyError}=await client.auth.mfa.verify({factorId,challengeId:challenge.id,code});
+    if(verifyError)throw verifyError;
+    await client.auth.refreshSession();
+    location.replace(base+"owner-testing.html");
+   }catch(e){say(e.message||"Verification failed.");$("verify").disabled=false}
+  });
+ }catch(e){say(e.message||"Unable to initialize authenticator setup.")}
+})();
+</script>
+</body></html>
