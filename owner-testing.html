@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#071a33">
+<title>KRIM Owner Testing Hub</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#061426;--panel:#0d2239;--panel2:#102b46;--line:#28435f;--ink:#f4f8ff;--muted:#a8bad0;--blue:#168fe0;--cyan:#64dfeb;--green:#6de0b5;--red:#ff9da9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#164b6d55,transparent 35%),var(--bg);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:none}.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 22px;background:#061426ed;border-bottom:1px solid #ffffff18;backdrop-filter:blur(14px)}.brand{display:flex;align-items:center;gap:14px;min-width:0}.brand img{display:block;width:174px;max-width:42vw;height:auto;object-fit:contain;object-position:left center}.brand span{padding-left:14px;border-left:1px solid #ffffff2b;color:var(--cyan);font-size:10px;font-weight:900;letter-spacing:.14em}.topright{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.badge{border:1px solid #6de0b544;border-radius:999px;padding:7px 10px;color:#9ef0d0;font-size:10px;font-weight:850}.btn{border:1px solid #385572;background:#102943;color:#eaf4ff;border-radius:9px;padding:9px 12px;font-size:11px;font-weight:850;cursor:pointer}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}.shell{width:min(1600px,100%);margin:auto;padding:24px;display:grid;grid-template-columns:minmax(280px,370px) minmax(0,1fr);gap:18px}.panel{background:linear-gradient(155deg,#102943,#0b1e33);border:1px solid var(--line);border-radius:15px;min-width:0;overflow:hidden}.panelhead{padding:17px 18px;border-bottom:1px solid #ffffff16}.eyebrow{font-size:9px;color:var(--cyan);font-weight:950;letter-spacing:.17em;text-transform:uppercase}.panelhead h1,.panelhead h2{margin:6px 0 4px;font-size:20px;line-height:1.2;letter-spacing:-.035em}.muted{color:var(--muted);font-size:11px;line-height:1.7}.controls{padding:13px;display:grid;gap:9px;border-bottom:1px solid #ffffff16}input,select{width:100%;min-width:0;padding:11px 12px;border:1px solid #385572;border-radius:9px;background:#07182a;color:#fff;outline:none;font-size:12px}input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #64dfeb1c}.count{padding:10px 14px;color:#9fb5cd;font-size:10px;border-bottom:1px solid #ffffff12}.directory{max-height:calc(100vh - 330px);min-height:300px;overflow:auto;padding:7px}.item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid transparent;border-radius:8px;color:#d6e5f5;font-size:11px;cursor:pointer}.item:hover{background:#ffffff0b}.item.active{background:#168fe022;border-color:#168fe066;color:#fff}.item small{display:block;color:#91a8c2;font-size:9px;overflow-wrap:anywhere}.item .openicon{margin-left:auto;color:var(--cyan)}.previewhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #ffffff16}.previewtitle{min-width:0}.previewtitle strong{display:block;font-size:13px;overflow-wrap:anywhere}.previewtitle small{display:block;color:#9eb3cb;font-size:10px;margin-top:3px;overflow-wrap:anywhere}.previewtools{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.viewports{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid #ffffff16}.viewports button{border:1px solid #35516d;background:#0a1b2e;color:#b8cce1;border-radius:7px;padding:6px 9px;font-size:10px;cursor:pointer}.viewports button.active{border-color:var(--cyan);color:#fff;background:#168fe022}.stage{height:calc(100vh - 190px);min-height:480px;display:flex;justify-content:center;align-items:stretch;padding:12px;background:#071321}.framewrap{width:100%;height:100%;max-width:100%;background:#fff;border:1px solid #52677d;border-radius:8px;overflow:hidden;transition:width .2s}.framewrap.mobile{width:390px;max-width:100%}.framewrap.tablet{width:820px;max-width:100%}iframe{display:block;width:100%;height:100%;border:0;background:#fff}.empty{display:grid;place-items:center;height:100%;padding:30px;text-align:center;color:#a9bfd4;font-size:12px}.warning{margin:14px;padding:12px 13px;border:1px solid #b58a4055;background:#a66c1717;border-radius:10px;color:#f2d39a;font-size:10px;line-height:1.7}.foot{padding:0 24px 24px;text-align:center;color:#8198b4;font-size:10px}@media(max-width:900px){.shell{grid-template-columns:1fr;padding:13px}.directory{max-height:300px;min-height:180px}.stage{height:68vh;min-height:430px}.top{padding:11px 13px}.brand span{display:none}}@media(max-width:520px){.brand img{width:145px}.topright .badge{display:none}.previewhead{align-items:flex-start;flex-direction:column}.previewtools{justify-content:flex-start}.stage{padding:6px}.shell{gap:12px}}
+</style>
+</head>
+<body>
+<header class="top"><a class="brand" href="index.html" aria-label="KRIM Logistics home"><img src="assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"><span>OWNER TESTING HUB</span></a><div class="topright"><span class="badge" id="auth-state">Verifying owner access…</span><button class="btn" id="refresh">Refresh inventory</button><button class="btn" id="signout">Sign out</button></div></header>
+<main class="shell">
+<section class="panel">
+ <div class="panelhead"><div class="eyebrow">Private control surface</div><h1>All KRIM pages</h1><div class="muted">Browse the complete HTML page inventory. Choose a page to inspect its interface at desktop, tablet or mobile width.</div></div>
+ <div class="controls"><input id="search" type="search" placeholder="Search page name or path…" autocomplete="off"><select id="group"><option value="">All sections</option></select></div>
+ <div class="count" id="count">Loading page inventory…</div>
+ <div class="directory" id="directory"><div class="empty">Checking secure owner authorization…</div></div>
+ <div class="warning"><strong>Preview safety:</strong> visual previews do not run page scripts, submit forms, or execute business actions. Live pages continue to enforce their own login, role, MFA and server permissions. This hub never grants public or cross-role backend access.</div>
+</section>
+<section class="panel">
+ <div class="previewhead"><div class="previewtitle"><strong id="selected-title">Select a page</strong><small id="selected-path">The preview will appear here.</small></div><div class="previewtools"><button class="btn primary" id="open-live" disabled>Open live page ↗</button></div></div>
+ <div class="viewports"><button data-size="desktop" class="active">Desktop</button><button data-size="tablet">Tablet</button><button data-size="mobile">Mobile</button></div>
+ <div class="stage"><div class="framewrap" id="framewrap"><div class="empty" id="preview-empty">Choose any page from the directory to preview its interface.</div><iframe id="preview" title="Safe static page preview" sandbox="allow-same-origin" hidden></iframe></div></div>
+</section>
+</main>
+<footer class="foot">KRIM Logistics · Owner-only testing access · Server-verified platform role + MFA required</footer>
+<script>
+(function(){
+ "use strict";
+ const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
+ const SUPABASE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+ const pathParts=location.pathname.split("/").filter(Boolean);
+ const base=location.hostname.endsWith("github.io")?"/"+(pathParts[0]||"logistics-saas"):"";
+ const authUrl=base+"/auth/krim-admin-access.html?reason=owner-testing-required";
+ const client=window.supabase&&window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ const $=id=>document.getElementById(id);
+ let pages=[],selected=null,authorized=false;
+ function deny(){location.replace(authUrl)}
+ async function verify(){
+  if(!client)throw new Error("Secure authentication client unavailable.");
+  const {data,error}=await client.auth.getSession();
+  if(error||!data.session)throw new Error("A verified KRIM platform administrator session is required.");
+  const {data:result,error:invokeError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+  if(invokeError||!result||result.ok!==true)throw new Error(result?.error||invokeError?.message||"Server authorization denied.");
+  authorized=true;
+  $("auth-state").textContent="Owner access verified · "+(data.session.user.email||"platform administrator");
+ }
+ function titleFromPath(path){const last=path.split("/").pop().replace(/\.html$/i,"");return last.split(/[-_]+/).filter(Boolean).map(x=>x.charAt(0).toUpperCase()+x.slice(1)).join(" ")}
+ function render(){
+  const q=$("search").value.trim().toLowerCase(),g=$("group").value;
+  const rows=pages.filter(p=>(!g||p.group===g)&&(!q||(p.path+" "+p.title+" "+p.group).toLowerCase().includes(q)));
+  $("count").textContent=rows.length+" of "+pages.length+" pages";
+  $("directory").innerHTML=rows.map(p=>'<button class="item '+(selected&&selected.path===p.path?"active":"")+'" data-path="'+encodeURIComponent(p.path)+'"><span>▤</span><span style="min-width:0;flex:1"><strong>'+escapeHtml(p.title)+'</strong><small>'+escapeHtml(p.path)+'</small></span><span class="openicon">›</span></button>').join("")||'<div class="empty">No pages match this search.</div>';
+  $("directory").querySelectorAll("[data-path]").forEach(b=>b.addEventListener("click",()=>choose(decodeURIComponent(b.dataset.path))));
+ }
+ function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+ async function choose(path){
+  if(!authorized)return;
+  selected=pages.find(p=>p.path===path);if(!selected)return;
+  $("selected-title").textContent=selected.title;
+  $("selected-path").textContent=selected.path;
+  $("open-live").disabled=false;
+  $("open-live").onclick=()=>window.open(base+"/"+selected.path,"_blank","noopener,noreferrer");
+  $("preview-empty").hidden=false;$("preview-empty").textContent="Loading safe visual preview…";$("preview").hidden=true;
+  render();
+  try{
+   const url=location.origin+base+"/"+selected.path;
+   const response=await fetch(url,{credentials:"omit",cache:"no-store"});
+   if(!response.ok)throw new Error("Page source unavailable ("+response.status+").");
+   const source=await response.text();
+   const doc=new DOMParser().parseFromString(source,"text/html");
+   doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
+   doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
+   doc.querySelectorAll("*").forEach(el=>{
+    [...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});
+    if(el.tagName==="A"){el.removeAttribute("href");el.setAttribute("aria-disabled","true")}
+    if(el.tagName==="FORM"){el.removeAttribute("action");el.removeAttribute("method")}
+    if(["BUTTON","INPUT","SELECT","TEXTAREA"].includes(el.tagName))el.setAttribute("disabled","disabled");
+   });
+   let baseEl=doc.querySelector("base");if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
+   baseEl.href=url;
+   const lock=doc.createElement("style");
+   lock.textContent="html{scroll-behavior:auto!important}body{cursor:default!important}a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
+   doc.head.appendChild(lock);
+   const frame=$("preview");
+   frame.srcdoc="<!doctype html>"+doc.documentElement.outerHTML;
+   frame.hidden=false;$("preview-empty").hidden=true;
+  }catch(e){$("preview-empty").hidden=false;$("preview-empty").textContent="Preview could not be rendered: "+e.message}
+ }
+ async function loadManifest(){
+  const res=await fetch(base+"/assets/krim-owner-testing-manifest.json",{cache:"no-store"});
+  if(!res.ok)throw new Error("Page inventory could not be loaded.");
+  pages=await res.json();
+  const groups=[...new Set(pages.map(p=>p.group))].sort();
+  $("group").innerHTML='<option value="">All sections</option>'+groups.map(g=>'<option value="'+escapeHtml(g)+'">'+escapeHtml(g)+'</option>').join("");
+  render();
+ }
+ document.querySelectorAll("[data-size]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-size]").forEach(x=>x.classList.toggle("active",x===b));
+  $("framewrap").className="framewrap"+(b.dataset.size==="desktop"?"":(" "+b.dataset.size));
+ }));
+ $("search").addEventListener("input",render);$("group").addEventListener("change",render);
+ $("refresh").addEventListener("click",async()=>{try{await loadManifest()}catch(e){$("count").textContent=e.message}});
+ $("signout").addEventListener("click",async()=>{if(!confirm("Sign out of KRIM owner testing access?"))return;await client.auth.signOut();deny()});
+ (async()=>{try{await verify();await loadManifest()}catch(e){deny()}})();
+})();
+</script>
+</body></html>
