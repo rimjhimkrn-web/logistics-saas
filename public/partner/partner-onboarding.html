@@ -871,7 +871,26 @@ body>footer{padding:26px 18px!important}
         });
         if (error) throw error;
         if (!data) throw new Error("KRIM did not return a verification reference.");
-        onboardingMessage("Business verification packet submitted. This is an application receipt only—not approval or permission to accept shipments. KRIM must complete independent identity and compliance review, then separately review evidence for each service capability and confirm applicable country/corridor activation before any commercial eligibility can be established.", "success");
+        // Reflect the committed submission immediately; do not leave the pre-submit
+        // organization status on screen until the partner manually reloads.
+        const { data: refreshedOrg, error: refreshedOrgError } = await onboardingClient
+          .from("krim_organizations")
+          .select("partner_verification_status, partner_compliance_status, partner_lifecycle_status, partner_account_mode")
+          .eq("id", onboardingOrganizationId)
+          .maybeSingle();
+        if (refreshedOrgError) throw new Error("Your verification packet was submitted, but KRIM could not refresh its status. Reload this page to confirm the saved application.");
+        if (!refreshedOrg) throw new Error("Your verification packet was submitted, but KRIM could not retrieve the organization status. Reload this page to confirm the saved application.");
+        const statusLabel = value => String(value || "not_started").split(/[_-]+/).map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : "").join(" ");
+        const verification = String(refreshedOrg.partner_verification_status || "pending").toLowerCase();
+        document.getElementById("partner-verification-status-title").textContent =
+          verification === "verified" || verification === "approved" ? "Business identity decision recorded" :
+          verification === "pending" ? "Business identity awaiting review" : "Business identity status updated";
+        document.getElementById("partner-status-mode").textContent = statusLabel(refreshedOrg.partner_account_mode || "registered_business");
+        document.getElementById("partner-status-verification").textContent = statusLabel(verification);
+        document.getElementById("partner-status-compliance").textContent = statusLabel(refreshedOrg.partner_compliance_status || "pending");
+        document.getElementById("partner-status-access").textContent = "Not established — separate approvals required";
+        document.getElementById("partner-status-guidance").textContent = "Your application has been saved. KRIM must independently review business identity and compliance, then separately approve each service capability and confirm applicable service areas and capacity. You cannot accept shipments or offer services until all required approvals are complete.";
+        onboardingMessage("Business verification packet submitted successfully. This is an application receipt only—not approval or permission to accept shipments. Your current status is shown above.", "success");
         document.getElementById("capability-next-step").hidden = false;
         uploadedDocumentPaths = [];
         button.textContent = "Verification Packet Submitted";
