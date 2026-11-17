@@ -108,6 +108,19 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
 
+### E3. Partner-facing capacity status and review feedback
+
+- [ ] Sign in as a partner with one active registered-business organization and confirm only that organization's resource, availability and commitment rows are visible.
+- [ ] Sign in as a partner with multiple active partner organizations; require an explicit organization choice before loading or registering resources, and verify a stale/tampered organization ID is rejected.
+- [ ] Confirm each resource displays its backend status and the recorded verification state.
+- [ ] After an administrator requests/rejects a resource with a reason, confirm the partner sees the exact recorded `metadata.review_reason`, review decision and review timestamp.
+- [ ] Confirm no feedback is fabricated when no review reason exists.
+- [ ] Confirm resource and linked availability rows remain organisation-scoped and RLS denies cross-organisation reads.
+- [ ] Confirm partner cannot alter review state or reviewer feedback through the page or direct client writes.
+- [ ] Confirm refresh reflects the latest database state after an administrator decision.
+
+**Pass condition:** a partner can understand the actual recorded resource decision and reviewer feedback, without gaining any approval or availability override.
+
 ### E2. Independent capacity-resource review
 
 - [ ] Open the dedicated platform-admin capacity review workspace.
