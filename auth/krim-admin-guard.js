@@ -4,7 +4,7 @@ const URL="https://ebltviniygljwwseplph.supabase.co";
 const KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 const parts=location.pathname.split("/").filter(Boolean);
 const base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
-const gate=base+"/auth/krim-admin-access.html?reason=required";
+const gate=base+"/auth/login.html?workspace=platform_admin&reason=required";
 function deny(){location.replace(gate)}
 async function loadSdk(){
  if(window.supabase)return;
