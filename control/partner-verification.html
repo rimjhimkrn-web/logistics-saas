@@ -22,6 +22,7 @@
 <section class="hero"><div><div class="eyebrow">Compliance operations</div><h1>Partner verification queue</h1><p>Review business registration details and private supporting documents. Decisions are recorded in the verification case, organization status and audit trail. Approval must follow independent checks.</p></div><button class="btn" id="refresh" type="button">↻ Refresh queue</button></section>
 <div id="notice" class="notice" role="status" aria-live="polite">Checking secure session…</div>
 <div class="stats"><div class="stat"><strong id="pending-count">—</strong><span>Awaiting decision</span></div><div class="stat"><strong id="approved-count">—</strong><span>Approved cases shown</span></div><div class="stat"><strong id="rejected-count">—</strong><span>Rejected cases shown</span></div></div>
+<section aria-labelledby="individual-title" style="margin:24px 0"><div class="hero"><div><div class="eyebrow">Partner acquisition</div><h1 id="individual-title">Individual partner interests</h1><p>Expressions of interest are shown separately from registered-business verification. These records are not business approvals.</p></div><button class="btn" id="refresh-individual" type="button">↻ Refresh interests</button></div><div id="individual-notice" class="notice" role="status" aria-live="polite">Loading individual partner interests…</div><section id="individual-queue" class="queue" aria-live="polite"></section></section>
 <section id="queue" class="queue" aria-live="polite"></section>
 </main>
 <footer><div class="wrap">KRIM Logistics OS · Private compliance workflow · Review decisions are audited.</div></footer>
@@ -156,9 +157,44 @@ async function loadQueue(){
    queue.append(node("div","No verification data was shown. Confirm that you are signed in with the platform administrator account.","empty"));
  }finally{refresh.disabled=false;refresh.textContent="↻ Refresh queue"}
 }
+async function loadIndividualInterests(){
+ const box=document.getElementById("individual-queue"),note=document.getElementById("individual-notice"),button=document.getElementById("refresh-individual");
+ if(!box||!note)return;
+ if(button){button.disabled=true;button.textContent="Loading…"}
+ box.replaceChildren();note.className="notice";note.textContent="Loading individual partner interests…";
+ try{
+  const {data,error}=await client.functions.invoke("global-admin-control",{body:{action:"partner_individual_interests",limit:100}});
+  if(error)throw error;
+  if(!data||data.ok!==true)throw new Error(data?.error||"The individual interest queue did not confirm success.");
+  const rows=Array.isArray(data.data?.items)?data.data.items:[];
+  if(!rows.length){note.textContent="No individual partner interests are currently recorded.";return}
+  note.textContent=rows.length+" individual-interest record(s). These are interest records only; no commercial approval is implied.";
+  rows.forEach(row=>{
+   const meta=row.partner_metadata&&typeof row.partner_metadata==="object"?row.partner_metadata:{};
+   const profile=meta.individual_profile&&typeof meta.individual_profile==="object"?meta.individual_profile:{};
+   const card=node("article",null,"case"),head=node("div",null,"casehead"),title=node("div");
+   title.append(node("h2",value(profile,"display_name",row.display_name||row.legal_name||"Individual applicant")));
+   title.append(node("div",(row.organization_type_code||row.organization_type||"partner")+" · Updated "+displayDate(row.updated_at),"caseno"));
+   head.append(title);head.append(node("span","INTEREST RECORDED","pill"));card.append(head);
+   const grid=node("div",null,"grid");
+   addField(grid,"Operating country",countryName(profile.country_code));
+   addField(grid,"Operating city",value(profile,"city"));
+   addField(grid,"Service interest",value(profile,"service_category"));
+   addField(grid,"Review status",value(profile,"review_status","interest_recorded"));
+   addField(grid,"Organization status",value(row,"status"));
+   addField(grid,"Commercial eligibility","Not approved · no commercial access");
+   card.append(grid);
+   card.append(node("div","Next action: contact the applicant for any required identity, qualification and jurisdiction-specific evidence. A formal individual review policy and decision workflow must be established before any eligibility decision or commercial activation.","notice"));
+   box.append(card);
+  });
+ }catch(error){note.className="notice error";note.textContent="Individual interest queue unavailable: "+(error?.message||"request failed")+". No records were changed."}
+ finally{if(button){button.disabled=false;button.textContent="↻ Refresh interests"}}
+}
+document.getElementById("refresh-individual")?.addEventListener("click",loadIndividualInterests);
 refresh.addEventListener("click",loadQueue);
 document.getElementById("signout").addEventListener("click",async function(){this.disabled=true;try{if(client)await client.auth.signOut()}finally{location.href="../auth/login.html"}});
 loadQueue();
+loadIndividualInterests();
 })();
 </script>
 </body>
