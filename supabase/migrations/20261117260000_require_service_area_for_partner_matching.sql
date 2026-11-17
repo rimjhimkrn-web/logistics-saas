@@ -16,7 +16,6 @@ as $function$
   join public.krim_partner_service_areas sa on sa.organization_id=p_organization_id
    and sa.country_id=l.country_id and sa.status='active'
    and sa.metadata->>'workflow_status'='approved'
-   and sa.service_type in ('transport','freight_forwarding','first_mile','last_mile','other')
    and sa.transport_mode_id=p_transport_mode_id
    and sa.effective_from<=pg_catalog.now()
    and (sa.effective_until is null or sa.effective_until>pg_catalog.now())
