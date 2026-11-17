@@ -39,6 +39,30 @@ Deno.serve(async(req)=>{
     break;
    }
    case"customer_ecosystem_inventory":{const inventory=[["Customer Services","Address Book","address-book.html"],["Customer Services","Analytics","analytics.html"],["Customer Services","Approval Workflows","approval-workflows.html"],["Customer Services","Booking Confirmation","booking-confirmation.html"],["Customer Services","Cargo Profiles","cargo-profiles.html"],["Customer Services","Claims","claims.html"],["Customer Services","Company Profile","company-profile.html"],["Customer Services","Contract Management","contract-management.html"],["Customer Services","Credit Notes","credit-notes.html"],["Customer Services","Delivery Confirmation","delivery-confirmation.html"],["Customer Services","Dispute","dispute.html"],["Customer Services","Service Centre","index.html"],["Customer Services","Invoices","invoices.html"],["Customer Services","Locations","locations.html"],["Customer Services","Onboarding","onboarding.html"],["Customer Services","Payment History","payment-history.html"],["Customer Services","Proof of Delivery Capture","pod-capture.html"],["Customer Services","Proof of Delivery Download","pod-download.html"],["Customer Services","Portal Overview","portal-overview.html"],["Customer Services","Ratings & Reviews","ratings-reviews.html"],["Customer Services","Recurring Shipments","recurring-shipments.html"],["Customer Services","Refunds","refunds.html"],["Customer Services","Reorder","reorder.html"],["Customer Services","Reports","reports.html"],["Customer Services","Returns","returns.html"],["Customer Services","Saved Routes","saved-routes.html"],["Customer Services","Settlement","settlement.html"],["Customer Services","Shipment Create","shipment-create.html"],["Customer Services","Shipment Details","shipment-details.html"],["Customer Services","Shipment List","shipment-list.html"],["Customer Services","Shipment Timeline","shipment-timeline.html"],["Customer Services","Shipping Preferences","shipping-preferences.html"],["Customer Services","Support","support.html"],["Customer Services","Team Members","team-members.html"],["Customer Services","Tracking Map","tracking-map.html"],["Customer Services","Verification","verification.html"],["Customer Services","Customer Workspace Tools","workspace.html"],["Quotes & Pricing","Contract Rates","contract-rates.html"],["Quotes & Pricing","Currency Conversion","currency-conversion.html"],["Quotes & Pricing","Price Audit","price-audit.html"],["Quotes & Pricing","Pricing Explanation","pricing-explanation.html"],["Quotes & Pricing","Quote Acceptance","quote-acceptance.html"],["Quotes & Pricing","Quote Approval","quote-approval.html"],["Quotes & Pricing","Quote Details","quote-details.html"],["Quotes & Pricing","Quote Expiry","quote-expiry.html"],["Quotes & Pricing","Quote List","quote-list.html"],["Quotes & Pricing","Quote Rejection","quote-rejection.html"],["Quotes & Pricing","Quote Revision","quote-revision.html"],["Quotes & Pricing","Spot Pricing","spot-pricing.html"],["Shipper Services","Booking Request","booking-request.html"],["Shipper Services","ePOD Vault","epod-vault.html"],["Shipper Services","Rate Calculator","rate-calculator.html"],["Shipper Services","Spot Approvals","spot-approvals.html"]];data={pages:inventory.map(([group,title,file])=>({group,title,path:"public/customer-os/"+(group==="Customer Services"?"customer-services/":group==="Quotes & Pricing"?"quotes-pricing/":"shipper-services/")+file}))};break}
+   case"partner_pending_capabilities":{
+    const {data:capabilities,error}=await db.from("krim_partner_capabilities")
+      .select("id,organization_id,transport_mode_id,service_type,coverage_country_id,coverage_region,max_weight_kg,refrigerated,hazardous_goods_capable,active,verification_status,effective_from,effective_until,metadata,created_at")
+      .eq("verification_status","pending")
+      .order("created_at",{ascending:false})
+      .limit(limit);
+    if(error)throw error;
+    const orgIds=[...new Set((capabilities??[]).map((x:any)=>x.organization_id).filter(Boolean))];
+    const modeIds=[...new Set((capabilities??[]).map((x:any)=>x.transport_mode_id).filter(Boolean))];
+    const countryIds=[...new Set((capabilities??[]).map((x:any)=>x.coverage_country_id).filter(Boolean))];
+    const [orgResult,modeResult,countryResult]=await Promise.all([
+      orgIds.length?db.from("krim_organizations").select("id,legal_name,partner_account_mode,partner_verification_status,partner_compliance_status,partner_lifecycle_status,status").in("id",orgIds):Promise.resolve({data:[],error:null}),
+      modeIds.length?db.from("krim_transport_modes").select("id,code,name").in("id",modeIds):Promise.resolve({data:[],error:null}),
+      countryIds.length?db.from("krim_countries").select("id,code,iso2_code,name").in("id",countryIds):Promise.resolve({data:[],error:null})
+    ]);
+    if(orgResult.error)throw orgResult.error;
+    if(modeResult.error)throw modeResult.error;
+    if(countryResult.error)throw countryResult.error;
+    const orgs=new Map((orgResult.data??[]).map((x:any)=>[x.id,x]));
+    const modes=new Map((modeResult.data??[]).map((x:any)=>[x.id,x]));
+    const countries=new Map((countryResult.data??[]).map((x:any)=>[x.id,x]));
+    data={items:(capabilities??[]).map((x:any)=>({...x,organization:orgs.get(x.organization_id)??null,transport_mode:modes.get(x.transport_mode_id)??null,coverage_country:countries.get(x.coverage_country_id)??null}))};
+    break;
+   }
    case"partner_individual_interests":{
     const {data:items,error}=await db.from("krim_organizations")
       .select("id,legal_name,display_name,organization_type,organization_type_code,status,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status,partner_metadata,updated_at")
