@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const supabase = createClient(
+export const supabase = createClient(
   "https://ebltviniygljwwseplph.supabase.co",
   "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
   { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
