@@ -83,31 +83,53 @@ async function renderCase(row){
  titleWrap.append(node("div",value(row,"case_number","No case reference")+" · Submitted "+displayDate(row.submitted_at),"caseno"));
  head.append(titleWrap);head.append(node("span",value(row,"case_status","unknown"),statusClass(row.case_status)));card.append(head);
  const meta={...(row.organization_metadata||{}),...(row.case_metadata||{})};
+ const mode=String(meta.account_mode||"").trim().toLowerCase();
  const details=node("div",null,"grid");
- addField(details,"Registered country",countryName(meta.country_code));
- addField(details,"Primary operating country",countryName(meta.operating_country_code));
- addField(details,"Business registration / authority ID",value(meta,"authority_id"));
- addField(details,"Transport category",value(meta,"operational_category"));
- addField(details,"Registered address",[meta.registered_address,meta.registered_region,meta.registered_city,meta.registered_postal_code].filter(Boolean).join(", ")||"Not supplied");
- addField(details,"Operating location",[meta.operating_region,meta.operating_city,meta.postal_code].filter(Boolean).join(", ")||"Not supplied");
- addField(details,"Business website",value(meta,"website"));
+ addField(details,"Partner pathway",mode==="individual_interest"?"Individual / independent interest":mode==="registered_business"?"Registered business":mode==="development_test"?"Development / test": "Not recorded — manual classification required");
+ if(mode==="individual_interest"){
+   const profile=meta.individual_profile&&typeof meta.individual_profile==="object"?meta.individual_profile:{};
+   addField(details,"Applicant name",value(profile,"display_name"));
+   addField(details,"Operating country",countryName(profile.country_code));
+   addField(details,"Operating city",value(profile,"city"));
+   addField(details,"Service interest",value(profile,"service_category"));
+ }else{
+   addField(details,"Registered country",countryName(meta.country_code));
+   addField(details,"Primary operating country",countryName(meta.operating_country_code));
+   addField(details,"Business registration / authority ID",value(meta,"authority_id"));
+   addField(details,"Transport category",value(meta,"operational_category"));
+   addField(details,"Registered address",[meta.registered_address,meta.registered_region,meta.registered_city,meta.registered_postal_code].filter(Boolean).join(", ")||"Not supplied");
+   addField(details,"Operating location",[meta.operating_region,meta.operating_city,meta.postal_code].filter(Boolean).join(", ")||"Not supplied");
+   addField(details,"Business website",value(meta,"website"));
+ }
  addField(details,"Organization type",value(row,"organization_type"));
  card.append(details);
- const documentsVerified=await addDocuments(card,row);
- if(!documentsVerified)card.append(node("div","Approval is disabled until every submitted verification document is available in private storage.","notice error"));
+ if(mode==="individual_interest"){
+   card.append(node("div","Interest-only application. This record is not a registered-business verification packet. Commercial approval is not available through the business verification decision. A separate individual eligibility and identity-review process is required; no commercial access is granted here.","notice"));
+ }else if(mode==="development_test"){
+   card.append(node("div","Development / Test account. This is not a commercial partner application and must not be approved as a registered business.","notice"));
+ }else if(mode!=="registered_business"){
+   card.append(node("div","The partner pathway is missing or unrecognized. Do not approve or reject until the account pathway is confirmed.","notice error"));
+ }
+ const isBusiness=mode==="registered_business";
+ const documentsVerified=isBusiness?await addDocuments(card,row):false;
+ if(isBusiness&&!documentsVerified)card.append(node("div","Approval is disabled until every submitted verification document is available in private storage.","notice error"));
  if(["open","in_review","pending_information"].includes(row.case_status)){
-   const review=node("div",null,"review");
-   review.append(node("label","Review notes (10+ characters for approval; 5+ for rejection)"));
-   const textarea=node("textarea");textarea.maxLength=1000;textarea.placeholder="Record what was checked, any discrepancies, and the decision rationale.";review.append(textarea);
-   const actions=node("div",null,"actions");
-   const reject=node("button","Reject & restrict","btn danger");reject.type="button";
-   const approve=node("button","Approve partner","btn primary");approve.type="button";
-   approve.disabled=!documentsVerified;
-   approve.title=documentsVerified?"Open and verify the business documents before approval.":"Approval unavailable: required verification documents are missing or inaccessible.";
-   actions.append(reject,approve);review.append(actions);card.append(review);
-   const buttons=[reject,approve];
-   reject.addEventListener("click",()=>decide(row,"rejected",textarea,buttons));
-   approve.addEventListener("click",()=>decide(row,"approved",textarea,buttons));
+   if(isBusiness){
+     const review=node("div",null,"review");
+     review.append(node("label","Review notes (10+ characters for approval; 5+ for rejection)"));
+     const textarea=node("textarea");textarea.maxLength=1000;textarea.placeholder="Record what was checked, any discrepancies, and the decision rationale.";review.append(textarea);
+     const actions=node("div",null,"actions");
+     const reject=node("button","Reject & restrict","btn danger");reject.type="button";
+     const approve=node("button","Approve partner","btn primary");approve.type="button";
+     approve.disabled=!documentsVerified;
+     approve.title=documentsVerified?"Open and verify the business documents before approval.":"Approval unavailable: required verification documents are missing or inaccessible.";
+     actions.append(reject,approve);review.append(actions);card.append(review);
+     const buttons=[reject,approve];
+     reject.addEventListener("click",()=>decide(row,"rejected",textarea,buttons));
+     approve.addEventListener("click",()=>decide(row,"approved",textarea,buttons));
+   }else{
+     card.append(node("div","No decision controls are available for this pathway in the business verification queue. The case remains pending until the correct review workflow is implemented.","notice"));
+   }
  }else if(row.decision_reason){card.append(node("p","Review note: "+row.decision_reason,"caseno"))}
  return card;
 }
