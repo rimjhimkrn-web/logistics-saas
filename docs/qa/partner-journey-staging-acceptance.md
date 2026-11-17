@@ -294,3 +294,25 @@ Do not merge PR #68 or deploy to Production until:
 - [ ] Confirm browser refresh preserves the authoritative binding/reservation state.
 
 **Implementation note:** the partner job page now reads capacity state through a SECURITY DEFINER RPC that checks active organization membership and limits results to supplied assignment IDs. Authenticated EXECUTE is granted; anon EXECUTE is denied. Direct SELECT on reservation tables remains denied.
+
+### E9. Terminal assignment capacity release
+
+- [ ] On rejected/cancelled/completed/failed assignment transition, confirm legacy shipment-weight commitment is released even without a modern capacity binding.
+- [ ] With a held or confirmed modern reservation, confirm the linked reservation and binding are released exactly once.
+- [ ] Confirm release events and audit events identify the assignment and terminal reason.
+- [ ] Confirm already released/expired bindings do not create duplicate release events.
+- [ ] Confirm expiry of a customer quote and partner rejection both release the associated commitment.
+- [ ] Confirm customer shipment cancellation remains covered by the independent shipment-terminal release trigger.
+- [ ] Run repeated and concurrent terminal transitions; confirm capacity is not double-released or left held.
+- [ ] Confirm completed assignments release reservation accounting while retaining the completed assignment history.
+
+**Pass condition:** every terminal assignment outcome frees its outstanding capacity commitment/reservation without duplicate release events or orphaned held capacity.
+
+### E9 implementation record
+
+| Control | Staging evidence | Status |
+|---|---|---|
+| Legacy commitment released without modern binding | Terminal trigger now updates committed legacy row independently of binding ID | Definition/migration verification pending |
+| Held/confirmed reservation and binding released | Trigger retains linked reservation/binding release and event writes | Fixture-based test pending |
+| Duplicate terminal transition | Trigger exits when status is unchanged and only updates live rows | Definition review only |
+| Positive lifecycle / concurrency tests | No verified capacity fixtures in Staging | Not end-to-end tested |
