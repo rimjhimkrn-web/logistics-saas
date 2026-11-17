@@ -173,7 +173,7 @@ jobs:
             -out private-export/krim-schema-export.sql.enc \
             -pass env:EXPORT_PASSPHRASE
 
-          sha256sum private-export/krim-schema-export.sql.enc > private-export/SHA256SUMS
+          (cd private-export && sha256sum krim-schema-export.sql.enc > SHA256SUMS)
           rm -f private-export/schema.sql
 
       - name: Upload encrypted export only
