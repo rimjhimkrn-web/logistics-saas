@@ -138,7 +138,7 @@
       } catch(error) {
         setStatus(error?.message || "Could not update notification.",true);
         button.disabled = false;
-      } finally { busy = false; }
+      } finally { busy = false; $("mark-all").disabled = Number($("unread-count").textContent || 0) === 0; }
     }
     async function reloadAfterAction() {
       const { data,error } = await supabase.from("notifications").select("id,title,message,notification_type,is_read,created_at")
@@ -155,7 +155,7 @@
         setStatus("All currently visible unread notifications were marked as read.");
         await reloadAfterAction();
       }catch(error){setStatus(error?.message||"Could not mark notifications as read.",true)}
-      finally{busy=false;$("mark-all").disabled=false}
+      finally{busy=false;$("mark-all").disabled=Number($("unread-count").textContent||0)===0}
     });
     $("refresh").addEventListener("click",load);
     await load();
