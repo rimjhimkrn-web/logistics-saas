@@ -54,3 +54,20 @@ This is a proposed structure, not a conclusion that KRIM is outside GST, e-comme
 2. Prepare the CA/lawyer briefing pack using the proposed model and exact website workflow.
 3. Obtain written opinions and map each conclusion to the relevant requirement code in the Staging regulatory-source register.
 4. Only then decide which registrations are mandatory and which commercial features may be enabled.
+
+
+## GST law update verified during follow-up research — 17 November 2026
+
+**Important correction/clarification to the preliminary GST discussion above:** the current text of CGST Act section 24(x), following the 2018 amendment, is “every electronic commerce operator who is required to collect tax at source under section 52” — not simply every person who operates any digital platform. The amendment is reproduced in the official India Code copy of the Central Goods and Services Tax (Amendment) Act, 2018: https://www.indiacode.nic.in/bitstream/123456789/11230/1/the_central_goods_and_services_tax_%28amendment%29_act%2C_2018.pdf
+
+Section 52(1) generally requires an ECO (other than an agent) to collect TCS on specified taxable supplies made through it by other suppliers **where consideration for those supplies is to be collected by the ECO**. This makes the actual collection/payment flow material to the section 52 analysis. Official CBIC section 52 text: https://taxinformation.cbic.gov.in/content-page/explore-act/1000325/1000001
+
+However, this does **not** establish that KRIM can automatically operate without GST:
+- Section 24(vii) separately addresses persons making taxable supplies on behalf of other taxable persons, as an agent or otherwise.
+- Whether KRIM is an ECO, an agent, a supplier of its own taxable referral/coordination service, or a combination depends on the real functionality, contractual authority, representations, pricing, control over the transaction and actual conduct.
+- If KRIM is not required to collect TCS under section 52 and does not fall into another compulsory-registration category, the specific section 24(x) ECO registration trigger may not apply. This is a legal/tax conclusion for a CA to confirm against current notifications and the complete facts.
+- The CBIC Sectoral FAQ currently surfaced in search still contains an older broad statement that every ECO must register. Do not rely on that FAQ sentence in isolation where the amended statutory wording is different. The Act and applicable amendments/notifications control.
+
+**Practical design implication (provisional, subject to written CA/legal approval):** keep freight consideration entirely outside KRIM's possession and payment systems; do not authorise KRIM to collect or release partner funds; do not issue partner freight invoices; do not negotiate or conclude carriage contracts as the partner's agent; and do not represent KRIM as the carrier/service supplier. A separately contracted KRIM marketing/referral service still needs its own GST threshold/compulsory-registration and invoicing analysis.
+
+This update is a statutory research correction, not a legal opinion or a launch approval.
