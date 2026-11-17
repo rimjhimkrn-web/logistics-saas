@@ -150,7 +150,7 @@ const {data:members,error:memberError}=await client.from("krim_organization_memb
 const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
 if(!ids.length){fail("Active partner membership required","Your account is signed in, but no active organization membership was returned. Complete partner onboarding or contact KRIM support.");return}
 const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,display_name,legal_name,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);if(orgError)throw orgError;
-const accepted=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
+const accepted=["partner","carrier","forwarder","logistics_provider","warehouse","warehouse_operator"];
 const matches=(orgs||[]).filter(o=>accepted.includes(String(o.organization_type||"").toLowerCase())||accepted.includes(String(o.organization_type_code||"").toLowerCase()));
 if(matches.length>1){fail("Organization selection required","Your account has multiple active partner organizations. Automatic workspace access is paused to prevent cross-organization data exposure.");return}
 const org=matches[0];
