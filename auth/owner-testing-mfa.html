@@ -31,7 +31,7 @@
  const client=window.supabase.createClient(URL,KEY);
  const $=id=>document.getElementById(id);
  const say=m=>$("feedback").textContent=m;
- const base="/logistics-saas/";
+ const parts=location.pathname.split("/").filter(Boolean);\n const base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas")+"/":"/";
  try{
   const {data:{session},error}=await client.auth.getSession();
   if(error||!session){location.replace(base+"auth/krim-admin-access.html");return}
