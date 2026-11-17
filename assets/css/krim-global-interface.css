@@ -193,3 +193,30 @@ body.krim-global-shell :focus-visible,body.krim-global-ui :focus-visible{outline
  body.krim-global-shell :where(button,.btn,[role=button]),body.krim-global-ui :where(button,.btn,[role=button]){min-height:44px}
 }
 @media(prefers-reduced-motion:reduce){body.krim-global-shell *,body.krim-global-ui *{transition:none!important;animation:none!important}}
+
+
+/* KRIM homepage dark-anchor correction v2.
+   Reserve deep ocean navy backgrounds for the main hero and footer only.
+   All other workspace surfaces remain light, with navy used for readable text. */
+body.krim-global-shell,body.krim-global-ui{
+ background:radial-gradient(ellipse at 88% -8%,rgba(70,157,220,.14),transparent 34%),linear-gradient(180deg,#f4f8fc 0%,#f8fbfe 58%,#f1f6fb 100%)!important;
+ color:#132b45!important;
+}
+body.krim-global-shell :where(.top,.topbar,.topline,.top-strip,.utility-bar),body.krim-global-ui :where(.top,.topbar,.topline,.top-strip,.utility-bar){background:#fff!important;color:#132b45!important;border-color:#dce7f1!important}
+body.krim-global-shell :where(.top,.topbar,.topline,.top-strip,.utility-bar) a,body.krim-global-ui :where(.top,.topbar,.topline,.top-strip,.utility-bar) a{color:#1769e8!important}
+body.krim-global-shell :where(.hero),body.krim-global-ui :where(.hero){position:relative;background:#082B4C!important;color:#fff!important;border:1px solid rgba(110,190,224,.28)!important;border-radius:22px!important;box-shadow:0 22px 54px rgba(4,24,45,.18)!important;isolation:isolate;overflow:hidden}
+body.krim-global-shell :where(.hero):before,body.krim-global-ui :where(.hero):before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 78% 35%,rgba(27,117,174,.52) 0,transparent 42%),radial-gradient(ellipse at 5% 100%,rgba(12,75,121,.55) 0,transparent 45%),linear-gradient(115deg,#061C33 0%,#0A3A64 58%,#082B4C 100%)!important;opacity:1!important}
+body.krim-global-shell :where(.hero):after,body.krim-global-ui :where(.hero):after{pointer-events:none}
+body.krim-global-shell :where(.hero) :where(h1,h2,h3,p,small,label),body.krim-global-ui :where(.hero) :where(h1,h2,h3,p,small,label){color:inherit!important}
+body.krim-global-shell :where(.hero) :where(.eyebrow,.kicker,.hero-tagline),body.krim-global-ui :where(.hero) :where(.eyebrow,.kicker,.hero-tagline){color:#9ADFFF!important}
+body.krim-global-shell :where(.hero) :where(.hero-lead,.hero-note),body.krim-global-ui :where(.hero) :where(.hero-lead,.hero-note){color:#E0EDF7!important}
+/* Other introductory panels are intentionally light; they are not hero banners. */
+body.krim-global-shell :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero),body.krim-global-ui :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero){background:linear-gradient(135deg,#fff 0%,#edf6fd 100%)!important;color:#132b45!important;border:1px solid #d9e5ef!important;border-radius:18px!important;box-shadow:0 12px 32px rgba(5,28,51,.07)!important}
+body.krim-global-shell :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero) :where(h1,h2,h3,p,small,label),body.krim-global-ui :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero) :where(h1,h2,h3,p,small,label){color:#132b45!important}
+body.krim-global-shell :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.module-card,.dashboard-card,.tile),body.krim-global-ui :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.module-card,.dashboard-card,.tile){background:#fff!important;color:#132b45!important;border:1px solid #d9e5ef!important;border-radius:17px!important;box-shadow:0 9px 27px rgba(6,30,54,.055)!important}
+body.krim-global-shell :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.module-card,.dashboard-card,.tile) :where(h1,h2,h3,h4,p,small,label),body.krim-global-ui :where(.card,.panel,.metric,.stat,.quote,.payment,.section-card,.workspace-card,.detail-cell,.module-card,.dashboard-card,.tile) :where(h1,h2,h3,h4,p,small,label){color:inherit}
+body.krim-global-shell :where(footer),body.krim-global-ui :where(footer){background:linear-gradient(135deg,#020D19 0%,#041A30 52%,#062B4B 100%)!important;color:#D8E8F5!important;border-top:4px solid #168FE0!important;position:relative}
+body.krim-global-shell :where(footer) :where(.footer-brand,.footer-col b),body.krim-global-ui :where(footer) :where(.footer-brand,.footer-col b){color:#fff!important}
+body.krim-global-shell :where(footer) :where(a,.footer-desc,.footer-brand small,.footer-bottom),body.krim-global-ui :where(footer) :where(a,.footer-desc,.footer-brand small,.footer-bottom){color:#C4D9E9!important}
+body.krim-global-shell :where(footer a:hover),body.krim-global-ui :where(footer a:hover){color:#8BD7FF!important}
+@media(max-width:760px){body.krim-global-shell :where(.hero),body.krim-global-ui :where(.hero){border-radius:17px!important}body.krim-global-shell :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero),body.krim-global-ui :where(.page-hero,.welcome,.intro,.hero-card,.dashboard-hero){border-radius:15px!important}}
