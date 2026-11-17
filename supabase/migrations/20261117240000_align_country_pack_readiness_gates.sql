@@ -45,7 +45,7 @@ left join lateral (
 $new$;
 
   v_def := pg_get_functiondef('public.krim_admin_list_country_packs()'::regprocedure);
-  if position(v_new_lateral in v_def)=0 then
+  if position('s.jurisdiction_code in (p.jurisdiction_code,' || chr(39) || '*' || chr(39) || ')' in v_def)=0 then
     if position(v_old_lateral in v_def)=0 then
       raise exception 'Country pack list RPC definition drifted; refusing unsafe patch';
     end if;
