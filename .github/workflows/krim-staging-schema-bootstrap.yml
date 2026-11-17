@@ -133,7 +133,7 @@ jobs:
           for line in sql.splitlines():
               if re.match(r"^\s*CREATE\s+SCHEMA\s+(?:IF\s+NOT\s+EXISTS\s+)?public\s*;\s*$", line, re.I):
                   continue
-              if re.match(r"^\s*COMMENT\s+ON\s+SCHEMA\s+(?:\\"?graphql_public\\"?)\s+IS\s+.*;\s*$", line, re.I):
+              if re.match(r"^\s*COMMENT\s+ON\s+SCHEMA\s+graphql_public\s+IS\s+.*;\s*$", line, re.I):
                   continue
               lines.append(line)
           Path("private-export/schema.sql").write_text("\n".join(lines) + "\n")
