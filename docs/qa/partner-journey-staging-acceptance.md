@@ -342,3 +342,14 @@ Do not merge PR #68 or deploy to Production until:
 - [ ] Verify selected vehicle payload sufficiency; final assignment RPC performs the authoritative capacity check.
 
 **E11 implementation record:** Staging function definition replaced and grants verified. No eligible driver/vehicle fixtures are recorded; no positive picker or real driver handover test has been completed.
+
+
+### E12. Driver acceptance audit trail
+
+- [x] A successful driver assignment transition from `assigned` to `accepted` creates a server-side audit event.
+- [x] Audit event records actor, partner organization, driver assignment, shipment, leg, partner assignment and vehicle references.
+- [x] Trigger runs only on a real status transition to accepted; repeated accepted-state updates do not create another event.
+- [ ] Exercise with a real verified driver fixture and verify exactly one audit event is created.
+- [ ] Confirm audit-event RLS and admin/operations visibility in the relevant workspace.
+
+**E12 implementation record:** Trigger and function installed in Staging. No driver assignment fixtures exist, so event creation and duplicate-transition behavior remain untested with live rows.
