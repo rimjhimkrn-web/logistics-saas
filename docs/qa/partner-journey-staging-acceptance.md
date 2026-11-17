@@ -80,6 +80,7 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 
 - [ ] Confirm unverified/non-compliant partners cannot submit commercial service areas.
 - [ ] Confirm India service-area submission remains blocked while India is inactive or has no active market/location.
+- [ ] Confirm the service-coverage page refuses to silently select an organization when the signed-in user has multiple active partner organizations; the intended organization must be selected explicitly.
 - [ ] In a separate test jurisdiction only, submit a test capability and service area with valid synthetic evidence.
 - [ ] Submit a verified resource and availability window.
 - [ ] Confirm unverified, expired, inactive, insufficient-capacity or mismatched-lane resources do not qualify.
