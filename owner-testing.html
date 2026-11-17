@@ -43,8 +43,8 @@
   if(!client)throw new Error("Secure authentication client unavailable.");
   const {data,error}=await client.auth.getSession();
   if(error||!data.session)throw new Error("A verified KRIM platform administrator session is required.");
-  const {data:result,error:invokeError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
-  if(invokeError||!result||result.ok!==true)throw new Error(result?.error||invokeError?.message||"Server authorization denied.");
+  const {data:result,error:invokeError}=await client.functions.invoke("global-admin-control",{body:{action:"owner_testing_authorize"}});
+  if(invokeError||!result||result.ok!==true||result.data?.owner_testing!==true)throw new Error(result?.error||invokeError?.message||"Server owner authorization denied.");
   authorized=true;
   $("auth-state").textContent="Owner access verified · "+(data.session.user.email||"platform administrator");
  }
