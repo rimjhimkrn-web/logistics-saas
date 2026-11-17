@@ -108,6 +108,25 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
 
+### E5. Partner service-area submission, review feedback and resubmission
+
+- [ ] Confirm only active, verified, compliant registered-business partners with active manager permission can submit.
+- [ ] Confirm country, market and location scopes must be active and consistent; inactive country/market/location and inactive transport modes are rejected.
+- [ ] Confirm one to five evidence files are uploaded to the private organisation/user service-area folder and verified as owned by the submitter.
+- [ ] Confirm submission creates one `draft` row with `workflow_status=pending_review`, a submitter identity, evidence references and an audit event; it is not operational coverage.
+- [ ] Confirm a matching duplicate pending request is blocked.
+- [ ] As an independent AAL2 platform administrator, approve or reject with a valid rationale; submitter cannot approve own request.
+- [ ] Confirm approval requires an active compliant registered-business organisation, approved current country operating pack, active matching market/location/mode, matching active verified capability and valid private evidence.
+- [ ] Confirm approval sets the service-area row active and workflow approved; rejection closes the row and stores the exact reviewer reason, identity and timestamp.
+- [ ] Confirm partner view shows the review decision, exact reason, review timestamp and correction count.
+- [ ] Confirm only the original submitter can select their own rejected request for correction; prefilled scope and service details match the rejected record.
+- [ ] Upload replacement evidence and resubmit; confirm same service-area ID is reused, prior review metadata is retained in `resubmission_history`, current review fields are cleared and workflow returns to pending review.
+- [ ] Confirm resubmission writes `partner.service_area.resubmitted` audit event and duplicate pending request checks exclude only the same record.
+- [ ] Confirm another user, another organisation, non-rejected record, inactive membership, missing permission, invalid scope, invalid dates and foreign/missing evidence are rejected.
+- [ ] Confirm failed submission/resubmission does not change the original row or prior review history.
+
+**Pass condition:** the partner declaration remains non-operational until independently approved; rejected declarations can be corrected without duplicate records or loss of audit history.
+
 ### E4. Rejected capacity correction and resubmission
 
 - [ ] As the original submitting partner, confirm only your own rejected resources appear in the correction selector; another organisation member cannot resubmit a resource they did not submit.
