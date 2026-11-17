@@ -90,6 +90,13 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 - [ ] Confirm an uncertain RPC response is not blindly retried; uploaded evidence is retained for reconciliation when the database outcome is unknown.
 - [ ] Confirm a successful submission appears in the selected organization's capability registry as pending and inactive, with evidence count and details saved.
 - [ ] Confirm another organization cannot read or manage the submitted capability or its private evidence.
+- [ ] Confirm capacity registration is locked unless the selected registered-business partner is active, independently verified and compliant, has at least one active verified capability, and an active KRIM network lane is available.
+- [ ] Confirm the lane dropdown contains only active lanes whose origin location and transport mode are present in the active KRIM catalogues.
+- [ ] Register a real vehicle/equipment/facility resource with finite positive capacity, supported units, future start/end timestamps, and one to five valid evidence documents; confirm evidence paths use the required organization/user/capacity-UUID filename format.
+- [ ] Confirm the lane-specific RPC rejects an inactive lane, mismatched origin, mismatched transport mode, unverified capability, invalid resource type, invalid capacity, invalid time window, duplicate/missing evidence, and evidence outside the partner's private folder.
+- [ ] Confirm successful registration creates a resource in pending_review and a linked availability row in unavailable status; no assignment/matching must use it before independent review.
+- [ ] Confirm the resource and availability rows appear only within the selected organization's inventory, and no other partner organization can read them.
+- [ ] Simulate a lost/uncertain RPC response; confirm the UI instructs reconciliation and does not automatically submit a duplicate resource.
 - [ ] In a separate test jurisdiction only, submit a test capability and service area with valid synthetic evidence.
 - [ ] Submit a verified resource and availability window.
 - [ ] Confirm unverified, expired, inactive, insufficient-capacity or mismatched-lane resources do not qualify.
