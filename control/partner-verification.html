@@ -23,6 +23,7 @@
 <div id="notice" class="notice" role="status" aria-live="polite">Checking secure session…</div>
 <div class="stats"><div class="stat"><strong id="pending-count">—</strong><span>Awaiting decision</span></div><div class="stat"><strong id="approved-count">—</strong><span>Approved cases shown</span></div><div class="stat"><strong id="rejected-count">—</strong><span>Rejected cases shown</span></div></div>
 <section aria-labelledby="individual-title" style="margin:24px 0"><div class="hero"><div><div class="eyebrow">Partner acquisition</div><h1 id="individual-title">Individual partner interests</h1><p>Expressions of interest are shown separately from registered-business verification. These records are not business approvals.</p></div><button class="btn" id="refresh-individual" type="button">↻ Refresh interests</button></div><div id="individual-notice" class="notice" role="status" aria-live="polite">Loading individual partner interests…</div><section id="individual-queue" class="queue" aria-live="polite"></section></section>
+<section aria-labelledby="capability-title" style="margin:28px 0"><div class="hero"><div><div class="eyebrow">Service activation control</div><h1 id="capability-title">Partner service capabilities</h1><p>Review each service scope separately. Business verification and current compliance are prerequisites; approval activates only the specific capability reviewed.</p></div><button class="btn" id="refresh-capabilities" type="button">↻ Refresh capabilities</button></div><div id="capability-notice" class="notice" role="status" aria-live="polite">Loading pending service capabilities…</div><section id="capability-queue" class="queue" aria-live="polite"></section></section>
 <section id="queue" class="queue" aria-live="polite"></section>
 </main>
 <footer><div class="wrap">KRIM Logistics OS · Private compliance workflow · Review decisions are audited.</div></footer>
@@ -190,11 +191,95 @@ async function loadIndividualInterests(){
  }catch(error){note.className="notice error";note.textContent="Individual interest queue unavailable: "+(error?.message||"request failed")+". No records were changed."}
  finally{if(button){button.disabled=false;button.textContent="↻ Refresh interests"}}
 }
+async function reviewCapability(row,decision,reason,buttons){
+ const trimmed=reason.trim();
+ const minimum=decision==="approved"?10:5;
+ if(trimmed.length<minimum){message("Enter a review note of at least "+minimum+" characters.", "error");return}
+ const warning=decision==="approved"
+  ?"Approve this exact service capability? The database will independently verify business status, current compliance, evidence ownership, dates and service restrictions."
+  :"Reject this exact service capability? The rejection reason will be recorded in the audit trail.";
+ if(!window.confirm(warning))return;
+ buttons.forEach(b=>b.disabled=true);
+ try{
+  const {data,error}=await client.rpc("krim_admin_review_partner_capability",{p_capability_id:row.id,p_decision:decision,p_reason:trimmed});
+  if(error)throw error;
+  if(!data||String(data.decision||"")!==decision)throw new Error("The database did not confirm the requested decision.");
+  const note=document.getElementById("capability-notice");
+  note.className="notice";note.textContent="Capability "+row.id+" review saved: "+decision+". The audit event was recorded.";
+  await loadPendingCapabilities();
+ }catch(error){
+  const note=document.getElementById("capability-notice");note.className="notice error";
+  note.textContent="Capability "+row.id+" was not changed: "+(error?.message||"review failed")+". Check business verification, compliance, evidence and service restrictions.";
+  buttons.forEach(b=>b.disabled=false);
+ }
+}
+async function renderCapability(row){
+ const card=node("article",null,"case"),head=node("div",null,"casehead"),title=node("div");
+ title.append(node("h2",value(row.organization,"legal_name","Partner organisation")));
+ title.append(node("div","Capability #"+row.id+" · Submitted "+displayDate(row.created_at),"caseno"));
+ head.append(title);head.append(node("span","PENDING REVIEW","pill"));card.append(head);
+ const grid=node("div",null,"grid");
+ addField(grid,"Service type",value(row,"service_type"));
+ addField(grid,"Transport mode",value(row.transport_mode,"name",value(row.transport_mode,"code","Mode #"+row.transport_mode_id)));
+ addField(grid,"Coverage country",value(row.coverage_country,"name","Country #"+row.coverage_country_id));
+ addField(grid,"Coverage region",value(row,"coverage_region"));
+ addField(grid,"Maximum weight",row.max_weight_kg?String(row.max_weight_kg)+" kg":"Not specified");
+ addField(grid,"Business identity",value(row.organization,"partner_verification_status"));
+ addField(grid,"Compliance",value(row.organization,"partner_compliance_status"));
+ addField(grid,"Lifecycle",value(row.organization,"partner_lifecycle_status"));
+ addField(grid,"Refrigerated service",row.refrigerated?"Yes — restricted from standard approval":"No");
+ addField(grid,"Hazardous goods",row.hazardous_goods_capable?"Yes — restricted from standard approval":"No");
+ card.append(grid);
+ const meta=row.metadata&&typeof row.metadata==="object"?row.metadata:{};
+ const details=meta.submission_details&&typeof meta.submission_details==="object"?meta.submission_details:{};
+ if(details.equipment_details)card.append(node("p","Equipment: "+details.equipment_details));
+ if(details.operational_constraints)card.append(node("p","Operational constraints: "+details.operational_constraints));
+ const paths=Array.isArray(meta.evidence_paths)?meta.evidence_paths:[];
+ const docs=node("div",null,"docs");
+ if(!paths.length)docs.append(node("span","No evidence paths recorded.","caseno"));
+ for(const path of paths){
+  const link=node("a","Open capability evidence","doc");link.href="#";link.setAttribute("aria-disabled","true");docs.append(link);
+  try{const signed=await client.storage.from("krim-partner-verification").createSignedUrl(path,120);
+   if(signed.error||!signed.data?.signedUrl)throw signed.error||new Error("Unavailable");
+   link.href=signed.data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.removeAttribute("aria-disabled");
+  }catch(_){link.textContent="Evidence unavailable";link.removeAttribute("href")}
+ }
+ card.append(docs);
+ const label=node("label","Review rationale (required)");label.style.display="block";label.style.fontWeight="800";label.style.marginTop="16px";
+ const textarea=node("textarea");textarea.rows=3;textarea.maxLength=1000;textarea.required=true;textarea.placeholder="Record the evidence reviewed and the reason for this decision. Approval requires at least 10 characters; rejection at least 5.";textarea.style.width="100%";textarea.style.marginTop="6px";textarea.style.padding="11px";textarea.style.border="1px solid var(--line)";textarea.style.borderRadius="10px";
+ card.append(label,textarea);
+ const actions=node("div",null,"actions"),approve=node("button","Approve this capability","btn primary"),reject=node("button","Reject capability","btn danger");
+ approve.type=reject.type="button";
+ const buttons=[approve,reject];
+ approve.addEventListener("click",()=>reviewCapability(row,"approved",textarea.value,buttons));
+ reject.addEventListener("click",()=>reviewCapability(row,"rejected",textarea.value,buttons));
+ actions.append(approve,reject);card.append(actions);
+ if(row.refrigerated||row.hazardous_goods_capable)card.append(node("div","This capability cannot be approved through the standard workflow. Specialized temperature-control or hazardous-goods evidence and controls are not yet supported by this approval path.","notice"));
+ return card;
+}
+async function loadPendingCapabilities(){
+ const box=document.getElementById("capability-queue"),note=document.getElementById("capability-notice"),button=document.getElementById("refresh-capabilities");
+ if(!box||!note)return;
+ if(button){button.disabled=true;button.textContent="Loading…"}
+ box.replaceChildren();note.className="notice";note.textContent="Loading pending service capabilities…";
+ try{
+  const {data,error}=await client.functions.invoke("global-admin-control",{body:{action:"partner_pending_capabilities",limit:100}});
+  if(error)throw error;
+  if(!data||data.ok!==true)throw new Error(data?.error||"Pending capability request was not confirmed.");
+  const rows=Array.isArray(data.data?.items)?data.data.items:[];
+  if(!rows.length){note.textContent="No pending partner service capabilities. No capability status was changed.";return}
+  note.textContent=rows.length+" pending capability record(s). Each approval is limited to its submitted scope.";
+  for(const row of rows)box.append(await renderCapability(row));
+ }catch(error){note.className="notice error";note.textContent="Pending capability queue unavailable: "+(error?.message||"request failed")+". No records were changed."}
+ finally{if(button){button.disabled=false;button.textContent="↻ Refresh capabilities"}}
+}
+document.getElementById("refresh-capabilities")?.addEventListener("click",loadPendingCapabilities);
 document.getElementById("refresh-individual")?.addEventListener("click",loadIndividualInterests);
 refresh.addEventListener("click",loadQueue);
 document.getElementById("signout").addEventListener("click",async function(){this.disabled=true;try{if(client)await client.auth.signOut()}finally{location.href="../auth/login.html"}});
 loadQueue();
 loadIndividualInterests();
+loadPendingCapabilities();
 })();
 </script>
 </body>
