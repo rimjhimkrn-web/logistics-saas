@@ -1,0 +1,151 @@
+name: KRIM staging schema-only bootstrap
+
+on:
+  workflow_run:
+    workflows:
+      - KRIM encrypted schema-only export
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  bootstrap:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'mobile/krim-partner-app' &&
+      github.event.workflow_run.head_sha == '1568749bdf41b0b3c6a89dc255f8d340dee0a6bb'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check staging connection secret
+        id: staging
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${STAGING_DB_URL}" ]]; then
+            echo "::warning::Staging bootstrap paused. Add the repository secret KRIM_STAGING_DB_URL (the staging project's PostgreSQL connection URI) and rerun the encrypted schema export."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install PostgreSQL client
+        if: steps.staging.outputs.configured == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Download encrypted schema artifact from the exact source run
+        if: steps.staging.outputs.configured == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: krim-schema-export-encrypted
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: private-export
+
+      - name: Verify, decrypt and apply schema to the empty staging project
+        if: steps.staging.outputs.configured == 'true'
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+          EXPORT_PASSPHRASE: ${{ secrets.KRIM_SCHEMA_EXPORT_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          set +x
+          umask 077
+          trap 'rm -f private-export/schema.sql' EXIT
+
+          test -s private-export/krim-schema-export.sql.enc
+          test -s private-export/SHA256SUMS
+          cd private-export
+          sha256sum --check SHA256SUMS
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in krim-schema-export.sql.enc \
+            -out schema.sql \
+            -pass env:EXPORT_PASSPHRASE
+          test -s schema.sql
+
+          # Independently reject data statements and credential-like material.
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+
+          def mask_sql_literals(sql):
+              out = list(sql)
+              i, n = 0, len(sql)
+              def blank(a, b):
+                  for k in range(a, b):
+                      if out[k] != "\\n":
+                          out[k] = " "
+              while i < n:
+                  if sql.startswith("--", i):
+                      j = sql.find("\\n", i); j = n if j < 0 else j
+                      blank(i, j); i = j; continue
+                  if sql.startswith("/*", i):
+                      start, depth, i = i, 1, i + 2
+                      while i < n and depth:
+                          if sql.startswith("/*", i): depth += 1; i += 2
+                          elif sql.startswith("*/", i): depth -= 1; i += 2
+                          else: i += 1
+                      blank(start, i); continue
+                  if sql[i] == "'":
+                      start = i; i += 1
+                      while i < n:
+                          if sql[i] == "'":
+                              if i + 1 < n and sql[i + 1] == "'": i += 2; continue
+                              i += 1; break
+                          if sql[i] == "\\\\" and i + 1 < n: i += 2
+                          else: i += 1
+                      blank(start, i); continue
+                  if sql[i] == '"':
+                      start = i; i += 1
+                      while i < n:
+                          if sql[i] == '"':
+                              if i + 1 < n and sql[i + 1] == '""': i += 2; continue
+                              i += 1; break
+                          i += 1
+                      blank(start, i); continue
+                  if sql[i] == "$":
+                      m = re.match(r"\\$[A-Za-z_][A-Za-z_0-9]*\\$|\\$\\$", sql[i:])
+                      if m:
+                          tag = m.group(0); start = i; i += len(tag)
+                          end = sql.find(tag, i); i = n if end < 0 else end + len(tag)
+                          blank(start, i); continue
+                  i += 1
+              return "".join(out)
+
+          sql = Path("schema.sql").read_text(errors="replace")
+          cleaned = mask_sql_literals(sql)
+          if re.search(r"(?im)^\\s*(?:INSERT\\s+INTO\\b|COPY\\s+.+?\\s+FROM\\s+stdin\\s*;)", cleaned):
+              print("::error::Data statements detected; staging import refused.")
+              sys.exit(1)
+          if re.search(r"rzp_live_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{10,}|sk_live_[A-Za-z0-9]{10,}|sb_secret_[A-Za-z0-9]{10,}|eyJhbGciOi[A-Za-z0-9._-]{20,}", sql):
+              print("::error::Credential-like material detected; staging import refused.")
+              sys.exit(1)
+
+          # The default public schema already exists in Supabase staging.
+          lines = [line for line in sql.splitlines() if not re.match(r"^\\s*CREATE\\s+SCHEMA\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?public\\s*;\\s*$", line, re.I)]
+          Path("schema.sql").write_text("\\n".join(lines) + "\\n")
+          print("Schema-only and credential checks passed; no row data will be imported.")
+          PY
+
+          # Fail closed unless all target application schemas are empty.
+          existing="$(psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p','v','m','S','f');")"
+          if [[ "$existing" != "0" ]]; then
+            echo "::error::Staging application schemas are not empty ($existing objects). No schema was applied."
+            exit 1
+          fi
+
+          # Single transaction guarantees all-or-nothing staging bootstrap.
+          psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --single-transaction --file schema.sql
+
+          tables="$(psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p');")"
+          routines="$(psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --command "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public');")"
+          echo "Staging schema bootstrap completed. Application tables: $tables; routines: $routines."
+          echo "No production rows, auth users, storage objects, Vault secrets or provider credentials were copied."
