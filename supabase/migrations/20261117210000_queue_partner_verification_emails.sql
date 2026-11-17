@@ -7,6 +7,7 @@ declare
   v_old_declaration text := $old$  v_recipient_user_id uuid;
   v_old_state jsonb;$old$;
   v_new_declaration text := $new$  v_recipient_user_id uuid;
+  v_old_state jsonb;
   v_email_confirmed boolean := false;
   v_outbox_id bigint;
   v_old_block text := $old$  if v_recipient_user_id is not null
