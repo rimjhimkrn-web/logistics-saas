@@ -144,6 +144,51 @@ footer a:hover{color:#fff}
   async function finishLogin(user) {
     if (!client) throw new Error("Secure sign-in did not initialize. Refresh and try again.");
 
+    // Resolve privileged platform roles from the server before evaluating
+    // customer/partner memberships. Organization membership must never
+    // downgrade a platform administrator into a customer workspace.
+    const routeCheck = await client.functions.invoke("krim-auth-workspace-route", { body: {} });
+    if (routeCheck.error || !routeCheck.data || routeCheck.data.ok !== true) {
+      console.error("KRIM privileged workspace routing check failed:", routeCheck.error || routeCheck.data);
+      throw new Error("KRIM could not securely verify your workspace type. Please retry sign-in. Reference: WORKSPACE_ROUTE_CHECK_FAILED.");
+    }
+    if (routeCheck.data.is_platform_admin === true) {
+      postLoginPath = window.krimPath
+        ? window.krimPath("admin-control-center.html")
+        : "../admin-control-center.html";
+
+      // Platform admins must complete authenticator enrollment/challenge before
+      // the protected Global Control Centre is opened. Its server guard performs
+      // the final role + AAL2 authorization independently.
+      const { data: adminFactors, error: adminFactorsError } = await client.auth.mfa.listFactors();
+      if (adminFactorsError) throw adminFactorsError;
+      const adminFactor = (adminFactors?.totp || []).find(item => item.status === "verified");
+      if (!adminFactor) {
+        const enrollUrl = new URL("mfa-enroll.html", window.location.href);
+        enrollUrl.searchParams.set("returnTo", postLoginPath);
+        window.location.replace(enrollUrl.href);
+        return;
+      }
+      const { data: adminAssurance, error: adminAssuranceError } =
+        await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (adminAssuranceError) throw adminAssuranceError;
+      if (adminAssurance?.currentLevel !== "aal2") {
+        factorId = adminFactor.id;
+        document.getElementById("stage-login").classList.add("hidden");
+        document.getElementById("stage-mfa").classList.remove("hidden");
+        document.getElementById("mfa-code").focus();
+        return;
+      }
+      const adminSession = await client.auth.getSession();
+      if (adminSession.error) throw adminSession.error;
+      if (!adminSession.data?.session || adminSession.data.session.user.id !== user.id) {
+        throw new Error("Your credentials were accepted, but the secure admin session was not saved. Please sign in again.");
+      }
+      say(loginFeedback, "Platform administrator verified. Opening the Global Control Centre…", "success");
+      window.location.replace(postLoginPath);
+      return;
+    }
+
     const metadata = user.user_metadata || {};
     const metadataType = normalize(metadata.krim_account_type || metadata.account_type);
     if (["platform_admin", "platform_superadmin", "superadmin", "admin"].includes(metadataType)) {
