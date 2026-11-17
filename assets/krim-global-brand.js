@@ -1,7 +1,7 @@
 /* KRIM global brand lockup — idempotently enforces the approved full master logo. */
 (function(){
   "use strict";
-  var base="/logistics-saas/assets/krim-primary.svg?v=20261117-exact-globe-k-wordmark-v2";
+  var base="/logistics-saas/assets/krim-primary.svg?v=20261117-transparent-brand-v3";
   function apply(){
     if(document.documentElement.dataset.krimBrandApplied==="1") return;
     document.documentElement.dataset.krimBrandApplied="1";
