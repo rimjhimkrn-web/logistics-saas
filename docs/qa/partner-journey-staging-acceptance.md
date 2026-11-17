@@ -316,3 +316,15 @@ Do not merge PR #68 or deploy to Production until:
 | Held/confirmed reservation and binding released | Trigger retains linked reservation/binding release and event writes | Fixture-based test pending |
 | Duplicate terminal transition | Trigger exits when status is unchanged and only updates live rows | Definition review only |
 | Positive lifecycle / concurrency tests | No verified capacity fixtures in Staging | Not end-to-end tested |
+
+### E10. Automated capacity-hold expiry
+
+- [ ] Worker accepts POST only and rejects missing/incorrect cron secret.
+- [ ] Worker uses server-side service credentials only; no service key is exposed to clients.
+- [ ] Worker invokes `krim_internal_expire_capacity_holds` with bounded batch size.
+- [ ] Expired held reservations become expired and linked held/pending bindings become expired.
+- [ ] Reservation and binding events are written once; repeat worker runs do not duplicate expiry events.
+- [ ] Verify worker schedule is configured at the platform scheduler and monitor failures.
+- [ ] Exercise retry after transient RPC failure and confirm next run safely processes remaining holds.
+
+**Current environment finding:** Staging has no `pg_cron` extension or cron.job relation. The worker source is prepared, but is not deployed or scheduled. A high-entropy `KRIM_CRON_SECRET` must be configured before deployment and scheduler activation.
