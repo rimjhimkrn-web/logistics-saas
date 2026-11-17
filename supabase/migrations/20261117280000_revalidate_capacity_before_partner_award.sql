@@ -6,8 +6,8 @@ begin
  if position('krim_internal_partner_has_verified_capacity' in v_definition)=0 then
   v_definition:=replace(v_definition,
    '  v_leg_id bigint;',
-   '  v_leg_id bigint;'+
-   '  v_mode_id bigint;'+
+   '  v_leg_id bigint;'||
+   '  v_mode_id bigint;'||
    '  v_service_date date;');
   v_definition:=replace(v_definition,
    '  IF NOT private.krim_partner_capability_covers_shipment(v_quote.partner_organization_id,v_shipment.id) THEN'||E'\n    RAISE EXCEPTION USING errcode=''42501'', message=''Partner capability no longer covers the shipment route, transport mode or weight'';'||E'\n  END IF;',
@@ -20,7 +20,7 @@ begin
  if position('krim_internal_partner_has_verified_capacity' in v_definition)=0 then
   v_definition:=replace(v_definition,
    '  v_number text;',
-   '  v_number text;'+
+   '  v_number text;'||
    '  v_service_date date;');
   v_definition:=replace(v_definition,
    '  SELECT * INTO v_assignment FROM public.krim_shipment_partner_assignments',
