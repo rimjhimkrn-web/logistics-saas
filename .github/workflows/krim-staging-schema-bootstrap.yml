@@ -17,7 +17,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'mobile/krim-partner-app'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 90
     steps:
       - name: Check staging connection secret
         id: staging
@@ -150,7 +150,10 @@ jobs:
           fi
 
           # Single transaction guarantees all-or-nothing staging bootstrap.
-          psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --single-transaction --file private-export/schema.sql
+          # The schema contains thousands of DDL/ACL statements; allow enough time for Supabase latency.
+          echo "Applying schema-only DDL to the empty staging project in one transaction."
+          psql "$STAGING_DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 --single-transaction --file private-export/schema.sql
+          echo "Schema import transaction committed."
 
           tables="$(psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --command "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p');")"
           routines="$(psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --command "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public');")"
