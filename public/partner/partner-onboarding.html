@@ -748,12 +748,21 @@ body>footer{padding:26px 18px!important}
         const verification = String(partnerOrg.partner_verification_status || "not_started").toLowerCase();
         const compliance = String(partnerOrg.partner_compliance_status || "not_started").toLowerCase();
         const lifecycle = String(partnerOrg.partner_lifecycle_status || "not_applicable").toLowerCase();
-        document.getElementById("partner-verification-status-title").textContent = verification === "verified" || verification === "approved" ? "Business identity decision recorded" : verification === "pending" ? "Business identity awaiting review" : "Complete business identity review";
+        const identityVerified = verification === "verified" || verification === "approved";
+        const reviewRejected = verification === "rejected" || lifecycle === "restricted" || compliance === "non_compliant";
+        document.getElementById("partner-verification-status-title").textContent = reviewRejected
+          ? "Business verification decision: rejected"
+          : identityVerified ? "Business identity verified — further review required"
+          : verification === "pending" ? "Business identity awaiting review" : "Complete business identity review";
         document.getElementById("partner-status-mode").textContent = statusLabel(partnerOrg.partner_account_mode || "pathway not selected");
         document.getElementById("partner-status-verification").textContent = statusLabel(verification);
         document.getElementById("partner-status-compliance").textContent = statusLabel(compliance);
         document.getElementById("partner-status-access").textContent = "Not established — separate approvals required";
-        document.getElementById("partner-status-guidance").textContent = "These are organization-level status fields only. They do not establish commercial eligibility or bookability. KRIM must separately review each service capability and its evidence, applicable country and corridor activation, shipment-specific compliance/customs controls, and assignment/capacity before any service can be offered. Development and individual-interest pathways have no commercial access."; 
+        document.getElementById("partner-status-guidance").textContent = reviewRejected
+          ? "KRIM has recorded a negative verification or compliance decision. Commercial access is blocked. Contact KRIM support for the recorded outcome and to ask whether a corrected application can be submitted."
+          : identityVerified
+          ? "Your business identity has been verified, but this is not commercial approval. Compliance clearance, each service capability, applicable country/corridor activation, shipment-specific compliance/customs controls, and assignment/capacity must still be independently confirmed."
+          : "These are organization-level status fields only. Your business verification is awaiting review or has not yet been submitted. Commercial eligibility is not established. KRIM must separately review business identity, compliance, each service capability, applicable country/corridor activation, shipment-specific controls and capacity. Development and individual-interest pathways have no commercial access."; 
         onboardingMessage("Secure session verified. Your documents will be associated only with the verified active partner organization.", "info");
       } catch (error) {
         onboardingMessage(error.message || "Unable to initialize partner onboarding.");
