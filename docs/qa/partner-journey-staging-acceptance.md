@@ -107,6 +107,24 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
+
+### E2. Independent capacity-resource review
+
+- [ ] Open the dedicated platform-admin capacity review workspace.
+- [ ] Confirm anonymous users and authenticated non-admin users cannot load the queue.
+- [ ] Confirm a platform admin without AAL2 is denied by the backend.
+- [ ] Confirm an AAL2 platform admin can load only pending-review resources.
+- [ ] Confirm each resource displays its organisation, partner lifecycle/compliance state, mode, location, capacity, availability windows and linked availability records.
+- [ ] Preview synthetic evidence using a 60-second signed URL; confirm private storage and cross-organisation access remain denied.
+- [ ] Confirm the submitter cannot approve their own resource, including when the UI is bypassed and the RPC is called directly.
+- [ ] Confirm approval is rejected if the organisation is not current/compliant, the matching transport capability is not independently verified, no future availability remains, or evidence is missing/invalid.
+- [ ] Confirm approval updates the resource to available/verified and only future availability records to available; expired windows remain expired.
+- [ ] Confirm rejection updates the resource to rejected and linked availability to unavailable.
+- [ ] Confirm decisions require a 5–1000 character reason and create an immutable audit event.
+- [ ] Confirm a failed/uncertain decision is not shown as successful and a refresh reconciles the actual database state.
+
+**Pass condition:** only an independent AAL2 platform administrator can decide a pending resource; approval cannot bypass partner, compliance, capability, evidence or availability gates.
+
 ### F. Notifications
 
 - [ ] Confirm in-app notification appears for relevant verification changes.
