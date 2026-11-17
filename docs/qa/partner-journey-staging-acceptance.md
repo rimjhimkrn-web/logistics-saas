@@ -251,3 +251,33 @@ Do not merge PR #68 or deploy to Production until:
 - Capacity/date/time-zone and concurrency tests pass.
 - The India legal/market activation gates are separately satisfied.
 - The owner explicitly approves release.
+
+
+### E8. Partner assignment acceptance and physical capacity reservation
+
+- [ ] Confirm only an active, verified, compliant registered-business partner with the exact awarded quote/opportunity/leg binding can accept an offer.
+- [ ] Confirm accepting an assignment for a customer-confirmed shipment does not mark the shipment assigned before a verified vehicle/weight capacity reservation exists.
+- [ ] Confirm the accepted partner can reserve capacity only for its own assignment, exact shipment leg, active route lane, verified resource and overlapping future departure/arrival window.
+- [ ] Confirm reservation checks both availability capacity and underlying resource capacity, subtracting overlapping held (unexpired) and confirmed reservations.
+- [ ] Run concurrent reservation attempts against the same resource/window; confirm row locks prevent overbooking and one attempt fails when remaining capacity is insufficient.
+- [ ] Retry with the same idempotency key; confirm the existing reservation/binding is returned and capacity is not counted twice.
+- [ ] Reuse an idempotency key for another shipment leg; confirm the RPC rejects it.
+- [ ] Confirm no suitable verified capacity leaves the assignment accepted but the shipment unassigned, with a clear next step to reserve capacity.
+- [ ] After a valid reservation, confirm a customer-confirmed shipment is finalized and the assignment becomes active; a shipment still awaiting customer quote acceptance remains deferred.
+- [ ] Reject/cancel/fail an assignment after reservation; confirm linked reservation and binding are released exactly once and capacity becomes available again.
+- [ ] Confirm expired holds and their bindings transition to expired and no longer consume capacity.
+- [ ] Confirm a failed reservation creates no orphan confirmed reservation or binding and leaves the assignment retryable.
+- [ ] Confirm capacity reservation and assignment transitions create traceable reservation, binding and audit events.
+
+**Pass condition:** partner acceptance alone cannot make a shipment operationally assigned; assignment finalization follows a successful, exact, verified physical capacity reservation, with idempotent retries and release on terminal outcomes.
+
+
+### E8 implementation record
+
+| Control | Staging evidence | Status |
+|---|---|---|
+| Acceptance defers confirmed shipment without physical reservation | Partner response RPC now checks for a confirmed reservation/binding before finalization | Definition verified |
+| Reservation completes assignment finalization | Reservation RPC invokes assignment finalizer after creating the verified binding for a confirmed shipment | Definition verified |
+| Reservation authorization | Authenticated execute granted; anon execute denied | Grant check passed |
+| Positive capacity reservation / concurrency / idempotency | Staging has no verified resource fixtures | Not end-to-end tested |
+| Release / expiry lifecycle | Existing terminal-status release trigger and expiry worker identified | Needs fixture-based lifecycle test |
