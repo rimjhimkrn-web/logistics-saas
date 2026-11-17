@@ -568,21 +568,7 @@ header,.nav-links,.nav-links.open{background:rgba(255,255,255,.98)!important}
 <style id="krim-global-interface-polish">
 /* Global-ready navigation, language control and light blue visual system */
 :root{--navy:#164B78!important;--navy2:#247DB5!important;--blue:#168FE0!important;--cyan:#69BFF0!important;--ink:#23445F!important;--muted:#617F98!important;--line:#DCEBF6!important;--soft:#F2F9FE!important}
-.nav-actions{gap:clamp(8px,1vw,15px)!important}
-.language-control{position:relative;display:flex;align-items:center}
-.language-toggle{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 10px;border:1px solid #D6E9F7;border-radius:8px;background:#fff;color:#176A9F;font-size:11px;font-weight:850;cursor:pointer}
-.language-toggle:hover,.language-toggle[aria-expanded="true"]{border-color:#80C4EA;background:#F1F9FE}
-.language-toggle>span:first-child{font-size:15px;color:#168FE0}
-.language-chevron{font-size:14px}
-.language-menu{position:absolute;right:0;top:calc(100% + 10px);z-index:100;display:grid;gap:9px;width:238px;padding:15px;border:1px solid #D6E9F7;border-radius:12px;background:#fff;box-shadow:0 18px 42px rgba(22,91,140,.15)}
-.language-menu[hidden]{display:none}
-.language-menu-label{color:#6A8AA3;font-size:9px;font-weight:900;letter-spacing:.13em}
-.language-option{display:flex;align-items:center;justify-content:space-between;padding:8px 9px;border-radius:7px;color:#164B78;font-size:12px;font-weight:800}
-.language-option.active{background:#EAF6FE;color:#0876C9}
-.language-option.unavailable{color:#8299AA;background:#FAFCFE}
-.language-option small{font-size:9px;font-weight:700}
-.language-note{padding-top:8px;border-top:1px solid #E7F0F7;color:#71899D;font-size:10px;line-height:1.6}
-.hero{background:#EAF6FE!important;color:#164B78!important}
+.nav-actions{gap:clamp(8px,1vw,15px)!important}.hero{background:#EAF6FE!important;color:#164B78!important}
 .hero:before{background:radial-gradient(ellipse at 82% 38%,rgba(91,185,239,.30) 0,transparent 42%),radial-gradient(ellipse at 5% 100%,rgba(160,220,249,.4) 0,transparent 45%),linear-gradient(115deg,#F8FCFF 0%,#EAF6FE 55%,#DDF1FC 100%)!important}
 .hero:after{opacity:.32!important;background-image:linear-gradient(rgba(38,126,180,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(38,126,180,.10) 1px,transparent 1px)!important}
 .hero h1,.hero h1 span{color:#164B78!important}.hero h1 span{color:#168FE0!important}
@@ -606,9 +592,6 @@ header,.nav-links,.nav-links.open{background:rgba(255,255,255,.98)!important}
 .footer{border-top:1px solid #DCEBF6!important}.footer-brand,.footer-col b{color:#164B78!important}
 .footer-brand small,.footer-desc,.footer-col a,.footer-bottom{color:#617F98!important}
 .footer-bottom{border-top-color:#DCEBF6!important}
-@media(max-width:1100px){.nav-actions{gap:9px!important}.language-toggle{min-height:42px}.language-menu{right:-55px}}
-@media(max-width:760px){.nav-actions{gap:8px!important}.language-toggle{min-height:42px;padding:7px 9px}.language-menu{right:-52px;top:calc(100% + 8px)}}
-@media(max-width:420px){.language-toggle{font-size:10px;padding:6px 8px}.language-menu{right:-50px;width:220px}}
 </style>
 
 </head>
@@ -622,15 +605,6 @@ header,.nav-links,.nav-links.open{background:rgba(255,255,255,.98)!important}
 <a class="mobile-signin-link" href="./auth/login.html">SIGN IN ↗</a>
 <a class="mobile-portal-link" href="./auth/access.html">ACCESS PORTAL ↗</a></nav>
 <div class="nav-actions">
-<div class="language-control">
- <button class="language-toggle" id="language-toggle" type="button" aria-expanded="false" aria-controls="language-menu" aria-label="Language selector"><span aria-hidden="true">◎</span> EN <span class="language-chevron" aria-hidden="true">⌄</span></button>
- <div class="language-menu" id="language-menu" hidden>
-  <span class="language-menu-label">WEBSITE LANGUAGE</span>
-  <span class="language-option active" aria-current="true">✓ English</span>
-  <span class="language-option unavailable" aria-disabled="true">Hindi <small>Coming soon</small></span>
-  <span class="language-note">More languages will be added as verified translations become available.</span>
- </div>
-</div>
 <a class="signin" href="./auth/login.html">SIGN IN</a><a class="btn btn-primary" href="./auth/access.html">ACCESS PORTAL ↗</a><button class="menu" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-nav">☰</button></div>
 </div></header>
 <main id="main">
@@ -707,18 +681,6 @@ header,.nav-links,.nav-links.open{background:rgba(255,255,255,.98)!important}
  }
  const year=document.getElementById('year');
  if(year)year.textContent=new Date().getFullYear();
-})();
-</script>
-<script>
-(function(){
- const toggle=document.getElementById('language-toggle');
- const menu=document.getElementById('language-menu');
- if(toggle&&menu){
-  const close=()=>{menu.hidden=true;toggle.setAttribute('aria-expanded','false')};
-  toggle.addEventListener('click',e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;toggle.setAttribute('aria-expanded',String(open))});
-  document.addEventListener('click',e=>{if(!menu.contains(e.target)&&!toggle.contains(e.target))close()});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();toggle.focus()}});
- }
 })();
 </script>
 </body>
