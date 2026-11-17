@@ -108,6 +108,22 @@ Use separate test identities for applicant and reviewer. An applicant must not a
 **Pass condition:** matching never returns a partner as eligible without approved service capability, active route/market, current evidence and sufficient verified capacity.
 
 
+### E6. Platform-admin service-area review workspace
+
+- [ ] Confirm unauthenticated users cannot see the protected queue or review controls.
+- [ ] Confirm privileged admin access gateway rejects users without platform-admin role and MFA/AAL2.
+- [ ] Confirm queue displays only `draft` / `pending_review` declarations and shows partner, geography, service, mode, effective dates, submitter, notes and evidence count.
+- [ ] Confirm filter works on the rendered queue without changing database records.
+- [ ] Preview each evidence file through a private signed URL that expires after 60 seconds; confirm missing/foreign paths fail closed.
+- [ ] Confirm approval requires a rationale of at least 10 characters and rejection at least 5; both are capped at 1,000 characters.
+- [ ] Confirm administrator who submitted the request cannot approve it.
+- [ ] Confirm approval failure when partner compliance, country operating pack, geography, capability or evidence gates are not satisfied.
+- [ ] Confirm rejection preserves exact reviewer reason, identity and timestamp; partner can see the reason.
+- [ ] Confirm success message is shown only after the RPC returns the matching request ID and decision.
+- [ ] Confirm queue refresh removes reviewed records and no duplicate decision is possible on a non-pending record.
+
+**Pass condition:** a privileged administrator can review evidence and make a reasoned, audited decision; no service-area declaration becomes active through partner self-service.
+
 ### E5. Partner service-area submission, review feedback and resubmission
 
 - [ ] Confirm only active, verified, compliant registered-business partners with active manager permission can submit.
