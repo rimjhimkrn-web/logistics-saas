@@ -89,7 +89,7 @@ async function openDocument(caseId,index){
 async function decide(id,decision){
  const input=$("reason-"+id),reason=input?.value.trim()||"";
  if(decision==="rejected"&&reason.length<5){message("A rejection reason of at least 5 characters is required.","error");return}
- if(decision==="approved"&&reason.length<5){message("Enter the evidence reviewed and approval basis (at least 5 characters).","error");return}
+ if(decision==="approved"&&reason.length<10){message("Enter the evidence reviewed and approval basis (at least 10 characters).","error");return}
  if(!confirm("Confirm "+decision+" for verification case #"+id+"? The decision is audited and cannot be silently reversed."))return;
  try{const {data,error}=await client.rpc("krim_admin_review_partner_verification",{p_case_id:id,p_decision:decision,p_reason:reason});if(error)throw error;if(!data||data.decision!==decision)throw new Error("Database did not confirm the decision.");message(decision==="approved"?"Business verification approved for case #"+id+". Compliance clearance and capability approval are still required; commercial access remains blocked.":"Verification case #"+id+" rejected. Database confirmation received.","success");await load()}
  catch(e){message(e.message||"Decision failed. No success was assumed.","error")}
