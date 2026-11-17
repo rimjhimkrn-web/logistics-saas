@@ -12,7 +12,7 @@ as $function$
   from public.krim_locations l
   join public.krim_countries c on c.id=l.country_id and c.is_active is true
   join public.krim_country_operating_packs cp on cp.jurisdiction_code=c.iso2_code
-   and cp.status='approved' and (cp.next_review_at is null or cp.next_review_at>pg_catalog.now())
+   and cp.pack_status='approved' and (cp.next_review_at is null or cp.next_review_at>pg_catalog.now())
   join public.krim_partner_service_areas sa on sa.organization_id=p_organization_id
    and sa.country_id=l.country_id and sa.status='active'
    and sa.metadata->>'workflow_status'='approved'
@@ -110,3 +110,15 @@ as $function$
  );
 $function$;
 revoke all on function private.krim_partner_capability_covers_shipment_leg(bigint,bigint) from public,anon,authenticated;
+
+-- The existing service-area approval RPC referenced a non-existent pack column.
+do $block$
+declare v_definition text;
+begin
+ select pg_catalog.pg_get_functiondef('public.krim_admin_review_partner_service_area(bigint,text,text)'::regprocedure)
+ into v_definition;
+ if position('cp.status' in v_definition)>0 then
+  execute replace(v_definition,'cp.status','cp.pack_status');
+ end if;
+end
+$block$;
