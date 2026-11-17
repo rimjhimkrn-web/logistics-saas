@@ -8,7 +8,6 @@
     var header=document.querySelector("header");
     var candidates=[
       header&&header.querySelector(".brand-mark"),
-      header&&header.querySelector(".mark"),
       header&&header.querySelector(".brandmark"),
       header&&header.querySelector(".logo"),
       header&&header.querySelector('img[alt*="krim" i],img[alt*="logo" i]'),
@@ -22,21 +21,30 @@
     }
     if(target){
       if(target.tagName==="IMG"){
-        target.src=base;target.alt="KRIM Logistics";target.classList.add("krim-official-brand-logo");
+        target.src=base;target.alt="KRIM Logistics — Global Logistics Operating System";target.classList.add("krim-official-brand-logo");
       }else{
         var replacement=document.createElement("img");
-        replacement.src=base;
-        replacement.alt="KRIM Logistics";
-        replacement.className="krim-official-brand-logo";
-        target.replaceWith(replacement);
+        replacement.src=base;replacement.alt="KRIM Logistics — Global Logistics Operating System";
+        replacement.className="krim-official-brand-logo";target.replaceWith(replacement);
       }
     }else{
-      var bar=document.createElement("div");bar.className="krim-global-brandbar";
-      var link=document.createElement("a");link.className="krim-global-brand-link";link.href="/logistics-saas/";link.setAttribute("aria-label","KRIM Logistics home");
-      var img=document.createElement("img");img.src=base;img.alt="KRIM Logistics";img.className="krim-official-brand-logo";link.appendChild(img);bar.appendChild(link);
-      var body=document.body;
-      if(header){header.insertBefore(link,header.firstChild);link.className="krim-global-brand-link";link.style.cssText="display:inline-flex;align-items:center;padding:6px 14px;max-width:100%;";}
-      else if(body){body.insertBefore(bar,body.firstChild);}
+      var brand=header&&header.querySelector(".brand,[class*='brand']");
+      var img=document.createElement("img");
+      img.src=base;img.alt="KRIM Logistics — Global Logistics Operating System";img.className="krim-official-brand-logo";
+      img.style.cssText="display:block;width:190px;max-width:clamp(148px,48vw,190px);height:auto;max-height:60px;object-fit:contain;object-position:left center;flex:none;";
+      if(brand){
+        var subtitle=brand.querySelector("small");
+        brand.replaceChildren(img);
+        if(subtitle)brand.appendChild(subtitle);
+        brand.style.cssText+="display:flex;align-items:center;gap:12px;min-width:0;";
+      }else if(header){
+        var link=document.createElement("a");link.href="/logistics-saas/";link.setAttribute("aria-label","KRIM Logistics home");link.appendChild(img);
+        header.insertBefore(link,header.firstChild);
+      }else if(document.body){
+        var bar=document.createElement("div");bar.className="krim-global-brandbar";
+        var link=document.createElement("a");link.className="krim-global-brand-link";link.href="/logistics-saas/";link.appendChild(img);bar.appendChild(link);
+        document.body.insertBefore(bar,document.body.firstChild);
+      }
     }
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",apply,{once:true}); else apply();
