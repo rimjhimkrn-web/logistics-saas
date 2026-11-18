@@ -60,34 +60,43 @@
  async function choose(path){
   if(!authorized)return;
   selected=pages.find(p=>p.path===path);if(!selected)return;
-  $("selected-title").textContent=selected.title;
-  $("selected-path").textContent=selected.path;
-  $("preview-empty").hidden=false;$("preview-empty").textContent="Loading safe visual preview…";$("preview").hidden=true;
+  const requested=selected;
+  $("selected-title").textContent=requested.title;
+  $("selected-path").textContent=requested.path;
+  $("preview-empty").hidden=false;
+  $("preview-empty").textContent="Loading safe visual preview…";
+  $("preview").hidden=true;
   render();
   try{
-   // Cloudflare Pages may publish the repository's public/ directory as the site root.
-   // Try the repository path first, then its published-root equivalent.
-   const candidates=selected.path.startsWith("public/")
-    ?[location.origin+base+"/"+selected.path.slice(7),location.origin+base+"/"+selected.path]
-    :[location.origin+base+"/"+selected.path];
-   let response=null,lastError=null,previewUrl="";
-   for(const url of candidates){
-    previewUrl=url;
+   // Cloudflare Pages may publish public/ as its document root.
+   // Fetch the published-root URL first, then fall back to the repository path.
+   const candidates=requested.path.startsWith("public/")
+    ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
+    :[location.origin+base+"/"+requested.path];
+   let source="",previewUrl="",lastError=null;
+   for(const candidate of candidates){
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),7000);
+    const timeout=setTimeout(()=>controller.abort(),8000);
     try{
-     response=await fetch(url,{credentials:"omit",cache:"default",signal:controller.signal});
+     const response=await fetch(candidate,{credentials:"omit",cache:"default",signal:controller.signal});
+     if(!response.ok)throw new Error("Page source unavailable ("+response.status+") at "+new URL(candidate).pathname);
+     // Keep the abort timer active until the response body is fully read.
+     // Previously it was cleared after headers, allowing response.text() to hang forever.
+     source=await response.text();
+     if(!source||!/<html[\\s>]/i.test(source))throw new Error("The server response was not an HTML page.");
+     previewUrl=candidate;
      clearTimeout(timeout);
-     if(response.ok)break;
-     lastError=new Error("Page source unavailable ("+response.status+").");
-     response=null;
+     break;
     }catch(fetchError){
      clearTimeout(timeout);
-     lastError=fetchError.name==="AbortError"?new Error("Preview request timed out after 7 seconds. Refresh the inventory and try again."):fetchError;
+     lastError=fetchError.name==="AbortError"
+      ?new Error("Page download timed out after 8 seconds.")
+      :fetchError;
+     source="";
     }
    }
-   if(!response)throw lastError||new Error("Page source could not be reached.");
-   const source=await response.text();
+   if(!source)throw lastError||new Error("The page source could not be downloaded.");
+   if(selected!==requested)return;
    const doc=new DOMParser().parseFromString(source,"text/html");
    doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
    doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
@@ -97,15 +106,22 @@
     if(el.tagName==="FORM"){el.removeAttribute("action");el.removeAttribute("method")}
     if(["BUTTON","INPUT","SELECT","TEXTAREA"].includes(el.tagName))el.setAttribute("disabled","disabled");
    });
-   let baseEl=doc.querySelector("base");if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
+   let baseEl=doc.querySelector("base");
+   if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
    baseEl.href=previewUrl;
    const lock=doc.createElement("style");
    lock.textContent="html{scroll-behavior:auto!important}body{cursor:default!important}a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
    doc.head.appendChild(lock);
    const frame=$("preview");
    frame.srcdoc="<!doctype html>"+doc.documentElement.outerHTML;
-   frame.hidden=false;$("preview-empty").hidden=true;
-  }catch(e){$("preview-empty").hidden=false;$("preview-empty").textContent="Preview could not be rendered: "+e.message}
+   frame.hidden=false;
+   $("preview-empty").hidden=true;
+  }catch(e){
+   if(selected!==requested)return;
+   $("preview").hidden=true;
+   $("preview-empty").hidden=false;
+   $("preview-empty").textContent="Preview could not be rendered: "+(e&&e.message?e.message:"Unknown preview error");
+  }
  }
  async function loadManifest(){
   const res=await fetch(base+"/assets/krim-owner-testing-manifest.json",{cache:"no-store"});
