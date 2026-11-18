@@ -74,7 +74,7 @@
    // return the homepage HTML for a missing path, so HTTP 200 alone is not proof
    // that the requested page was actually found.
    const candidates=requested.path.startsWith("public/")
-    ?[location.origin+base+"/"+requested.path,location.origin+base+"/"+requested.path.slice(7)]
+    ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
     :[location.origin+base+"/"+requested.path];
    let source="",previewUrl="",lastError=null;
    for(const candidate of candidates){
