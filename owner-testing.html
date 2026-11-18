@@ -69,8 +69,9 @@
    // Try the repository path first, then its published-root equivalent.
    const candidates=[location.origin+base+"/"+selected.path];
    if(selected.path.startsWith("public/"))candidates.push(location.origin+base+"/"+selected.path.slice(7));
-   let response=null,lastError=null;
+   let response=null,lastError=null,previewUrl="";
    for(const url of candidates){
+    previewUrl=url;
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),12000);
     try{
@@ -96,7 +97,7 @@
     if(["BUTTON","INPUT","SELECT","TEXTAREA"].includes(el.tagName))el.setAttribute("disabled","disabled");
    });
    let baseEl=doc.querySelector("base");if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
-   baseEl.href=url;
+   baseEl.href=previewUrl;
    const lock=doc.createElement("style");
    lock.textContent="html{scroll-behavior:auto!important}body{cursor:default!important}a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
    doc.head.appendChild(lock);
