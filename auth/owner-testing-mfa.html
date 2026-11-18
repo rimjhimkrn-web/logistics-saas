@@ -26,9 +26,9 @@
 </main>
 <script>
 (async()=>{
- const URL="https://qrpcivhdxobiaofppbkl.supabase.co";
+ const SUPABASE_URL="https://qrpcivhdxobiaofppbkl.supabase.co";
  const KEY="sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
- const client=window.supabase.createClient(URL,KEY);
+ const client=window.supabase.createClient(SUPABASE_URL,KEY);
  const $=id=>document.getElementById(id);
  const say=m=>$("feedback").textContent=m;
  const parts=location.pathname.split("/").filter(Boolean);
@@ -45,9 +45,9 @@
   if(!pending){
    const {data,error:enrollError}=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Staging Owner"});
    if(enrollError)throw enrollError;
-   factorId=enroll.id;
-   $("qr").src=enroll.totp.qr_code;
-   $("secret").textContent=enroll.totp.secret;
+   factorId=data.id;
+   $("qr").src=data.totp.qr_code;
+   $("secret").textContent=data.totp.secret;
   }else{
    $("qr").remove();
    $("secret").textContent="A pending authenticator setup already exists. Use the authenticator app that started that setup.";
