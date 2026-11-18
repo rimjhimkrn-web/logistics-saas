@@ -21,7 +21,7 @@
  <div class="warning"><strong>Preview safety:</strong> previews are static and read-only: page scripts, forms, links and business actions are disabled. This hub does not open production workflows or grant public or cross-role backend access. Interactive staging tests will be enabled only after staging workflows are configured and verified.</div>
 </section>
 <section class="panel">
- <div class="previewhead"><div class="previewtitle"><strong id="selected-title">Select a page</strong><small id="selected-path">The preview will appear here.</small></div><div class="previewtools"><span class="badge">STATIC PREVIEW ONLY</span></div></div>
+ <div class="previewhead"><div class="previewtitle"><strong id="selected-title">Select a page</strong><small id="selected-path">The preview will appear here.</small></div><div class="previewtools"><span class="badge">STATIC PREVIEW ONLY</span><a class="btn primary" id="open-direct" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Open page in new tab ↗</a></div></div>
  <div class="viewports"><button data-size="desktop" class="active">Desktop</button><button data-size="tablet">Tablet</button><button data-size="mobile">Mobile</button></div>
  <div class="stage"><div class="framewrap" id="framewrap"><div class="empty" id="preview-empty">Choose any page from the directory to preview its interface.</div><iframe id="preview" title="Safe static page preview" sandbox="allow-same-origin" hidden></iframe></div></div>
 </section>
@@ -63,6 +63,10 @@
   const requested=selected;
   $("selected-title").textContent=requested.title;
   $("selected-path").textContent=requested.path;
+  const direct=$("open-direct");
+  const directPath=requested.path.startsWith("public/")?requested.path.slice(7):requested.path;
+  direct.href=base+"/"+directPath;
+  direct.removeAttribute("aria-disabled");
   $("preview-empty").hidden=false;
   $("preview-empty").textContent="Opening safe visual preview…";
   const frame=$("preview");
