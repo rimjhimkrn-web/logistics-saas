@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM — Staging Page Review Links</title>
+<style>
+body{font:15px/1.5 system-ui,sans-serif;margin:0;background:#07182b;color:#edf5ff}
+header{position:sticky;top:0;background:#0b223b;padding:16px;border-bottom:1px solid #35516d}
+main{max-width:1100px;margin:auto;padding:20px}
+input,select{padding:11px;border-radius:8px;border:1px solid #45617d;background:#102b46;color:white}
+input{width:min(100%,500px)}a{color:#75d9f0;text-decoration:none}a:hover{text-decoration:underline}
+.row{padding:10px;border-bottom:1px solid #29425c;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+small{display:block;color:#9db3ca;overflow-wrap:anywhere}.group{margin-top:22px;color:#74dcec}
+#list{margin-top:15px}.pill{color:#b6f2d9}
+</style></head><body>
+<header><strong>KRIM Logistics — Staging Page Review Links</strong><div id="status">Loading page inventory…</div></header>
+<main><p>Direct links to the individual pages in this Staging deployment. Open each page in a new tab for review. Page functionality still requires separate testing.</p>
+<input id="q" placeholder="Search page title or path…"><select id="g"><option value="">All sections</option></select><div id="list"></div></main>
+<script>
+(async()=>{
+const status=document.getElementById('status'),list=document.getElementById('list'),q=document.getElementById('q'),g=document.getElementById('g');
+try{
+const r=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});if(!r.ok)throw Error('Inventory unavailable');const pages=await r.json();
+const groups=[...new Set(pages.map(p=>p.group))].sort();g.innerHTML='<option value="">All sections</option>'+groups.map(x=>'<option>'+x+'</option>').join('');
+status.textContent=pages.length+' pages indexed · '+location.host;
+function draw(){const query=q.value.toLowerCase(),group=g.value;const rows=pages.filter(p=>(!group||p.group===group)&&(!query||(p.title+' '+p.path).toLowerCase().includes(query)));status.textContent=rows.length+' shown · '+pages.length+' total pages';
+list.innerHTML=rows.map(p=>{const path=p.path.startsWith('public/')?p.path.slice(7):p.path;const url=location.origin+'/'+path;return '<div class="row"><div><strong>'+p.title+'</strong><small>'+p.path+'</small></div><a href="'+url+'" target="_blank" rel="noopener">Open page ↗</a></div>'}).join('')||'<p>No matching pages.</p>'}
+q.addEventListener('input',draw);g.addEventListener('change',draw);draw();
+}catch(e){status.textContent='Could not load inventory: '+e.message}
+})();
+</script></body></html>
