@@ -64,76 +64,75 @@
   $("selected-title").textContent=requested.title;
   $("selected-path").textContent=requested.path;
   $("preview-empty").hidden=false;
-  $("preview-empty").textContent="Loading safe visual preview…";
-  $("preview").hidden=true;
+  $("preview-empty").textContent="Opening safe visual preview…";
+  const frame=$("preview");
+  frame.onload=null;
+  frame.hidden=true;
+  frame.removeAttribute("src");
   render();
-  try{
-   // Cloudflare Pages may publish public/ as its document root.
-   // Fetch the published-root URL first, then fall back to the repository path.
-   // Try both repository-relative and Pages-public-root paths. Cloudflare can
-   // return the homepage HTML for a missing path, so HTTP 200 alone is not proof
-   // that the requested page was actually found.
-   const candidates=requested.path.startsWith("public/")
-    ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
-    :[location.origin+base+"/"+requested.path];
-   let source="",previewUrl="",lastError=null;
-   for(const candidate of candidates){
-    const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),8000);
-    try{
-     const response=await fetch(candidate,{credentials:"omit",cache:"default",signal:controller.signal});
-     if(!response.ok)throw new Error("Page source unavailable ("+response.status+") at "+new URL(candidate).pathname);
-     // Keep the abort timer active until the response body is fully read.
-     // Previously it was cleared after headers, allowing response.text() to hang forever.
-     source=await response.text();
-     if(!source||!/<html[\s>]/i.test(source))throw new Error("The server response was not an HTML page.");
-     // Reject SPA/404 fallbacks that serve the homepage with status 200.
-     const parsed=new DOMParser().parseFromString(source,"text/html");
-     const pageTitle=(parsed.title||"").toLowerCase();
-     const visibleHeadings=[...parsed.querySelectorAll("h1,h2")].map(n=>n.textContent||"").join(" ").toLowerCase();
-     const expectedWords=requested.title.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>2);
-     const evidence=pageTitle+" "+visibleHeadings+" "+source.slice(0,12000).toLowerCase();
-     const matched=expectedWords.filter(word=>evidence.includes(word)).length;
-     if(expectedWords.length && matched<Math.ceil(expectedWords.length*0.5))
-      throw new Error("This URL returned a fallback page, not "+requested.title+".");
-     previewUrl=candidate;
-     clearTimeout(timeout);
-     break;
-    }catch(fetchError){
-     clearTimeout(timeout);
-     lastError=fetchError.name==="AbortError"
-      ?new Error("Page download timed out after 8 seconds.")
-      :fetchError;
-     source="";
-    }
-   }
-   if(!source)throw lastError||new Error("The page source could not be downloaded.");
-   if(selected!==requested)return;
-   const doc=new DOMParser().parseFromString(source,"text/html");
-   doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
-   doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
-   doc.querySelectorAll("*").forEach(el=>{
-    [...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});
-    if(el.tagName==="A"){el.removeAttribute("href");el.setAttribute("aria-disabled","true")}
-    if(el.tagName==="FORM"){el.removeAttribute("action");el.removeAttribute("method")}
-    if(["BUTTON","INPUT","SELECT","TEXTAREA"].includes(el.tagName))el.setAttribute("disabled","disabled");
-   });
-   let baseEl=doc.querySelector("base");
-   if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
-   baseEl.href=previewUrl;
-   const lock=doc.createElement("style");
-   lock.textContent="html{scroll-behavior:auto!important}body{cursor:default!important}a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
-   doc.head.appendChild(lock);
-   const frame=$("preview");
-   frame.srcdoc="<!doctype html>"+doc.documentElement.outerHTML;
-   frame.hidden=false;
-   $("preview-empty").hidden=true;
-  }catch(e){
-   if(selected!==requested)return;
-   $("preview").hidden=true;
+
+  // Load the actual page in a sandboxed frame so its original layout, styles,
+  // fonts and images render naturally. Scripts and form submission remain blocked
+  // by the sandbox; after load, links and controls are also made inert.
+  const candidates=requested.path.startsWith("public/")
+   ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
+   :[location.origin+base+"/"+requested.path];
+  let candidateIndex=0;
+  let finished=false;
+  const timeout=setTimeout(()=>{
+   if(finished||selected!==requested)return;
+   finished=true;
+   frame.onload=null;
+   frame.hidden=true;
    $("preview-empty").hidden=false;
-   $("preview-empty").textContent="Preview could not be rendered: "+(e&&e.message?e.message:"Unknown preview error");
-  }
+   $("preview-empty").textContent="Preview timed out. The selected page did not finish loading from this Staging deployment.";
+  },20000);
+
+  const tryNext=()=>{
+   if(selected!==requested||finished)return;
+   if(candidateIndex>=candidates.length){
+    finished=true;clearTimeout(timeout);
+    $("preview-empty").hidden=false;
+    $("preview-empty").textContent="Preview unavailable: neither published page path returned the requested "+requested.title+" page.";
+    return;
+   }
+   frame.src=candidates[candidateIndex++];
+  };
+
+  frame.onload=()=>{
+   if(selected!==requested||finished)return;
+   try{
+    const doc=frame.contentDocument;
+    if(!doc||!doc.documentElement)throw new Error("Page document unavailable.");
+    const pageTitle=(doc.title||"").toLowerCase();
+    const headings=[...doc.querySelectorAll("h1,h2")].map(n=>n.textContent||"").join(" ").toLowerCase();
+    const evidence=pageTitle+" "+headings;
+    const words=requested.title.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>2);
+    const matched=words.filter(w=>evidence.includes(w)).length;
+    if(words.length&&matched<Math.ceil(words.length*.5)){
+     frame.removeAttribute("src");
+     tryNext();
+     return;
+    }
+    // Keep this frame read-only even if the source page contains live workflows.
+    doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
+    doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
+    doc.querySelectorAll("a").forEach(n=>{n.removeAttribute("href");n.setAttribute("aria-disabled","true")});
+    doc.querySelectorAll("form").forEach(n=>{n.removeAttribute("action");n.removeAttribute("method");n.addEventListener("submit",e=>e.preventDefault(),true)});
+    doc.querySelectorAll("button,input,select,textarea").forEach(n=>{n.disabled=true});
+    doc.querySelectorAll("*").forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)}));
+    const lock=doc.createElement("style");
+    lock.textContent="a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
+    doc.head.appendChild(lock);
+    finished=true;clearTimeout(timeout);
+    frame.hidden=false;
+    $("preview-empty").hidden=true;
+   }catch(err){
+    frame.removeAttribute("src");
+    tryNext();
+   }
+  };
+  tryNext();
  }
  async function loadManifest(){
   const res=await fetch(base+"/assets/krim-owner-testing-manifest.json",{cache:"no-store"});
