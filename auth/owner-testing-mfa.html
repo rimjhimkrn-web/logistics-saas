@@ -40,12 +40,12 @@
   if(factorError)throw factorError;
   const verified=(factors.totp||[]).find(f=>f.status==="verified");
   if(verified){location.replace(base+"owner-testing.html");return}
-  const pending=(factors.totp||[]).find(f=>f.status==="unverified");
-  // The previous broken page created an unverified factor but failed before showing its QR.
-  // Remove only that unverified factor, then create a fresh enrollment whose QR is displayed.
-  if(pending){
-   const {error:removeError}=await client.auth.mfa.unenroll({factorId:pending.id});
-   if(removeError)throw removeError;
+  // Remove every unverified TOTP factor left by interrupted setup attempts.
+  // Never remove a verified factor. Then enroll once and display both QR and manual key.
+  const pending=(factors.totp||[]).filter(f=>f.status==="unverified");
+  for(const factor of pending){
+   const {error:removeError}=await client.auth.mfa.unenroll({factorId:factor.id});
+   if(removeError)throw new Error("Could not clear an unfinished authenticator setup: "+removeError.message);
   }
   const {data:enrollData,error:enrollError}=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Staging Owner"});
   if(enrollError)throw enrollError;
