@@ -67,13 +67,14 @@
   try{
    // Cloudflare Pages may publish the repository's public/ directory as the site root.
    // Try the repository path first, then its published-root equivalent.
-   const candidates=[location.origin+base+"/"+selected.path];
-   if(selected.path.startsWith("public/"))candidates.push(location.origin+base+"/"+selected.path.slice(7));
+   const candidates=selected.path.startsWith("public/")
+    ?[location.origin+base+"/"+selected.path.slice(7),location.origin+base+"/"+selected.path]
+    :[location.origin+base+"/"+selected.path];
    let response=null,lastError=null,previewUrl="";
    for(const url of candidates){
     previewUrl=url;
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),12000);
+    const timeout=setTimeout(()=>controller.abort(),7000);
     try{
      response=await fetch(url,{credentials:"omit",cache:"default",signal:controller.signal});
      clearTimeout(timeout);
@@ -82,7 +83,7 @@
      response=null;
     }catch(fetchError){
      clearTimeout(timeout);
-     lastError=fetchError.name==="AbortError"?new Error("Preview request timed out after 12 seconds. Refresh the inventory and try again."):fetchError;
+     lastError=fetchError.name==="AbortError"?new Error("Preview request timed out after 7 seconds. Refresh the inventory and try again."):fetchError;
     }
    }
    if(!response)throw lastError||new Error("Page source could not be reached.");
