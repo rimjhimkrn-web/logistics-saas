@@ -70,8 +70,11 @@
   try{
    // Cloudflare Pages may publish public/ as its document root.
    // Fetch the published-root URL first, then fall back to the repository path.
+   // Try both repository-relative and Pages-public-root paths. Cloudflare can
+   // return the homepage HTML for a missing path, so HTTP 200 alone is not proof
+   // that the requested page was actually found.
    const candidates=requested.path.startsWith("public/")
-    ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
+    ?[location.origin+base+"/"+requested.path,location.origin+base+"/"+requested.path.slice(7)]
     :[location.origin+base+"/"+requested.path];
    let source="",previewUrl="",lastError=null;
    for(const candidate of candidates){
@@ -84,6 +87,15 @@
      // Previously it was cleared after headers, allowing response.text() to hang forever.
      source=await response.text();
      if(!source||!/<html[\s>]/i.test(source))throw new Error("The server response was not an HTML page.");
+     // Reject SPA/404 fallbacks that serve the homepage with status 200.
+     const parsed=new DOMParser().parseFromString(source,"text/html");
+     const pageTitle=(parsed.title||"").toLowerCase();
+     const visibleHeadings=[...parsed.querySelectorAll("h1,h2")].map(n=>n.textContent||"").join(" ").toLowerCase();
+     const expectedWords=requested.title.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>2);
+     const evidence=pageTitle+" "+visibleHeadings+" "+source.slice(0,12000).toLowerCase();
+     const matched=expectedWords.filter(word=>evidence.includes(word)).length;
+     if(expectedWords.length && matched<Math.ceil(expectedWords.length*0.5))
+      throw new Error("This URL returned a fallback page, not "+requested.title+".");
      previewUrl=candidate;
      clearTimeout(timeout);
      break;
