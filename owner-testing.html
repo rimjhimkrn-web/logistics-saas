@@ -83,7 +83,7 @@
      // Keep the abort timer active until the response body is fully read.
      // Previously it was cleared after headers, allowing response.text() to hang forever.
      source=await response.text();
-     if(!source||!/<html[\\s>]/i.test(source))throw new Error("The server response was not an HTML page.");
+     if(!source||!/<html[\s>]/i.test(source))throw new Error("The server response was not an HTML page.");
      previewUrl=candidate;
      clearTimeout(timeout);
      break;
