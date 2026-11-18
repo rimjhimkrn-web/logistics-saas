@@ -152,7 +152,7 @@ const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>
 if(!ids.length){state("Partner onboarding required","Your account is signed in, but no active organization membership was returned. Continue through partner onboarding to establish the appropriate pathway.","No workspace is opened until an active partner organization membership is available.");$("signin").hidden=true;return}
 $("status-title").textContent="Identifying your partner organization";
 const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);if(orgError)throw orgError;
-const valid=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
+const valid=["partner","carrier","forwarder","logistics_provider","warehouse","warehouse_operator"];
 const matches=(orgs||[]).filter(o=>valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase()));
 if(matches.length>1){state("Choose the correct partner organization","Your account has more than one active partner organization. Automatic routing is paused to prevent opening the wrong organization workspace.","Ask KRIM support to establish an explicit organization context before continuing.");return}
 const org=matches[0];

@@ -68,6 +68,65 @@ a{display:inline-block;margin-top:18px;color:#0369a1;font-weight:700;text-decora
     // which checks active membership, organization state, MFA and workspace role.
     const metadata=session.user?.user_metadata||{};
     const accountType=String(metadata.krim_account_type||metadata.account_type||"").trim().toLowerCase();
+    if(accountType==="partner"){
+      // Email-confirmation signups have no authenticated session during the
+      // original signup request, so organization provisioning is completed here.
+      // Reuse an existing active partner organization; never create a duplicate.
+      const {data: memberships,error: membershipError}=await client
+        .from("krim_organization_members")
+        .select("organization_id")
+        .eq("user_id",session.user.id)
+        .eq("status","active");
+      if(membershipError)throw membershipError;
+      const organizationIds=[...new Set((memberships||[]).map(row=>Number(row.organization_id)).filter(Number.isSafeInteger))];
+      let partnerOrganizations=[];
+      if(organizationIds.length){
+        const {data: organizations,error: organizationError}=await client
+          .from("krim_organizations")
+          .select("id,organization_type,organization_type_code,status,partner_account_mode")
+          .in("id",organizationIds);
+        if(organizationError)throw organizationError;
+        const partnerTypes=["partner","carrier","forwarder","logistics_provider","warehouse","warehouse_operator"];
+        partnerOrganizations=(organizations||[]).filter(org=>
+          partnerTypes.includes(String(org.organization_type_code||org.organization_type||"").toLowerCase())
+        );
+      }
+      if(partnerOrganizations.length>1){
+        throw new Error("Multiple partner organizations are linked to this account. Contact KRIM support; no organization was selected automatically.");
+      }
+      let partnerOrganization=partnerOrganizations[0]||null;
+      if(partnerOrganization && String(partnerOrganization.status||"").toLowerCase()!=="active"){
+        throw new Error("Your partner organization is inactive. Contact KRIM support before continuing.");
+      }
+      if(!partnerOrganization){
+        const legalName=String(metadata.company_name||"").trim();
+        if(legalName.length<2)throw new Error("Partner account details are incomplete. Return to Partner Sign Up and contact KRIM support; do not create another account.");
+        const {data: organizationId,error: provisionError}=await client.rpc(
+          "krim_provision_partner_organization",{p_legal_name:legalName}
+        );
+        if(provisionError)throw provisionError;
+        if(!organizationId)throw new Error("KRIM did not confirm partner organization setup.");
+        const {data: organization,error: fetchError}=await client
+          .from("krim_organizations")
+          .select("id,organization_type,organization_type_code,status,partner_account_mode")
+          .eq("id",organizationId)
+          .maybeSingle();
+        if(fetchError)throw fetchError;
+        partnerOrganization=organization;
+      }
+      if(!partnerOrganization || String(partnerOrganization.status||"").toLowerCase()!=="active"){
+        throw new Error("KRIM could not confirm an active partner organization. Contact support.");
+      }
+      if(!String(partnerOrganization.partner_account_mode||"").trim()){
+        const mode=String(metadata.krim_partner_account_mode||"").trim();
+        if(["registered_business","individual_interest","development_test"].includes(mode)){
+          const profile=metadata.krim_partner_profile && typeof metadata.krim_partner_profile==="object"
+            ? metadata.krim_partner_profile : {};
+          const {error: modeError}=await client.rpc("krim_set_partner_account_mode",{p_mode:mode,p_profile:profile});
+          if(modeError)throw modeError;
+        }
+      }
+    }
     let destination=base+"/auth/login.html";
     if(accountType==="driver")destination=base+"/auth/driver-signin.html";
     else if(accountType==="partner")destination=base+"/auth/partner-signin.html";

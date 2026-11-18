@@ -1,0 +1,12 @@
+begin;
+revoke all on function public.krim_admin_list_country_packs() from public, anon, authenticated;
+revoke all on function public.krim_admin_get_country_pack(bigint) from public, anon, authenticated;
+revoke all on function public.krim_admin_list_regulatory_sources(bigint) from public, anon, authenticated;
+revoke all on function public.krim_admin_review_country_pack_control(bigint,text,text,bigint,text,text,timestamptz) from public, anon, authenticated;
+revoke all on function public.krim_admin_set_country_pack_status(bigint,text,text) from public, anon, authenticated;
+grant execute on function public.krim_admin_list_country_packs() to authenticated;
+grant execute on function public.krim_admin_get_country_pack(bigint) to authenticated;
+grant execute on function public.krim_admin_list_regulatory_sources(bigint) to authenticated;
+grant execute on function public.krim_admin_review_country_pack_control(bigint,text,text,bigint,text,text,timestamptz) to authenticated;
+grant execute on function public.krim_admin_set_country_pack_status(bigint,text,text) to authenticated;
+commit;
