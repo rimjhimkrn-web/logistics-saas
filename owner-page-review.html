@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM — Static Page Review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07182b;color:#edf5ff;font:14px/1.5 system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:#0b223b;border-bottom:1px solid #35516d;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+a{color:#75d9f0}.meta{color:#a9bfd4;font-size:12px}#frame{display:block;width:100%;height:calc(100vh - 76px);border:0;background:#fff}
+#msg{padding:24px}
+</style></head><body>
+<header><strong>KRIM · STAGING STATIC VISUAL REVIEW</strong><span class="meta" id="title">Loading…</span><span class="meta">Read-only preview · scripts, forms and navigation disabled</span><a href="/owner-page-review-links.html">← All pages</a></header>
+<div id="msg">Preparing safe visual preview…</div><iframe id="frame" title="Static visual page preview" sandbox="allow-same-origin" hidden></iframe>
+<script>
+(async()=>{
+const msg=document.getElementById('msg'),frame=document.getElementById('frame'),title=document.getElementById('title');
+try{
+ const manifestResponse=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});
+ if(!manifestResponse.ok)throw Error('Page inventory unavailable');
+ const pages=await manifestResponse.json();
+ const requested=new URLSearchParams(location.search).get('path');
+ if(!requested)throw Error('No page selected. Return to the page directory.');
+ const item=pages.find(p=>{const normalized=p.path.startsWith('public/')?p.path.slice(7):p.path;return normalized===requested});
+ if(!item)throw Error('This page is not in the approved review inventory.');
+ const path=item.path.startsWith('public/')?item.path.slice(7):item.path;
+ if(path.startsWith('/')||path.split('/').includes('..')||!path.endsWith('.html'))throw Error('Invalid page path.');
+ title.textContent=item.title+' · '+item.path;
+ const response=await fetch('/'+path,{cache:'no-store',credentials:'omit',redirect:'error'});
+ if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
+ const source=await response.text();
+ const doc=new DOMParser().parseFromString(source,'text/html');
+ doc.querySelectorAll('script,noscript,iframe,object,embed,base').forEach(n=>n.remove());
+ doc.querySelectorAll('meta[http-equiv]').forEach(n=>{if((n.getAttribute('http-equiv')||'').toLowerCase()==='refresh')n.remove()});
+ doc.querySelectorAll('*').forEach(el=>{
+   [...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});
+   if(el.tagName==='A'){el.removeAttribute('href');el.setAttribute('aria-disabled','true');}
+ });
+ doc.querySelectorAll('form').forEach(f=>{f.removeAttribute('action');f.removeAttribute('method');f.setAttribute('onsubmit','return false')});
+ doc.querySelectorAll('input,button,select,textarea').forEach(el=>{el.disabled=true;el.removeAttribute('autofocus')});
+ doc.querySelectorAll('video,audio').forEach(el=>{el.removeAttribute('autoplay');el.controls=false});
+ const base=doc.createElement('base');base.href=new URL('/'+path,location.origin).href.replace(/[^/]*$/,'');doc.head.prepend(base);
+ const banner=doc.createElement('div');banner.textContent='STAGING · STATIC VISUAL REVIEW — INTERACTIONS DISABLED';
+ banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#102b46;color:#dff7ff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #75d9f0');
+ doc.body.prepend(banner);
+ frame.srcdoc='<!doctype html>\n'+doc.documentElement.outerHTML;
+ frame.hidden=false;msg.hidden=true;
+}catch(e){msg.textContent='Preview unavailable: '+e.message}
+})();
+</script></body></html>
