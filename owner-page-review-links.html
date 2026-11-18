@@ -9,20 +9,27 @@ input,select{padding:11px;border-radius:8px;border:1px solid #45617d;background:
 input{width:min(100%,500px)}a{color:#75d9f0;text-decoration:none}a:hover{text-decoration:underline}
 .row{padding:10px;border-bottom:1px solid #29425c;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
 small{display:block;color:#9db3ca;overflow-wrap:anywhere}.group{margin-top:22px;color:#74dcec}
-#list{margin-top:15px}.pill{color:#b6f2d9}
+#list{margin-top:15px}
 </style></head><body>
 <header><strong>KRIM Logistics — Staging Page Review Links</strong><div id="status">Loading page inventory…</div></header>
-<main><p>Direct links to the individual pages in this Staging deployment. Open each page in a new tab for review. Page functionality still requires separate testing.</p>
+<main><p>Open any page for a no-login, static visual review. Preview scripts, forms, navigation and backend actions are disabled. This does not test page functionality.</p>
 <input id="q" placeholder="Search page title or path…"><select id="g"><option value="">All sections</option></select><div id="list"></div></main>
 <script>
 (async()=>{
 const status=document.getElementById('status'),list=document.getElementById('list'),q=document.getElementById('q'),g=document.getElementById('g');
 try{
 const r=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});if(!r.ok)throw Error('Inventory unavailable');const pages=await r.json();
-const groups=[...new Set(pages.map(p=>p.group))].sort();g.innerHTML='<option value="">All sections</option>'+groups.map(x=>'<option>'+x+'</option>').join('');
-status.textContent=pages.length+' pages indexed · '+location.host;
-function draw(){const query=q.value.toLowerCase(),group=g.value;const rows=pages.filter(p=>(!group||p.group===group)&&(!query||(p.title+' '+p.path).toLowerCase().includes(query)));status.textContent=rows.length+' shown · '+pages.length+' total pages';
-list.innerHTML=rows.map(p=>{const path=p.path.startsWith('public/')?p.path.slice(7):p.path;const url=location.origin+'/'+path;return '<div class="row"><div><strong>'+p.title+'</strong><small>'+p.path+'</small></div><a href="'+url+'" target="_blank" rel="noopener">Open page ↗</a></div>'}).join('')||'<p>No matching pages.</p>'}
+const groups=[...new Set(pages.map(p=>p.group))].sort();groups.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;g.append(o)});
+function draw(){const query=q.value.toLowerCase(),group=g.value;const rows=pages.filter(p=>(!group||p.group===group)&&(!query||(p.title+' '+p.path).toLowerCase().includes(query)));
+status.textContent=rows.length+' shown · '+pages.length+' total pages';
+list.replaceChildren();
+rows.forEach(p=>{const row=document.createElement('div');row.className='row';const info=document.createElement('div'),name=document.createElement('strong'),path=document.createElement('small'),link=document.createElement('a');
+name.textContent=p.title;path.textContent=p.path;info.append(name,path);
+const normalized=p.path.startsWith('public/')?p.path.slice(7):p.path;
+link.textContent='Open visual review ↗';link.href='/owner-page-review.html?path='+encodeURIComponent(normalized);link.target='_blank';link.rel='noopener';
+row.append(info,link);list.append(row)});
+if(!rows.length)list.textContent='No matching pages.';
+}
 q.addEventListener('input',draw);g.addEventListener('change',draw);draw();
 }catch(e){status.textContent='Could not load inventory: '+e.message}
 })();
