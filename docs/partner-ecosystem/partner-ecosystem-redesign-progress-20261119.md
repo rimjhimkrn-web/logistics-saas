@@ -136,3 +136,28 @@ Still required:
 - Run keyboard-only, screen-reader, contrast and touch-target checks.
 
 **Disposition:** Source-level review and KRIM palette correction complete. Authentication, MFA and end-to-end runtime tests are not claimed.
+
+
+## Page 4 of 63 — Partner Authentication Redirect
+
+**Page:** `auth/partner-redirect.html`  
+**Role in journey:** Post-authentication handoff to the canonical partner workspace gateway.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Staging preview:** `https://krim-staging.pages.dev/auth/partner-redirect.html`  
+**Source audit status:** Initial source review and KRIM palette correction completed; runtime routing verification remains pending.
+
+### Findings and corrections
+- Confirmed the page checks for a Supabase session and sends unauthenticated visitors back to `auth/partner-signin.html`.
+- Confirmed authenticated users are handed to `app/partner/index.html`, which performs the active organization membership, recognized partner organization, organization status and account-pathway checks before selecting the business, individual or development workspace.
+- Corrected the page description so it accurately describes a secure handoff; the organization and pathway decision is performed by the downstream partner workspace gateway, not by this redirect page itself.
+- Replaced the decorative green/teal accent and legacy midnight surface with the official KRIM navy, blue, sky-blue and neutral palette. Updated the browser theme colour.
+- Preserved the accessible live status message and sign-in recovery link.
+- No database, authentication configuration or production changes were made.
+
+### Remaining verification before page 4 can be marked fully passed
+- Test no-session redirect, valid-session handoff, expired session, Supabase load failure and network/API errors.
+- Test downstream organization membership and pathway outcomes: no active membership, unrecognized organization type, inactive organization, multiple partner organizations, missing pathway, and each supported pathway.
+- Verify direct URL, refresh, browser back behaviour, deployed asset loading, and layout at phone, foldable, tablet, touch laptop, desktop and ultra-wide sizes.
+- Confirm screen-reader announcement of status changes and keyboard access to the recovery link.
+
+**Disposition:** Source-level review and palette correction complete. The actual organization authorization decision is delegated to `app/partner/index.html`; live routing and access tests remain pending.
