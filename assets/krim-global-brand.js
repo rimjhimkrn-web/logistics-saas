@@ -1,7 +1,8 @@
 /* KRIM global brand lockup — idempotently enforces the approved full master logo. */
 (function(){
   "use strict";
-  var base="/logistics-saas/assets/krim-primary.svg?v=20261117-transparent-brand-v3";
+  var basePath=location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";
+  var base=basePath+"assets/krim-primary.svg?v=20261117-transparent-brand-v3";
   function apply(){
     if(document.documentElement.dataset.krimBrandApplied==="1") return;
     document.documentElement.dataset.krimBrandApplied="1";
@@ -38,7 +39,7 @@
         if(subtitle)brand.appendChild(subtitle);
         brand.style.cssText+="display:flex;align-items:center;gap:12px;min-width:0;";
       }else if(header){
-        var link=document.createElement("a");link.href="/logistics-saas/";link.setAttribute("aria-label","KRIM Logistics home");link.appendChild(img);
+        var link=document.createElement("a");link.href=basePath;link.setAttribute("aria-label","KRIM Logistics home");link.appendChild(img);
         header.insertBefore(link,header.firstChild);
       }else if(document.body){
         var bar=document.createElement("div");bar.className="krim-global-brandbar";
