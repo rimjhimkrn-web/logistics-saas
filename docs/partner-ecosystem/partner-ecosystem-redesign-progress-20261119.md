@@ -56,3 +56,29 @@ Still required:
 - Re-fetched the updated file and confirmed both the control and its handler are present.
 - This is a source-level correction only. Browser, authentication, sign-out session invalidation and redirect testing remain pending.
 - The audit is continuing in batches; this does not mark any page or the 63-page ecosystem complete.
+
+
+## Page 1 of 63 — Partner With KRIM
+
+**Page:** `partner-with-us.html`  
+**Role in journey:** Public partner discovery and entry point for registration/authentication.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Source audit status:** Completed for this pass; runtime/browser verification remains pending.
+
+### Findings and corrections
+- Confirmed the page has a clear partner-acquisition purpose, one primary H1, partner categories, a four-step review journey, standards/agreement links, and clear language that registration does not guarantee loads, route coverage, activation or payouts.
+- Checked all 19 relative internal links against the staging repository tree: no broken internal destinations found.
+- Confirmed there are no duplicate element IDs, empty hrefs, or inline onclick handlers.
+- Confirmed the responsive viewport, mobile navigation control, reduced-motion handling, visible keyboard-focus styling and shared KRIM identity stylesheet are present.
+- Corrected the Open Graph and Twitter hero-image URLs, which previously omitted the repository path segment.
+- Normalized local page colour values and legacy accent naming to the official KRIM identity palette; the page now uses the shared identity stylesheet and KRIM-approved colour values only.
+- No form is present on this public introduction page; registration is correctly routed to the dedicated partner signup page.
+
+### Remaining verification before page 1 can be marked fully passed
+- Browser visual inspection at phone, tablet, foldable, laptop, desktop and ultra-wide breakpoints.
+- Test menu open/close, Escape handling, outside-click handling and navigation at breakpoint boundaries.
+- Verify logo and hero asset load in the deployed staging preview.
+- Follow the signup and sign-in links and test their complete journeys, including validation, authentication and error states.
+- Check keyboard-only operation, screen-reader labels, contrast and touch-target behaviour in a browser.
+
+**Disposition:** Source-level audit and corrections complete. Do not mark page 1 fully verified until runtime and real-device checks pass.
