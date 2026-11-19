@@ -37,11 +37,17 @@ try{
  doc.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)})});
  doc.querySelectorAll('video,audio').forEach(el=>{el.removeAttribute('autoplay');el.controls=false});
  const base=doc.createElement('base');base.href=new URL('/'+path,location.origin).href.replace(/[^/]*$/,'');doc.head.prepend(base);
- const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri https://krim-staging.pages.dev";doc.head.prepend(csp);
+ // Re-apply the current KRIM global styles in the review frame, after stripping page scripts.
+ [['stylesheet','/core/krim-unified-page.css?v=20261119-official-blue-v2'],['stylesheet','/assets/krim-global-brand.css?v=20261119-official-blue-v2'],['stylesheet','/core/krim-global-identity.css?v=20261119-official-blue-v4']].forEach(([rel,href])=>{const link=doc.createElement('link');link.rel=rel;link.href=href;doc.head.append(link)});
+ const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri https:";doc.head.prepend(csp);
  const banner=doc.createElement('div');
  banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — simulated sample data only · external requests, authentication, payments and real changes blocked':'STAGING · ISOLATED VISUAL REVIEW — scripts, forms, navigation and API/network requests blocked';
  banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#09243D;color:#fff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #45B8F0');
  doc.body.prepend(banner);
+ // Restore the approved KRIM master logo without enabling any page application scripts.
+ const brandFix=doc.createElement('script');
+ brandFix.textContent=`(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/',src=b+'assets/krim-primary.svg?v=20261117-transparent-brand-v3',h=document.querySelector('header'),t=h&&(h.querySelector('.brand-mark')||h.querySelector('.brandmark')||h.querySelector('.logo')||h.querySelector('img[alt*="krim" i],img[alt*="logo" i]')||h.querySelector('[class*="brand"] img')||h.querySelector('[class*="logo"] img'));function img(){var n=document.createElement('img');n.src=src;n.alt='KRIM Logistics — Global Logistics Operating System';n.className='krim-official-brand-logo';return n}if(t){if(t.tagName==='IMG'){t.src=src;t.alt='KRIM Logistics — Global Logistics Operating System';t.classList.add('krim-official-brand-logo')}else t.replaceWith(img())}else if(h){var brand=h.querySelector('.brand,[class*="brand"]');if(brand)brand.replaceChildren(img());else{var a=document.createElement('a');a.href=b;a.setAttribute('aria-label','KRIM Logistics home');a.append(img());h.insertBefore(a,h.firstChild)}}})();`;
+ doc.body.append(brandFix);
  if(mode==='demo'){
   const demoScript=doc.createElement('script');
   demoScript.textContent=`(function(){
@@ -68,7 +74,7 @@ window.fetch=()=>Promise.reject(new Error('Network blocked in KRIM demo mode'));
 })();`;
   doc.body.append(demoScript);
   frame.setAttribute('sandbox','allow-scripts');
- }else frame.setAttribute('sandbox','');
+ }else frame.setAttribute('sandbox','allow-scripts');
  frame.srcdoc='<!doctype html>\\n'+doc.documentElement.outerHTML;
  frame.hidden=false;msg.hidden=true;
 }catch(e){msg.textContent='Preview unavailable: '+e.message}
