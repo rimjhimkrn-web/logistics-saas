@@ -509,6 +509,10 @@ body>footer{padding:26px 18px!important}
           <p id="partner-status-guidance" class="text-xs leading-6 text-slate-300">Your status will appear after your secure partner organization is loaded. Selecting a pathway does not approve commercial operations.</p>
         </section>
         <div id="onboarding-feedback" class="text-sm" role="status" aria-live="polite"></div>
+        <div id="partner-mfa-guidance" hidden class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100" role="status" aria-live="polite">
+          <strong class="block text-amber-300">MFA required for business verification</strong>
+          <p class="mt-1 text-xs leading-6">Before uploading registration or insurance documents, enable an authenticator app and complete the MFA challenge. KRIM requires a verified MFA session for private document uploads and verification submission. Development/Test and Independent Interest pathways do not submit business verification documents.</p>
+        </div>
         <section id="capability-next-step" hidden aria-live="polite" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-slate-800">
           <strong class="block text-sm text-blue-950">Next stage: service capability evidence</strong>
           <p class="mt-2 text-xs leading-6 text-slate-700">Your business verification packet is only an application receipt. KRIM must first complete independent identity and compliance review. Once the organization is verified and compliant, use Services &amp; Capabilities to submit separate evidence for each transport mode and service. Each capability remains inactive until an independent reviewer approves it; country, corridor, service-area and capacity gates still apply.</p>
@@ -780,6 +784,26 @@ body>footer{padding:26px 18px!important}
       return data.path;
     }
 
+    async function ensureRegisteredBusinessMfa() {
+      const factorResult = await onboardingClient.auth.mfa.listFactors();
+      if (factorResult.error) throw factorResult.error;
+      const verifiedFactor = (factorResult.data?.totp || []).some(factor => factor.status === "verified");
+      const partnerWorkspace = new URL("../../app/partner/index.html", window.location.href).href;
+      if (!verifiedFactor) {
+        onboardingMessage("MFA setup is required before business documents can be uploaded. Complete authenticator enrollment; you will return to your Partner Workspace, then reopen Business Verification.", "info");
+        window.location.assign("../../auth/mfa-enroll.html?returnTo=" + encodeURIComponent(partnerWorkspace));
+        return false;
+      }
+      const assuranceResult = await onboardingClient.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assuranceResult.error) throw assuranceResult.error;
+      if (assuranceResult.data?.currentLevel !== "aal2") {
+        onboardingMessage("Your authenticator is enrolled. Complete the MFA challenge before submitting business verification.", "info");
+        window.location.assign("../../auth/mfa-challenge.html?returnTo=" + encodeURIComponent(partnerWorkspace));
+        return false;
+      }
+      return true;
+    }
+
     document.getElementById("partner-onboarding-form").addEventListener("submit", async function(event) {
       event.preventDefault();
       const button = this.querySelector("button[type=submit]");
@@ -817,6 +841,8 @@ body>footer{padding:26px 18px!important}
           return;
         }
         if (mode !== "registered_business") throw new Error("Choose a partner pathway before continuing.");
+        const mfaReady = await ensureRegisteredBusinessMfa();
+        if (!mfaReady) return;
         const legalName = document.getElementById("partner-legal-name").value.trim();
         const countryCode = document.getElementById("partner-country").value;
         const authorityId = document.getElementById("partner-authority-id").value.trim();
@@ -889,6 +915,16 @@ body>footer{padding:26px 18px!important}
         button.textContent = mode === "development_test" ? "Retry Development / Test Setup →" : mode === "individual_interest" ? "Retry Independent Partner Interest →" : "Retry Business Verification Submission →";
       }
     });
+
+    const partnerModeSelect = document.getElementById("partner-account-mode");
+    const partnerMfaGuidance = document.getElementById("partner-mfa-guidance");
+    function updatePartnerMfaGuidance() {
+      if (partnerMfaGuidance) partnerMfaGuidance.hidden = !partnerModeSelect || partnerModeSelect.value !== "registered_business";
+    }
+    if (partnerModeSelect) {
+      partnerModeSelect.addEventListener("change", updatePartnerMfaGuidance);
+      updatePartnerMfaGuidance();
+    }
 
     initializePartnerOnboarding();
   </script>
