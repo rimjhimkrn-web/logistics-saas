@@ -43,7 +43,7 @@
         header.insertBefore(link,header.firstChild);
       }else if(document.body){
         var bar=document.createElement("div");bar.className="krim-global-brandbar";
-        var link=document.createElement("a");link.className="krim-global-brand-link";link.href="/logistics-saas/";link.appendChild(img);bar.appendChild(link);
+        var link=document.createElement("a");link.className="krim-global-brand-link";link.href=basePath;link.appendChild(img);bar.appendChild(link);
         document.body.insertBefore(bar,document.body.firstChild);
       }
     }
