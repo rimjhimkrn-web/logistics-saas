@@ -23,8 +23,10 @@ try{
  const path=item.path.startsWith('public/')?item.path.slice(7):item.path;
  if(path.startsWith('/')||path.split('/').includes('..')||!path.endsWith('.html'))throw Error('Invalid page path.');
  title.textContent=item.title+' · '+item.path;
- const response=await fetch('/'+path,{cache:'no-store',credentials:'omit',redirect:'error'});
- if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
+ const sourcePath=item.path;
+ const sourceUrl='https://raw.githubusercontent.com/rimjhimkrn-web/logistics-saas/staging/owner-admin-url-fix/'+sourcePath.split('/').map(encodeURIComponent).join('/');
+ const response=await fetch(sourceUrl,{cache:'no-store',mode:'cors',credentials:'omit'});
+ if(!response.ok)throw Error('Page source could not be loaded from the staging source branch (HTTP '+response.status+').');
  const source=await response.text();
  const doc=new DOMParser().parseFromString(source,'text/html');
  doc.querySelectorAll('script,noscript,iframe,object,embed,base').forEach(n=>n.remove());
