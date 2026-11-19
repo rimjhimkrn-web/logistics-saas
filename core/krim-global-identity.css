@@ -11,6 +11,10 @@
  --krim-line:#DCE5EE;--krim-surface:#F3F7FB;--krim-white:#fff;
  --krim-green:#16836C;--krim-radius:14px;
  --krim-shadow:0 14px 38px rgba(4,23,43,.08);
+ /* Legacy page variables mapped to the same KRIM palette */
+ --navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue-dark:#0754A4;
+ --primary:#168FE0;--primary-dark:#0754A4;--accent:#168FE0;
+ --orange:#168FE0;--orange-500:#168FE0;--teal:#168FE0;--cyan:#45B8F0;
  color-scheme:light;
 }
 html{color-scheme:light;scroll-behavior:smooth;scroll-padding-top:88px}
@@ -53,3 +57,12 @@ img{max-width:100%;height:auto}
  main{max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Force legacy brand-variable aliases onto the official KRIM blue palette. */
+:root{--brand:#168FE0;--brand-primary:#168FE0;--brand-accent:#168FE0;--accent-color:#168FE0;--primary-color:#168FE0;--secondary-color:#123B5A;--highlight:#45B8F0}
+:where(.bg-orange-400,.bg-orange-500,.bg-orange-600,.bg-amber-400,.bg-amber-500,.bg-amber-600,.bg-teal-500,.bg-teal-600){background-color:var(--krim-blue)!important}
+:where(.text-orange-400,.text-orange-500,.text-orange-600,.text-amber-500,.text-amber-600,.text-teal-500,.text-teal-600){color:var(--krim-blue-dark)!important}
+:where(.border-orange-400,.border-orange-500,.border-amber-500,.border-teal-500){border-color:var(--krim-blue)!important}
+:where(.bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-sky-500,.bg-sky-600){background-color:var(--krim-blue)!important}
+:where(.text-blue-500,.text-blue-600,.text-blue-700,.text-sky-500,.text-sky-600){color:var(--krim-blue-dark)!important}
+:where(.border-blue-400,.border-blue-500,.border-blue-600,.border-sky-500){border-color:var(--krim-blue)!important}
