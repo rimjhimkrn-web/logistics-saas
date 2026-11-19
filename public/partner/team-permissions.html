@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Team Permissions & Role-Based Access Control</title>
-    <meta name="description" content="Manage staff roles, dispatcher permissions, and accountant access controls inside KRIM OS.">
+    <title>Partner Team Permissions | KRIM Logistics</title>
+    <meta name="description" content="Understand partner team access and role permissions in KRIM Logistics.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,68 +27,39 @@
 <script defer src="../../assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 
 <link rel="stylesheet" href="../../core/krim-global-identity.css?v=20261119-official-blue-v3" data-krim-global-identity="official-blue">
+<!-- KRIM_TEAM_PERMISSION_GUIDANCE_V1 -->
+
+<style>
+body.krim-page{margin:0;min-width:320px;background:#F3F7FB;color:#14283E;font-family:Inter,system-ui,sans-serif}
+.krim-header{background:#09243D;color:#fff;border-bottom:3px solid #168FE0;padding:clamp(12px,2vw,20px) max(16px,calc((100vw - 1200px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.krim-logo{display:block;width:clamp(150px,22vw,220px);height:auto;max-height:54px;object-fit:contain}
+.krim-header nav,.krim-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.krim-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:1px solid #45B8F0;border-radius:9px;color:#fff;text-decoration:none;font-weight:650;font-size:14px}
+.krim-link.primary{background:#168FE0;border-color:#168FE0}
+.krim-main{width:min(100% - 32px,1000px);margin:clamp(24px,5vw,56px) auto;display:grid;gap:20px}
+.krim-kicker{color:#0754A4;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.krim-main h1{margin:0;color:#09243D;font-size:clamp(28px,4vw,42px);line-height:1.12}
+.krim-main h2{margin:0;color:#09243D;font-size:20px}
+.krim-main p,.krim-main li{color:#52677D;font-size:14px;line-height:1.7}
+.krim-card{background:#fff;border:1px solid #DCE5EE;border-radius:16px;padding:clamp(18px,3vw,26px);box-shadow:0 10px 28px rgba(9,36,61,.06);display:grid;gap:12px}
+.krim-status{display:inline-flex;width:max-content;max-width:100%;padding:6px 10px;border-radius:999px;background:#EAF5FE;color:#0754A4;border:1px solid #C9E6FA;font-size:11px;font-weight:800;text-transform:uppercase}
+.krim-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.krim-footer{padding:22px 16px;text-align:center;background:#09243D;color:#DCE5EE;font-size:12px}
+.krim-footer a{color:#45B8F0}
+@media(max-width:680px){.krim-header nav{width:100%}.krim-link{flex:1 1 auto}.krim-grid{grid-template-columns:1fr}.krim-main{width:calc(100% - 24px)}}
+@media(hover:none) and (pointer:coarse){.krim-link{min-height:48px}}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-slate-900 flex items-center justify-center text-white font-bold text-lg">K</div>
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-emerald-400 font-semibold uppercase">Team Permissions</span>
-                </div>
-            </div>
-            <a href="../../public/partner/offboarding.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">Next: Partner Offboarding →</a>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">Support & Administration • Step 33 of 35</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Team Permissions & Role Access Control (RBAC)</h1>
-            <p class="text-slate-400 text-xs font-mono">Assign granular administrative access, dispatcher privileges, and financial ledger viewing rights for your operations team.</p>
-        </div>
-
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
-            <form onsubmit="handleTeamSubmit(event)" class="space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Team Member Full Name</label>
-                        <input type="text" required placeholder="e.g., Priya Nair" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-slate-400 uppercase tracking-wider">Corporate Email</label>
-                        <input type="email" required placeholder="priya.nair@fleetpartner.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-slate-400 uppercase tracking-wider">Assign Role & Permissions</label>
-                    <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition">
-                        <option value="dispatcher">Fleet Dispatcher (Load Bidding & Route Tracking)</option>
-                        <option value="accountant">Financial Auditor (Invoices, Ledger & Escrow Payouts)</option>
-                        <option value="manager">Operations Manager (Full Administrative Access)</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/25 cursor-pointer">
-                    Grant Access & Proceed to Partner Offboarding →
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
-
-    <script>
-        function handleTeamSubmit(e) {
-            e.preventDefault();
-            alert('Team member access credentials generated successfully! Proceeding to Partner Offboarding.');
-            window.location.href = '/public/partner/offboarding.html';
-        }
-    </script>
-</body>
+<body class="krim-page">
+<header class="krim-header"><a href="../../index.html" aria-label="KRIM Logistics home"><img class="krim-logo" src="../../assets/krim-primary.svg" alt="KRIM Logistics — Global Logistics Operating System"></a><nav aria-label="Page navigation"><a class="krim-link" href="../../workspaces/partner-workspace.html">Partner workspace</a><a class="krim-link primary" href="../../contact.html">Contact KRIM</a></nav></header>
+<main class="krim-main" id="main"><span class="krim-kicker">Partner administration · Organization access</span><h1>Team roles and permissions</h1><p>Team access must be granted to verified organization members through an authenticated, permission-controlled workflow. This page is guidance only; it does not create accounts, issue credentials or change anyone's access.</p>
+<section class="krim-card"><span class="krim-status">Self-service changes not enabled here</span><h2>Access control status</h2><p>Do not enter a teammate's personal details or email address on this page. No invitation or permission change will be made here. A team invitation should only be issued after the organization owner or an authorized administrator confirms the member's identity and the minimum permissions required.</p></section>
+<section class="krim-grid" aria-label="Role assignment guidance">
+<article class="krim-card"><h2>Operational roles</h2><p>Dispatch, shipment updates, driver coordination and service evidence should be limited to staff who need those functions for an assigned operational responsibility.</p></article>
+<article class="krim-card"><h2>Finance and sensitive records</h2><p>Financial access must be separately authorized and limited to records actually available to the organization. KRIM does not provide escrow payouts or partner-fund custody through this page.</p></article>
+<article class="krim-card"><h2>Owner and administrator</h2><p>Organization owners should periodically review active memberships, remove access when a person leaves, and retain an audit trail of authorized changes.</p></article>
+<article class="krim-card"><h2>Need an access review?</h2><p>Contact KRIM with your organization reference and the type of access change required. Do not send passwords, OTPs, identity documents or full banking details in an ordinary message.</p><div class="krim-actions"><a class="krim-link primary" href="../../contact.html">Contact KRIM</a><a class="krim-link" href="team-organization.html">View organization page</a></div></article>
+</section><div class="krim-actions"><a class="krim-link" href="../../partner-standards.html">Partner standards</a><a class="krim-link" href="../../workspaces/partner-workspace.html">Return to partner workspace</a></div></main>
+<footer class="krim-footer">© 2026 KRIM Logistics · Global Logistics Operating System · <a href="../../privacy.html">Privacy</a> · <a href="../../terms.html">Terms</a></footer></body>
   </html>
   
