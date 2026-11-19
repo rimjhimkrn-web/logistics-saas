@@ -79,3 +79,20 @@ The following staging database function definitions were inspected:
 ## Decision
 
 Keep the existing journey pages. Do not delete or merge registration, onboarding, verification or role-specific workspace pages at this stage. Fix and verify the MFA/backend boundary first; then consolidate navigation and aliases without breaking the journey.
+
+
+## Staging-only remediation applied (19 Nov 2026)
+
+A staging database change was applied and then read back for verification.
+
+- Added an AAL2 check to `krim_submit_partner_onboarding_global_multi_v1(...)`. AAL1 requests are rejected before verification data is submitted.
+- Added a restrictive INSERT policy on `storage.objects` for the private `krim-partner-verification` bucket. It requires AAL2 while retaining the existing permissive organization-folder/user ownership policy.
+- Confirmed the bucket remains private.
+- Confirmed both the original upload ownership policy and the new restrictive AAL2 policy are present.
+- Confirmed the onboarding RPC definition contains the new MFA guard.
+- Kept `krim_provision_partner_organization` and `krim_set_partner_account_mode` available during bootstrap. These operations create pending/non-commercial state and are called before the partner can complete MFA enrollment; blocking them at AAL1 would break initial registration. They do not approve verification or enable commercial access.
+- Tracked the repeatable SQL change at `supabase/migrations/202611190001_partner_onboarding_require_aal2.sql`.
+
+**Still outstanding:** add clear MFA enrollment/challenge guidance to the partner onboarding page before document upload; perform authenticated AAL1-denial/AAL2-success tests using dedicated staging accounts; verify function grants and direct URL behavior; run full browser end-to-end testing. The database policy is the security boundary; the page-level MFA prompt is usability, not a replacement for it.
+
+**Do not interpret this as full production approval.** No production project was changed.
