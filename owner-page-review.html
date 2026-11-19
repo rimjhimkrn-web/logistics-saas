@@ -27,21 +27,22 @@ try{
  const url='/owner-page-review.html?path='+encodeURIComponent(requested);
  document.getElementById('visual').href=url;document.getElementById('demo').href=url+'&mode=demo';
  document.getElementById(mode).classList.add('active');
- description.textContent=mode==='demo'?'Page-wide safe interaction simulation · no production APIs or records':'Original page styling · app scripts, forms, navigation and API calls disabled; KRIM identity renderer only';
+ description.textContent=mode==='demo'?'Page-wide safe interaction simulation · no production APIs or records':'Original page styling · app scripts, forms, navigation and API calls disabled; Tailwind and KRIM identity renderers only';
  const sourceUrl=new URL('/'+path.split('/').map(encodeURIComponent).join('/'),location.origin).href;
  const response=await fetch(sourceUrl,{cache:'no-store',mode:'cors',credentials:'omit'});
  if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
  const source=await response.text(),doc=new DOMParser().parseFromString(source,'text/html');
- doc.querySelectorAll('script,noscript,iframe,object,embed').forEach(n=>n.remove());
+ doc.querySelectorAll('script').forEach(n=>{const src=(n.getAttribute('src')||'').toLowerCase(),code=(n.textContent||'').trim();const tailwindRuntime=/cdn\\.tailwindcss\\.com/.test(src);const tailwindConfig=!src&&/tailwind\\.config\\s*=/.test(code)&&!/supabase|client\\.auth|\\.rpc\\(|fetch\\s*\\(/i.test(code);if(!tailwindRuntime&&!tailwindConfig)n.remove()});
+ doc.querySelectorAll('noscript,iframe,object,embed').forEach(n=>n.remove());
  doc.querySelectorAll('meta[http-equiv]').forEach(n=>{if((n.getAttribute('http-equiv')||'').toLowerCase()==='refresh')n.remove()});
  doc.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)})});
  doc.querySelectorAll('video,audio').forEach(el=>{el.removeAttribute('autoplay');el.controls=false});
  const base=doc.createElement('base');base.href=new URL('/'+path,location.origin).href.replace(/[^/]*$/,'');doc.head.prepend(base);
  // Re-apply the current KRIM global styles in the review frame, after stripping page scripts.
  [['stylesheet','/core/krim-unified-page.css?v=20261119-official-blue-v2'],['stylesheet','/assets/krim-global-brand.css?v=20261119-official-blue-v2'],['stylesheet','/core/krim-global-identity.css?v=20261119-official-blue-v4']].forEach(([rel,href])=>{const link=doc.createElement('link');link.rel=rel;link.href=href;doc.head.append(link)});
- const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri https:";doc.head.prepend(csp);
+ const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline' https://cdn.tailwindcss.com; connect-src 'none'; form-action 'none'; base-uri https:";doc.head.prepend(csp);
  const banner=doc.createElement('div');
- banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — local UI simulations only · authentication, APIs, uploads, payments and real data changes blocked':'STAGING · ISOLATED VISUAL REVIEW — app scripts, forms, navigation and API/network requests blocked; KRIM identity renderer only';
+ banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — local UI simulations only · authentication, APIs, uploads, payments and real data changes blocked':'STAGING · ISOLATED VISUAL REVIEW — app scripts, forms, navigation and API/network requests blocked; Tailwind styling and KRIM identity renderer only';
  banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#09243D;color:#fff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #45B8F0');
  doc.body.prepend(banner);
  // Restore the approved KRIM master logo without enabling any page application scripts.
