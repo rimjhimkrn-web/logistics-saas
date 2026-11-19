@@ -1,4 +1,111 @@
-/* Compact the homepage footer on narrow screens: keep its three navigation groups side by side. */
+/* KRIM social links — consistent blue identity, aligned cards and responsive spacing. */
+.krim-social{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:stretch;
+  gap:12px;
+  width:100%;
+}
+.krim-social a{
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-width:0;
+  min-height:48px;
+  padding:10px 12px;
+  border:1px solid rgba(22,143,224,.48);
+  border-radius:10px;
+  background:rgba(22,143,224,.12);
+  color:#8BD7FF!important;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+  text-decoration:none!important;
+  white-space:nowrap;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.krim-social a:hover{
+  background:rgba(22,143,224,.23);
+  border-color:#168FE0;
+  color:#BCE8FF!important;
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(0,20,40,.16);
+}
+.krim-social a:focus-visible{
+  outline:3px solid #8BD7FF;
+  outline-offset:3px;
+}
+.krim-social .social-icon{
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 22px;
+  width:22px;
+  height:22px;
+  color:#8BD7FF;
+}
+.krim-social .social-icon svg{
+  display:block;
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.krim-social .social-icon svg .brand-fill{
+  fill:currentColor;
+  stroke:none;
+}
+.krim-social .social-label{display:inline-block}
+.footer-social-row .krim-social-footer{
+  flex:1 1 620px;
+  max-width:760px;
+  min-width:0;
+}
+.footer-social-row .krim-social-footer .krim-social{width:100%}
+
+/* Contact page footer shares the same visual language and spacing. */
+.footer-social{
+  flex:1 1 560px;
+  min-width:0;
+  max-width:760px;
+}
+.footer-social>strong{
+  display:block;
+  margin:0 0 12px;
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.footer-social>[data-krim-social]{width:100%}
+.footer-social .krim-social{width:100%}
+
+@media(max-width:900px){
+  .krim-social{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .krim-social a{min-height:46px;padding:9px 10px}
+  .footer-social-row{align-items:flex-start}
+  .footer-social-row .krim-social-footer{max-width:none}
+}
+@media(max-width:600px){
+  .krim-social{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .krim-social a{justify-content:flex-start;min-height:46px;padding:9px 12px;font-size:12px}
+  .krim-social a:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 5px)}
+  .footer-social{width:100%;max-width:none}
+  .footer-social>strong{margin-bottom:11px}
+  .footer-row{align-items:stretch}
+}
+@media(max-width:360px){
+  .krim-social{gap:8px}
+  .krim-social a{gap:7px;padding:8px 9px;font-size:11px}
+  .krim-social .social-icon,.krim-social .social-icon svg{width:20px;height:20px}
+}
+
+/* Keep the compact footer navigation layout on narrow screens. */
 @media(max-width:420px){
   .footer{padding:34px 0 18px}
   .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px;padding-bottom:22px}
