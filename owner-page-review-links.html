@@ -26,8 +26,11 @@ list.replaceChildren();
 rows.forEach(p=>{const row=document.createElement('div');row.className='row';const info=document.createElement('div'),name=document.createElement('strong'),path=document.createElement('small'),link=document.createElement('a');
 name.textContent=p.title;path.textContent=p.path;info.append(name,path);
 const normalized=p.path.startsWith('public/')?p.path.slice(7):p.path;
-link.textContent='Open visual review ↗';link.href='/owner-page-review.html?path='+encodeURIComponent(normalized);link.target='_blank';link.rel='noopener';
-row.append(info,link);list.append(row)});
+link.textContent='Visual ↗';link.href='/owner-page-review.html?path='+encodeURIComponent(normalized);link.target='_blank';link.rel='noopener';
+const actions=document.createElement('div');actions.style.cssText='display:flex;gap:12px;align-items:center;flex-wrap:wrap';
+actions.append(link);
+if(normalized==='workspaces/customer-workspace.html'){const demo=document.createElement('a');demo.textContent='Interactive demo ↗';demo.href='/owner-page-review.html?path='+encodeURIComponent(normalized)+'&mode=demo';demo.target='_blank';demo.rel='noopener';actions.append(demo)}
+row.append(info,actions);list.append(row)});
 if(!rows.length)list.textContent='No matching pages.';
 }
 q.addEventListener('input',draw);g.addEventListener('change',draw);draw();
