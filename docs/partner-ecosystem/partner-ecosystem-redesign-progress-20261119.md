@@ -110,3 +110,29 @@ Still required:
 - Check country catalogue completeness against the intended KRIM country list, keyboard navigation, contrast and touch-target sizing.
 
 **Disposition:** Source-level audit and corrections complete. No live registration or end-to-end test is claimed. Do not mark page 2 fully verified until runtime checks pass.
+
+
+## Page 3 of 63 — Partner Sign In
+
+**Page:** `auth/partner-signin.html`  
+**Role in journey:** Existing partner authentication, organization membership validation, MFA routing and workspace handoff.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Staging preview:** `https://krim-staging.pages.dev/auth/partner-signin.html`  
+**Source audit status:** Initial source review and palette correction completed; runtime/authentication verification remains pending.
+
+### Findings and corrections
+- Confirmed the page authenticates with Supabase email/password and checks active organization membership before granting partner workspace routing.
+- Confirmed partner organization type, active status and onboarding pathway are checked; pending/unverified organizations are not described as commercially approved.
+- Confirmed verified TOTP enrollment and AAL2 challenge routing are present in the sign-in flow.
+- Confirmed password visibility toggle, required email/password validation, live feedback region, skip link, keyboard-operable navigation menu, Escape/outside-click close handling and reduced-motion CSS.
+- Normalized legacy navy, teal, cyan and off-palette blue decorative accents to the official KRIM identity palette. Genuine success/error feedback colours remain semantic status indicators.
+- No database or production changes were made.
+
+### Remaining verification before page 3 can be marked fully passed
+- Verify Supabase client/config loading and sign-in with controlled staging accounts.
+- Test invalid credentials, unconfirmed email, duplicate/multiple partner organizations, inactive membership, missing organization, pathway recovery and network/API failures.
+- Test first-time MFA enrollment, verified TOTP challenge/AAL2 routing, and approved vs pending partner workspace handoff.
+- Verify all menu destinations, logo and tracking links in deployed staging; inspect visual layout across phone, foldable, tablet, touch laptop, desktop and ultra-wide, including landscape and zoom.
+- Run keyboard-only, screen-reader, contrast and touch-target checks.
+
+**Disposition:** Source-level review and KRIM palette correction complete. Authentication, MFA and end-to-end runtime tests are not claimed.
