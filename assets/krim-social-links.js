@@ -4,7 +4,7 @@
   var links=[
     {label:"Facebook",href:"https://www.facebook.com/1405128699351990",mark:"f"},
     {label:"Instagram",href:"https://www.instagram.com/krimlogistics/",mark:"◎"},
-    {label:"LinkedIn",href:"https://www.linkedin.com/in/krim-logistics-0b609b448",mark:"in"},
+    {label:"LinkedIn",href:"https://www.linkedin.com/company/krim-logistics/",mark:"in"},
     {label:"YouTube",href:"https://www.youtube.com/channel/UCXlIzrjD8Ei7eMU97YxXOAg",mark:"▶"},
     {label:"WhatsApp",href:"https://wa.me/916204624596",mark:"✆"}
   ];
