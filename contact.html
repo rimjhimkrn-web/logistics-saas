@@ -259,7 +259,6 @@
 </style>
 
 
-/* Contact page footer refinement: center icon group and eliminate trailing page gap. */
 <style id="krim-contact-footer-center-tight-bottom">
 .footer-social{
   display:flex;
@@ -536,7 +535,7 @@ html,body{margin-bottom:0!important;padding-bottom:0!important}
               <input id="privacy_consent" name="privacy_consent" type="checkbox" required>
               <label for="privacy_consent">I agree that KRIM Logistics may use the information I submit to review and respond to this enquiry, as explained in the <a href="./privacy.html">current privacy notice</a>. *</label>
             </div>
-            <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label>Leave this field empty<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+            <div class="contact-honeypot" aria-hidden="true"><input name="website" type="text" tabindex="-1" autocomplete="off" aria-label="Leave this field empty"></div>
             <button class="submit" id="contact-submit" type="submit">Send enquiry <span aria-hidden="true">→</span></button>
             <p class="status" id="contact-response-box" role="status" aria-live="polite"></p>
             <p class="privacy-hint">Submitting this form confirms receipt of a general enquiry only. It does not create a shipment booking or a trackable support ticket, and does not confirm a quote, partner approval, route availability or guaranteed response time. For an existing case, use <a href="./public/support/create-ticket.html">Create a secure support ticket</a> or review <a href="./public/support/ticket-history.html">Ticket History</a>.</p>
@@ -812,6 +811,23 @@ html,body{margin-bottom:0!important;padding-bottom:0!important}
   .footer-social .krim-social .social-icon,
   .footer-social .krim-social .social-icon svg{width:19px!important;height:19px!important}
 }
+</style>
+
+
+<style id="krim-contact-cleanup">
+/* Keep the anti-spam field inaccessible to sighted visitors and out of page flow. */
+.contact-honeypot{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+.contact-honeypot input{position:absolute!important;left:-10000px!important}
 </style>
 
 </body>
