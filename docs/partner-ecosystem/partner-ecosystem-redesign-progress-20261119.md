@@ -188,3 +188,29 @@ Still required:
 - Review every generated category/country/region field, keyboard/screen-reader operation, focus order, contrast and touch targets.
 
 **Disposition:** Source review and palette correction complete. No live registration, storage-security or end-to-end test is claimed.
+
+
+## Page 6 of 63 — Partner Workspace Gateway
+
+**Page:** `app/partner/index.html`  
+**Role in journey:** Authenticated routing gateway that resolves the signed-in user's active partner organization and account pathway before opening a partner workspace.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Staging preview:** `https://krim-staging.pages.dev/app/partner/index.html`  
+**Source audit status:** Source review and official KRIM palette correction completed; runtime authorization and routing tests remain pending.
+
+### Findings and corrections
+- Confirmed the gateway requires a Supabase authenticated user, queries active `krim_organization_members` membership, resolves linked organizations, checks recognized partner organization types and active organization status, then routes supported account modes to the registered-business, individual-interest or development/test workspace.
+- Confirmed the three destination files exist in the repository: `app/partner/business/index.html`, `app/partner/individual/index.html` and `app/partner/development/index.html`.
+- Confirmed the page explicitly warns that sign-in alone does not authorize bidding, assignments, capacity commitments, shipments or payments, and that development/test is non-commercial.
+- Normalized page-local navy, ink, muted, line, surface, focus, decorative teal and blue values to the official KRIM palette. Kept the menu and navigation, and added a clear KRIM-styled treatment for the pre-launch control notice.
+- Preserved responsive breakpoints, touch-friendly menu button, keyboard Escape/outside-click handling, skip link, live status feedback and reduced-motion handling.
+- No database, authentication, storage or production changes were made.
+
+### Remaining verification before page 6 can be marked fully passed
+- Test unauthenticated, expired-session, Supabase load/network failure, zero active memberships, inactive membership, no recognized organization, inactive organization and multiple partner organization outcomes.
+- Verify the exact allowed `organization_type` and `partner_account_mode` values against production-safe schema/seed definitions; source inspection alone does not prove these values cover every valid partner.
+- Test all three pathway redirects with controlled staging accounts, including refresh, browser back, direct URL access and authorization enforcement inside each destination workspace.
+- Verify menu destinations, deployed assets and visual layout on compact phones, foldables, tablets, touch laptops, desktop and ultra-wide displays, including landscape and zoom.
+- Run keyboard-only, screen-reader, contrast and touch-target checks. Confirm the gateway's underlying Supabase RLS prevents unauthorized membership/organization reads.
+
+**Disposition:** Source review and KRIM palette correction complete. No live authentication, RLS, organization authorization or end-to-end routing test is claimed.
