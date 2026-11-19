@@ -12,7 +12,7 @@ small{display:block;color:#9db3ca;overflow-wrap:anywhere}.group{margin-top:22px;
 #list{margin-top:15px}
 </style></head><body>
 <header><strong>KRIM Logistics — Staging Page Review Links</strong><div id="status">Loading page inventory…</div></header>
-<main><p>Open workspace pages to inspect their actual HTML layout, styling and images without signing in. Authentication scripts and redirects are disabled in this visual-only preview. Sign-in and MFA pages are included in the inventory as designs, but will naturally display their sign-in screens.</p>
+<main><p>Review all inventoried pages without signing in. Visual mode disables scripts and controls. Interactive Demo mode enables safe local UI simulations across every page; authentication, network calls, payments, uploads and real data changes remain blocked. This staging review link is not private unless access protection is configured.</p>
 <input id="q" placeholder="Search page title or path…"><select id="g"><option value="">All sections</option></select><div id="list"></div></main>
 <script>
 (async()=>{
@@ -29,7 +29,7 @@ const normalized=p.path.startsWith('public/')?p.path.slice(7):p.path;
 link.textContent='Visual ↗';link.href='/owner-page-review.html?path='+encodeURIComponent(normalized);link.target='_blank';link.rel='noopener';
 const actions=document.createElement('div');actions.style.cssText='display:flex;gap:12px;align-items:center;flex-wrap:wrap';
 actions.append(link);
-if(normalized==='workspaces/customer-workspace.html'){const demo=document.createElement('a');demo.textContent='Interactive demo ↗';demo.href='/owner-page-review.html?path='+encodeURIComponent(normalized)+'&mode=demo';demo.target='_blank';demo.rel='noopener';actions.append(demo)}
+const demo=document.createElement('a');demo.textContent='Interactive demo ↗';demo.href='/owner-page-review.html?path='+encodeURIComponent(normalized)+'&mode=demo';demo.target='_blank';demo.rel='noopener';actions.append(demo)
 row.append(info,actions);list.append(row)});
 if(!rows.length)list.textContent='No matching pages.';
 }
