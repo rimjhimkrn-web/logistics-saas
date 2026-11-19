@@ -66,3 +66,57 @@ img{max-width:100%;height:auto}
 :where(.bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-sky-500,.bg-sky-600){background-color:var(--krim-blue)!important}
 :where(.text-blue-500,.text-blue-600,.text-blue-700,.text-sky-500,.text-sky-600){color:var(--krim-blue-dark)!important}
 :where(.border-blue-400,.border-blue-500,.border-blue-600,.border-sky-500){border-color:var(--krim-blue)!important}
+
+
+/* Global device and accessibility standard — fluid from compact phones to large displays,
+   tablets, foldables, touch laptops, desktop workstations and high-density screens. */
+:root{
+ --krim-space-1:clamp(.5rem,1vw,.75rem);
+ --krim-space-2:clamp(.75rem,1.5vw,1rem);
+ --krim-space-3:clamp(1rem,2vw,1.5rem);
+ --krim-space-4:clamp(1.25rem,3vw,2rem);
+ --krim-content-max: min(100% - 2rem, 84rem);
+}
+html{min-width:320px;text-size-adjust:100%;-webkit-text-size-adjust:100%;scrollbar-gutter:stable}
+body{min-width:320px;min-height:100vh;min-height:100dvh;overflow-wrap:anywhere}
+main{width:min(100% - 2rem,84rem);margin-inline:auto}
+:where(button,input,select,textarea){font:inherit;max-width:100%}
+:where(button,a,[role=button],input,select,textarea){touch-action:manipulation}
+:where(button,.btn,[role=button],a.btn,a.button){min-height:44px}
+:where(input,select,textarea){min-height:44px;max-width:100%}
+:where(input[type=checkbox],input[type=radio]){min-height:1rem;min-width:1rem;width:1.1rem;height:1.1rem}
+:where(img,video,canvas,svg,iframe){max-width:100%}
+:where(pre,code){max-width:100%;overflow-x:auto}
+:where(table){max-width:100%;border-collapse:collapse}
+:where(th,td){overflow-wrap:anywhere}
+:where(.table-wrap,.table-responsive,.table-container,.overflow-x-auto){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+:where(.grid,.flex){min-width:0}
+:where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){min-width:0}
+:where(input,select,textarea){color:var(--krim-ink)}
+:where(input,select,textarea)::placeholder{color:#718399;opacity:1}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{scroll-margin-block:7rem}
+@media(max-width:480px){
+ html{scroll-padding-top:72px}
+ main{width:calc(100% - 1.25rem)}
+ :where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){border-radius:12px}
+ :where(button,.btn,[role=button],a.btn,a.button){max-width:100%;white-space:normal}
+}
+@media(min-width:481px) and (max-width:900px){
+ main{width:calc(100% - 2rem)}
+}
+@media(min-width:1600px){
+ body{font-size:clamp(1rem,.42vw + .55rem,1.125rem)}
+}
+@media(hover:none) and (pointer:coarse){
+ :where(button,.btn,[role=button],a.btn,a.button){min-height:48px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ header{position:relative}
+}
+@supports(padding:max(0px)){
+ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+}
+@media(prefers-contrast:more){
+ :where(a,button,input,select,textarea){outline-offset:3px}
+ :where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){border:1px solid var(--krim-line)}
+}
