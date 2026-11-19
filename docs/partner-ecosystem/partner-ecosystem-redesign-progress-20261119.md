@@ -46,3 +46,13 @@ Still required:
 ## Status
 
 **Staging source updated; static checks partially completed; visual and end-to-end verification pending.**
+
+
+## Page-by-page audit — first pass
+
+- Began direct inspection of the three partner pathway gateways plus the partner onboarding, partner signup and partner command-centre entry pages.
+- Found a runtime defect in `app/partner/individual/index.html`: the page's startup script attached a sign-out handler to an element with id `signout`, but the page did not contain that element. This would throw before the workspace boot routine ran.
+- Fixed the defect on staging by adding the missing sign-out control to the existing navigation. The existing menu sign-out bridge now has its expected target.
+- Re-fetched the updated file and confirmed both the control and its handler are present.
+- This is a source-level correction only. Browser, authentication, sign-out session invalidation and redirect testing remain pending.
+- The audit is continuing in batches; this does not mark any page or the 63-page ecosystem complete.
