@@ -82,3 +82,31 @@ Still required:
 - Check keyboard-only operation, screen-reader labels, contrast and touch-target behaviour in a browser.
 
 **Disposition:** Source-level audit and corrections complete. Do not mark page 1 fully verified until runtime and real-device checks pass.
+
+
+## Page 2 of 63 — Partner Registration
+
+**Page:** `auth/partner-signup.html`  
+**Role in journey:** Partner account creation, pathway declaration and primary operating-profile capture.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Staging preview:** `https://krim-staging.pages.dev/auth/partner-signup.html`  
+**Source audit status:** Completed for this pass; runtime/browser and live-auth verification remain pending.
+
+### Findings and corrections
+- Confirmed the page creates a partner authentication identity and captures applicant/business name, contact identity, country/territory, region, city, service category and the declared account pathway.
+- Confirmed the three visible entry choices: Registered Business, Individual Partner Interest, and the guided Development / Test route. The Development / Test action correctly selects the Individual Interest prerequisite; fixed its follow-through so focus and scroll move to the visible selected pathway card rather than the visually-hidden select control.
+- Confirmed the registration form validates required identity, pathway, country, city, service category, email, 10-character minimum password and Terms/Privacy acceptance before submission.
+- Confirmed password visibility toggle, live feedback region, skip link, menu state announcements, Escape/outside-click handling, reduced-motion handling, responsive layouts and visible focus treatment are present in source.
+- Confirmed the email-confirmation callback, partner sign-in recovery route, organization-provisioning RPC, pathway-recovery RPC and MFA enrollment route all exist in the staging repository. The sign-in page contains recovery logic for accounts whose email confirmation completes before organization/pathway provisioning.
+- Checked all 10 unique relative navigation/resource links against the staging repository: all destinations exist.
+- Static checks: 19 unique element IDs; no duplicate IDs; no empty hrefs; no inline onclick handlers; all explicit label targets resolve; 261 select options with no duplicate option values, including 245 two-letter country/territory codes.
+- Normalized page-local decorative colors and legacy orange token naming to the official KRIM palette. Genuine success/error feedback colors remain semantic status indicators, not brand accents.
+
+### Remaining verification before page 2 can be marked fully passed
+- Browser visual inspection across compact phones, foldables, tablets, touch laptops, desktop and ultra-wide screens, including landscape and zoom/text scaling.
+- Test pathway selection using touch, keyboard and screen reader; verify the Development / Test route's selected-state guidance is understandable.
+- Test invalid/valid form submissions, duplicate email, rate limiting, network failure, email confirmation and expired confirmation links.
+- Verify organization creation and pathway recovery against a controlled staging test account, then test MFA enrollment and partner workspace routing end to end.
+- Check country catalogue completeness against the intended KRIM country list, keyboard navigation, contrast and touch-target sizing.
+
+**Disposition:** Source-level audit and corrections complete. No live registration or end-to-end test is claimed. Do not mark page 2 fully verified until runtime checks pass.
