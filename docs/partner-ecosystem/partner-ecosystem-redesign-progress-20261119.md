@@ -161,3 +161,30 @@ Still required:
 - Confirm screen-reader announcement of status changes and keyboard access to the recovery link.
 
 **Disposition:** Source-level review and palette correction complete. The actual organization authorization decision is delegated to `app/partner/index.html`; live routing and access tests remain pending.
+
+
+## Page 5 of 63 — Partner Onboarding & Verification
+
+**Page:** `public/partner/partner-onboarding.html`  
+**Role in journey:** Authenticated partner onboarding, pathway selection, organization-scoped business evidence submission and verification status display.  
+**Staging branch:** `staging/owner-admin-url-fix`  
+**Staging preview:** `https://krim-staging.pages.dev/public/partner/partner-onboarding.html`  
+**Source audit status:** Initial source review and palette correction completed; runtime/security verification remains pending.
+
+### Findings and corrections
+- Confirmed the page uses an authenticated Supabase session and requires one active organization membership; it then checks that exactly one recognized, active partner organization is selected before associating onboarding documents.
+- Confirmed three pathways are represented: registered business, individual partner interest and development/test. The latter two explicitly remain without commercial access.
+- Confirmed registered-business submission requires verified TOTP MFA and AAL2, validates document MIME type and a 10 MB maximum, uploads into the `krim-partner-verification` storage bucket under organization/user-scoped paths, and calls `krim_submit_partner_onboarding_global_multi_v1`.
+- Confirmed the page distinguishes an application receipt from approval and states that service/country/corridor activation and commercial eligibility require separate review.
+- Confirmed responsive viewport and shared KRIM identity stylesheet are present; source checks found one form, no duplicate IDs, no empty hrefs and no inline onclick handlers. Five explicit label-for targets resolve.
+- Normalized the decorative legacy dark-blue, violet, teal and off-palette blue values to the official KRIM palette; retained genuine green/red/amber workflow feedback colours. Updated the browser theme colour to KRIM navy.
+- No database, storage-policy, authentication-configuration or production changes were made.
+
+### Remaining verification before page 5 can be marked fully passed
+- Verify deployed preview, all navigation destinations and layout on narrow phones, foldables, tablets, touch laptops, desktop and ultra-wide displays, including landscape and zoom/text scaling.
+- Test no-session, expired-session, zero membership, inactive organization, unsupported organization type and multiple-partner-organization cases.
+- Test all three pathways, form validation, MIME/size rejection, upload failure and cleanup, MFA enrollment/challenge return routing, duplicate submissions, RPC errors and successful receipt handling with controlled staging accounts.
+- Verify storage bucket policies prevent cross-organization/user access, and confirm database RPC authorization, audit events and idempotency. Source inspection alone does not prove these controls.
+- Review every generated category/country/region field, keyboard/screen-reader operation, focus order, contrast and touch targets.
+
+**Disposition:** Source review and palette correction complete. No live registration, storage-security or end-to-end test is claimed.
