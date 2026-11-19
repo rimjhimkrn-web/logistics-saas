@@ -1,24 +1,28 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KRIM — Staging Page Review Links</title>
+<title>KRIM Partner Ecosystem — 63-Page Staging Review</title>
+<link rel="stylesheet" href="core/krim-global-identity.css?v=20261119-official-blue-v2" data-krim-global-identity="official-blue">
 <style>
-body{font:15px/1.5 system-ui,sans-serif;margin:0;background:#07182b;color:#edf5ff}
-header{position:sticky;top:0;background:#0b223b;padding:16px;border-bottom:1px solid #35516d}
+body{font:15px/1.5 system-ui,sans-serif;margin:0;background:#F3F7FB;color:#14283E}
+header{position:sticky;top:0;background:#09243D;padding:16px;border-bottom:1px solid #DCE5EE}
 main{max-width:1100px;margin:auto;padding:20px}
-input,select{padding:11px;border-radius:8px;border:1px solid #45617d;background:#102b46;color:white}
-input{width:min(100%,500px)}a{color:#75d9f0;text-decoration:none}a:hover{text-decoration:underline}
+input,select{padding:11px;border-radius:8px;border:1px solid #DCE5EE;background:#fff;color:#14283E;min-height:44px}
+input{width:min(100%,500px)}a{color:#0754A4;text-decoration:none}a:hover{text-decoration:underline}
 .row{padding:10px;border-bottom:1px solid #29425c;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
-small{display:block;color:#9db3ca;overflow-wrap:anywhere}.group{margin-top:22px;color:#74dcec}
+small{display:block;color:#60748A;overflow-wrap:anywhere}.group{margin-top:22px;color:#0754A4}
 #list{margin-top:15px}
-</style></head><body>
-<header><strong>KRIM Logistics — Staging Page Review Links</strong><div id="status">Loading page inventory…</div></header>
-<main><p>Review all inventoried pages without signing in. Visual mode disables scripts and controls. Interactive Demo mode enables safe local UI simulations across every page; authentication, network calls, payments, uploads and real data changes remain blocked. This staging review link is not private unless access protection is configured.</p>
+@media(max-width:600px){main{padding:14px}.row{grid-template-columns:1fr}.row>div:last-child{justify-content:flex-start!important}}\n@media(hover:none) and (pointer:coarse){a,input,select{min-height:48px}}\n</style></head><body>
+<header><strong>KRIM Logistics — Partner Ecosystem Review</strong><div id="status">Loading page inventory…</div></header>
+<main><p>Review the 63 proposed Partner Ecosystem pages. Visual mode disables scripts and controls. Interactive Demo mode enables safe local UI simulations; authentication, network calls, payments, uploads and real data changes remain blocked. This review address is not private unless access protection is configured.</p>
 <input id="q" placeholder="Search page title or path…"><select id="g"><option value="">All sections</option></select><div id="list"></div></main>
 <script>
 (async()=>{
 const status=document.getElementById('status'),list=document.getElementById('list'),q=document.getElementById('q'),g=document.getElementById('g');
 try{
-const r=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});if(!r.ok)throw Error('Inventory unavailable');const pages=await r.json();
+const r=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});if(!r.ok)throw Error('Inventory unavailable');const allPages=await r.json();
+const reviewPaths=new Set(["app/finance/partner-settlements.html","app/partner/business/index.html","app/partner/carrier/active-shipments.html","app/partner/carrier/exception-reporting.html","app/partner/carrier/index.html","app/partner/carrier/milestone-updates.html","app/partner/carrier/performance-quality.html","app/partner/customs/index.html","app/partner/development/index.html","app/partner/driver-vehicle-assignment.html","app/partner/first-mile/index.html","app/partner/forwarder/index.html","app/partner/index.html","app/partner/individual/index.html","app/partner/last-mile/index.html","app/partner/multimodal/index.html","app/partner/specialist/index.html","app/partner/vehicle-registry.html","app/platform-admin/partner-capabilities.html","app/platform-admin/partner-compliance.html","app/platform-admin/partner-service-areas.html","app/platform-admin/partner-verification.html","auth/partner-redirect.html","auth/partner-signin.html","auth/partner-signup.html","control/partner-verification.html","domains/partners.html","partner-agreement.html","partner-standards.html","partner-with-us.html","public/growth/partner-activation.html","public/growth/partner-intelligence.html","public/growth/partner-network.html","public/growth/partner-outreach.html","public/operations/partner-selection-assignment.html","public/partner/accepted-loads.html","public/partner/api-webhooks.html","public/partner/available-loads.html","public/partner/capacity-resources.html","public/partner/commercial-rates.html","public/partner/compliance-evidence.html","public/partner/dispatch-assignment.html","public/partner/documents-delivery-evidence.html","public/partner/driver-invitations.html","public/partner/export-center.html","public/partner/integrations-automation.html","public/partner/notifications-support.html","public/partner/offboarding.html","public/partner/partner-onboarding.html","public/partner/performance-quality.html","public/partner/pickup-confirmation.html","public/partner/quote-history.html","public/partner/security-audit.html","public/partner/service-coverage.html","public/partner/services-capabilities.html","public/partner/settlements.html","public/partner/submit-quote.html","public/partner/team-organization.html","public/partner/team-permissions.html","public/partners.html","public/shipper/partner-bid-status.html","public/support/partner-complaints.html","workspaces/partner-workspace.html"]);
+const pages=allPages.filter(p=>reviewPaths.has(p.path));
+if(pages.length!==63)throw Error('Expected 63 review pages; found '+pages.length);
 const groups=[...new Set(pages.map(p=>p.group))].sort();groups.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;g.append(o)});
 function draw(){const query=q.value.toLowerCase(),group=g.value;const rows=pages.filter(p=>(!group||p.group===group)&&(!query||(p.title+' '+p.path).toLowerCase().includes(query)));
 status.textContent=rows.length+' shown · '+pages.length+' total pages';
