@@ -96,3 +96,19 @@ A staging database change was applied and then read back for verification.
 **Still outstanding:** add clear MFA enrollment/challenge guidance to the partner onboarding page before document upload; perform authenticated AAL1-denial/AAL2-success tests using dedicated staging accounts; verify function grants and direct URL behavior; run full browser end-to-end testing. The database policy is the security boundary; the page-level MFA prompt is usability, not a replacement for it.
 
 **Do not interpret this as full production approval.** No production project was changed.
+
+
+## Partner onboarding MFA guidance added (19 Nov 2026)
+
+Updated `public/partner/partner-onboarding.html` on the staging branch:
+
+- Added a visible MFA explanation when the Registered Business pathway is selected.
+- Before any registered-business document upload, the page checks for a verified TOTP factor.
+- If no verified factor exists, it sends the user to `auth/mfa-enroll.html`.
+- If a factor exists but the session is not AAL2, it sends the user to `auth/mfa-challenge.html`.
+- Both flows return to the Partner Workspace gateway; the user can reopen onboarding from there.
+- Development/Test and Independent Interest pathways are not forced through the business-document MFA gate.
+
+**Static validation:** both inline scripts passed JavaScript syntax compilation; the MFA gate was confirmed to occur before the first document upload call.
+
+**Not yet verified:** browser execution of enrollment/challenge redirects, live AAL1 denial/AAL2 success using staging test accounts, and end-to-end document submission/reviewer access. The enrollment and challenge pages intentionally return to the Partner Workspace gateway because their allowlists do not permit arbitrary onboarding-page return URLs.
