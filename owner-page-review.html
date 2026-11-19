@@ -23,7 +23,7 @@ try{
  const path=item.path.startsWith('public/')?item.path.slice(7):item.path;
  if(path.startsWith('/')||path.split('/').includes('..')||!path.endsWith('.html'))throw Error('Invalid page path.');
  title.textContent=item.title+' · '+item.path;
- const sourceUrl='https://raw.githubusercontent.com/rimjhimkrn-web/logistics-saas/staging/owner-admin-url-fix/'+item.path.split('/').map(encodeURIComponent).join('/');
+ const sourceUrl=new URL('/'+path.split('/').map(encodeURIComponent).join('/'),location.origin).href;
  const response=await fetch(sourceUrl,{cache:'no-store',mode:'cors',credentials:'omit'});
  if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
  const source=await response.text();
