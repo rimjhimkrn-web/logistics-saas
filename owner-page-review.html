@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KRIM — Staging Page Review</title>
+<title>KRIM Partner Ecosystem — Isolated Page Review</title>
+<link rel="stylesheet" href="core/krim-global-identity.css?v=20261119-official-blue-v2" data-krim-global-identity="official-blue">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#07182b;color:#edf5ff;font:14px/1.5 system-ui,sans-serif}
-header{position:sticky;top:0;z-index:5;background:#0b223b;border-bottom:1px solid #35516d;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-a{color:#75d9f0}.meta{color:#a9bfd4;font-size:12px}.mode{padding:6px 10px;border:1px solid #45617d;border-radius:7px;text-decoration:none}.mode.active{background:#17486a;border-color:#75d9f0;color:#fff}
-#frame{display:block;width:100%;height:calc(100vh - 76px);border:0;background:#fff}#msg{padding:24px}
-</style></head><body>
+*{box-sizing:border-box}body{margin:0;background:#F3F7FB;color:#14283E;font:14px/1.5 system-ui,sans-serif;min-width:320px;min-height:100vh;min-height:100dvh}
+header{position:sticky;top:0;z-index:5;background:#09243D;border-bottom:1px solid #DCE5EE;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+a{color:#45B8F0}.meta{color:#DCE5EE;font-size:12px}.mode{padding:6px 10px;border:1px solid #DCE5EE;border-radius:7px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.mode.active{background:#168FE0;border-color:#45B8F0;color:#fff}
+#frame{display:block;width:100%;height:calc(100vh - 76px);height:calc(100dvh - 76px);border:0;background:#fff}#msg{padding:24px}
+@media(max-width:600px){header{gap:8px;padding:10px}.meta{flex:1 1 100%}#frame{height:calc(100dvh - 130px)}}\n@media(hover:none) and (pointer:coarse){.mode{min-height:48px;padding-inline:14px}}\n</style></head><body>
 <header><strong>KRIM · STAGING PAGE REVIEW</strong><span class="meta" id="title">Loading…</span><span class="meta" id="description">Isolated review</span><a class="mode" id="visual" href="#">Visual</a><a class="mode" id="demo" href="#">Interactive Demo</a><a href="/owner-page-review-links.html">← All pages</a></header>
 <div id="msg">Preparing isolated preview…</div><iframe id="frame" title="Isolated staging page preview" sandbox="" hidden></iframe>
 <script>
@@ -39,7 +40,7 @@ try{
  const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri https://krim-staging.pages.dev";doc.head.prepend(csp);
  const banner=doc.createElement('div');
  banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — simulated sample data only · external requests, authentication, payments and real changes blocked':'STAGING · ISOLATED VISUAL REVIEW — scripts, forms, navigation and API/network requests blocked';
- banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#102b46;color:#dff7ff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #75d9f0');
+ banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#09243D;color:#fff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #45B8F0');
  doc.body.prepend(banner);
  if(mode==='demo'){
   const demoScript=doc.createElement('script');
@@ -58,7 +59,7 @@ document.querySelectorAll('form').forEach(form=>form.addEventListener('submit',e
 document.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const label=safeLabel(a),raw=a.getAttribute('href')||'';if(/^(mailto:|tel:|javascript:|#)/i.test(raw)){toast(label+' is not activated in the isolated demo.');return}let target;try{target=new URL(raw,document.baseURI)}catch(_){toast('This link is unavailable in the demo.');return}if(target.origin===location.origin&&/\.html?(?:$|[?#])/i.test(target.pathname)){parent.postMessage({type:'krim-demo-navigate',path:target.pathname.replace(/^\//,'')},'*');return}toast(label+' — external navigation is blocked in demo mode.')}));
 document.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]').forEach(button=>{if(button.dataset.krimDemoBound)return;button.dataset.krimDemoBound='1';button.addEventListener('click',e=>{if(button.type==='submit'&&button.form)return;const label=safeLabel(button);if(/close|dismiss|cancel/i.test(label)){const dialog=button.closest('[role="dialog"],dialog,.modal');if(dialog){dialog.hidden=true;dialog.removeAttribute('open');return}}modal(label+' · Interactive Demo','This control is simulated for owner review. Real permission checks, business rules, API calls and data changes are not executed.')})});
 document.querySelectorAll('input:not([type="hidden"]),textarea').forEach(input=>{input.addEventListener('change',()=>input.dataset.krimDemoEdited='true');if(input.type==='file')input.addEventListener('change',()=>toast('File selection is local only. No file was uploaded.'))});
-if('workspaces/customer-workspace.html'==='workspaces/customer-workspace.html'){
+if(${JSON.stringify(path)}==='workspaces/customer-workspace.html'){
  const table=document.querySelector('.table tbody'),rows=[['KR-IND-26041','Ranchi → Kolkata','In transit','22 Nov 2026','Demo Carrier East'],['KR-IND-26038','Delhi → Mumbai','Confirmed','24 Nov 2026','Demo Road Network'],['KR-IND-26029','Kolkata → Bengaluru','Delivered','18 Nov 2026','Demo Multimodal']];
  if(table){table.replaceChildren();rows.forEach(r=>{const tr=document.createElement('tr');r.forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i===2){const badge=document.createElement('span');badge.className='status';badge.textContent=v;td.replaceChildren(badge)}tr.append(td)});table.append(tr)})}
  const k=document.querySelectorAll('.k b');['3','1','1','0','2','1'].forEach((v,i)=>{if(k[i])k[i].textContent=v});
