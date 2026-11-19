@@ -216,3 +216,16 @@ body{overflow-x:clip}
  a{color:inherit!important;text-decoration:underline}
  *{box-shadow:none!important;text-shadow:none!important}
 }
+
+/* Compatibility aliases for page-local design systems, keeping their layout
+   while routing brand tokens through the single KRIM palette. */
+:root{
+ --ink:var(--krim-ink);--muted:var(--krim-muted);--line:var(--krim-line);
+ --pale:var(--krim-surface);--teal:var(--krim-blue);--cyan:var(--krim-sky);
+ --brand:var(--krim-blue);--brand-color:var(--krim-blue);
+ --brand-dark:var(--krim-navy);--navy-dark:var(--krim-navy);
+ --blue-500:var(--krim-blue);--blue-600:var(--krim-blue-dark);
+ --primary-blue:var(--krim-blue);--accent-blue:var(--krim-blue);
+}
+:where([class*="shadow-amber-"],[class*="shadow-teal-"],[class*="shadow-cyan-"]){--tw-shadow-color:rgb(22 143 224 / .18)!important}
+:where([class*="ring-emerald-"],[class*="ring-teal-"],[class*="ring-cyan-"]){--tw-ring-color:var(--krim-sky)!important}
