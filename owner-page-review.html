@@ -7,8 +7,8 @@ header{position:sticky;top:0;z-index:5;background:#0b223b;border-bottom:1px soli
 a{color:#75d9f0}.meta{color:#a9bfd4;font-size:12px}#frame{display:block;width:100%;height:calc(100vh - 76px);border:0;background:#fff}
 #msg{padding:24px}
 </style></head><body>
-<header><strong>KRIM · STAGING LIVE VISUAL REVIEW</strong><span class="meta" id="title">Loading…</span><span class="meta">Page scripts run in an isolated sandbox · network/API, forms and navigation blocked</span><a href="/owner-page-review-links.html">← All pages</a></header>
-<div id="msg">Preparing isolated visual preview…</div><iframe id="frame" title="Isolated staging visual page preview" sandbox="allow-scripts" hidden></iframe>
+<header><strong>KRIM · STAGING VISUAL PAGE REVIEW</strong><span class="meta" id="title">Loading…</span><span class="meta">Original HTML and styling · scripts, authentication redirects, forms and navigation disabled</span><a href="/owner-page-review-links.html">← All pages</a></header>
+<div id="msg">Preparing isolated visual preview…</div><iframe id="frame" title="Static visual page preview" sandbox="allow-scripts" hidden></iframe>
 <script>
 (async()=>{
 const msg=document.getElementById('msg'),frame=document.getElementById('frame'),title=document.getElementById('title');
@@ -28,18 +28,15 @@ try{
  if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
  const source=await response.text();
  const doc=new DOMParser().parseFromString(source,'text/html');
- doc.querySelectorAll('noscript,iframe,object,embed').forEach(n=>n.remove());
+ doc.querySelectorAll('script,noscript,iframe,object,embed').forEach(n=>n.remove());
  doc.querySelectorAll('meta[http-equiv]').forEach(n=>{if((n.getAttribute('http-equiv')||'').toLowerCase()==='refresh')n.remove()});
  doc.querySelectorAll('*').forEach(el=>{
    [...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});
    if(el.tagName==='A'){el.removeAttribute('href');el.setAttribute('aria-disabled','true')}
  });
- doc.querySelectorAll('form').forEach(f=>{f.removeAttribute('action');f.removeAttribute('method');f.setAttribute('onsubmit','return false')});
+ doc.querySelectorAll('form').forEach(f=>{f.removeAttribute('action');f.removeAttribute('method');f.removeAttribute('onsubmit');f.setAttribute('aria-disabled','true')});
  doc.querySelectorAll('input,button,select,textarea').forEach(el=>{el.disabled=true;el.removeAttribute('autofocus')});
  doc.querySelectorAll('video,audio').forEach(el=>{el.removeAttribute('autoplay');el.controls=false});
- const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';
- csp.content="default-src https: data: blob:; script-src 'unsafe-inline' https:; style-src 'unsafe-inline' https: data:; img-src https: data: blob:; font-src https: data:; media-src https: data: blob:; connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri https:";
- doc.head.prepend(csp);
  const base=doc.createElement('base');base.href=new URL('/'+path,location.origin).href.replace(/[^/]*$/,'');doc.head.prepend(base);
  const banner=doc.createElement('div');banner.textContent='STAGING · ISOLATED VISUAL REVIEW — API/network requests, forms and navigation blocked';
  banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#102b46;color:#dff7ff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #75d9f0');
