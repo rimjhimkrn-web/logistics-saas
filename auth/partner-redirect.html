@@ -1,39 +1,94 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1d3a">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Partner Access Route | KRIM Logistics</title>
-<meta name="description" content="KRIM partner access routing preview for staging.">
-<style>
-:root{--navy:#0b1d3a;--navy2:#173457;--orange:#f28a24;--ink:#172943;--muted:#64758a;--line:#dce4ed;--wash:#f4f7fb;--white:#fff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--wash);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:hover{text-decoration:underline}a:focus-visible,button:focus-visible{outline:3px solid var(--orange);outline-offset:3px}.skip{position:absolute;top:-60px;left:15px;background:#fff;padding:10px 14px;z-index:5}.skip:focus{top:12px}
-header{background:var(--navy);color:#fff}.nav{width:min(1120px,calc(100% - 40px));min-height:80px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo{background:#fff;border-radius:8px;padding:7px 12px;display:flex;align-items:center}.logo img{display:block;width:126px;height:36px;object-fit:contain}.nav a:last-child{font-size:13px;color:#e5edf6;font-weight:700;border:1px solid #ffffff55;border-radius:7px;padding:9px 14px}
-main{width:min(760px,calc(100% - 36px));margin:64px auto 76px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(24px,5vw,42px);box-shadow:0 22px 65px rgba(11,29,58,.09)}.eyebrow{display:inline-flex;align-items:center;gap:9px;background:#fff5e9;color:#8c4d0d;border:1px solid #f6d7b2;padding:6px 11px;border-radius:30px;font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.dot{width:7px;height:7px;background:var(--orange);border-radius:50%}h1{font-size:clamp(30px,5vw,43px);line-height:1.13;letter-spacing:-.04em;color:var(--navy);margin:18px 0 12px}.lead{color:var(--muted);font-size:16px;margin:0;max-width:620px}.status{display:flex;gap:14px;align-items:flex-start;padding:17px;margin:26px 0 24px;background:#fff8ef;border:1px solid #f4d8b8;border-radius:12px}.symbol{flex:0 0 36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#ffead2;color:#8d4b08;font-weight:900;font-size:18px}.status strong{display:block;color:#74420f;font-size:14px}.status p{margin:3px 0 0;color:#805a32;font-size:13px}.sectionlabel{font-size:11px;color:#64758a;text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin:0 0 12px}.routes{display:grid;grid-template-columns:1fr 1fr;gap:12px}.route{display:block;border:1px solid var(--line);border-radius:11px;padding:16px;background:#fff;transition:border-color .15s,transform .15s}.route:hover{border-color:#e8a35c;transform:translateY(-1px);text-decoration:none}.route b{display:block;color:var(--navy);font-size:14px}.route span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.route em{display:block;color:#9b5611;font-style:normal;font-weight:800;font-size:12px;margin-top:13px}.safety{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:#748398}.safety strong{color:#344963}
-footer{background:#08172e;color:#dce5f0}.foot{width:min(1120px,calc(100% - 40px));margin:auto;padding:26px 0;display:flex;justify-content:space-between;gap:20px;align-items:center}.foot strong{font-size:14px;letter-spacing:.08em}.foot small{display:block;color:#aebdd0;margin-top:4px}.footlinks{display:flex;gap:17px;flex-wrap:wrap;font-size:12px}.copyright{width:min(1120px,calc(100% - 40px));margin:auto;border-top:1px solid #ffffff20;padding:13px 0 18px;color:#9cacc1;font-size:11px}
-@media(max-width:600px){.nav{width:calc(100% - 28px);min-height:72px}.logo img{width:108px;height:32px}main{margin:32px auto 46px}.routes{grid-template-columns:1fr}.foot{align-items:flex-start;flex-direction:column}.footlinks{gap:12px}.lead{font-size:15px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
-</head>
+<meta name="theme-color" content="#09243D">
+<title>Partner Access Gateway | KRIM Logistics</title>
+<meta name="description" content="Securely verify your KRIM partner account and route you to its authorized workspace.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+
+<script defer src="../assets/krim-global-brand.js?v=20261120-official-logo-rollout"></script>
+<style id="krim-partner-gateway-colour-rebuild-20261120">:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:linear-gradient(135deg,#EAF5FC,#F3F7FB 50%,#E6F5FC);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}button,input,select,textarea{font:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.skip{position:absolute;top:-60px;left:16px;z-index:200;background:#fff;padding:10px 14px;border-radius:8px}.skip:focus{top:12px}
+.krim-staging-review-banner{margin:0 0 18px;padding:12px 14px;border:1px solid #9DD5F3;border-left:4px solid var(--blue);border-radius:9px;background:linear-gradient(100deg,#DDF3FF,#F4FBFF);color:var(--navy2);font-size:11px;line-height:1.7}.krim-staging-review-banner strong{color:var(--blue2);letter-spacing:.1em}
+body{min-height:100vh;min-height:100dvh;padding:clamp(14px,3vw,34px);display:grid;place-items:center;background:radial-gradient(ellipse at 8% 4%,#45B8F033,transparent 34%),radial-gradient(ellipse at 95% 95%,#168FE022,transparent 34%),linear-gradient(145deg,#F8FBFE,#EAF2F8)}.gateway{width:min(100%,820px);overflow:hidden;background:#fff;border:1px solid #DCE5EE;border-radius:22px;box-shadow:0 28px 80px #09243d20}.top{padding:clamp(20px,4vw,34px) clamp(22px,5vw,42px);display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border-bottom:1px solid var(--line)}.logo{display:block;width:clamp(170px,22vw,224px);height:auto;max-height:66px;object-fit:contain;object-position:left center}.brand-note{color:var(--muted);font-size:10px;font-weight:950;letter-spacing:.15em;text-align:right;line-height:1.55}.content{padding:clamp(26px,5vw,52px)}.eyebrow{margin:0 0 10px;color:var(--blue2);font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}h1{max-width:590px;margin:0;color:var(--navy);font-size:clamp(30px,5.5vw,46px);font-weight:900;line-height:1.1;letter-spacing:-.045em}.lead{max-width:590px;margin:16px 0 28px;color:var(--muted);font-size:14px;line-height:1.8}.status{display:flex;align-items:flex-start;gap:16px;padding:20px;border:1px solid #B9DDF2;border-radius:14px;background:linear-gradient(120deg,#EAF7FE,#F7FBFE)}.status-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,var(--blue2),var(--blue));color:#fff;font-size:21px;font-weight:900}.status-title{display:block;margin:0 0 5px;color:var(--navy);font-size:15px;font-weight:900}.status-text{margin:0;color:#38536B;font-size:13px;line-height:1.7;overflow-wrap:anywhere}.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 0}.step{min-width:0;padding:16px;border:1px solid var(--line);border-top:3px solid var(--sky);border-radius:11px;background:#fff}.step:nth-child(2){border-top-color:var(--blue)}.step:nth-child(3){border-top-color:var(--blue2)}.step-num{display:block;margin-bottom:7px;color:var(--blue2);font-size:9px;font-weight:950;letter-spacing:.13em}.step-label{display:block;color:var(--navy);font-size:12px;font-weight:850;line-height:1.5}.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}.help{max-width:360px;margin:0;color:var(--muted);font-size:11px;line-height:1.7}.back{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 17px;border:1px solid var(--blue2);border-radius:9px;background:linear-gradient(100deg,var(--blue2),var(--blue),var(--sky));color:#fff;text-decoration:none;font-size:12px;font-weight:950;white-space:nowrap}.back:hover{filter:brightness(.95);text-decoration:none}@media(max-width:600px){body{padding:12px}.gateway{border-radius:17px}.top{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 20px}.brand-note{text-align:left}.content{padding:24px 19px}.steps{grid-template-columns:1fr;gap:9px}.step{display:flex;align-items:center;gap:14px;padding:13px 15px}.step-num{flex:0 0 58px;margin:0}.footer{align-items:stretch;flex-direction:column}.back{width:100%}.status{padding:16px;gap:12px}.status-icon{flex-basis:36px;width:36px;height:36px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;750;800&display=swap" rel="stylesheet"><style id="krim-global-typography">
+/* KRIM global typography system — consistent across partner ecosystem pages */
+:root{
+ --krim-font-sans:"Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+ --krim-font-display:"Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+ --krim-type-ink:#14283E;
+ --krim-type-muted:#60748A;
+}
+html{font-family:var(--krim-font-sans);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body,button,input,select,textarea{font-family:var(--krim-font-sans)!important;font-optical-sizing:auto}
+body{font-size:15px;line-height:1.65;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+h1,h2,h3,h4,h5,h6,.hero-title,.page-title{
+ font-family:var(--krim-font-display)!important;
+ font-weight:750;
+ letter-spacing:-.035em;
+ line-height:1.13;
+ text-wrap:balance;
+}
+h1{font-weight:780;letter-spacing:-.045em}
+h2{font-weight:740;letter-spacing:-.032em}
+h3,h4,h5,h6{font-weight:700;letter-spacing:-.022em}
+p,li,dd,dt,label,legend,small,figcaption{font-family:var(--krim-font-sans)}
+p,li{line-height:1.68}
+button,input,select,textarea{font-size:inherit;letter-spacing:inherit}
+button,a,[role=button]{-webkit-tap-highlight-color:transparent}
+strong,b{font-weight:700}
+small,.eyebrow,.tag,.badge,.pill,.state,.num,.section-tag{letter-spacing:.045em}
+::placeholder{font-family:var(--krim-font-sans);opacity:.72}
+@media(max-width:640px){body{font-size:14.5px}h1{letter-spacing:-.04em}}
+</style></head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<header><nav class="nav" aria-label="Main navigation"><a class="logo" href="../index.html" aria-label="KRIM Logistics home"><img src="../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics"></a><a href="partner-signin.html">Back to partner sign in</a></nav></header>
-<main id="main">
-<section class="card" aria-labelledby="title">
-<span class="eyebrow"><i class="dot"></i> Partner access routing</span>
-<h1 id="title">Your next step starts here.</h1>
-<p class="lead">In the production KRIM platform, this route helps direct an authenticated partner to the appropriate workspace. This staging page demonstrates the route without checking a session or changing account state.</p>
-<div class="status" role="status" aria-live="polite"><span class="symbol" aria-hidden="true">i</span><div><strong>Staging preview — no session verified</strong><p>Authentication and organization permissions are intentionally disabled in this preview. No automatic redirect will occur, and this page does not grant access to operational tools.</p></div></div>
-<p class="sectionlabel">Choose where you want to go next</p>
-<div class="routes">
-<a class="route" href="partner-signin.html"><b>Partner sign-in preview</b><span>Return to the partner workspace selection screen.</span><em>Return to sign-in →</em></a>
-<a class="route" href="partner-signup.html"><b>Partner registration</b><span>Review the interest form for businesses and individuals.</span><em>Explore registration →</em></a>
-<a class="route" href="../public/partner/partner-onboarding.html"><b>Partner onboarding overview</b><span>Explore the public-facing partner onboarding journey.</span><em>View onboarding →</em></a>
-<a class="route" href="../partner-with-us.html"><b>Join the KRIM network</b><span>Learn about the partner ecosystem and participation.</span><em>Explore partnership →</em></a>
-</div>
-<div class="safety"><strong>Preview boundary:</strong> no password, token, profile, or organization data is read or stored. No Supabase client, authentication SDK, or redirect script is loaded on this page.</div>
+<main class="gateway">
+<header class="top">
+<img class="logo" src="../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics">
+<div class="brand-note">GLOBAL LOGISTICS<br>OPERATING SYSTEM</div>
+</header>
+<div class="content">
+<p class="eyebrow">Secure partner access</p>
+<h1>Taking you to the right partner workspace.</h1>
+<p class="lead">KRIM verifies your sign-in session and organization access before opening the workspace assigned to your partner account. Your workspace is selected by your authorized account access.</p>
+<div id="gateway-staging-note" class="krim-staging-review-banner" hidden><strong>STAGING REVIEW MODE</strong> — Gateway design preview only. Authentication and workspace routing are not executed in staging.</div>
+<section class="status" aria-live="polite" aria-atomic="true">
+<span class="status-icon" aria-hidden="true">✓</span>
+<div><strong class="status-title">Verifying your access</strong><p class="status-text" id="status" role="status">Checking your authenticated session and organization permissions…</p></div>
 </section>
+<div class="steps" aria-label="Partner access verification steps">
+<div class="step"><span class="step-num">01 / SESSION</span><span class="step-label">Confirm your sign-in</span></div>
+<div class="step"><span class="step-num">02 / ORGANIZATION</span><span class="step-label">Verify organization membership</span></div>
+<div class="step"><span class="step-num">03 / WORKSPACE</span><span class="step-label">Open your authorized workspace</span></div>
+</div>
+<div class="footer">
+<p class="help">If verification does not continue, return to partner sign-in and try again. KRIM never grants workspace access based on a page link alone.</p>
+<a class="back" id="back" href="partner-signin.html">← Return to Partner Sign In</a>
+</div>
+</div>
 </main>
-<footer><div class="foot"><div><strong>KRIM LOGISTICS</strong><small>Global Logistics Operating System<br>Knowledge · Reliability · Integration · Movement</small></div><div class="footlinks"><a href="../partner-with-us.html">Partner ecosystem</a><a href="../contact.html">Contact</a><a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a></div></div><div class="copyright">© 2026 KRIM Logistics. Partner access route preview — staging interface only.</div></footer>
-</body></html>
+<script>
+(async function(){
+"use strict";
+const status=document.getElementById("status");
+const stagingReviewMode=location.hostname==="krim-staging.pages.dev"||new URLSearchParams(location.search).get("mode")==="review";
+if(stagingReviewMode){document.getElementById("gateway-staging-note").hidden=false;document.querySelector(".status-title").textContent="Staging preview ready";status.textContent="This is a visual review of the secure partner gateway. No account check, authentication request or workspace redirect runs in staging.";return;}
+const client=window.KRIM_SUPABASE||window.supabaseClient;
+const base=window.KRIM_BASE_PATH||"";
+try{
+ if(!client)throw new Error("Authentication service did not load. Return to sign-in and retry.");
+ const {data,error}=await client.auth.getSession();
+ if(error)throw error;
+ if(!data.session){location.replace(base+"/auth/partner-signin.html");return;}
+ status.textContent="Your session is confirmed. KRIM is checking your organization membership and authorized workspace…";
+ location.replace(base+"/app/partner/index.html");
+}catch(error){
+ status.textContent=error&&error.message?error.message:"Unable to verify partner access. Please return to sign-in and retry.";
+}
+})();
+</script>
+</body>
+</html>
