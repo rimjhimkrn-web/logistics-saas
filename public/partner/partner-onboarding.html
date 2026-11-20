@@ -257,6 +257,30 @@ main#main>section:nth-child(3){margin-bottom:46px!important;padding:17px!importa
 body>footer{padding:26px 18px!important}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* KRIM partner pathway selector — final unified treatment */
+#partner-onboarding-form>div:first-child{padding:24px!important;border:1px solid #dbe4eb!important;border-top:4px solid #f47a24!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 34px rgba(7,27,45,.07)!important}
+#partner-onboarding-form>div:first-child .partner-section-heading{margin-bottom:17px!important}
+#partner-onboarding-form>div:first-child .partner-section-kicker{color:#c65c18!important;font-size:9px!important;letter-spacing:.16em!important}
+#partner-onboarding-form>div:first-child .partner-section-heading h3{margin:5px 0 7px!important;color:#09243d!important;font-size:clamp(21px,2.4vw,28px)!important;font-weight:850!important;letter-spacing:-.045em!important;text-transform:none!important}
+#partner-onboarding-form>div:first-child .partner-section-heading p{max-width:650px!important;margin:0!important;color:#5c7184!important;font-size:12px!important;line-height:1.75!important}
+#partner-onboarding-form>div:first-child>label{margin:0 0 9px!important;color:#18364c!important;font-size:10px!important;letter-spacing:.04em!important}
+.partner-pathway-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important;margin-top:0!important}
+.partner-pathway-card{position:relative!important;min-height:225px!important;gap:11px!important;padding:19px!important;border:1px solid #d8e2e9!important;border-radius:12px!important;background:#fff!important;color:#183247!important;text-align:left!important;box-shadow:0 4px 14px rgba(7,27,45,.035)!important}
+.partner-pathway-card:hover{transform:translateY(-3px)!important;border-color:#e7a06f!important;box-shadow:0 13px 26px rgba(7,27,45,.09)!important}
+.partner-pathway-card[aria-pressed=true]{padding:18px!important;border:2px solid #f47a24!important;background:linear-gradient(155deg,#fff7f0 0%,#fff 78%)!important;box-shadow:0 0 0 4px rgba(244,122,36,.12),0 12px 25px rgba(7,27,45,.07)!important}
+.partner-pathway-card .pathway-number{color:#b95417!important;font-size:9px!important;letter-spacing:.13em!important}
+.partner-pathway-card strong{color:#09243d!important;font-size:16px!important;line-height:1.25!important}
+.partner-pathway-card .pathway-summary{color:#40596d!important;font-size:11px!important;line-height:1.7!important}
+.partner-pathway-card .pathway-detail{padding-top:10px!important;border-color:#e4ebf0!important;color:#607589!important;font-size:10px!important;line-height:1.65!important}
+.partner-pathway-card .pathway-action{display:flex!important;align-items:center!important;gap:7px!important;margin-top:auto!important;color:#b95417!important;font-size:10px!important;font-weight:900!important}
+.partner-pathway-card[aria-pressed=true] .pathway-action:after{content:"✓";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#f47a24;color:white}
+.partner-pathway-footnote{margin:13px 0 0!important;padding:11px 13px!important;border-left:3px solid #f47a24!important;border-radius:0 7px 7px 0!important;background:#f7f9fb!important;color:#526a7d!important;font-size:10px!important;line-height:1.7!important}
+.partner-mode-native{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+#partner-pathway-live{margin-top:12px;padding:12px 14px;border:1px solid #f0d1b9;border-radius:9px;background:#fff8f2;color:#68411f;font-size:10px;line-height:1.7}
+@media(max-width:980px){.partner-pathway-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.partner-pathway-card{min-height:210px!important}.partner-pathway-card:last-child{grid-column:1/-1}}
+@media(max-width:640px){#partner-onboarding-form>div:first-child{padding:17px!important}.partner-pathway-grid{grid-template-columns:1fr!important;gap:10px!important}.partner-pathway-card,.partner-pathway-card[aria-pressed=true]{grid-column:auto!important;min-height:0!important;padding:16px!important}.partner-pathway-card[aria-pressed=true]{padding:15px!important}.partner-pathway-card .pathway-detail{font-size:10px!important}}
+@media(prefers-reduced-motion:reduce){.partner-pathway-card{transition:none!important}.partner-pathway-card:hover{transform:none!important}}
 </style>
 </head>
 <body><a class="skip" href="#main">Skip to partner verification</a>
@@ -549,8 +573,90 @@ body>footer{padding:26px 18px!important}
       node.className = "text-sm " + (type === "success" ? "text-emerald-400" : type === "info" ? "text-amber-300" : "text-rose-400");
     }
 
+    function initializePartnerStagingPreview() {
+      const form = document.getElementById("partner-onboarding-form");
+      const modeSelect = document.getElementById("partner-account-mode");
+      const businessFields = document.getElementById("registered-business-fields");
+      const individualFields = document.getElementById("individual-interest-fields");
+      const testNote = document.getElementById("development-test-note");
+      const steps = document.getElementById("registered-business-steps");
+      const submit = form.querySelector('button[type="submit"]');
+      const feedback = document.getElementById("onboarding-feedback");
+      const modes = {
+        development_test: {
+          title: "Development / Test selected",
+          detail: "Explore the partner workspace with clearly labelled sample records. No business documents, live loads, customer data, bookings or payouts are involved."
+        },
+        individual_interest: {
+          title: "Individual / Independent selected",
+          detail: "This pathway is for an individual or self-employed operator. The preview shows the interest details requested; identity and eligibility checks would happen separately."
+        },
+        registered_business: {
+          title: "Registered Business selected",
+          detail: "This pathway is for an established logistics provider. Business identity, operating scope and supporting evidence are reviewed separately before approval."
+        }
+      };
+      const countryOptions = [["IN","India"],["AE","United Arab Emirates"],["BD","Bangladesh"],["NP","Nepal"],["SG","Singapore"],["GB","United Kingdom"],["US","United States"]];
+      ["partner-country","partner-operating-country","individual-country"].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.replaceChildren(new Option("Select country",""));
+        countryOptions.forEach(([code,name]) => select.add(new Option(name + " (" + code + ")",code)));
+        select.value = "IN";
+      });
+      const update = mode => {
+        modeSelect.value = mode || "";
+        document.querySelectorAll("[data-mode-card]").forEach(card => {
+          const active = card.dataset.modeCard === mode;
+          card.setAttribute("aria-pressed",String(active));
+          card.setAttribute("aria-label",card.querySelector("strong").textContent + (active ? ", selected" : ", select pathway"));
+        });
+        const business = mode === "registered_business";
+        const individual = mode === "individual_interest";
+        businessFields.hidden = !business;
+        individualFields.hidden = !individual;
+        testNote.hidden = mode !== "development_test";
+        if (steps) steps.hidden = !business;
+        businessFields.querySelectorAll("input,select,textarea").forEach(el => el.disabled = !business);
+        individualFields.querySelectorAll("input,select,textarea").forEach(el => el.disabled = !individual);
+        submit.disabled = !mode;
+        submit.textContent = mode === "development_test" ? "Preview Development / Test →" : mode === "individual_interest" ? "Preview Individual Interest →" : mode === "registered_business" ? "Preview Business Verification →" : "Choose a Partner Pathway →";
+        feedback.textContent = mode ? modes[mode].title + " — " + modes[mode].detail : "Select one of the three pathways above. The relevant next-step panel will open below.";
+        feedback.className = "text-sm";
+        feedback.style.cssText = "display:block;margin-top:12px;padding:12px 14px;border:1px solid #dce5ec;border-radius:9px;background:#f5f8fb;color:#41596d;font-size:11px;line-height:1.7";
+      };
+      document.querySelectorAll("[data-mode-card]").forEach(card => card.addEventListener("click",() => update(card.dataset.modeCard)));
+      modeSelect.addEventListener("change",() => update(modeSelect.value));
+      if (!document.getElementById("partner-pathway-live")) {
+        const live = document.createElement("div");
+        live.id = "partner-pathway-live";
+        live.setAttribute("role","status");
+        live.setAttribute("aria-live","polite");
+        live.textContent = "Choose a pathway to see the correct next step. You can change your choice at any time.";
+        document.querySelector(".partner-pathway-grid").after(live);
+      }
+      update("");
+      form.noValidate = true;
+      form.addEventListener("submit",event => {
+        event.preventDefault();
+        const mode = modeSelect.value;
+        if (!mode) {
+          feedback.textContent = "Please choose Development / Test, Individual / Independent, or Registered Business first.";
+          feedback.style.borderColor = "#e7b6a6";
+          feedback.style.background = "#fff5f1";
+          feedback.style.color = "#8b3d27";
+          return;
+        }
+        feedback.textContent = modes[mode].title + " — selection works. This staging preview does not sign you in, create an account, upload documents, submit information, or change KRIM records. The live verification workflow is intentionally disabled here.";
+      });
+    }
+
     async function initializePartnerOnboarding() {
       try {
+        if (location.hostname === "krim-staging.pages.dev" || location.hostname.endsWith(".pages.dev")) {
+          initializePartnerStagingPreview();
+          return;
+        }
         if (!onboardingClient) throw new Error("KRIM authentication did not initialize. Refresh and try again.");
         const { data: sessionData, error: sessionError } = await onboardingClient.auth.getSession();
         if (sessionError) throw sessionError;
