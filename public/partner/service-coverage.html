@@ -78,7 +78,7 @@ img,svg,video{max-width:100%}
  .btn,button{font-size:12px!important}
 }
 @media(hover:none){button,.btn,a{min-height:44px}}
-</style><style id="krim-page24-polish">body{background:var(--surface)!important}.top{background:#09243D!important;color:#FFFFFF!important}.mark{background:linear-gradient(135deg,#45B8F0,#168FE0,#0754A4)!important}.metric{--accent:#168FE0!important}.metric:nth-child(2),.metric:nth-child(3),.metric:nth-child(4){--accent:#0754A4!important}.chip.violet,.pathway-badge{background:#EAF5FC!important;color:#0754A4!important;border-color:#C9E4F5!important}.chip.green{background:#EAF6F2!important;color:#16836C!important}.chip.amber{background:#FFF5E5!important;color:#80550E!important}.layout{align-items:start}.panel{min-width:0}.hero-side{background:#FFFFFF12!important;border:1px solid #FFFFFF30!important}</style>
+</style><style id="krim-page24-polish">body{background:var(--surface)!important}.top{background:#09243D!important;color:#FFFFFF!important}.mark{background:linear-gradient(135deg,#45B8F0,#168FE0,#0754A4)!important}.metric{--accent:#168FE0!important}.metric:nth-child(2),.metric:nth-child(3),.metric:nth-child(4){--accent:#0754A4!important}.chip.violet,.pathway-badge{background:#EAF5FC!important;color:#0754A4!important;border-color:#C9E4F5!important}.chip.green{background:#EAF6F2!important;color:#16836C!important}.chip.amber{background:#FFF5E5!important;color:#80550E!important}.layout{align-items:start}.panel{min-width:0}.hero-side{background:#FFFFFF12!important;border:1px solid #FFFFFF30!important}footer{background:linear-gradient(112deg,#071E34,#0D3657 58%,#0754A4)!important;color:#DCECF8!important;border-top:4px solid #168FE0!important;padding:22px max(16px,calc((100% - 1240px)/2))!important;margin-top:28px!important}footer span{color:#DCECF8!important}.coverage-icon{background:#EAF5FC!important;color:#0754A4!important}.status.active{background:#EAF6F2!important;color:#16836C!important}.status.pending{background:#FFF5E5!important;color:#80550E!important}.coverage-row{border-color:#DCE5EE!important}.draftbox{background:linear-gradient(145deg,#FFFFFF,#F5FAFF)!important}
 <style id="krim-accessibility-motion">@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation:none!important;transition:none!important}}</style>
 </head>
 <body>
@@ -114,9 +114,9 @@ const staging=location.hostname==="krim-staging.pages.dev";
 if(staging){
  const $=id=>document.getElementById(id);
  const sampleAreas=[
- {country:"India",region:"Jharkhand · illustrative",service:"Road transport",scope:"Market / region",status:"Pending review"},
+ {country:"India",region:"Jharkhand · illustrative",service:"Road transport",scope:"Market / region",status:"Illustrative only"},
  {country:"India",region:"Ranchi · illustrative",service:"First-mile collection",scope:"Location",status:"Illustrative only"},
- {country:"United Arab Emirates",region:"Not specified",service:"Freight forwarding",scope:"Country",status:"Not submitted"}
+ {country:"United Arab Emirates",region:"Not specified",service:"Freight forwarding",scope:"Country",status:"Reference only"}
  ];
  const sampleCaps=[
  {service:"Road transport",mode:"Road",geo:"India · region not verified",limit:"Not declared",status:"Illustrative"},
@@ -129,15 +129,24 @@ if(staging){
  $("pathway-title").textContent="Registered Logistics Business Workspace";
  $("pathway-description").textContent="Illustrative registered-business pathway. Actual organisation eligibility and commercial access are determined only by the authenticated production platform.";
  $("pathway-badge").textContent="ILLUSTRATIVE PREVIEW";$("pathway-badge").className="pathway-badge is-registered";
- $("area-count").textContent="2";$("country-count").textContent="1";$("cap-count").textContent="2";$("data-state").textContent="Preview";$("data-detail").textContent="Illustrative content only · no live records";
+ $("area-count").textContent="3";$("country-count").textContent="2";$("cap-count").textContent="2";$("data-state").textContent="Preview";$("data-detail").textContent="Illustrative content only · no live records";
  const coverage=rows=>rows.map(a=>'<article class="coverage-row"><span class="coverage-icon">◎</span><div><strong>'+a.country+' · '+a.region+'</strong><small>'+a.service+' · '+a.scope+'</small></div><span class="status pending">'+a.status+'</span></article>').join("");
  $("coverage-list").innerHTML=coverage(sampleAreas);
  $("capability-list").innerHTML=sampleCaps.map(c=>'<article class="cap"><strong>'+c.service+'</strong><span>Transport / service mode: '+c.mode+'</span><span>Geography: '+c.geo+'</span><span>Declared limit: '+c.limit+'</span><div class="capflags"><span class="amber">'+c.status+'</span></div></article>').join("");
  $("cap-summary").textContent="2 illustrative capability cards. These are not real partner records.";
+ const option=(id,items)=>{const el=$(id);if(!el)return;el.replaceChildren(new Option("Choose an illustrative option…",""));items.forEach(([label,value])=>el.add(new Option(label,value)));};
+ option("area-country",[["India · IN","1"],["United Arab Emirates · AE","2"]]);
+ option("area-market",[["Jharkhand · India (illustrative)","101"],["Dubai · UAE (illustrative)","201"]]);
+ option("area-location",[["Ranchi · Jharkhand (illustrative)","1001"],["Jamshedpur · Jharkhand (illustrative)","1002"],["Dubai · UAE (illustrative)","2001"]]);
+ option("area-mode",[["Road (illustrative)","1"],["Rail (illustrative)","2"],["Air (illustrative)","3"],["Ocean (illustrative)","4"],["Warehouse (illustrative)","5"]]);
+ $("area-from").value=new Date().toISOString().slice(0,10);
+ $("area-submit").disabled=false;
+ $("area-submit").textContent="Preview request (not submitted)";
+
  $("country-list").innerHTML='<article class="coverage-row"><span class="coverage-icon">IN</span><div><strong>India</strong><small>IN · Illustrative reference entry</small></div><span class="status">REFERENCE</span></article><article class="coverage-row"><span class="coverage-icon">AE</span><div><strong>United Arab Emirates</strong><small>AE · Illustrative reference entry</small></div><span class="status">REFERENCE</span></article>';
  $("country-summary").textContent="Illustrative country references only. No service availability is implied.";
  $("export-coverage").disabled=true;$("export-capabilities").disabled=true;
- $("search").disabled=true;$("status-filter").disabled=true;$("cap-search").disabled=true;$("cap-status-filter").disabled=true;$("country-search").disabled=true;$("country-region").disabled=true;
+ $("search").disabled=false;$("status-filter").disabled=false;$("cap-search").disabled=false;$("cap-status-filter").disabled=false;$("country-search").disabled=false;$("country-region").disabled=false;
  $("area-submit").textContent="Preview request (not submitted)";
  $("service-area-form").addEventListener("submit",e=>{e.preventDefault();$("area-state").textContent="Staging preview only. No evidence files are uploaded and no service-area request is created or transmitted.";});
  $("service-area-form").querySelectorAll("input[type=file]").forEach(el=>el.addEventListener("change",()=>{$("area-state").textContent="Local file selected for interface preview. It remains on this device and is not uploaded."; }));
