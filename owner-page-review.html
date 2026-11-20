@@ -58,6 +58,90 @@ doc.body.prepend(banner);
  const brandFix=doc.createElement('script');
  brandFix.textContent=`(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/',src=b+'assets/krim-primary.svg?v=20261117-transparent-brand-v3',h=document.querySelector('header'),t=h&&(h.querySelector('.brand-mark')||h.querySelector('.brandmark')||h.querySelector('.logo')||h.querySelector('img[alt*="krim" i],img[alt*="logo" i]')||h.querySelector('[class*="brand"] img')||h.querySelector('[class*="logo"] img'));function img(){var n=document.createElement('img');n.src=src;n.alt='KRIM Logistics — Global Logistics Operating System';n.className='krim-official-brand-logo';return n}if(t){if(t.tagName==='IMG'){t.src=src;t.alt='KRIM Logistics — Global Logistics Operating System';t.classList.add('krim-official-brand-logo')}else t.replaceWith(img())}else if(h){var brand=h.querySelector('.brand,[class*="brand"]');if(brand)brand.replaceChildren(img());else{var a=document.createElement('a');a.href=b;a.setAttribute('aria-label','KRIM Logistics home');a.append(img());h.insertBefore(a,h.firstChild)}}})();`;
  doc.body.append(brandFix);
+ // Safe static workspace renderer for Pages 7–9. Original application scripts remain stripped.
+ if(mode==='demo' && ['app/partner/business/index.html','app/partner/individual/index.html','app/partner/development/index.html'].includes(path)){
+  const staticCards={
+   'app/partner/business/index.html':[
+    ['02','Business identity & verification','Organization profile, legal identity, documents and review progress.','public/partner/partner-onboarding.html',false],
+    ['03','Global service coverage','Recorded countries, regions, lanes and service-area requests.','public/partner/service-coverage.html',false],
+    ['04','Services & capabilities','Declared transport modes, handling capabilities and operational constraints.','public/partner/services-capabilities.html',false],
+    ['05','Opportunities & tendering','Eligible freight opportunities and tender responses.','public/partner/load-marketplace.html',true],
+    ['06','Quotes & commercial rates','Rate cards, offer preparation and bid history.','public/partner/commercial-rates.html',true],
+    ['07','Shipment & job management','Assignment offers, response deadlines and confirmed jobs.','public/partner/accepted-loads.html',true],
+    ['08','Capacity & resources','Fleet, equipment, capacity windows and commitments.','public/partner/capacity-resources.html',true],
+    ['09','Dispatch & execution','Dispatch records and operational execution milestones.','public/partner/dispatch-execution.html',true],
+    ['10','Tracking & exceptions','Shipment events, milestone visibility and exceptions.','public/partner/tracking-exceptions.html',true],
+    ['11','Documents & delivery evidence','Shipment documents and proof-of-delivery evidence.','public/partner/documents-delivery-evidence.html',true],
+    ['12','Finance & settlements','Partner payables, invoices and settlement history.','public/partner/settlements.html',true],
+    ['13','Performance & quality','Service-level indicators, exceptions and quality evidence.','public/partner/performance-quality.html',true],
+    ['14','Team & organization','Organization membership and recorded role visibility.','public/partner/team-organization.html',true],
+    ['15','Notifications & support','Notifications, delivery history and support cases.','public/partner/notifications-support.html',false],
+    ['16','Integrations & automation','Webhook and workflow integration visibility.','app/partner/integrations-automation.html',true],
+    ['17','Security & audit','Permitted access records and governance evidence.','app/partner/security-audit.html',true]
+   ],
+   'app/partner/individual/index.html':[
+    ['01','Your onboarding profile','Review the individual-interest pathway and the information submitted for your partner profile.','public/partner/partner-onboarding.html',false],
+    ['02','Partner standards & eligibility','Understand identity, service quality, safety, documentation and jurisdiction-specific review expectations.','partner-standards.html',false],
+    ['03','Partner agreement framework','Read the framework that may apply if a future service relationship is approved. It is not an executed agreement.','partner-agreement.html',false],
+    ['04','KRIM network overview','Understand the network model, participant responsibilities and how partner participation is structured.','network.html',false],
+    ['05','Support & enquiries','Contact KRIM about your profile, eligibility questions, document requests or review progress.','contact.html',false],
+    ['06','Account access & security','Review the available account access route and keep your sign-in credentials secure.','auth/access.html',false]
+   ],
+   'app/partner/development/index.html':[
+    ['01','Partner standards & eligibility','Understand partner responsibilities, verification expectations, safety, documentation and local requirements.','partner-standards.html',false],
+    ['02','Partner onboarding','Review the supported onboarding pathways and the information required for each account type.','public/partner/partner-onboarding.html',false],
+    ['03','Partner agreement framework','Explore the reference framework for a potential future service relationship. It is not an executed agreement.','partner-agreement.html',false],
+    ['04','Network overview','Understand the KRIM network model, participant responsibilities and partner lifecycle.','network.html',false],
+    ['05','Global markets & coverage','Explore the global-ready market architecture and distinguish planned reach from currently activated markets.','global-markets.html',false],
+    ['06','Support & account security','Find support for your development pathway and review account access guidance.','contact.html',false]
+   ]
+  };
+  const groupsByPath={
+   'app/partner/business/index.html':[
+    ['network-readiness','Network readiness','Establish your organization identity, service footprint and declared capabilities.',2,4],
+    ['commercial-access','Commercial access','Prepare commercial offers and participate only when the organization is eligible.',5,6],
+    ['service-execution','Service execution','Manage assigned work, capacity, dispatch, tracking and delivery evidence.',7,11],
+    ['finance-governance','Finance & governance','Review financial records, quality, team access, notifications and platform integrations.',12,17]
+   ],
+   'app/partner/individual/index.html':[
+    ['profile-eligibility','Profile & eligibility','Review your submitted profile and understand the standards and agreement framework.',1,3],
+    ['network-participation','Network participation','Learn how KRIM’s partner network is structured and what participation involves.',4,4],
+    ['support-security','Support & account security','Get help with your profile and review secure account access routes.',5,6]
+   ],
+   'app/partner/development/index.html':[
+    ['onboarding-foundations','Onboarding foundations','Understand partner standards, select the appropriate pathway and review the agreement framework.',1,3],
+    ['network-market-understanding','Network & market understanding','Learn how KRIM’s network is structured and distinguish global-ready architecture from activated service coverage.',4,5],
+    ['support-account-safety','Support & account safety','Find support and review account access guidance for your test profile.',6,6]
+   ]
+  };
+  const nav=doc.getElementById('module-nav'),sections=doc.getElementById('module-sections'),cards=staticCards[path]||[],groups=groupsByPath[path]||[];
+  if(nav&&sections){
+   nav.replaceChildren();sections.replaceChildren();
+   groups.forEach(g=>{
+    const items=cards.filter(x=>Number(x[0])>=g[3]&&Number(x[0])<=g[4]);
+    const link=doc.createElement('a');link.href='#'+g[0];link.textContent=g[1]+' '+items.length;nav.append(link);
+    const section=doc.createElement('section');section.className='module-group';section.id=g[0];
+    const head=doc.createElement('div');head.className='module-group-head';
+    const title=doc.createElement('h3');title.textContent=g[1];const desc=doc.createElement('p');desc.textContent=g[2];head.append(title,desc);section.append(head);
+    const grid=doc.createElement('div');grid.className='grid';
+    items.forEach(item=>{
+     const card=doc.createElement('article');card.className='card';
+     const top=doc.createElement('div');top.className='card-top';
+     const num=doc.createElement('span');num.className='num';num.textContent=(path.includes('/business/')?'WORK AREA ':'LEARNING AREA ')+item[0];
+     const state=doc.createElement('span');state.className='state';
+     state.textContent=path.includes('/business/')?(item[4]?(item[0]==='12'?'FINANCE RESTRICTED · LEAN LAUNCH':'VERIFICATION REQUIRED'):'REFERENCE / GUIDANCE'):'REFERENCE / NON-COMMERCIAL';
+     top.append(num,state);const h=doc.createElement('h3');h.textContent=item[1];const p=doc.createElement('p');p.textContent=item[2];card.append(top,h,p);
+     const note=doc.createElement('span');note.className='locked-label';
+     if(path.includes('/business/')&&item[0]==='12')note.textContent='Settlement activity is not enabled in this preview. KRIM does not hold or settle partner freight funds.';
+     else if(path.includes('/business/')&&item[4])note.textContent='Visible for review only. Requires organization verification and server-side eligibility.';
+     else note.textContent='Preview reference only. No account access, submission or backend action is enabled.';
+     card.append(note);grid.append(card);
+    });
+    section.append(grid);sections.append(section);
+   });
+   const notice=doc.createElement('p');notice.className='notice';notice.textContent='STAGING PREVIEW · All work areas are displayed for review. This view does not grant approval, access, commercial eligibility or operational permissions.';sections.append(notice);
+  }
+ }
  if(mode==='demo'){
   const demoScript=doc.createElement('script');
   demoScript.textContent=`(function(){
