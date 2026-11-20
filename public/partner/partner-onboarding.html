@@ -290,6 +290,12 @@ body>footer p{color:#C9D7E4!important}
 <link rel="stylesheet" href="../../core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
 
 <link rel="stylesheet" href="../../core/krim-partner-experience.css?v=20261120-release1">
+<style id="krim-onboarding-staging-review-style">
+.krim-staging-review-banner{width:min(1180px,calc(100% - 48px));margin:18px auto 0;padding:13px 16px;border:1px solid #B8DDF2;border-left:4px solid #168FE0;border-radius:9px;background:#EAF6FD;color:#123B5A;font:12px/1.65 Inter,Arial,sans-serif}
+.krim-staging-review-banner strong{color:#0754A4;letter-spacing:.08em}
+@media(max-width:640px){.krim-staging-review-banner{width:calc(100% - 28px);margin-top:12px}}
+</style>
+<script>document.addEventListener("DOMContentLoaded",function(){if(location.hostname==="krim-staging.pages.dev"||new URLSearchParams(location.search).get("mode")==="review"){const n=document.getElementById("krim-staging-review-banner");if(n)n.hidden=false;}});</script>
 </head>
 <body><a class="skip" href="#main">Skip to partner verification</a>
 
@@ -307,6 +313,7 @@ body>footer p{color:#C9D7E4!important}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
   </header>
+  <div class="krim-staging-review-banner" id="krim-staging-review-banner" hidden><strong>STAGING REVIEW MODE</strong><span> No account or sign-in required. Explore the page and pathway interactions; submissions, uploads and backend changes are disabled.</span></div>
   <nav id="krimUnifiedMenu" class="krim-unified-menu" aria-label="Partner navigation" hidden>
     <a href="../../app/partner/index.html?release=partner-workspace-v3">Partner workspace</a>
     <a href="../../partner-standards.html">Partner standards</a>
@@ -575,6 +582,7 @@ body>footer p{color:#C9D7E4!important}
 
   <script>
     const onboardingClient = window.KRIM_SUPABASE || window.supabaseClient;
+    const stagingReviewMode = location.hostname === "krim-staging.pages.dev" || new URLSearchParams(location.search).get("mode") === "review";
     let onboardingSession = null;
     let onboardingOrganizationId = null;
     let uploadedDocumentPaths = [];
@@ -587,17 +595,19 @@ body>footer p{color:#C9D7E4!important}
 
     async function initializePartnerOnboarding() {
       try {
-        if (!onboardingClient) throw new Error("KRIM authentication did not initialize. Refresh and try again.");
-        const { data: sessionData, error: sessionError } = await onboardingClient.auth.getSession();
-        if (sessionError) throw sessionError;
-        onboardingSession = sessionData.session;
-        if (!onboardingSession) {
-          window.location.href = "../../auth/partner-signin.html";
-          return;
+        if (!stagingReviewMode) {
+          if (!onboardingClient) throw new Error("KRIM authentication did not initialize. Refresh and try again.");
+          const { data: sessionData, error: sessionError } = await onboardingClient.auth.getSession();
+          if (sessionError) throw sessionError;
+          onboardingSession = sessionData.session;
+          if (!onboardingSession) {
+            window.location.href = "../../auth/partner-signin.html";
+            return;
+          }
+          const metadata = onboardingSession.user.user_metadata || {};
+          const legalName = document.getElementById("partner-legal-name");
+          if (metadata.company_name && !legalName.value) legalName.value = String(metadata.company_name).slice(0, 200);
         }
-        const metadata = onboardingSession.user.user_metadata || {};
-        const legalName = document.getElementById("partner-legal-name");
-        if (metadata.company_name && !legalName.value) legalName.value = String(metadata.company_name).slice(0, 200);
 
         // Global ISO-3166-1 alpha-2 list is the baseline; the database catalog can add/override display names.
         // This prevents onboarding from being blocked when a market has not yet been seeded in krim_countries.
@@ -605,16 +615,20 @@ body>footer p{color:#C9D7E4!important}
         const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
         let countryMap = new Map(globalCountryCodes.map(code => [code, regionNames.of(code) || code]));
         let activeCountryCodes = new Set();
-        try {
-          const { data: countries } = await onboardingClient.from("krim_countries")
-            .select("iso2_code, code, name").eq("is_active", true).order("name", { ascending: true });
-          activeCountryCodes = new Set((countries || []).map(country => String(country.iso2_code || country.code || "").toUpperCase()).filter(code => /^[A-Z]{2}$/.test(code)));
-          (countries || []).forEach(country => {
-            const code = String(country.iso2_code || country.code || "").toUpperCase();
-            if (/^[A-Z]{2}$/.test(code) && country.name) countryMap.set(code, String(country.name));
-          });
-        } catch (catalogError) {
-          console.warn("Using built-in global country catalog; database country lookup unavailable.", catalogError);
+        if (stagingReviewMode) {
+          activeCountryCodes = new Set(globalCountryCodes);
+        } else {
+          try {
+            const { data: countries } = await onboardingClient.from("krim_countries")
+              .select("iso2_code, code, name").eq("is_active", true).order("name", { ascending: true });
+            activeCountryCodes = new Set((countries || []).map(country => String(country.iso2_code || country.code || "").toUpperCase()).filter(code => /^[A-Z]{2}$/.test(code)));
+            (countries || []).forEach(country => {
+              const code = String(country.iso2_code || country.code || "").toUpperCase();
+              if (/^[A-Z]{2}$/.test(code) && country.name) countryMap.set(code, String(country.name));
+            });
+          } catch (catalogError) {
+            console.warn("Using built-in global country catalog; database country lookup unavailable.", catalogError);
+          }
         }
         function populateCountrySelect(selectId, placeholderText) {
           const select = document.getElementById(selectId);
@@ -753,6 +767,17 @@ body>footer p{color:#C9D7E4!important}
         });
         updatePartnerModeUI();
 
+        if (stagingReviewMode) {
+          document.getElementById("partner-verification-status-title").textContent = "Staging preview — no account required";
+          document.getElementById("partner-status-mode").textContent = "Preview only";
+          document.getElementById("partner-status-verification").textContent = "Not checked";
+          document.getElementById("partner-status-compliance").textContent = "Not checked";
+          document.getElementById("partner-status-access").textContent = "Disabled in staging";
+          document.getElementById("partner-status-guidance").textContent = "This is a visual and workflow review only. No account, organisation, document upload, verification request or commercial access is created. Sign in is not required to inspect this page.";
+          onboardingMessage("STAGING REVIEW MODE — explore the pathway cards and form layout freely. Submissions, authentication and document uploads are disabled; no data will be saved.", "info");
+          document.querySelectorAll('#partner-onboarding-form input[type="file"]').forEach(input => input.disabled = true);
+          return;
+        }
         const { data: memberships, error: membershipError } = await onboardingClient
           .from("krim_organization_members")
           .select("organization_id")
@@ -838,6 +863,10 @@ body>footer p{color:#C9D7E4!important}
 
     document.getElementById("partner-onboarding-form").addEventListener("submit", async function(event) {
       event.preventDefault();
+      if (stagingReviewMode) {
+        onboardingMessage("Staging review only — no account, verification request, document upload or backend change has been made. Sign-in is not required to review this page.", "info");
+        return;
+      }
       const button = this.querySelector("button[type=submit]");
       const mode = document.getElementById("partner-account-mode").value;
       button.disabled = true;
