@@ -90,7 +90,7 @@ const cards=[
 {n:"05",group:"support",title:"Support & enquiries",desc:"Contact KRIM about your profile, eligibility questions, document requests or review progress.",href:"contact.html",label:"Contact KRIM support"},
 {n:"06",group:"support",title:"Account access & security",desc:"Review the account access route and guidance for protecting your sign-in credentials.",href:"auth/access.html",label:"Review account security"}
 ];
-function root(path){return "../../../"+path.replace(/^\/+ /,"") }
+function root(path){return "../../../"+String(path).replace(/^\/+/, "")}
 function render(){ $("moduleNavigation").innerHTML=groups.map(g=>'<a href="#group-'+g.id+'">'+g.label+' <b>'+cards.filter(c=>c.group===g.id).length+'</b></a>').join("");
 $("moduleSections").innerHTML=groups.map(g=>'<section class="module-group" id="group-'+g.id+'" aria-labelledby="title-'+g.id+'"><div class="group-head"><div><h3 id="title-'+g.id+'">'+g.label+'</h3><p>'+g.description+'</p></div><span class="group-index">PATHWAY '+g.range+'</span></div><div class="module-grid">'+cards.filter(c=>c.group===g.id).map(c=>'<article class="module-card"><div class="card-top"><span class="module-number">WORK AREA '+c.n+'</span><span class="status">GUIDANCE / REFERENCE</span></div><h4>'+c.title+'</h4><p>'+c.desc+'</p><a class="card-action" href="'+root(c.href)+'">'+c.label+' <span aria-hidden="true">→</span></a></article>').join("")+'</div></section>').join("")}
 function setError(title,message){$("main").hidden=true;$("accessError").hidden=false;$("errorTitle").textContent=title;$("errorMessage").textContent=message}
