@@ -1,256 +1,250 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#09243D"><meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09243D">
+<meta name="robots" content="noindex,nofollow">
 <title>Partner Workspace Gateway | KRIM Logistics</title>
 <meta name="description" content="Secure gateway to the appropriate KRIM partner workspace.">
+<link rel="icon" type="image/svg+xml" href="../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../config.js"></script>
 <style>
-:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--teal:#168FE0;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--bg:#F3F7FB;--shadow:0 18px 48px rgba(7,26,53,.09)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% 0,rgba(210,228,249,.7),transparent 34%),var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}a:focus-visible,button:focus-visible{outline:3px solid #45B8F0;outline-offset:3px}
-.skip{position:absolute;top:-60px;left:14px;z-index:10;padding:10px 14px;background:#fff;border:2px solid var(--blue);border-radius:7px;font-weight:800}.skip:focus{top:10px}
-header{width:min(1180px,calc(100% - 40px));min-height:76px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:flex;align-items:center;gap:11px;color:var(--navy);font-weight:950;letter-spacing:.055em;font-size:12px}.mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(145deg,#0754A4,#168FE0);display:grid;place-items:center;color:#fff;font-size:21px;box-shadow:0 5px 13px #168FE033}.brand small{display:block;font-size:8px;color:#60748A;letter-spacing:.15em}
-.head-label{font-size:9px;font-weight:900;letter-spacing:.12em;color:#60748A;text-transform:uppercase}
-main{width:min(1180px,calc(100% - 40px));margin:34px auto 60px}
-.gateway{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:28px;align-items:center;padding:clamp(27px,5vw,54px);border-radius:16px;background:linear-gradient(112deg,#09243D 0%,#123B5A 68%,#123B5A 125%);color:#fff;box-shadow:var(--shadow)}
-.gateway:after{content:"";position:absolute;width:420px;height:420px;right:-145px;top:-220px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 50px #ffffff07,0 0 0 100px #ffffff05}
-.copy,.status{position:relative;z-index:1}.eyebrow{font-size:9px;font-weight:950;letter-spacing:.19em;color:#45B8F0}
-h1{font-size:clamp(30px,4.4vw,48px);line-height:1.08;letter-spacing:-.05em;margin:12px 0;max-width:760px}
-.lead{font-size:13px;line-height:1.85;color:#C9F1FF;max-width:680px;margin:0}
-.status{padding-left:20px;border-left:1px solid #ffffff30}.spinner{width:34px;height:34px;border:3px solid #ffffff42;border-top-color:#45B8F0;border-radius:50%;animation:spin .9s linear infinite}.status strong{display:block;margin-top:14px;font-size:12px}.status span{display:block;margin-top:5px;color:#C9F1FF;font-size:10px;line-height:1.7}
-.info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:18px}.info article{padding:17px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 5px 18px #09243D07}.info b{display:block;color:var(--navy);font-size:12px;margin-bottom:5px}.info p{margin:0;color:var(--muted);font-size:10px;line-height:1.7}
-.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 15px;border:1px solid var(--line);border-radius:7px;background:#fff;color:#60748A;font-size:10px;font-weight:900}.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
-footer{width:min(1180px,calc(100% - 40px));margin:0 auto;padding:18px 0 26px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;color:#60748A;font-size:10px}\n.notice{width:min(1180px,100%);margin:0 auto 18px;padding:14px 17px;border:1px solid #C9F1FF;border-left:4px solid #168FE0;border-radius:9px;background:#F3F7FB;color:#14283E;font-size:12px;line-height:1.7}\n.notice strong{color:#09243D}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:760px){.gateway{grid-template-columns:1fr;gap:20px}.status{border-left:0;border-top:1px solid #ffffff30;padding:15px 0 0}.info{grid-template-columns:1fr}}
-@media(max-width:640px){header,main,footer{width:calc(100% - 28px)}header{min-height:66px}.brand{font-size:10px;gap:8px}.brand small{font-size:7px}.mark{width:36px;height:36px}.head-label{font-size:8px}main{margin:20px auto 38px}.gateway{padding:25px 19px;border-radius:12px}h1{font-size:31px}.lead{font-size:12px}.info article{padding:14px}footer{flex-direction:column}}
-@media(max-width:380px){header,main,footer{width:calc(100% - 24px)}.head-label{max-width:90px;text-align:right}.gateway{padding:22px 16px}h1{font-size:28px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.spinner{animation:none}}
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB;--white:#fff;--shadow:0 20px 54px rgba(9,36,61,.12);--font:"Inter","Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:92px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#EAF5FC 0%,#F3F7FB 48%,#E6F5FC 100%);color:var(--ink);font:15px/1.65 var(--font);letter-spacing:-.008em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+a{color:var(--blue2);text-decoration:none}
+a:hover{text-decoration:underline}
+button,a{ -webkit-tap-highlight-color:transparent}
+button,input{font:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.skip{position:absolute;top:-70px;left:16px;z-index:200;padding:10px 14px;border-radius:8px;background:#fff;color:var(--navy);font-weight:800}
+.skip:focus{top:12px}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(9,36,61,.07)}
+.nav-shell{width:min(1220px,calc(100% - 48px));min-height:82px;margin:auto;display:flex;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;flex:0 1 auto;min-width:0}
+.brand img{display:block;width:225px;height:64px;max-width:min(48vw,225px);object-fit:contain;object-position:left center}
+.nav-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid transparent;border-radius:9px;font-size:12px;font-weight:850;line-height:1.2;text-align:center;transition:transform .15s,filter .15s,border-color .15s}
+.button:hover{transform:translateY(-1px);text-decoration:none}
+.button-primary{background:linear-gradient(105deg,var(--blue2),var(--blue),var(--sky));color:#fff;box-shadow:0 8px 20px rgba(22,143,224,.2)}
+.button-outline{border-color:#C8D6E2;background:#fff;color:var(--navy)}
+.menu-toggle{display:none;width:46px;height:46px;place-items:center;margin-left:auto;border:1px solid var(--line);border-radius:10px;background:#F3F7FB;color:var(--navy);cursor:pointer}
+.menu-toggle svg{width:21px;height:21px}
+.mobile-menu{position:absolute;top:100%;left:0;right:0;z-index:110;max-height:calc(100dvh - 82px);overflow:auto;padding:12px max(24px,calc((100vw - 1220px)/2)) 20px;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);box-shadow:0 18px 30px rgba(9,36,61,.13)}
+.mobile-menu:not([hidden]){display:flex;flex-direction:column}
+.mobile-menu a{padding:13px 5px;border-bottom:1px solid var(--line);color:var(--navy);font-size:13px;font-weight:800}
+main{width:min(1220px,calc(100% - 48px));margin:clamp(24px,4vw,44px) auto 58px;flex:1}
+.staging-banner{display:none;margin:0 0 18px;padding:14px 17px;border:1px solid #9DD5F3;border-left:5px solid var(--blue);border-radius:10px;background:linear-gradient(100deg,#DDF3FF,#F4FBFF);color:var(--navy2);font-size:11px;line-height:1.75;box-shadow:0 6px 18px rgba(22,143,224,.07)}
+.staging-banner strong{display:block;margin-bottom:2px;color:var(--blue2);font-size:10px;letter-spacing:.13em}
+.hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,.75fr);gap:clamp(24px,4vw,56px);align-items:center;padding:clamp(30px,5.2vw,62px);border:1px solid #0A426B;border-radius:20px;background:linear-gradient(115deg,#06192B 0%,#09243D 48%,#0754A4 100%);color:#fff;box-shadow:var(--shadow)}
+.hero:before{content:"";position:absolute;z-index:-1;right:-175px;top:-300px;width:660px;height:660px;border:1px solid #C9F1FF35;border-radius:50%;box-shadow:0 0 0 55px #C9F1FF0c,0 0 0 115px #C9F1FF08,0 0 0 175px #C9F1FF05}
+.hero:after{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;background:radial-gradient(ellipse at 75% 85%,#168FE033,transparent 42%)}
+.hero-copy,.status-panel{position:relative;z-index:1;min-width:0}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--pale);font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+.eyebrow:before{content:"";width:25px;height:3px;border-radius:4px;background:var(--sky)}
+h1{max-width:740px;margin:18px 0 16px;color:#fff;font-size:clamp(36px,5vw,58px);font-weight:800;line-height:1.04;letter-spacing:-.052em;text-wrap:balance}
+.hero-lead{max-width:690px;margin:0;color:#D8EAF6;font-size:14px;line-height:1.9}
+.hero-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:26px}
+.hero .button-outline{border-color:#ffffff70;background:#ffffff10;color:#fff}
+.status-panel{padding:23px;border:1px solid #C9F1FF45;border-radius:15px;background:linear-gradient(145deg,#ffffff19,#ffffff09);box-shadow:0 18px 40px #0002;backdrop-filter:blur(8px)}
+.status-kicker{color:var(--pale);font-size:9px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.status-icon{display:grid;place-items:center;width:44px;height:44px;margin:15px 0 12px;border:1px solid #45B8F080;border-radius:12px;background:#168FE033;color:#fff}
+.status-icon svg{width:22px;height:22px}
+.status-panel strong{display:block;color:#fff;font-size:16px;line-height:1.35}
+.status-panel p{margin:8px 0 0;color:#D8EAF6;font-size:11px;line-height:1.8}
+.status-detail{margin-top:15px;padding-top:14px;border-top:1px solid #ffffff30;color:#C9F1FF;font-size:10px;line-height:1.75}
+.pathways{padding:64px 0 0}
+.section-heading{max-width:800px;margin:0 auto 25px;text-align:center}
+.section-heading .eyebrow{color:var(--blue2)}
+.section-heading .eyebrow:before{display:none}
+.section-heading h2{margin:12px 0 10px;color:var(--navy);font-size:clamp(28px,3.6vw,40px);font-weight:780;line-height:1.13;letter-spacing:-.04em;text-wrap:balance}
+.section-heading p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.pathway-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pathway-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;padding:24px;border:1px solid var(--line);border-top:4px solid var(--sky);border-radius:14px;background:#fff;box-shadow:0 9px 26px rgba(9,36,61,.06);transition:transform .16s,border-color .16s,box-shadow .16s}
+.pathway-card:nth-child(2){border-top-color:var(--blue)}
+.pathway-card:nth-child(3){border-top-color:var(--blue2)}
+.pathway-card:hover{transform:translateY(-3px);border-color:#A9CDE4;box-shadow:0 16px 32px rgba(9,36,61,.11)}
+.card-index{color:var(--muted);font-size:9px;font-weight:850;letter-spacing:.15em}
+.card-icon{display:grid;place-items:center;width:44px;height:44px;margin:15px 0 13px;border-radius:12px;background:linear-gradient(145deg,#DDF3FF,#EEF9FE);color:var(--blue2)}
+.card-icon svg{width:22px;height:22px}
+.pathway-card h3{margin:0 0 8px;color:var(--navy);font-size:17px;font-weight:750;line-height:1.3;letter-spacing:-.025em}
+.pathway-card p{flex:1;margin:0 0 20px;color:var(--muted);font-size:12px;line-height:1.8}
+.pathway-card .button{width:100%;min-height:46px}
+.card-note{margin-top:11px;color:var(--muted);font-size:10px;line-height:1.65}
+.operating-note{margin-top:22px;padding:17px 19px;border:1px solid #B9DDF2;border-left:4px solid var(--blue);border-radius:10px;background:#F0F8FD;color:#52677C;font-size:11px;line-height:1.8}
+.operating-note strong{color:var(--navy)}
+.trust-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:20px}
+.trust-item{padding:17px 18px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.trust-item strong{display:block;margin-bottom:5px;color:var(--navy);font-size:12px}
+.trust-item span{display:block;color:var(--muted);font-size:10px;line-height:1.7}
+.site-footer{padding:26px 0;background:linear-gradient(110deg,#06192B,#09243D 70%,#123B5A);border-top:4px solid var(--sky);color:#E7F0F7}
+.footer-row{width:min(1220px,calc(100% - 48px));margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.footer-copy{font-size:10px;line-height:1.8}
+.footer-links{display:flex;gap:18px;flex-wrap:wrap}
+.footer-links a{color:var(--pale);font-size:10px;font-weight:750}
+[hidden]{display:none!important}
+@media(max-width:900px){.nav-actions{display:none}.menu-toggle{display:grid}.hero{grid-template-columns:1fr}.status-panel{max-width:none}.pathway-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pathway-card:last-child{grid-column:1/-1}}
+@media(max-width:640px){.nav-shell{width:calc(100% - 28px);min-height:70px}.brand img{width:202px;height:58px;max-width:calc(100vw - 92px)}.mobile-menu{max-height:calc(100dvh - 70px);padding:10px 20px 18px}main{width:calc(100% - 28px);margin:18px auto 38px}.hero{gap:22px;padding:29px 21px;border-radius:15px}.hero h1{font-size:clamp(33px,9vw,45px)}.hero-lead{font-size:12px}.hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .button{width:100%}.status-panel{padding:19px}.pathways{padding-top:46px}.section-heading{text-align:left;margin-bottom:19px}.section-heading h2{font-size:29px}.pathway-grid,.trust-strip{grid-template-columns:1fr}.pathway-card:last-child{grid-column:auto}.pathway-card{padding:20px}.operating-note{padding:14px}.footer-row{width:calc(100% - 28px);align-items:flex-start;flex-direction:column;gap:12px}.footer-links{gap:13px}}
+@media(max-width:360px){.nav-shell,main,.footer-row{width:calc(100% - 22px)}.brand img{width:184px}.hero{padding:24px 17px}h1{font-size:31px}.pathway-card{padding:17px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
-<style id="krim-partner-gateway-navigation">
-.krim-partner-gateway-header{position:sticky!important;top:0!important;z-index:1000!important;width:100%!important;min-height:82px!important;padding:0 max(24px,calc((100vw - 1180px)/2))!important;background:#fff!important;border-bottom:1px solid #DCE5EE!important;box-shadow:0 5px 20px rgba(9,36,61,.055)!important}
-.krim-partner-gateway-header .brand{min-width:0}
-.krim-partner-gateway-header .brand img{display:block;width:250px!important;height:70px!important;max-width:min(68vw,250px)!important;object-fit:contain!important;object-position:left center!important}
-.krim-partner-menu-button{display:grid!important;place-items:center!important;width:46px!important;height:46px!important;flex:0 0 46px!important;margin-left:auto!important;border:1px solid #DCE5EE!important;border-radius:11px!important;background:#fff!important;color:#09243d!important;cursor:pointer!important}
-.krim-partner-menu-button svg{width:21px;height:21px}
-.krim-partner-menu{position:fixed!important;top:82px!important;left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;max-height:calc(100dvh - 82px)!important;overflow-y:auto!important;box-sizing:border-box!important;padding:14px max(24px,calc((100vw - 1180px)/2)) 22px!important;background:#fff!important;border-top:1px solid #DCE5EE!important;border-bottom:1px solid #DCE5EE!important;box-shadow:0 18px 36px rgba(9,36,61,.13)!important;z-index:1100!important}
-.krim-partner-menu:not([hidden]){display:flex!important;flex-direction:column!important}
-.krim-partner-menu a{display:block!important;width:100%!important;padding:13px 5px!important;border:0!important;border-bottom:1px solid #DCE5EE!important;background:#fff!important;color:#60748A!important;font-size:13px!important;font-weight:750!important;text-decoration:none!important}
-.krim-partner-menu a:hover{color:#0754A4!important;background:#F3F7FB!important}
-@media(max-width:640px){.krim-partner-gateway-header{width:100%!important;min-height:70px!important;padding:0 14px!important}.krim-partner-gateway-header .brand img{width:218px!important;height:60px!important;max-width:calc(100vw - 88px)!important}.krim-partner-menu{top:70px!important;max-height:calc(100dvh - 70px)!important;padding:12px 20px 20px!important}}
-</style>
-
-
-<link rel="stylesheet" href="../../assets/krim-public-polish.css?v=master-logo">
-<script defer src="../../assets/krim-global-language.js?v=20261110-universal"></script>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="../../assets/krim-global-brand.css?v=20261120-official-logo-rollout">
-<script defer src="../../assets/krim-global-brand.js?v=20261120-official-logo-rollout"></script>
-
-
-<style id="krim-homepage-navigation-fix">
-/* KRIM homepage-aligned navigation + brand sizing */
-.krim-official-brand-logo{display:block!important;width:190px!important;max-width:clamp(148px,48vw,190px)!important;height:auto!important;max-height:60px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;border:0!important;box-shadow:none!important}
-@media(max-width:700px){.krim-official-brand-logo{width:148px!important;max-width:148px!important;max-height:48px!important}}
-#krim-menu-toggle,#partnerGatewayMenuButton,[id*="menuButton"],.mobile-nav-toggle{min-width:42px;min-height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;border:1px solid rgba(120,160,205,.45);background:#09243D;color:#fff;cursor:pointer}
-#krim-menu-panel,#partnerGatewayNavigation,#krim-full-menu{z-index:1000;max-width:100vw;box-sizing:border-box}
-#krim-menu-panel:not([hidden]),#partnerGatewayNavigation:not([hidden]),#krim-full-menu:not([hidden]){display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-#krim-menu-panel a,#partnerGatewayNavigation a,#krim-full-menu a{display:inline-flex;align-items:center;min-height:40px;padding:9px 12px;border-radius:7px;color:inherit;text-decoration:none}
-#krim-menu-panel a:hover,#partnerGatewayNavigation a:hover,#krim-full-menu a:hover{background:rgba(35,105,190,.14)}
-@media(max-width:760px){#krim-menu-panel:not([hidden]),#partnerGatewayNavigation:not([hidden]),#krim-full-menu:not([hidden]){position:absolute;left:12px;right:12px;top:70px;width:auto;max-height:calc(100dvh - 88px);overflow:auto;display:flex;flex-direction:column;align-items:stretch;padding:12px;background:#09243D;color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:12px;box-shadow:0 18px 48px rgba(3,15,35,.28)}#krim-menu-panel a,#partnerGatewayNavigation a,#krim-full-menu a{width:100%;color:#F3F7FB;min-height:44px}}
-</style>
-<style id="krim-homepage-navigation-match-v4">
-/* Batch 9: match live workspace navigation to approved KRIM homepage */
-header#krim-site-nav,header.bar,header.krim-partner-gateway-header,body>header{
- position:relative!important;z-index:1100!important;background:#fff!important;color:#09243d!important;
- border-bottom:1px solid #DCE5EE!important;box-shadow:0 4px 18px rgba(7,24,43,.06)!important;
-}
-header#krim-site-nav .head,header .barin,header.krim-partner-gateway-header{
- min-height:78px!important;width:100%!important;padding:8px clamp(14px,3vw,36px)!important;
- display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;
-}
-header .brand,header .logo{display:flex!important;align-items:center!important;flex:0 1 auto!important;min-width:0!important;max-width:calc(100% - 110px)!important}
-header .brand img,header .logo img,header .brand .krim-official-brand-logo{
- display:block!important;width:190px!important;max-width:clamp(148px,48vw,190px)!important;height:auto!important;max-height:60px!important;
- object-fit:contain!important;object-position:left center!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
-}
-header .menu-toggle,header .krim-menu-toggle,header .menu-button,header .krim-partner-menu-button{
- display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;flex:0 0 auto!important;
- min-width:44px!important;min-height:44px!important;padding:10px 15px!important;border:1px solid #09243d!important;
- border-radius:8px!important;background:#09243d!important;color:#fff!important;font-size:12px!important;font-weight:900!important;cursor:pointer!important;box-shadow:none!important;
-}
-nav.krim-menu-panel,nav.krim-full-menu,nav.menu,nav.krim-partner-menu{
- position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;
- max-height:calc(100dvh - 78px)!important;min-height:0!important;overflow:auto!important;
- padding:20px clamp(18px,4vw,48px) 26px!important;background:rgba(255,255,255,.985)!important;color:#09243d!important;
- border-top:1px solid #DCE5EE!important;border-bottom:1px solid #dce5ee!important;
- box-shadow:0 16px 30px rgba(7,24,43,.14)!important;backdrop-filter:blur(16px)!important;z-index:1200!important;
-}
-nav.krim-menu-panel[hidden],nav.krim-full-menu[hidden],nav.menu[hidden],nav.krim-partner-menu[hidden]{display:none!important}
-nav.krim-menu-panel .krim-menu-inner,nav.krim-full-menu,nav.menu .menu-inner,nav.krim-partner-menu{
- width:min(1180px,100%)!important;margin:0 auto!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 26px!important;
-}
-nav.krim-menu-panel a,nav.krim-full-menu a,nav.menu .menu-inner>a,nav.krim-partner-menu a{
- display:flex!important;align-items:center!important;min-height:48px!important;padding:11px 6px!important;
- border:0!important;border-bottom:1px solid #DCE5EE!important;border-radius:0!important;background:transparent!important;
- color:#60748A!important;font-size:12px!important;font-weight:850!important;text-decoration:none!important;overflow-wrap:anywhere!important;
-}
-nav.krim-menu-panel a:hover,nav.krim-full-menu a:hover,nav.menu .menu-inner>a:hover,nav.krim-partner-menu a:hover{
- color:#0754A4!important;background:#F3F7FB!important;border-bottom-color:#168FE0!important;
-}
-nav a[aria-current=page]{color:#09243d!important;border-bottom-color:#168FE0!important}
-header.krim-partner-gateway-header nav.krim-partner-menu{padding-left:clamp(18px,4vw,48px)!important;padding-right:clamp(18px,4vw,48px)!important}
-header.krim-partner-gateway-header nav.krim-partner-menu a{width:100%!important}
-@media(max-width:760px){
- header#krim-site-nav .head,header .barin,header.krim-partner-gateway-header{min-height:68px!important;padding:6px 14px!important;gap:10px!important}
- header .brand img,header .logo img,header .brand .krim-official-brand-logo{max-width:clamp(140px,48vw,170px)!important;max-height:54px!important}
- nav.krim-menu-panel,nav.krim-full-menu,nav.menu,nav.krim-partner-menu{max-height:calc(100dvh - 68px)!important;padding:10px 18px 20px!important}
- nav.krim-menu-panel .krim-menu-inner,nav.krim-full-menu,nav.menu .menu-inner,nav.krim-partner-menu{grid-template-columns:1fr!important;gap:0!important}
- nav.krim-menu-panel a,nav.krim-full-menu a,nav.menu .menu-inner>a,nav.krim-partner-menu a{min-height:47px!important;padding:11px 4px!important;font-size:14px!important}
-}
-
-/* KRIM partner gateway redesign — clear pathway architecture */
-.pathways{margin:24px 0 36px}.pathways-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:16px}.pathways-head .eyebrow{color:#0754A4}.pathways-head h2{margin:7px 0 5px;color:#09243D;font-size:clamp(22px,3vw,30px);line-height:1.15;letter-spacing:-.035em}.pathways-head p{max-width:720px;margin:0;color:#60748A;font-size:12px;line-height:1.75}.pathway-count{flex:0 0 auto;padding:8px 11px;border:1px solid #DCE5EE;border-radius:7px;color:#60748A;font-size:9px;font-weight:900;letter-spacing:.1em}.pathway-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.pathway-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;padding:21px;background:#fff;border:1px solid #DCE5EE;border-radius:13px;box-shadow:0 8px 24px rgba(9,36,61,.045)}.pathway-card.featured{border-color:#168FE0;box-shadow:0 12px 30px rgba(22,143,224,.11)}.pathway-index{color:#60748A;font-size:9px;font-weight:950;letter-spacing:.13em}.pathway-icon{display:grid;place-items:center;width:40px;height:40px;margin:15px 0 12px;border-radius:10px;background:#EAF4FC;color:#0754A4;font-size:17px;font-weight:950}.pathway-card h3{margin:0 0 7px;color:#09243D;font-size:16px;letter-spacing:-.02em}.pathway-card p{flex:1;margin:0 0 17px;color:#60748A;font-size:11px;line-height:1.75}.pathway-card>a{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:42px;padding:10px 12px;border-radius:7px;background:#09243D;color:#fff;font-size:10px;font-weight:900;text-decoration:none}.pathway-card.featured>a{background:#0754A4}.pathway-card>a:hover{background:#168FE0}.pathway-card small{margin-top:10px;color:#60748A;font-size:9px}.pathway-foot{display:flex;justify-content:space-between;gap:14px;margin-top:14px;padding:13px 15px;border:1px solid #DCE5EE;border-radius:9px;background:#fff;color:#60748A;font-size:10px;line-height:1.6}.pathway-foot strong{color:#09243D}.pathway-foot span{text-align:right}@media(max-width:850px){.pathway-grid{grid-template-columns:1fr 1fr}.pathway-card:last-child{grid-column:1/-1}}@media(max-width:600px){.pathways-head{align-items:flex-start;flex-direction:column}.pathway-count{display:none}.pathway-grid{grid-template-columns:1fr}.pathway-card:last-child{grid-column:auto}.pathway-card{padding:18px}.pathway-foot{flex-direction:column}.pathway-foot span{text-align:left}}
-</style>
-<link rel="stylesheet" href="../../core/krim-global-interface.css">
-
-<link rel="stylesheet" href="../../core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
-
-<link rel="stylesheet" href="../../core/krim-partner-experience.css?v=20261120-release2">
-<style id="krim-partner-release2">
-/* KRIM official identity and responsive system — Pages 6–10 */
-:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB}
-html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{background:radial-gradient(ellipse at 8% 0,rgba(69,184,240,.13),transparent 34%),radial-gradient(ellipse at 95% 10%,rgba(22,143,224,.09),transparent 30%),linear-gradient(180deg,#F8FBFE 0%,#F3F7FB 100%)!important;color:var(--ink)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
-a:focus-visible,button:focus-visible{outline:3px solid rgba(22,143,224,.45)!important;outline-offset:3px}
-.hero{background:linear-gradient(115deg,#09243D 0%,#123B5A 64%,#0754A4 100%)!important;border:1px solid rgba(201,241,255,.20)!important;box-shadow:0 22px 55px rgba(9,36,61,.16)!important}
-.hero .eyebrow,.hero .kicker{color:#C9F1FF!important}
-.hero h1,.hero h2,.hero h3{color:#fff!important}
-.hero p,.hero li{color:#E5F0F8!important}
-.card,.info article,.metric,.stat,.step,.gate{border-color:var(--line)!important;box-shadow:0 12px 30px rgba(9,36,61,.065)!important}
-.card:not(.locked):hover{border-color:rgba(22,143,224,.38)!important;box-shadow:0 18px 38px rgba(9,36,61,.11)!important}
-.btn.primary,.button-primary{background:linear-gradient(135deg,#168FE0,#0754A4)!important;border-color:#168FE0!important;color:#fff!important}
-.btn,.button{min-height:42px;border-radius:9px!important;font-weight:800!important}
-.notice{border-left-color:#168FE0!important;background:#fff!important;color:#526A80!important}
-.notice strong,.section-head h2,.section h2,.card h3,.metric b,.stat b{color:#09243D!important}
-.tag,.state,.section-tag,.num,.chip{background:#EAF4FC!important;color:#0754A4!important;border-color:#C9E8FA!important}
-footer{border-color:#DCE5EE!important;color:#60748A!important}
-input,select,textarea{max-width:100%}
-img{max-width:100%}
-@media(min-width:1500px){body{font-size:15px}.wrap,main,footer{max-width:1380px}}
-@media(max-width:900px){.grid,.pathway-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.hero{gap:20px}}
-@media(max-width:640px){.grid,.pathway-grid,.info,.metrics,.stats{grid-template-columns:1fr!important}.hero{border-radius:17px!important}.hero h1{font-size:clamp(28px,8vw,36px)!important}.card{min-height:0!important}.actions,.head-actions{gap:8px}.btn{min-height:44px}.section-head{align-items:flex-start!important;flex-direction:column!important}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{transition:none!important;animation:none!important}}
-</style>
-<style id="krim-staging-review-banner">.krim-staging-review-banner{position:relative;z-index:900;width:min(1200px,calc(100% - 32px));margin:14px auto;padding:13px 16px;border:1px solid #C9F1FF;border-left:4px solid #168FE0;border-radius:9px;background:#fff;color:#14283E;font-size:12px;line-height:1.65}.krim-staging-review-banner strong{color:#09243D}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;750;800&display=swap" rel="stylesheet"><style id="krim-global-typography">
-/* KRIM global typography system — consistent across partner ecosystem pages */
-:root{
- --krim-font-sans:"Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
- --krim-font-display:"Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
- --krim-type-ink:#14283E;
- --krim-type-muted:#60748A;
-}
-html{font-family:var(--krim-font-sans);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body,button,input,select,textarea{font-family:var(--krim-font-sans)!important;font-optical-sizing:auto}
-body{font-size:15px;line-height:1.65;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
-h1,h2,h3,h4,h5,h6,.hero-title,.page-title{
- font-family:var(--krim-font-display)!important;
- font-weight:750;
- letter-spacing:-.035em;
- line-height:1.13;
- text-wrap:balance;
-}
-h1{font-weight:780;letter-spacing:-.045em}
-h2{font-weight:740;letter-spacing:-.032em}
-h3,h4,h5,h6{font-weight:700;letter-spacing:-.022em}
-p,li,dd,dt,label,legend,small,figcaption{font-family:var(--krim-font-sans)}
-p,li{line-height:1.68}
-button,input,select,textarea{font-size:inherit;letter-spacing:inherit}
-button,a,[role=button]{-webkit-tap-highlight-color:transparent}
-strong,b{font-weight:700}
-small,.eyebrow,.tag,.badge,.pill,.state,.num,.section-tag{letter-spacing:.045em}
-::placeholder{font-family:var(--krim-font-sans);opacity:.72}
-@media(max-width:640px){body{font-size:14.5px}h1{letter-spacing:-.04em}}
-</style></head>
-<body class="krim-global-shell">
-<a class="skip" href="#main">Skip to gateway status</a>
-<header class="krim-partner-gateway-header"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><button class="krim-partner-menu-button" id="partnerGatewayMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="partnerGatewayNavigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><nav class="krim-partner-menu" id="partnerGatewayNavigation" aria-label="Partner navigation" hidden><a href="../../index.html">KRIM Home</a><a href="../../auth/partner-signin.html">Partner sign in</a><a href="../../public/partner/partner-onboarding.html">Partner onboarding</a><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-with-us.html">Partner with KRIM</a><a href="../../contact.html">Contact KRIM</a></nav></header>
+</head>
+<body>
+<a class="skip" href="#main">Skip to partner workspace gateway</a>
+<header class="site-header">
+ <div class="nav-shell">
+  <a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a>
+  <div class="nav-actions"><a class="button button-outline" href="../../auth/partner-signin.html">Partner sign in</a><a class="button button-primary" href="../../public/partner/partner-onboarding.html">Partner onboarding <span aria-hidden="true">→</span></a></div>
+  <button class="menu-toggle" id="partnerGatewayMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="partnerGatewayNavigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+ </div>
+ <nav class="mobile-menu" id="partnerGatewayNavigation" aria-label="Partner navigation" hidden>
+  <a href="../../index.html">KRIM Home</a><a href="../../partner-with-us.html">Partner with KRIM</a><a href="../../auth/partner-signup.html">Partner registration</a><a href="../../auth/partner-signin.html">Partner sign in</a><a href="../../public/partner/partner-onboarding.html">Partner onboarding</a><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-agreement.html">Partner agreement framework</a><a href="../../contact.html">Contact KRIM</a>
+ </nav>
+</header>
 <main id="main">
-<div class="notice" role="status"><strong>Pre-launch control:</strong> Development/test mode is non-commercial. Live commercial operations are disabled until the complete ecosystem review, partner verification, market readiness and controlled launch approval are complete. A sign-in alone does not enable bidding, assignments, capacity commitments, shipments or payments.</div>
-<section class="gateway" role="status" aria-live="polite" aria-atomic="true">
-<div class="copy"><div class="eyebrow">PARTNER WORKSPACE GATEWAY</div><h1 id="title">Opening your partner workspace.</h1><p class="lead" id="message">KRIM is verifying your sign-in, active organization membership and selected partner pathway. You will be directed to the workspace associated with your account.</p>
-<div class="actions"><a class="btn primary" id="signin" href="../../auth/partner-signin.html">Partner sign in</a><a class="btn" id="onboarding" href="../../public/partner/partner-onboarding.html">Partner onboarding</a></div></div>
-<div class="status"><div class="spinner" id="spinner" aria-hidden="true"></div><strong id="status-title">Checking account access</strong><span id="status-detail">This gateway does not grant permissions. Workspace access is checked against your authenticated account and organization membership.</span></div>
-</section>
-<section class="pathways" aria-labelledby="pathways-title">
-<div class="pathways-head"><div><span class="eyebrow">THREE PARTNER PATHWAYS</span><h2 id="pathways-title">One network. The right workspace for each partner.</h2><p>Explore the workspace structure. Your authenticated organization membership determines your actual destination and permissions.</p></div><span class="pathway-count">03 WORKSPACE TYPES</span></div>
-<div class="pathway-grid">
-<article class="pathway-card"><span class="pathway-index">01 / PREPARE</span><div class="pathway-icon" aria-hidden="true">D</div><h3>Development &amp; Test</h3><p>A non-commercial learning environment to understand KRIM workflows, explore service concepts and prepare onboarding information.</p><a href="development/index.html">View development workspace <span aria-hidden="true">→</span></a><small>Learning only · No live operations</small></article>
-<article class="pathway-card"><span class="pathway-index">02 / INDIVIDUAL</span><div class="pathway-icon" aria-hidden="true">I</div><h3>Independent Partner</h3><p>For individual operators and independent service providers to review profile readiness, eligibility guidance and next steps.</p><a href="individual/index.html">View individual workspace <span aria-hidden="true">→</span></a><small>Interest is not partner approval</small></article>
-<article class="pathway-card featured"><span class="pathway-index">03 / ORGANIZATION</span><div class="pathway-icon" aria-hidden="true">B</div><h3>Registered Business</h3><p>A structured organization workspace for capabilities, coverage, commercial opportunities, execution, quality and governance.</p><a href="business/index.html">View business workspace <span aria-hidden="true">→</span></a><small>Verification and permissions apply</small></article>
-</div>
-<div class="pathway-foot"><strong>Access is controlled by evidence, not by page visibility.</strong><span>Viewing a staging preview does not create an account, approve a partner or enable commercial activity.</span></div>
-</section>
+ <div class="staging-banner" id="stagingReviewBanner" role="status"><strong>STAGING REVIEW MODE</strong>You can inspect the partner workspace pathways without creating an account or signing in. This preview does not authenticate, access partner records, upload files, submit data or enable live operations.</div>
+ <section class="hero" aria-labelledby="gatewayTitle">
+  <div class="hero-copy">
+   <div class="eyebrow">GLOBAL PARTNER NETWORK · SECURE WORKSPACE GATEWAY</div>
+   <h1 id="gatewayTitle">One network.<br>Clear operating authority.</h1>
+   <p class="hero-lead">KRIM directs each approved partner to the workspace that matches its account pathway and active organisation membership. Explore the available workspace structures below. An application, sign-in or pathway selection does not itself grant commercial approval.</p>
+   <div class="hero-actions"><a class="button button-primary" id="signin" href="../../auth/partner-signin.html">Partner sign in <span aria-hidden="true">→</span></a><a class="button button-outline" id="onboarding" href="../../public/partner/partner-onboarding.html">Explore onboarding</a></div>
+  </div>
+  <aside class="status-panel" aria-live="polite" aria-atomic="true">
+   <div class="status-kicker">ACCESS CONTROL</div>
+   <div class="status-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 4.8-2.8 8-7 10-4.2-2-7-5.2-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+   <strong id="status-title">Workspace access is controlled</strong>
+   <p id="message">Production access is checked against authenticated identity, active organisation membership, organisation status and the selected partner pathway.</p>
+   <div class="status-detail" id="status-detail">A successful sign-in does not bypass verification, service approval or commercial activation requirements.</div>
+  </aside>
+ </section>
+ <section class="pathways" aria-labelledby="pathways-title">
+  <div class="section-heading"><div class="eyebrow">Choose the correct workspace</div><h2 id="pathways-title">Three pathways. One connected partner network.</h2><p>Use the pathway that accurately reflects your current role. The staging links are previews only; production workspace permissions are determined by KRIM's authenticated account and organisation controls.</p></div>
+  <div class="pathway-grid">
+   <article class="pathway-card">
+    <span class="card-index">PATHWAY 01 · NON-COMMERCIAL</span>
+    <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></div>
+    <h3>Development &amp; Test</h3>
+    <p>A controlled, non-commercial environment for learning the platform structure and reviewing workflows. It does not authorise live loads, customer data, bookings, service delivery or payouts.</p>
+    <a class="button button-primary" href="development/index.html">Review development workspace <span aria-hidden="true">→</span></a>
+    <span class="card-note">No live operational authority.</span>
+   </article>
+   <article class="pathway-card">
+    <span class="card-index">PATHWAY 02 · INDIVIDUAL APPLICANTS</span>
+    <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.5-3.5 3.1-5.5 7-5.5s6.5 2 7 5.5"/></svg></div>
+    <h3>Individual Partner Interest</h3>
+    <p>For independent professionals and prospective partners preparing a profile and expressing interest. An expression of interest is not verification, appointment or commercial approval.</p>
+    <a class="button button-primary" href="individual/index.html">Review individual workspace <span aria-hidden="true">→</span></a>
+    <span class="card-note">Profile and eligibility preparation.</span>
+   </article>
+   <article class="pathway-card">
+    <span class="card-index">PATHWAY 03 · REGISTERED PROVIDERS</span>
+    <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V7l8-4 8 4v13H4Z"/><path d="M9 20v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg></div>
+    <h3>Registered Business</h3>
+    <p>For logistics businesses and service providers whose organisation profile, authority, service capabilities and evidence are subject to KRIM verification and approval.</p>
+    <a class="button button-primary" href="business/index.html">Review business workspace <span aria-hidden="true">→</span></a>
+    <span class="card-note">Commercial access remains approval-gated.</span>
+   </article>
+  </div>
+  <div class="operating-note"><strong>Operating and safety boundary:</strong> KRIM is the technology platform connecting customers with verified logistics partners. Partners provide the actual logistics services. Routes, rates, capacity, service coverage and operational permissions must be confirmed for the relevant partner and engagement; this gateway does not create or imply those capabilities.</div>
+  <div class="trust-strip" aria-label="Access principles">
+   <div class="trust-item"><strong>Identity and membership</strong><span>Workspace routing depends on an authenticated identity and active organisation membership.</span></div>
+   <div class="trust-item"><strong>Verification before activation</strong><span>Evidence, jurisdiction, service scope and required approvals remain separate controls.</span></div>
+   <div class="trust-item"><strong>Least-privilege access</strong><span>The gateway does not create permissions, select an organisation on assumption or bypass review.</span></div>
+  </div>
+ </section>
 </main>
-<footer><span>© <span id="year"></span> KRIM Logistics OS</span><span>Secure partner gateway · No public administrator entry</span></footer>
+<footer class="site-footer">
+ <div class="footer-row"><div class="footer-copy">© <span id="year"></span> KRIM Logistics · Global Logistics Operating System<br>Knowledge · Reliability · Integration · Movement</div><nav class="footer-links" aria-label="Footer navigation"><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-agreement.html">Agreement framework</a><a href="../../contact.html">Contact</a><a href="../../privacy.html">Privacy</a></nav></div>
+</footer>
 <script>
 (function(){
 "use strict";
-const $=id=>document.getElementById(id),client=window.KRIM_SUPABASE,base=window.KRIM_BASE_PATH||"";
-$("year").textContent=new Date().getFullYear();
-function go(path){return base+"/"+path.replace(/^\/+/, "")}
-function state(title,message,detail){$("title").textContent=title;$("message").textContent=message;$("status-title").textContent=title;$("status-detail").textContent=detail;$("spinner").hidden=true}
-function redirect(path){location.replace(go(path))}
-async function boot(){
-if(location.hostname==="krim-staging.pages.dev"){
-state("Partner workspace gateway — staging preview","You are viewing the KRIM partner workspace structure without signing in. Select a pathway below to review its pages. This preview does not authenticate, create accounts, access partner records or enable operations.","STAGING REVIEW MODE · Read-only navigation · No backend access");
-$("signin").hidden=true;$("spinner").hidden=true;
-const notice=document.createElement("div");notice.className="notice";notice.innerHTML="<strong>STAGING REVIEW MODE:</strong> Public preview only. No account, MFA, database records or live actions are used.";document.querySelector("main").prepend(notice);
-return;
+const $=id=>document.getElementById(id);
+$("year").textContent=String(new Date().getFullYear());
+const menuButton=$("partnerGatewayMenuButton");
+const menu=$("partnerGatewayNavigation");
+if(menuButton&&menu){
+ const close=()=>{menu.hidden=true;menuButton.setAttribute("aria-expanded","false");menuButton.setAttribute("aria-label","Open navigation menu");};
+ menuButton.addEventListener("click",()=>{const open=menu.hidden;menu.hidden=!open;menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");});
+ document.addEventListener("click",event=>{if(!menu.hidden&&!menu.contains(event.target)&&!menuButton.contains(event.target))close();});
+ document.addEventListener("keydown",event=>{if(event.key==="Escape")close();});
+ menu.addEventListener("click",event=>{if(event.target.closest("a"))close();});
 }
-try{
-if(!client)throw new Error("KRIM authentication service did not load. Refresh the page or contact support.");
-const {data,error}=await client.auth.getUser();if(error)throw error;
-if(!data?.user){redirect("auth/partner-signin.html");return}
-$("status-title").textContent="Checking organization membership";
-const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",data.user.id).eq("status","active");if(memberError)throw memberError;
-const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
-if(!ids.length){state("Partner onboarding required","Your account is signed in, but no active organization membership was returned. Continue through partner onboarding to establish the appropriate pathway.","No workspace is opened until an active partner organization membership is available.");$("signin").hidden=true;return}
-$("status-title").textContent="Identifying your partner organization";
-const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);if(orgError)throw orgError;
-const valid=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
-const matches=(orgs||[]).filter(o=>valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase()));
-if(matches.length>1){state("Choose the correct partner organization","Your account has more than one active partner organization. Automatic routing is paused to prevent opening the wrong organization workspace.","Ask KRIM support to establish an explicit organization context before continuing.");return}
-const org=matches[0];
-if(!org){state("Partner organization not found","Your account does not currently resolve to a recognized partner organization. Contact KRIM support if you believe this is an error.","The gateway will not infer or create organization permissions.");return}
-if(String(org.status||"").toLowerCase()!=="active"){state("Organization access unavailable","The linked organization is not active. Contact KRIM support for assistance.","An active membership alone does not override organization status.");return}
-const routes={development_test:"development",individual_interest:"individual",registered_business:"business"};
-const mode=String(org.partner_account_mode||"").trim().toLowerCase();
-if(!routes[mode]){state("Partner pathway setup required","Your organization does not have a recognized partner account pathway yet. Continue to onboarding to review the available options.","No commercial access is granted by this gateway.");$("signin").hidden=true;return}
-$("status-title").textContent="Opening your assigned workspace";
-$("status-detail").textContent="Your account and partner pathway have been identified. Redirecting to the matching workspace.";
-redirect("app/partner/"+routes[mode]+"/index.html");
-}catch(e){console.error("Partner workspace gateway check failed",e);state("Workspace could not be opened",e?.message||"Refresh the page and sign in again.","If the issue continues, contact KRIM support. No access decision has been assumed.");$("signin").hidden=false}
+const isStaging=location.hostname==="krim-staging.pages.dev";
+if(isStaging){
+ $("stagingReviewBanner").style.display="block";
+ $("status-title").textContent="Staging preview · no sign-in required";
+ $("message").textContent="Review the three partner workspace pathways using the cards below. This preview does not authenticate or read any account or organisation data.";
+ $("status-detail").textContent="STAGING REVIEW MODE · Read-only page navigation · No backend access, account creation, uploads, payments or live operations.";
+ $("signin").textContent="Open sign-in page preview →";
+ $("onboarding").textContent="Open onboarding preview";
+}else{
+ const client=window.KRIM_SUPABASE;
+ const base=window.KRIM_BASE_PATH||"";
+ function go(path){return base+"/"+path.replace(/^\/+/, "");}
+ function state(title,message,detail){
+  $("status-title").textContent=title;
+  $("message").textContent=message;
+  $("status-detail").textContent=detail;
+ }
+ function redirect(path){location.replace(go(path));}
+ async function boot(){
+  try{
+   if(!client)throw new Error("KRIM authentication service did not load. Refresh the page or contact support.");
+   const {data,error}=await client.auth.getUser();
+   if(error)throw error;
+   if(!data?.user){redirect("auth/partner-signin.html");return;}
+   state("Checking organisation membership","Your identity is confirmed. KRIM is checking your active organisation membership before opening a workspace.","A sign-in alone does not grant workspace or commercial permissions.");
+   const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",data.user.id).eq("status","active");
+   if(memberError)throw memberError;
+   const ids=[...new Set((members||[]).map(member=>Number(member.organization_id)).filter(id=>Number.isSafeInteger(id)&&id>0))];
+   if(!ids.length){
+    state("Partner onboarding required","Your account is signed in, but no active organisation membership was returned. Continue through partner onboarding to establish the appropriate pathway.","No workspace is opened until an active partner organisation membership is available.");
+    $("signin").hidden=true;
+    return;
+   }
+   state("Identifying your partner organisation","KRIM is confirming the organisation type and current account status.","The gateway will not infer or create organisation permissions.");
+   const {data:organisations,error:organisationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);
+   if(organisationError)throw organisationError;
+   const validTypes=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
+   const matches=(organisations||[]).filter(org=>validTypes.includes(String(org.organization_type||"").toLowerCase())||validTypes.includes(String(org.organization_type_code||"").toLowerCase()));
+   if(matches.length>1){
+    state("Organisation selection required","Your account has more than one active partner organisation. Automatic routing is paused to prevent opening the wrong organisation workspace.","Contact KRIM support to establish an explicit organisation context before continuing.");
+    return;
+   }
+   const organisation=matches[0];
+   if(!organisation){
+    state("Partner organisation not found","Your account does not currently resolve to a recognised partner organisation. Contact KRIM support if you believe this is an error.","The gateway will not infer or create organisation permissions.");
+    return;
+   }
+   if(String(organisation.status||"").toLowerCase()!=="active"){
+    state("Organisation access unavailable","The linked organisation is not active. Contact KRIM support for assistance.","An active membership alone does not override organisation status.");
+    return;
+   }
+   const routes={development_test:"development",individual_interest:"individual",registered_business:"business"};
+   const mode=String(organisation.partner_account_mode||"").trim().toLowerCase();
+   if(!routes[mode]){
+    state("Partner pathway setup required","Your organisation does not have a recognised partner account pathway yet. Continue to onboarding to review the available options.","No commercial access is granted by this gateway.");
+    $("signin").hidden=true;
+    return;
+   }
+   state("Opening your assigned workspace","Your identity, organisation membership and partner pathway have been identified. KRIM is opening the matching workspace.","Commercial actions remain subject to partner verification, service approval and applicable permissions.");
+   redirect("app/partner/"+routes[mode]+"/index.html");
+  }catch(error){
+   console.error("Partner workspace gateway check failed",error);
+   state("Workspace could not be opened",error?.message||"Refresh the page and sign in again.","If the issue continues, contact KRIM support. No access decision has been assumed.");
+   $("signin").hidden=false;
+  }
+ }
+ boot();
 }
-boot();
-})();
-</script>
-
-<script id="krim-partner-gateway-menu-script">
-(function(){
- const button=document.getElementById("partnerGatewayMenuButton");
- const menu=document.getElementById("partnerGatewayNavigation");
- if(!button||!menu)return;
- const close=()=>{menu.hidden=true;button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu");};
- button.addEventListener("click",()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");});
- document.addEventListener("click",e=>{if(!menu.hidden&&!menu.contains(e.target)&&!button.contains(e.target))close();});
- document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
- menu.addEventListener("click",e=>{if(e.target.closest("a"))close();});
 })();
 </script>
 </body>
