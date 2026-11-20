@@ -108,7 +108,6 @@ h1{max-width:740px;margin:18px 0 16px;color:#fff;font-size:clamp(36px,5vw,58px);
  </nav>
 </header>
 <main id="main">
- <div class="staging-banner" id="stagingReviewBanner" role="status"><strong>STAGING REVIEW MODE</strong>You can inspect the partner workspace pathways without creating an account or signing in. This preview does not authenticate, access partner records, upload files, submit data or enable live operations.</div>
  <section class="hero" aria-labelledby="gatewayTitle">
   <div class="hero-copy">
    <div class="eyebrow">GLOBAL PARTNER NETWORK · SECURE WORKSPACE GATEWAY</div>
@@ -125,7 +124,7 @@ h1{max-width:740px;margin:18px 0 16px;color:#fff;font-size:clamp(36px,5vw,58px);
   </aside>
  </section>
  <section class="pathways" aria-labelledby="pathways-title">
-  <div class="section-heading"><div class="eyebrow">Choose the correct workspace</div><h2 id="pathways-title">Three pathways. One connected partner network.</h2><p>Use the pathway that accurately reflects your current role. The staging links are previews only; production workspace permissions are determined by KRIM's authenticated account and organisation controls.</p></div>
+  <div class="section-heading"><div class="eyebrow">Choose the correct workspace</div><h2 id="pathways-title">Three pathways. One connected partner network.</h2><p>Use the pathway that accurately reflects your current role. Workspace permissions are determined by KRIM's authenticated account and organisation controls.</p></div>
   <div class="pathway-grid">
    <article class="pathway-card">
     <span class="card-index">PATHWAY 01 · NON-COMMERCIAL</span>
@@ -179,12 +178,7 @@ if(menuButton&&menu){
 }
 const isStaging=location.hostname==="krim-staging.pages.dev";
 if(isStaging){
- $("stagingReviewBanner").style.display="block";
- $("status-title").textContent="Staging preview · no sign-in required";
- $("message").textContent="Review the three partner workspace pathways using the cards below. This preview does not authenticate or read any account or organisation data.";
- $("status-detail").textContent="STAGING REVIEW MODE · Read-only page navigation · No backend access, account creation, uploads, payments or live operations.";
- $("signin").textContent="Open sign-in page preview →";
- $("onboarding").textContent="Open onboarding preview";
+ // Staging keeps the page read-only and skips all authentication and backend access.
 }else{
  const client=window.KRIM_SUPABASE;
  const base=window.KRIM_BASE_PATH||"";
