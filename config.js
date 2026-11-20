@@ -4,18 +4,16 @@ const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 
 function detectKrimEnvironment() {
-  const configured = window.KRIM_ENVIRONMENT ||
-    document.querySelector('meta[name="krim-environment"]')?.content;
-  const supported = ["development", "preview", "production"];
-
-  if (supported.includes(configured)) return configured;
-
   const hostname = window.location.hostname.toLowerCase();
-  // KRIM Cloudflare Pages staging must always render public UI previews.
-  // Keep this explicit so staging is never mistaken for production.
+  // Staging hostname takes priority over any page-level environment setting.
   if (hostname === "krim-staging.pages.dev" || hostname.endsWith(".krim-staging.pages.dev")) {
     return "preview";
   }
+
+  const configured = window.KRIM_ENVIRONMENT ||
+    document.querySelector('meta[name="krim-environment"]')?.content;
+  const supported = ["development", "preview", "production"];
+  if (supported.includes(configured)) return configured;
   if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
     return "development";
   }
