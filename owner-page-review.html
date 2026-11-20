@@ -21,7 +21,7 @@ try{
  if(!requested)throw Error('No page selected. Return to the page directory.');
  const item=pages.find(p=>(p.path.startsWith('public/')?p.path.slice(7):p.path)===requested);
  if(!item)throw Error('This page is not in the approved review inventory.');
- const path=item.path.startsWith('public/')?item.path.slice(7):item.path;
+ const path=item.path;
  if(path.startsWith('/')||path.split('/').includes('..')||!path.endsWith('.html'))throw Error('Invalid page path.');
  title.textContent=item.title+' · '+item.path;
  const url='/owner-page-review.html?path='+encodeURIComponent(requested);
