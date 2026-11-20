@@ -11,6 +11,11 @@ function detectKrimEnvironment() {
   if (supported.includes(configured)) return configured;
 
   const hostname = window.location.hostname.toLowerCase();
+  // KRIM Cloudflare Pages staging must always render public UI previews.
+  // Keep this explicit so staging is never mistaken for production.
+  if (hostname === "krim-staging.pages.dev" || hostname.endsWith(".krim-staging.pages.dev")) {
+    return "preview";
+  }
   if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
     return "development";
   }
@@ -25,6 +30,8 @@ function detectKrimEnvironment() {
 }
 
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
+window.KRIM_STAGING_PREVIEW = window.KRIM_ENVIRONMENT === "preview";
+window.KRIM_AUTH_DISABLED = window.KRIM_STAGING_PREVIEW;
 
 const krimBasePath =
   window.location.hostname.endsWith("github.io") &&
