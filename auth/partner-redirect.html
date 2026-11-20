@@ -1,13 +1,42 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#09243D"><title>Verifying Partner Access | KRIM</title><meta name="description" content="Secure handoff to the KRIM partner workspace gateway, where organization membership and pathway permissions are checked."><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(800px 500px at 90% 0,#C9F1FF66,transparent 70%),#09243D;color:#fff;font:15px/1.5 system-ui,sans-serif}.box{width:min(100%,500px);padding:32px;text-align:center;background:#123B5A;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 25px 80px #0005}.mark{width:44px;height:44px;margin:auto;display:grid;place-items:center;border-radius:14px;background:#45B8F0;color:#09243D;font-weight:950;font-size:22px}.eyebrow{margin-top:16px;color:#C9F1FF;font-size:11px;font-weight:800;letter-spacing:.16em}h1{font-size:25px}p{color:#DCE5EE;overflow-wrap:anywhere}a{color:#C9F1FF}#status{font-weight:650}</style>
+<style>
+:root{color-scheme:dark;--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:clamp(16px,4vw,40px);background:radial-gradient(ellipse at 12% 8%,#168FE033 0,transparent 36%),radial-gradient(ellipse at 90% 92%,#45B8F022 0,transparent 34%),var(--navy);color:#fff;font:15px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.box{width:min(100%,650px);padding:clamp(24px,5vw,48px);background:linear-gradient(155deg,#123B5A,#0D2D49);border:1px solid #45B8F044;border-radius:22px;box-shadow:0 28px 90px #0005}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:25px;border-bottom:1px solid #ffffff20}
+.brand img{display:block;width:min(220px,52%);height:58px;object-fit:contain;object-position:left center;background:#fff;padding:5px 10px;border-radius:9px}
+.brand-label{color:#C9F1FF;font-size:10px;font-weight:850;letter-spacing:.15em;text-align:right}
+.eyebrow{margin:30px 0 8px;color:#45B8F0;font-size:11px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+h1{max-width:510px;margin:0;color:#fff;font-size:clamp(28px,5vw,40px);line-height:1.12;letter-spacing:-.035em}
+.intro{max-width:520px;margin:14px 0 25px;color:#DCE5EE;font-size:14px}
+.status-card{display:flex;align-items:flex-start;gap:15px;padding:17px;border:1px solid #45B8F055;border-radius:13px;background:#09243D88}
+.status-icon{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:#C9F1FF;color:#0754A4;font-size:19px;font-weight:900}
+.status-copy{min-width:0}.status-copy strong{display:block;margin:1px 0 4px;color:#fff;font-size:14px}.status-copy p{margin:0;color:#DCE5EE;font-size:13px;overflow-wrap:anywhere}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:22px 0 0}
+.step{padding:13px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08}
+.step b{display:block;color:#45B8F0;font-size:10px;letter-spacing:.1em}.step span{display:block;margin-top:5px;color:#fff;font-size:12px;font-weight:700}
+.back{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:24px;padding:10px 16px;border:1px solid #ffffff55;border-radius:9px;color:#fff;text-decoration:none;font-size:13px;font-weight:750}
+.back:hover{background:#ffffff12;text-decoration:none}.back:focus-visible{outline:3px solid #45B8F0;outline-offset:3px}
+@media(max-width:540px){.box{border-radius:16px}.brand{align-items:flex-start;flex-direction:column}.brand img{width:200px}.brand-label{text-align:left}.eyebrow{margin-top:24px}.steps{grid-template-columns:1fr}.step{display:flex;align-items:center;gap:12px}.step span{margin:0}.back{width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
 <link rel="stylesheet" href="../assets/krim-global-brand.css?v=20261111-global-brand-v1">
 <script defer src="../assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 
 <link rel="stylesheet" href="../core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
 </head>
-<body><main class="box"><img class="mark" src="../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:240px;height:64px;max-width:100%;object-fit:contain;background:#fff;padding:4px;border-radius:8px"><div class="eyebrow">KRIM LOGISTICS OS</div><h1>Verifying partner access</h1><p id="status" role="status" aria-live="polite">Checking your authenticated session and organization permissions…</p><p><a id="back" href="partner-signin.html">Return to Partner Sign In</a></p></main>
+<body><main class="box">
+<div class="brand"><img src="../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System"><span class="brand-label">GLOBAL LOGISTICS<br>OPERATING SYSTEM</span></div>
+<div class="eyebrow">Secure partner access</div>
+<h1>Taking you to the right partner workspace.</h1>
+<p class="intro">KRIM checks your sign-in session and organization access before opening the workspace assigned to your partner account.</p>
+<section class="status-card" aria-live="polite" aria-atomic="true"><span class="status-icon" aria-hidden="true">↗</span><div class="status-copy"><strong>Verifying your access</strong><p id="status" role="status">Checking your authenticated session and organization permissions…</p></div></section>
+<div class="steps" aria-label="Access process"><div class="step"><b>01 · SESSION</b><span>Confirm sign-in</span></div><div class="step"><b>02 · ORGANIZATION</b><span>Check membership</span></div><div class="step"><b>03 · WORKSPACE</b><span>Route your account</span></div></div>
+<a class="back" id="back" href="partner-signin.html">← Return to Partner Sign In</a>
+</main>
 <script>
 (async function(){
 "use strict";
