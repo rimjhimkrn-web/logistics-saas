@@ -21,7 +21,7 @@ input,select,textarea{width:100%;border:1px solid #d8e2ed;border-radius:9px;padd
 textarea{min-height:88px;resize:vertical}
 .docs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
 .doc{border:1px solid #e0e8f1;border-radius:12px;padding:14px;min-width:0}.doc h3{font-size:12px;color:var(--navy);margin:0 0 5px}.doc p{font-size:10px;line-height:1.6;color:var(--muted);min-height:48px;margin:0}
-.doc .field{margin-top:10px}.reason{display:none}.doc[data-mode="not_applicable"] .reason{display:grid}.doc[data-mode="not_applicable"] .file{display:none}
+.doc .field{margin-top:10px}.file-meta{display:block;margin-top:5px;color:#60748A;font-size:10px;line-height:1.5;overflow-wrap:anywhere}.reason{display:none}.doc[data-mode="not_applicable"] .reason{display:grid}.doc[data-mode="not_applicable"] .file{display:none}
 .actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:16px}
 button{border:0;border-radius:9px;background:var(--blue);color:#fff;padding:12px 17px;font-size:11px;font-weight:900;cursor:pointer;min-height:44px}
 button.secondary{background:#fff;color:#31506f;border:1px solid var(--line)}button:disabled{opacity:.55;cursor:not-allowed}
@@ -129,25 +129,25 @@ input,select,textarea{width:100%;border:1px solid #c7d5e3;border-radius:10px;pad
 <section class="doc" data-code="business_registration">
 <h3>1. Business registration & legal identity</h3><p>Certificate or registry extract showing legal entity name, registration number, issuing authority and current status.</p>
 <div class="field"><label>Submission type</label><select data-mode><option value="uploaded">Upload supporting document</option><option value="not_applicable">Declare not applicable</option></select></div>
-<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div>
+<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"><small class="file-meta" data-file-meta aria-live="polite">No file selected · PDF, JPEG or PNG · up to 10 MB</small></div>
 <div class="field reason"><label>Why does this not apply?</label><textarea data-reason maxlength="1000" placeholder="Explain the entity structure and why this category is not applicable."></textarea></div>
 </section>
 <section class="doc" data-code="tax_registration">
 <h3>2. Tax identity & invoicing</h3><p>Applicable tax registration or an explanation of the lawful basis for non-registration in this jurisdiction.</p>
 <div class="field"><label>Submission type</label><select data-mode><option value="uploaded">Upload supporting document</option><option value="not_applicable">Declare not applicable</option></select></div>
-<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div>
+<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"><small class="file-meta" data-file-meta aria-live="polite">No file selected · PDF, JPEG or PNG · up to 10 MB</small></div>
 <div class="field reason"><label>Why does this not apply?</label><textarea data-reason maxlength="1000" placeholder="Explain the tax registration position and applicable threshold or exemption."></textarea></div>
 </section>
 <section class="doc" data-code="operating_authority">
 <h3>3. Operating authority & service permissions</h3><p>Relevant permits, licences, registrations or service authority for the actual logistics activities and territories.</p>
 <div class="field"><label>Submission type</label><select data-mode><option value="uploaded">Upload supporting document</option><option value="not_applicable">Declare not applicable</option></select></div>
-<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div>
+<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"><small class="file-meta" data-file-meta aria-live="polite">No file selected · PDF, JPEG or PNG · up to 10 MB</small></div>
 <div class="field reason"><label>Why does this not apply?</label><textarea data-reason maxlength="1000" placeholder="Explain the services performed and why no separate authority is required."></textarea></div>
 </section>
 <section class="doc" data-code="insurance_liability">
 <h3>4. Insurance & liability</h3><p>Relevant cargo, carrier, warehouse, motor, public or professional liability cover, or a reasoned explanation of the current position.</p>
 <div class="field"><label>Submission type</label><select data-mode><option value="uploaded">Upload supporting document</option><option value="not_applicable">Declare not applicable</option></select></div>
-<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div>
+<div class="field file"><label>Document (PDF / JPG / PNG)</label><input data-file type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"><small class="file-meta" data-file-meta aria-live="polite">No file selected · PDF, JPEG or PNG · up to 10 MB</small></div>
 <div class="field reason"><label>Why does this not apply?</label><textarea data-reason maxlength="1000" placeholder="Explain the service scope, risk allocation and why this cover is not applicable or not held."></textarea></div>
 </section>
 </div>
@@ -164,7 +164,7 @@ const $=id=>document.getElementById(id);
 const status=(node,text,bad)=>{node.textContent=text;node.style.background=bad?"#fff0f1":"#edf3fb";node.style.color=bad?"#a22e40":"#345371";};
 const labels={business_registration:"Business registration & legal identity",tax_registration:"Tax identity & invoicing",operating_authority:"Operating authority & service permissions",insurance_liability:"Insurance & liability"};
 function syncMode(card){const na=card.querySelector("[data-mode]").value==="not_applicable";card.dataset.mode=na?"not_applicable":"uploaded";}
-document.querySelectorAll(".doc").forEach(card=>card.querySelector("[data-mode]").addEventListener("change",()=>syncMode(card)));
+document.querySelectorAll(".doc").forEach(card=>{card.querySelector("[data-mode]").addEventListener("change",()=>syncMode(card));const input=card.querySelector("[data-file]");const meta=card.querySelector("[data-file-meta]");if(input&&meta)input.addEventListener("change",()=>{const file=input.files&&input.files[0];meta.textContent=file?file.name+" · "+(file.size<1048576?(file.size/1024).toFixed(0)+" KB":(file.size/1048576).toFixed(2)+" MB")+" · selected on this device":"No file selected · PDF, JPEG or PNG · up to 10 MB";});});
 if(staging){
  const org=$("organization");org.replaceChildren(new Option("KRIM Demo Logistics Pvt. Ltd. · illustrative organisation","demo"));org.disabled=true;
  status($("org-state"),"Illustrative staging organisation. No account, organisation record or backend data is accessed.",false);
@@ -219,7 +219,7 @@ function loadScript(src){return new Promise((resolve,reject)=>{const s=document.
     const {data,error}=await db.rpc("krim_partner_submit_compliance_evidence",{p_organization_id:org.id,p_documents:submission,p_declaration:declaration});if(error)throw error;
     if(data?.success!==true||data.evidence_count!==4||data.status!=="submitted"||data.commercial_activation!==false)throw Error("The database did not return a confirmed four-category pending submission.");
     rpcConfirmed=true;status($("submit-state"),"Submitted successfully. Reference organisation #"+org.id+" · "+data.evidence_count+" categories · status: "+data.status+". KRIM review is still required; commercial access remains disabled.",false);
-    $("declaration").value="";document.querySelectorAll(".doc").forEach(card=>{card.querySelector("[data-mode]").value="uploaded";syncMode(card);card.querySelector("[data-file]").value="";card.querySelector("[data-reason]").value="";});
+    $("declaration").value="";document.querySelectorAll(".doc").forEach(card=>{card.querySelector("[data-mode]").value="uploaded";syncMode(card);card.querySelector("[data-file]").value="";const meta=card.querySelector("[data-file-meta]");if(meta)meta.textContent="No file selected · PDF, JPEG or PNG · up to 10 MB";card.querySelector("[data-reason]").value="";});
    }catch(err){console.error("Partner compliance evidence submission failed",err);
     if(!rpcAttempted&&uploaded.length)status($("submit-state"),"Upload failed before submission. Partial private evidence files may remain because automatic applicant deletion is not authorized by the current Storage policy. No review request was submitted. Contact KRIM support before retrying.",true);
     else if(rpcAttempted&&!rpcConfirmed)status($("submit-state"),"The submission response was not confirmed. Do not retry yet. Ask KRIM support to check the compliance evidence register; uploaded files are retained privately for reconciliation.",true);
