@@ -1,26 +1,39 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#07111f"><title>Verifying Partner Access | KRIM</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../config.js"></script>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(800px 500px at 90% 0,#14504c66,transparent 70%),#07111f;color:#f3f7fb;font:15px/1.5 system-ui,sans-serif}.box{width:min(100%,500px);padding:32px;text-align:center;background:#102137;border:1px solid #ffffff20;border-radius:24px;box-shadow:0 25px 80px #0005}.mark{width:44px;height:44px;margin:auto;display:grid;place-items:center;border-radius:14px;background:#4ce0a2;color:#06241d;font-weight:950;font-size:22px}.eyebrow{margin-top:16px;color:#4ce0a2;font-size:11px;font-weight:800;letter-spacing:.16em}h1{font-size:25px}p{color:#a9bbcf;overflow-wrap:anywhere}a{color:#9ed4ff}#status{font-weight:650}</style>
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1d3a">
+<meta name="robots" content="noindex,nofollow">
+<title>Partner Access Route | KRIM Logistics</title>
+<meta name="description" content="KRIM partner access routing preview for staging.">
+<style>
+:root{--navy:#0b1d3a;--navy2:#173457;--orange:#f28a24;--ink:#172943;--muted:#64758a;--line:#dce4ed;--wash:#f4f7fb;--white:#fff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--wash);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:hover{text-decoration:underline}a:focus-visible,button:focus-visible{outline:3px solid var(--orange);outline-offset:3px}.skip{position:absolute;top:-60px;left:15px;background:#fff;padding:10px 14px;z-index:5}.skip:focus{top:12px}
+header{background:var(--navy);color:#fff}.nav{width:min(1120px,calc(100% - 40px));min-height:80px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo{background:#fff;border-radius:8px;padding:7px 12px;display:flex;align-items:center}.logo img{display:block;width:126px;height:36px;object-fit:contain}.nav a:last-child{font-size:13px;color:#e5edf6;font-weight:700;border:1px solid #ffffff55;border-radius:7px;padding:9px 14px}
+main{width:min(760px,calc(100% - 36px));margin:64px auto 76px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(24px,5vw,42px);box-shadow:0 22px 65px rgba(11,29,58,.09)}.eyebrow{display:inline-flex;align-items:center;gap:9px;background:#fff5e9;color:#8c4d0d;border:1px solid #f6d7b2;padding:6px 11px;border-radius:30px;font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.dot{width:7px;height:7px;background:var(--orange);border-radius:50%}h1{font-size:clamp(30px,5vw,43px);line-height:1.13;letter-spacing:-.04em;color:var(--navy);margin:18px 0 12px}.lead{color:var(--muted);font-size:16px;margin:0;max-width:620px}.status{display:flex;gap:14px;align-items:flex-start;padding:17px;margin:26px 0 24px;background:#fff8ef;border:1px solid #f4d8b8;border-radius:12px}.symbol{flex:0 0 36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#ffead2;color:#8d4b08;font-weight:900;font-size:18px}.status strong{display:block;color:#74420f;font-size:14px}.status p{margin:3px 0 0;color:#805a32;font-size:13px}.sectionlabel{font-size:11px;color:#64758a;text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin:0 0 12px}.routes{display:grid;grid-template-columns:1fr 1fr;gap:12px}.route{display:block;border:1px solid var(--line);border-radius:11px;padding:16px;background:#fff;transition:border-color .15s,transform .15s}.route:hover{border-color:#e8a35c;transform:translateY(-1px);text-decoration:none}.route b{display:block;color:var(--navy);font-size:14px}.route span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.route em{display:block;color:#9b5611;font-style:normal;font-weight:800;font-size:12px;margin-top:13px}.safety{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:#748398}.safety strong{color:#344963}
+footer{background:#08172e;color:#dce5f0}.foot{width:min(1120px,calc(100% - 40px));margin:auto;padding:26px 0;display:flex;justify-content:space-between;gap:20px;align-items:center}.foot strong{font-size:14px;letter-spacing:.08em}.foot small{display:block;color:#aebdd0;margin-top:4px}.footlinks{display:flex;gap:17px;flex-wrap:wrap;font-size:12px}.copyright{width:min(1120px,calc(100% - 40px));margin:auto;border-top:1px solid #ffffff20;padding:13px 0 18px;color:#9cacc1;font-size:11px}
+@media(max-width:600px){.nav{width:calc(100% - 28px);min-height:72px}.logo img{width:108px;height:32px}main{margin:32px auto 46px}.routes{grid-template-columns:1fr}.foot{align-items:flex-start;flex-direction:column}.footlinks{gap:12px}.lead{font-size:15px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
 </head>
-<body><main class="box"><img class="mark" src="../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:240px;height:64px;max-width:100%;object-fit:contain;background:#fff;padding:4px;border-radius:8px"><div class="eyebrow">KRIM LOGISTICS OS</div><h1>Verifying partner access</h1><p id="status" role="status" aria-live="polite">Checking your authenticated session and organization permissions…</p><p><a id="back" href="partner-signin.html">Return to Partner Sign In</a></p></main>
-<script>
-(async function(){
-"use strict";
-const client=window.KRIM_SUPABASE||window.supabaseClient;
-const base=window.KRIM_BASE_PATH||"";
-const status=document.getElementById("status");
-try{
- if(!client)throw new Error("Authentication service did not load. Return to sign-in and retry.");
- const {data,error}=await client.auth.getSession();
- if(error)throw error;
- if(!data.session){location.replace(base+"/auth/partner-signin.html");return;}
- status.textContent="Session confirmed. The secure partner gateway will identify your account pathway and route you to the correct workspace…";
- location.replace(base+"/app/partner/index.html");
-}catch(error){
- status.textContent=error&&error.message?error.message:"Unable to verify partner access. Please return to sign-in and retry.";
-}
-})();
-</script></body></html>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header><nav class="nav" aria-label="Main navigation"><a class="logo" href="../index.html" aria-label="KRIM Logistics home"><img src="../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics"></a><a href="partner-signin.html">Back to partner sign in</a></nav></header>
+<main id="main">
+<section class="card" aria-labelledby="title">
+<span class="eyebrow"><i class="dot"></i> Partner access routing</span>
+<h1 id="title">Your next step starts here.</h1>
+<p class="lead">In the production KRIM platform, this route helps direct an authenticated partner to the appropriate workspace. This staging page demonstrates the route without checking a session or changing account state.</p>
+<div class="status" role="status" aria-live="polite"><span class="symbol" aria-hidden="true">i</span><div><strong>Staging preview — no session verified</strong><p>Authentication and organization permissions are intentionally disabled in this preview. No automatic redirect will occur, and this page does not grant access to operational tools.</p></div></div>
+<p class="sectionlabel">Choose where you want to go next</p>
+<div class="routes">
+<a class="route" href="partner-signin.html"><b>Partner sign-in preview</b><span>Return to the partner workspace selection screen.</span><em>Return to sign-in →</em></a>
+<a class="route" href="partner-signup.html"><b>Partner registration</b><span>Review the interest form for businesses and individuals.</span><em>Explore registration →</em></a>
+<a class="route" href="../public/partner/partner-onboarding.html"><b>Partner onboarding overview</b><span>Explore the public-facing partner onboarding journey.</span><em>View onboarding →</em></a>
+<a class="route" href="../partner-with-us.html"><b>Join the KRIM network</b><span>Learn about the partner ecosystem and participation.</span><em>Explore partnership →</em></a>
+</div>
+<div class="safety"><strong>Preview boundary:</strong> no password, token, profile, or organization data is read or stored. No Supabase client, authentication SDK, or redirect script is loaded on this page.</div>
+</section>
+</main>
+<footer><div class="foot"><div><strong>KRIM LOGISTICS</strong><small>Global Logistics Operating System<br>Knowledge · Reliability · Integration · Movement</small></div><div class="footlinks"><a href="../partner-with-us.html">Partner ecosystem</a><a href="../contact.html">Contact</a><a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a></div></div><div class="copyright">© 2026 KRIM Logistics. Partner access route preview — staging interface only.</div></footer>
+</body></html>
