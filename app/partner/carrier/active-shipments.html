@@ -1,152 +1,29 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#09243d"><meta name="robots" content="noindex,nofollow,noarchive">
-<title>Active Shipments | KRIM Carrier Workspace</title>
-<meta name="description" content="Authenticated, organization-scoped active shipment register for KRIM carrier partners.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../../config.js"></script>
-<link rel="stylesheet" href="../../../assets/krim-global-brand.css?v=20261120-official-logo-rollout">
-<script defer src="../../../assets/krim-global-brand.js?v=20261120-official-logo-rollout"></script>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#09243D"><meta name="robots" content="noindex,nofollow,noarchive"><title>Active Shipments | KRIM Carrier Workspace</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#09243d;--ink:#1c3349;--muted:#64788c;--line:#dce5ed;--bg:#f3f6fa;--blue:#1762c4;--teal:#087f80;--orange:#168FE0}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--blue);text-decoration:none}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #45b8bb;outline-offset:2px}
-.skip{position:absolute;top:-60px;left:12px;background:white;padding:10px;z-index:2000}.skip:focus{top:10px}
-header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 3px 16px #09243d0b}
-.head{height:76px;width:min(1240px,100%);margin:auto;padding:0 clamp(16px,3vw,34px);display:flex;align-items:center;justify-content:space-between;gap:16px}
-.logo{display:flex;align-items:center;min-width:0}.logo img{display:block;width:225px;height:62px;max-width:65vw;object-fit:contain;object-position:left center}
-.menu-button{border:1px solid var(--navy);border-radius:7px;background:var(--navy);color:#fff;padding:10px 15px;min-height:42px;font-weight:850;cursor:pointer}
-.menu{position:absolute;top:100%;left:0;width:100%;max-height:calc(100dvh - 76px);overflow:auto;background:#071a35;padding:24px clamp(18px,6vw,80px);box-shadow:0 20px 40px #071a3533}
-.menu[hidden]{display:none}.menu-inner{width:min(1120px,100%);margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.menu a{padding:14px 16px;border:1px solid #ffffff26;border-radius:7px;color:white;font-weight:750;background:#ffffff0b}
-main{width:min(1240px,100%);margin:0 auto;padding:clamp(18px,3vw,34px)}
-.crumb{font-size:11px;color:var(--muted);margin:2px 0 16px}.crumb a{color:var(--blue)}
-.hero{padding:clamp(24px,4vw,40px);border-radius:16px;background:linear-gradient(112deg,#09243d,#154c70 70%,#087f80);color:#fff}
-.eyebrow{font-size:10px;letter-spacing:.17em;font-weight:900;color:#9ee6df}.hero h1{font-size:clamp(29px,4vw,43px);line-height:1.1;margin:10px 0}.hero p{max-width:820px;color:#e0edf5;margin:0}
-.guard{margin:16px 0;padding:13px 16px;border:1px solid #efd8a7;background:#fff8e8;color:#6c501b;border-radius:10px;font-size:12px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
-.stat,.panel,.shipment{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 5px 20px #09243d08}
-.stat{padding:15px 17px}.stat small{display:block;color:var(--muted);font-size:10px;font-weight:750}.stat strong{display:block;color:var(--navy);font-size:24px;margin-top:2px}
-.panel{padding:17px;margin:14px 0}.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select{min-height:42px;padding:9px 11px;border:1px solid #cbd7e3;border-radius:7px;background:#fff;color:var(--ink);font:inherit;min-width:0}.toolbar input{flex:1 1 230px}.toolbar select{flex:0 1 190px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid #cbd7e3;border-radius:7px;background:#fff;color:#29455e;font-size:11px;font-weight:850;cursor:pointer}.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}.btn:disabled{opacity:.55;cursor:wait}
-.state{font-size:12px;color:var(--muted);margin:10px 0}.state.error{color:#a32b2b}.state.success{color:#08745e}
-.list{display:grid;gap:11px}.shipment{padding:16px;min-width:0}.ship-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.ship-ref{font-size:15px;font-weight:900;color:var(--navy);overflow-wrap:anywhere}.badge{display:inline-flex;padding:5px 9px;border-radius:99px;background:#e8f3f3;color:#086c69;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
-.route{font-size:14px;font-weight:800;margin:12px 0 8px;overflow-wrap:anywhere}.route span{color:var(--orange);padding:0 6px}.meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.meta div{padding:9px;background:#f6f8fb;border-radius:7px;min-width:0}.meta small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}.meta strong{display:block;font-size:11px;overflow-wrap:anywhere}
-.empty{padding:26px 16px;text-align:center;color:var(--muted);border:1px dashed #cbd7e3;border-radius:10px;background:#fff}.empty h2{font-size:17px;color:var(--navy);margin:0 0 6px}.empty p{font-size:12px;margin:0}
-footer{width:min(1240px,100%);margin:auto;padding:20px clamp(16px,3vw,34px) 30px;color:var(--muted);font-size:11px}
-@media(max-width:700px){.head{height:70px;padding:0 14px}.logo img{width:200px;height:58px}.menu{max-height:calc(100dvh - 70px);padding:18px 14px}.menu-inner{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}.meta{grid-template-columns:1fr 1fr}main{padding:16px 14px}.hero{padding:23px 19px}}
-@media(max-width:380px){.logo img{width:170px}.meta{grid-template-columns:1fr}.ship-head{display:block}.badge{margin-top:8px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
-<style id="krim-partner-homepage-brand">header .krim-official-brand-logo,.head .krim-official-brand-logo,.barin .krim-official-brand-logo,.nav .krim-official-brand-logo{display:block!important;width:190px!important;height:auto!important;max-width:clamp(148px,38vw,190px)!important;max-height:58px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;flex:none!important}.brand,.logo{display:flex;align-items:center;min-width:0;justify-content:flex-start}@media(max-width:650px){header .krim-official-brand-logo,.head .krim-official-brand-logo,.barin .krim-official-brand-logo,.nav .krim-official-brand-logo{width:148px!important;max-width:148px!important;max-height:52px!important}}</style><style id="krim-homepage-navigation-match-v3">
-/* Navigation aligned to the approved KRIM homepage system */
-header#krim-site-nav, body>header, header.bar{
-  position:relative!important;z-index:1100!important;background:#fff!important;color:#09243d!important;
-  border-bottom:1px solid #e8edf2!important;box-shadow:0 4px 18px rgba(7,24,43,.06)!important;
-}
-header#krim-site-nav .head,header .barin,header .nav{
-  min-height:78px!important;width:100%!important;padding:8px clamp(14px,3vw,36px)!important;
-  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;
-}
-header .logo,header .brand{display:flex!important;align-items:center!important;flex:0 1 auto!important;min-width:0!important;max-width:calc(100% - 110px)!important}
-header .logo img,header .brand img,header .brand .krim-official-brand-logo{
-  display:block!important;width:190px!important;max-width:clamp(148px,48vw,190px)!important;height:auto!important;
-  max-height:60px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-}
-header .menu-button,header .menu-toggle,header .krim-menu-toggle,header button#menu-toggle{
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
-  flex:0 0 auto!important;min-width:44px!important;min-height:44px!important;padding:10px 15px!important;
-  border:1px solid #dce5ee!important;border-radius:8px!important;background:#09243d!important;color:#fff!important;
-  font-size:12px!important;font-weight:900!important;cursor:pointer!important;box-shadow:none!important;
-}
-nav.menu,nav.krim-menu-panel,nav#primary-nav,nav#mainMenu,nav#krim-menu-panel{
-  position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;
-  max-height:calc(100dvh - 78px)!important;min-height:0!important;overflow:auto!important;
-  padding:20px clamp(18px,4vw,48px) 26px!important;background:rgba(255,255,255,.985)!important;
-  color:#09243d!important;border-top:1px solid #e8edf2!important;border-bottom:1px solid #dce5ee!important;
-  box-shadow:0 16px 30px rgba(7,24,43,.14)!important;backdrop-filter:blur(16px)!important;z-index:1200!important;
-}
-nav.menu[hidden],nav.krim-menu-panel[hidden],nav#primary-nav[hidden],nav#mainMenu[hidden],nav#krim-menu-panel[hidden]{display:none!important}
-nav.menu .menu-inner,nav.krim-menu-panel .krim-menu-inner,nav#mainMenu .menu-inner,nav#krim-menu-panel .krim-menu-inner,nav#primary-nav{
-  width:min(1180px,100%)!important;margin:0 auto!important;display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 26px!important;
-}
-nav.menu a,nav.krim-menu-panel a,nav#mainMenu a,nav#krim-menu-panel a,nav#primary-nav a{
-  display:flex!important;align-items:center!important;min-height:48px!important;padding:11px 6px!important;
-  border:0!important;border-bottom:1px solid #edf1f5!important;border-radius:0!important;
-  background:transparent!important;color:#40556b!important;font-size:12px!important;font-weight:850!important;
-  text-decoration:none!important;overflow-wrap:anywhere!important;
-}
-nav.menu a:hover,nav.krim-menu-panel a:hover,nav#mainMenu a:hover,nav#krim-menu-panel a:hover,nav#primary-nav a:hover{
-  color:#174bc4!important;background:#f4f8fd!important;border-bottom-color:#168FE0!important;
-}
-header nav a[aria-current="page"]{color:#09243d!important;border-bottom-color:#168FE0!important}
-@media(max-width:760px){
- header#krim-site-nav .head,header .barin,header .nav{min-height:68px!important;padding:6px 14px!important;gap:10px!important}
- header .logo img,header .brand img,header .brand .krim-official-brand-logo{max-width:clamp(140px,48vw,170px)!important;max-height:54px!important}
- nav.menu,nav.krim-menu-panel,nav#primary-nav,nav#mainMenu,nav#krim-menu-panel{
-  max-height:calc(100dvh - 68px)!important;padding:10px 18px 20px!important;
- }
- nav.menu .menu-inner,nav.krim-menu-panel .krim-menu-inner,nav#mainMenu .menu-inner,nav#krim-menu-panel .krim-menu-inner,nav#primary-nav{
-  grid-template-columns:1fr!important;gap:0!important;
- }
- nav.menu a,nav.krim-menu-panel a,nav#mainMenu a,nav#krim-menu-panel a,nav#primary-nav a{
-  min-height:47px!important;padding:11px 4px!important;font-size:14px!important;
- }
-}
-</style>
-
-<link rel="stylesheet" href="../../../core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
-
-<link rel="stylesheet" href="../../../core/krim-partner-experience.css?v=20261120-release2">
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header id="krim-site-nav"><div class="head"><a class="logo" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics"></a><button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="mainMenu">☰ <span>Menu</span></button></div>
-<nav class="menu" id="mainMenu" aria-label="Main navigation" hidden><div class="menu-inner"><a href="../../../index.html">KRIM Home</a><a href="../index.html">Partner workspace gateway</a><a href="./index.html">Carrier Operations Workspace</a><a href="./active-shipments.html" aria-current="page">Active Shipments</a><a href="./milestone-updates.html">Shipment Milestone Updates</a><a href="../../../public/partner/accepted-loads.html">Assignments & bookings</a><a href="../../../public/partner/dispatch-assignment.html">Driver dispatch</a><a href="../../../app/driver/index.html">Driver workspace</a><a href="../../../auth/partner-signin.html">Partner sign in</a><a href="../../../contact.html">Contact KRIM</a></div></nav></header>
-<main id="main"><div class="crumb"><a href="./index.html">Carrier Workspace</a> / Active Shipments</div>
-<section class="hero"><div class="eyebrow">PARTNER / CARRIER OPERATIONS · PAGE 46</div><h1>Active Shipments</h1><p>A single view of shipment work awarded to your verified carrier organization. Review current shipment status, route references and assignment ownership. This register is read-only; shipment events must be recorded through the authorized dispatch and driver workflows.</p></section>
-<div class="guard"><strong>Operational control:</strong> Records are loaded from KRIM's authenticated partner assignment and shipment tables. Organization membership and backend row-level security remain authoritative. No sample shipments or estimated live positions are displayed.</div>
-<section class="stats" aria-label="Shipment summary"><div class="stat"><small>ACTIVE SHIPMENTS</small><strong id="activeCount">—</strong></div><div class="stat"><small>IN TRANSIT</small><strong id="transitCount">—</strong></div><div class="stat"><small>AWAITING MOVEMENT</small><strong id="pendingCount">—</strong></div></section>
-<section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Search shipment, assignment or route" aria-label="Search active shipments"><select id="statusFilter" aria-label="Filter by shipment status"><option value="all">All active statuses</option></select><button class="btn" id="refresh" type="button">Refresh records</button><button class="btn" id="export" type="button">Export CSV</button></div><p id="message" class="state" role="status" aria-live="polite">Verifying your account and loading authorized shipment records…</p></section>
-<section id="shipments" class="list" aria-live="polite"><div class="empty"><h2>Loading shipment register</h2><p>Only records authorized for your organization will appear here.</p></div></section>
-<section class="panel"><strong>Related carrier workflows</strong><div class="toolbar" style="margin-top:12px"><a class="btn primary" href="../../../public/partner/accepted-loads.html">Assignments & bookings</a><a class="btn" href="../../../public/partner/dispatch-assignment.html">Driver dispatch</a><a class="btn" href="../../../app/driver/index.html">Driver workspace</a><a class="btn" href="./index.html">Carrier workspace home</a></div></section>
-</main><footer>KRIM Logistics · Active Shipments · Organization-scoped data · Shipment status is not proof of delivery or settlement.</footer>
+:root{--n:#09243D;--n2:#123B5A;--b:#168FE0;--b2:#0754A4;--sky:#45B8F0;--ink:#14283E;--m:#60748A;--l:#DCE5EE;--bg:#F3F7FB;--g:#16836C}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7fbfe,#edf4f9);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif}a,button,input,select{font:inherit}a{text-decoration:none;color:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.wrap{width:min(1200px,100%);margin:auto;padding:0 22px}header{background:#fff;border-bottom:1px solid var(--l)}.top{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:14px}.logo{width:205px;height:62px;object-fit:contain;object-position:left}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{padding:9px 12px;border:1px solid var(--l);border-radius:9px;color:var(--n);font-size:11px;font-weight:750}.nav a:hover{background:#edf6fc;border-color:#b8d8ed}.hero{margin-top:27px;padding:clamp(25px,4vw,42px);border-radius:23px;background:linear-gradient(120deg,var(--n),var(--n2) 65%,var(--b2));color:#fff;box-shadow:0 20px 48px #09243d20}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c9f1ff;font-weight:850}.hero h1{font-size:clamp(30px,4.5vw,45px);line-height:1.1;letter-spacing:-.04em;margin:11px 0}.hero p{max-width:850px;color:#e0edf7;font-size:13px;margin:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:19px}.chip{padding:7px 10px;border:1px solid #ffffff38;border-radius:99px;color:#eaf6ff;font-size:9px;font-weight:750}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.metric,.panel,.shipment{background:#fff;border:1px solid var(--l);border-radius:15px;box-shadow:0 8px 24px #09243d08}.metric{padding:15px}.metric small{display:block;color:var(--m);font-size:10px;font-weight:750}.metric b{display:block;color:var(--n);font-size:25px;margin-top:4px}.metric span{color:var(--m);font-size:9px}.panel{padding:17px;margin:14px 0}.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.toolbar input,.toolbar select{min-height:43px;padding:10px 12px;border:1px solid #cbd8e4;border-radius:10px;background:#fff;color:var(--ink);font-size:11px;min-width:0}.toolbar input{flex:1 1 230px}.toolbar select{flex:0 1 200px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 14px;border:1px solid transparent;border-radius:10px;background:var(--b);color:white;font-size:10px;font-weight:850;cursor:pointer}.btn:hover{background:var(--b2)}.btn.soft{background:#edf5fb;border-color:#d5e5f1;color:var(--b2)}.state{font-size:11px;color:var(--m);margin:11px 0 0}.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.shipment{padding:16px;min-width:0}.shiphead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.ref{font-size:10px;font-weight:850;color:var(--b2);letter-spacing:.06em;overflow-wrap:anywhere}.badge{display:inline-flex;padding:5px 9px;border-radius:99px;background:#e8f5ff;color:#0754A4;font-size:9px;font-weight:850;text-transform:uppercase}.route{font-size:15px;font-weight:850;color:var(--n);margin:13px 0 8px}.route span{color:var(--b);padding:0 5px}.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.fact{padding:9px;border-radius:9px;background:#f4f8fb;min-width:0}.fact small{display:block;color:var(--m);font-size:8px;font-weight:800;text-transform:uppercase}.fact b{display:block;margin-top:4px;color:var(--n);font-size:10px;overflow-wrap:anywhere}.empty{padding:26px 16px;text-align:center;color:var(--m);border:1px dashed #cbd7e3;border-radius:12px;background:#fff;grid-column:1/-1}.empty h2{font-size:17px;color:var(--n);margin:0 0 6px}.empty p{font-size:11px;margin:0}.note{padding:14px 16px;margin:16px 0;border:1px solid #c9e0f0;border-radius:12px;background:#f0f7fc;color:#285473;font-size:10px;line-height:1.8}footer{padding:22px 0;border-top:1px solid var(--l);color:var(--m);font-size:10px;margin-top:22px}
+@media(max-width:800px){.list{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.wrap{padding:0 13px}.top{padding:10px 0;align-items:flex-start;flex-direction:column}.logo{width:180px;height:54px}.nav{display:grid;grid-template-columns:1fr 1fr;width:100%}.nav a{text-align:center}.hero{margin-top:16px;padding:23px 18px}.hero h1{font-size:30px}.metrics{gap:7px}.metric{padding:11px}.metric b{font-size:21px}.panel{padding:13px}.facts{gap:6px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style></head><body>
+<header><div class="wrap top"><a href="../../../index.html"><img class="logo" src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics"></a><nav class="nav" aria-label="Carrier workspace"><a href="./index.html">Carrier Workspace</a><a href="active-shipments.html" aria-current="page">Active Shipments</a><a href="milestone-updates.html">Milestone Updates</a><a href="../../../public/partner/dispatch-assignment.html">Dispatch Assignment</a></nav></div></header>
+<main class="wrap"><section class="hero"><div class="eyebrow">Carrier operations · Shipment register · Page 44</div><h1>Active Shipments</h1><p>A clear operational view of shipments assigned to a carrier partner. Review route context, service mode, cargo information and current milestone status, then continue into the relevant execution workflow.</p><div class="chips"><span class="chip">Shipment visibility</span><span class="chip">Assignment-linked</span><span class="chip">Milestone tracking</span><span class="chip">Operational overview</span></div></section>
+<section class="metrics" aria-label="Shipment summary"><article class="metric"><small>Active shipments</small><b id="activeCount">04</b><span>Illustrative records</span></article><article class="metric"><small>In transit</small><b id="transitCount">02</b><span>Illustrative records</span></article><article class="metric"><small>Pickup pending</small><b id="pickupCount">01</b><span>Illustrative records</span></article><article class="metric"><small>Delivery planning</small><b id="deliveryCount">01</b><span>Illustrative records</span></article></section>
+<section class="panel"><div class="toolbar"><input id="search" type="search" placeholder="Search shipment, route, cargo or reference" aria-label="Search active shipments"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="pickup_pending">Pickup pending</option><option value="in_transit">In transit</option><option value="delivery_planning">Delivery planning</option></select><button class="btn soft" id="reset" type="button">Reset filters</button></div><p class="state" id="resultCount" role="status" aria-live="polite">Showing 4 illustrative shipment records.</p></section>
+<section class="list" id="shipments"></section>
+<div class="note"><strong>Staging preview:</strong> Shipment references, routes, cargo details, dates and statuses are fictional examples created for interface review. Search and filters operate locally in this browser only. No authentication, Supabase, live partner data, shipment updates, tracking positions or customer records are accessed.</div>
+<section class="panel"><strong>Continue shipment operations</strong><div class="toolbar" style="margin-top:12px"><a class="btn" href="../../../public/partner/dispatch-assignment.html">Dispatch Assignment</a><a class="btn soft" href="milestone-updates.html">Milestone Updates</a><a class="btn soft" href="exception-reporting.html">Exception Reporting</a></div></section>
+<footer><strong>KRIM Logistics</strong> · Knowledge · Reliability · Integration · Movement<br>Global Logistics Operating System · India initial market activation, global-ready by design.</footer></main>
 <script>
-(()=>{"use strict";
-const $=id=>document.getElementById(id),db=window.KRIM_SUPABASE;
-let rows=[],orgIds=[],locations=new Map(),shipments=new Map();
-const activeAssignment=new Set(["accepted","assigned","active","in_progress","dispatched","picked_up","in_transit","out_for_delivery"]);
-const terminal=new Set(["delivered","completed","cancelled","canceled","rejected","declined","expired","failed"]);
-const norm=v=>String(v??"").trim().toLowerCase().replace(/[ -]+/g,"_");
-const esc=v=>String(v??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function say(s,type=""){ $("message").textContent=s;$("message").className="state "+type; }
-function place(id){return locations.get(Number(id))||"Location reference "+(id??"pending");}
-function shipmentState(a){const s=shipments.get(Number(a.shipment_id))||{};return norm(s.status||a.status||"unknown");}
-function isActive(a){const as=norm(a.status),ss=shipmentState(a);return !terminal.has(as)&&!terminal.has(ss)&&(activeAssignment.has(as)||activeAssignment.has(ss));}
-function visible(){const q=$("search").value.trim().toLowerCase(),st=$("statusFilter").value;return rows.filter(a=>{const s=shipments.get(Number(a.shipment_id))||{},state=shipmentState(a),hay=[a.assignment_number,a.id,a.shipment_id,s.shipment_number,s.goods_description,place(s.origin_location_id),place(s.destination_location_id),state].join(" ").toLowerCase();return isActive(a)&&(!q||hay.includes(q))&&(st==="all"||state===st)});}
-function render(){const list=visible(),root=$("shipments");const all=rows.filter(isActive);$("activeCount").textContent=all.length;$("transitCount").textContent=all.filter(a=>["in_transit","out_for_delivery","picked_up"].includes(shipmentState(a))).length;$("pendingCount").textContent=all.filter(a=>["accepted","assigned","active","dispatched","in_progress"].includes(shipmentState(a))).length;
-const states=[...new Set(all.map(shipmentState))].sort(),select=$("statusFilter"),prior=select.value;select.innerHTML='<option value="all">All active statuses</option>'+states.map(s=>'<option value="'+esc(s)+'">'+esc(s.replaceAll("_"," "))+'</option>').join("");select.value=states.includes(prior)?prior:"all";
-if(!list.length){root.innerHTML='<div class="empty"><h2>No active shipment records</h2><p>No matching active shipments are visible under your current organization permissions. New assignments will appear after they are accepted and recorded.</p></div>';return;}
-root.innerHTML=list.map(a=>{const s=shipments.get(Number(a.shipment_id))||{},state=shipmentState(a);return '<article class="shipment"><div class="ship-head"><div><div class="ship-ref">'+esc(s.shipment_number||("Shipment #"+a.shipment_id))+'</div><div style="font-size:10px;color:#64788c">Assignment '+esc(a.assignment_number||a.id)+'</div></div><span class="badge">'+esc(state.replaceAll("_"," "))+'</span></div><div class="route">'+esc(place(s.origin_location_id))+' <span>→</span> '+esc(place(s.destination_location_id))+'</div><div class="meta"><div><small>Transport mode</small><strong>'+esc(s.requested_transport_mode||"Not recorded")+'</strong></div><div><small>Goods / cargo</small><strong>'+esc(s.goods_description||"Not provided")+'</strong></div><div><small>Gross weight</small><strong>'+(s.total_weight_kg==null?"Not recorded":esc(s.total_weight_kg)+" kg")+'</strong></div><div><small>Shipment status</small><strong>'+esc(norm(s.status||"unknown").replaceAll("_"," "))+'</strong></div><div><small>Assignment status</small><strong>'+esc(norm(a.status).replaceAll("_"," "))+'</strong></div><div><small>Last recorded offer</small><strong>'+esc(a.offered_at?new Date(a.offered_at).toLocaleString():"Not available")+'</strong></div></div></article>';}).join("");}
-async function load(){if(!db)throw Error("KRIM authentication service is unavailable. Check config.js and refresh.");say("Verifying session and partner organization…");const sr=await db.auth.getSession();if(sr.error)throw sr.error;if(!sr.data.session){location.replace("../../../auth/partner-signin.html");return;}
-const user=sr.data.session.user;const mr=await db.from("krim_organization_members").select("organization_id,status").eq("user_id",user.id).eq("status","active");if(mr.error)throw mr.error;orgIds=[...new Set((mr.data||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!orgIds.length)throw Error("No active organization membership is linked to this account.");
-const or=await db.from("krim_organizations").select("id,organization_type,status,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",orgIds);if(or.error)throw or.error;
-const eligible=(or.data||[]).filter(o=>["partner","carrier","forwarder","logistics_provider"].includes(norm(o.organization_type))&&norm(o.status)==="active"&&norm(o.partner_account_mode)==="registered_business"&&["verified","approved"].includes(norm(o.partner_verification_status))&&["active","verified"].includes(norm(o.partner_lifecycle_status))&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(norm(o.partner_compliance_status)));
-if(!eligible.length)throw Error("Carrier shipment access is restricted. An active registered-business partner organization with verified status and cleared compliance is required.");
-const ids=eligible.map(o=>Number(o.id));const ar=await db.from("krim_shipment_partner_assignments").select("id,shipment_id,shipment_leg_id,partner_organization_id,assignment_number,status,offered_at,response_deadline").in("partner_organization_id",ids).order("offered_at",{ascending:false}).limit(500);if(ar.error)throw ar.error;rows=ar.data||[];
-shipments.clear();locations.clear();const shipmentIds=[...new Set(rows.map(a=>Number(a.shipment_id)).filter(Number.isSafeInteger))];
-if(shipmentIds.length){const sr2=await db.from("krim_shipments").select("id,shipment_number,goods_description,total_weight_kg,origin_location_id,destination_location_id,requested_transport_mode,status").in("id",shipmentIds);if(sr2.error)throw sr2.error;(sr2.data||[]).forEach(s=>shipments.set(Number(s.id),s));const locIds=[...new Set((sr2.data||[]).flatMap(s=>[Number(s.origin_location_id),Number(s.destination_location_id)]).filter(Number.isSafeInteger))];if(locIds.length){const lr=await db.from("krim_locations").select("id,city,state_region,location_code").in("id",locIds);if(lr.error)throw lr.error;(lr.data||[]).forEach(l=>locations.set(Number(l.id),[l.city,l.state_region,l.location_code].filter(Boolean).join(", ")||("Location #"+l.id)));}}
-render();say("Loaded "+rows.filter(isActive).length+" active shipment assignment(s) visible to your verified partner organization. Records are read-only in this register.","success");}
-function exportCsv(){const list=visible();if(!list.length){say("There are no visible active shipments to export.","error");return;}const cell=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const data=[["Shipment","Assignment","Origin","Destination","Shipment status","Assignment status","Cargo","Weight kg"],...list.map(a=>{const s=shipments.get(Number(a.shipment_id))||{};return[s.shipment_number||a.shipment_id,a.assignment_number||a.id,place(s.origin_location_id),place(s.destination_location_id),s.status,a.status,s.goods_description,s.total_weight_kg];})];const blob=new Blob(["\uFEFF"+data.map(r=>r.map(cell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="krim-active-shipments-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);say("Exported "+list.length+" currently visible active shipment(s).","success");}
-$("menuButton").addEventListener("click",()=>{const open=$("menuButton").getAttribute("aria-expanded")!=="true";$("menuButton").setAttribute("aria-expanded",String(open));$("mainMenu").hidden=!open;$("menuButton").innerHTML=open?"✕ <span>Close</span>":"☰ <span>Menu</span>";});
-$("mainMenu").addEventListener("click",e=>{if(e.target.closest("a")){$("mainMenu").hidden=true;$("menuButton").setAttribute("aria-expanded","false");$("menuButton").innerHTML="☰ <span>Menu</span>";}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("mainMenu").hidden){$("mainMenu").hidden=true;$("menuButton").setAttribute("aria-expanded","false");$("menuButton").focus();}});
-$("refresh").addEventListener("click",async()=>{const b=$("refresh");b.disabled=true;try{await load()}catch(e){say(e.message||"Unable to load active shipments.","error")}finally{b.disabled=false}});
-$("search").addEventListener("input",render);$("statusFilter").addEventListener("change",render);$("export").addEventListener("click",exportCsv);
-load().catch(e=>{console.error(e);rows=[];render();say(e.message||"Shipment register unavailable. No demo records are shown.","error");});
+(function(){"use strict";
+const records=[
+{ref:"KR-SH-PREVIEW-8802",assignment:"KR-AS-PREVIEW-1051",origin:"Ranchi, Jharkhand",destination:"Kolkata, West Bengal",cargo:"Industrial equipment",weight:"4,800 kg",mode:"Road · Full truckload",status:"in_transit",label:"In transit",updated:"Today · 10:40"},
+{ref:"KR-SH-PREVIEW-8761",assignment:"KR-AS-PREVIEW-1038",origin:"Delhi, NCT",destination:"Jaipur, Rajasthan",cargo:"Temperature-sensitive goods",weight:"2,100 kg",mode:"Road · Refrigerated",status:"pickup_pending",label:"Pickup pending",updated:"Today · 09:15"},
+{ref:"KR-SH-PREVIEW-8714",assignment:"KR-AS-PREVIEW-1019",origin:"Pune, Maharashtra",destination:"Mumbai, Maharashtra",cargo:"Packaged components",weight:"1,650 kg",mode:"Road · Part load",status:"in_transit",label:"In transit",updated:"Yesterday · 18:25"},
+{ref:"KR-SH-PREVIEW-8680",assignment:"KR-AS-PREVIEW-0996",origin:"Ahmedabad, Gujarat",destination:"Indore, Madhya Pradesh",cargo:"Commercial machinery",weight:"3,300 kg",mode:"Road · Full truckload",status:"delivery_planning",label:"Delivery planning",updated:"Yesterday · 15:50"}
+];
+const $=id=>document.getElementById(id);
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function render(){const q=$("search").value.trim().toLowerCase(),st=$("statusFilter").value;const filtered=records.filter(r=>(st==="all"||r.status===st)&&(!q||[r.ref,r.assignment,r.origin,r.destination,r.cargo,r.mode,r.label].join(" ").toLowerCase().includes(q)));$("resultCount").textContent="Showing "+filtered.length+" of "+records.length+" illustrative shipment records.";if(!filtered.length){$("shipments").innerHTML='<div class="empty"><h2>No matching shipments</h2><p>Try another search term or reset the status filter.</p></div>';return;}$("shipments").innerHTML=filtered.map(r=>'<article class="shipment"><div class="shiphead"><span class="ref">'+esc(r.ref)+'</span><span class="badge">'+esc(r.label)+'</span></div><div class="route">'+esc(r.origin)+' <span>→</span> '+esc(r.destination)+'</div><div class="facts"><div class="fact"><small>Partner assignment</small><b>'+esc(r.assignment)+'</b></div><div class="fact"><small>Transport mode</small><b>'+esc(r.mode)+'</b></div><div class="fact"><small>Cargo</small><b>'+esc(r.cargo)+'</b></div><div class="fact"><small>Gross weight</small><b>'+esc(r.weight)+'</b></div><div class="fact"><small>Current milestone</small><b>'+esc(r.label)+'</b></div><div class="fact"><small>Last update (example)</small><b>'+esc(r.updated)+'</b></div></div></article>').join("");}
+$("search").addEventListener("input",render);$("statusFilter").addEventListener("change",render);$("reset").addEventListener("click",()=>{$("search").value="";$("statusFilter").value="all";render();});render();
 })();
-</script>
-</body></html>
+</script></body></html>
