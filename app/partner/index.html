@@ -147,7 +147,7 @@ img{max-width:100%}
 @media(max-width:640px){.grid,.pathway-grid,.info,.metrics,.stats{grid-template-columns:1fr!important}.hero{border-radius:17px!important}.hero h1{font-size:clamp(28px,8vw,36px)!important}.card{min-height:0!important}.actions,.head-actions{gap:8px}.btn{min-height:44px}.section-head{align-items:flex-start!important;flex-direction:column!important}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
-</head>
+<style id="krim-staging-review-banner">.krim-staging-review-banner{position:relative;z-index:900;width:min(1200px,calc(100% - 32px));margin:14px auto;padding:13px 16px;border:1px solid #C9F1FF;border-left:4px solid #168FE0;border-radius:9px;background:#fff;color:#14283E;font-size:12px;line-height:1.65}.krim-staging-review-banner strong{color:#09243D}</style></head>
 <body class="krim-global-shell">
 <a class="skip" href="#main">Skip to gateway status</a>
 <header class="krim-partner-gateway-header"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><button class="krim-partner-menu-button" id="partnerGatewayMenuButton" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="partnerGatewayNavigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><nav class="krim-partner-menu" id="partnerGatewayNavigation" aria-label="Partner navigation" hidden><a href="../../index.html">KRIM Home</a><a href="../../auth/partner-signin.html">Partner sign in</a><a href="../../public/partner/partner-onboarding.html">Partner onboarding</a><a href="../../partner-standards.html">Partner standards</a><a href="../../partner-with-us.html">Partner with KRIM</a><a href="../../contact.html">Contact KRIM</a></nav></header>
@@ -178,6 +178,12 @@ function go(path){return base+"/"+path.replace(/^\/+/, "")}
 function state(title,message,detail){$("title").textContent=title;$("message").textContent=message;$("status-title").textContent=title;$("status-detail").textContent=detail;$("spinner").hidden=true}
 function redirect(path){location.replace(go(path))}
 async function boot(){
+if(location.hostname==="krim-staging.pages.dev"){
+state("Partner workspace gateway — staging preview","You are viewing the KRIM partner workspace structure without signing in. Select a pathway below to review its pages. This preview does not authenticate, create accounts, access partner records or enable operations.","STAGING REVIEW MODE · Read-only navigation · No backend access");
+$("signin").hidden=true;$("spinner").hidden=true;
+const notice=document.createElement("div");notice.className="notice";notice.innerHTML="<strong>STAGING REVIEW MODE:</strong> Public preview only. No account, MFA, database records or live actions are used.";document.querySelector("main").prepend(notice);
+return;
+}
 try{
 if(!client)throw new Error("KRIM authentication service did not load. Refresh the page or contact support.");
 const {data,error}=await client.auth.getUser();if(error)throw error;
