@@ -224,7 +224,7 @@ const sel=$('docVehicle'),previous=sel.value;sel.innerHTML='<option value="">Sel
 
 function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("A secure KRIM component could not be loaded."));document.head.appendChild(s);});}
 if(staging){
- $("authState").textContent="ILLUSTRATIVE PREVIEW";$("submit").disabled=false;$("docSubmit").disabled=true;
+ $("authState").textContent="Vehicle register";$("submit").disabled=false;$("docSubmit").disabled=true;
  msg("Preview uses illustrative examples. You can test the vehicle form locally; no account data is read and nothing is submitted or uploaded.");
  const samples=[{country:"IN",registration:"JH01XX0001 · SAMPLE",category:"Goods vehicle",type:"Heavy commercial vehicle",make:"Illustrative make",model:"Fleet example",capacity:"18 tonnes",status:"pending"},{country:"IN",registration:"MH00XX0002 · SAMPLE",category:"Goods vehicle",type:"Light commercial vehicle",make:"Illustrative make",model:"Fleet example",capacity:"3.5 tonnes",status:"in review"}];
  function draw(){ $("fleet").innerHTML=samples.map(v=>'<article class="row"><strong>'+esc(v.country)+' · '+esc(v.registration)+' <span class="tag">'+esc(v.status)+'</span></strong><small>'+esc(v.category)+' · '+esc(v.type)+' · '+esc(v.make)+' '+esc(v.model)+'<br>Payload: '+esc(v.capacity)+'<br>Illustrative record only.</small></article>').join("");$("docVehicle").innerHTML='<option value="">Select a sample vehicle</option>'+samples.map((v,i)=>'<option value="sample-'+i+'">'+esc(v.registration)+'</option>').join("");}
