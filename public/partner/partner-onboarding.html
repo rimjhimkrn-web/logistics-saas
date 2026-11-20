@@ -665,8 +665,33 @@ body>footer>div{align-items:flex-start!important;flex-direction:column!important
           document.getElementById("partner-status-compliance").textContent = "Not checked";
           document.getElementById("partner-status-access").textContent = "Disabled in staging";
           document.getElementById("partner-status-guidance").textContent = "This is a visual and workflow review only. No account, organisation, document upload, verification request or commercial access is created. Sign in is not required to inspect this page.";
-          onboardingMessage("STAGING REVIEW MODE — explore the pathway cards and form layout freely. Submissions, authentication and document uploads are disabled; no data will be saved.", "info");
-          document.querySelectorAll('#partner-onboarding-form input[type="file"]').forEach(input => input.disabled = true);
+          onboardingMessage("STAGING REVIEW MODE — explore the pathway cards, complete the form fields and choose sample files from your device. File selection is local preview only: nothing is uploaded or saved. Submissions and backend changes remain disabled.", "info");
+          document.querySelectorAll('#partner-onboarding-form input[type="file"]').forEach(input => {
+            input.disabled = false;
+            input.required = false;
+            input.addEventListener("change", () => {
+              const selected = Array.from(input.files || []);
+              let status = input.parentElement.querySelector("[data-staging-file-status]");
+              if (!status) {
+                status = document.createElement("p");
+                status.setAttribute("data-staging-file-status", "true");
+                status.setAttribute("aria-live", "polite");
+                status.className = "mt-2 text-[11px] font-semibold";
+                input.insertAdjacentElement("afterend", status);
+              }
+              if (!selected.length) {
+                status.textContent = "No file selected.";
+                status.style.color = "#60748A";
+                return;
+              }
+              const file = selected[0];
+              const size = file.size < 1024 * 1024
+                ? Math.max(1, Math.round(file.size / 1024)) + " KB"
+                : (file.size / (1024 * 1024)).toFixed(2) + " MB";
+              status.textContent = "Selected: " + file.name + " · " + size + " · Local preview only";
+              status.style.color = "#0754A4";
+            });
+          });
           return;
         }
         const { data: memberships, error: membershipError } = await onboardingClient
