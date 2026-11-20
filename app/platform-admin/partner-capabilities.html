@@ -1,88 +1,160 @@
 <!doctype html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#0b1f3a">
-<title>KRIM | Partner Capability Review</title>
-<meta name="description" content="Restricted administrator review of partner service capabilities.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../config.js"></script>
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#09243D">
+<title>Partner Capabilities Governance | KRIM Logistics</title>
+<meta name="description" content="Restricted, evidence-led review of partner service capabilities for KRIM Logistics.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/krim-global-brand.css?v=20261120-official-logo-rollout">
+<link rel="stylesheet" href="../../core/krim-global-identity.css?v=20261119-official-blue-v4">
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172c48;background:#f3f6fb;--navy:#0b1f3a;--blue:#1769e8;--line:#e0e8f2;--muted:#708198;--green:#138564;--red:#bd3345;--amber:#a56609}
-*{box-sizing:border-box}body{margin:0;background:#f3f6fb}html{visibility:hidden}html.authorized{visibility:visible}button{font:inherit;cursor:pointer}.top{height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 clamp(14px,3vw,32px);background:#fff;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;color:var(--navy);font-weight:950;letter-spacing:.07em}.mark{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#37bfd5,#1769e8 65%,#7357d9);font-size:20px}.brand small{display:block;color:#8795a8;font-size:9px;letter-spacing:.15em}.actions{display:flex;gap:8px;align-items:center}.btn{border:1px solid #dce5ef;border-radius:10px;background:#fff;color:#314863;padding:9px 12px;font-size:11px;font-weight:850}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.danger{color:var(--red);border-color:#f0cbd0}.btn:disabled{opacity:.45;cursor:not-allowed}.wrap{max-width:1500px;margin:auto;padding:clamp(16px,3vw,34px)}.crumb{font-size:10px;font-weight:900;letter-spacing:.13em;color:#7d8ca1}.head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin:13px 0 22px}.eyebrow{color:var(--blue);font-size:10px;font-weight:950;letter-spacing:.15em}.head h1{font-size:clamp(27px,3vw,38px);line-height:1.1;letter-spacing:-.045em;color:var(--navy);margin:7px 0}.head p{font-size:12px;color:var(--muted);line-height:1.75;margin:0;max-width:800px}.badge{border:1px solid #c7eadb;background:#effbf5;color:#11724f;border-radius:99px;padding:7px 10px;font-size:10px;font-weight:900;white-space:nowrap}.hero{padding:23px 25px;border-radius:18px;background:linear-gradient(110deg,#0b1f3a,#164a77 70%,#087f91);color:white;margin-bottom:16px}.hero h2{font-size:20px;margin:0 0 7px}.hero p{font-size:11px;line-height:1.7;color:#d6e8f7;margin:0;max-width:850px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 22px #15365708}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid #edf1f6}.cardhead h3{font-size:13px;color:var(--navy);margin:0}.cardhead p{font-size:10px;color:#8391a5;margin:4px 0 0}.toolbar{display:flex;gap:9px;padding:13px 16px;border-bottom:1px solid #edf1f6;align-items:center;flex-wrap:wrap}.toolbar input{flex:1;min-width:180px;border:1px solid #dce5ef;border-radius:9px;padding:10px 11px;font-size:11px}.state{display:inline-flex;border-radius:99px;padding:5px 8px;font-size:9px;font-weight:900;background:#f0f4f9;color:#60728a}.state.good{background:#e9fbf3;color:#11724f}.state.bad{background:#fff0f2;color:#a92b40}.state.warn{background:#fff6e5;color:#94600b}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:980px}th,td{text-align:left;vertical-align:top;padding:13px 14px;border-bottom:1px solid #edf1f6;font-size:10px}th{background:#f8fafd;color:#718198;text-transform:uppercase;letter-spacing:.08em;font-size:9px;position:sticky;top:0}td{color:#314762}td strong{color:#172c48;font-size:11px}td small{display:block;color:#8190a4;margin-top:4px;line-height:1.5}.mono{font-family:ui-monospace,monospace;color:#63758e}.review{display:flex;gap:6px;flex-wrap:wrap}.empty{padding:30px;text-align:center;color:#718198;font-size:11px;line-height:1.7}.statusline{padding:12px 16px;border-top:1px solid #edf1f6;color:#7c8ca1;font-size:10px}.notice{margin-top:15px;padding:13px 15px;border:1px solid #f0dfb9;background:#fff9ec;color:#7c5b20;border-radius:12px;font-size:11px;line-height:1.7}.alert{display:none;margin-bottom:14px;padding:12px 14px;border-radius:11px;font-size:11px;line-height:1.6}.alert.show{display:block}.alert.error{background:#fff0f2;color:#9f2639;border:1px solid #f1cbd1}.alert.success{background:#effbf5;color:#11724f;border:1px solid #c7eadb}.foot{text-align:center;color:#8a98aa;font-size:10px;padding:23px}.back{color:#1769e8;font-size:11px;font-weight:850}
-@media(max-width:650px){.head{display:block}.head .badge{display:inline-flex;margin-top:12px}.top{height:62px}.actions .badge{display:none}.wrap{padding:16px 12px}.hero{padding:19px}.cardhead{padding:14px}.toolbar{padding:11px}.toolbar input{min-width:100%;flex-basis:100%}}
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB;--green:#16836C;--amber:#93610B;--red:#B4233A}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:radial-gradient(ellipse at 8% 0,rgba(69,184,240,.14),transparent 34%),linear-gradient(180deg,#F9FCFF,#F1F6FB);color:var(--ink);font:14px/1.65 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.skip{position:absolute;left:12px;top:-70px;z-index:10;padding:10px 14px;background:#fff;color:var(--navy);border-radius:8px}.skip:focus{top:10px}
+header{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 5px 20px #09243d0b}.headerin{width:min(1440px,100%);min-height:76px;margin:auto;padding:8px clamp(14px,3vw,34px);display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.logo{width:190px;max-width:45vw;max-height:58px;object-fit:contain;object-position:left center}.headright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.secure{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #cfe3f5;background:#f0f8ff;color:#0754a4;border-radius:99px;font-size:9px;font-weight:900;letter-spacing:.08em}.secure:before{content:"";width:7px;height:7px;background:#16836c;border-radius:50%}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#29445f;font-size:11px;font-weight:850;cursor:pointer;transition:transform .16s,box-shadow .16s}.btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px #09243d12}.btn.primary{background:linear-gradient(120deg,var(--blue),var(--blue2));border-color:var(--blue);color:#fff}.btn.danger{border-color:#efcbd1;color:var(--red);background:#fff}.btn:disabled{opacity:.48;cursor:not-allowed;transform:none;box-shadow:none}
+.wrap{width:min(1320px,100%);margin:auto;padding:clamp(16px,3vw,34px)}.crumb{color:#8494a7;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.hero{position:relative;overflow:hidden;margin:14px 0 17px;padding:clamp(23px,4vw,36px);border-radius:19px;background:linear-gradient(112deg,#09243D 0%,#123B5A 62%,#0754A4 100%);color:#fff;box-shadow:0 17px 38px #09243d1c}.hero:after{content:"";position:absolute;width:290px;height:290px;right:-85px;top:-170px;border:1px solid #ffffff32;border-radius:50%;box-shadow:0 0 0 28px #ffffff09,0 0 0 60px #ffffff08}.hero-content{position:relative;z-index:1;max-width:950px}.eyebrow{color:#8edaff;font-size:10px;font-weight:900;letter-spacing:.19em}.hero h1{margin:9px 0 10px;color:#fff;font-size:clamp(30px,4.6vw,48px);line-height:1.06;letter-spacing:-.045em}.hero p{max-width:850px;margin:0;color:#e2eff8;font-size:12px;line-height:1.85}.hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:19px}.hero-tags span{padding:7px 10px;border:1px solid #ffffff27;border-radius:99px;background:#ffffff12;color:#e5f3fc;font-size:9px;font-weight:800}
+.notice{display:flex;align-items:flex-start;gap:11px;margin:15px 0;padding:14px 16px;border:1px solid #d5e7f5;border-radius:12px;background:#f0f8ff;color:#385c7a;font-size:11px;line-height:1.75}.notice strong{color:#123b5a}.notice.warning{border-color:#f0dfbd;background:#fff9ec;color:#76571c}.notice.error{border-color:#f0cbd1;background:#fff2f3;color:#9d3142}.notice.success{border-color:#cce9dc;background:#effaf4;color:#176b4b}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{position:relative;overflow:hidden;padding:17px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 6px 20px #09243d08}.stat:after{content:"";position:absolute;right:-22px;top:-30px;width:90px;height:90px;border-radius:50%;background:#e9f6ff}.stat small{position:relative;z-index:1;color:#7c8da1;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.stat strong{position:relative;z-index:1;display:block;margin-top:5px;color:var(--navy);font-size:29px;line-height:1.2}.stat span{position:relative;z-index:1;color:#7b8da2;font-size:9px}
+.panel{margin-top:17px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 8px 28px #09243d08;overflow:hidden}.panelhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 20px;border-bottom:1px solid #edf1f6}.panelhead h2{margin:0;color:var(--navy);font-size:17px;letter-spacing:-.02em}.panelhead p{margin:3px 0 0;color:#7b8da2;font-size:10px}.pill{padding:7px 10px;border-radius:99px;background:#eaf5fd;color:#1766a2;font-size:9px;font-weight:900}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 18px;background:#f9fbfd;border-bottom:1px solid #edf1f6}.toolbar input{flex:1;min-width:220px;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:11px}.queue{display:grid;gap:13px;padding:16px}.case{padding:18px;border:1px solid #e2eaf2;border-radius:14px;background:linear-gradient(145deg,#fff,#fbfdff)}.casehead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.casehead h3{margin:0;color:var(--navy);font-size:17px}.subline{margin-top:4px;color:#8091a5;font-size:10px}.status{display:inline-flex;padding:6px 10px;border-radius:99px;background:#fff4df;color:#875c0c;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.status.approved{background:#e9f8f1;color:#14724f}.status.rejected{background:#fff0f2;color:#a92b40}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:14px}.fieldbox{min-width:0;padding:11px;border:1px solid #eaf0f5;border-radius:10px;background:#fff}.fieldbox small{display:block;color:#8393a5;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.fieldbox b{display:block;margin-top:5px;color:#304a64;font-size:10px;overflow-wrap:anywhere}.docs{margin-top:13px;padding:13px;border:1px solid #e1edf6;border-radius:11px;background:#f4f9ff}.docs h4{margin:0 0 8px;color:#29445f;font-size:10px}.docpath{padding:5px 0;color:#49617a;font:10px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}.docbtn{display:inline-flex;margin:5px 7px 5px 0;padding:7px 10px;border:1px solid #cfe3f5;border-radius:8px;background:#fff;color:#0754a4;font-size:9px;font-weight:850;cursor:pointer}.reviewgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.reviewitem{padding:12px;border:1px solid #e7edf3;border-radius:11px;background:#fff}.reviewitem h4{margin:0;color:#1b3554;font-size:11px}.reviewitem p{margin:4px 0 0;color:#73869b;font-size:9px;line-height:1.65}.control{display:grid;gap:6px;margin-top:9px}.control label{color:#60748a;font-size:9px;font-weight:850}.control input,.control select,.control textarea{width:100%;min-height:38px;padding:9px 10px;border:1px solid #dce5ee;border-radius:8px;background:#fff;color:#213a57;font-size:10px}.control textarea{min-height:62px;resize:vertical}.actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:12px}.empty{padding:38px 20px;text-align:center;border:1px dashed #cbd9e6;border-radius:13px;background:#fbfdff;color:#71849a;font-size:11px;line-height:1.8}.empty strong{display:block;color:#29445f;font-size:14px}
+footer{padding:25px 8px 12px;text-align:center;color:#8796a8;font-size:9px;line-height:1.8}.hidden{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.headerin{min-height:68px;padding:8px 12px}.logo{width:150px}.secure{font-size:8px;padding:7px 9px}.headright{gap:6px}.wrap{padding:15px 12px}.stats{grid-template-columns:1fr}.grid,.reviewgrid{grid-template-columns:1fr}.panelhead{padding:14px}.queue{padding:10px}.case{padding:13px}.toolbar input{min-width:100%}.hero{padding:21px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style><style id="krim-global-device-standard-v20261120">
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+html{min-width:320px;max-width:100%;scroll-padding-top:5rem}
+body{min-width:320px;max-width:100%;overflow-x:hidden;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+img,svg,video,canvas,iframe{max-width:100%;height:auto}
+h1,h2,h3,h4,p,li,small,label,th,td{overflow-wrap:anywhere}
+h1{font-size:clamp(1.75rem,4vw,2.65rem);line-height:1.12;letter-spacing:-.035em}
+h2{font-size:clamp(1.2rem,2.5vw,1.7rem);line-height:1.2;letter-spacing:-.02em}
+h3{line-height:1.3}
+button,input,select,textarea{font:inherit}
+input,select,textarea{max-width:100%;min-width:0}
+button,a,[role=button],input[type=button],input[type=submit],input[type=file]::file-selector-button{touch-action:manipulation}
+button,a,[role=button],input[type=button],input[type=submit]{-webkit-tap-highlight-color:transparent}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid #45B8F0!important;outline-offset:3px!important}
+button,.btn,[role=button],input[type=button],input[type=submit]{min-height:44px}
+table{max-width:100%;border-collapse:collapse}
+@media(max-width:900px){.container,.wrap,.page,.shell,main{max-width:100%}}
+@media(max-width:680px){
+ html,body{width:100%;min-width:320px}
+ .wrap,.container,.page,.shell,main{width:100%;max-width:100%;margin-left:auto;margin-right:auto}
+ .toolbar,.filters,.actions,.head-actions,.nav,.toprow{flex-wrap:wrap}
+ .toolbar>*,.filters>*,.formgrid>*,.form-grid>*,.grid>*{min-width:0;max-width:100%}
+ input,select,textarea{width:100%;min-width:0}
+ button,.btn,[role=button],input[type=button],input[type=submit]{max-width:100%;white-space:normal}
+ pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
+}
+@media(max-width:420px){
+ body{font-size:14px}
+ .wrap,.container,.page,.shell,main{padding-left:12px;padding-right:12px}
+ h1{font-size:clamp(1.55rem,7.8vw,2rem)}
+ .hero{max-width:100%}
+}
+@media(orientation:landscape) and (max-height:520px){header,nav{max-height:35vh;overflow-y:auto}}
+@media(hover:none){button,.btn,a,[role=button]{-webkit-tap-highlight-color:transparent}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media print{body{background:#fff!important;color:#111!important}button,.btn,nav{display:none!important}main,.wrap,.container{width:100%!important;max-width:100%!important}}
 </style>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 </head>
 <body>
-<header class="top"><div class="brand"><span class="mark">K</span><span>KRIM GLOBAL<small>PLATFORM CONTROL PLANE</small></span></div><div class="actions"><span class="badge">● MFA-VERIFIED PRIVILEGED SESSION</span><button class="btn" id="refresh">↻ Refresh</button><button class="btn" id="signout">Sign out</button></div></header>
-<main class="wrap">
+<a class="skip" href="#main">Skip to content</a>
+<header><div class="headerin"><a href="../../index.html" aria-label="KRIM Logistics home"><img class="logo" src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a><div class="headright"><span class="secure" id="access-state">PRIVILEGED GOVERNANCE</span><button class="btn" id="refresh">↻ Refresh</button><button class="btn" id="signout">Sign out</button></div></div></header>
+<main class="wrap" id="main">
 <div class="crumb">KRIM / PLATFORM ADMINISTRATION / PARTNER NETWORK</div>
-<section class="head"><div><div class="eyebrow">NETWORK GOVERNANCE · RESTRICTED</div><h1>Partner capability review</h1><p>Review individual services submitted by logistics partners. A verified organisation is a prerequisite, not an automatic approval of every transport mode, service type or coverage area.</p></div><span class="badge" id="queue-state">VERIFYING ACCESS</span></section>
-<section class="hero"><h2>Approve capabilities—not assumptions.</h2><p>Each pending capability is reviewed independently. Approval is permitted only for an active, verified, compliant registered business. All decisions are sent to the protected database function and recorded in the platform audit trail.</p></section>
-<div class="alert" id="message" role="status" aria-live="polite"></div>
-<section class="card"><div class="cardhead"><div><h3>Pending capability queue</h3><p>Only pending capability records are returned by the administrator-only database function.</p></div><a class="back" href="index.html">← Back to control centre</a></div>
-<div class="toolbar"><input id="filter" type="search" placeholder="Filter organisation, service, country or region…" aria-label="Filter pending capabilities"><button class="btn" id="reload">Reload queue</button></div>
-<div id="content"><div class="empty">Checking privileged access…</div></div><div class="statusline" id="status">No review action has been performed.</div></section>
-<div class="notice"><strong>Review standard:</strong> inspect the organisation's submitted registration evidence and relevant service evidence before making a decision. Reject decisions require a reason. Approval requires the organisation-level verification and compliance gates to pass. A browser status is never authority to activate a partner.</div>
-<div class="foot">KRIM Logistics · Global Logistics Operating System · Private administrator workspace</div>
+<section class="hero"><div class="hero-content"><div class="eyebrow">NETWORK GOVERNANCE · RESTRICTED</div><h1>Partner capability governance</h1><p>Review the specific logistics services a partner declares and the evidence supporting its technical and operational readiness. Every capability is assessed independently; organisation verification is only one prerequisite, not automatic service approval.</p><div class="hero-tags"><span>Evidence-led review</span><span>Independent capability decisions</span><span>Auditable governance</span><span>India first · global-ready architecture</span></div></div></section>
+<div id="message" class="notice hidden" role="status" aria-live="polite"></div>
+<section class="stats" aria-label="Capability queue summary"><article class="stat"><small>Review-ready submissions</small><strong id="stat-ready">—</strong><span>Returned by the protected review queue</span></article><article class="stat"><small>Held for evidence</small><strong id="stat-held">—</strong><span>Declarations not yet review-ready</span></article><article class="stat"><small>Current filter</small><strong id="stat-visible">—</strong><span>Visible records in this view</span></article></section>
+<section class="panel"><div class="panelhead"><div><h2>Capability review queue</h2><p>Only pending evidence-backed records are presented for administrator review.</p></div><span class="pill" id="queue-state">CHECKING ACCESS</span></div><div class="toolbar"><input id="filter" type="search" placeholder="Search organisation, service, transport mode or region…" aria-label="Filter capability queue"><button class="btn" id="reload">Reload queue</button></div><div id="content" class="queue"><div class="empty">Preparing secure capability review…</div></div></section>
+<div class="notice warning"><strong>Governance boundary:</strong>&nbsp; capability approval records a platform review of a declared service. It does not grant a statutory licence, customs authority, dangerous-goods authorisation, route or service-area approval, available capacity, insurance validity, commercial activation or dispatch authority. Those controls remain separate and must be verified independently.</div>
+<footer>KRIM Logistics · Global Logistics Operating System · Knowledge · Reliability · Integration · Movement</footer>
 </main>
 <script>
 (function(){
 "use strict";
-const client=window.KRIM_SUPABASE||window.supabaseClient;
+const staging=location.hostname==="krim-staging.pages.dev";
 const $=id=>document.getElementById(id);
-let isSuperadmin=false,items=[],incompleteCount=0;
-function esc(v){return String(v===null||v===undefined||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function msg(text,type){const el=$("message");el.textContent=text;el.className="alert show "+type}
-function setState(text,kind){$("queue-state").textContent=text;$("queue-state").className="badge"+(kind==="bad"?" state bad":"")}
-async function verifyAccess(){
- if(!client)throw new Error("Secure authentication client unavailable.");
- const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error("No active administrator session.");
- const {data:gate,error:gateError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
- if(gateError||!gate||gate.ok!==true)throw new Error(gate?.code==="MFA_REQUIRED"?"Complete MFA before accessing capability review.":gate?.error||gateError?.message||"Administrator access denied.");
- isSuperadmin=(gate.data?.roles||[]).includes("platform_superadmin");
- if(!isSuperadmin)throw new Error("Platform Super Admin access is required for capability review.");
- document.documentElement.classList.add("authorized");
-}
+const esc=v=>String(v===null||v===undefined||v===""?"—":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let client=null,items=[],incompleteCount=0;
+function message(text,type=""){const el=$("message");el.textContent=text;el.className="notice"+(type?" "+type:"");}
+function state(text){$("queue-state").textContent=text;}
+function stats(ready,held,visible){$("stat-ready").textContent=ready;$("stat-held").textContent=held;$("stat-visible").textContent=visible;}
+function setControlsDisabled(disabled){["refresh","reload","signout","filter"].forEach(id=>{const el=$(id);if(el)el.disabled=disabled;});}
 function render(){
- const term=$("filter").value.trim().toLowerCase(),filtered=items.filter(x=>JSON.stringify(x).toLowerCase().includes(term));
- if(!filtered.length){const emptyText=items.length?"No matching evidence-backed capability submissions.":(incompleteCount?"No capability submissions are ready for review. "+incompleteCount+" pending declaration(s) are held until the partner uploads capability-specific evidence through Services & Capabilities.":"There are no pending evidence-backed partner capabilities.");$("content").innerHTML='<div class="empty">'+esc(emptyText)+'</div>';$("status").textContent=items.length?"0 matching records":(incompleteCount?incompleteCount+" held for evidence":"0 review-ready records");return}
- const cell=esc;
- let html='<div class="tablewrap"><table><thead><tr><th>Partner organisation</th><th>Service capability</th><th>Coverage</th><th>Operating limits</th><th>Evidence</th><th>Organisation verification</th><th>Capability state</th><th>Decision</th></tr></thead><tbody>';
- html+=filtered.map(x=>{
+ const term=$("filter").value.trim().toLowerCase();
+ const filtered=items.filter(x=>JSON.stringify(x).toLowerCase().includes(term));
+ stats(items.length,incompleteCount,filtered.length);
+ if(!filtered.length){$("content").innerHTML='<div class="empty"><strong>'+(items.length?"No matching capability submissions.":"No pending evidence-backed capabilities.")+'</strong><br>'+(incompleteCount?esc(incompleteCount+" additional declaration(s) are held until capability-specific evidence is submitted."):"The queue is clear. No partner capability is assumed or created by this screen.")+'</div>';return;}
+ $("content").innerHTML=filtered.map(x=>{
   const ready=x.partner_account_mode==="registered_business"&&x.organization_status==="active"&&["active","verified"].includes(String(x.partner_lifecycle_status||"").toLowerCase())&&["verified","approved"].includes(String(x.partner_verification_status||"").toLowerCase())&&["clear","compliant","approved","verified","not_required","not_applicable"].includes(String(x.partner_compliance_status||"").toLowerCase());
   const specialistBlocked=!!x.refrigerated||!!x.hazardous_goods_capable;
-  const approveBlocked=!ready||specialistBlocked;
-  const approveTitle=specialistBlocked?"Specialist review controls are not yet available":"Organisation must be verified and compliant first";
-  const limits=[x.refrigerated?"Refrigerated":"",x.hazardous_goods_capable?"Hazardous goods":"",x.max_weight_kg?"Max "+x.max_weight_kg+" kg":""].filter(Boolean).join(" · ")||"Not supplied";
-  return '<tr><td><strong>'+cell(x.organization_name)+'</strong><small class="mono">Organisation #'+cell(x.organization_id)+'</small><small>'+cell(x.partner_account_mode||"Mode not selected")+'</small></td><td><strong>'+cell(x.service_type)+'</strong><small>Transport: '+cell(x.transport_mode_name||x.transport_mode_code||("Mode #"+x.transport_mode_id))+'</small><small>Capability #'+cell(x.id)+'</small></td><td>Coverage: '+cell(x.coverage_country_name||("Country #"+x.coverage_country_id))+' · '+cell(x.coverage_country_iso2||"")+'<small>'+cell(x.coverage_region)+'</small></td><td>'+cell(limits)+(specialistBlocked?'<small class="state warn">Specialist approval held until dedicated controls are available.</small>':'')+'</td><td>'+((Array.isArray(x.metadata?.evidence_paths)?x.metadata.evidence_paths:[]).map(p=>'<button type="button" class="btn evidence" data-path="'+cell(p)+'">Open '+cell(String(p).split("/").pop())+'</button>').join("<br>")||'<span class="state bad">No evidence attached</span>')+'</td><td><span class="state '+(ready?"good":"bad")+'">'+(ready?"Verified & compliant":"Gate not satisfied")+'</span><small>'+cell(x.partner_verification_status)+" · "+cell(x.partner_compliance_status)+'</small></td><td><span class="state warn">'+cell(x.verification_status)+'</span><small>Active: '+(x.active?"Yes":"No")+'</small></td><td><div class="review"><button class="btn primary approve" data-id="'+cell(x.id)+'" '+(approveBlocked?'disabled title="'+cell(approveTitle)+'"':'')+'>Approve</button><button class="btn danger reject" data-id="'+cell(x.id)+'">Reject</button></div></td></tr>';
+  const limits=[x.refrigerated?"Refrigerated handling":"",x.hazardous_goods_capable?"Hazardous-goods handling":"",x.max_weight_kg?"Maximum declared weight: "+x.max_weight_kg+" kg":""].filter(Boolean).join(" · ")||"No operating limits declared";
+  const paths=Array.isArray(x.metadata?.evidence_paths)?x.metadata.evidence_paths:[];
+  const evidence=paths.length?paths.map(p=>'<button type="button" class="docbtn evidence" data-path="'+esc(p)+'">↗ Open private evidence · '+esc(String(p).split("/").pop())+'</button>').join(""):'<span class="status rejected">No evidence path supplied</span>';
+  const blocked=!ready||specialistBlocked;
+  return '<article class="case"><div class="casehead"><div><h3>'+esc(x.organization_name)+'</h3><div class="subline">Organisation #'+esc(x.organization_id)+' · Capability #'+esc(x.id)+' · '+esc(x.partner_account_mode||"Account mode not supplied")+'</div></div><span class="status">'+esc(x.verification_status||"Pending review")+'</span></div><div class="grid"><div class="fieldbox"><small>Declared service</small><b>'+esc(x.service_type)+'</b></div><div class="fieldbox"><small>Transport mode</small><b>'+esc(x.transport_mode_name||x.transport_mode_code||("Mode #"+(x.transport_mode_id??"—")))+'</b></div><div class="fieldbox"><small>Declared country</small><b>'+esc((x.coverage_country_name||("Country #"+x.coverage_country_id))+(x.coverage_country_iso2?" · "+x.coverage_country_iso2:""))+'</b></div><div class="fieldbox"><small>Declared region</small><b>'+esc(x.coverage_region||"Not specified")+'</b></div><div class="fieldbox"><small>Operating limits</small><b>'+esc(limits)+'</b></div><div class="fieldbox"><small>Organisation identity</small><b>'+esc(x.partner_verification_status||"Not supplied")+'</b></div><div class="fieldbox"><small>Compliance state</small><b>'+esc(x.partner_compliance_status||"Not supplied")+'</b></div><div class="fieldbox"><small>Organisation lifecycle</small><b>'+esc(x.partner_lifecycle_status||x.organization_status||"Not supplied")+'</b></div></div><section class="docs"><h4>Submitted capability evidence</h4>'+evidence+'</section><div class="notice '+(ready&&!specialistBlocked?"success":"warning")+'"><strong>'+(ready&&!specialistBlocked?"Organisation gates appear satisfied.":"Additional review gates remain.")+'</strong>&nbsp; '+esc(specialistBlocked?"Specialist controls are not supported by this approval workflow; keep this case outside ordinary approval.":ready?"Review capability evidence and rationale before any decision.":"Registered-business, active lifecycle, identity and compliance prerequisites are not all satisfied.")+'</div><div class="actions"><button type="button" class="btn primary approve" data-id="'+esc(x.id)+'" '+(blocked?'disabled title="Prerequisite or specialist review gate is not satisfied"':'')+'>Approve capability</button><button type="button" class="btn danger reject" data-id="'+esc(x.id)+'">Reject capability</button></div><div class="subline">Approval applies only to this capability record. Route coverage, capacity, legal authority and commercial activation remain separate.</div></article>';
  }).join("");
- html+='</tbody></table></div>';$("content").innerHTML=html;$("status").textContent="Showing "+filtered.length+" of "+items.length+" pending capabilities.";
- $("content").querySelectorAll(".evidence").forEach(b=>b.addEventListener("click",async()=>{const old=b.textContent;const preview=window.open("about:blank","_blank");if(!preview){msg("Allow pop-ups to open a short-lived private evidence preview.","error");return;}preview.opener=null;b.disabled=true;b.textContent="Preparing secure link…";try{const {data,error}=await client.storage.from("krim-partner-verification").createSignedUrl(b.dataset.path,60);if(error)throw error;if(!data?.signedUrl)throw new Error("Private evidence link unavailable");preview.location.replace(data.signedUrl);}catch(e){preview.close();msg("Evidence preview unavailable: "+(e?.message||"Access denied"),"error");}finally{b.disabled=false;b.textContent=old;}}));
-  $("content").querySelectorAll(".approve").forEach(b=>b.addEventListener("click",()=>review(Number(b.dataset.id),"approved")));
+ $("content").querySelectorAll(".evidence").forEach(b=>b.addEventListener("click",()=>openEvidence(b)));
+ $("content").querySelectorAll(".approve").forEach(b=>b.addEventListener("click",()=>review(Number(b.dataset.id),"approved")));
  $("content").querySelectorAll(".reject").forEach(b=>b.addEventListener("click",()=>review(Number(b.dataset.id),"rejected")));
 }
+async function openEvidence(button){
+ const path=button.dataset.path;if(!path)return;
+ const win=window.open("about:blank","_blank");if(!win){message("Allow pop-ups to open the private evidence preview.","error");return;}
+ win.opener=null;button.disabled=true;
+ try{const {data,error}=await client.storage.from("krim-partner-verification").createSignedUrl(path,60);if(error)throw error;if(!data?.signedUrl)throw new Error("Private evidence link unavailable.");win.location.replace(data.signedUrl);message("Private evidence preview opened. The signed link expires in 60 seconds.","success");}
+ catch(e){win.close();message("Evidence preview unavailable: "+(e?.message||"Access denied."),"error");}
+ finally{button.disabled=false;}
+}
 async function load(){
- $("content").innerHTML='<div class="empty">Loading pending capabilities…</div>';
- try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;if(!data||!Array.isArray(data.items)||!Number.isInteger(data.incomplete_count)||data.incomplete_count<0)throw new Error("Capability review returned an invalid response shape. No cases were rendered and no decision is enabled.");items=data.items;incompleteCount=data.incomplete_count;render();setState(items.length+" REVIEW-READY"+(incompleteCount?" · "+incompleteCount+" HELD":"") ,"good")}
- catch(e){items=[];$("content").innerHTML='<div class="empty">'+esc(e.message||"Queue unavailable")+'</div>';setState("QUEUE UNAVAILABLE","bad");$("status").textContent="No review decision was submitted."}
+ $("content").innerHTML='<div class="empty">Loading pending capability records…</div>';
+ try{const {data,error}=await client.rpc("krim_admin_list_partner_capabilities");if(error)throw error;if(!data||!Array.isArray(data.items)||!Number.isInteger(data.incomplete_count)||data.incomplete_count<0)throw new Error("Capability queue returned an unexpected response. No decisions were enabled.");items=data.items;incompleteCount=data.incomplete_count;render();state(items.length+" READY · "+incompleteCount+" HELD");}
+ catch(e){items=[];incompleteCount=0;stats("—","—","—");$("content").innerHTML='<div class="empty"><strong>Capability queue unavailable.</strong><br>'+esc(e.message||"No data was returned.")+'</div>';state("QUEUE UNAVAILABLE");}
 }
 async function review(id,decision){
- const reason=prompt(decision==="approved"?"Describe the supporting evidence reviewed and the basis for approving this capability:":"Provide the reason for rejecting this capability:");
- if(reason===null)return;const minReason=decision==="approved"?10:5;if(reason.trim().length<minReason||reason.trim().length>1000){msg("Review note must contain "+minReason+"–1000 characters for this decision.","error");return}
- if(!confirm("Confirm "+decision+" for capability #"+id+"? This action is privileged and audited."))return;
- try{const {data,error}=await client.rpc("krim_admin_review_partner_capability",{p_capability_id:id,p_decision:decision,p_reason:reason.trim()});if(error)throw error;if(!data||data.decision!==decision)throw new Error("The database did not confirm the requested decision.");msg("Capability #"+id+" "+decision+". The database confirmed the decision.","success");await load()}
- catch(e){msg(e.message||"Review failed. No success was assumed.","error")}
+ const promptText=decision==="approved"?"Describe the capability evidence reviewed and the basis for approval:":"Provide the reason for rejecting this capability:";
+ const reason=prompt(promptText);if(reason===null)return;
+ const trimmed=reason.trim(),minimum=decision==="approved"?10:5;
+ if(trimmed.length<minimum||trimmed.length>1000){message("Review rationale must contain "+minimum+"–1000 characters.","error");return;}
+ if(!confirm("Confirm "+decision+" for capability #"+id+"? The protected database function will record this privileged decision."))return;
+ try{const {data,error}=await client.rpc("krim_admin_review_partner_capability",{p_capability_id:id,p_decision:decision,p_reason:trimmed});if(error)throw error;if(!data||data.decision!==decision)throw new Error("The database did not confirm the requested decision.");message("Capability #"+id+" "+decision+". The database confirmed the decision.","success");await load();}
+ catch(e){message("Decision not completed: "+(e.message||"The review was blocked."),"error");}
+}
+function preview(){
+ $("access-state").textContent="STAGING PREVIEW · SAMPLE DATA";
+ state("ILLUSTRATIVE REVIEW QUEUE");
+ const sample=[
+ {id:"DEMO-2101",organization_id:"DEMO-041",organization_name:"Northstar Regional Logistics (sample)",partner_account_mode:"registered_business",service_type:"Road freight — full truckload",transport_mode_name:"Road",coverage_country_name:"India",coverage_country_iso2:"IN",coverage_region:"Jharkhand · declared sample region",max_weight_kg:18000,verification_status:"Pending review",partner_lifecycle_status:"active",organization_status:"active",partner_verification_status:"verified",partner_compliance_status:"compliant",metadata:{evidence_paths:["Illustrative capability statement — sample only"]}},
+ {id:"DEMO-2102",organization_id:"DEMO-042",organization_name:"BlueHarbour Multimodal (sample)",partner_account_mode:"registered_business",service_type:"Ocean freight forwarding",transport_mode_name:"Ocean",coverage_country_name:"India",coverage_country_iso2:"IN",coverage_region:"West coast · declared sample region",verification_status:"Pending review",partner_lifecycle_status:"active",organization_status:"active",partner_verification_status:"verified",partner_compliance_status:"compliant",metadata:{evidence_paths:["Illustrative service evidence — sample only"]}},
+ {id:"DEMO-2103",organization_id:"DEMO-043",organization_name:"PolarChain Specialist Cargo (sample)",partner_account_mode:"registered_business",service_type:"Temperature-controlled transport",transport_mode_name:"Road",coverage_country_name:"India",coverage_country_iso2:"IN",coverage_region:"Sample declaration only",refrigerated:true,verification_status:"Pending review",partner_lifecycle_status:"active",organization_status:"active",partner_verification_status:"verified",partner_compliance_status:"compliant",metadata:{evidence_paths:["Illustrative specialist evidence — sample only"]}}
+ ];
+ items=sample;incompleteCount=2;render();stats("3","2","3");
+ message("Illustrative sample records only. This staging preview does not load authentication, Supabase, storage, private evidence or live partner data. All decision and evidence controls are disabled.","warning");
+ $("content").querySelectorAll("button").forEach(b=>b.disabled=true);setControlsDisabled(true);
+}
+if(staging){preview();return;}
+function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("Secure administration dependency could not be loaded."));document.head.appendChild(s);});}
+async function boot(){
+ await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+ await loadScript("../../config.js");
+ client=window.KRIM_SUPABASE||window.supabaseClient;
+ if(!client)throw new Error("Secure authentication client unavailable.");
+ const {data:{session},error}=await client.auth.getSession();if(error)throw error;if(!session)throw new Error("Administrator sign-in is required.");
+ const {data:userData,error:userError}=await client.auth.getUser();if(userError)throw userError;if(!userData.user)throw new Error("No valid signed-in user.");
+ const {data:assurance,error:assuranceError}=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assuranceError)throw assuranceError;if(assurance.currentLevel!=="aal2")throw new Error("AAL2 MFA is required for capability decisions.");
+ const {data:gate,error:gateError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
+ if(gateError||!gate||gate.ok!==true)throw new Error(gate?.code==="MFA_REQUIRED"?"Complete MFA before accessing capability review.":gate?.error||gateError?.message||"Administrator access denied.");
+ if(!(gate.data?.roles||[]).includes("platform_superadmin"))throw new Error("Platform Super Admin access is required for capability review.");
+ $("access-state").textContent="AAL2 · SUPERADMIN VERIFIED";state("PRIVILEGED SESSION VERIFIED");message("AAL2 administrator session verified. Capability decisions remain subject to server-side validation and audit logging.","success");
+ await load();
 }
 $("reload").addEventListener("click",load);$("refresh").addEventListener("click",load);$("filter").addEventListener("input",render);
-$("signout").addEventListener("click",async()=>{try{await client.auth.signOut()}finally{location.replace("../../auth/krim-admin-access.html?reason=signed-out")}});
-(async()=>{try{await verifyAccess();setState("MFA VERIFIED · SUPERADMIN","good");await load()}catch(e){setState("ACCESS DENIED","bad");$("content").innerHTML='<div class="empty">'+esc(e.message)+'<br><br><a class="back" href="../../auth/krim-admin-access.html">Open privileged access gateway →</a></div>';document.documentElement.classList.add("authorized")}})();
+$("signout").addEventListener("click",async()=>{if(!client)return;try{await client.auth.signOut()}finally{location.replace("../../auth/krim-admin-access.html?reason=signed-out")}});
+boot().catch(e=>{state("ACCESS DENIED");$("access-state").textContent="RESTRICTED ADMIN";$("content").innerHTML='<div class="empty"><strong>Restricted administrator access required.</strong><br>'+esc(e.message||"Secure access could not be verified.")+'<br><br><a class="btn primary" href="../../auth/krim-admin-access.html">Open privileged access gateway</a></div>';stats("—","—","—");});
 })();
-</script>
-</body>
-</html>
+</script></body></html>
