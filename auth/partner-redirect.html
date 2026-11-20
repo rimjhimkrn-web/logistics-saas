@@ -9,52 +9,10 @@
 <meta name="description" content="Securely verify your KRIM partner account and route you to its authorized workspace.">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
-<style>
-:root{color-scheme:light;--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#526A80;--line:#DCE5EE;--surface:#F3F7FB;--white:#fff}
-*{box-sizing:border-box}
-html{min-height:100%;background:var(--surface)}
-body{margin:0;min-height:100vh;min-height:100dvh;padding:clamp(18px,4vw,48px);display:grid;place-items:center;background:radial-gradient(ellipse at 8% 4%,rgba(69,184,240,.19),transparent 34%),radial-gradient(ellipse at 95% 95%,rgba(22,143,224,.13),transparent 34%),linear-gradient(145deg,#F8FBFE,#EAF2F8);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);line-height:1.6}
-.gateway{width:min(100%,760px);overflow:hidden;background:var(--white);border:1px solid rgba(9,36,61,.10);border-radius:26px;box-shadow:0 28px 80px rgba(9,36,61,.14)}
-.top{padding:clamp(22px,4vw,34px) clamp(22px,5vw,48px);display:flex;align-items:center;justify-content:space-between;gap:20px;background:linear-gradient(120deg,var(--navy),var(--navy2) 72%,var(--blue2))}
-.logo{display:block;width:min(210px,52vw);height:auto;max-height:58px;object-fit:contain;object-position:left center;background:#fff;padding:7px 11px;border-radius:9px}
-.brand-note{color:var(--pale);font-size:clamp(9px,1.5vw,11px);font-weight:800;letter-spacing:.15em;text-align:right;line-height:1.55}
-.content{padding:clamp(26px,5vw,52px)}
-.eyebrow{margin:0 0 10px;color:var(--blue2);font-size:11px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
-h1{max-width:590px;margin:0;color:var(--navy);font-size:clamp(30px,5.5vw,46px);font-weight:800;line-height:1.1;letter-spacing:-.045em}
-.lead{max-width:590px;margin:16px 0 28px;color:var(--muted);font-size:clamp(14px,2vw,16px);line-height:1.75}
-.status{display:flex;align-items:flex-start;gap:16px;padding:20px;border:1px solid #B9DDF2;border-radius:16px;background:#F0F8FD}
-.status-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:var(--navy);color:#fff;font-size:21px;font-weight:800}
-.status-title{display:block;margin:0 0 5px;color:var(--navy);font-size:15px;font-weight:800}
-.status-text{margin:0;color:#38536B;font-size:14px;line-height:1.65;overflow-wrap:anywhere}
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 0}
-.step{min-width:0;padding:16px;border:1px solid var(--line);border-radius:13px;background:#fff}
-.step-num{display:block;margin-bottom:7px;color:var(--blue2);font-size:10px;font-weight:850;letter-spacing:.13em}
-.step-label{display:block;color:var(--navy);font-size:13px;font-weight:750;line-height:1.4}
-.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
-.help{max-width:360px;margin:0;color:var(--muted);font-size:12px;line-height:1.6}
-.back{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 17px;border:1px solid var(--navy);border-radius:11px;background:var(--navy);color:#fff;text-decoration:none;font-size:13px;font-weight:750;white-space:nowrap;transition:background .18s ease,transform .18s ease}
-.back:hover{background:var(--blue2);transform:translateY(-1px)}
-.back:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
-@media(max-width:600px){body{padding:14px}.gateway{border-radius:19px}.top{align-items:flex-start;flex-direction:column;gap:14px}.brand-note{text-align:left}.content{padding:25px 21px}.steps{grid-template-columns:1fr;gap:9px}.step{display:flex;align-items:center;gap:14px;padding:13px 15px}.step-num{flex:0 0 52px;margin:0}.footer{align-items:stretch;flex-direction:column}.back{width:100%}.status{padding:16px;gap:12px}.status-icon{flex-basis:36px;width:36px;height:36px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-/* KRIM PARTNER JOURNEY REDESIGN 20261120 */
-/* KRIM PARTNER JOURNEY REDESIGN 20261120 */
-body{background:#F3F7FB!important;padding:clamp(12px,3vw,34px)!important}
-.gateway{width:min(100%,820px)!important;border:1px solid #DCE5EE!important;border-radius:20px!important;box-shadow:0 22px 64px rgba(9,36,61,.10)!important}
-.top{background:#fff!important;color:#09243D!important;border-bottom:1px solid #DCE5EE!important;padding:20px clamp(22px,4vw,38px)!important}
-.logo{width:clamp(170px,22vw,224px)!important;max-height:66px!important;object-fit:contain!important;object-position:left center!important;background:#fff!important;padding:0!important;border-radius:0!important}
-.brand-note{color:#60748A!important;font-size:10px!important;letter-spacing:.13em!important}
-.content{padding:clamp(24px,5vw,50px)!important}
-h1{color:#09243D!important;letter-spacing:-.045em!important}
-.status{border:1px solid #C9E4F5!important;background:#F3F9FD!important;border-radius:13px!important}
-.status-icon{background:#09243D!important}
-.step{background:#fff!important;border:1px solid #DCE5EE!important;border-radius:12px!important}
-.back{background:#168FE0!important;border-color:#168FE0!important;border-radius:9px!important}
-.back:hover{background:#0754A4!important}
-@media(max-width:600px){body{padding:12px!important}.top{padding:18px 20px!important}.logo{width:min(205px,68vw)!important;max-height:58px!important}.brand-note{text-align:left!important}.content{padding:23px 19px!important}}
-</style>
-<link rel="stylesheet" href="../assets/krim-global-brand.css?v=20261120-official-logo-rollout">
+
 <script defer src="../assets/krim-global-brand.js?v=20261120-official-logo-rollout"></script>
+<style id="krim-partner-gateway-colour-rebuild-20261120">:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:linear-gradient(135deg,#EAF5FC,#F3F7FB 50%,#E6F5FC);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:var(--blue2);text-decoration:none}a:hover{text-decoration:underline}button,input,select,textarea{font:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.skip{position:absolute;top:-60px;left:16px;z-index:200;background:#fff;padding:10px 14px;border-radius:8px}.skip:focus{top:12px}
+body{min-height:100vh;min-height:100dvh;padding:clamp(14px,3vw,34px);display:grid;place-items:center;background:radial-gradient(ellipse at 8% 4%,#45B8F033,transparent 34%),radial-gradient(ellipse at 95% 95%,#168FE022,transparent 34%),linear-gradient(145deg,#F8FBFE,#EAF2F8)}.gateway{width:min(100%,820px);overflow:hidden;background:#fff;border:1px solid #DCE5EE;border-radius:22px;box-shadow:0 28px 80px #09243d20}.top{padding:clamp(20px,4vw,34px) clamp(22px,5vw,42px);display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border-bottom:1px solid var(--line)}.logo{display:block;width:clamp(170px,22vw,224px);height:auto;max-height:66px;object-fit:contain;object-position:left center}.brand-note{color:var(--muted);font-size:10px;font-weight:950;letter-spacing:.15em;text-align:right;line-height:1.55}.content{padding:clamp(26px,5vw,52px)}.eyebrow{margin:0 0 10px;color:var(--blue2);font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}h1{max-width:590px;margin:0;color:var(--navy);font-size:clamp(30px,5.5vw,46px);font-weight:900;line-height:1.1;letter-spacing:-.045em}.lead{max-width:590px;margin:16px 0 28px;color:var(--muted);font-size:14px;line-height:1.8}.status{display:flex;align-items:flex-start;gap:16px;padding:20px;border:1px solid #B9DDF2;border-radius:14px;background:linear-gradient(120deg,#EAF7FE,#F7FBFE)}.status-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,var(--blue2),var(--blue));color:#fff;font-size:21px;font-weight:900}.status-title{display:block;margin:0 0 5px;color:var(--navy);font-size:15px;font-weight:900}.status-text{margin:0;color:#38536B;font-size:13px;line-height:1.7;overflow-wrap:anywhere}.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 0}.step{min-width:0;padding:16px;border:1px solid var(--line);border-top:3px solid var(--sky);border-radius:11px;background:#fff}.step:nth-child(2){border-top-color:var(--blue)}.step:nth-child(3){border-top-color:var(--blue2)}.step-num{display:block;margin-bottom:7px;color:var(--blue2);font-size:9px;font-weight:950;letter-spacing:.13em}.step-label{display:block;color:var(--navy);font-size:12px;font-weight:850;line-height:1.5}.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}.help{max-width:360px;margin:0;color:var(--muted);font-size:11px;line-height:1.7}.back{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 17px;border:1px solid var(--blue2);border-radius:9px;background:linear-gradient(100deg,var(--blue2),var(--blue),var(--sky));color:#fff;text-decoration:none;font-size:12px;font-weight:950;white-space:nowrap}.back:hover{filter:brightness(.95);text-decoration:none}@media(max-width:600px){body{padding:12px}.gateway{border-radius:17px}.top{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 20px}.brand-note{text-align:left}.content{padding:24px 19px}.steps{grid-template-columns:1fr;gap:9px}.step{display:flex;align-items:center;gap:14px;padding:13px 15px}.step-num{flex:0 0 58px;margin:0}.footer{align-items:stretch;flex-direction:column}.back{width:100%}.status{padding:16px;gap:12px}.status-icon{flex-basis:36px;width:36px;height:36px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}</style>
 </head>
 <body>
 <main class="gateway">
@@ -66,6 +24,7 @@ h1{color:#09243D!important;letter-spacing:-.045em!important}
 <p class="eyebrow">Secure partner access</p>
 <h1>Taking you to the right partner workspace.</h1>
 <p class="lead">KRIM verifies your sign-in session and organization access before opening the workspace assigned to your partner account. Your workspace is selected by your authorized account access.</p>
+<div id="gateway-staging-note" class="krim-staging-review-banner" hidden><strong>STAGING REVIEW MODE</strong> — Gateway design preview only. Authentication and workspace routing are not executed in staging.</div>
 <section class="status" aria-live="polite" aria-atomic="true">
 <span class="status-icon" aria-hidden="true">✓</span>
 <div><strong class="status-title">Verifying your access</strong><p class="status-text" id="status" role="status">Checking your authenticated session and organization permissions…</p></div>
@@ -84,6 +43,9 @@ h1{color:#09243D!important;letter-spacing:-.045em!important}
 <script>
 (async function(){
 "use strict";
+const status=document.getElementById("status");
+const stagingReviewMode=location.hostname==="krim-staging.pages.dev"||new URLSearchParams(location.search).get("mode")==="review";
+if(stagingReviewMode){document.getElementById("gateway-staging-note").hidden=false;document.querySelector(".status-title").textContent="Staging preview ready";status.textContent="This is a visual review of the secure partner gateway. No account check, authentication request or workspace redirect runs in staging.";return;}
 const client=window.KRIM_SUPABASE||window.supabaseClient;
 const base=window.KRIM_BASE_PATH||"";
 const status=document.getElementById("status");
