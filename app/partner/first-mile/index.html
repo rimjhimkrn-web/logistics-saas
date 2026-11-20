@@ -1,121 +1,172 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081a36"><meta name="robots" content="noindex,nofollow,noarchive"><title>First-mile Collection Workspace | KRIM Logistics OS</title><meta name="description" content="Secure first-mile collection operations workspace for registered and verified logistics partners."><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script>
-<style>
-:root{--n:#081a36;--b:#245fc9;--t:#168FE0;--ink:#172b46;--muted:#64758b;--line:#dce5ef;--bg:#f3f6fa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 Inter,system-ui,sans-serif}a{color:var(--b);text-decoration:none}a:focus-visible,button:focus-visible{outline:3px solid #26a9b5;outline-offset:3px}.skip{position:absolute;top:-60px;left:12px;background:#fff;padding:10px}.skip:focus{top:8px}.bar{background:var(--n);color:#fff}.barin,main,footer{width:min(1200px,100%);margin:auto;padding:0 22px}.barin{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font-weight:900;letter-spacing:.1em;color:#fff}.barlinks{display:flex;gap:15px;flex-wrap:wrap}.barlinks a{color:#e3edf8;font-size:11px}.hero{margin:28px 0 18px;padding:clamp(23px,4vw,38px);border-radius:16px;background:linear-gradient(115deg,#081a36,#123d67 70%,#087b80);color:#fff}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.18em;color:#72d8cb}.hero h1{font-size:clamp(29px,4.5vw,46px);line-height:1.08;letter-spacing:-.045em;margin:10px 0}.hero p{max-width:790px;color:#d5e4f3;margin:0}.badge{display:inline-flex;margin-top:17px;padding:7px 10px;border:1px solid #ffffff45;border-radius:6px;color:#fff;font-size:10px;font-weight:900;letter-spacing:.08em}.notice{padding:14px 16px;border:1px solid #e3d5b7;border-left:4px solid #bd852b;border-radius:10px;background:#fff9ec;color:#715019;font-size:11px;line-height:1.7}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:17px 0}.metric,.card,.gate{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px;box-shadow:0 7px 22px #081a3608}.metric b{display:block;font-size:20px;color:var(--n)}.metric span{font-size:11px;color:var(--muted)}.section{margin:28px 0}.section h2{margin:0 0 5px;color:var(--n);font-size:21px}.section>p{margin:0 0 14px;color:var(--muted);font-size:12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.card{display:flex;flex-direction:column;min-height:165px}.tag{font-size:9px;font-weight:900;letter-spacing:.13em;color:var(--t)}.card h3{margin:9px 0 6px;font-size:15px;color:var(--n)}.card p{margin:0 0 13px;color:var(--muted);font-size:11px;line-height:1.7;flex:1}.card a{font-size:11px;font-weight:850}.gate{width:min(650px,calc(100% - 28px));margin:45px auto}.gate h1{color:var(--n)}.gate p{color:var(--muted);font-size:12px}.gate[hidden],main[hidden]{display:none!important}footer{padding:28px 22px;color:var(--muted);font-size:10px}@media(max-width:760px){.barin,main{padding-left:15px;padding-right:15px}.barin{align-items:flex-start;flex-direction:column;padding-top:14px;padding-bottom:13px}.metrics,.grid{grid-template-columns:1fr}.hero{margin-top:18px}.card{min-height:0}.barlinks{gap:10px}}
-</style>
-<style id="krim-firstmile-navigation">
-.bar{position:relative;z-index:1000;background:#fff;color:#09243d;border-bottom:1px solid #dce5ef;box-shadow:0 3px 16px rgba(7,26,53,.04)}
-.barin{width:100%;min-height:78px;padding:0 clamp(14px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{display:flex;align-items:center;min-width:0;color:#09243d}
-.menu-toggle{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:9px 14px;border:1px solid #09243d;border-radius:7px;background:#09243d;color:#fff;font-size:11px;font-weight:900;cursor:pointer;flex:0 0 auto}
-.menu-icon{display:grid;gap:4px;width:17px}.menu-icon i{display:block;width:17px;height:2px;border-radius:2px;background:#fff;transition:transform .18s ease,opacity .18s ease}
-.menu-toggle[aria-expanded="true"] .menu-icon i:first-child{transform:translateY(6px) rotate(45deg)}.menu-toggle[aria-expanded="true"] .menu-icon i:nth-child(2){opacity:0}.menu-toggle[aria-expanded="true"] .menu-icon i:last-child{transform:translateY(-6px) rotate(-45deg)}
-.krim-menu-panel{position:absolute;top:100%;left:0;width:100%;min-height:calc(100vh - 78px);max-height:calc(100vh - 78px);overflow-y:auto;overflow-x:hidden;padding:clamp(24px,5vw,54px) clamp(18px,6vw,80px);background:#071a35;box-shadow:0 22px 45px rgba(7,26,53,.24);z-index:1001}
-.krim-menu-panel[hidden]{display:none!important}.krim-menu-inner{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.krim-menu-inner>a{display:flex;align-items:center;min-height:58px;padding:14px 17px;border:1px solid #ffffff26;border-radius:8px;color:#fff;background:#ffffff0b;font-size:13px;font-weight:800;text-decoration:none;overflow-wrap:anywhere}
-.krim-menu-inner>a:hover{background:#ffffff18;border-color:#5ccfc2}
-.menu-toggle:focus-visible,.krim-menu-inner a:focus-visible{outline:3px solid #37b9c3;outline-offset:3px}
-@media(max-width:760px){
-.barin{width:100%;min-height:70px;padding:6px 14px;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-.bar .brand{flex:1 1 auto;min-width:0;max-width:calc(100% - 88px);overflow:hidden}
-.bar .brand .krim-official-brand-logo{display:block!important;width:clamp(145px,56vw,220px)!important;height:auto!important;max-width:56vw!important;max-height:58px!important;object-fit:contain!important;object-position:left center!important}
-.krim-menu-panel{position:absolute;left:0;right:0;top:100%;width:100%;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px);max-height:calc(100vh - 70px);max-height:calc(100dvh - 70px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:18px 14px calc(24px + env(safe-area-inset-bottom))}
-.krim-menu-inner{width:100%;grid-template-columns:minmax(0,1fr);gap:9px}.krim-menu-inner>a{width:100%;min-width:0;min-height:50px;padding:12px 14px;font-size:12px}
-main{width:100%;padding-left:16px!important;padding-right:16px!important}
-.hero{margin:18px 0 15px;padding:22px 19px;border-radius:13px}
-.eyebrow{font-size:9px;line-height:1.6;letter-spacing:.12em;overflow-wrap:anywhere}
-.hero h1{font-size:clamp(27px,8vw,36px);line-height:1.12;overflow-wrap:anywhere}
-.hero p,.notice,.card p,.section>p{overflow-wrap:anywhere}
-.badge{max-width:100%;white-space:normal;line-height:1.5}
-.metrics,.grid{grid-template-columns:minmax(0,1fr);gap:10px}
-.metric,.card{min-width:0;padding:16px}.card{min-height:0}
-.section{margin:24px 0}
-footer{width:100%;padding:24px 16px calc(24px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
-}
-@media(max-width:360px){.barin{padding-left:11px;padding-right:11px;gap:7px}.bar .brand{max-width:calc(100% - 80px)}.bar .brand .krim-official-brand-logo{width:clamp(138px,53vw,180px)!important;max-width:53vw!important}.menu-toggle{padding:8px 9px;font-size:10px}main{padding-left:13px!important;padding-right:13px!important}.hero{padding:20px 16px}}
-html,body{max-width:100%;overflow-x:hidden}
-</style>
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09243D">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>First-Mile Collection Workspace | KRIM Logistics</title>
+<meta name="description" content="First-mile collection operations workspace for verified KRIM logistics partners.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../../assets/krim-global-brand.css?v=20261120-official-logo-rollout">
-<script defer src="../../../assets/krim-global-brand.js?v=20261120-official-logo-rollout"></script>
-<style id="krim-partner-homepage-brand">header .krim-official-brand-logo,.head .krim-official-brand-logo,.barin .krim-official-brand-logo,.nav .krim-official-brand-logo{display:block!important;width:190px!important;height:auto!important;max-width:clamp(148px,38vw,190px)!important;max-height:58px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;flex:none!important}.brand,.logo{display:flex;align-items:center;min-width:0;justify-content:flex-start}@media(max-width:650px){header .krim-official-brand-logo,.head .krim-official-brand-logo,.barin .krim-official-brand-logo,.nav .krim-official-brand-logo{width:148px!important;max-width:148px!important;max-height:52px!important}}</style><style id="krim-homepage-navigation-match-v3">
-/* Navigation aligned to the approved KRIM homepage system */
-header#krim-site-nav, body>header, header.bar{
-  position:relative!important;z-index:1100!important;background:#fff!important;color:#09243d!important;
-  border-bottom:1px solid #e8edf2!important;box-shadow:0 4px 18px rgba(7,24,43,.06)!important;
-}
-header#krim-site-nav .head,header .barin,header .nav{
-  min-height:78px!important;width:100%!important;padding:8px clamp(14px,3vw,36px)!important;
-  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;
-}
-header .logo,header .brand{display:flex!important;align-items:center!important;flex:0 1 auto!important;min-width:0!important;max-width:calc(100% - 110px)!important}
-header .logo img,header .brand img,header .brand .krim-official-brand-logo{
-  display:block!important;width:190px!important;max-width:clamp(148px,48vw,190px)!important;height:auto!important;
-  max-height:60px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-}
-header .menu-button,header .menu-toggle,header .krim-menu-toggle,header button#menu-toggle{
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
-  flex:0 0 auto!important;min-width:44px!important;min-height:44px!important;padding:10px 15px!important;
-  border:1px solid #dce5ee!important;border-radius:8px!important;background:#09243d!important;color:#fff!important;
-  font-size:12px!important;font-weight:900!important;cursor:pointer!important;box-shadow:none!important;
-}
-nav.menu,nav.krim-menu-panel,nav#primary-nav,nav#mainMenu,nav#krim-menu-panel{
-  position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;
-  max-height:calc(100dvh - 78px)!important;min-height:0!important;overflow:auto!important;
-  padding:20px clamp(18px,4vw,48px) 26px!important;background:rgba(255,255,255,.985)!important;
-  color:#09243d!important;border-top:1px solid #e8edf2!important;border-bottom:1px solid #dce5ee!important;
-  box-shadow:0 16px 30px rgba(7,24,43,.14)!important;backdrop-filter:blur(16px)!important;z-index:1200!important;
-}
-nav.menu[hidden],nav.krim-menu-panel[hidden],nav#primary-nav[hidden],nav#mainMenu[hidden],nav#krim-menu-panel[hidden]{display:none!important}
-nav.menu .menu-inner,nav.krim-menu-panel .krim-menu-inner,nav#mainMenu .menu-inner,nav#krim-menu-panel .krim-menu-inner,nav#primary-nav{
-  width:min(1180px,100%)!important;margin:0 auto!important;display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 26px!important;
-}
-nav.menu a,nav.krim-menu-panel a,nav#mainMenu a,nav#krim-menu-panel a,nav#primary-nav a{
-  display:flex!important;align-items:center!important;min-height:48px!important;padding:11px 6px!important;
-  border:0!important;border-bottom:1px solid #edf1f5!important;border-radius:0!important;
-  background:transparent!important;color:#40556b!important;font-size:12px!important;font-weight:850!important;
-  text-decoration:none!important;overflow-wrap:anywhere!important;
-}
-nav.menu a:hover,nav.krim-menu-panel a:hover,nav#mainMenu a:hover,nav#krim-menu-panel a:hover,nav#primary-nav a:hover{
-  color:#174bc4!important;background:#f4f8fd!important;border-bottom-color:#168FE0!important;
-}
-header nav a[aria-current="page"]{color:#09243d!important;border-bottom-color:#168FE0!important}
-@media(max-width:760px){
- header#krim-site-nav .head,header .barin,header .nav{min-height:68px!important;padding:6px 14px!important;gap:10px!important}
- header .logo img,header .brand img,header .brand .krim-official-brand-logo{max-width:clamp(140px,48vw,170px)!important;max-height:54px!important}
- nav.menu,nav.krim-menu-panel,nav#primary-nav,nav#mainMenu,nav#krim-menu-panel{
-  max-height:calc(100dvh - 68px)!important;padding:10px 18px 20px!important;
- }
- nav.menu .menu-inner,nav.krim-menu-panel .krim-menu-inner,nav#mainMenu .menu-inner,nav#krim-menu-panel .krim-menu-inner,nav#primary-nav{
-  grid-template-columns:1fr!important;gap:0!important;
- }
- nav.menu a,nav.krim-menu-panel a,nav#mainMenu a,nav#krim-menu-panel a,nav#primary-nav a{
-  min-height:47px!important;padding:11px 4px!important;font-size:14px!important;
- }
-}
+<link rel="stylesheet" href="../../../core/krim-global-identity.css?v=20261119-official-blue-v4">
+<style>
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#C9F1FF;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--surface:#F3F7FB;--white:#fff;--green:#16836C}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;max-width:100%;overflow-x:hidden;background:radial-gradient(ellipse at 8% 0,rgba(69,184,240,.13),transparent 34%),radial-gradient(ellipse at 95% 8%,rgba(22,143,224,.09),transparent 30%),linear-gradient(180deg,#F8FBFE,#F3F7FB);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,a{ -webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.skip{position:absolute;z-index:3000;top:-70px;left:12px;padding:11px 14px;background:#fff;color:var(--navy);border-radius:7px}.skip:focus{top:10px}
+.site-header{position:relative;z-index:1100;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(7,24,43,.06)}.header-inner{width:100%;min-height:78px;padding:8px clamp(14px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;min-width:0;max-width:calc(100% - 100px)}.brand img{display:block;width:190px;max-width:clamp(145px,48vw,190px);height:auto;max-height:60px;object-fit:contain;object-position:left center}.menu-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:44px;min-height:44px;padding:10px 15px;border:1px solid var(--navy);border-radius:8px;background:var(--navy);color:#fff;font:800 12px Inter,sans-serif;cursor:pointer}.menu-icon{display:grid;gap:4px;width:17px}.menu-icon i{display:block;width:17px;height:2px;border-radius:2px;background:#fff;transition:transform .18s,opacity .18s}.menu-toggle[aria-expanded=true] .menu-icon i:first-child{transform:translateY(6px) rotate(45deg)}.menu-toggle[aria-expanded=true] .menu-icon i:nth-child(2){opacity:0}.menu-toggle[aria-expanded=true] .menu-icon i:last-child{transform:translateY(-6px) rotate(-45deg)}
+.menu-panel{position:absolute;top:100%;left:0;right:0;max-height:calc(100dvh - 78px);overflow:auto;padding:20px clamp(18px,4vw,48px) 26px;background:rgba(255,255,255,.99);border-top:1px solid #e8edf2;border-bottom:1px solid var(--line);box-shadow:0 16px 30px rgba(7,24,43,.14);z-index:1200}.menu-panel[hidden]{display:none!important}.menu-inner{width:min(1180px,100%);margin:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 26px}.menu-inner a{display:flex;align-items:center;min-height:48px;padding:11px 6px;border-bottom:1px solid #edf1f5;color:#40556b;font-size:12px;font-weight:800;overflow-wrap:anywhere}.menu-inner a:hover{color:var(--blue2);background:#f4f8fd;border-bottom-color:var(--blue)}
+main{width:min(1240px,100%);margin:auto;padding:0 24px}.hero{position:relative;overflow:hidden;margin:30px 0 18px;padding:clamp(26px,4.5vw,48px);border-radius:18px;background:linear-gradient(112deg,#09243D 0%,#123B5A 57%,#0754A4 100%);color:#fff;box-shadow:0 18px 44px rgba(9,36,61,.13)}.hero:after{content:"";position:absolute;width:360px;height:360px;right:-100px;top:-190px;border:1px solid rgba(255,255,255,.17);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 72px rgba(255,255,255,.025)}.hero-content{position:relative;z-index:1;max-width:850px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.18em;color:#9DDBFF;text-transform:uppercase}.hero h1{margin:12px 0 11px;font-size:clamp(30px,4.6vw,49px);line-height:1.08;letter-spacing:-.045em}.hero p{max-width:790px;margin:0;color:#D9E9F7;font-size:14px}.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:23px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 15px;border-radius:7px;background:#fff;color:var(--navy);font-size:11px;font-weight:900}.button.secondary{border:1px solid #ffffff66;background:#ffffff12;color:#fff}.hero-label{display:inline-flex;margin-top:18px;padding:7px 10px;border:1px solid #ffffff45;border-radius:6px;color:#fff;font-size:10px;font-weight:900;letter-spacing:.1em}
+.notice{display:flex;gap:12px;align-items:flex-start;padding:15px 17px;border:1px solid #cfe4f4;border-left:4px solid var(--blue);border-radius:10px;background:#f2f9ff;color:#36536d;font-size:12px}.notice-mark{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border-radius:50%;background:#d9efff;color:var(--blue2);font-weight:900}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}.metric{padding:17px 18px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 7px 22px rgba(8,32,57,.035)}.metric-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.metric-label{color:var(--muted);font-size:11px;font-weight:700}.metric-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#eaf6ff;color:var(--blue2);font-weight:900}.metric strong{display:block;margin-top:10px;color:var(--navy);font-size:20px;line-height:1.25}.metric small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.section{margin:32px 0}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:15px}.section-kicker{display:block;margin-bottom:4px;color:var(--blue2);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.section h2{margin:0;color:var(--navy);font-size:clamp(20px,2.5vw,25px);letter-spacing:-.025em}.section-heading p{max-width:650px;margin:5px 0 0;color:var(--muted);font-size:12px}.cycle{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.step{position:relative;padding:17px;background:#fff;border:1px solid var(--line);border-radius:11px}.step-number{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#eaf6ff;color:var(--blue2);font-size:11px;font-weight:900}.step h3{margin:11px 0 5px;color:var(--navy);font-size:13px}.step p{margin:0;color:var(--muted);font-size:11px}
+.workspace-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.work-card{display:flex;flex-direction:column;min-width:0;min-height:202px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 7px 22px rgba(8,32,57,.035);transition:transform .18s,border-color .18s,box-shadow .18s}.work-card:hover{transform:translateY(-2px);border-color:#a9d7f4;box-shadow:0 12px 26px rgba(8,32,57,.08)}.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.card-tag{color:var(--blue2);font-size:9px;font-weight:900;letter-spacing:.13em}.card-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#edf7ff;color:var(--blue2);font-size:14px;font-weight:900}.work-card h3{margin:12px 0 6px;color:var(--navy);font-size:15px}.work-card p{margin:0 0 14px;color:var(--muted);font-size:11px;line-height:1.7;flex:1}.card-link{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:11px;border-top:1px solid #edf1f5;color:var(--blue2);font-size:11px;font-weight:900}.card-link span:last-child{font-size:16px}
+.split{display:grid;grid-template-columns:1.2fr .8fr;gap:15px}.panel{padding:20px;background:#fff;border:1px solid var(--line);border-radius:12px}.panel h3{margin:0 0 7px;color:var(--navy);font-size:15px}.panel>p{margin:0;color:var(--muted);font-size:11px}.check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 16px;margin:16px 0 0;padding:0;list-style:none}.check-list li{display:flex;gap:9px;align-items:flex-start;color:#435a70;font-size:11px}.check{display:grid;place-items:center;flex:0 0 19px;width:19px;height:19px;border-radius:50%;background:#e8f7f1;color:var(--green);font-size:11px;font-weight:900}.boundary{padding:17px;border-radius:10px;background:#f3f7fb;border:1px solid var(--line)}.boundary strong{display:block;margin-bottom:6px;color:var(--navy);font-size:12px}.boundary p{margin:0;color:var(--muted);font-size:11px;line-height:1.75}.quick-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}.quick-links a{padding:8px 11px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--blue2);font-size:10px;font-weight:850}
+.gate{width:min(680px,calc(100% - 28px));margin:55px auto;padding:25px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 35px rgba(8,32,57,.07)}.gate[hidden],main[hidden]{display:none!important}.gate h1{margin:0 0 8px;color:var(--navy);font-size:25px}.gate p{color:var(--muted);font-size:12px}.gate a{color:var(--blue2);font-size:12px;font-weight:900}
+footer{margin-top:40px;background:var(--navy);color:#d5e3f0}.footer-inner{width:min(1240px,100%);margin:auto;padding:28px 24px 24px}.footer-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:1px solid #ffffff26}.footer-brand{font-size:15px;font-weight:900;letter-spacing:.08em;color:#fff}.footer-values{color:#a9c7df;font-size:10px}.footer-bottom{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;padding-top:16px;color:#a9c0d4;font-size:10px}.footer-bottom a{color:#fff}
+@media(max-width:900px){.workspace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cycle{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
+@media(max-width:650px){.header-inner{min-height:68px;padding:6px 14px;gap:10px}.brand img{width:clamp(140px,48vw,170px);max-height:54px}.menu-panel{max-height:calc(100dvh - 68px);padding:10px 18px 20px}.menu-inner{grid-template-columns:1fr;gap:0}.menu-inner a{min-height:47px;padding:11px 4px;font-size:13px}main{padding:0 16px}.hero{margin:18px 0 15px;padding:23px 19px;border-radius:14px}.hero h1{font-size:clamp(28px,8vw,38px)}.hero p{font-size:13px}.metrics,.workspace-grid,.cycle{grid-template-columns:1fr;gap:10px}.metric{padding:15px}.work-card{min-height:0;padding:16px}.section{margin:26px 0}.section-heading{display:block}.check-list{grid-template-columns:1fr}.footer-inner{padding:25px 16px calc(24px + env(safe-area-inset-bottom))}.footer-top{align-items:flex-start;flex-direction:column;gap:7px}}
+@media(max-width:360px){.header-inner{padding-left:11px;padding-right:11px}.brand img{width:140px}.menu-toggle{padding:8px 10px;font-size:10px}main{padding:0 13px}.hero{padding:20px 16px}.hero h1{font-size:27px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
-
-<link rel="stylesheet" href="../../../core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
-</head><body><a class="skip" href="#main">Skip to content</a><header class="bar" id="krim-site-nav"><div class="barin"><a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><span class="mark" aria-hidden="true"></span></a><button class="menu-toggle" id="krim-menu-toggle" type="button" aria-expanded="false" aria-controls="krim-menu-panel"><span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button></div><nav class="krim-menu-panel" id="krim-menu-panel" aria-label="Main navigation" hidden><div class="krim-menu-inner"><a href="../../../index.html">KRIM Home</a><a href="../index.html">Partner workspace gateway</a><a href="../business/index.html">Registered business workspace</a><a href="../carrier/index.html">Carrier operations</a><a href="../customs/index.html">Customs brokerage</a><a href="../individual/index.html">Independent partner pathway</a><a href="../development/index.html">Development & test pathway</a><a href="../../../public/partner/partner-onboarding.html">Partner onboarding</a><a href="../../../public/partner/services-capabilities.html">Service capabilities</a><a href="../../../public/partner/capacity-resources.html">Capacity & resources</a><a href="../../../public/partner/available-loads.html">Freight opportunities</a><a href="../../../partner-standards.html">Partner standards</a><a href="../../../partner-agreement.html">Partner agreement</a><a href="../../../contact.html">Contact KRIM</a><a href="../../../auth/partner-signin.html">Partner sign in</a></div></nav></header>
-<main id="main"><section class="hero"><div class="eyebrow">GLOBAL FREIGHT COORDINATION · REGISTERED BUSINESS</div><h1>First-mile Collection Workspace</h1><p>Coordinate first-mile, local distribution and final-mile delivery services through a controlled operating environment for service coverage, capacity, opportunities, shipment execution, documentation and financial closeout. Market availability is determined by verified organization capabilities—not by the country catalogue alone.</p><span class="badge" id="access-badge">VERIFYING ORGANIZATION</span></section>
-<div class="notice" id="access-note" role="status" aria-live="polite">Commercial actions remain restricted until your registered business and relevant first-mile collection capabilities are verified. Every commercial operation is independently authorized by its server-side workflow.</div>
-<section class="metrics" aria-label="Organization status"><article class="metric"><b id="org-status">Checking</b><span>Organization lifecycle</span></article><article class="metric"><b id="forwarding-status">Checking</b><span>First-mile capability</span></article><article class="metric"><b id="service-count">Checking</b><span>Verified service categories</span></article></section>
-<section class="section"><h2>First-mile operating cycle</h2><p>Declare coverage → establish capacity → quote and coordinate → execute → reconcile.</p><div class="grid">
-<article class="card"><span class="tag">01 · NETWORK & COVERAGE</span><h3>Services and capabilities</h3><p>Declare first-mile collection, multimodal and related service coverage. Each service category is reviewed independently.</p><a href="../../../public/partner/services-capabilities.html">Manage service capabilities →</a></article>
-<article class="card"><span class="tag">02 · CAPACITY</span><h3>Resources and availability</h3><p>Register genuine operating resources and supporting documents. Submitted records remain pending review until approved.</p><a href="../../../public/partner/capacity-resources.html">Manage capacity →</a></article>
-<article class="card"><span class="tag">03 · SOURCING</span><h3>Freight opportunities</h3><p>Review opportunities visible to your organization and submit offers only where server-side eligibility permits.</p><a href="../../../public/partner/available-loads.html">Review opportunities →</a></article>
-<article class="card"><span class="tag">04 · COMMERCIAL</span><h3>Quotes and shipment awards</h3><p>Manage submitted quotes, award decisions and accepted shipment work.</p><a href="../../../public/partner/accepted-loads.html">Open shipment workbench →</a></article>
-<article class="card"><span class="tag">05 · TRADE SERVICES</span><h3>Customs and documentation</h3><p>Use approved customs-brokerage capability and controlled document workflows. This link does not confer customs authorization.</p><a href="../../../public/partner/documents-delivery-evidence.html">Open documents & evidence →</a></article>
-<article class="card"><span class="tag">06 · EXECUTION CONTROL</span><h3>Dispatch and milestones</h3><p>Monitor assigned work, dispatch milestones and operational exceptions within authorized organization scope.</p><a href="../../../public/partner/dispatch-execution.html">Open execution console →</a></article>
-<article class="card"><span class="tag">07 · VISIBILITY</span><h3>Tracking and exceptions</h3><p>Review shipment visibility and exception workflows based on recorded events.</p><a href="../../../public/partner/tracking-exceptions.html">Open tracking →</a></article>
-<article class="card"><span class="tag">08 · FINANCIAL CONTROL</span><h3>Finance and settlements</h3><p>Review available financial records and settlement states. No settlement is implied by a dashboard status.</p><a href="../../../public/partner/finance-settlements.html">Open finance →</a></article>
-<article class="card"><span class="tag">09 · ORGANIZATION</span><h3>Team and governance</h3><p>Manage organization-level access through existing permission controls and review your partner pathway.</p><a href="../../../public/partner/team-organization.html">Team & organization →</a></article>
-</div></section></main>
-<section class="gate" id="gate" hidden><h1 id="gate-title">Workspace access check</h1><p id="gate-message"></p><a href="../../../auth/partner-signin.html">Return to partner sign in →</a></section>
-<footer>KRIM Logistics OS · Private first-mile collection route · Capability, country and commercial access are verified separately.</footer>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="krim-site-nav">
+  <div class="header-inner">
+    <a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics"></a>
+    <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-panel"><span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span><span>Menu</span></button>
+  </div>
+  <nav class="menu-panel" id="menu-panel" aria-label="Main navigation" hidden>
+    <div class="menu-inner">
+      <a href="../../../index.html">KRIM Home</a>
+      <a href="../index.html">Partner workspace gateway</a>
+      <a href="../business/index.html">Registered business workspace</a>
+      <a href="../carrier/index.html">Carrier operations</a>
+      <a href="../last-mile/index.html">Last-mile delivery</a>
+      <a href="../forwarder/index.html">Freight forwarding</a>
+      <a href="../customs/index.html">Customs brokerage</a>
+      <a href="../multimodal/index.html">Multimodal operations</a>
+      <a href="../individual/index.html">Individual partner pathway</a>
+      <a href="../development/index.html">Development & test pathway</a>
+      <a href="../../../public/partner/services-capabilities.html">Service capabilities</a>
+      <a href="../../../public/partner/service-coverage.html">Service coverage</a>
+      <a href="../../../public/partner/capacity-resources.html">Capacity & resources</a>
+      <a href="../../../public/partner/available-loads.html">Freight opportunities</a>
+      <a href="../../../public/partner/accepted-loads.html">Accepted shipment work</a>
+      <a href="../../../public/partner/dispatch-assignment.html">Dispatch & assignment</a>
+      <a href="../../../public/partner/documents-delivery-evidence.html">Documents & delivery evidence</a>
+      <a href="../../../partner-standards.html">Partner standards</a>
+      <a href="../../../partner-agreement.html">Partner agreement</a>
+      <a href="../../../contact.html">Contact KRIM</a>
+      <a href="../../../auth/partner-signin.html">Partner sign in</a>
+    </div>
+  </nav>
+</header>
+<main id="main">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="eyebrow">PARTNER OPERATIONS · ORIGIN COLLECTION</div>
+      <h1>First-Mile Collection Workspace</h1>
+      <p>Coordinate the first movement of a shipment—from collection readiness at the shipper's location through pickup confirmation and controlled handover into the next transport leg. Coverage, capacity and commercial access depend on verified organization capabilities and the specific assignment.</p>
+      <div class="hero-actions">
+        <a class="button" href="../../../public/partner/service-coverage.html">Review service coverage <span aria-hidden="true">→</span></a>
+        <a class="button secondary" href="../../../public/partner/available-loads.html">View freight opportunities <span aria-hidden="true">→</span></a>
+      </div>
+      <span class="hero-label" id="access-badge">FIRST-MILE OPERATING OVERVIEW</span>
+    </div>
+  </section>
+  <div class="notice" role="note"><span class="notice-mark" aria-hidden="true">i</span><span>Workspace navigation does not itself grant operating authority. A partner may act only on service areas, capabilities and assignments that have been verified and authorized for its organization. Shipment, quote, document and financial actions retain their own permission checks.</span></div>
+  <section class="metrics" aria-label="First-mile operating controls">
+    <article class="metric"><div class="metric-top"><span class="metric-label">Organization standing</span><span class="metric-icon" aria-hidden="true">01</span></div><strong id="org-status">Verified status required</strong><small>Organization lifecycle and compliance review</small></article>
+    <article class="metric"><div class="metric-top"><span class="metric-label">First-mile capability</span><span class="metric-icon" aria-hidden="true">02</span></div><strong id="capability-status">Approval required</strong><small>Service capability is reviewed independently</small></article>
+    <article class="metric"><div class="metric-top"><span class="metric-label">Service availability</span><span class="metric-icon" aria-hidden="true">03</span></div><strong id="service-count">Not assumed</strong><small>Only verified service areas and capacity apply</small></article>
+  </section>
+  <section class="section" aria-labelledby="cycle-title">
+    <div class="section-heading"><div><span class="section-kicker">Operating sequence</span><h2 id="cycle-title">From collection request to origin handover</h2><p>A controlled first-mile sequence with clear responsibility at every transition.</p></div></div>
+    <div class="cycle">
+      <article class="step"><span class="step-number">01</span><h3>Confirm collection scope</h3><p>Check the pickup location, cargo context, service area and assignment authority before accepting work.</p></article>
+      <article class="step"><span class="step-number">02</span><h3>Prepare pickup resources</h3><p>Confirm approved vehicles, personnel, capacity, timing and any required handling instructions.</p></article>
+      <article class="step"><span class="step-number">03</span><h3>Collect and evidence</h3><p>Record authorized pickup milestones and supporting evidence through the applicable workflow.</p></article>
+      <article class="step"><span class="step-number">04</span><h3>Handover to next leg</h3><p>Confirm the transfer of custody and record the handover event before the next operating party proceeds.</p></article>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="work-title">
+    <div class="section-heading"><div><span class="section-kicker">Workspace directory</span><h2 id="work-title">First-mile work areas</h2><p>Navigate the tools used to establish readiness, review genuine work, execute authorized collections and close out records.</p></div></div>
+    <div class="workspace-grid">
+      <article class="work-card"><div class="card-top"><span class="card-tag">01 · SERVICE READINESS</span><span class="card-icon" aria-hidden="true">◎</span></div><h3>Service capabilities</h3><p>Declare first-mile collection services and related operating capabilities. Each capability remains subject to independent review and approval.</p><a class="card-link" href="../../../public/partner/services-capabilities.html"><span>Manage capabilities</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">02 · GEOGRAPHIC SCOPE</span><span class="card-icon" aria-hidden="true">⌖</span></div><h3>Service coverage</h3><p>Review declared pickup areas and service locations. A country or city listing is not proof of an active service commitment.</p><a class="card-link" href="../../../public/partner/service-coverage.html"><span>Review coverage</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">03 · RESOURCES</span><span class="card-icon" aria-hidden="true">▦</span></div><h3>Capacity and resources</h3><p>Maintain operating capacity, fleet and resource information with supporting records for verification.</p><a class="card-link" href="../../../public/partner/capacity-resources.html"><span>Manage capacity</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">04 · WORK SOURCING</span><span class="card-icon" aria-hidden="true">↗</span></div><h3>Available freight opportunities</h3><p>Review opportunities made visible to your organization and respond only where eligibility and deadlines permit.</p><a class="card-link" href="../../../public/partner/available-loads.html"><span>Review opportunities</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">05 · COMMERCIAL RESPONSE</span><span class="card-icon" aria-hidden="true">₹</span></div><h3>Quotes and commercial rates</h3><p>Review the commercial terms available to your organization and submit a quote through the authorized workflow.</p><a class="card-link" href="../../../public/partner/commercial-rates.html"><span>Open rate workspace</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">06 · ASSIGNMENT CONTROL</span><span class="card-icon" aria-hidden="true">✓</span></div><h3>Accepted shipment work</h3><p>Distinguish an accepted commercial quote from a confirmed operational assignment. Work only from a genuine assignment.</p><a class="card-link" href="../../../public/partner/accepted-loads.html"><span>Open shipment workbench</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">07 · COLLECTION EXECUTION</span><span class="card-icon" aria-hidden="true">⇢</span></div><h3>Dispatch and pickup confirmation</h3><p>Review dispatch instructions, pickup milestones and authorized assignment details before collection.</p><a class="card-link" href="../../../public/partner/dispatch-assignment.html"><span>Open dispatch workspace</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">08 · RECORDS & EVIDENCE</span><span class="card-icon" aria-hidden="true">▤</span></div><h3>Documents and delivery evidence</h3><p>Access controlled shipment documents and submit evidence only through the permitted organization workflow.</p><a class="card-link" href="../../../public/partner/documents-delivery-evidence.html"><span>Open evidence vault</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">09 · PEOPLE & GOVERNANCE</span><span class="card-icon" aria-hidden="true">♧</span></div><h3>Team and organization</h3><p>Review organization membership and role-based access. Access is limited to assigned permissions.</p><a class="card-link" href="../../../public/partner/team-organization.html"><span>Manage organization</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">10 · PERFORMANCE CONTROL</span><span class="card-icon" aria-hidden="true">↗</span></div><h3>Performance and quality</h3><p>Review service quality, recorded milestones and operational performance based on available verified records.</p><a class="card-link" href="../../../public/partner/performance-quality.html"><span>Review performance</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">11 · FINANCIAL CONTROL</span><span class="card-icon" aria-hidden="true">▣</span></div><h3>Settlements and finance</h3><p>Review financial records and settlement states where your organization has the relevant access. A dashboard label is not proof of payment.</p><a class="card-link" href="../../../public/partner/settlements.html"><span>Open settlements</span><span aria-hidden="true">→</span></a></article>
+      <article class="work-card"><div class="card-top"><span class="card-tag">12 · ASSISTANCE</span><span class="card-icon" aria-hidden="true">?</span></div><h3>Support and enquiries</h3><p>Find the appropriate support route for account access, operational questions or partner network enquiries.</p><a class="card-link" href="../../../public/partner/notifications-support.html"><span>Open partner support</span><span aria-hidden="true">→</span></a></article>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="control-title">
+    <div class="section-heading"><div><span class="section-kicker">Operating authority</span><h2 id="control-title">Collection control and handover standards</h2><p>Keep collection execution traceable and within the agreed scope of service.</p></div></div>
+    <div class="split">
+      <article class="panel"><h3>Before a first-mile collection</h3><p>Confirm that the job, organization, resources and pickup instructions are aligned.</p><ul class="check-list"><li><span class="check">✓</span><span>Organization verification and compliance are current.</span></li><li><span class="check">✓</span><span>First-mile service capability and pickup area are approved.</span></li><li><span class="check">✓</span><span>Assignment, cargo details and service scope are confirmed.</span></li><li><span class="check">✓</span><span>Vehicle, driver and capacity are authorized for the job.</span></li><li><span class="check">✓</span><span>Pickup evidence and exception process are understood.</span></li><li><span class="check">✓</span><span>Handover recipient and next transport leg are identified.</span></li></ul></article>
+      <aside class="panel"><div class="boundary"><strong>Important operating boundary</strong><p>KRIM provides the platform and partner-network coordination. The logistics partner remains responsible for the services it undertakes. This workspace does not certify a route, confirm a rate, create a shipment assignment, grant a licence or authorize customs activity.</p></div><div class="quick-links"><a href="../../../partner-standards.html">Partner standards</a><a href="../../../partner-agreement.html">Partner agreement</a><a href="../../../contact.html">Contact KRIM</a></div></aside>
+    </div>
+  </section>
+</main>
+<section class="gate" id="gate" hidden aria-live="polite"><h1 id="gate-title">Workspace access check</h1><p id="gate-message"></p><a href="../../../auth/partner-signin.html">Return to partner sign in →</a></section>
+<footer><div class="footer-inner"><div class="footer-top"><div class="footer-brand">KRIM LOGISTICS</div><div class="footer-values">Knowledge · Reliability · Integration · Movement</div></div><div class="footer-bottom"><span>Global Logistics Operating System</span><span><a href="../../../privacy.html">Privacy</a> · <a href="../../../terms.html">Terms</a> · <a href="../../../contact.html">Contact</a></span></div></div></footer>
 <script>
-(async()=>{"use strict";const client=window.KRIM_SUPABASE,$=id=>document.getElementById(id);function fail(title,message){$("gate-title").textContent=title;$("gate-message").textContent=message;$("gate").hidden=false;$("main").hidden=true;}try{if(!client)throw Error("Secure identity service is unavailable.");const auth=await client.auth.getUser();if(auth.error)throw auth.error;if(!auth.data.user){location.replace((window.KRIM_BASE_PATH||"")+"/auth/partner-signin.html");return;}const mem=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",auth.data.user.id).eq("status","active");if(mem.error)throw mem.error;const ids=[...new Set((mem.data||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];if(!ids.length){fail("Active partner membership required","No active organization membership is linked to this account.");return;}const orgs=await client.from("krim_organizations").select("id,organization_type,status,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);if(orgs.error)throw orgs.error;const org=(orgs.data||[]).find(o=>["partner","carrier","forwarder","logistics_provider","freight_forwarder"].includes(String(o.organization_type||"").toLowerCase()));if(!org){fail("Partner organization required","This account is not linked to a recognized partner organization.");return;}if(String(org.partner_account_mode||"")!=="registered_business"){fail("Registered business pathway required","Individual-interest and development/test accounts cannot access commercial forwarding operations.");return;}const orgEligible=String(org.status).toLowerCase()==="active"&&String(org.partner_verification_status).toLowerCase()==="verified"&&String(org.partner_lifecycle_status).toLowerCase()==="active"&&String(org.partner_compliance_status).toLowerCase()==="compliant";const caps=await client.from("krim_partner_capabilities").select("service_type,verification_status,active").eq("organization_id",org.id).eq("active",true).eq("verification_status","verified");if(caps.error)throw caps.error;const verified=caps.data||[],forwarding=verified.filter(c=>c.service_type==="first_mile");$("org-status").textContent=orgEligible?"Verified / eligible":"Approval pending";$("forwarding-status").textContent=forwarding.length?"Verified":"Not verified";$("service-count").textContent=String(verified.length);const ready=orgEligible&&forwarding.length>0;$("access-badge").textContent=ready?"FIRST-MILE CAPABILITY VERIFIED":"COMMERCIAL ACCESS RESTRICTED";$("access-note").textContent=ready?"A verified first-mile collection capability is recorded. Shipment, route, document, quote and payment actions remain subject to their own server-side permissions and controls.": "Complete registered-business verification and obtain approval for the first_mile service capability before commercial forwarding activity. This workspace does not approve an organization or create operational availability.";}catch(e){console.error(e);fail("Workspace access could not be verified",e.message||"Sign in again and retry.");}})();
-</script><script id="krim-firstmile-menu-controller">(function(){const button=document.getElementById("krim-menu-toggle"),panel=document.getElementById("krim-menu-panel");if(!button||!panel)return;function close(){panel.hidden=true;button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu")}button.addEventListener("click",()=>{const open=button.getAttribute("aria-expanded")!=="true";button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");panel.hidden=!open});panel.addEventListener("click",e=>{if(e.target.closest("a"))close()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!panel.hidden){close();button.focus()}})})();</script>
-</body></html>
+(function(){
+"use strict";
+const button=document.getElementById("menu-toggle"),panel=document.getElementById("menu-panel");
+if(button&&panel){
+ const close=()=>{panel.hidden=true;button.setAttribute("aria-expanded","false");button.setAttribute("aria-label","Open navigation menu")};
+ button.addEventListener("click",()=>{const open=button.getAttribute("aria-expanded")!=="true";button.setAttribute("aria-expanded",String(open));button.setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");panel.hidden=!open});
+ panel.addEventListener("click",e=>{if(e.target.closest("a"))close()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!panel.hidden){close();button.focus()}});
+}
+const staging=location.hostname==="krim-staging.pages.dev";
+if(staging){document.documentElement.dataset.environment="preview";return;}
+const main=document.getElementById("main"),gate=document.getElementById("gate");
+main.hidden=true;
+function fail(title,message){document.getElementById("gate-title").textContent=title;document.getElementById("gate-message").textContent=message;gate.hidden=false;main.hidden=true;}
+function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("A required security component could not be loaded."));document.head.appendChild(s);});}
+(async()=>{
+ try{
+  await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+  await loadScript("../../../config.js");
+  const client=window.KRIM_SUPABASE;
+  if(!client)throw new Error("Secure identity service is unavailable.");
+  const auth=await client.auth.getUser();
+  if(auth.error)throw auth.error;
+  if(!auth.data.user){location.replace((window.KRIM_BASE_PATH||"")+"/auth/partner-signin.html");return;}
+  const memberships=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",auth.data.user.id).eq("status","active");
+  if(memberships.error)throw memberships.error;
+  const ids=[...new Set((memberships.data||[]).map(x=>Number(x.organization_id)).filter(Number.isSafeInteger))];
+  if(!ids.length){fail("Active partner membership required","No active organization membership is linked to this account.");return;}
+  const orgs=await client.from("krim_organizations").select("id,organization_type,status,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);
+  if(orgs.error)throw orgs.error;
+  const org=(orgs.data||[]).find(o=>["partner","carrier","forwarder","logistics_provider","freight_forwarder"].includes(String(o.organization_type||"").toLowerCase()));
+  if(!org){fail("Partner organization required","This account is not linked to a recognized partner organization.");return;}
+  if(String(org.partner_account_mode||"")!=="registered_business"){fail("Registered business pathway required","Individual-interest and development/test accounts cannot access commercial first-mile operations.");return;}
+  const orgEligible=String(org.status||"").toLowerCase()==="active"&&String(org.partner_verification_status||"").toLowerCase()==="verified"&&String(org.partner_lifecycle_status||"").toLowerCase()==="active"&&String(org.partner_compliance_status||"").toLowerCase()==="compliant";
+  const caps=await client.from("krim_partner_capabilities").select("service_type,verification_status,active").eq("organization_id",org.id).eq("active",true).eq("verification_status","verified");
+  if(caps.error)throw caps.error;
+  const firstMile=(caps.data||[]).filter(c=>["first_mile","first-mile","first_mile_collection"].includes(String(c.service_type||"").toLowerCase()));
+  document.getElementById("org-status").textContent=orgEligible?"Verified / eligible":"Approval pending";
+  document.getElementById("capability-status").textContent=firstMile.length?"Verified":"Not verified";
+  document.getElementById("service-count").textContent=String((caps.data||[]).length)+" verified";
+  const ready=orgEligible&&firstMile.length>0;
+  document.getElementById("access-badge").textContent=ready?"FIRST-MILE CAPABILITY VERIFIED":"COMMERCIAL ACCESS RESTRICTED";
+  if(!ready){const note=document.querySelector(".notice span:last-child");note.textContent="Complete registered-business verification and obtain approval for the first-mile service capability before commercial first-mile activity. Individual shipment, route, document, quote and payment actions remain subject to their own server-side controls.";}
+  main.hidden=false;
+ }catch(error){console.error("KRIM first-mile access check:",error);fail("Workspace access could not be verified",error&&error.message?error.message:"Sign in again and retry.");}
+})();
+})();
+</script>
+</body>
+</html>
