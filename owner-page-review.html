@@ -44,7 +44,16 @@ try{
  const banner=doc.createElement('div');
  banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — local UI simulations only · authentication, APIs, uploads, payments and real data changes blocked':'STAGING · ISOLATED VISUAL REVIEW — app scripts, forms, navigation and API/network requests blocked; Tailwind styling and KRIM identity renderer only';
  banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#09243D;color:#fff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #45B8F0');
- doc.body.prepend(banner);
+ 
+// In isolated staging review, expose the real workspace layout without running its
+// authentication code. This is a visual preview only; production auth remains intact.
+const gate=doc.querySelector('#gate');
+if(gate){gate.hidden=true;gate.setAttribute('aria-hidden','true');gate.style.setProperty('display','none','important');}
+const workspace=doc.querySelector('#workspace')||doc.querySelector('main');
+if(workspace){workspace.hidden=false;workspace.removeAttribute('hidden');workspace.style.removeProperty('display');workspace.setAttribute('data-krim-staging-preview','visible');}
+doc.querySelectorAll('#session-label,.session').forEach(el=>{el.textContent='STAGING PREVIEW · No account required';});
+doc.querySelectorAll('[id*="signout"],[id*="signOut"]').forEach(el=>{el.hidden=true;});
+doc.body.prepend(banner);
  // Restore the approved KRIM master logo without enabling any page application scripts.
  const brandFix=doc.createElement('script');
  brandFix.textContent=`(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/',src=b+'assets/krim-primary.svg?v=20261117-transparent-brand-v3',h=document.querySelector('header'),t=h&&(h.querySelector('.brand-mark')||h.querySelector('.brandmark')||h.querySelector('.logo')||h.querySelector('img[alt*="krim" i],img[alt*="logo" i]')||h.querySelector('[class*="brand"] img')||h.querySelector('[class*="logo"] img'));function img(){var n=document.createElement('img');n.src=src;n.alt='KRIM Logistics — Global Logistics Operating System';n.className='krim-official-brand-logo';return n}if(t){if(t.tagName==='IMG'){t.src=src;t.alt='KRIM Logistics — Global Logistics Operating System';t.classList.add('krim-official-brand-logo')}else t.replaceWith(img())}else if(h){var brand=h.querySelector('.brand,[class*="brand"]');if(brand)brand.replaceChildren(img());else{var a=document.createElement('a');a.href=b;a.setAttribute('aria-label','KRIM Logistics home');a.append(img());h.insertBefore(a,h.firstChild)}}})();`;
