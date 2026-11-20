@@ -80,8 +80,7 @@ async function boot(){
   const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,display_name,legal_name,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);if(orgError)throw orgError;
   org=(orgs||[]).find(o=>["partner","carrier","forwarder","logistics_provider","warehouse","warehouse_operator"].includes(String(o.organization_type_code||o.organization_type||"").toLowerCase()));
   if(!org||String(org.status).toLowerCase()!=="active"){fail("Partner organisation not eligible","An active partner organisation membership is required.");return;}
-  const {data:perm,error:permError}=await client.rpc("krim_has_permission",{p_organization_id:Number(org.id),p_permission_code:"partner.manage"});
-  if(permError)throw permError;if(perm!==true){fail("Partner manager permission required","Your current organisation membership does not have permission to manage service capabilities.");return;}
+  // The submission RPC is the authoritative partner.manage and organisation-scope enforcement point.
   $("session-state").textContent="AUTHENTICATED PARTNER";$("signout").hidden=false;
   const results=await Promise.all([
    client.from("krim_partner_capabilities").select("id,organization_id,transport_mode_id,service_type,coverage_country_id,coverage_region,max_weight_kg,refrigerated,hazardous_goods_capable,active,verification_status,effective_from,effective_until,metadata,created_at").eq("organization_id",org.id).order("created_at",{ascending:false}),
