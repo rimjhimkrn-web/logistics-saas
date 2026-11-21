@@ -60,33 +60,79 @@
  async function choose(path){
   if(!authorized)return;
   selected=pages.find(p=>p.path===path);if(!selected)return;
-  $("selected-title").textContent=selected.title;
-  $("selected-path").textContent=selected.path;
-  $("preview-empty").hidden=false;$("preview-empty").textContent="Loading safe visual preview…";$("preview").hidden=true;
+  const requested=selected;
+  $("selected-title").textContent=requested.title;
+  $("selected-path").textContent=requested.path;
+  $("preview-empty").hidden=false;
+  $("preview-empty").textContent="Opening safe visual preview…";
+  const frame=$("preview");
+  frame.onload=null;
+  frame.hidden=true;
+  frame.removeAttribute("src");
   render();
-  try{
-   const url=location.origin+base+"/"+selected.path;
-   const response=await fetch(url,{credentials:"omit",cache:"no-store"});
-   if(!response.ok)throw new Error("Page source unavailable ("+response.status+").");
-   const source=await response.text();
-   const doc=new DOMParser().parseFromString(source,"text/html");
-   doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
-   doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
-   doc.querySelectorAll("*").forEach(el=>{
-    [...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});
-    if(el.tagName==="A"){el.removeAttribute("href");el.setAttribute("aria-disabled","true")}
-    if(el.tagName==="FORM"){el.removeAttribute("action");el.removeAttribute("method")}
-    if(["BUTTON","INPUT","SELECT","TEXTAREA"].includes(el.tagName))el.setAttribute("disabled","disabled");
-   });
-   let baseEl=doc.querySelector("base");if(!baseEl){baseEl=doc.createElement("base");doc.head.prepend(baseEl)}
-   baseEl.href=url;
-   const lock=doc.createElement("style");
-   lock.textContent="html{scroll-behavior:auto!important}body{cursor:default!important}a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
-   doc.head.appendChild(lock);
-   const frame=$("preview");
-   frame.srcdoc="<!doctype html>"+doc.documentElement.outerHTML;
-   frame.hidden=false;$("preview-empty").hidden=true;
-  }catch(e){$("preview-empty").hidden=false;$("preview-empty").textContent="Preview could not be rendered: "+e.message}
+
+  // Load the actual page in a sandboxed frame so its original layout, styles,
+  // fonts and images render naturally. Scripts and form submission remain blocked
+  // by the sandbox; after load, links and controls are also made inert.
+  const candidates=requested.path.startsWith("public/")
+   ?[location.origin+base+"/"+requested.path.slice(7),location.origin+base+"/"+requested.path]
+   :[location.origin+base+"/"+requested.path];
+  let candidateIndex=0;
+  let finished=false;
+  const timeout=setTimeout(()=>{
+   if(finished||selected!==requested)return;
+   finished=true;
+   frame.onload=null;
+   frame.hidden=true;
+   $("preview-empty").hidden=false;
+   $("preview-empty").textContent="Preview timed out. The selected page did not finish loading from this Staging deployment.";
+  },20000);
+
+  const tryNext=()=>{
+   if(selected!==requested||finished)return;
+   if(candidateIndex>=candidates.length){
+    finished=true;clearTimeout(timeout);
+    $("preview-empty").hidden=false;
+    $("preview-empty").textContent="Preview unavailable: neither published page path returned the requested "+requested.title+" page.";
+    return;
+   }
+   frame.src=candidates[candidateIndex++];
+  };
+
+  frame.onload=()=>{
+   if(selected!==requested||finished)return;
+   try{
+    const doc=frame.contentDocument;
+    if(!doc||!doc.documentElement)throw new Error("Page document unavailable.");
+    const pageTitle=(doc.title||"").toLowerCase();
+    const headings=[...doc.querySelectorAll("h1,h2")].map(n=>n.textContent||"").join(" ").toLowerCase();
+    const evidence=pageTitle+" "+headings;
+    const words=requested.title.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>2);
+    const matched=words.filter(w=>evidence.includes(w)).length;
+    if(words.length&&matched<Math.ceil(words.length*.5)){
+     frame.removeAttribute("src");
+     tryNext();
+     return;
+    }
+    // Keep this frame read-only even if the source page contains live workflows.
+    doc.querySelectorAll("script,iframe,frame,object,embed").forEach(n=>n.remove());
+    doc.querySelectorAll('meta[http-equiv="refresh" i]').forEach(n=>n.remove());
+    doc.querySelectorAll("a").forEach(n=>{n.removeAttribute("href");n.setAttribute("aria-disabled","true")});
+    doc.querySelectorAll("form").forEach(n=>{n.removeAttribute("action");n.removeAttribute("method");n.addEventListener("submit",e=>e.preventDefault(),true)});
+    doc.querySelectorAll("button,input,select,textarea").forEach(n=>{n.disabled=true});
+    doc.querySelectorAll("*").forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)}));
+    const lock=doc.createElement("style");
+    lock.textContent="a,button,input,select,textarea,form{pointer-events:none!important}*{animation:none!important;transition:none!important}";
+    doc.head.appendChild(lock);
+    finished=true;clearTimeout(timeout);
+    frame.hidden=false;
+    $("preview-empty").hidden=true;
+   }catch(err){
+    frame.removeAttribute("src");
+    tryNext();
+   }
+  };
+  tryNext();
  }
  async function loadManifest(){
   const res=await fetch(base+"/assets/krim-owner-testing-manifest.json",{cache:"no-store"});

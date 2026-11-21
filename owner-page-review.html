@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KRIM Partner Ecosystem — Isolated Page Review</title>
+<link rel="stylesheet" href="core/krim-global-identity.css?v=20261119-official-blue-v4" data-krim-global-identity="official-blue">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#F3F7FB;color:#14283E;font:14px/1.5 system-ui,sans-serif;min-width:320px;min-height:100vh;min-height:100dvh}
+header{position:sticky;top:0;z-index:5;background:#09243D;border-bottom:1px solid #DCE5EE;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+a{color:#45B8F0}.meta{color:#DCE5EE;font-size:12px}.mode{padding:6px 10px;border:1px solid #DCE5EE;border-radius:7px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.mode.active{background:#168FE0;border-color:#45B8F0;color:#fff}
+#frame{display:block;width:100%;height:calc(100vh - 76px);height:calc(100dvh - 76px);border:0;background:#fff}#msg{padding:24px}
+@media(max-width:600px){header{gap:8px;padding:10px}.meta{flex:1 1 100%}#frame{height:calc(100dvh - 130px)}}\n@media(hover:none) and (pointer:coarse){.mode{min-height:48px;padding-inline:14px}}\n</style></head><body>
+<header><strong>KRIM · STAGING PAGE REVIEW</strong><span class="meta" id="title">Loading…</span><span class="meta" id="description">Isolated review</span><a class="mode" id="visual" href="#">Visual</a><a class="mode" id="demo" href="#">Interactive Demo</a><a href="/owner-page-review-links.html">← All pages</a></header>
+<div id="msg">Preparing isolated preview…</div><iframe id="frame" title="Isolated staging page preview" sandbox="" hidden></iframe>
+<script>
+(async()=>{
+const msg=document.getElementById('msg'),frame=document.getElementById('frame'),title=document.getElementById('title'),description=document.getElementById('description');
+try{
+ window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||!event.data||event.data.type!=='krim-demo-navigate')return;const next=String(event.data.path||'').replace(/^\/+/, '');if(!next||next.split('/').includes('..')||!next.endsWith('.html'))return;location.href='/owner-page-review.html?path='+encodeURIComponent(next)+'&mode=demo'});
+ const pagesResponse=await fetch('/assets/krim-owner-testing-manifest.json',{cache:'no-store'});
+ if(!pagesResponse.ok)throw Error('Page inventory unavailable');
+ const pages=await pagesResponse.json(),params=new URLSearchParams(location.search),requested=params.get('path'),mode=params.get('mode')==='demo'?'demo':'visual';
+ if(!requested)throw Error('No page selected. Return to the page directory.');
+ const item=pages.find(p=>(p.path.startsWith('public/')?p.path.slice(7):p.path)===requested);
+ if(!item)throw Error('This page is not in the approved review inventory.');
+ const path=item.path;
+ if(path.startsWith('/')||path.split('/').includes('..')||!path.endsWith('.html'))throw Error('Invalid page path.');
+ title.textContent=item.title+' · '+item.path;
+ const url='/owner-page-review.html?path='+encodeURIComponent(requested);
+ document.getElementById('visual').href=url;document.getElementById('demo').href=url+'&mode=demo';
+ document.getElementById(mode).classList.add('active');
+ description.textContent=mode==='demo'?'Page-wide safe interaction simulation · no production APIs or records':'Original page styling · app scripts, forms, navigation and API calls disabled; Tailwind and KRIM identity renderers only';
+ const sourceUrl=new URL('/'+path.split('/').map(encodeURIComponent).join('/'),location.origin).href;
+ const response=await fetch(sourceUrl,{cache:'no-store',mode:'cors',credentials:'omit'});
+ if(!response.ok)throw Error('Page source could not be loaded (HTTP '+response.status+').');
+ const source=await response.text(),doc=new DOMParser().parseFromString(source,'text/html');
+ doc.querySelectorAll('script').forEach(n=>{const src=(n.getAttribute('src')||'').toLowerCase(),code=(n.textContent||'').trim();const tailwindRuntime=/cdn\.tailwindcss\.com/.test(src);const tailwindConfig=!src&&/tailwind\.config\s*=/.test(code)&&!/supabase|client\.auth|\.rpc\(|fetch\s*\(/i.test(code);if(!tailwindRuntime&&!tailwindConfig)n.remove()});
+ doc.querySelectorAll('noscript,iframe,object,embed').forEach(n=>n.remove());
+ doc.querySelectorAll('meta[http-equiv]').forEach(n=>{if((n.getAttribute('http-equiv')||'').toLowerCase()==='refresh')n.remove()});
+ doc.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)})});
+ doc.querySelectorAll('video,audio').forEach(el=>{el.removeAttribute('autoplay');el.controls=false});
+ const base=doc.createElement('base');base.href=new URL('/'+path,location.origin).href.replace(/[^/]*$/,'');doc.head.prepend(base);
+ // Re-apply the current KRIM global styles in the review frame, after stripping page scripts.
+ [['stylesheet','/core/krim-unified-page.css?v=20261119-official-blue-v2'],['stylesheet','/assets/krim-global-brand.css?v=20261119-official-blue-v2'],['stylesheet','/core/krim-global-identity.css?v=20261119-official-blue-v4']].forEach(([rel,href])=>{const link=doc.createElement('link');link.rel=rel;link.href=href;doc.head.append(link)});
+ const csp=doc.createElement('meta');csp.httpEquiv='Content-Security-Policy';csp.content="default-src 'none'; img-src https: data: blob:; style-src 'unsafe-inline' https:; font-src https: data:; script-src 'unsafe-inline' https://cdn.tailwindcss.com; connect-src 'none'; form-action 'none'; base-uri https:";doc.head.prepend(csp);
+ const banner=doc.createElement('div');
+ banner.textContent=mode==='demo'?'STAGING · INTERACTIVE DEMO — local UI simulations only · authentication, APIs, uploads, payments and real data changes blocked':'STAGING · ISOLATED VISUAL REVIEW — app scripts, forms, navigation and API/network requests blocked; Tailwind styling and KRIM identity renderer only';
+ banner.setAttribute('style','position:sticky;top:0;z-index:2147483647;background:#09243D;color:#fff;padding:7px 12px;font:12px/1.4 system-ui,sans-serif;text-align:center;border-bottom:1px solid #45B8F0');
+ 
+// In isolated staging review, expose the real workspace layout without running its
+// authentication code. This is a visual preview only; production auth remains intact.
+const gate=doc.querySelector('#gate');
+if(gate){gate.hidden=true;gate.setAttribute('aria-hidden','true');gate.style.setProperty('display','none','important');}
+const workspace=doc.querySelector('#workspace')||doc.querySelector('main');
+if(workspace){workspace.hidden=false;workspace.removeAttribute('hidden');workspace.style.removeProperty('display');workspace.setAttribute('data-krim-staging-preview','visible');}
+doc.querySelectorAll('#session-label,.session').forEach(el=>{el.textContent='STAGING PREVIEW · No account required';});
+doc.querySelectorAll('[id*="signout"],[id*="signOut"]').forEach(el=>{el.hidden=true;});
+doc.body.prepend(banner);
+ // Restore the approved KRIM master logo without enabling any page application scripts.
+ const brandFix=doc.createElement('script');
+ brandFix.textContent=`(function(){var p=location.pathname,b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/',src=b+'assets/krim-primary.svg?v=20261117-transparent-brand-v3',h=document.querySelector('header'),t=h&&(h.querySelector('.brand-mark')||h.querySelector('.brandmark')||h.querySelector('.logo')||h.querySelector('img[alt*="krim" i],img[alt*="logo" i]')||h.querySelector('[class*="brand"] img')||h.querySelector('[class*="logo"] img'));function img(){var n=document.createElement('img');n.src=src;n.alt='KRIM Logistics — Global Logistics Operating System';n.className='krim-official-brand-logo';return n}if(t){if(t.tagName==='IMG'){t.src=src;t.alt='KRIM Logistics — Global Logistics Operating System';t.classList.add('krim-official-brand-logo')}else t.replaceWith(img())}else if(h){var brand=h.querySelector('.brand,[class*="brand"]');if(brand)brand.replaceChildren(img());else{var a=document.createElement('a');a.href=b;a.setAttribute('aria-label','KRIM Logistics home');a.append(img());h.insertBefore(a,h.firstChild)}}})();`;
+ doc.body.append(brandFix);
+ // Safe static workspace renderer for Pages 7–9. Original application scripts remain stripped.
+ if(mode==='demo' && ['app/partner/business/index.html','app/partner/individual/index.html','app/partner/development/index.html'].includes(path)){
+  const staticCards={
+   'app/partner/business/index.html':[
+    ['02','Business identity & verification','Organization profile, legal identity, documents and review progress.','public/partner/partner-onboarding.html',false],
+    ['03','Global service coverage','Recorded countries, regions, lanes and service-area requests.','public/partner/service-coverage.html',false],
+    ['04','Services & capabilities','Declared transport modes, handling capabilities and operational constraints.','public/partner/services-capabilities.html',false],
+    ['05','Opportunities & tendering','Eligible freight opportunities and tender responses.','public/partner/load-marketplace.html',true],
+    ['06','Quotes & commercial rates','Rate cards, offer preparation and bid history.','public/partner/commercial-rates.html',true],
+    ['07','Shipment & job management','Assignment offers, response deadlines and confirmed jobs.','public/partner/accepted-loads.html',true],
+    ['08','Capacity & resources','Fleet, equipment, capacity windows and commitments.','public/partner/capacity-resources.html',true],
+    ['09','Dispatch & execution','Dispatch records and operational execution milestones.','public/partner/dispatch-execution.html',true],
+    ['10','Tracking & exceptions','Shipment events, milestone visibility and exceptions.','public/partner/tracking-exceptions.html',true],
+    ['11','Documents & delivery evidence','Shipment documents and proof-of-delivery evidence.','public/partner/documents-delivery-evidence.html',true],
+    ['12','Finance & settlements','Partner payables, invoices and settlement history.','public/partner/settlements.html',true],
+    ['13','Performance & quality','Service-level indicators, exceptions and quality evidence.','public/partner/performance-quality.html',true],
+    ['14','Team & organization','Organization membership and recorded role visibility.','public/partner/team-organization.html',true],
+    ['15','Notifications & support','Notifications, delivery history and support cases.','public/partner/notifications-support.html',false],
+    ['16','Integrations & automation','Webhook and workflow integration visibility.','app/partner/integrations-automation.html',true],
+    ['17','Security & audit','Permitted access records and governance evidence.','app/partner/security-audit.html',true]
+   ],
+   'app/partner/individual/index.html':[
+    ['01','Your onboarding profile','Review the individual-interest pathway and the information submitted for your partner profile.','public/partner/partner-onboarding.html',false],
+    ['02','Partner standards & eligibility','Understand identity, service quality, safety, documentation and jurisdiction-specific review expectations.','partner-standards.html',false],
+    ['03','Partner agreement framework','Read the framework that may apply if a future service relationship is approved. It is not an executed agreement.','partner-agreement.html',false],
+    ['04','KRIM network overview','Understand the network model, participant responsibilities and how partner participation is structured.','network.html',false],
+    ['05','Support & enquiries','Contact KRIM about your profile, eligibility questions, document requests or review progress.','contact.html',false],
+    ['06','Account access & security','Review the available account access route and keep your sign-in credentials secure.','auth/access.html',false]
+   ],
+   'app/partner/development/index.html':[
+    ['01','Partner standards & eligibility','Understand partner responsibilities, verification expectations, safety, documentation and local requirements.','partner-standards.html',false],
+    ['02','Partner onboarding','Review the supported onboarding pathways and the information required for each account type.','public/partner/partner-onboarding.html',false],
+    ['03','Partner agreement framework','Explore the reference framework for a potential future service relationship. It is not an executed agreement.','partner-agreement.html',false],
+    ['04','Network overview','Understand the KRIM network model, participant responsibilities and partner lifecycle.','network.html',false],
+    ['05','Global markets & coverage','Explore the global-ready market architecture and distinguish planned reach from currently activated markets.','global-markets.html',false],
+    ['06','Support & account security','Find support for your development pathway and review account access guidance.','contact.html',false]
+   ]
+  };
+  const groupsByPath={
+   'app/partner/business/index.html':[
+    ['network-readiness','Network readiness','Establish your organization identity, service footprint and declared capabilities.',2,4],
+    ['commercial-access','Commercial access','Prepare commercial offers and participate only when the organization is eligible.',5,6],
+    ['service-execution','Service execution','Manage assigned work, capacity, dispatch, tracking and delivery evidence.',7,11],
+    ['finance-governance','Finance & governance','Review financial records, quality, team access, notifications and platform integrations.',12,17]
+   ],
+   'app/partner/individual/index.html':[
+    ['profile-eligibility','Profile & eligibility','Review your submitted profile and understand the standards and agreement framework.',1,3],
+    ['network-participation','Network participation','Learn how KRIM’s partner network is structured and what participation involves.',4,4],
+    ['support-security','Support & account security','Get help with your profile and review secure account access routes.',5,6]
+   ],
+   'app/partner/development/index.html':[
+    ['onboarding-foundations','Onboarding foundations','Understand partner standards, select the appropriate pathway and review the agreement framework.',1,3],
+    ['network-market-understanding','Network & market understanding','Learn how KRIM’s network is structured and distinguish global-ready architecture from activated service coverage.',4,5],
+    ['support-account-safety','Support & account safety','Find support and review account access guidance for your test profile.',6,6]
+   ]
+  };
+  const nav=doc.getElementById('module-nav'),sections=doc.getElementById('module-sections'),cards=staticCards[path]||[],groups=groupsByPath[path]||[];
+  if(nav&&sections){
+   nav.replaceChildren();sections.replaceChildren();
+   groups.forEach(g=>{
+    const items=cards.filter(x=>Number(x[0])>=g[3]&&Number(x[0])<=g[4]);
+    const link=doc.createElement('a');link.href='#'+g[0];link.textContent=g[1]+' '+items.length;nav.append(link);
+    const section=doc.createElement('section');section.className='module-group';section.id=g[0];
+    const head=doc.createElement('div');head.className='module-group-head';
+    const title=doc.createElement('h3');title.textContent=g[1];const desc=doc.createElement('p');desc.textContent=g[2];head.append(title,desc);section.append(head);
+    const grid=doc.createElement('div');grid.className='grid';
+    items.forEach(item=>{
+     const card=doc.createElement('article');card.className='card';
+     const top=doc.createElement('div');top.className='card-top';
+     const num=doc.createElement('span');num.className='num';num.textContent=(path.includes('/business/')?'WORK AREA ':'LEARNING AREA ')+item[0];
+     const state=doc.createElement('span');state.className='state';
+     state.textContent=path.includes('/business/')?(item[4]?(item[0]==='12'?'FINANCE RESTRICTED · LEAN LAUNCH':'VERIFICATION REQUIRED'):'REFERENCE / GUIDANCE'):'REFERENCE / NON-COMMERCIAL';
+     top.append(num,state);const h=doc.createElement('h3');h.textContent=item[1];const p=doc.createElement('p');p.textContent=item[2];card.append(top,h,p);
+     const note=doc.createElement('span');note.className='locked-label';
+     if(path.includes('/business/')&&item[0]==='12')note.textContent='Settlement activity is not enabled in this preview. KRIM does not hold or settle partner freight funds.';
+     else if(path.includes('/business/')&&item[4])note.textContent='Visible for review only. Requires organization verification and server-side eligibility.';
+     else note.textContent='Preview reference only. No account access, submission or backend action is enabled.';
+     card.append(note);grid.append(card);
+    });
+    section.append(grid);sections.append(section);
+   });
+   const notice=doc.createElement('p');notice.className='notice';notice.textContent='STAGING PREVIEW · All work areas are displayed for review. This view does not grant approval, access, commercial eligibility or operational permissions.';sections.append(notice);
+  }
+ }
+ if(mode==='demo'){
+  const demoScript=doc.createElement('script');
+  demoScript.textContent=`(function(){
+const toast=(message)=>{let n=document.getElementById('krim-demo-toast');if(!n){n=document.createElement('div');n.id='krim-demo-toast';n.style.cssText='position:fixed;right:16px;bottom:16px;z-index:2147483647;background:#132b4a;color:white;padding:12px 16px;border-radius:9px;box-shadow:0 5px 24px #0003;max-width:min(380px,90vw);font:13px/1.45 Arial';document.body.append(n)}n.textContent=message;n.style.display='block';clearTimeout(window.__krimToastTimer);window.__krimToastTimer=setTimeout(()=>n.style.display='none',3500)};
+const modal=(heading,copy)=>{let old=document.getElementById('krim-demo-modal');if(old)old.remove();const box=document.createElement('div');box.id='krim-demo-modal';box.style.cssText='position:fixed;inset:0;z-index:2147483646;background:#07182bcc;display:grid;place-items:center;padding:18px;font:14px Arial';const card=document.createElement('section');card.style.cssText='background:white;color:#172033;border-radius:12px;padding:20px;width:min(460px,100%);box-shadow:0 15px 50px #0004';const h=document.createElement('h2');h.textContent=heading;h.style.margin='0 0 10px';const p=document.createElement('p');p.textContent=copy;p.style.cssText='line-height:1.5;color:#526077';const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;justify-content:flex-end;margin-top:18px';const close=document.createElement('button');close.type='button';close.textContent='Close';close.onclick=()=>box.remove();close.style.cssText='padding:10px 15px;border:1px solid #dce3eb;background:white;border-radius:7px';const simulate=document.createElement('button');simulate.type='button';simulate.textContent='Simulate';simulate.style.cssText='padding:10px 15px;border:0;background:#0b5cff;color:white;border-radius:7px';simulate.onclick=()=>{box.remove();toast('Demo action completed locally. No live data or backend record was changed.')};actions.append(close,simulate);card.append(h,p,actions);box.append(card);box.addEventListener('click',e=>{if(e.target===box)box.remove()});document.body.append(box)};
+const safeLabel=el=>(el.innerText||el.getAttribute('aria-label')||el.getAttribute('title')||el.value||el.name||el.id||el.tagName||'Control').trim().replace(/\s+/g,' ').slice(0,90);
+[['menu','side','overlay'],['hamburger','sidebar','sidebar-overlay']].forEach(([tid,sid,oid])=>{const t=document.getElementById(tid),s=document.getElementById(sid),o=document.getElementById(oid);if(t&&s)t.addEventListener('click',()=>{s.classList.toggle('open');o?.classList.toggle('open')});if(o&&s)o.addEventListener('click',()=>{s.classList.remove('open');o.classList.remove('open')})});
+document.querySelectorAll('[aria-expanded="false"],[data-toggle],.accordion-button,[role="tab"]').forEach(el=>el.addEventListener('click',()=>{const ex=el.getAttribute('aria-expanded');if(ex!==null)el.setAttribute('aria-expanded',ex==='true'?'false':'true');const id=el.getAttribute('aria-controls')||el.dataset.target;if(id){const panel=document.getElementById(id.replace(/^#/ ,''));if(panel)panel.hidden=!panel.hidden}}));
+const profile=document.getElementById('profile'),pop=document.getElementById('profilePop');if(profile&&pop)profile.addEventListener('click',()=>pop.classList.toggle('show'));
+const lang=document.getElementById('language');if(lang)lang.addEventListener('click',()=>{const list=['English','हिन्दी','Español','Français','Deutsch','日本語'],el=document.getElementById('lang'),ctx=document.getElementById('contextLang');let i=list.indexOf(el?.textContent||'English'),v=list[(i+1)%list.length];if(el)el.textContent=v;if(ctx)ctx.textContent=v;toast('Demo language label changed to '+v+'. Translation is not connected.')});
+const signout=document.getElementById('signout');if(signout)signout.addEventListener('click',e=>{e.preventDefault();toast('Sign-out is disabled in demo mode. No session exists.')});
+document.querySelectorAll('input[type="search"],input[placeholder*="search" i],input[aria-label*="search" i]').forEach(input=>{input.addEventListener('input',()=>{const q=input.value.trim().toLowerCase(),scope=input.closest('section,main,article,.card,.panel')||document,rows=scope.querySelectorAll('tbody tr,.list-item,[data-search-item]');if(rows.length)rows.forEach(row=>row.hidden=!!q&&!row.textContent.toLowerCase().includes(q))});input.addEventListener('keydown',e=>{if(e.key==='Enter'&&input.value.trim())toast('Local demo search: '+input.value.trim()+'. No server search was made.')})});
+document.querySelectorAll('select').forEach(select=>select.addEventListener('change',()=>{const table=select.closest('section,main,article,.card,.panel')?.querySelector('tbody')||document.querySelector('tbody');if(!table)return;const value=select.value.toLowerCase();[...table.rows].forEach(row=>row.hidden=!!value&&!/all|select|status/i.test(value)&&!row.textContent.toLowerCase().includes(value))}));
+document.querySelectorAll('form').forEach(form=>form.addEventListener('submit',e=>{e.preventDefault();const invalid=[...form.querySelectorAll('[required]')].find(x=>!x.value.trim());if(invalid){invalid.reportValidity?.();toast('Complete the required fields to continue this local demo.');return}toast('Form validated locally. Submission, uploads and backend writes are disabled.')}));
+document.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const label=safeLabel(a),raw=a.getAttribute('href')||'';if(/^(mailto:|tel:|javascript:|#)/i.test(raw)){toast(label+' is not activated in the isolated demo.');return}let target;try{target=new URL(raw,document.baseURI)}catch(_){toast('This link is unavailable in the demo.');return}if(target.origin===new URL(document.baseURI).origin&&/\.html?(?:$|[?#])/i.test(target.pathname)){parent.postMessage({type:'krim-demo-navigate',path:target.pathname.replace(/^\//,'')},'*');return}toast(label+' — external navigation is blocked in demo mode.')}));
+document.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]').forEach(button=>{if(button.dataset.krimDemoBound)return;button.dataset.krimDemoBound='1';button.addEventListener('click',e=>{if(button.type==='submit'&&button.form)return;const label=safeLabel(button);if(/close|dismiss|cancel/i.test(label)){const dialog=button.closest('[role="dialog"],dialog,.modal');if(dialog){dialog.hidden=true;dialog.removeAttribute('open');return}}modal(label+' · Interactive Demo','This control is simulated for owner review. Real permission checks, business rules, API calls and data changes are not executed.')})});
+document.querySelectorAll('input:not([type="hidden"]),textarea').forEach(input=>{input.addEventListener('change',()=>input.dataset.krimDemoEdited='true');if(input.type==='file')input.addEventListener('change',()=>toast('File selection is local only. No file was uploaded.'))});
+if(${JSON.stringify(path)}==='workspaces/customer-workspace.html'){
+ const table=document.querySelector('.table tbody'),rows=[['KR-IND-26041','Ranchi → Kolkata','In transit','22 Nov 2026','Demo Carrier East'],['KR-IND-26038','Delhi → Mumbai','Confirmed','24 Nov 2026','Demo Road Network'],['KR-IND-26029','Kolkata → Bengaluru','Delivered','18 Nov 2026','Demo Multimodal']];
+ if(table){table.replaceChildren();rows.forEach(r=>{const tr=document.createElement('tr');r.forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i===2){const badge=document.createElement('span');badge.className='status';badge.textContent=v;td.replaceChildren(badge)}tr.append(td)});table.append(tr)})}
+ const k=document.querySelectorAll('.k b');['3','1','1','0','2','1'].forEach((v,i)=>{if(k[i])k[i].textContent=v});
+}
+window.fetch=()=>Promise.reject(new Error('Network blocked in KRIM demo mode'));window.XMLHttpRequest=function(){throw new Error('Network blocked in KRIM demo mode')};window.WebSocket=function(){throw new Error('Network blocked in KRIM demo mode')};window.EventSource=function(){throw new Error('Network blocked in KRIM demo mode')};try{if(navigator.sendBeacon)navigator.sendBeacon=()=>false}catch(_){}
+})();`;
+  doc.body.append(demoScript);
+  frame.setAttribute('sandbox','allow-scripts');
+ }else frame.setAttribute('sandbox','allow-scripts');
+ frame.srcdoc='<!doctype html>\\n'+doc.documentElement.outerHTML;
+ frame.hidden=false;msg.hidden=true;
+}catch(e){msg.textContent='Preview unavailable: '+e.message}
+})();
+</script></body></html>

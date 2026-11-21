@@ -26,9 +26,9 @@
 </main>
 <script>
 (async()=>{
- const URL="https://qrpcivhdxobiaofppbkl.supabase.co";
+ const SUPABASE_URL="https://qrpcivhdxobiaofppbkl.supabase.co";
  const KEY="sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
- const client=window.supabase.createClient(URL,KEY);
+ const client=window.supabase.createClient(SUPABASE_URL,KEY);
  const $=id=>document.getElementById(id);
  const say=m=>$("feedback").textContent=m;
  const parts=location.pathname.split("/").filter(Boolean);
@@ -40,18 +40,18 @@
   if(factorError)throw factorError;
   const verified=(factors.totp||[]).find(f=>f.status==="verified");
   if(verified){location.replace(base+"owner-testing.html");return}
-  const pending=(factors.totp||[]).find(f=>f.status==="unverified");
-  let factorId=pending?.id;
-  if(!pending){
-   const {data,error:enrollError}=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Staging Owner"});
-   if(enrollError)throw enrollError;
-   factorId=enroll.id;
-   $("qr").src=enroll.totp.qr_code;
-   $("secret").textContent=enroll.totp.secret;
-  }else{
-   $("qr").remove();
-   $("secret").textContent="A pending authenticator setup already exists. Use the authenticator app that started that setup.";
+  // Remove every unverified TOTP factor left by interrupted setup attempts.
+  // Never remove a verified factor. Then enroll once and display both QR and manual key.
+  const pending=(factors.totp||[]).filter(f=>f.status==="unverified");
+  for(const factor of pending){
+   const {error:removeError}=await client.auth.mfa.unenroll({factorId:factor.id});
+   if(removeError)throw new Error("Could not clear an unfinished authenticator setup: "+removeError.message);
   }
+  const {data:enrollData,error:enrollError}=await client.auth.mfa.enroll({factorType:"totp",friendlyName:"KRIM Staging Owner"});
+  if(enrollError)throw enrollError;
+  const factorId=enrollData.id;
+  $("qr").src=enrollData.totp.qr_code;
+  $("secret").textContent=enrollData.totp.secret;
   $("verify").addEventListener("click",async()=>{
    const code=$("code").value.trim();
    if(!/^\d{6}$/.test(code)){say("Enter the six-digit code.");return}

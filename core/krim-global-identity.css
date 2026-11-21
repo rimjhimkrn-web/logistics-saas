@@ -1,0 +1,231 @@
+/* KRIM Global Identity — partner ecosystem visual layer.
+   Exact source: KRIM live homepage index.html + assets/krim-icon.svg.
+   Official palette only: navy #09243D / #123B5A, blue #168FE0 / #0754A4,
+   light-blue #C9F1FF / #45B8F0, ink #14283E, muted #60748A,
+   line #DCE5EE, surface #F3F7FB, white. No orange accent. */
+:root{
+ --krim-navy:#09243D;--krim-navy-2:#123B5A;
+ --krim-blue:#168FE0;--krim-blue-dark:#0754A4;
+ --krim-sky:#45B8F0;--krim-sky-light:#C9F1FF;
+ --krim-ink:#14283E;--krim-muted:#60748A;
+ --krim-line:#DCE5EE;--krim-surface:#F3F7FB;--krim-white:#fff;
+ --krim-green:#16836C;--krim-radius:14px;
+ --krim-shadow:0 14px 38px rgba(4,23,43,.08);
+ /* Legacy page variables mapped to the same KRIM palette */
+ --navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue-dark:#0754A4;
+ --primary:#168FE0;--primary-dark:#0754A4;--accent:#168FE0;
+ --orange:#168FE0;--orange-500:#168FE0;--teal:#168FE0;--cyan:#45B8F0;--violet:#0754A4;
+ color-scheme:light;
+}
+html{color-scheme:light;scroll-behavior:smooth;scroll-padding-top:88px}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;color:var(--krim-ink)!important;-webkit-font-smoothing:antialiased}
+a{transition:color .16s ease}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role=button]:focus-visible{outline:3px solid var(--krim-sky)!important;outline-offset:3px!important}
+input,select,textarea{border-color:var(--krim-line)}
+::selection{background:rgba(22,143,224,.18);color:var(--krim-navy)}
+/* Common brand colors used by existing page components */
+:where(.btn-primary,.button-primary,.primary-button,.action-primary,.bg-blue-600,.bg-blue-700){background-color:var(--krim-blue)!important;border-color:var(--krim-blue)!important;color:#fff!important}
+:where(.btn-primary,.button-primary,.primary-button,.action-primary,.bg-blue-600,.bg-blue-700):hover{background-color:var(--krim-blue-dark)!important;border-color:var(--krim-blue-dark)!important}
+:where(.text-blue-600,.text-blue-700,.text-primary,.link-primary){color:var(--krim-blue-dark)!important}
+:where(.border-blue-500,.border-blue-600){border-color:var(--krim-blue)!important}
+:where(.bg-slate-900,.bg-gray-900,.bg-navy){background-color:var(--krim-navy)!important}
+:where(.text-slate-900,.text-gray-900,.text-navy){color:var(--krim-navy)!important}
+/* Headers: preserve each page's nav structure while unifying surface and logo scale */
+header,[role=banner]{border-color:var(--krim-line)!important}
+body>header,header.top,header.header{box-shadow:0 4px 18px rgba(4,23,43,.06)}
+header img[alt*="KRIM" i],header img[src*="krim" i],header .brand img,header a.brand img{
+ display:block;max-height:46px;width:auto;max-width:min(220px,42vw);object-fit:contain
+}
+header .brand-mark,header .logo-mark,header .brand-icon{
+ width:44px;height:44px;object-fit:contain;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important
+}
+/* Unified page surfaces, leaving workflow-specific status colors intact */
+.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card{
+ border-color:var(--krim-line);border-radius:var(--krim-radius)
+}
+.card,.panel,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card{
+ box-shadow:var(--krim-shadow)
+}
+button,.btn,[role=button],a.btn,a.button{border-radius:8px;font-family:inherit;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+table th{background:var(--krim-surface)}
+hr{border:0;border-top:1px solid var(--krim-line)}
+img{max-width:100%;height:auto}
+@media(max-width:720px){
+ body>header,header.top,header.header{gap:10px}
+ header img[alt*="KRIM" i],header img[src*="krim" i],header .brand img,header a.brand img{max-width:170px;max-height:40px}
+ main{max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Force legacy brand-variable aliases onto the official KRIM blue palette. */
+:root{--brand:#168FE0;--brand-primary:#168FE0;--brand-accent:#168FE0;--accent-color:#168FE0;--primary-color:#168FE0;--secondary-color:#123B5A;--highlight:#45B8F0}
+:where(.bg-orange-400,.bg-orange-500,.bg-orange-600){background-color:var(--krim-blue)!important}
+:where(.text-orange-400,.text-orange-500,.text-orange-600){color:var(--krim-blue-dark)!important}
+:where(.border-orange-400,.border-orange-500){border-color:var(--krim-blue)!important}
+/* Amber and teal remain available for warning, pending and informational states; they are not brand accents. */
+:where(.bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-sky-500,.bg-sky-600){background-color:var(--krim-blue)!important}
+:where(.text-blue-500,.text-blue-600,.text-blue-700,.text-sky-500,.text-sky-600){color:var(--krim-blue-dark)!important}
+:where(.border-blue-400,.border-blue-500,.border-blue-600,.border-sky-500){border-color:var(--krim-blue)!important}
+
+
+/* Global device and accessibility standard — fluid from compact phones to large displays,
+   tablets, foldables, touch laptops, desktop workstations and high-density screens. */
+:root{
+ --krim-space-1:clamp(.5rem,1vw,.75rem);
+ --krim-space-2:clamp(.75rem,1.5vw,1rem);
+ --krim-space-3:clamp(1rem,2vw,1.5rem);
+ --krim-space-4:clamp(1.25rem,3vw,2rem);
+ --krim-content-max: min(100% - 2rem, 84rem);
+}
+html{min-width:320px;text-size-adjust:100%;-webkit-text-size-adjust:100%;scrollbar-gutter:stable}
+body{min-width:320px;min-height:100vh;min-height:100dvh;overflow-wrap:anywhere}
+main{width:min(100% - 2rem,84rem);margin-inline:auto}
+:where(button,input,select,textarea){font:inherit;max-width:100%}
+:where(button,a,[role=button],input,select,textarea){touch-action:manipulation}
+:where(button,.btn,[role=button],a.btn,a.button){min-height:44px}
+:where(input,select,textarea){min-height:44px;max-width:100%}
+:where(input[type=checkbox],input[type=radio]){min-height:1rem;min-width:1rem;width:1.1rem;height:1.1rem}
+:where(img,video,canvas,svg,iframe){max-width:100%}
+:where(pre,code){max-width:100%;overflow-x:auto}
+:where(table){max-width:100%;border-collapse:collapse}
+:where(th,td){overflow-wrap:anywhere}
+:where(.table-wrap,.table-responsive,.table-container,.overflow-x-auto){max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+:where(.grid,.flex){min-width:0}
+:where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){min-width:0}
+:where(input,select,textarea){color:var(--krim-ink)}
+:where(input,select,textarea)::placeholder{color:#718399;opacity:1}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{scroll-margin-block:7rem}
+@media(max-width:480px){
+ html{scroll-padding-top:72px}
+ main{width:calc(100% - 1.25rem)}
+ :where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){border-radius:12px}
+ :where(button,.btn,[role=button],a.btn,a.button){max-width:100%;white-space:normal}
+}
+@media(min-width:481px) and (max-width:900px){
+ main{width:calc(100% - 2rem)}
+}
+@media(min-width:1600px){
+ body{font-size:clamp(1rem,.42vw + .55rem,1.125rem)}
+}
+@media(hover:none) and (pointer:coarse){
+ :where(button,.btn,[role=button],a.btn,a.button){min-height:48px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ header{position:relative}
+}
+@supports(padding:max(0px)){
+ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+}
+@media(prefers-contrast:more){
+ :where(a,button,input,select,textarea){outline-offset:3px}
+ :where(.card,.panel,.surface,.workspace-card,.module-card,.stat-card,.metric-card,.content-card,.dashboard-card,.form-card,.table-card,.info-card){border:1px solid var(--krim-line)}
+}
+
+
+/* Cyan and teal are not secondary KRIM brand colours: normalize their decorative
+   utility classes to the official KRIM blue/sky-blue pair. Workflow status colours
+   (green, amber and red) remain semantic and are intentionally preserved. */
+:where(.bg-cyan-400,.bg-cyan-500,.bg-cyan-600,.bg-teal-400,.bg-teal-500,.bg-teal-600){background-color:var(--krim-blue)!important}
+:where(.text-cyan-400,.text-cyan-500,.text-cyan-600,.text-teal-400,.text-teal-500,.text-teal-600){color:var(--krim-blue-dark)!important}
+:where(.border-cyan-400,.border-cyan-500,.border-cyan-600,.border-teal-400,.border-teal-500,.border-teal-600){border-color:var(--krim-blue)!important}
+:where(.from-cyan-400,.from-cyan-500,.from-teal-400,.from-teal-500){--tw-gradient-from:var(--krim-blue)!important;--tw-gradient-to:rgb(22 143 224 / 0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
+:where(.to-cyan-400,.to-cyan-500,.to-teal-400,.to-teal-500){--tw-gradient-to:var(--krim-sky)!important}
+
+
+/* Brand-system normalization pass v4: decorative legacy accent families are
+   remapped to KRIM blue. Semantic success/warning/error indicators are untouched. */
+:where(
+ .bg-emerald-400,.bg-emerald-500,.bg-emerald-600,.bg-emerald-700,
+ .bg-indigo-400,.bg-indigo-500,.bg-indigo-600,.bg-indigo-700,
+ .bg-violet-400,.bg-violet-500,.bg-violet-600,.bg-violet-700,
+ .bg-purple-400,.bg-purple-500,.bg-purple-600,.bg-purple-700,
+ .bg-fuchsia-400,.bg-fuchsia-500,.bg-fuchsia-600,.bg-fuchsia-700,
+ .bg-pink-400,.bg-pink-500,.bg-pink-600,.bg-pink-700
+){background-color:var(--krim-blue)!important}
+:where(
+ .text-emerald-400,.text-emerald-500,.text-emerald-600,.text-emerald-700,
+ .text-indigo-400,.text-indigo-500,.text-indigo-600,.text-indigo-700,
+ .text-violet-400,.text-violet-500,.text-violet-600,.text-violet-700,
+ .text-purple-400,.text-purple-500,.text-purple-600,.text-purple-700,
+ .text-fuchsia-400,.text-fuchsia-500,.text-fuchsia-600,.text-fuchsia-700,
+ .text-pink-400,.text-pink-500,.text-pink-600,.text-pink-700
+){color:var(--krim-blue-dark)!important}
+:where(
+ .border-emerald-200,.border-emerald-300,.border-emerald-400,.border-emerald-500,.border-emerald-600,
+ .border-indigo-200,.border-indigo-300,.border-indigo-400,.border-indigo-500,.border-indigo-600,
+ .border-violet-200,.border-violet-300,.border-violet-400,.border-violet-500,.border-violet-600,
+ .border-purple-200,.border-purple-300,.border-purple-400,.border-purple-500,.border-purple-600,
+ .border-fuchsia-200,.border-fuchsia-300,.border-fuchsia-400,.border-fuchsia-500,.border-fuchsia-600,
+ .border-pink-200,.border-pink-300,.border-pink-400,.border-pink-500,.border-pink-600
+){border-color:var(--krim-blue)!important}
+[class*="from-emerald-"],[class*="from-indigo-"],[class*="from-violet-"],[class*="from-purple-"],[class*="from-fuchsia-"],[class*="from-pink-"]{
+ --tw-gradient-from:var(--krim-blue)!important;--tw-gradient-to:rgb(22 143 224 / 0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important
+}
+[class*="to-emerald-"],[class*="to-indigo-"],[class*="to-violet-"],[class*="to-purple-"],[class*="to-fuchsia-"],[class*="to-pink-"]{--tw-gradient-to:var(--krim-navy-2)!important}
+[class*="shadow-emerald-"],[class*="shadow-indigo-"],[class*="shadow-violet-"],[class*="shadow-purple-"]{--tw-shadow-color:rgb(22 143 224 / .18)!important}
+
+/* Cross-device baseline: phones, tablets, foldables, touch laptops, desktop,
+   high-density displays, keyboard navigation and assistive technologies. */
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:clip;overscroll-behavior-x:none}
+body{overflow-x:clip}
+:where(button,input,select,textarea){min-width:0}
+:where(a,button,[role=button]){-webkit-tap-highlight-color:transparent}
+:where(button:disabled,input:disabled,select:disabled,textarea:disabled,[aria-disabled=true]){cursor:not-allowed;opacity:.65}
+:where(.skip-link,[data-skip-link]){position:absolute;left:1rem;top:-5rem;z-index:10000;padding:.75rem 1rem;background:var(--krim-navy);color:#fff;border-radius:.5rem}
+:where(.skip-link,[data-skip-link]):focus{top:1rem}
+:where(dialog){max-width:min(94vw,48rem);max-height:min(90dvh,52rem);overflow:auto;border:1px solid var(--krim-line);border-radius:var(--krim-radius)}
+:where(dialog)::backdrop{background:rgb(4 23 43 / .58)}
+:where(.modal,.dialog-panel,[role=dialog]){max-width:min(100%,48rem);max-height:90dvh;overflow:auto;overscroll-behavior:contain}
+:where(.table-wrap,.table-responsive,.table-container,.overflow-x-auto){overscroll-behavior-inline:contain}
+:where(iframe){width:100%;border:0}
+:where(svg){flex-shrink:0}
+:where(h1,h2,h3,h4,p,li,td,th,label,legend){overflow-wrap:anywhere}
+:where(input[type=email],input[type=tel],input[type=url],input[type=number],input[type=text],input[type=password],input[type=search],textarea,select){width:100%}
+:where(label){line-height:1.45}
+:where(.form-row,.form-grid,.field-row){min-width:0}
+@media(max-width:640px){
+ main{width:calc(100% - 1.25rem)}
+ :where(.actions,.button-row,.toolbar,.filter-row){flex-wrap:wrap}
+ :where(.actions > *, .button-row > *, .toolbar > *, .filter-row > *){max-width:100%}
+ :where(table){font-size:.875rem}
+ :where(th,td){padding:.625rem .5rem}
+ :where(.modal,.dialog-panel,[role=dialog]){width:calc(100vw - 1rem);max-width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem);margin:.5rem}
+}
+@media(min-width:641px) and (max-width:1024px){
+ main{width:calc(100% - 2rem)}
+}
+@media(min-width:1025px) and (max-width:1599px){
+ main{width:min(calc(100% - 3rem),84rem)}
+}
+@media(min-width:1600px){
+ main{width:min(calc(100% - 4rem),96rem)}
+}
+@media(hover:none) and (pointer:coarse){
+ :where(a,button,[role=button],input,select,textarea){scroll-margin:1rem}
+}
+@media(forced-colors:active){
+ :where(a,button,input,select,textarea,[role=button]){forced-color-adjust:auto}
+ :where(a,button,[role=button]):focus-visible{outline:2px solid Highlight!important}
+}
+@media print{
+ body{background:#fff!important;color:#000!important}
+ header,nav,footer,.no-print,[data-no-print]{display:none!important}
+ main{width:100%!important;max-width:none!important;margin:0!important}
+ a{color:inherit!important;text-decoration:underline}
+ *{box-shadow:none!important;text-shadow:none!important}
+}
+
+/* Compatibility aliases for page-local design systems, keeping their layout
+   while routing brand tokens through the single KRIM palette. */
+:root{
+ --ink:var(--krim-ink);--muted:var(--krim-muted);--line:var(--krim-line);
+ --pale:var(--krim-surface);--teal:var(--krim-blue);--cyan:var(--krim-sky);
+ --brand:var(--krim-blue);--brand-color:var(--krim-blue);
+ --brand-dark:var(--krim-navy);--navy-dark:var(--krim-navy);
+ --blue-500:var(--krim-blue);--blue-600:var(--krim-blue-dark);
+ --primary-blue:var(--krim-blue);--accent-blue:var(--krim-blue);
+}
+:where([class*="shadow-amber-"],[class*="shadow-teal-"],[class*="shadow-cyan-"]){--tw-shadow-color:rgb(22 143 224 / .18)!important}
+:where([class*="ring-emerald-"],[class*="ring-teal-"],[class*="ring-cyan-"]){--tw-ring-color:var(--krim-sky)!important}
