@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="Create a shipment in KRIM Global Logistics OS. Secure, organization-scoped shipment intake for global freight operations.">
+<title>Booking Request | KRIM Customer OS</title>
+<link rel="manifest" href="../../../manifest.json">
+<link rel="icon" href="../../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../../config.js"></script>
+<script defer src="../assets/customer-os-globalization.js"></script>
+<style>
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--sky:#EAF5FC;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--paper:#F3F7FB;--white:#fff;--green:#0754A4;--amber:#0754A4;--red:#b42318;--shadow:0 14px 40px rgba(20,48,85,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:14px}button,input,select{font:inherit}a{color:inherit;text-decoration:none}button,a,select,input{outline-color:#78aaf8}.topline{height:5px;background:linear-gradient(90deg,#09243D 0%,#168FE0 60%,#67b7ff 100%)}.shell{min-height:100vh}.topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,56px);position:sticky;top:0;z-index:10}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#168FE0,#09243D);color:#fff;display:grid;place-items:center;font:800 22px Manrope,sans-serif;box-shadow:0 7px 18px #168FE033}.brandname{font:800 16px Manrope,sans-serif;letter-spacing:.07em;color:var(--navy)}.branddesc{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-top:3px}.top-actions{display:flex;align-items:center;gap:10px}.session-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#f8fbff;padding:9px 12px;border-radius:999px;color:#51637b;font-size:12px;max-width:250px}.dot{width:7px;height:7px;background:#168FE0;border-radius:50%;flex:none}.btn{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:1px solid transparent;border-radius:11px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.18s}.btn:disabled{opacity:.55;cursor:not-allowed}.btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 18px #168FE026}.btn-primary:hover:not(:disabled){background:#0d58c6;transform:translateY(-1px)}.btn-secondary{background:#fff;border-color:var(--line);color:var(--navy)}.btn-secondary:hover{background:#f6f9fd}.layout{max-width:1440px;margin:0 auto;padding:28px clamp(14px,3.5vw,48px) 54px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:26px}.rail{align-self:start;position:sticky;top:100px}.rail-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7c8ca3;font-weight:800;margin:8px 10px 12px}.rail-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}.rail-item{display:flex;gap:11px;align-items:flex-start;padding:12px 9px;border-radius:12px;color:#708096}.rail-item.active{background:#EAF5FC;color:var(--navy)}.rail-num{width:25px;height:25px;border-radius:8px;background:#eef2f7;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}.rail-item.active .rail-num{background:var(--blue);color:white}.rail-title{font-size:12px;font-weight:800}.rail-sub{font-size:11px;margin-top:3px;line-height:1.4}.rail-note{margin-top:14px;padding:14px;border-radius:13px;background:#f7faff;border:1px solid #e3edf9;color:#60718a;font-size:11px;line-height:1.65}.main{min-width:0}.crumb{font-size:12px;color:#7b8aa0;margin:3px 0 15px}.crumb span{color:#a4b0c0;margin:0 7px}.hero{border-radius:20px;background:linear-gradient(115deg,#09243D 0%,#123b6b 62%,#168FE0 100%);color:#fff;padding:clamp(23px,4vw,39px);position:relative;overflow:hidden;box-shadow:0 16px 36px #09243D20}.hero:after{content:"";position:absolute;width:290px;height:290px;border:1px solid #ffffff20;border-radius:50%;right:-75px;top:-140px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff06}.hero-content{position:relative;z-index:1;max-width:760px}.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.17em;font-weight:800;color:#bcd8ff}.eyebrow i{width:6px;height:6px;background:#45B8F0;border-radius:50%}.hero h1{font:800 clamp(25px,3.4vw,38px)/1.16 Manrope,sans-serif;margin:14px 0 12px;letter-spacing:-.04em}.hero p{color:#d3e3f8;line-height:1.65;max-width:650px;margin:0;font-size:13px}.hero-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.hero-tag{padding:8px 11px;border:1px solid #ffffff2b;background:#ffffff0b;border-radius:9px;color:#e4efff;font-size:11px}.progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0 24px}.progress-step{display:flex;align-items:center;gap:9px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:12px;min-width:0}.progress-step.current{border-color:#8db8fa;box-shadow:0 0 0 3px #168FE00c}.progress-step .n{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#edf2f8;color:#52647b;font-size:11px;font-weight:800;flex:none}.progress-step.current .n{background:var(--blue);color:#fff}.progress-step b{font-size:11px;display:block;white-space:nowrap}.progress-step small{display:block;color:#8290a4;font-size:10px;margin-top:3px;white-space:nowrap}.content-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,.8fr);gap:18px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:21px 23px 17px;border-bottom:1px solid #edf1f6;display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.panel-head h2{font:800 17px Manrope,sans-serif;margin:0;color:var(--navy);letter-spacing:-.02em}.panel-head p{margin:6px 0 0;color:#78879b;font-size:12px;line-height:1.5}.required{font-size:10px;color:#8492a6}.panel-body{padding:22px 23px}.section-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#77879c;margin:2px 0 15px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.field{min-width:0}.field.full{grid-column:1/-1}.field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#2e4058;margin-bottom:8px}.req{color:#d14d42}.field input,.field select{width:100%;border:1px solid #d8e2ee;background:#fbfdff;border-radius:10px;padding:13px 13px;color:#192c45;min-height:46px;transition:.15s}.field input:focus,.field select:focus{border-color:#6ca3f5;box-shadow:0 0 0 3px #168FE013;background:#fff}.field input::placeholder{color:#a3afbf}.hint{font-size:10px;line-height:1.5;color:#8492a6;margin-top:7px}.route-pair{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:center;gap:9px}.global-route-grid{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:start;gap:9px}.global-place{position:relative;min-width:0}.global-place input[type=search]{width:100%;border:1px solid #d8e2ee;background:#fbfdff;border-radius:10px;padding:13px;min-height:46px;color:#192c45}.global-place input[type=search]:focus{border-color:#6ca3f5;box-shadow:0 0 0 3px #168FE013;background:#fff}.place-results{position:absolute;z-index:30;top:calc(100% + 5px);left:0;right:0;max-height:280px;overflow:auto;background:#fff;border:1px solid #DCE5EE;border-radius:12px;box-shadow:0 14px 32px #09243D20;padding:5px}.place-result{display:block;width:100%;text-align:left;border:0;background:#fff;border-radius:8px;padding:10px;cursor:pointer;color:#243a56;font-size:12px;line-height:1.45}.place-result:hover,.place-result:focus{background:#edf4ff}.place-result small{display:block;color:#7a8ba1;margin-top:3px}.place-empty{padding:12px;color:#7a8ba1;font-size:11px;line-height:1.5}.global-place .place-results[hidden]{display:none}.route-arrow{width:34px;height:34px;border-radius:50%;background:#edf4ff;color:var(--blue);display:grid;place-items:center;font-size:17px}.divider{height:1px;background:#edf1f6;margin:23px 0}.form-footer{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:23px;padding-top:19px;border-top:1px solid #edf1f6}.secure-note{display:flex;gap:8px;align-items:center;color:#75859b;font-size:10px;line-height:1.5}.secure-icon{width:27px;height:27px;border-radius:8px;background:#EAF5FC;color:var(--green);display:grid;place-items:center;flex:none}.side-panel{padding:20px}.side-title{font:800 14px Manrope,sans-serif;color:var(--navy);margin:0 0 16px}.route-preview{background:#f7faff;border:1px solid #e1ebf8;border-radius:13px;padding:15px;margin-bottom:17px}.route-label{font-size:10px;color:#7c8ba0;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.route-line{display:flex;gap:12px;margin:13px 0 5px}.route-track{display:flex;flex-direction:column;align-items:center;width:13px;flex:none;padding:4px 0}.route-track .point{width:9px;height:9px;border:2px solid var(--blue);background:#fff;border-radius:50%}.route-track .line{width:1px;height:30px;background:#a9c9f7}.route-city{font-size:12px;font-weight:800;color:#263b56;overflow-wrap:anywhere}.route-city small{display:block;font-size:10px;color:#8492a6;font-weight:500;margin-top:4px}.route-placeholder{color:#a0adbd;font-weight:500}.summary-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #edf1f6;font-size:11px}.summary-row:last-child{border-bottom:0}.summary-row span{color:#7d8ba0}.summary-row strong{color:#31445e;text-align:right;font-weight:700;overflow-wrap:anywhere}.notice{padding:13px;border-radius:12px;background:#EAF5FC;border:1px solid #C9F1FF;color:#0754A4;font-size:11px;line-height:1.6;margin-top:15px}.notice b{display:block;margin-bottom:4px;color:#0754A4}.workflow-list{display:grid;gap:13px;margin-top:18px}.workflow-row{display:flex;gap:10px;align-items:flex-start}.workflow-icon{width:28px;height:28px;border-radius:9px;background:#edf4ff;color:var(--blue);display:grid;place-items:center;flex:none;font-size:12px;font-weight:800}.workflow-row b{font-size:11px;display:block;color:#31445e}.workflow-row small{display:block;font-size:10px;line-height:1.5;color:#8794a6;margin-top:4px}.feedback{display:none;padding:13px 15px;border-radius:11px;margin-top:15px;font-size:12px;line-height:1.55;overflow-wrap:anywhere}.feedback.show{display:block}.feedback.error{background:#fff1f0;border:1px solid #ffd3cf;color:var(--red)}.feedback.success{background:#EAF5FC;border:1px solid #C9F1FF;color:#0754A4}.feedback.info{background:#eff6ff;border:1px solid #d5e6ff;color:#2459a8}.statusbar{display:flex;align-items:center;gap:8px;color:#73839a;font-size:11px}.statusbar .dot{background:#168FE0}.footer{max-width:1440px;margin:0 auto;padding:0 clamp(14px,3.5vw,48px) 25px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#8a97a9;font-size:10px}.footer-links{display:flex;gap:17px}.footer a:hover{color:var(--blue)}
+.journey-banner{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:16px 0 0;padding:12px 15px;background:#fff;border:1px solid var(--line);border-radius:12px;color:#5c6e85;font-size:11px;line-height:1.55}.journey-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:#f0f7ff;color:#2459a8;font-weight:700}.journey-chip:nth-child(2){background:#EAF5FC;color:#0754A4}.journey-chip:nth-child(3){background:#EAF5FC;color:#0754A4}.journey-chip:nth-child(4){background:#EAF5FC;color:#0754A4}.section-label:before{content:"";display:inline-block;width:4px;height:15px;border-radius:5px;background:#168FE0;margin-right:8px;vertical-align:middle}.section-label:nth-of-type(2):before{background:#168FE0}.section-label:nth-of-type(3):before{background:#168FE0}.section-label:nth-of-type(4):before{background:#168FE0}.global-standards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.standard-card{padding:11px;border:1px solid #e1eaf5;border-radius:11px;background:#f9fbff}.standard-card b{display:block;font-size:11px;color:#30445e}.standard-card small{display:block;font-size:10px;color:#8391a4;line-height:1.45;margin-top:4px}@media(max-width:430px){.global-standards{grid-template-columns:1fr}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.rail{position:static}.rail-card{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.rail-label,.rail-note{display:none}.rail-item{padding:9px 6px}.content-grid{grid-template-columns:minmax(0,1.4fr) minmax(220px,.8fr)}}@media(max-width:760px){.topbar{height:66px;padding:0 14px}.brandmark{width:37px;height:37px}.brandname{font-size:14px}.branddesc{font-size:9px}.session-pill{display:none}.top-actions .btn{padding:10px 11px;font-size:11px}.layout{padding-top:17px;gap:15px}.rail-card{grid-template-columns:repeat(2,minmax(0,1fr))}.rail-item{padding:10px 8px}.hero{border-radius:16px}.progress{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.progress-step{padding:10px}.content-grid{grid-template-columns:1fr}.panel-head,.panel-body{padding-left:17px;padding-right:17px}.side-panel{padding:17px}.footer{padding-bottom:22px}.form-footer{align-items:stretch;flex-direction:column-reverse}.form-footer .btn{width:100%}}@media(max-width:430px){.global-route-grid{grid-template-columns:minmax(0,1fr)}.global-route-grid .route-arrow{display:none}.field-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.route-pair{grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);gap:5px}.route-arrow{width:27px;height:27px}.progress-step b{font-size:10px}.progress-step small{font-size:9px}.hero h1{font-size:27px}.top-actions .btn{padding:9px}.brand{gap:8px}}
+
+.krim-skip{position:absolute;top:-80px;left:12px;z-index:100;background:#fff;color:#09243D;padding:10px 14px;border-radius:8px;font-weight:800}.krim-skip:focus{top:10px}
+.customer-nav{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:10px clamp(14px,3.5vw,48px);background:#fff;border-bottom:1px solid #DCE5EE}
+.customer-nav a{padding:8px 10px;border-radius:7px;background:#EAF5FC;color:#0754A4;font-size:10px;font-weight:800}
+.customer-nav a[aria-current=page]{background:#09243D;color:#fff}
+.footer-links{display:flex;gap:12px;flex-wrap:wrap}.footer-links a{font-size:11px}
+@media(max-width:620px){.customer-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.customer-nav a{text-align:center}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+.booking-hold{margin:14px 0;padding:14px 16px;border:1px solid #C9F1FF;border-radius:12px;background:#EAF5FC;color:#174A78;font-size:11px;line-height:1.65}.booking-hold strong{color:#09243D}
+
+/* Consistent KRIM Customer OS masthead and responsive primary navigation */
+.topbar{min-height:82px;height:auto;padding:10px clamp(14px,3.5vw,48px);gap:16px}
+.brand{min-width:0;display:flex;align-items:center;gap:14px}
+.brand img{display:block;width:clamp(150px,19vw,224px);height:62px;max-width:45vw;object-fit:contain;object-position:left center;flex:none}
+.brand-caption{display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--line);padding-left:14px}
+.brand-caption strong{font:800 9px Manrope,sans-serif;letter-spacing:.12em;color:var(--navy)}
+.brand-caption small{font-size:9px;color:var(--muted);letter-spacing:.02em}
+.top-actions{gap:9px}
+.staging-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:#EAF5FC;color:#0754A4;font-size:10px;font-weight:800;white-space:nowrap}
+.nav-toggle{display:none;min-width:42px;min-height:42px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:21px;font-weight:800}
+.customer-nav{position:sticky;top:82px;z-index:9;display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:9px clamp(14px,3.5vw,48px);background:#fff;border-bottom:1px solid var(--line);box-shadow:0 5px 14px rgba(9,36,61,.04)}
+.customer-nav a{display:inline-flex;align-items:center;min-height:36px;padding:8px 11px;border-radius:8px;color:#40556b;font-size:10px;font-weight:800;white-space:nowrap}
+.customer-nav a:hover,.customer-nav a[aria-current=page]{background:#EAF5FC;color:#0754A4}
+.customer-nav a[aria-current=page]{box-shadow:inset 0 -2px #168FE0}
+.customer-nav .nav-home{margin-left:auto;color:#0754A4}
+@media(max-width:1050px){
+ .topbar{top:0}
+ .nav-toggle{display:inline-grid;place-items:center}
+ .customer-nav{display:none;position:sticky;top:82px;max-height:calc(100dvh - 90px);overflow:auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:12px clamp(14px,3.5vw,48px);box-shadow:0 14px 25px rgba(9,36,61,.12)}
+ .customer-nav.open{display:grid}
+ .customer-nav a{white-space:normal;min-height:42px;background:#F3F7FB}
+ .customer-nav .nav-home{margin-left:0}
+}
+@media(max-width:600px){
+ .topbar{min-height:72px;padding:8px 13px;gap:8px}
+ .brand{gap:8px}
+ .brand img{width:142px;height:49px;max-width:42vw}
+ .brand-caption{padding-left:8px}
+ .brand-caption strong{font-size:7px;letter-spacing:.06em}
+ .brand-caption small{font-size:7px;line-height:1.25}
+ .staging-pill{display:none}
+ .workspace-link{display:none}
+ .customer-nav{top:72px;grid-template-columns:1fr}
+ .customer-nav a{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.customer-nav,.nav-toggle{transition:none!important}}
+/* Official KRIM homepage master wordmark: preserve full horizontal logo, never crop to an icon. */
+body.krim-global-shell header.topbar .brand{display:flex!important;align-items:center!important;gap:0!important;min-width:0!important}
+body.krim-global-shell header.topbar .brand img{display:block!important;visibility:visible!important;opacity:1!important;width:clamp(150px,19vw,224px)!important;height:62px!important;max-width:55vw!important;max-height:62px!important;object-fit:contain!important;object-position:left center!important;flex:none!important;border-radius:0!important}
+@media(max-width:600px){body.krim-global-shell header.topbar .brand img{width:clamp(145px,48vw,178px)!important;height:50px!important;max-width:55vw!important;max-height:50px!important}}
+</style>
+<link rel="stylesheet" href="../../../core/krim-global-interface.css">
+<style id="krim-booking-header-visibility-fix">
+/* KRIM masthead: persistent brand identity, visible logo and accessible responsive navigation. */
+body.krim-global-shell .topline{display:block!important;height:5px!important;min-height:5px!important;background:linear-gradient(90deg,#09243D 0%,#168FE0 60%,#67b7ff 100%)!important}
+body.krim-global-shell header.topbar{display:flex!important;visibility:visible!important;position:sticky!important;top:0!important;z-index:30!important;min-height:82px!important;height:auto!important;background:#fff!important;color:#09243D!important;padding:8px clamp(14px,3.5vw,48px)!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;border-bottom:1px solid #DCE5EE!important;box-shadow:0 4px 18px rgba(9,36,61,.06)!important}
+body.krim-global-shell header.topbar .brand{display:flex!important;visibility:visible!important;align-items:center!important;gap:13px!important;min-width:0!important;flex:0 1 auto!important}
+body.krim-global-shell header.topbar .brand img{display:block!important;visibility:visible!important;opacity:1!important;width:clamp(150px,19vw,224px)!important;height:62px!important;max-width:42vw!important;object-fit:contain!important;object-position:left center!important;flex:none!important}
+body.krim-global-shell header.topbar .brand-caption{display:flex!important;visibility:visible!important;flex-direction:column!important;gap:4px!important;border-left:1px solid #DCE5EE!important;padding-left:13px!important;min-width:0!important}
+body.krim-global-shell header.topbar .brand-caption strong{display:block!important;color:#09243D!important;font-size:10px!important;letter-spacing:.1em!important;font-weight:800!important}
+body.krim-global-shell header.topbar .brand-caption small{display:block!important;color:#60748A!important;font-size:9px!important;line-height:1.4!important}
+body.krim-global-shell header.topbar .top-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;min-width:0!important}
+body.krim-global-shell .staging-pill{display:inline-flex!important;align-items:center!important;gap:7px!important;padding:8px 11px!important;border:1px solid #C9F1FF!important;border-radius:999px!important;background:#EAF5FC!important;color:#0754A4!important;font-size:10px!important;font-weight:800!important;white-space:nowrap!important}
+body.krim-global-shell .nav-toggle{display:none!important;visibility:visible!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:0!important;border:1px solid #DCE5EE!important;border-radius:10px!important;background:#fff!important;color:#09243D!important;font-size:23px!important;line-height:1!important;box-shadow:none!important}
+body.krim-global-shell nav.customer-nav{display:flex!important;visibility:visible!important;position:sticky!important;top:82px!important;z-index:20!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;background:#fff!important;padding:9px clamp(14px,3.5vw,48px)!important;border-bottom:1px solid #DCE5EE!important;box-shadow:0 5px 14px rgba(9,36,61,.04)!important}
+body.krim-global-shell nav.customer-nav a{display:inline-flex!important;visibility:visible!important;align-items:center!important;justify-content:center!important;min-height:38px!important;padding:8px 11px!important;border-radius:8px!important;background:transparent!important;color:#40556B!important;font-size:11px!important;font-weight:800!important;white-space:nowrap!important;text-decoration:none!important}
+body.krim-global-shell nav.customer-nav a:hover,body.krim-global-shell nav.customer-nav a[aria-current=page]{background:#EAF5FC!important;color:#0754A4!important}
+body.krim-global-shell nav.customer-nav a[aria-current=page]{box-shadow:inset 0 -2px #168FE0!important}
+body.krim-global-shell nav.customer-nav .nav-home{margin-left:auto!important}
+@media(max-width:1050px){
+ body.krim-global-shell header.topbar{min-height:72px!important}
+ body.krim-global-shell header.topbar .brand img{width:clamp(145px,23vw,190px)!important;height:54px!important;max-width:35vw!important}
+ body.krim-global-shell .nav-toggle{display:inline-flex!important}
+ body.krim-global-shell nav.customer-nav{display:none!important;position:relative!important;top:auto!important;max-height:calc(100dvh - 90px)!important;overflow:auto!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:12px clamp(14px,3.5vw,48px)!important;box-shadow:0 14px 25px rgba(9,36,61,.12)!important}
+ body.krim-global-shell nav.customer-nav.open{display:grid!important}
+ body.krim-global-shell nav.customer-nav a{justify-content:flex-start!important;white-space:normal!important;text-align:left!important;min-height:42px!important;background:#F3F7FB!important;padding:10px 12px!important}
+ body.krim-global-shell nav.customer-nav .nav-home{margin-left:0!important}
+}
+@media(max-width:600px){
+ body.krim-global-shell header.topbar{min-height:70px!important;padding:7px 12px!important;gap:7px!important}
+ body.krim-global-shell header.topbar .brand{gap:7px!important}
+ body.krim-global-shell header.topbar .brand img{width:clamp(132px,39vw,158px)!important;height:48px!important;max-width:42vw!important}
+ body.krim-global-shell header.topbar .brand-caption{padding-left:7px!important;gap:2px!important}
+ body.krim-global-shell header.topbar .brand-caption strong{font-size:7px!important;letter-spacing:.035em!important}
+ body.krim-global-shell header.topbar .brand-caption small{font-size:7px!important;line-height:1.25!important}
+ body.krim-global-shell .staging-pill,body.krim-global-shell .workspace-link{display:none!important}
+ body.krim-global-shell .nav-toggle{min-width:44px!important;min-height:44px!important;flex:0 0 44px!important}
+ body.krim-global-shell nav.customer-nav{grid-template-columns:1fr!important}
+ body.krim-global-shell nav.customer-nav a{font-size:12px!important}
+}
+@media(max-width:370px){
+ body.krim-global-shell header.topbar .brand-caption{display:none!important}
+ body.krim-global-shell header.topbar .brand img{width:clamp(150px,52vw,178px)!important;max-width:60vw!important}
+}
+@media(prefers-reduced-motion:reduce){body.krim-global-shell nav.customer-nav,body.krim-global-shell .nav-toggle{transition:none!important}}
+</style>
+
+<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
+
+
+
+<!-- KRIM_BOOKING_RESPONSIVE_REFINEMENT_20261121 -->
+<style id="krim-booking-layout-refinement">
+/* Booking Request: calmer hierarchy, balanced desktop composition, robust tablet and phone layouts. */
+:root{--booking-radius:18px;--booking-shadow:0 10px 30px rgba(9,36,61,.065)}
+html{scroll-padding-top:105px}
+body.krim-global-shell{background:#f4f7fb;color:#14283e;line-height:1.5}
+body.krim-global-shell .topbar{min-height:86px!important;padding:10px clamp(16px,4vw,64px)!important;gap:18px!important}
+body.krim-global-shell .brand{gap:16px!important}
+body.krim-global-shell .brand img{width:clamp(158px,18vw,218px)!important;height:58px!important;max-width:42vw!important}
+body.krim-global-shell .brand-caption{gap:5px!important;padding-left:16px!important}
+body.krim-global-shell .brand-caption strong{font-size:10px!important;letter-spacing:.12em!important}
+body.krim-global-shell .brand-caption small{font-size:10px!important;line-height:1.35!important}
+body.krim-global-shell .top-actions{gap:10px!important;flex:0 0 auto}
+body.krim-global-shell nav.customer-nav{position:sticky!important;top:86px!important;z-index:25!important;min-height:54px;padding:8px clamp(16px,4vw,64px)!important;gap:7px!important}
+body.krim-global-shell nav.customer-nav a{font-size:11px!important;padding:9px 12px!important}
+body.krim-global-shell .layout{max-width:1320px!important;display:block!important;padding:30px clamp(16px,3.5vw,48px) 48px!important}
+body.krim-global-shell .rail{display:none!important}
+body.krim-global-shell .main{width:100%;max-width:100%;min-width:0}
+body.krim-global-shell .crumb{margin:0 0 18px!important;font-size:12px;line-height:1.5}
+body.krim-global-shell .hero{min-height:260px;padding:clamp(28px,4.5vw,54px)!important;border-radius:22px!important;display:flex;align-items:center;background:linear-gradient(112deg,#071f36 0%,#103d63 57%,#087fc5 100%)!important;box-shadow:0 18px 42px rgba(9,36,61,.15)!important}
+body.krim-global-shell .hero-content{max-width:790px!important}
+body.krim-global-shell .hero h1{max-width:720px;font-size:clamp(30px,4vw,48px)!important;line-height:1.12!important;letter-spacing:-.045em!important;margin:15px 0 14px!important}
+body.krim-global-shell .hero p{max-width:720px!important;font-size:14px!important;line-height:1.75!important;color:#e0edf8!important}
+body.krim-global-shell .hero-meta{gap:8px!important;margin-top:24px!important}
+body.krim-global-shell .hero-tag{font-size:11px!important;padding:9px 12px!important;border-radius:999px!important}
+body.krim-global-shell .booking-hold{margin:18px 0!important;padding:15px 18px!important;border-left:4px solid #168fe0!important;border-radius:12px!important;background:#eaf5fc!important;font-size:12px!important}
+body.krim-global-shell .progress{gap:12px!important;margin:20px 0 12px!important}
+body.krim-global-shell .progress-step{min-height:70px;padding:13px 15px!important;border-radius:14px!important;box-shadow:0 3px 12px rgba(9,36,61,.035)}
+body.krim-global-shell .progress-step b{font-size:12px!important;white-space:normal!important;line-height:1.3}
+body.krim-global-shell .progress-step small{font-size:10px!important;white-space:normal!important;line-height:1.35}
+body.krim-global-shell .journey-banner{margin:14px 0 20px!important;padding:13px 16px!important;gap:8px!important;border-radius:13px!important}
+body.krim-global-shell .content-grid{grid-template-columns:minmax(0,1.65fr) minmax(285px,.78fr)!important;gap:22px!important;align-items:start!important}
+body.krim-global-shell .panel{border-radius:var(--booking-radius)!important;box-shadow:var(--booking-shadow)!important}
+body.krim-global-shell .panel-head{padding:25px 27px 20px!important;gap:18px!important}
+body.krim-global-shell .panel-head h2{font-size:19px!important;line-height:1.3}
+body.krim-global-shell .panel-head p{font-size:12px!important;line-height:1.65!important;max-width:570px}
+body.krim-global-shell .panel-body{padding:26px 27px!important}
+body.krim-global-shell .section-label{margin:3px 0 17px!important;font-size:10px!important;letter-spacing:.15em!important}
+body.krim-global-shell .field-grid{gap:18px!important}
+body.krim-global-shell .field label{font-size:12px!important;margin-bottom:9px!important}
+body.krim-global-shell .field input,body.krim-global-shell .field select,body.krim-global-shell .global-place input[type=search]{min-height:50px!important;padding:13px 14px!important;border-radius:11px!important;font-size:13px!important}
+body.krim-global-shell .hint{font-size:11px!important;line-height:1.6!important;margin-top:8px!important}
+body.krim-global-shell .divider{margin:25px 0!important}
+body.krim-global-shell .form-footer{margin-top:26px!important;padding-top:21px!important;gap:18px!important}
+body.krim-global-shell .secure-note{font-size:11px!important;max-width:360px}
+body.krim-global-shell .form-footer .btn{min-height:48px;padding:13px 19px!important}
+body.krim-global-shell .side-panel{padding:23px!important}
+body.krim-global-shell .side-title{font-size:16px!important;margin-bottom:18px!important}
+body.krim-global-shell .route-preview{padding:17px!important}
+body.krim-global-shell .summary-row{padding:12px 0!important;gap:16px!important;font-size:11px!important}
+body.krim-global-shell .summary-row span{flex:0 0 42%;line-height:1.45}
+body.krim-global-shell .summary-row strong{min-width:0;line-height:1.45}
+body.krim-global-shell .notice{font-size:11px!important;line-height:1.7!important;padding:15px!important}
+body.krim-global-shell .workflow-list{gap:15px!important}
+body.krim-global-shell .footer{max-width:1320px!important;padding:0 clamp(16px,3.5vw,48px) 28px!important;line-height:1.7}
+body.krim-global-shell .footer-links{gap:18px!important}
+body.krim-global-shell .footer-links a{font-size:11px!important}
+body.krim-global-shell .place-results{max-height:min(280px,42vh)!important}
+body.krim-global-shell .place-result{padding:12px!important;font-size:12px!important;line-height:1.5!important}
+@media(max-width:1100px){
+ body.krim-global-shell .layout{padding-top:24px!important}
+ body.krim-global-shell .content-grid{grid-template-columns:minmax(0,1.25fr) minmax(260px,.85fr)!important;gap:16px!important}
+ body.krim-global-shell .panel-head,body.krim-global-shell .panel-body{padding-left:21px!important;padding-right:21px!important}
+ body.krim-global-shell nav.customer-nav{top:82px!important}
+}
+@media(max-width:820px){
+ body.krim-global-shell .topbar{min-height:76px!important;padding:8px 18px!important}
+ body.krim-global-shell .brand img{width:clamp(145px,27vw,190px)!important;height:52px!important}
+ body.krim-global-shell .brand-caption{padding-left:11px!important}
+ body.krim-global-shell .brand-caption strong{font-size:8px!important;letter-spacing:.08em!important}
+ body.krim-global-shell .brand-caption small{font-size:8px!important}
+ body.krim-global-shell nav.customer-nav{top:76px!important}
+ body.krim-global-shell .layout{padding:22px 18px 38px!important}
+ body.krim-global-shell .content-grid{grid-template-columns:1fr!important}
+ body.krim-global-shell .side-panel{padding:21px!important}
+ body.krim-global-shell .hero{min-height:0}
+ body.krim-global-shell .global-standards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ body.krim-global-shell .topbar{min-height:68px!important;padding:7px 12px!important;gap:7px!important}
+ body.krim-global-shell .brand{gap:8px!important}
+ body.krim-global-shell .brand img{width:clamp(132px,39vw,158px)!important;height:46px!important;max-width:42vw!important}
+ body.krim-global-shell .brand-caption{padding-left:8px!important;gap:3px!important}
+ body.krim-global-shell .brand-caption strong{font-size:6.5px!important;letter-spacing:.025em!important}
+ body.krim-global-shell .brand-caption small{font-size:6.5px!important;line-height:1.2!important}
+ body.krim-global-shell .nav-toggle{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;font-size:20px!important}
+ body.krim-global-shell nav.customer-nav{top:68px!important;padding:10px 12px!important}
+ body.krim-global-shell .layout{padding:16px 12px 30px!important;gap:12px!important}
+ body.krim-global-shell .crumb{font-size:10px!important;margin-bottom:13px!important;overflow-wrap:anywhere}
+ body.krim-global-shell .hero{padding:25px 20px!important;border-radius:17px!important}
+ body.krim-global-shell .eyebrow{font-size:9px!important;letter-spacing:.12em!important}
+ body.krim-global-shell .hero h1{font-size:clamp(27px,8vw,35px)!important;line-height:1.12!important;margin:13px 0!important}
+ body.krim-global-shell .hero p{font-size:12px!important;line-height:1.7!important}
+ body.krim-global-shell .hero-meta{margin-top:17px!important;gap:7px!important}
+ body.krim-global-shell .hero-tag{font-size:9px!important;padding:7px 9px!important;border-radius:8px!important}
+ body.krim-global-shell .booking-hold{font-size:10px!important;padding:12px 13px!important;line-height:1.6!important}
+ body.krim-global-shell .progress{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:14px 0 10px!important}
+ body.krim-global-shell .progress-step{min-height:64px;padding:9px!important;gap:8px!important}
+ body.krim-global-shell .progress-step .n{width:25px;height:25px}
+ body.krim-global-shell .progress-step b{font-size:10px!important}
+ body.krim-global-shell .progress-step small{font-size:9px!important}
+ body.krim-global-shell .journey-banner{font-size:10px!important;padding:11px!important;line-height:1.55!important;margin-bottom:14px!important}
+ body.krim-global-shell .journey-chip{font-size:9px!important;padding:6px 7px!important}
+ body.krim-global-shell .panel{border-radius:15px!important}
+ body.krim-global-shell .panel-head{display:block!important;padding:18px 16px 14px!important}
+ body.krim-global-shell .panel-head h2{font-size:17px!important}
+ body.krim-global-shell .panel-head p{font-size:11px!important}
+ body.krim-global-shell .required{display:block;margin-top:9px}
+ body.krim-global-shell .panel-body{padding:18px 16px!important}
+ body.krim-global-shell .section-label{font-size:9px!important;margin-bottom:13px!important}
+ body.krim-global-shell .field-grid{grid-template-columns:1fr!important;gap:14px!important}
+ body.krim-global-shell .field.full{grid-column:auto!important}
+ body.krim-global-shell .global-route-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ body.krim-global-shell .global-route-grid .route-arrow{display:none!important}
+ body.krim-global-shell .field input,body.krim-global-shell .field select,body.krim-global-shell .global-place input[type=search]{min-height:48px!important;font-size:13px!important}
+ body.krim-global-shell .hint{font-size:10px!important;line-height:1.55!important}
+ body.krim-global-shell .divider{margin:19px 0!important}
+ body.krim-global-shell .form-footer{flex-direction:column-reverse!important;align-items:stretch!important;margin-top:20px!important;padding-top:17px!important}
+ body.krim-global-shell .form-footer .btn{width:100%!important;min-height:48px!important}
+ body.krim-global-shell .secure-note{font-size:10px!important}
+ body.krim-global-shell .side-panel{padding:17px!important}
+ body.krim-global-shell .side-title{font-size:15px!important}
+ body.krim-global-shell .summary-row{font-size:10px!important}
+ body.krim-global-shell .footer{padding:0 12px 22px!important;font-size:9px!important}
+ body.krim-global-shell .footer-links{gap:12px!important}
+ body.krim-global-shell .global-standards{grid-template-columns:1fr!important}
+}
+@media(max-width:370px){
+ body.krim-global-shell .brand-caption{display:none!important}
+ body.krim-global-shell .brand img{width:clamp(145px,54vw,170px)!important;max-width:60vw!important}
+ body.krim-global-shell .top-actions{gap:5px!important}
+ body.krim-global-shell .progress-step{gap:6px!important}
+ body.krim-global-shell .progress-step b{font-size:9px!important}
+}
+@media(prefers-reduced-motion:reduce){body.krim-global-shell *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+
+
+<style id="krim-booking-footer-refinement">
+body.krim-global-shell .krim-booking-footer{max-width:none!important;margin:34px 0 0!important;padding:34px clamp(18px,5vw,72px) 0!important;display:grid!important;grid-template-columns:minmax(230px,.9fr) minmax(0,1.4fr)!important;gap:30px 56px!important;background:#09243D!important;color:#d5e2ef!important;border-top:4px solid #168FE0!important}
+body.krim-global-shell .krim-booking-footer .footer-brand{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+body.krim-global-shell .krim-booking-footer .footer-brand-link{display:inline-flex;align-items:center;max-width:190px;min-height:48px}
+body.krim-global-shell .krim-booking-footer .footer-brand img{display:block;width:166px;height:52px;max-width:100%;object-fit:contain;object-position:left center;filter:brightness(0) invert(1);opacity:.96}
+body.krim-global-shell .krim-booking-footer .footer-brand p{margin:0;color:#fff;font:800 12px Manrope,sans-serif;letter-spacing:.04em}
+body.krim-global-shell .krim-booking-footer .footer-brand>span{font-size:10px;color:#b8cadd;line-height:1.6}
+body.krim-global-shell .krim-booking-footer .footer-navigation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+body.krim-global-shell .krim-booking-footer .footer-group{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+body.krim-global-shell .krim-booking-footer .footer-group h2{margin:3px 0 4px;color:#fff;font:800 11px Manrope,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+body.krim-global-shell .krim-booking-footer .footer-group a{font-size:11px;line-height:1.5;color:#c3d2e1;text-decoration:none}
+body.krim-global-shell .krim-booking-footer .footer-group a:hover,body.krim-global-shell .krim-booking-footer .footer-group a:focus-visible{color:#fff;text-decoration:underline;text-underline-offset:4px}
+body.krim-global-shell .krim-booking-footer .footer-bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #ffffff24;padding:16px 0 20px;color:#aebfd0;font-size:10px;line-height:1.6}
+@media(max-width:650px){
+ body.krim-global-shell .krim-booking-footer{grid-template-columns:1fr!important;gap:22px!important;margin-top:24px!important;padding:26px 18px 0!important}
+ body.krim-global-shell .krim-booking-footer .footer-navigation{gap:16px!important}
+ body.krim-global-shell .krim-booking-footer .footer-bottom{flex-direction:column;gap:5px;padding-bottom:18px}
+}
+@media(max-width:360px){body.krim-global-shell .krim-booking-footer .footer-navigation{grid-template-columns:1fr!important;gap:18px!important}}
+</style>
+
+<style id="krim-booking-footer-readable-text">
+/* Footer identity is text-led; increase contrast, size and spacing for clear reading. */
+body.krim-global-shell .krim-booking-footer .footer-brand-link{display:inline-flex!important;align-items:center!important;min-height:0!important;max-width:100%!important;text-decoration:none!important}
+body.krim-global-shell .krim-booking-footer .footer-brand-name{display:block!important;color:#fff!important;font:800 clamp(20px,2vw,25px)/1.25 Manrope,sans-serif!important;letter-spacing:.015em!important}
+body.krim-global-shell .krim-booking-footer .footer-brand p{color:#fff!important;font:700 14px/1.55 "DM Sans",sans-serif!important;letter-spacing:0!important}
+body.krim-global-shell .krim-booking-footer .footer-brand>span{color:#d5e2ef!important;font:500 12px/1.7 "DM Sans",sans-serif!important}
+body.krim-global-shell .krim-booking-footer .footer-group h2{color:#fff!important;font-size:12px!important;line-height:1.5!important;letter-spacing:.08em!important}
+body.krim-global-shell .krim-booking-footer .footer-group a{color:#e2ebf4!important;font-size:13px!important;line-height:1.7!important}
+body.krim-global-shell .krim-booking-footer .footer-bottom{color:#d0dce8!important;font-size:12px!important;line-height:1.7!important}
+body.krim-global-shell .krim-booking-footer .footer-group a:hover,body.krim-global-shell .krim-booking-footer .footer-group a:focus-visible{color:#fff!important}
+@media(max-width:650px){
+ body.krim-global-shell .krim-booking-footer{gap:20px!important;padding:25px 18px 0!important}
+ body.krim-global-shell .krim-booking-footer .footer-navigation{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+ body.krim-global-shell .krim-booking-footer .footer-group{gap:9px!important}
+ body.krim-global-shell .krim-booking-footer .footer-bottom{font-size:11px!important}
+}
+@media(max-width:380px){body.krim-global-shell .krim-booking-footer .footer-navigation{grid-template-columns:1fr!important}}
+</style>
+
+<style id="krim-booking-brand-cleanup">
+/* Keep the masthead brand clear; remove the logo's embedded strapline/acronym text. */
+body.krim-global-shell header.topbar .brand{display:flex!important;align-items:center!important;gap:12px!important;text-decoration:none!important}
+body.krim-global-shell header.topbar .brand img{display:block!important;width:42px!important;height:42px!important;max-width:42px!important;object-fit:contain!important;flex:none!important}
+body.krim-global-shell header.topbar .brand .booking-brand-name{display:block!important;color:#09243D!important;font:800 17px/1.2 Manrope,sans-serif!important;letter-spacing:.015em!important;white-space:nowrap!important}
+@media(max-width:600px){body.krim-global-shell header.topbar .brand{gap:9px!important}body.krim-global-shell header.topbar .brand img{width:36px!important;height:36px!important}body.krim-global-shell header.topbar .brand .booking-brand-name{font-size:15px!important}}
+</style>
+</head>
+<body class="krim-global-shell"><a class="krim-skip" href="#main">Skip to content</a>
+<div class="shell">
+<div class="topline"></div>
+<header class="topbar" id="page-top">
+  <a class="brand" href="../index.html" aria-label="KRIM Customer homepage">
+    <img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71">
+  </a>
+  <div class="top-actions">
+    <span class="staging-pill"><span class="dot"></span>Public staging preview</span>
+    <a class="btn btn-secondary workspace-link" href="shipment-list.html">Shipment overview ↗</a>
+    <button class="nav-toggle" id="customer-nav-toggle" type="button" aria-expanded="false" aria-controls="customer-primary-nav" aria-label="Open navigation">☰</button>
+  </div>
+</header>
+<nav class="customer-nav" id="customer-primary-nav" aria-label="Primary customer navigation">
+  <a href="../index.html">Customer homepage</a>
+  <a href="shipment-list.html">Shipment overview</a>
+  <a href="shipment-create.html">Shipment creation</a>
+  <a href="active-shipments.html">Active shipments</a>
+  <a href="shipment-details.html">Shipment details</a>
+  <a href="shipment-timeline.html">Shipment timeline</a>
+  <a href="booking-request.html" aria-current="page">Booking request</a>
+  <a href="../../../index.html" class="nav-home">KRIM homepage ↗</a>
+</nav>
+<div class="layout">
+  <aside class="rail" aria-label="Shipment journey">
+    <div class="rail-label">Customer operations</div>
+    <div class="rail-card">
+      <div class="rail-item active"><span class="rail-num">01</span><div><div class="rail-title">Shipment request</div><div class="rail-sub">Route & cargo details</div></div></div>
+      <div class="rail-item"><span class="rail-num">02</span><div><div class="rail-title">Pricing & service</div><div class="rail-sub">Approved tariff or partner bids</div></div></div>
+      <div class="rail-item"><span class="rail-num">03</span><div><div class="rail-title">Review & accept</div><div class="rail-sub">Choose an available offer</div></div></div>
+      <div class="rail-item"><span class="rail-num">04</span><div><div class="rail-title">Provider payment</div><div class="rail-sub">Direct provider payment terms</div></div></div>
+    </div>
+    <div class="rail-note"><b style="color:#344b68">One connected platform</b><br>Shipment, quote, partner assignment and tracking must share the same verified shipment record. The customer pays the contracting logistics provider directly; KRIM does not collect or settle freight funds. A booking request is not a confirmed dispatch.</div>
+  </aside>
+  <main class="main" id="main">
+    <div class="crumb"><a href="../index.html">Customer homepage</a><span>/</span>Shipment management<span>/</span><b>Booking request</b></div>
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow"><i></i> Global shipment intake · Customer workspace</div>
+        <h1>One shipment request.<br>A world of logistics possibilities.</h1>
+        <p>Create a shipment request for domestic or cross-border freight. Choose origin and destination across countries, describe the cargo, and state your preferred movement. KRIM must separately validate service coverage, cargo eligibility, compliance, partner capacity and an approved price before a shipment can be booked.</p>
+        <div class="hero-meta"><span class="hero-tag">🌍 Multi-country route planning</span><span class="hero-tag">🚛 Road · 🚆 Rail · 🚢 Ocean · ✈️ Air</span><span class="hero-tag">🔐 Secure customer organization</span></div>
+      </div>
+    </section>
+    <div class="booking-hold" role="status" aria-live="polite"><strong>Booking integrity safeguard · submission currently paused</strong><br>The production booking RPC has a documented conflict with mandatory shipment corridor controls. Booking remains disabled until the atomic mode-aware backend fix is tested and approved. Notifications remain mandatory for release: the booking-created event must create an in-app record with history, delivery state and retry handling; essential service/security alerts cannot be disabled, and marketing preferences stay separate. Customer email / push delivery is not yet verified end-to-end, so no delivery is claimed here.</div>
+    <div class="progress" aria-label="Booking progress">
+      <div class="progress-step current"><span class="n">1</span><div><b>Shipment details</b><small>Current step</small></div></div>
+      <div class="progress-step"><span class="n">2</span><div><b>Rate & service</b><small>Next</small></div></div>
+      <div class="progress-step"><span class="n">3</span><div><b>Quote review</b><small>After pricing</small></div></div>
+      <div class="progress-step"><span class="n">4</span><div><b>Partner payment</b><small>Direct provider invoice</small></div></div>
+    </div>
+    <div class="journey-banner"><span class="journey-chip">01 · Create</span><span class="journey-chip">02 · Validate</span><span class="journey-chip">03 · Price</span><span class="journey-chip">04 · Book</span><span><b>Global rule:</b> geographic place search does not activate a market or guarantee freight service.</span></div>
+    <div class="content-grid">
+      <section class="panel">
+        <div class="panel-head"><div><h2>Build your shipment profile</h2><p>Start with the international route, select a transport preference, and describe your freight accurately.</p></div><span class="required"><span class="req">*</span> Required fields</span></div>
+        <div class="panel-body">
+          <form id="form-booking" novalidate>
+            <div class="section-label">01 / Global route planning</div>
+            <div class="field-grid">
+              <div class="field full">
+                <label for="booking-origin">Origin location / dispatch hub <span class="req">*</span></label>
+                <div class="global-route-grid"><div class="global-place"><label class="sr-only" for="origin-search">Search origin worldwide</label><input id="origin-search" type="search" autocomplete="off" required placeholder="Search city, airport, port or address worldwide"><div id="origin-results" class="place-results" role="listbox" aria-label="Origin search results" hidden></div><input id="booking-origin" type="hidden"></div><div class="route-arrow" aria-hidden="true">→</div><div class="global-place"><label class="sr-only" for="destination-search">Search destination worldwide</label><input id="destination-search" type="search" autocomplete="off" required placeholder="Search destination worldwide"><div id="destination-results" class="place-results" role="listbox" aria-label="Destination search results" hidden></div><input id="booking-destination" type="hidden"></div></div>
+                <div class="hint">Search worldwide for cities, towns, airports, seaports, terminals and addresses. Select a suggested result for each endpoint. These results identify geography only; they do not confirm an active market, a freight lane, customs clearance or carrier coverage.</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="section-label">02 / Route type</div>
+            <div class="field-grid"><div class="field full"><label for="booking-route-type">Route arrangement <span class="req">*</span></label><select id="booking-route-type" required><option value="door_to_door">Door-to-door pickup and delivery</option><option value="airport_to_airport">Airport-to-airport</option><option value="port_to_port">Seaport-to-seaport</option><option value="terminal_to_terminal">Terminal / rail hub to terminal / rail hub</option><option value="warehouse_to_warehouse">Warehouse-to-warehouse</option><option value="domestic">Domestic movement within one country</option><option value="cross_border">Cross-border / international movement</option><option value="first_last_mile">First-mile / last-mile connection</option><option value="multimodal_end_to_end">End-to-end multimodal logistics</option></select><div class="hint">Choose the route arrangement that best describes the request. KRIM records it as a preference; actual route legs and handoffs must be confirmed.</div></div></div>
+            <div class="divider"></div>
+            <div class="section-label">03 / Transport network preference</div>
+            <div class="field-grid">
+              <div class="field full"><label for="booking-transport-mode">Preferred transport mode <span class="req">*</span></label><select id="booking-transport-mode" required><option value="multimodal">Multimodal — combine modes where feasible</option><option value="road">Road freight / trucking</option><option value="rail">Rail freight</option><option value="ocean">Ocean / sea freight</option><option value="air">Air freight</option><option value="warehouse_transfer">Warehouse / distribution transfer</option><option value="specialist">Specialist / heavy or project cargo</option></select><div class="hint">Your preference is saved on the shipment record. KRIM must still confirm geographic feasibility, customs or trade requirements, available partners, capacity and pricing before accepting a booking.</div></div>
+            </div>
+            <div class="section-label">04 / Service expectation</div>
+            <div class="field-grid">
+              <div class="field full"><label for="booking-service-tier">Service tier <span class="req">*</span></label><select id="booking-service-tier" required><option value="surface_express">Surface Express — road / surface network</option><option value="air_priority">Air Priority — air service (availability must be confirmed)</option><option value="heavy_haul">Heavy Haul — specialist capacity (availability must be confirmed)</option></select><div class="hint">This selection is passed to the quote workflow. It does not guarantee a mode, carrier, serviceability, transit time, or price; those require backend confirmation.</div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="section-label">05 / Cargo profile</div>
+            <div class="field-grid">
+              <div class="field full"><label for="booking-goods">Goods description <span class="req">*</span></label><input id="booking-goods" name="goods" type="text" maxlength="500" required autocomplete="off" placeholder="e.g. packaged consumer goods, machinery parts"><div class="hint">Describe the goods accurately. Restricted, dangerous or regulated cargo may require additional compliance review.</div></div>
+              <div class="field"><label for="booking-weight">Gross shipment weight (kg) <span class="req">*</span></label><input id="booking-weight" name="weight" type="number" min="0.01" max="100000000" step="0.01" required inputmode="decimal" placeholder="e.g. 1250"><div class="hint">Enter total gross weight in kilograms.</div></div>
+              
+            </div>
+            <div class="form-footer">
+              <div class="secure-note"><span class="secure-icon">✓</span><span>Protected by KRIM sign-in and backend authorization.<br>Submission creates a shipment request—not a paid or dispatched booking.</span></div>
+              <button class="btn btn-primary" type="submit" id="btn-submit-booking" disabled>Submit booking request <span aria-hidden="true">→</span></button>
+            </div>
+          </form>
+          <div id="booking-feedback" class="feedback" role="status" aria-live="polite"></div>
+          <div class="journey-banner" style="margin-top:14px"><span><b>Can't find your exact village, locality or route?</b> Keep the original location and ask KRIM to review coverage.</span><a class="btn btn-secondary" id="coverage-review-link" href="../../shipper/coverage-review.html">Request coverage review →</a></div>
+        </div>
+      </section>
+      <aside>
+        <section class="panel side-panel">
+          <h3 class="side-title">Route preview</h3>
+          <div class="route-preview">
+            <div class="route-label">Selected movement</div>
+            <div class="route-line"><div class="route-track"><span class="point"></span><span class="line"></span><span class="point"></span></div><div style="min-width:0;flex:1"><div class="route-city" id="origin-preview"><span class="route-placeholder">Origin not selected</span><small>Pickup / dispatch location</small></div><div style="height:18px"></div><div class="route-city" id="destination-preview"><span class="route-placeholder">Destination not selected</span><small>Delivery / receiving location</small></div></div></div>
+          </div>
+          <div class="summary-row"><span>Goods</span><strong id="goods-preview">Not provided</strong></div>
+          <div class="summary-row"><span>Gross weight</span><strong id="weight-preview">— kg</strong></div>
+          <div class="summary-row"><span>Route arrangement</span><strong id="route-type-preview">Door-to-door</strong></div>
+          <div class="summary-row"><span>Transport preference</span><strong id="mode-preview">Multimodal</strong></div>
+          <div class="summary-row"><span>Requested service tier</span><strong id="service-preview">Surface Express</strong></div>
+          <div class="summary-row"><span>Customer account</span><strong id="org-preview">Verifying access…</strong></div>
+          <div class="summary-row"><span>Request status</span><strong>Draft / awaiting pricing</strong></div>
+          <div class="notice"><b>Global serviceability &amp; pricing integrity</b>A country appearing in place search does not mean KRIM is active there. No freight price, transit time, customs clearance, carrier or delivery commitment is implied here. Quotes require an eligible route, approved tariff or valid partner offer, capacity and compliance checks. KRIM does not collect freight payments on this page or elsewhere under the current partner-direct launch model.</div>
+        </section>
+        <section class="panel side-panel" style="margin-top:16px">
+          <h3 class="side-title">Your global shipment journey</h3>
+          <div class="workflow-list">
+            <div class="workflow-row"><span class="workflow-icon">1</span><div><b>Register shipment</b><small>Server-side validation and organization-scoped record creation.</small></div></div>
+            <div class="workflow-row"><span class="workflow-icon">2</span><div><b>Validate serviceability</b><small>Check market status, route feasibility, cargo eligibility and operational coverage.</small></div></div><div class="workflow-row"><span class="workflow-icon">3</span><div><b>Request real pricing</b><small>Use an approved tariff or a supported, valid partner-offer workflow.</small></div></div>
+            <div class="workflow-row"><span class="workflow-icon">4</span><div><b>Accept quote &amp; confirm provider</b><small>Service dispatch follows valid quote acceptance, an accepted partner assignment and required compliance checks. The customer pays the contracting provider directly under its invoice and agreed terms.</small></div></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+<footer class="footer krim-booking-footer" aria-label="KRIM site footer">
+  <div class="footer-brand">
+    <a class="footer-brand-link" href="../../../index.html" aria-label="KRIM Logistics homepage">
+      <span class="footer-brand-name">KRIM Logistics</span>
+    </a>
+    <p>Global Logistics Operating System</p>
+    <span>Knowledge · Reliability · Integration · Movement</span>
+  </div>
+  <nav class="footer-navigation" aria-label="Footer navigation">
+    <div class="footer-group">
+      <h2>Customer workspace</h2>
+      <a href="../index.html">Customer homepage</a>
+      <a href="shipment-list.html">Shipment overview</a>
+      <a href="active-shipments.html">My shipments</a>
+    </div>
+    <div class="footer-group">
+      <h2>KRIM Logistics</h2>
+      <a href="../../../index.html">KRIM homepage</a>
+      <a href="../../../terms.html">Terms</a>
+    </div>
+  </nav>
+  <div class="footer-bottom">
+    <span>© <span id="krim-footer-year">2026</span> KRIM Logistics. All rights reserved.</span>
+    <span>Global logistics, connected responsibly.</span>
+  </div>
+</footer>
+</div>
+<script>
+(function(){
+  const year=document.getElementById("krim-footer-year");if(year)year.textContent=String(new Date().getFullYear());
+  const button=document.getElementById('customer-nav-toggle');
+  const nav=document.getElementById('customer-primary-nav');
+  if(!button||!nav)return;
+  function close(){nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation');button.textContent='☰'}
+  button.addEventListener('click',()=>{const open=!nav.classList.contains('open');nav.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close navigation':'Open navigation');button.textContent=open?'×':'☰'});
+  nav.addEventListener('click',event=>{if(event.target.closest('a'))close()});
+  document.addEventListener('click',event=>{if(!nav.contains(event.target)&&!button.contains(event.target))close()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')close()});
+  window.addEventListener('resize',()=>{if(window.innerWidth>1050)close()});
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  const STAGING_REVIEW = location.hostname.endsWith('.krim-staging.pages.dev');
+  const stagePill=document.querySelector('.staging-pill');
+  if(stagePill&&!STAGING_REVIEW) stagePill.hidden=true;
+  // Fail closed until the documented production RPC/trigger contract defect is remediated and verified.
+  const BOOKING_CREATION_RELEASED = false;
+  const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+  const client = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+  let currentUserOrgId = null;
+  let isReady = false;
+  let submitting = false;
+  const BOOKING_REQUEST_STORAGE_KEY = "krim_global_booking_request_id";
+  function newBookingRequestId(){
+    if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      const bytes = new Uint8Array(16); window.crypto.getRandomValues(bytes); bytes[6]=(bytes[6]&15)|64; bytes[8]=(bytes[8]&63)|128;
+      const hex=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+      return hex.slice(0,8)+"-"+hex.slice(8,12)+"-"+hex.slice(12,16)+"-"+hex.slice(16,20)+"-"+hex.slice(20);
+    }
+    throw new Error("Secure booking reference generation is unavailable in this browser.");
+  }
+  function getBookingRequestId(){
+    let id=null;
+    try {
+      id=window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY);
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||"")) return id;
+      id=newBookingRequestId();
+      window.sessionStorage.setItem(BOOKING_REQUEST_STORAGE_KEY,id);
+      if(window.sessionStorage.getItem(BOOKING_REQUEST_STORAGE_KEY)!==id) throw new Error("Request reference could not be saved");
+      return id;
+    } catch (_) {
+      throw new Error("KRIM could not securely save this booking's retry reference in browser session storage. Enable browser storage and reload; no shipment request was sent.");
+    }
+  }
+  function clearBookingRequestId(){ try { window.sessionStorage.removeItem(BOOKING_REQUEST_STORAGE_KEY); } catch (_) {} }
+  const $ = id => document.getElementById(id);
+  const form = $("form-booking"), button = $("btn-submit-booking"), feedback = $("booking-feedback");
+  function showFeedback(message, type){
+    feedback.textContent = message;
+    feedback.className = "feedback show " + (type || "info");
+  }
+  function escapeHtml(value){
+    return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  }
+  let originPlace = null;
+  let destinationPlace = null;
+  const placeSearchTimers = {};
+  function placeLabel(place){return place ? (place.display_name || [place.name,place.state,place.country].filter(Boolean).join(", ")) : "";}
+  function updatePreview(){
+    const origin=placeLabel(originPlace), destination=placeLabel(destinationPlace);
+    $("origin-preview").innerHTML=origin?escapeHtml(origin)+"<small>Pickup / dispatch location</small>":'<span class="route-placeholder">Origin not selected</span><small>Pickup / dispatch location</small>';
+    $("destination-preview").innerHTML=destination?escapeHtml(destination)+"<small>Delivery / receiving location</small>":'<span class="route-placeholder">Destination not selected</span><small>Delivery / receiving location</small>';
+    $("goods-preview").textContent=$("booking-goods").value.trim()||"Not provided";
+    const weight=Number($("booking-weight").value);
+    const globalContext=window.KRIM_GLOBAL_CONTEXT;
+    $("weight-preview").textContent=Number.isFinite(weight)&&weight>0?(globalContext&&globalContext.formatWeight?globalContext.formatWeight(weight):new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(weight)+" kg"):"— kg";
+    const tier=$("booking-service-tier");
+    $("service-preview").textContent=tier.options[tier.selectedIndex]?.textContent.split(" — ")[0]||"Surface Express";
+    const mode=$("booking-transport-mode");
+    $("mode-preview").textContent=mode.options[mode.selectedIndex]?.textContent.split(" — ")[0]||"Multimodal";
+    const routeType=$("booking-route-type");
+    $("route-type-preview").textContent=routeType.options[routeType.selectedIndex]?.textContent.split(" — ")[0]||"Door-to-door";
+    const coverageLink=$("coverage-review-link");
+    if(coverageLink){const params=new URLSearchParams();if(origin)params.set("origin",origin);if(destination)params.set("destination",destination);params.set("route_type",routeType.value);params.set("mode",mode.value.toUpperCase());if(Number.isFinite(weight)&&weight>0)params.set("weight",String(weight));coverageLink.href="../../shipper/coverage-review.html"+(params.toString()?"?"+params.toString():"");}
+    button.disabled=!isReady||submitting;
+  }
+  function normalizePlace(feature){
+    const p=feature&&feature.properties||{}, coords=feature&&feature.geometry&&feature.geometry.coordinates||[];
+    const countryCode=String(p.countrycode||p.country_code||"").toUpperCase();
+    const city=p.city||p.town||p.village||p.municipality||p.county||p.name||"";
+    if(!city||!p.country||!/^[A-Z]{2}$/.test(countryCode)||coords.length<2)return null;
+    const state=String(p.state||p.region||"").slice(0,160), country=String(p.country).slice(0,160);
+    const featureName=String(p.name||"").trim();
+    const label=[featureName&&featureName.toLowerCase()!==String(city).toLowerCase()?featureName:"",String(city),state,country].filter(Boolean).filter((v,i,a)=>a.findIndex(x=>x.toLowerCase()===v.toLowerCase())===i).join(", ");
+    const rawType=String(p.osm_value||p.type||"place").toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||"place";
+    return {name:String(city).slice(0,160),city:String(city).slice(0,160),state,country,country_code:countryCode,latitude:Number(coords[1]),longitude:Number(coords[0]),display_name:label.slice(0,240),place_type:rawType};
+  }
+  function drawPlaceResults(kind,features,query){
+    const box=$(kind+"-results");box.replaceChildren();
+    const valid=(features||[]).map(normalizePlace).filter(Boolean);
+    if(!valid.length){const empty=document.createElement("div");empty.className="place-empty";empty.textContent=query?"No matching place found. Try a city, airport, port, or a more specific search.":"Type at least 3 characters to search globally.";box.appendChild(empty);box.hidden=false;return;}
+    valid.forEach(place=>{
+      const item=document.createElement("button");item.type="button";item.className="place-result";item.setAttribute("role","option");
+      item.innerHTML=escapeHtml(place.display_name)+'<small>'+escapeHtml([place.place_type,place.country_code].filter(Boolean).join(" · "))+'</small>';
+      item.addEventListener("click",()=>{
+        if(kind==="origin"){originPlace=place;$("booking-origin").value=place.name;$("origin-search").value=placeLabel(place);}
+        else{destinationPlace=place;$("booking-destination").value=place.name;$("destination-search").value=placeLabel(place);}
+        box.hidden=true;updatePreview();
+      });box.appendChild(item);
+    });box.hidden=false;
+  }
+  function attachGlobalPlaceSearch(kind){
+    const input=$(kind+"-search");
+    input.addEventListener("input",()=>{
+      if(kind==="origin"){originPlace=null;$("booking-origin").value="";}else{destinationPlace=null;$("booking-destination").value="";}
+      updatePreview();clearTimeout(placeSearchTimers[kind]);const query=input.value.trim(),box=$(kind+"-results");
+      if(query.length<3){drawPlaceResults(kind,[],query);return;}
+      box.hidden=false;box.innerHTML='<div class="place-empty">Searching the global place directory…</div>';
+      placeSearchTimers[kind]=setTimeout(async()=>{
+        try{
+          const response=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(query)+"&limit=7&lang=en",{headers:{Accept:"application/json"}});
+          if(!response.ok)throw new Error("Global place search is temporarily unavailable.");
+          const result=await response.json();if(input.value.trim()===query)drawPlaceResults(kind,result.features||[],query);
+        }catch(error){box.replaceChildren();const empty=document.createElement("div");empty.className="place-empty";empty.textContent="Global search could not connect. Check your internet and try again.";box.appendChild(empty);box.hidden=false;}
+      },350);
+    });
+  }
+  function loadBookingLocations(){
+    attachGlobalPlaceSearch("origin");attachGlobalPlaceSearch("destination");
+    document.addEventListener("click",event=>{["origin","destination"].forEach(kind=>{const box=$(kind+"-results");if(!box.contains(event.target)&&event.target!==$(kind+"-search"))box.hidden=true;});});
+  }
+  async function initBooking(){
+    if(STAGING_REVIEW){
+      $('org-preview').textContent='Staging · no account required';
+      loadBookingLocations();
+      showFeedback('STAGING REVIEW MODE · Public preview without sign-in. You can inspect the global booking form and search places. Submission is disabled; no customer data is loaded and no shipment or partner opportunity can be created.', 'info');
+      updatePreview();
+      button.disabled=true;
+      return;
+    }
+    try{
+      const {data,error} = await client.auth.getSession();
+      if(error) throw error;
+      const session = data && data.session;
+      if(!session){
+        const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace("../../../auth/login.html?role=customer&next=" + returnTo);
+        return;
+      }
+      $("session-identity-node").textContent = session.user.email || "Authenticated customer";
+      const {data:memberships,error:membershipError} = await client.from("krim_organization_members").select("organization_id,role,status").eq("user_id",session.user.id).eq("status","active");
+      if(membershipError) throw membershipError;
+      const activeMemberships=Array.isArray(memberships)?memberships:[];
+      const orgIds=[...new Set(activeMemberships.map(m=>m.organization_id).filter(Boolean))];
+      if(!orgIds.length) throw new Error("Your account is not linked to an active KRIM organization. Ask your organization administrator to provision customer access.");
+      const {data:organizations,error:organizationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",orgIds);
+      if(organizationError) throw organizationError;
+      const orgById=new Map((organizations||[]).map(org=>[String(org.id),org]));
+      function roleKey(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");}
+      function isCustomerMembership(m){
+        const org=orgById.get(String(m.organization_id));
+        if(!org || String(org.status||"").toLowerCase()!=="active") return false;
+        const role=roleKey(m.role);
+        if(/customer|shipper|client/.test(role)) return true;
+        if(/platform_admin|superadmin|partner|carrier|driver|warehouse|customs|finance|operations|enterprise|dispatcher/.test(role)) return false;
+        return /customer|shipper|client/.test(roleKey(org.organization_type||org.organization_type_code));
+      }
+      const customerMemberships=activeMemberships.filter(isCustomerMembership);
+      if(!customerMemberships.length) throw new Error("No active customer organization membership was found for this account. Sign in to the Customer Workspace or ask your organization administrator to provision customer access.");
+      if(customerMemberships.length>1) throw new Error("This account has multiple active customer organizations. Ask your organization administrator to set the intended booking organization before creating a shipment.");
+      currentUserOrgId=customerMemberships[0].organization_id;
+      $("org-preview").textContent = "Active organization verified";
+      loadBookingLocations();
+      if(!BOOKING_CREATION_RELEASED){
+        isReady = false;
+        updatePreview();
+        button.disabled = true;
+        showFeedback("LIVE BOOKING TEMPORARILY PAUSED · A production audit identified a shipment-creation RPC / mandatory corridor-trigger contract defect. This safeguard prevents failed or partial requests. No shipment will be submitted until the backend fix passes staging verification and is released. Do not retry from a legacy booking page.", "error");
+        return;
+      }
+      isReady = true;
+      updatePreview();
+      showFeedback("Secure session and active organization verified. Complete the required fields to create a shipment request.", "info");
+    }catch(err){
+      $("org-preview").textContent = "Access not verified";
+      showFeedback("Booking setup could not be completed: " + (err && err.message ? err.message : "Unknown error") + " Refresh after resolving the access or location issue.", "error");
+      button.disabled = true;
+    }
+  }
+  ["booking-goods","booking-weight"].forEach(id => $(id).addEventListener("input",updatePreview));
+  $("booking-service-tier").addEventListener("change",updatePreview);
+  $("booking-transport-mode").addEventListener("change",updatePreview);
+  $("booking-route-type").addEventListener("change",updatePreview);
+  form.addEventListener("submit",async function(event){
+    event.preventDefault();
+    if(!isReady || submitting || !currentUserOrgId) return;
+    const goods = $("booking-goods").value.trim();
+    const weight = Number($("booking-weight").value);
+    if(!originPlace||!destinationPlace){showFeedback("Search globally and select both an origin and destination from the suggested places.","error");return;}
+    if(originPlace.latitude===destinationPlace.latitude&&originPlace.longitude===destinationPlace.longitude){showFeedback("Origin and destination must be different places.","error");return;}
+     const routeType=$("booking-route-type").value;
+     const sameCountry=originPlace.country_code===destinationPlace.country_code;
+     if(routeType==="domestic"&&!sameCountry){showFeedback("This route is international. Choose Cross-border / international or select two places in the same country.","error");return;}
+     if(routeType==="cross_border"&&sameCountry){showFeedback("Both selected places are in the same country. Choose Domestic movement or select a destination in another country.","error");return;}
+    // Check both endpoints against active KRIM market mappings before shipment creation.
+    // This prevents a draft being created when the downstream partner-opportunity RPC cannot route it.
+    async function hasActiveMarket(place){
+      const code=String(place.country_code||"").toUpperCase();
+      const city=String(place.city||place.name||"").trim();
+      const region=String(place.state||"").trim();
+      if(!/^[A-Z]{2}$/.test(code)||!city) return false;
+      const {data:country,error:countryError}=await client.from("krim_countries").select("id").eq("code",code).eq("is_active",true).maybeSingle();
+      if(countryError) throw countryError;
+      if(!country) return false;
+      let locationQuery=client.from("krim_locations").select("id,market_id").eq("country_id",country.id).eq("is_active",true).ilike("city",city).not("market_id","is",null).limit(10);
+      if(region) locationQuery=locationQuery.ilike("state_region",region);
+      const {data:locations,error:locationError}=await locationQuery;
+      if(locationError) throw locationError;
+      const marketIds=[...new Set((locations||[]).map(row=>Number(row.market_id)).filter(Number.isSafeInteger))];
+      if(!marketIds.length) return false;
+      const {data:markets,error:marketError}=await client.from("krim_markets").select("id").in("id",marketIds).eq("is_active",true).eq("status","active");
+      if(marketError) throw marketError;
+      const activeMarketIds=(markets||[]).map(row=>Number(row.id)).filter(Number.isSafeInteger);
+      if(!activeMarketIds.length) return false;
+      // A catalogue market marked active is not operational approval. Require
+      // the separate activation-control decision used by the database gate.
+      const {data:controls,error:controlError}=await client.from("krim_market_activation_controls").select("market_id").in("market_id",activeMarketIds).eq("operational_status","active");
+      if(controlError) throw controlError;
+      return !!(controls||[]).length;
+    }
+    try{
+      const endpointsReady=await Promise.all([hasActiveMarket(originPlace),hasActiveMarket(destinationPlace)]);
+      if(!endpointsReady.every(Boolean)){
+        showFeedback("One or both endpoint markets have not passed KRIM's operational activation control. Your shipment has NOT been created. Contact KRIM for a manual route review. Even when both endpoints are active, the database must still approve the exact corridor, transport mode and mandatory controls.","error");
+        return;
+      }
+    }catch(preflightError){
+      showFeedback("KRIM could not verify active market coverage. Your shipment has NOT been created. Please retry later or contact support.","error");
+      return;
+    }
+    if(!goods || goods.length > 500){showFeedback("Enter a goods description (up to 500 characters).","error");return;}
+    if(!Number.isFinite(weight) || weight <= 0 || weight > 100000000){showFeedback("Enter a valid gross weight greater than zero and within the supported range.","error");return;}
+    submitting = true; button.disabled = true; button.innerHTML = "Creating secure shipment request…";
+    showFeedback("Submitting to the KRIM shipment core. Please keep this page open and do not submit again.", "info");
+    try{
+      const bookingRequestId = getBookingRequestId();
+      const {data,error} = await client.rpc("krim_create_global_shipment_idempotent",{
+        p_customer_organization_id: currentUserOrgId,
+        p_origin_place: originPlace,
+        p_destination_place: destinationPlace,
+        p_goods_description: goods,
+        p_total_weight_kg: weight,
+        p_transport_mode: $("booking-transport-mode").value,
+        p_route_type: $("booking-route-type").value,
+        p_booking_request_id: bookingRequestId
+      });
+      if(error) throw error;
+      let shipmentId = null;
+      if(Array.isArray(data) && data.length) shipmentId = data[0].id || data[0].shipment_id;
+      else if(data && typeof data === "object") shipmentId = data.id || data.shipment_id;
+      if(!shipmentId){
+        // The RPC returned without a usable identifier; do not invite a blind retry that could duplicate a shipment.
+        submitting = true; button.disabled = true;
+        showFeedback("KRIM returned a response but no shipment reference. To prevent a duplicate, this form is locked for now. Check My Shipments or contact support before trying again.", "error");
+        return;
+      }
+      clearBookingRequestId();
+      showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
+      button.innerHTML = "Shipment created ✓";
+      window.setTimeout(()=>{window.location.href="../../shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value)+"&route_type="+encodeURIComponent($("booking-route-type").value);},1000);
+    }catch(err){
+      submitting = false;
+      button.disabled = !isReady;
+      button.innerHTML = 'Create shipment request <span aria-hidden="true">→</span>';
+      showFeedback("Shipment request failed: " + (err && err.message ? err.message : "Unknown error") + " No success has been assumed. If the connection timed out, check My Shipments before retrying.", "error");
+    }
+  });
+  Promise.resolve(window.KRIM_GLOBAL_CONTEXT && window.KRIM_GLOBAL_CONTEXT.ready).catch(()=>{}).finally(initBooking);
+})();
+</script>
+<style id="krim-homepage-matched-logo-sizing">
+/* Match the KRIM homepage wordmark sizing exactly: 180px desktop, 150px tablet, 132px compact mobile. */
+body.krim-global-shell header.topbar .brand{flex:0 1 180px!important;width:180px!important;min-width:0!important;max-width:180px!important;gap:0!important;overflow:visible!important}
+body.krim-global-shell header.topbar .brand img{display:block!important;visibility:visible!important;opacity:1!important;width:180px!important;height:auto!important;max-width:180px!important;max-height:58px!important;object-fit:contain!important;object-position:left center!important;flex:none!important;border-radius:0!important}
+@media(max-width:760px){body.krim-global-shell header.topbar .brand{flex:0 1 150px!important;width:150px!important;max-width:150px!important}body.krim-global-shell header.topbar .brand img{width:150px!important;max-width:150px!important;max-height:48px!important}}
+@media(max-width:420px){body.krim-global-shell header.topbar .brand{flex:0 1 132px!important;width:132px!important;max-width:132px!important}body.krim-global-shell header.topbar .brand img{width:132px!important;max-width:132px!important;max-height:42px!important}}
+</style>
+</body>
+</html>
