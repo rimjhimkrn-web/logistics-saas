@@ -58,7 +58,7 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
       <div class="field full"><label for="mode">Preferred transport mode</label><select id="mode" name="mode"><option value="road">Road</option><option value="rail">Rail</option><option value="ocean">Ocean freight</option><option value="air">Air freight</option><option value="multimodal">Multimodal</option></select></div>
       <div class="field full"><label for="description">Cargo description</label><textarea id="description" name="description" maxlength="500" required placeholder="Describe the goods, packaging and handling needs accurately."></textarea><small>Maximum 500 characters. Never omit regulated, hazardous or special-handling information.</small></div>
      </div>
-     <div class="form-actions"><button class="btn primary" id="save" type="submit" disabled>Save cargo profile →</button><a class="btn" href="../../../shipments/shipment-create.html">Start a shipment draft</a></div>
+     <div class="form-actions"><button class="btn primary" id="save" type="submit" disabled>Save cargo profile →</button><a class="btn" href="../../shipments/shipment-create.html">Start a shipment draft</a></div>
      <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true">Checking your secure account session…</div>
     </form>
    </div>
@@ -90,7 +90,7 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  function msg(s,error){$('status').textContent=s;$('status').className='status'+(error?' error':'')}
  function updateCount(){$('count').textContent=profiles.length+' / 30 SAVED'}
- function bookingUrl(id){return '../../../shipments/shipment-create.html?cargo_profile_id='+encodeURIComponent(id)}
+ function bookingUrl(id){return '../../shipments/shipment-create.html?cargo_profile_id='+encodeURIComponent(id)}
  async function persist(){const next={...(prefs||{}),cargo_profiles:profiles};const {error}=await client.from('krim_user_app_preferences').upsert({user_id:user.id,preferences:next,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;prefs=next}
  function render(){
   updateCount();
