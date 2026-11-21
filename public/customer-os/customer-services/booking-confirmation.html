@@ -1,52 +1,125 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1f3a"><title>Shipment Request Status | KRIM Logistics</title><meta name="description" content="Review the shipment request saved to your authorized KRIM customer organization.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="Review a shipment request confirmation and its recorded status in KRIM Customer OS.">
+<title>Booking Confirmation | KRIM Customer OS</title>
+<link rel="icon" href="../../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../../config.js"></script>
+<script defer src="../assets/customer-os-globalization.js"></script>
 <style>
-:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#182943;background:#f4f7fc;--navy:#0b1f3a;--blue:#1769e8;--teal:#0c8b8b;--line:#dfe7f2;--muted:#64748b}
-*{box-sizing:border-box}body{margin:0}.top{background:var(--navy);color:#dce9fa;padding:12px 5vw;font-size:10px;letter-spacing:.15em;font-weight:850}.wrap{width:min(1000px,calc(100% - 30px));margin:auto}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0}.brand{font-weight:950;color:var(--navy);text-decoration:none}.brand small{display:block;font-size:9px;color:var(--muted);letter-spacing:.13em}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:11px 14px;background:white;color:#174ea6;text-decoration:none;font-size:12px;font-weight:850}.btn.primary{background:var(--blue);color:white;border-color:var(--blue)}.hero{background:linear-gradient(115deg,#0b1f3a,#164879 68%,#0c8b8b);border-radius:22px;padding:clamp(24px,4vw,40px);color:white}.eyebrow{font-size:10px;letter-spacing:.16em;font-weight:900;color:#a4f0e4}.hero h1{font-size:clamp(29px,4vw,42px);line-height:1.1;margin:11px 0}.hero p{max-width:760px;color:#dce9fa;line-height:1.7}.card{margin:16px 0;background:white;border:1px solid var(--line);border-radius:16px;padding:20px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{border:1px solid #e5ebf4;border-radius:12px;padding:13px;min-width:0}.label{font-size:10px;color:var(--muted);font-weight:850;letter-spacing:.1em;text-transform:uppercase}.value{font-size:15px;font-weight:850;color:var(--navy);overflow-wrap:anywhere;margin-top:6px}.notice{padding:13px;border-radius:11px;background:#edf5ff;border:1px solid #d8e5f4;color:#173b72;font-size:12px;line-height:1.7}.notice.error{background:#fff0ef;border-color:#f0c6c2;color:#9d2520}.notice.warn{background:#fff8e8;border-color:#f0dfb9;color:#76551b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.status-pill{display:inline-block;background:#e5f7ef;color:#087e5b;padding:6px 10px;border-radius:999px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.muted{color:var(--muted);font-size:12px;line-height:1.7}@media(max-width:560px){.grid{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}}
-</style><link rel="stylesheet" href="../assets/customer-os-global.css">
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
-</head><body>
-<div class="top">KRIM GLOBAL LOGISTICS OS · SHIPMENT LIFECYCLE</div><main class="wrap">
-<header class="nav"><a class="brand" href="../../../index.html">◈ KRIM LOGISTICS<small>GLOBAL LOGISTICS OPERATING SYSTEM</small></a><a class="btn" href="../../../app/customer/index.html">Customer Workspace</a></header>
-<section class="hero"><div class="eyebrow">SHIPMENT REQUEST · RECORD CONFIRMATION</div><h1 id="headline">Checking your shipment record…</h1><p id="intro">KRIM will show the saved shipment only after your session, active organization membership and record ownership checks pass.</p><div class="actions"><a class="btn primary" id="list-link" href="../customer-services/shipment-list.html">View My Shipments →</a><a class="btn" id="new-link" href="../../../public/shipments/shipment-create.html">Create another shipment</a></div></section>
-<section class="card"><div id="status" class="notice" role="status" aria-live="polite">Verifying secure session and shipment ownership…</div><div id="details" class="grid" style="margin-top:14px"></div></section>
-<section class="card"><h2 style="color:#0b1f3a;margin-top:0">What happens next?</h2><p class="muted">A saved shipment request is not a confirmed carrier booking. Partner responses, an accepted quote, carrier assignment, payment verification, transit milestones and proof of delivery are separate states. KRIM will not mark these complete unless the corresponding backend record confirms them.</p></section>
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--deep:#0754A4;--pale:#EAF5FC;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--paper:#F3F7FB;--white:#fff;--shadow:0 16px 42px rgba(9,36,61,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 Inter,system-ui,sans-serif}a{color:inherit;text-decoration:none}button{font:inherit}.topline{height:5px;background:linear-gradient(90deg,var(--navy),var(--blue),#67b7ff)}.topbar{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px clamp(16px,4vw,58px);background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}.brand{display:flex;align-items:center;gap:12px;min-width:0}.brand-name{font-size:17px;font-weight:900;letter-spacing:.015em;color:var(--navy)}.brand-sub{font-size:10px;color:var(--muted);letter-spacing:.11em;text-transform:uppercase}.nav-toggle{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);font-size:21px}.customer-nav{position:sticky;top:76px;z-index:20;display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:9px clamp(16px,4vw,58px);background:#fff;border-bottom:1px solid var(--line)}.customer-nav a{padding:9px 11px;border-radius:8px;color:#40556b;font-size:11px;font-weight:750}.customer-nav a:hover,.customer-nav a[aria-current=page]{background:var(--pale);color:var(--deep)}.customer-nav .home{margin-left:auto}.wrap{width:min(1160px,calc(100% - 36px));margin:0 auto}.main{padding:34px 0 58px}.crumb{font-size:12px;color:#72849a;margin:0 0 17px}.crumb a{color:var(--deep);font-weight:700}.hero{position:relative;overflow:hidden;padding:clamp(25px,5vw,48px);border-radius:22px;background:linear-gradient(118deg,#09243D 0%,#123B5A 62%,#168FE0 100%);color:#fff;box-shadow:0 18px 42px rgba(9,36,61,.14)}.hero:after{content:"";position:absolute;width:300px;height:300px;right:-110px;top:-160px;border:1px solid #ffffff35;border-radius:50%;box-shadow:0 0 0 36px #ffffff0d,0 0 0 72px #ffffff09}.hero-content{position:relative;z-index:1;max-width:760px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#c7e4ff;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#45B8F0}.hero h1{font-size:clamp(28px,4vw,43px);line-height:1.12;letter-spacing:-.04em;margin:15px 0 11px}.hero p{max-width:680px;margin:0;color:#dceafa;font-size:14px;line-height:1.75}.hero-status{display:inline-flex;align-items:center;gap:8px;margin-top:23px;padding:9px 13px;border:1px solid #ffffff42;border-radius:999px;background:#ffffff12;font-size:11px;font-weight:800}.hero-status i{width:8px;height:8px;border-radius:50%;background:#9ed9ff}.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:20px;margin-top:22px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:21px 23px;border-bottom:1px solid #edf1f6}.panel-head h2{margin:0;color:var(--navy);font-size:16px;font-weight:850}.panel-head p{margin:5px 0 0;color:var(--muted);font-size:12px}.panel-body{padding:22px 23px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{min-width:0;padding:14px;border:1px solid #e6edf4;border-radius:12px;background:#fbfdff}.label{font-size:10px;color:#75869a;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.value{margin-top:6px;font-size:13px;font-weight:750;color:#243b54;overflow-wrap:anywhere}.ref-value{font-size:16px;color:var(--deep)}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:43px;padding:10px 15px;border-radius:10px;background:var(--blue);color:#fff;font-size:12px;font-weight:800}.btn.secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}.btn:hover{filter:brightness(.97)}.side{padding:21px}.side h2{font-size:15px;color:var(--navy);margin:0 0 14px}.step{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid #edf1f6}.step:last-of-type{border-bottom:0}.step-icon{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:var(--pale);color:var(--deep);font-weight:900;flex:none}.step b{display:block;font-size:12px;color:#30465e}.step small{display:block;margin-top:4px;color:#718399;font-size:11px;line-height:1.55}.notice{margin-top:18px;padding:14px 16px;border:1px solid #c9e6f7;border-radius:12px;background:#eff8fd;color:#174a78;font-size:12px;line-height:1.65}.notice.warn{background:#f5f8fb;border-color:#dce5ee;color:#53677e}.notice.error{background:#fff5f4;border-color:#f3d2cf;color:#9b2c24}.footer{background:var(--navy);color:#d5e2ef;border-top:4px solid var(--blue);padding:28px 0 18px}.footer-inner{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}.footer strong{display:block;color:#fff;font-size:20px;font-weight:900}.footer p{margin:7px 0 0;color:#d5e2ef;font-size:12px;line-height:1.7}.footer-links{display:flex;gap:15px;flex-wrap:wrap;align-items:center}.footer-links a{font-size:12px;color:#e2ebf4}.copy{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px;padding-top:14px;border-top:1px solid #ffffff24;color:#d0dce8;font-size:11px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.side h2{grid-column:1/-1}.side .notice{grid-column:1/-1}}
+@media(max-width:700px){.topbar{min-height:68px;padding:9px 15px}.nav-toggle{display:grid;place-items:center}.customer-nav{display:none;position:sticky;top:68px;max-height:calc(100dvh - 76px);overflow:auto;grid-template-columns:1fr;padding:10px 15px;box-shadow:0 12px 24px #09243d18}.customer-nav.open{display:grid}.customer-nav a{background:var(--paper);min-height:42px}.customer-nav .home{margin-left:0}.wrap{width:min(100% - 28px,1160px)}.main{padding-top:22px}.hero{border-radius:17px}.panel-head,.panel-body{padding:18px}.side{display:block}.fields{grid-template-columns:1fr}.footer-inner{display:grid}.copy{flex-direction:column;gap:5px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header class="topbar">
+ <a class="brand" href="../index.html" aria-label="KRIM Customer homepage"><span><span class="brand-name">KRIM Logistics</span><br><span class="brand-sub">Global Logistics Operating System</span></span></a>
+ <button class="nav-toggle" id="toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">☰</button>
+</header>
+<nav class="customer-nav" id="nav" aria-label="Customer navigation">
+ <a href="../index.html">Customer homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">My shipments</a><a href="shipment-create.html">Create shipment</a><a href="booking-request.html">Booking request</a><a class="home" href="../../../index.html">KRIM homepage</a>
+</nav>
+<main class="main wrap">
+ <p class="crumb"><a href="../index.html">Customer workspace</a> / <a href="shipment-list.html">Shipments</a> / Booking confirmation</p>
+ <section class="hero" aria-labelledby="page-title">
+  <div class="hero-content">
+   <div class="eyebrow">Customer workspace · Shipment request</div>
+   <h1 id="page-title">Booking confirmation</h1>
+   <p id="subtitle">Review the recorded outcome of your shipment request. A confirmation reference is not a carrier acceptance, confirmed rate, dispatch or delivery commitment.</p>
+   <div class="hero-status" id="status-pill"><i></i><span id="status-text">Awaiting verified record</span></div>
+  </div>
+ </section>
+ <div class="layout">
+  <section class="panel">
+   <div class="panel-head"><h2 id="record-heading">Request summary</h2><p id="record-caption">Only verified shipment information is displayed.</p></div>
+   <div class="panel-body">
+    <div class="fields" id="fields"><div class="field"><div class="label">Shipment reference</div><div class="value">Loading…</div></div></div>
+    <div class="actions" id="actions"></div>
+    <div class="notice warn" id="feedback" role="status" aria-live="polite">Checking the request reference…</div>
+   </div>
+  </section>
+  <aside class="panel side">
+   <h2>What happens next</h2>
+   <div class="step"><span class="step-icon">1</span><div><b>Request record</b><small>Check that your request appears in the authorized shipment register.</small></div></div>
+   <div class="step"><span class="step-icon">2</span><div><b>Operational review</b><small>Route eligibility, partner capability, capacity and compliance require separate verification.</small></div></div>
+   <div class="step"><span class="step-icon">3</span><div><b>Quote and acceptance</b><small>Pricing and partner acceptance are separate records; neither is assumed by this page.</small></div></div>
+   <div class="step"><span class="step-icon">4</span><div><b>Shipment updates</b><small>Review recorded milestones and available customer notifications as the journey progresses.</small></div></div>
+   <div class="notice">Essential service and security updates are intended to keep customers informed. Marketing preferences are separate from operational notifications.</div>
+  </aside>
+ </div>
 </main>
+<footer class="footer"><div class="wrap">
+ <div class="footer-inner"><div><strong>KRIM Logistics</strong><p>Global Logistics Operating System<br>Knowledge · Reliability · Integration · Movement</p></div>
+ <nav class="footer-links" aria-label="Footer navigation"><a href="../index.html">Customer homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">My shipments</a><a href="../../../index.html">KRIM homepage</a><a href="../../../terms.html">Terms</a></nav></div>
+ <div class="copy"><span>© <span id="year">2026</span> KRIM Logistics. All rights reserved.</span><span>Global logistics, connected responsibly.</span></div>
+</div></footer>
 <script>
 (function(){
 'use strict';
-const client=window.KRIM_SUPABASE||window.supabaseClient,$=id=>document.getElementById(id),params=new URLSearchParams(location.search);
-const shipmentId=Number(params.get('shipment_id'));
-function route(p){return window.krimPath?window.krimPath(p):p}
-function message(text,kind){$('status').textContent=text;$('status').className='notice'+(kind?' '+kind:'')}
-function field(label,value){const box=document.createElement('div');box.className='field';const l=document.createElement('div');l.className='label';l.textContent=label;const v=document.createElement('div');v.className='value';v.textContent=value||'Not recorded';box.append(l,v);$('details').appendChild(box)}
-function escDate(value){if(!value)return 'Not recorded';const d=new Date(value);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
-async function init(){
- $('list-link').href=route('public/customer-os/customer-services/shipment-list.html');
- $('new-link').href=route('public/shipments/shipment-create.html');
- if(!client)throw new Error('KRIM configuration did not load. Refresh this page.');
- const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
- if(!auth?.session){const next=location.pathname+location.search;location.replace(route('auth/login.html')+'?role=customer&next='+encodeURIComponent(next));return}
- if(!Number.isSafeInteger(shipmentId)||shipmentId<=0){$('headline').textContent='Shipment reference required';$('intro').textContent='Open this page from the result of a shipment request or select a shipment from your register.';message('No valid shipment_id was provided. No record was queried.','warn');return}
- const user=auth.session.user;
- const {data:members,error:memberError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',user.id).eq('status','active');if(memberError)throw memberError;
- const orgIds=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!orgIds.length)throw new Error('No active KRIM organization membership was found for this account.');
- const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,organization_type,status').in('id',orgIds).eq('status','active');if(orgError)throw orgError;
- const customerIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));if(!customerIds.length)throw new Error('This account has no active customer, shipper or enterprise organization.');
- const {data:shipment,error:shipmentError}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,origin_location_id,destination_location_id,goods_description,total_weight_kg,status,created_at').eq('id',shipmentId).in('customer_organization_id',customerIds).maybeSingle();if(shipmentError)throw shipmentError;
- if(!shipment){$('headline').textContent='Shipment not found for this organization';$('intro').textContent='KRIM did not reveal any record outside the active customer organizations for this account.';message('The shipment does not exist in your authorized organization scope, or the backend denied access.','error');return}
- const locIds=[...new Set([Number(shipment.origin_location_id),Number(shipment.destination_location_id)].filter(Number.isSafeInteger))];
- const {data:locs,error:locError}=locIds.length?await client.from('krim_locations').select('id,city,state_region,region,location_code').in('id',locIds):{data:[],error:null};if(locError)throw locError;
- const locMap=new Map((locs||[]).map(l=>[Number(l.id),[l.city,l.state_region||l.region,l.location_code].filter(Boolean).join(', ')]));
- $('headline').textContent='Shipment request received';$('intro').textContent='The shipment record was found inside your authorized customer organization. Carrier booking and pricing are not implied by this confirmation.';
- field('Shipment reference',shipment.shipment_number||('#'+shipment.id));field('Operational status',String(shipment.status||'pending').replace(/_/g,' '));field('Origin',locMap.get(Number(shipment.origin_location_id))||'Location label unavailable');field('Destination',locMap.get(Number(shipment.destination_location_id))||'Location label unavailable');field('Cargo description',shipment.goods_description||'Not recorded');field('Total weight',shipment.total_weight_kg==null?'Not recorded':Number(shipment.total_weight_kg).toLocaleString()+' kg');field('Created',escDate(shipment.created_at));
- if(params.get('distribution')==='needs-attention')message('The shipment record exists, but the booking form reported a problem submitting the partner opportunity. Do not submit the shipment again. Check your shipment register or contact KRIM support to verify the backend status.','warn');
- else message('Shipment record verified for your active customer organization. Partner responses, quote, assignment and payment remain separate checks.','');
+const staging=location.hostname.endsWith('.krim-staging.pages.dev');
+const $=id=>document.getElementById(id);
+const nav=$('nav'),toggle=$('toggle');
+function closeNav(){nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open navigation');toggle.textContent='☰'}
+toggle.addEventListener('click',()=>{const open=!nav.classList.contains('open');nav.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');toggle.textContent=open?'×':'☰'});
+nav.addEventListener('click',e=>{if(e.target.closest('a'))closeNav()});
+document.addEventListener('click',e=>{if(!nav.contains(e.target)&&!toggle.contains(e.target))closeNav()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav()});
+window.addEventListener('resize',()=>{if(innerWidth>700)closeNav()});
+$('year').textContent=String(new Date().getFullYear());
+const params=new URLSearchParams(location.search),rawId=params.get('shipment_id');
+function setFeedback(message,kind='warn'){$('feedback').textContent=message;$('feedback').className='notice '+kind}
+function field(label,value,important=false){const box=document.createElement('div');box.className='field';const l=document.createElement('div');l.className='label';l.textContent=label;const v=document.createElement('div');v.className='value'+(important?' ref-value':'');v.textContent=value==null||value===''?'Not recorded':String(value);box.append(l,v);$('fields').append(box)}
+function addLink(label,path,id){const a=document.createElement('a');a.className='btn'+(label==='Shipment overview'?' secondary':'');a.textContent=label+' →';a.href=path+(id?'?shipment_id='+encodeURIComponent(id):'');$('actions').append(a)}
+function statusLabel(s){return String(s||'Not recorded').replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+function sample(){
+ $('status-text').textContent='Illustrative preview · not a real booking';
+ $('record-heading').textContent='Illustrative request summary';
+ $('record-caption').textContent='Sample data only · no real customer or shipment record is loaded.';
+ $('fields').replaceChildren();
+ [['Shipment reference','KRIM-DEMO-2026-001',true],['Request status','Illustrative · not submitted'],['Origin','Example origin · not activated'],['Destination','Example destination · not activated'],['Cargo description','Illustrative packaged goods'],['Gross weight','1,250 kg · illustrative'],['Transport mode','Road · illustrative'],['Requested on','Sample timestamp · not a real event']].forEach(x=>field(x[0],x[1],x[2]));
+ addLink('Shipment overview','shipment-list.html');
+ setFeedback('STAGING REVIEW MODE · Public preview without sign-in. This sample is illustrative only. No database reads or writes occur, and no booking, partner acceptance, rate or delivery is represented.','warn');
 }
-init().catch(err=>{console.error(err);$('headline').textContent='Unable to verify shipment';$('intro').textContent='KRIM could not confirm this record. No booking or payment status has been assumed.';message((err&&err.message)||'Secure record verification failed. Refresh and retry.','error')});
+async function production(){
+ const id=Number(rawId);
+ if(!rawId||!Number.isSafeInteger(id)||id<=0){$('status-text').textContent='Reference required';$('record-heading').textContent='No shipment reference supplied';$('fields').replaceChildren();setFeedback('Open this page from an authorized shipment record. No shipment lookup was performed.','warn');addLink('Shipment overview','shipment-list.html');return}
+ const client=window.KRIM_SUPABASE||window.supabaseClient;
+ if(!client)throw new Error('KRIM secure configuration could not be loaded.');
+ const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
+ if(!auth?.session){location.replace('../../../auth/login.html?role=customer&next='+encodeURIComponent(location.pathname+location.search));return}
+ const userId=auth.session.user.id;
+ const {data:members,error:memberError}=await client.from('krim_organization_members').select('organization_id').eq('user_id',userId).eq('status','active');if(memberError)throw memberError;
+ const orgIds=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!orgIds.length)throw new Error('No active customer organization membership was found.');
+ const {data:orgs,error:orgError}=await client.from('krim_organizations').select('id,organization_type,status').in('id',orgIds).eq('status','active');if(orgError)throw orgError;
+ const customerOrgIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));if(!customerOrgIds.length)throw new Error('No active customer, shipper or enterprise organization is linked to this account.');
+ const {data:s,error}=await client.from('krim_shipments').select('id,shipment_number,customer_organization_id,origin_place_label,destination_place_label,goods_description,total_weight_kg,status,created_at,updated_at,estimated_delivery_at,actual_delivery_at,requested_transport_mode,requested_route_type').eq('id',id).in('customer_organization_id',customerOrgIds).maybeSingle();if(error)throw error;
+ if(!s){$('status-text').textContent='Record not available';$('fields').replaceChildren();setFeedback('Shipment not found inside your authorized customer organizations. No outside-organization record was revealed.','error');addLink('Shipment overview','shipment-list.html');return}
+ const zone=window.KRIM_GLOBAL_CONTEXT?.preferences?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+ const fmtDate=v=>{if(!v)return 'Not recorded';const d=new Date(v);if(Number.isNaN(d.getTime()))return 'Not recorded';try{return new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short',timeZone:zone}).format(d)+' · '+zone}catch{return d.toLocaleString()}};
+ const weight=s.total_weight_kg==null?'Not recorded':(window.KRIM_GLOBAL_CONTEXT?.formatWeight?window.KRIM_GLOBAL_CONTEXT.formatWeight(Number(s.total_weight_kg)):new Intl.NumberFormat(undefined,{maximumFractionDigits:2}).format(Number(s.total_weight_kg))+' kg');
+ $('status-text').textContent='Recorded status · '+statusLabel(s.status);
+ $('record-heading').textContent='Shipment request record';
+ $('record-caption').textContent='Loaded from the shipment register within your active customer organization.';
+ $('fields').replaceChildren();
+ [['Shipment reference',s.shipment_number||('#'+s.id),true],['Request status',statusLabel(s.status)],['Origin',s.origin_place_label],['Destination',s.destination_place_label],['Cargo description',s.goods_description],['Gross weight',weight],['Requested transport mode',s.requested_transport_mode],['Route type',statusLabel(s.requested_route_type)],['Request recorded',fmtDate(s.created_at)],['Last updated',fmtDate(s.updated_at)],['Estimated delivery',fmtDate(s.estimated_delivery_at)],['Actual delivery',fmtDate(s.actual_delivery_at)]].forEach(x=>field(x[0],x[1],x[2]));
+ addLink('Shipment overview','shipment-list.html');
+ addLink('Shipment details','shipment-details.html',s.id);
+ addLink('Shipment timeline','shipment-timeline.html',s.id);
+ setFeedback('Shipment record ownership verified. This confirms that a shipment record exists; it does not confirm carrier acceptance, a final rate, dispatch, live tracking or delivery. Review separate quote and partner records for those milestones.','warn');
+}
+Promise.resolve(window.KRIM_GLOBAL_CONTEXT?.ready).catch(()=>{}).finally(()=>{if(staging)sample();else production().catch(e=>{$('status-text').textContent='Unable to verify record';$('fields').replaceChildren();setFeedback(e?.message||'The shipment confirmation could not be loaded. No booking success has been assumed.','error');addLink('Shipment overview','shipment-list.html')})});
 })();
-</script></body></html>
+</script>
+</body>
+</html>
