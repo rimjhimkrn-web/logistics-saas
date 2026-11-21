@@ -1,43 +1,414 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1f3a"><meta name="description" content="KRIM Logistics customer portal for global freight: book shipments, compare quotes, track delivery and manage documents and billing across countries and locations.">
-<title>KRIM Logistics | Global Customer Operations</title>
-<link rel="stylesheet" href="assets/customer-os-global.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="KRIM Customer Ecosystem — a connected global customer workspace for shipment requests, quotes, bookings, tracking, delivery records and support.">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>Customer Ecosystem | KRIM Logistics</title>
 <style>
-:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172943;background:#f4f7fc}
-*{box-sizing:border-box}body{margin:0}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:#0b1f3a;color:#e8f1ff;padding:13px max(16px,calc((100% - 1200px)/2));font-size:12px}.brand{font-weight:900;letter-spacing:.08em}.topnav{display:flex;gap:12px;flex-wrap:wrap}.topnav a{color:#dce9fa;text-decoration:none;font-weight:750}.topnav a:hover{text-decoration:underline}.hero{margin-top:22px;background:linear-gradient(118deg,#0b1f3a 0%,#174b82 57%,#087f86 100%);color:#fff;padding:clamp(24px,5vw,52px);border-radius:24px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.16em;font-weight:900;color:#9ff0e0}.hero h1{font-size:clamp(32px,5vw,54px);line-height:1.04;max-width:800px;margin:13px 0}.hero p{max-width:780px;line-height:1.75;color:#e0edff}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:11px;border:1px solid #c9d9ed;text-decoration:none;font-weight:850;background:#fff;color:#174ea6;min-height:44px}.btn.primary{background:#a7f3e5;color:#073b45;border-color:#a7f3e5}.btn.ghost{background:transparent;color:#fff;border-color:#8aa8c9}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin:28px 0 12px}.section-head h2{margin:0;color:#0b1f3a;font-size:clamp(22px,3vw,30px)}.section-head p{margin:4px 0 0;color:#64748b;font-size:13px}.journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.step,.service{background:#fff;border:1px solid #dfe7f2;border-radius:16px;padding:17px;min-width:0;box-shadow:0 8px 25px rgba(11,31,58,.04)}.num{display:inline-grid;place-items:center;width:31px;height:31px;border-radius:10px;background:#e8f1ff;color:#174ea6;font-weight:900}.step h3,.service h3{margin:11px 0 6px;color:#0b1f3a}.step p,.service p{color:#64748b;font-size:13px;line-height:1.65;margin:0 0 12px}.step a,.service a{color:#1769e8;text-decoration:none;font-weight:850}.service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.service{border-top:4px solid #1769e8}.service:nth-child(3n+2){border-top-color:#0c8b8b}.service:nth-child(3n){border-top-color:#7c5ce7}.global-note{margin-top:20px;background:#eaf8f6;border:1px solid #b9e6df;border-radius:15px;padding:16px;color:#14534d;font-size:13px;line-height:1.7}.foot{padding:26px 4px 40px;color:#64748b;font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot a{color:#174ea6;font-weight:750;text-decoration:none}
-@media(max-width:850px){.journey{grid-template-columns:repeat(2,minmax(0,1fr))}.service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.journey,.service-grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.hero{border-radius:18px}.actions .btn{width:100%}}
-</style>
-<link rel="stylesheet" href="../../core/krim-global-interface.css">
+:root{color-scheme:light;--navy:#09243D;--navy-2:#123B5A;--blue:#168FE0;--blue-2:#0754A4;--sky:#45B8F0;--pale:#EAF5FC;--pale-2:#F4F9FD;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--white:#fff;--shadow:0 20px 55px rgba(9,36,61,.10);--radius:18px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:135px}
+body{margin:0;background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+img,svg{max-width:100%}
+.skip{position:absolute;left:14px;top:-70px;z-index:1000;padding:12px 16px;background:#fff;color:var(--navy);border:2px solid var(--blue);border-radius:8px;font-weight:800}
+.skip:focus{top:12px}
+.wrap{width:min(1220px,calc(100% - 48px));margin-inline:auto}
+.site-head{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);box-shadow:0 6px 24px rgba(9,36,61,.055)}
+.head-inner{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.logo{display:flex;align-items:center;min-width:0}
+.logo img{display:block;width:205px;max-width:42vw;max-height:62px;object-fit:contain;object-position:left center}
+.head-actions{display:flex;align-items:center;gap:10px}
+.head-actions>a,.head-actions>button{min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:800;white-space:nowrap}
+.head-actions .sign-up{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 7px 18px rgba(22,143,224,.18)}
+.head-actions .sign-up:hover,.btn-primary:hover{background:var(--blue-2);border-color:var(--blue-2)}
+.notification-trigger svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mobile-toggle{display:none;min-width:44px;padding:8px!important;font-size:20px!important}
+.primary-nav{border-top:1px solid #edf2f6;background:#fff}
+.nav-inner{min-height:52px;display:flex;align-items:center;gap:5px}
+.nav-inner a{min-height:44px;padding:12px 16px;display:inline-flex;align-items:center;border-radius:8px;color:#40556B;font-size:13px;font-weight:750}
+.nav-inner a:hover,.nav-inner a[aria-current=page]{background:var(--pale);color:var(--blue-2)}
+.nav-inner .nav-right{margin-left:auto;color:var(--blue-2)}
+main{overflow:hidden}
+.hero{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(115deg,#071D34 0%,#0B3154 52%,#0754A4 100%);color:#fff}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 80% 30%,rgba(69,184,240,.28),transparent 34%),radial-gradient(ellipse at 8% 100%,rgba(22,143,224,.2),transparent 38%)}
+.hero:after{content:"";position:absolute;inset:0;z-index:-1;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(90deg,transparent,#000 100%)}
+.hero-inner{min-height:600px;padding-block:70px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px}
+.eyebrow,.kicker{display:flex;align-items:center;gap:10px;color:#8BD4FA;font-size:12px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.eyebrow:before{content:"";width:30px;height:2px;background:var(--sky)}
+h1{max-width:650px;margin:22px 0 18px;color:#fff;font-size:clamp(46px,5.3vw,70px);line-height:1.04;letter-spacing:-.065em;font-weight:850}
+h1 span{color:#8BD4FA}
+.hero-lead{max-width:590px;margin:0;color:#D6E6F2;font-size:17px;line-height:1.8}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{min-height:50px;padding:13px 19px;border:1px solid transparent;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:850;letter-spacing:.01em;transition:background .18s,border-color .18s,transform .18s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 22px rgba(22,143,224,.22)}
+.btn-white{background:#fff;color:var(--navy)}
+.btn-outline-light{border-color:rgba(255,255,255,.42);color:#fff;background:rgba(255,255,255,.06)}
+.hero-note{max-width:570px;margin-top:22px;color:#B7CDDE;font-size:12px;line-height:1.8}
+.hero-note strong{color:#fff}
+.dashboard-frame{position:relative;padding:16px;border:1px solid rgba(255,255,255,.28);border-radius:20px;background:rgba(255,255,255,.12);box-shadow:0 28px 70px rgba(0,0,0,.25);backdrop-filter:blur(12px)}
+.dashboard{overflow:hidden;border-radius:13px;background:#fff;color:var(--ink);box-shadow:0 12px 34px rgba(0,0,0,.15)}
+.dash-top{min-height:58px;padding:12px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.dash-brand{display:flex;align-items:center;gap:9px;color:var(--navy);font-size:12px;font-weight:900;letter-spacing:.06em}
+.dash-symbol{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;background:var(--pale);color:var(--blue-2)}
+.dash-label{padding:6px 9px;border-radius:5px;background:var(--pale);color:var(--blue-2);font-size:9px;font-weight:850;letter-spacing:.06em}
+.dash-body{padding:20px}
+.dash-welcome{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:17px}
+.dash-welcome b{display:block;color:var(--navy);font-size:17px}
+.dash-welcome small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+.dash-new{padding:8px 11px;border-radius:7px;background:var(--blue);color:#fff;font-size:10px;font-weight:850;white-space:nowrap}
+.dash-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{padding:13px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.metric small{display:block;color:var(--muted);font-size:10px;line-height:1.4}
+.metric b{display:block;margin-top:7px;color:var(--navy);font-size:24px;line-height:1}
+.metric span{display:block;margin-top:6px;color:var(--blue-2);font-size:9px;font-weight:750}
+.dash-activity{margin-top:16px;padding:15px;border:1px solid var(--line);border-radius:9px}
+.activity-title{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px;color:var(--navy);font-size:12px;font-weight:850}
+.activity-title span{color:var(--blue-2);font-size:10px}
+.activity-row{display:grid;grid-template-columns:1.1fr 1fr auto;gap:8px;padding:10px 0;border-top:1px solid #edf2f6;font-size:10px}
+.activity-row b{color:var(--navy);font-weight:800}
+.activity-row span{color:var(--muted)}
+.activity-row em{padding:3px 7px;border-radius:4px;background:var(--pale);color:var(--blue-2);font-style:normal;font-size:8px;font-weight:850}
+.dash-foot{margin-top:12px;color:var(--muted);font-size:10px;line-height:1.6}
+.dash-foot strong{color:var(--navy)}
+.hero-side-note{position:absolute;right:-13px;bottom:34px;padding:12px 15px;border:1px solid rgba(255,255,255,.35);border-radius:10px;background:#0A3154;color:#fff;box-shadow:0 12px 26px rgba(0,0,0,.2);font-size:11px}
+.hero-side-note b{display:block;font-size:12px}
+.hero-side-note span{color:#C7DDED}
+.quick-strip{position:relative;z-index:2;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 12px 26px rgba(9,36,61,.045)}
+.quick-inner{display:grid;grid-template-columns:1.15fr repeat(4,1fr);align-items:stretch}
+.quick-intro{padding:20px 16px 20px 0}
+.quick-intro b{display:block;color:var(--navy);font-size:14px}
+.quick-intro span{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+.quick-link{min-height:82px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-left:1px solid var(--line);color:var(--navy);font-size:12px;font-weight:850}
+.quick-link span{color:var(--blue);font-size:20px}
+.quick-link:hover{background:var(--pale-2);color:var(--blue-2)}
+.section{padding:82px 0}
+.section-soft{background:var(--pale-2)}
+.section-head{max-width:820px;margin-bottom:34px}
+.kicker{color:var(--blue-2)}
+h2{margin:12px 0 13px;color:var(--navy);font-size:clamp(32px,3.8vw,48px);line-height:1.12;letter-spacing:-.055em;font-weight:850}
+.section-intro{margin:0;color:var(--muted);font-size:15px;line-height:1.85}
+.workspace-layout{display:grid;grid-template-columns:.78fr 1.22fr;gap:26px;align-items:stretch}
+.workspace-aside{padding:30px;border-radius:16px;background:linear-gradient(145deg,#0A2947,#0754A4);color:#fff}
+.workspace-aside .kicker{color:#8BD4FA}
+.workspace-aside h3{margin:15px 0 10px;font-size:27px;line-height:1.18;letter-spacing:-.04em}
+.workspace-aside p{margin:0;color:#D1E2EF;font-size:14px;line-height:1.85}
+.workspace-aside a{display:inline-flex;margin-top:22px;color:#fff;font-size:12px;font-weight:850;border-bottom:1px solid #8BD4FA;padding-bottom:5px}
+.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.service-card{min-height:175px;padding:22px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 8px 22px rgba(9,36,61,.035);transition:transform .18s,border-color .18s,box-shadow .18s}
+.service-card:hover{transform:translateY(-3px);border-color:#9CCBE8;box-shadow:var(--shadow)}
+.service-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:var(--pale);color:var(--blue-2)}
+.service-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.service-card h3{margin:14px 0 5px;color:var(--navy);font-size:16px}
+.service-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.75}
+.service-card a{display:inline-flex;margin-top:12px;color:var(--blue-2);font-size:12px;font-weight:850}
+.journey-grid{display:grid;grid-template-columns:repeat(5,1fr);overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff}
+.journey-step{min-height:180px;padding:22px 18px;border-right:1px solid var(--line)}
+.journey-step:last-child{border-right:0}
+.journey-step small{color:var(--blue-2);font-size:10px;font-weight:900;letter-spacing:.12em}
+.journey-step h3{margin:13px 0 7px;color:var(--navy);font-size:15px}
+.journey-step p{margin:0;color:var(--muted);font-size:12px;line-height:1.75}
+.notification-panel{margin-top:24px;padding:24px 26px;border:1px solid #B9DDF3;border-radius:13px;background:var(--pale);display:flex;align-items:center;justify-content:space-between;gap:22px}
+.notification-panel h3{margin:0 0 5px;color:var(--navy);font-size:17px}
+.notification-panel p{max-width:780px;margin:0;color:#40556B;font-size:12px;line-height:1.8}
+.notification-panel a{flex:none;color:var(--blue-2);font-size:12px;font-weight:850}
+.global-panel{display:grid;grid-template-columns:1.1fr .9fr;gap:35px;align-items:center;padding:36px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.global-panel h2{margin-top:10px}
+.global-panel p{margin:0;color:var(--muted);font-size:14px;line-height:1.85}
+.global-tags{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.global-tags span{min-height:48px;padding:12px;border:1px solid #D7EAF7;border-radius:8px;background:var(--pale-2);color:var(--blue-2);font-size:11px;font-weight:800;display:flex;align-items:center}
+.cta{padding:42px 0;background:linear-gradient(105deg,#09243D,#0754A4);color:#fff}
+.cta-inner{display:flex;align-items:center;justify-content:space-between;gap:25px}
+.cta h2{margin:0 0 7px;color:#fff;font-size:clamp(26px,3vw,36px)}
+.cta p{margin:0;color:#D2E4F2;font-size:13px}
+.cta-actions{display:flex;flex-wrap:wrap;gap:10px}
+.footer{padding:52px 0 20px;background:#071D34;color:#D0DFEA}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;padding-bottom:30px}
+.footer-wordmark{display:inline-flex;align-items:center;color:#fff;font-size:25px;font-weight:850;letter-spacing:-.045em;line-height:1.2}.footer-wordmark:hover{color:#8BD4FA}
+.footer-desc{max-width:350px;color:#B4C8D8;font-size:12px;line-height:1.8}
+.footer-col b{display:block;margin-bottom:12px;color:#fff;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.footer-col a{display:block;margin:9px 0;color:#B4C8D8;font-size:12px}
+.footer-col a:hover{color:#8BD4FA}
+.footer-social{display:flex;justify-content:space-between;gap:15px;padding:18px 0;border-top:1px solid rgba(255,255,255,.16);border-bottom:1px solid rgba(255,255,255,.16)}
+.footer-social b{display:block;color:#fff;font-size:12px}
+.footer-social small{color:#AFC4D5;font-size:11px}
+.footer-bottom{display:flex;justify-content:space-between;gap:20px;padding-top:18px;color:#9EB4C5;font-size:10px}
+.dialog{position:fixed;inset:0;z-index:300;display:none;place-items:center;padding:20px;background:rgba(4,19,33,.68)}
+.dialog.open{display:grid}
+.dialog-card{width:min(520px,100%);padding:25px;border-radius:15px;background:#fff;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dialog-head h2{margin:0;color:var(--navy);font-size:23px}
+.dialog-close{width:40px;height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--navy);font-size:22px}
+.dialog-card p{color:var(--muted);font-size:13px;line-height:1.8}
+.dialog-info{padding:15px;border-radius:9px;background:var(--pale-2);color:#40556B;font-size:12px;line-height:1.8}
+.dialog-link{display:inline-flex;margin-top:15px;color:var(--blue-2);font-size:12px;font-weight:850}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+@media(max-width:1080px){.head-inner{gap:14px}.brand-lockup{width:150px!important;max-width:150px!important;flex-basis:150px!important}.brand-lockup img{width:150px!important;max-height:48px!important}.head-actions>a,.head-actions>button{padding-inline:11px;font-size:12px}.quick-inner{grid-template-columns:repeat(2,1fr)}.quick-intro{grid-column:1/-1;padding:16px 0 10px}.quick-link{border-top:1px solid var(--line)}.quick-link:nth-child(odd){border-left:0}.workspace-layout{grid-template-columns:1fr}.workspace-aside{padding:25px}.journey-grid{grid-template-columns:repeat(3,1fr)}.journey-step{border-bottom:1px solid var(--line)}.journey-step:nth-child(3){border-right:0}.journey-step:nth-child(4),.journey-step:nth-child(5){border-bottom:0}}
+@media(max-width:760px){.wrap{width:calc(100% - 34px)}.head-inner{min-height:70px}.brand-lockup{min-width:0!important;width:132px!important;max-width:132px!important;flex-basis:132px!important}.brand-lockup img{width:132px!important;max-height:42px!important}.head-actions{gap:7px}.head-actions>a,.head-actions>button{min-height:41px;padding:8px 10px;font-size:11px}.head-actions .sign-in{display:none}.notification-trigger span{display:none}.notification-trigger{width:42px;padding:8px!important}.mobile-toggle{display:inline-flex}.primary-nav{position:relative}.nav-inner{display:none;position:absolute;top:100%;left:0;right:0;z-index:110;align-items:stretch;flex-direction:column;gap:0;padding:9px 17px 15px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 15px 25px rgba(9,36,61,.12)}.nav-inner.open{display:flex}.nav-inner a{min-height:45px;padding:12px 8px;border-bottom:1px solid #edf2f6;border-radius:0;font-size:13px}.nav-inner .nav-right{margin-left:0}.hero-inner{min-height:0;padding-block:48px 44px;grid-template-columns:1fr;gap:35px}.hero-lead{font-size:15px}.hero-actions .btn{min-height:48px}.dashboard-frame{max-width:590px;margin-inline:auto;width:100%}.hero-side-note{right:8px;bottom:12px}.section{padding:60px 0}.section-head{margin-bottom:25px}.section-intro{font-size:14px}.service-grid{gap:10px}.service-card{padding:17px;min-height:175px}.journey-grid{grid-template-columns:1fr 1fr}.journey-step{min-height:150px;padding:17px 14px;border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}.journey-step:nth-child(2n){border-right:0!important}.journey-step:last-child{grid-column:1/-1;border-bottom:0!important}.notification-panel{align-items:flex-start;flex-direction:column;padding:20px}.global-panel{grid-template-columns:1fr;padding:25px}.cta-inner{align-items:flex-start;flex-direction:column}.footer-grid{grid-template-columns:1fr 1fr;gap:23px 16px}.footer-grid>div:first-child{grid-column:1/-1}.footer-bottom{flex-direction:column;gap:6px}}
+@media(max-width:430px){.wrap{width:calc(100% - 28px)}.brand-lockup{width:122px!important;max-width:122px!important;flex-basis:122px!important}.brand-lockup img{width:122px!important;max-height:39px!important}.head-inner{gap:7px}.head-actions{gap:5px}.head-actions .sign-up{padding-inline:9px;font-size:10px}.hero h1{font-size:clamp(40px,11vw,51px)}.hero-actions .btn{width:100%}.dashboard-frame{padding:9px}.dash-body{padding:13px}.dash-metrics{gap:6px}.metric{padding:9px}.metric b{font-size:19px}.metric small{font-size:9px}.activity-row{grid-template-columns:1fr auto}.activity-row span{display:none}.hero-side-note{position:static;margin:10px 0 0;display:inline-block}.quick-inner{grid-template-columns:1fr 1fr}.quick-link{min-height:68px;padding:12px 9px;font-size:11px}.service-grid{grid-template-columns:1fr}.service-card{min-height:0}.journey-grid{grid-template-columns:1fr}.journey-step,.journey-step:nth-child(2n){min-height:0;border-right:0!important}.journey-step:last-child{grid-column:auto}.global-tags{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr}.footer-grid>div:first-child{grid-column:auto}.footer-social{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+/* Shared KRIM homepage menu behaviour and blue/white social controls */
+header.site-head{position:sticky;top:0;z-index:1000}
+header.site-head>.wrap.nav{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+header .nav-links{display:flex;align-items:center;gap:3px}
+header .nav-links>a{min-height:42px;padding:10px 11px;display:inline-flex;align-items:center;border-radius:7px;color:#40556B;font-size:12px;font-weight:800;white-space:nowrap}
+header .nav-links>a:hover,header .nav-links>a:focus-visible{background:#EAF5FC;color:#0754A4}
+header .nav-actions{display:flex;align-items:center;gap:9px}
+header .nav-actions>a,header .nav-actions>button{min-height:43px;padding:9px 13px;border:1px solid #DCE5EE;border-radius:8px;background:#fff;color:#09243D;font-size:11px;font-weight:850;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+header .nav-actions .btn-primary{background:#168FE0;border-color:#168FE0;color:#fff}
+header .nav-actions .menu{display:none;min-width:44px;min-height:44px;padding:8px 12px;background:#fff;color:#09243D;border:1px solid #DCE5EE;border-radius:8px;font-size:20px;cursor:pointer}
+header .nav-links.open{display:flex}
+header .mobile-signin-link,header .mobile-portal-link{display:none!important}
+.brand-lockup{display:inline-flex!important;align-items:center!important;min-width:180px!important;width:180px!important;max-width:180px!important;flex:0 1 180px!important;visibility:visible!important;opacity:1!important;position:relative!important;left:-6px!important}.brand-lockup img{display:block!important;width:180px!important;height:auto!important;max-width:100%!important;max-height:58px!important;object-fit:contain!important}.krim-social{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.krim-social a{min-width:42px;min-height:42px;padding:9px 13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,.22);border-radius:9px;background:rgba(255,255,255,.08);color:#fff;text-decoration:none;font-size:11px;font-weight:750;transition:background .18s,border-color .18s,transform .18s}
+.krim-social a:hover{background:#0754A4;border-color:#45B8F0;transform:translateY(-2px)}
+.krim-social .social-label{display:inline-block;color:#fff;font-size:12px;font-weight:800;white-space:nowrap}.krim-social .social-icon{width:20px;height:20px;display:grid;place-items:center;flex:none}
+.krim-social .social-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.krim-social .social-icon .brand-fill{fill:currentColor;stroke:none}
+.krim-social .social-label{display:inline}
+.krim-social-footer{flex:1 1 620px;max-width:760px;min-width:0}
+.krim-social-footer .krim-social{justify-content:flex-end}
+.dashboard-frame{padding:12px}
+.dashboard{position:relative}
+.dash-visual{position:relative;overflow:hidden;min-height:198px;margin:0 17px 14px;border:1px solid #D5E7F4;border-radius:11px;background:linear-gradient(120deg,#F4FAFE,#E6F3FC)}
+.dash-visual svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dash-map-label{position:absolute;z-index:2;padding:5px 8px;border:1px solid #D5E7F4;border-radius:5px;background:rgba(255,255,255,.94);color:#0754A4;font-size:9px;font-weight:850;letter-spacing:.04em;box-shadow:0 3px 9px rgba(9,36,61,.07)}
+.dash-map-label.origin{left:5%;bottom:17%}.dash-map-label.hub{left:47%;top:14%}.dash-map-label.destination{right:5%;bottom:18%}
+.dash-visual-caption{position:absolute;left:13px;top:12px;z-index:2;color:#09243D;font-size:10px;font-weight:900;letter-spacing:.08em}
+.dash-visual-caption span{display:block;margin-top:3px;color:#60748A;font-size:9px;font-weight:600;letter-spacing:0}
+.dash-foot{padding:0 17px 16px}
+.footer-social{align-items:center}
+@media(max-width:1100px){
+ header .nav-actions .menu{display:inline-flex}
+ header.site-head>.wrap.nav{min-height:76px}
+ header .nav-links{display:none;position:absolute;top:100%;left:0;right:0;z-index:1200;max-height:calc(100dvh - 76px);overflow-y:auto;align-items:stretch;flex-direction:column;gap:0;padding:12px 22px 20px;background:#fff;border-top:1px solid #E8EDF2;border-bottom:1px solid #DCE5EE;box-shadow:0 16px 28px rgba(7,24,43,.14)}
+ header .nav-links.open{display:flex}
+ header .nav-links>a{min-height:48px;padding:12px 5px;border-bottom:1px solid #EDF1F5;border-radius:0;font-size:14px}
+ header .nav-links .mobile-signin-link,header .nav-links .mobile-portal-link{display:flex!important}
+ header .nav-actions .signin,header .nav-actions .btn-primary{display:none}
+ header .nav-actions{margin-left:auto}
+}
+@media(max-width:560px){
+ header.site-head>.wrap.nav{min-height:70px;gap:8px}
+ header .nav-actions{gap:6px}
+ .krim-social-footer .krim-social{justify-content:flex-start}
+ .krim-social a{min-width:42px;padding:8px}
+ .krim-social .social-label{display:none}
+ .dash-visual{min-height:165px;margin-inline:12px}
+ .dash-map-label{font-size:8px}
+}
+body #krim-language-control #krim-language-toggle,body #krim-language-control #krim-language-toggle:hover{background:#0754A4!important;border-color:#0754A4!important;color:#fff!important;box-shadow:0 4px 12px rgba(8,43,76,.16)!important}
+body #krim-language-control #krim-language-menu{border-color:#DCE5EE!important}
+body #krim-language-control #krim-language-menu select{border-color:#DCE5EE!important;color:#09243D!important;background:#F4F9FD!important}
+body #krim-language-control #krim-language-note{color:#0754A4!important}
+
+
+/* Customer header and footer visibility refinements */
+header.site-head .brand-lockup{transform:translateX(-11px)}
+header.site-head .nav-actions{position:relative;z-index:5;flex-shrink:0}
+header.site-head #krim-language-control{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;order:-1!important;margin:0 2px!important}
+header.site-head #krim-language-toggle{min-height:42px!important;padding:0 11px!important;border:1px solid #0754A4!important;border-radius:8px!important;background:#0754A4!important;color:#fff!important;box-shadow:0 4px 12px rgba(8,43,76,.16)!important}
+header.site-head #krim-language-toggle:hover{background:#123B5A!important;border-color:#123B5A!important}
+header.site-head #krim-language-menu{z-index:2000!important;right:0!important;left:auto!important;border:1px solid #DCE5EE!important;background:#fff!important;color:#09243D!important}
+header.site-head #krim-language-menu select{border:1px solid #DCE5EE!important;background:#F4F9FD!important;color:#09243D!important}
+.footer-social .krim-social-footer{display:flex!important;align-items:center!important;justify-content:flex-start!important;min-width:0!important;min-height:44px!important;visibility:visible!important;opacity:1!important}
+.footer-social .krim-social-footer nav.krim-social{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;flex-wrap:wrap!important}
+.footer-social .krim-social a{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;padding:8px!important;border:1px solid rgba(255,255,255,.34)!important;border-radius:9px!important;background:rgba(255,255,255,.09)!important;color:#fff!important}
+.footer-social .krim-social .social-icon,.footer-social .krim-social .social-icon svg{display:block!important;width:20px!important;height:20px!important;visibility:visible!important;opacity:1!important}
+.footer-social .krim-social .social-label{display:none!important}.footer-social .krim-social .social-icon{display:grid!important;place-items:center!important}.footer-social .krim-social svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.footer-social .krim-social svg .brand-fill{fill:currentColor;stroke:none}
+@media(max-width:1100px){
+ header.site-head>.wrap.nav{gap:12px!important}
+ header.site-head .brand-lockup{transform:translateX(-6px)}
+ header.site-head .nav-actions{gap:7px!important}
+ header.site-head #krim-language-control{margin:0!important}
+ header.site-head #krim-language-toggle{min-height:42px!important;padding:0 9px!important}
+}
+@media(max-width:560px){
+ header.site-head>.wrap.nav{gap:6px!important}
+ header.site-head .brand-lockup{transform:translateX(-5px)}
+ header.site-head .brand-lockup img{max-width:39vw!important}
+ header.site-head .nav-actions{gap:5px!important}
+ header.site-head #krim-language-toggle{min-height:40px!important;padding:0 8px!important;font-size:12px!important}
+ header.site-head #krim-language-toggle .krim-language-word{display:inline!important}
+ .footer-social .krim-social-footer nav.krim-social{gap:8px!important}
+}
+
+/* Final visibility and alignment correction */
+header.site-head>.wrap.nav{position:relative;display:flex!important;align-items:center!important}
+header.site-head a.brand-lockup{display:flex!important;align-items:center!important;justify-content:flex-start!important;flex:0 0 auto!important;width:224px!important;min-width:190px!important;max-width:30vw!important;min-height:62px!important;visibility:visible!important;opacity:1!important;overflow:visible!important;transform:translateX(-9px)!important}
+header.site-head a.brand-lockup img{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:224px!important;height:auto!important;max-height:62px!important;object-fit:contain!important;object-position:left center!important}
+header.site-head .nav-links{flex:1 1 auto!important;min-width:0}
+header.site-head .nav-actions{flex:0 0 auto!important}
+.footer-social{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important}
+.footer-social>div{flex:0 1 auto!important}
+.footer-social>nav.krim-social-footer{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;flex:0 0 auto!important;width:auto!important;max-width:100%!important;margin-left:auto!important;visibility:visible!important;opacity:1!important}
+.footer-social>nav.krim-social-footer>a{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;padding:8px!important;border:1px solid rgba(255,255,255,.38)!important;border-radius:9px!important;background:rgba(255,255,255,.10)!important;color:#fff!important}
+.footer-social>nav.krim-social-footer .social-icon{display:grid!important;place-items:center!important;width:22px!important;height:22px!important;visibility:visible!important;opacity:1!important}
+.footer-social>nav.krim-social-footer .social-icon svg{display:block!important;width:22px!important;height:22px!important;visibility:visible!important;opacity:1!important;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.footer-social>nav.krim-social-footer .social-icon svg .brand-fill{fill:currentColor;stroke:none}
+@media(max-width:1100px){
+ header.site-head a.brand-lockup{width:190px!important;min-width:150px!important;max-width:34vw!important;transform:translateX(-5px)!important}
+ header.site-head a.brand-lockup img{max-width:190px!important}
+}
+@media(max-width:560px){
+ header.site-head a.brand-lockup{width:150px!important;min-width:118px!important;max-width:42vw!important;min-height:52px!important;transform:translateX(-3px)!important}
+ header.site-head a.brand-lockup img{max-width:150px!important;max-height:52px!important}
+ .footer-social{align-items:flex-start!important}
+ .footer-social>nav.krim-social-footer{justify-content:flex-start!important;margin-left:0!important;flex-wrap:wrap!important}
+}
+/* Customer page: stable logo; left-align Follow KRIM with the footer content while keeping icons spaced to the right. */
+header.site-head a.brand-lockup{flex:0 0 auto!important;visibility:visible!important;opacity:1!important;overflow:visible!important}
+header.site-head a.brand-lockup img{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;object-fit:contain!important}
+.footer-social{align-items:flex-start!important;justify-content:flex-start!important;gap:24px!important}
+.footer-social>div{flex:0 0 auto!important;margin:0!important;text-align:left!important;align-self:flex-start!important}
+.footer-social>nav.krim-social-footer{margin-left:auto!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:14px!important;flex:0 1 auto!important;flex-wrap:nowrap!important}
+.footer-social>nav.krim-social-footer>a{flex:0 0 44px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important}
+@media(max-width:560px){
+ .footer-social{align-items:flex-start!important;justify-content:flex-start!important;gap:12px!important}
+ .footer-social>div{align-self:flex-start!important;width:100%!important}
+ .footer-social>nav.krim-social-footer{justify-content:flex-start!important;margin-left:0!important;gap:10px!important;flex-wrap:wrap!important}
+ .footer-social>nav.krim-social-footer>a{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex-basis:40px!important}
+}
+
+</style>
+<script defer src="../../assets/krim-global-language.js?v=20261121-customer-language-visible-v2"></script>
+<!-- Keep this page logo asset relative so it resolves on both staging previews and production. -->
 </head>
-<body class="krim-global-shell">
-<header class="topbar"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:220px;height:58px;max-width:100%;object-fit:contain;object-position:left center"></a><nav class="topnav" aria-label="Primary navigation"><a href="../../index.html">Home</a><a href="../../contact.html">Contact</a><a href="../../auth/login.html">Sign in</a></nav></header>
-<main>
-<section class="hero"><div class="eyebrow">GLOBAL CUSTOMER OPERATIONS · ONE CONNECTED JOURNEY</div><h1>Move freight.<br>Connect globally.</h1><p>One customer journey for local, regional, national and international logistics. Start from a village, rural collection point, town, city, industrial zone, warehouse, airport or seaport. Your available services depend on verified locations, carrier coverage, route feasibility and applicable trade rules.</p><div class="actions"><a class="btn primary" href="../../auth/signup.html">Create customer account →</a><a class="btn ghost" href="../../auth/login.html">Sign in to your workspace</a><a class="btn ghost" href="../shipments/shipment-create.html">Start shipment booking</a></div></section>
-<div class="section-head"><div><h2>Your shipment journey</h2><p>Follow one clear path from request to delivery and records.</p></div></div>
-<section class="journey" aria-label="Customer shipment journey">
-<article class="step"><span class="num">01</span><h3>Describe your shipment</h3><p>Choose origin and destination, cargo, package details, service mode and required dates.</p><a href="../shipments/shipment-create.html">Create shipment →</a></article>
-<article class="step"><span class="num">02</span><h3>Review quotes</h3><p>Request pricing and compare available offers, validity, service and terms before accepting.</p><a href="../customer/quote-request.html">Request a quote →</a></article>
-<article class="step"><span class="num">03</span><h3>Confirm & pay</h3><p>Continue only with a valid accepted quote and confirmed booking/payment status.</p><a href="../shipper/quote-comparison.html">Compare quotes →</a></article>
-<article class="step"><span class="num">04</span><h3>Track to delivery</h3><p>Follow shipment events, proof of delivery, documents, invoices and support cases.</p><a href="customer-services/shipment-list.html">Open shipment register →</a></article>
+<body class="krim-customer-ecosystem">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+ <div class="wrap nav">
+  <a class="brand brand-lockup" href="../../index.html" aria-label="KRIM Logistics global homepage"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71"></a>
+  <nav class="nav-links" id="primary-nav" aria-label="Customer ecosystem navigation">
+   <a href="#workspace">Workspace</a><a href="#services">Customer services</a><a href="#journey">How it works</a><a href="#global">Global access</a>
+   <a class="mobile-signin-link" href="../../auth/login.html">SIGN IN ↗</a><a class="mobile-portal-link" href="../../auth/signup.html">CREATE ACCOUNT ↗</a>
+  </nav>
+  <div class="nav-actions">
+   <a class="signin" href="../../auth/login.html">SIGN IN</a>
+   <a class="btn btn-primary" href="../../auth/signup.html">CREATE ACCOUNT ↗</a>
+   <button class="menu" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-nav">☰</button>
+  </div>
+ </div>
+</header>
+<main id="main">
+<section class="hero">
+ <div class="wrap hero-inner">
+  <div class="hero-copy">
+   <div class="eyebrow">KRIM CUSTOMER ECOSYSTEM</div>
+   <h1>Your logistics.<br><span>Connected globally.</span></h1>
+   <p class="hero-lead">A clear customer workspace to request freight, review available offers, confirm bookings and follow shipment progress — with documents, billing and support connected across the journey.</p>
+   <div class="hero-actions"><a class="btn btn-primary" href="../customer/quote-request.html">Start a shipment request <span aria-hidden="true">↗</span></a><a class="btn btn-outline-light" href="../../tracking.html">Track a shipment <span aria-hidden="true">→</span></a><a class="btn btn-white" href="../../auth/signup.html">Create account</a></div>
+   <p class="hero-note"><strong>Clear commitments. Connected execution.</strong> KRIM connects customers with logistics providers. Service availability, rates, capacity and shipment commitments are confirmed for each route before execution.</p>
+  </div>
+  <div class="dashboard-frame" aria-label="Customer workspace preview with a global shipment route illustration">
+   <div class="dashboard">
+    <div class="dash-top"><div class="dash-brand"><span class="dash-symbol" aria-hidden="true">K</span> CUSTOMER WORKSPACE</div><span class="dash-label">WORKSPACE PREVIEW</span></div>
+    <div class="dash-body">
+     <div class="dash-welcome"><div><b>Your logistics overview</b><small>One view for your customer activity</small></div><a class="dash-new" href="../customer/quote-request.html">+ New request</a></div>
+     <div class="dash-metrics"><div class="metric"><small>Shipment requests</small><b>—</b><span>Account data</span></div><div class="metric"><small>Quotes to review</small><b>—</b><span>Account data</span></div><div class="metric"><small>In progress</small><b>—</b><span>Account data</span></div></div>
+    </div>
+    <div class="dash-visual" role="img" aria-label="Illustration of a connected international freight route linking origin, logistics hub and destination">
+     <div class="dash-visual-caption">GLOBAL SHIPMENT NETWORK<span>Connected route · multimodal movement</span></div>
+     <span class="dash-map-label origin">ORIGIN</span><span class="dash-map-label hub">KRIM NETWORK HUB</span><span class="dash-map-label destination">DESTINATION</span>
+     <svg viewBox="0 0 600 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs><linearGradient id="routeLine" x1="0" x2="1"><stop offset="0" stop-color="#168FE0"/><stop offset="1" stop-color="#0754A4"/></linearGradient><pattern id="mapDots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#A9CDE5" opacity=".55"/></pattern></defs>
+      <rect width="600" height="220" fill="url(#mapDots)"/>
+      <path d="M28 116 C82 48 142 45 193 78 S276 150 324 105 S426 40 480 82 S548 141 584 92" fill="none" stroke="#C4DDED" stroke-width="17" stroke-linecap="round" opacity=".55"/>
+      <path d="M28 116 C82 48 142 45 193 78 S276 150 324 105 S426 40 480 82 S548 141 584 92" fill="none" stroke="url(#routeLine)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="7 8"/>
+      <g fill="#fff" stroke="#168FE0" stroke-width="3"><circle cx="64" cy="104" r="11"/><circle cx="300" cy="115" r="13"/><circle cx="535" cy="106" r="11"/></g>
+      <g fill="#0754A4"><circle cx="64" cy="104" r="4"/><circle cx="300" cy="115" r="5"/><circle cx="535" cy="106" r="4"/></g>
+      <g transform="translate(268 34)" fill="#0754A4"><path d="M31 4c-2-3-7-3-9 0L13 17 2 21c-2 1-2 4 0 5l11 2 6 9c1 2 4 2 5 0l3-9 12-4c3-1 3-5 0-6l-12-2z"/></g>
+      <g transform="translate(43 137)" fill="#168FE0"><path d="M3 6h29v16H3zM8 2h17l5 4H8zM9 22a4 4 0 1 0 8 0M24 22a4 4 0 1 0 8 0"/></g>
+      <g transform="translate(492 135)" fill="#0754A4"><path d="M0 8h45l-6 12H7zM5 3h9v5H5zM17 3h9v5h-9zM29 3h9v5h-9z"/></g>
+      <g fill="none" stroke="#9CC7E4" stroke-width="1.3" opacity=".7"><path d="M100 20l23 9 22-6 15 10-12 15-30 3-20-10zM385 160l22-8 22 8 15 17-24 11-31-8zM180 170l18-9 20 8-6 14-23 4z"/></g>
+     </svg>
+    </div>
+    <div class="dash-body" style="padding-top:0">
+     <div class="dash-activity"><div class="activity-title">Recent activity <span>Account view →</span></div><div class="activity-row"><b>Shipment activity</b><span>Event timeline</span><em>STATUS</em></div><div class="activity-row"><b>Quote response</b><span>Commercial review</span><em>REVIEW</em></div><div class="activity-row"><b>Delivery record</b><span>Proof &amp; documents</span><em>RECORD</em></div></div>
+     <div class="dash-foot"><strong>Secure customer data.</strong> Live account information appears after secure sign-in.</div>
+    </div>
+   </div>
+   <div class="hero-side-note"><b>One connected journey</b><span>Request · Review · Move · Complete</span></div>
+  </div>
+ </div>
 </section>
-<div class="section-head"><div><h2>Customer services</h2><p>Open the function you need. Access and available actions depend on your signed-in role and organization.</p></div></div>
-<section class="service-grid" aria-label="Customer service categories">
-<article class="service"><h3>Shipments & tracking</h3><p>Create and manage shipments, inspect details and timelines, follow delivery progress.</p><a href="customer-services/shipment-list.html">Shipment register →</a><br><a href="../pickup-tracking.html">Pickup &amp; custody →</a><br><a href="../visibility/live-tracking-map.html">Live tracking →</a></article>
-<article class="service"><h3>Quotes & pricing</h3><p>Request rates, compare offers and review quote status, revisions and expiry.</p><a href="../customer/quote-request.html">Request pricing →</a><br><a href="../shipper/quote-comparison.html">Compare offers →</a></article>
-<article class="service"><h3>Booking & preferences</h3><p>Manage addresses, locations, saved routes, cargo profiles and shipping preferences.</p><a href="customer-services/address-book.html">Address book →</a><br><a href="customer-services/saved-routes.html">Saved routes →</a><br><a href="customer-services/shipping-preferences.html">Language, time zone & notifications →</a></article>
-<article class="service"><h3>Delivery & documents</h3><p>Access proof of delivery, document records and delivery confirmation when available.</p><a href="customer-services/pod-download.html">Proof of delivery →</a><br><a href="../documents/document-list.html">Documents →</a></article>
-<article class="service"><h3>Payments & invoices</h3><p>Review checkout, invoice records and payment history. Never treat a client-side message as proof of payment.</p><a href="../shipper/payment-checkout.html">Payment checkout →</a><br><a href="customer-services/invoices.html">Invoices →</a></article>
-<article class="service"><h3>Support & service quality</h3><p>Contact support, submit claims or disputes, and share service feedback.</p><a href="../support/ticket-desk.html">Support centre →</a><br><a href="customer-services/claims.html">Claims →</a></article>
-</section>
-<div class="global-note"><strong>Designed for global access:</strong> KRIM's interface should support country-specific address formats, international phone numbers, local time zones, currencies, units, languages and rural-to-urban pickup/delivery points. A route is offered only when its location data, service coverage, legal requirements and partner capacity are verified. If a location is not yet serviceable, the customer should receive a clear coverage message instead of a false booking confirmation.</div>
-<footer class="foot"><span>KRIM Logistics · Global logistics operating system</span><span><a href="../../auth/login.html">Customer sign in</a> · <a href="../../contact.html">Get help</a></span></footer>
+<section class="quick-strip" aria-label="Quick customer actions"><div class="wrap quick-inner">
+ <div class="quick-intro"><b>Move to your next step</b><span>Direct access to the actions customers use most.</span></div>
+ <a class="quick-link" href="../customer/quote-request.html">Request a quote <span aria-hidden="true">↗</span></a>
+ <a class="quick-link" href="../../tracking.html">Track shipment <span aria-hidden="true">↗</span></a>
+ <a class="quick-link" href="../customer/index.html">My workspace <span aria-hidden="true">↗</span></a>
+ <a class="quick-link" href="../../contact.html">Customer support <span aria-hidden="true">↗</span></a>
+</div></section>
+<section class="section" id="workspace"><div class="wrap">
+ <div class="section-head"><div class="kicker">THE CUSTOMER WORKSPACE</div><h2>Everything important, connected.</h2><p class="section-intro">Organize freight requests, commercial decisions, shipment visibility, delivery evidence and billing records around one consistent customer experience.</p></div>
+ <div class="workspace-layout">
+  <aside class="workspace-aside"><div class="kicker">BUILT AROUND YOUR WORK</div><h3>More clarity at every stage of the shipment.</h3><p>Keep customer records and shipment activity connected to the right account, authorized team members and confirmed provider arrangements.</p><a href="../customer/index.html">Explore customer workspace <span aria-hidden="true">→</span></a></aside>
+  <div class="service-grid" id="services">
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h11v11H3zM14 11h4l3 3v4h-7zM7 18a2 2 0 1 0 4 0M16 18a2 2 0 1 0 4 0"/></svg></div><h3>Shipments &amp; bookings</h3><p>Create shipment requests, review bookings and manage shipment records.</p><a href="../customer/shipment-create.html">Manage shipments →</a></article>
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5M8 16h3"/></svg></div><h3>Quotes &amp; pricing</h3><p>Review available provider offers, compare terms and record quote decisions.</p><a href="../shipper/quote-comparison.html">Review quotes →</a></article>
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg></div><h3>Tracking &amp; visibility</h3><p>Follow available shipment status, received milestones and reported exceptions.</p><a href="../../tracking.html">Track a shipment →</a></article>
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 13h7M9 17h7"/></svg></div><h3>Delivery &amp; documents</h3><p>Access delivery confirmation and authorized proof-of-delivery records.</p><a href="../shipper/epod-vault.html">Open ePOD vault →</a></article>
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div><h3>Payments &amp; invoices</h3><p>Review billing records and payment outcomes from connected services.</p><a href="../customer/invoices.html">View invoices →</a></article>
+   <article class="service-card"><div class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4zM8 9h8M8 12h5"/></svg></div><h3>Claims &amp; support</h3><p>Raise a service issue, follow support responses and manage claims.</p><a href="../customer/support.html">Get customer support →</a></article>
+  </div>
+ </div>
+</div></section>
+<section class="section section-soft" id="journey"><div class="wrap">
+ <div class="section-head"><div class="kicker">A CLEAR, CONNECTED PROCESS</div><h2>From first request to completed delivery.</h2><p class="section-intro">Each stage has a clear purpose. Shipment status and commitments reflect confirmed arrangements and operational updates actually received.</p></div>
+ <div class="journey-grid">
+  <article class="journey-step"><small>01 / REQUEST</small><h3>Share requirements</h3><p>Provide origin, destination, cargo details and preferred timing.</p></article>
+  <article class="journey-step"><small>02 / REVIEW</small><h3>Evaluate offers</h3><p>Review available provider options, rates, terms and service conditions.</p></article>
+  <article class="journey-step"><small>03 / CONFIRM</small><h3>Agree arrangements</h3><p>Confirm the selected offer, capacity, responsibilities and charges.</p></article>
+  <article class="journey-step"><small>04 / FOLLOW</small><h3>Stay informed</h3><p>Follow milestones and exceptions as verified updates are received.</p></article>
+  <article class="journey-step"><small>05 / COMPLETE</small><h3>Close the shipment</h3><p>Review delivery evidence, invoices and any support actions.</p></article>
+ </div>
+</div></section>
+<section class="section" id="global"><div class="wrap"><div class="global-panel">
+ <div><div class="kicker">GLOBAL-READY CUSTOMER EXPERIENCE</div><h2>One connected experience across borders.</h2><p>Designed for multi-country customer details, local time zones, currencies, measurements and multilingual access. Actual service coverage and execution remain subject to route verification, partner capacity and applicable requirements.</p></div>
+ <div class="global-tags"><span>Multi-country addresses</span><span>Local time zones</span><span>Multi-currency workflows</span><span>15 language options</span><span>Responsive on every screen</span><span>Route-verified service access</span></div>
+</div></div></section>
+<section class="cta"><div class="wrap cta-inner"><div><h2>Ready to move your next shipment?</h2><p>Start a request, check an existing shipment or contact the KRIM team.</p></div><div class="cta-actions"><a class="btn btn-primary" href="../customer/quote-request.html">Request a quote ↗</a><a class="btn btn-outline-light" href="../../tracking.html">Track shipment →</a><a class="btn btn-white" href="../../contact.html">Contact KRIM</a></div></div></section>
 </main>
-</body></html>
+<footer class="footer"><div class="wrap">
+ <div class="footer-grid">
+  <div><a class="footer-wordmark" href="../../index.html" aria-label="KRIM Logistics home">KRIM Logistics</a><p class="footer-desc">Global Logistics Operating System. Knowledge · Reliability · Integration · Movement. Move Freight. Connect Globally.</p></div>
+  <nav class="footer-col" aria-label="Customer links"><b>Customer</b><a href="../customer/index.html">Customer workspace</a><a href="customer-services/shipment-list.html">My shipments</a><a href="../customer/quote-request.html">Request a quote</a><a href="customer-services/shipping-preferences.html">Account &amp; notification settings</a></nav>
+  <nav class="footer-col" aria-label="Explore KRIM"><b>Explore KRIM</b><a href="../../index.html">KRIM global homepage</a><a href="../../tracking.html">Shipment tracking</a><a href="../../partner-with-us.html">Become a partner</a></nav>
+  <nav class="footer-col" aria-label="Company and policies"><b>Company &amp; policies</b><a href="../../about.html">About KRIM</a><a href="../../contact.html">Contact &amp; support</a><a href="../../privacy.html">Privacy policy</a><a href="../../terms.html">Terms &amp; conditions</a></nav>
+ </div>
+ <div class="footer-social"><div><b>Follow KRIM</b><small>Company updates and partnership news.</small></div><nav class="krim-social krim-social-footer" aria-label="KRIM Logistics social channels">
+  <a href="https://www.facebook.com/1405128699351990" target="_blank" rel="noopener noreferrer" aria-label="KRIM Logistics on Facebook" title="Facebook"><span class="social-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="brand-fill" d="M13.4 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.5 1.6-1.5h1.7V3.7c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2H7.3V13h2.8v8z"/></svg></span><span class="social-label">Facebook</span></a>
+  <a href="https://www.instagram.com/krimlogistics/" target="_blank" rel="noopener noreferrer" aria-label="KRIM Logistics on Instagram" title="Instagram"><span class="social-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.7" r="1" class="brand-fill"/></svg></span><span class="social-label">Instagram</span></a>
+  <a href="https://www.linkedin.com/company/krim-logistics/" target="_blank" rel="noopener noreferrer" aria-label="KRIM Logistics on LinkedIn" title="LinkedIn"><span class="social-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="brand-fill" d="M5 8.5H2V21h3zM3.5 2a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6M21 13.2c0-3.7-2-5.4-4.6-5.4a4 4 0 0 0-3.6 2V8.5h-3V21h3v-6.2c0-1.6.3-3.2 2.3-3.2s2 1.9 2 3.3V21h3z"/></svg></span><span class="social-label">LinkedIn</span></a>
+  <a href="https://www.youtube.com/channel/UCXlIzrjD8Ei7eMU97YxXOAg" target="_blank" rel="noopener noreferrer" aria-label="KRIM Logistics on YouTube" title="YouTube"><span class="social-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="brand-fill" d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8M9.8 15.5v-7l6 3.5z"/></svg></span><span class="social-label">YouTube</span></a>
+  <a href="https://wa.me/916204624596" target="_blank" rel="noopener noreferrer" aria-label="KRIM Logistics on WhatsApp" title="WhatsApp"><span class="social-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.2 11.7a8.2 8.2 0 0 1-12.1 7.2L3 20l1.2-4.9a8.2 8.2 0 1 1 16-3.4z"/><path class="brand-fill" d="M9 7.7c-.3 0-.6.1-.8.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.9 4.4 3.9 2.2.9 2.6.7 3.1.7.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.1.1-1.3-.1-.1-.3-.2-.7-.4l-1.9-.9c-.2-.1-.4-.1-.6.2l-.9 1.1c-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.3-1.6-1.5-1.9-.2-.3 0-.4.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.5-.5-.7-.5z"/></svg></span><span class="social-label">WhatsApp</span></a>
+ </nav></div>
+ <div class="footer-bottom"><span>© <span id="year"></span> KRIM Logistics. All rights reserved.</span><span>Service availability and shipment commitments require route confirmation.</span></div>
+</div></footer>
+<script>
+(function(){
+ const button=document.getElementById('menu-toggle'),nav=document.getElementById('primary-nav');
+ function closeMenu(restore){if(!button||!nav)return;nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation');button.textContent='☰';if(restore)button.focus();}
+ if(button&&nav){
+  button.addEventListener('click',function(){const open=nav.classList.toggle('open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close navigation':'Open navigation');button.textContent=open?'×':'☰';if(open){const first=nav.querySelector('a');if(first)first.focus();}});
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))closeMenu(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nav.classList.contains('open'))closeMenu(true);});
+  document.addEventListener('click',function(e){if(nav.classList.contains('open')&&!nav.contains(e.target)&&!button.contains(e.target))closeMenu(false);});
+  window.addEventListener('resize',function(){if(window.innerWidth>1100&&nav.classList.contains('open'))closeMenu(false);});
+ }
+ const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();
+})();
+</script>
+
+</body>
+</html>
