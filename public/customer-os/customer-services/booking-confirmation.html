@@ -57,6 +57,13 @@
 @media(max-width:1100px){.krim-menu-toggle{display:inline-flex;align-items:center;justify-content:center}.krim-site-nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:72dvh;overflow:auto;background:#fff;box-shadow:0 16px 30px #09243d26}.krim-site-nav.open{display:block}.krim-site-nav-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0}.krim-site-nav .krim-nav-home{margin:0}}
 @media(max-width:700px){.krim-head-inner,.krim-site-nav-inner{width:calc(100% - 28px)}.krim-head-logo img{width:170px;max-width:65vw}.krim-site-nav-inner{grid-template-columns:1fr}.krim-site-nav a{background:var(--paper);min-height:42px}}
 </style>
+
+<style>
+/* Official homepage wordmark sizing — consistent across all customer pages. */
+.krim-head-logo img{width:180px;max-width:44vw;height:auto;max-height:58px;object-fit:contain;object-position:left}
+@media(max-width:760px){.krim-head-logo img{width:150px;max-width:65vw;max-height:48px}}
+@media(max-width:420px){.krim-head-logo img{width:132px;max-width:65vw;max-height:42px}}
+</style>
 </head>
 <body>
 <div class="topline"></div>
@@ -164,14 +171,6 @@ async function production(){
 Promise.resolve(window.KRIM_GLOBAL_CONTEXT?.ready).catch(()=>{}).finally(()=>{if(staging)sample();else production().catch(e=>{$('status-text').textContent='Unable to verify record';$('fields').replaceChildren();setFeedback(e?.message||'The shipment confirmation could not be loaded. No booking success has been assumed.','error');addLink('Shipment overview','shipment-list.html')})});
 })();
 
-const krimMenuToggle=document.getElementById('toggle');
-const krimCustomerNav=document.getElementById('nav');
-function closeKrimNav(){krimCustomerNav.classList.remove('open');krimMenuToggle.setAttribute('aria-expanded','false');krimMenuToggle.setAttribute('aria-label','Open navigation');krimMenuToggle.textContent='☰'}
-krimMenuToggle.addEventListener('click',()=>{const open=!krimCustomerNav.classList.contains('open');krimCustomerNav.classList.toggle('open',open);krimMenuToggle.setAttribute('aria-expanded',String(open));krimMenuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');krimMenuToggle.textContent=open?'×':'☰'});
-krimCustomerNav.addEventListener('click',e=>{if(e.target.closest('a'))closeKrimNav()});
-document.addEventListener('click',e=>{if(!krimCustomerNav.contains(e.target)&&!krimMenuToggle.contains(e.target))closeKrimNav()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeKrimNav()});
-window.addEventListener('resize',()=>{if(innerWidth>1100)closeKrimNav()});
 </script>
 </body>
 </html>
