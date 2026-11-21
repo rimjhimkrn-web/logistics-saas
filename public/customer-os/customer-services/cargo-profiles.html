@@ -54,8 +54,8 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
     <form id="form" novalidate>
      <div class="fields">
       <div class="field"><label for="name">Profile name</label><input id="name" name="name" maxlength="80" required autocomplete="off" placeholder="e.g. Packaged consumer goods"><small>A short name your team will recognize.</small></div>
-      <div class="field"><label for="weight">Typical total weight (kg)</label><input id="weight" name="weight" type="number" min="0.01" max="1000000" step="0.01" inputmode="decimal" required placeholder="e.g. 250"><small>Use kilograms. Confirm the actual shipment weight each time.</small></div>
-      <div class="field full"><label for="mode">Preferred transport mode</label><select id="mode" name="mode"><option value="road">Road</option><option value="rail">Rail</option><option value="ocean">Ocean freight</option><option value="air">Air freight</option><option value="multimodal">Multimodal</option></select></div>
+      <div class="field"><label for="weight">Typical total gross weight</label><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,.42fr);gap:8px"><input id="weight" name="weight" type="number" min="0.001" step="0.001" inputmode="decimal" required placeholder="e.g. 250"><select id="weight-unit" name="weight_unit" aria-label="Weight unit"><option value="kg">Kilograms (kg)</option><option value="t">Metric tonnes (t)</option><option value="lb">Pounds (lb)</option><option value="short_ton">US short tons</option><option value="long_ton">UK long tons</option></select></div><small>Stored internally as kilograms for consistent calculations. Confirm actual gross weight and unit for every shipment.</small></div>
+      <div class="field full"><label for="mode">Preferred transport mode</label><select id="mode" name="mode"><option value="road">Road</option><option value="rail">Rail</option><option value="ocean">Ocean freight</option><option value="air">Air freight</option><option value="multimodal">Multimodal</option><option value="inland_waterway">Inland waterways</option><option value="courier">Courier & express</option><option value="cold_chain">Temperature-controlled</option><option value="project_cargo">Project & heavy-lift</option><option value="warehouse">Warehousing & fulfilment</option><option value="customs">Customs coordination</option></select></div>
       <div class="field full"><label for="description">Cargo description</label><textarea id="description" name="description" maxlength="500" required placeholder="Describe the goods, packaging and handling needs accurately."></textarea><small>Maximum 500 characters. Never omit regulated, hazardous or special-handling information.</small></div>
      </div>
      <div class="form-actions"><button class="btn primary" id="save" type="submit" disabled>Save cargo profile →</button><a class="btn" href="../../../shipments/shipment-create.html">Start a shipment draft</a></div>
@@ -104,16 +104,19 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
  });
  $('form').addEventListener('submit',async e=>{
   e.preventDefault();if(!user||busy)return;
-  const name=$('name').value.trim(),description=$('description').value.trim(),weight=Number($('weight').value),mode=$('mode').value;
-  if(!name||!description||!Number.isFinite(weight)||weight<=0||weight>1000000){msg('Enter a profile name, a cargo description and a valid weight between 0.01 and 1,000,000 kg.',true);return}
+  const name=$('name').value.trim(),description=$('description').value.trim(),weight=Number($('weight').value),unit=$('weight-unit').value,mode=$('mode').value;
+  const kgFactor={kg:1,t:1000,lb:0.45359237,short_ton:907.18474,long_ton:1016.0469088}[unit]||1,weightKg=weight*kgFactor;
+  if(!name||!description||!Number.isFinite(weightKg)||weightKg<=0||weightKg>1000000){msg('Enter a profile name, cargo description and valid weight (maximum 1,000,000 kg equivalent).',true);return}
   if(profiles.length>=30){msg('You have reached the 30-profile limit. Delete a profile before adding another.',true);return}
   const old=profiles.slice(),id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'cargo-'+Date.now()+'-'+Math.random().toString(36).slice(2);
-  profiles.unshift({id,name,description,weight_kg:weight,transport_mode:mode,created_at:new Date().toISOString()});
+  profiles.unshift({id,name,description,weight_kg:Number(weightKg.toFixed(3)),transport_mode:mode,created_at:new Date().toISOString()});
   busy=true;$('save').disabled=true;$('save').textContent='Saving securely…';
   try{await persist();$('form').reset();render();msg('Cargo profile saved to your KRIM account. Review actual shipment details before using it in a booking draft.')}
   catch(err){profiles=old;render();msg(err?.message||'Could not save cargo profile. No success has been recorded.',true)}
   finally{busy=false;$('save').disabled=false;$('save').textContent='Save cargo profile →'}
  });
+ const stagingPreview=location.hostname.endsWith('.krim-staging.pages.dev');
+ if(stagingPreview){$('save').disabled=true;$('save').textContent='Saving disabled in staging preview';$('form').querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=true);msg('Staging review mode: authentication is bypassed. No personal cargo records are loaded and all saving is disabled.');$('profiles').innerHTML='<div class="empty"><strong>Private cargo library hidden in staging.</strong><p>Sign in on the production customer workspace to access real account records.</p></div>';return}
  try{
   if(!client)throw new Error('KRIM backend configuration did not load. Check the configuration and reload this page.');
   const {data:a,error:ae}=await client.auth.getSession();if(ae)throw ae;
@@ -121,10 +124,11 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
   user=a.session.user;
   const {data:p,error}=await client.from('krim_user_app_preferences').select('preferences').eq('user_id',user.id).maybeSingle();if(error)throw error;
   prefs=p?.preferences||{};
-  profiles=Array.isArray(prefs.cargo_profiles)?prefs.cargo_profiles.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'&&typeof x.description==='string'&&Number(x.weight_kg)>0&&['road','rail','ocean','air','multimodal'].includes(x.transport_mode)): [];
+  profiles=Array.isArray(prefs.cargo_profiles)?prefs.cargo_profiles.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'&&typeof x.description==='string'&&Number(x.weight_kg)>0&&['road','rail','ocean','air','multimodal','inland_waterway','courier','cold_chain','project_cargo','warehouse','customs'].includes(x.transport_mode)): [];
   render();$('save').disabled=false;msg('Secure session verified. Loaded '+profiles.length+' saved cargo profile(s).');
  }catch(e){$('save').disabled=true;msg(e?.message||'Unable to load cargo profiles. No sample data is displayed.',true);$('profiles').innerHTML='<div class="empty"><strong>Your cargo profiles are unavailable right now.</strong><p>Check your sign-in and account permissions, then refresh. No placeholder records have been inserted.</p></div>'}
 })();
 </script>
+<script src="../assets/customer-os-globalization.js" defer></script>
 </body>
 </html>
