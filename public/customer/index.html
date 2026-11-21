@@ -1,114 +1,275 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRIM OS — Enterprise Master Navigation Index</title>
-    <meta name="description" content="Master file directory and navigation index for the institutional KRIM OS logistics platform.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#026f9e', 900: '#0f172a' }
-                    },
-                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
-            }
-        }
-    </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-
-<!-- KRIM_CUSTOMER_FLOW_NAV -->
-<link rel="stylesheet" href="/logistics-saas/core/krim-customer-workflow.css">
-<script defer src="/logistics-saas/core/krim-customer-workflow.js"></script>
-<script src="/logistics-saas/assets/krim-global-language.js?v=20261111-hamburger" defer></script>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="KRIM Customer Portal Overview — access your customer workspace, shipment requests, quotes, bookings, tracking, documents, billing and support.">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>Customer Portal Overview | KRIM Logistics</title>
+<style>
+:root{color-scheme:light;--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#EAF5FC;--soft:#F3F7FB;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--white:#fff;--shadow:0 16px 42px rgba(9,36,61,.08);--radius:16px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:130px}
+body{margin:0;background:#fff;color:var(--ink);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit}img,svg{max-width:100%}
+a:focus-visible,button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.wrap{width:min(1200px,calc(100% - 44px));margin-inline:auto}
+.skip{position:absolute;top:-80px;left:12px;z-index:500;padding:10px 14px;background:#fff;color:var(--navy);border:2px solid var(--blue);border-radius:8px}.skip:focus{top:12px}
+.site-head{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(9,36,61,.05)}
+.head-main{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand img{display:block;width:205px;max-width:42vw;max-height:62px;object-fit:contain;object-position:left center}
+.head-actions{display:flex;align-items:center;gap:9px}
+.head-actions a,.head-actions button{min-height:42px;padding:9px 15px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.head-actions .primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.menu-toggle{display:none;min-width:44px;font-size:20px!important}
+.nav-row{border-top:1px solid #edf2f6;background:#fff}
+.nav-inner{min-height:48px;display:flex;align-items:center;gap:5px}
+.nav-inner a{padding:10px 14px;border-radius:8px;color:#40556b;font-size:12px;font-weight:750}
+.nav-inner a:hover,.nav-inner a[aria-current=page]{background:var(--pale);color:var(--blue2)}
+.nav-inner .push{margin-left:auto;color:var(--blue2)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(115deg,#071d34 0%,#0b3154 55%,#0754a4 100%);color:#fff}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 82% 24%,rgba(69,184,240,.25),transparent 34%),linear-gradient(130deg,transparent 48%,rgba(255,255,255,.035) 48%,rgba(255,255,255,.035) 49%,transparent 49%);pointer-events:none}
+.hero-inner{position:relative;min-height:360px;padding-block:62px;display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:42px}
+.eyebrow,.kicker{display:flex;align-items:center;gap:9px;color:#8bd4fa;font-size:11px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
+.eyebrow:before{content:"";width:26px;height:2px;background:var(--sky)}
+h1{max-width:680px;margin:18px 0 14px;font-size:clamp(38px,5vw,58px);line-height:1.07;letter-spacing:-.055em;font-weight:850;color:#fff}
+.hero p{max-width:620px;margin:0;color:#d7e7f3;font-size:15px;line-height:1.85}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:25px}
+.btn{min-height:46px;padding:11px 17px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:850;border:1px solid transparent;transition:.18s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(22,143,224,.2)}
+.btn-light{background:#fff;color:var(--navy)}
+.btn-outline{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.42);color:#fff}
+.hero-panel{padding:22px;border:1px solid rgba(255,255,255,.22);border-radius:17px;background:rgba(255,255,255,.09);backdrop-filter:blur(10px)}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.18)}
+.panel-top strong{font-size:13px;color:#fff}.secure-pill{padding:5px 9px;border:1px solid rgba(139,212,250,.45);border-radius:20px;color:#a9def9;font-size:10px;font-weight:800}
+.panel-stat{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:16px}
+.stat{padding:14px;border-radius:11px;background:rgba(255,255,255,.09)}
+.stat small{display:block;color:#b8cfdf;font-size:10px;font-weight:750;letter-spacing:.06em;text-transform:uppercase}
+.stat b{display:block;margin-top:5px;color:#fff;font-size:25px;line-height:1.2}
+.stat span{display:block;margin-top:3px;color:#c1d5e4;font-size:10px}
+.panel-foot{margin-top:13px;color:#d1e1ed;font-size:11px;line-height:1.7}
+.section{padding:54px 0}
+.section-soft{background:var(--soft)}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}
+.section-head h2{margin:8px 0 0;color:var(--navy);font-size:clamp(25px,3vw,34px);line-height:1.15;letter-spacing:-.035em}
+.section-head p{max-width:570px;margin:0;color:var(--muted);font-size:12px;line-height:1.8}
+.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.quick-card{min-height:122px;padding:18px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 5px 18px rgba(9,36,61,.035);display:flex;flex-direction:column;justify-content:space-between;transition:.18s}
+.quick-card:hover,.module:hover{transform:translateY(-3px);border-color:#a9d8f3;box-shadow:var(--shadow)}
+.quick-card small{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.quick-card b{color:var(--navy);font-size:15px}
+.quick-card span{color:var(--blue2);font-size:12px;font-weight:850}
+.module-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.module{padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 5px 18px rgba(9,36,61,.035);transition:.18s}
+.module-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:var(--pale);color:var(--blue2)}
+.module-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.module h3{margin:14px 0 5px;color:var(--navy);font-size:16px}
+.module p{min-height:42px;margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.7}
+.module a{color:var(--blue2);font-size:12px;font-weight:850}
+.module-links{display:flex;flex-wrap:wrap;gap:9px 15px}
+.notice{display:grid;grid-template-columns:auto 1fr;gap:15px;padding:19px;border:1px solid #b9dff4;border-radius:13px;background:#f0f8fd}
+.notice-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#d9effb;color:var(--blue2);font-weight:900;font-size:18px}
+.notice h3{margin:0 0 4px;color:var(--navy);font-size:14px}
+.notice p{margin:0;color:#49647c;font-size:12px;line-height:1.75}
+.journey{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;counter-reset:stage}
+.stage{position:relative;padding:17px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.stage:before{counter-increment:stage;content:"0" counter(stage);display:block;margin-bottom:13px;color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.1em}
+.stage h3{margin:0 0 6px;color:var(--navy);font-size:13px}
+.stage p{margin:0;color:var(--muted);font-size:11px;line-height:1.7}
+.global-panel{padding:26px;border-radius:16px;background:linear-gradient(115deg,var(--navy),var(--navy2));color:#fff;display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:center}
+.global-panel h2{margin:8px 0;color:#fff;font-size:clamp(23px,3vw,31px);line-height:1.15}
+.global-panel p{margin:0;color:#d3e2ee;font-size:12px;line-height:1.8}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{padding:8px 10px;border:1px solid rgba(255,255,255,.2);border-radius:30px;color:#e4f2fb;font-size:10px;font-weight:750}
+.footer{padding:28px 0 18px;background:#071d34;color:#c5d5e1}
+.footer-top{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.14)}
+.footer-brand{color:#fff;font-size:15px;font-weight:900}.footer-top p{max-width:470px;margin:5px 0 0;color:#a9bdcc;font-size:11px}
+.footer-links{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}.footer-links a{color:#d5e5f0;font-size:11px;font-weight:700}
+.footer-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:14px;color:#91a9bb;font-size:10px}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;gap:25px;padding-block:48px}.hero-panel{max-width:600px}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.journey{grid-template-columns:repeat(3,minmax(0,1fr))}.global-panel{grid-template-columns:1fr}}
+@media(max-width:680px){.wrap{width:min(100% - 28px,1200px)}.head-main{min-height:70px}.brand img{width:174px}.menu-toggle{display:inline-flex!important}.head-actions .login,.head-actions .primary{display:none}.nav-row{display:none}.nav-row.open{display:block}.nav-inner{align-items:stretch;flex-direction:column;padding:8px 0}.nav-inner a{padding:12px}.nav-inner .push{margin-left:0}.hero-inner{min-height:0;padding-block:42px}.hero h1{font-size:clamp(35px,10vw,46px)}.hero p{font-size:13px}.hero-actions .btn{flex:1 1 100%}.section{padding:40px 0}.section-head{display:block}.section-head p{margin-top:10px}.quick-grid,.module-grid{grid-template-columns:1fr}.quick-card{min-height:105px}.journey{grid-template-columns:1fr 1fr}.global-panel{padding:21px}.footer-links{width:100%}}
+@media(max-width:390px){.journey{grid-template-columns:1fr}.head-actions{gap:5px}}
+/* Tablet and mobile navigation: keep the menu inside the header and viewport. */
+@media(max-width:900px){
+ .site-head{position:sticky;top:0}
+ .head-main{position:relative}
+ .menu-toggle{display:inline-flex!important;align-items:center;justify-content:center}
+ .head-actions .login,.head-actions .primary{display:none!important}
+ .nav-row{display:none;position:absolute;top:100%;left:0;right:0;width:100%;max-height:calc(100dvh - 78px);overflow-y:auto;overflow-x:hidden;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);box-shadow:0 16px 28px rgba(9,36,61,.14);z-index:110}
+ .nav-row.open{display:block!important}
+ .nav-inner{width:min(100% - 28px,1200px);min-width:0;min-height:0;margin-inline:auto;padding:8px 0 12px;display:flex;flex-direction:column;align-items:stretch;gap:3px}
+ .nav-inner a{display:flex;width:100%;min-width:0;min-height:44px;padding:11px 13px;white-space:normal;overflow-wrap:anywhere;border-radius:8px}
+ .nav-inner .push{margin-left:0}
+}
+@media(max-width:680px){
+ .nav-row{max-height:calc(100dvh - 70px)}
+}
+/* Navigation repair: use normal document flow when expanded. This prevents the dropdown from escaping its header/viewport on mobile and tablet. */
+@media(max-width:900px){
+ .site-head{position:sticky;top:0;z-index:300;isolation:isolate}
+ .head-main{position:relative;z-index:2;background:#fff}
+ .nav-row,.nav-row.open{
+  position:static!important;inset:auto!important;display:none;width:100%;max-height:min(70dvh,560px);
+  overflow-x:hidden;overflow-y:auto;background:#fff;border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);box-shadow:0 12px 22px rgba(9,36,61,.12);z-index:auto;
+ }
+ .nav-row.open{display:block!important}
+ .nav-inner{
+  width:min(100% - 28px,1200px);min-height:0;margin-inline:auto;padding:8px 0 12px;
+  display:flex;flex-direction:column;align-items:stretch;gap:2px;
+ }
+ .nav-inner a{
+  display:flex;align-items:center;width:100%;min-width:0;min-height:46px;padding:11px 14px;
+  white-space:normal;overflow-wrap:anywhere;border-radius:8px;
+ }
+ .nav-inner .push{margin-left:0}
+}
+@media(max-width:680px){
+ .head-main{min-height:70px}
+ .nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}
+}
+/* KRIM global navigation: full horizontal navigation on desktop; contained menu on smaller screens. */
+.site-head{position:sticky;top:0;z-index:500;isolation:isolate}
+.head-main{position:relative;z-index:2;background:rgba(255,255,255,.98)}
+.head-actions{display:flex;align-items:center;gap:10px}
+.menu-toggle{display:none!important;min-width:44px;min-height:44px;cursor:pointer;background:#fff!important;color:var(--navy)!important;border:1px solid var(--line)!important}
+.nav-row,.nav-row.open{position:static!important;display:block!important;width:auto!important;max-height:none;overflow:visible;background:#fff;border-top:1px solid #edf2f6;box-shadow:none}
+.nav-inner{width:min(1200px,calc(100% - 44px));min-height:48px;margin-inline:auto;padding:0;display:flex!important;flex-direction:row;align-items:center;gap:5px}
+.nav-inner a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;white-space:nowrap;overflow-wrap:normal;border-radius:8px}
+.nav-inner .push{margin-left:auto!important}
+@media(max-width:1100px){
+ .head-main{min-height:74px}
+ .menu-toggle{display:inline-flex!important;align-items:center;justify-content:center}
+ .nav-row,.nav-row.open{position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;display:none!important;max-height:min(72dvh,620px);overflow-x:hidden;overflow-y:auto;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);box-shadow:0 18px 34px rgba(9,36,61,.16);z-index:1}
+ .nav-row.open{display:block!important}
+ .nav-inner{width:min(1200px,calc(100% - 32px));min-height:0;margin-inline:auto;padding:12px 0;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:5px 10px}
+ .nav-inner a{display:flex;width:100%;min-width:0;min-height:46px;padding:11px 13px;white-space:normal;overflow-wrap:anywhere}
+ .nav-inner .push{margin-left:0!important}
+}
+@media(max-width:680px){
+ .head-main{min-height:70px}
+ .nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}
+ .nav-inner{width:calc(100% - 28px);grid-template-columns:minmax(0,1fr);padding:8px 0 12px;gap:2px}
+ .nav-inner a{min-height:46px}
+ .head-actions .login,.head-actions .primary{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* Language is selected once on the Customer Ecosystem homepage; keep the shared translator active here so the saved preference still applies, but do not show a second selector. */
+#krim-language-control{display:none!important}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans antialiased">
-    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <img src="../../assets/krim-icon.svg?v=20261111-masterbrand-v3" alt="KRIM" class="w-10 h-10 object-contain">
-                <div>
-                    <span class="text-base font-extrabold tracking-wide text-white uppercase">KRIM OS</span>
-                    <span class="block text-[10px] tracking-widest text-sky-400 font-semibold uppercase">Master Index</span>
-                </div>
-            </div>
-            <a href="/logistics-saas/public/customer/workspace.html" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/20">Launch Workspace</a>
-        </div>
-    </header>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+ <div class="wrap head-main">
+  <a class="brand" href="../customer-os/index.html" aria-label="KRIM Customer Ecosystem home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71"></a>
+  <div class="head-actions nav-actions">
+   <a class="login" href="../../auth/login.html">Sign in</a>
+   <a class="primary" href="onboarding.html">Create account</a>
+   <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false" aria-label="Open navigation">☰</button>
+  </div>
+ </div>
+ <nav class="nav-row" id="primary-nav" aria-label="Customer portal navigation"><div class="wrap nav-inner">
+  <a href="../customer-os/index.html">Customer ecosystem</a>
+  <a href="index.html" aria-current="page">Portal overview</a>
+  <a href="workspace.html">Workspace</a>
+  <a href="shipment-create.html">New shipment</a>
+  <a href="tracking-map.html">Tracking</a>
+  <a href="invoices.html">Billing</a>
+  <a href="support.html">Support</a>
+  <a class="push" href="shipping-preferences.html">Account settings →</a>
+ </div></nav>
+</header>
+<main id="main">
+<section class="hero"><div class="wrap hero-inner">
+ <div>
+  <div class="eyebrow">KRIM CUSTOMER PORTAL</div>
+  <h1>Your logistics activity.<br><span>One connected view.</span></h1>
+  <p>Access the customer tools for requests, quotes, bookings, shipment visibility, delivery records, billing and support — organized around your account and authorized team.</p>
+  <div class="hero-actions"><a class="btn btn-primary" href="workspace.html">Open customer workspace ↗</a><a class="btn btn-light" href="shipment-create.html">Start a shipment request</a><a class="btn btn-outline" href="../../auth/login.html">Sign in securely</a></div>
+ </div>
+ <aside class="hero-panel" aria-label="Customer account overview preview">
+  <div class="panel-top"><strong>Customer account overview</strong><span class="secure-pill">SECURE WORKSPACE</span></div>
+  <div class="panel-stat">
+   <div class="stat"><small>Shipment requests</small><b>—</b><span>Shown after sign-in</span></div>
+   <div class="stat"><small>Quotes to review</small><b>—</b><span>Shown after sign-in</span></div>
+   <div class="stat"><small>Active movements</small><b>—</b><span>Verified status only</span></div>
+   <div class="stat"><small>Open actions</small><b>—</b><span>Account-linked tasks</span></div>
+  </div>
+  <div class="panel-foot">This is a portal preview. Live account information is displayed only after secure sign-in and authorization.</div>
+ </aside>
+</div></section>
 
-    <main class="flex-grow max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-widest">System Complete</span>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Institutional Architecture & Navigation Directory</h1>
-            <p class="text-slate-400 text-xs font-mono">Complete directory of all customer-side shipper operational modules, escrow vaults, and telemetry views built for KRIM OS.</p>
-        </div>
+<section class="section"><div class="wrap">
+ <div class="section-head"><div><div class="kicker">QUICK ACCESS</div><h2>Go straight to what you need.</h2></div><p>Common customer actions are grouped here for faster access on desktop, tablet and mobile.</p></div>
+ <div class="quick-grid">
+  <a class="quick-card" href="shipment-create.html"><small>01 / Start</small><b>Create a shipment request</b><span>Begin request →</span></a>
+  <a class="quick-card" href="../shipper/quote-comparison.html"><small>02 / Commercial</small><b>Review quote options</b><span>Compare offers →</span></a>
+  <a class="quick-card" href="tracking-map.html"><small>03 / Visibility</small><b>Track shipment activity</b><span>Open tracking →</span></a>
+  <a class="quick-card" href="pod-download.html"><small>04 / Completion</small><b>View delivery documents</b><span>Open records →</span></a>
+ </div>
+</div></section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-sky-400 font-bold uppercase tracking-wider block">Phase I: Onboarding & Setup</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="/logistics-saas/public/customer/address-book.html" class="hover:text-sky-400 transition">→ Address Book (`address-book.html`)</a></li>
-                    <li><a href="quote-request.html" class="hover:text-sky-400 transition">→ Quote Request (`quote-request.html`)</a></li>
-                </ul>
-            </div>
+<section class="section section-soft"><div class="wrap">
+ <div class="section-head"><div><div class="kicker">CUSTOMER OPERATIONS</div><h2>One portal. Every key stage.</h2></div><p>Choose a service area to continue. Access to sensitive records and actions depends on your sign-in, organization membership and permissions.</p></div>
+ <div class="module-grid">
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h11v11H3zM14 11h4l3 3v4h-7zM7 18a2 2 0 1 0 4 0M16 18a2 2 0 1 0 4 0"/></svg></div><h3>Shipments & bookings</h3><p>Create requests, review booking information and manage shipment records.</p><div class="module-links"><a href="shipment-create.html">New request →</a><a href="shipment-details.html">Shipment details →</a><a href="../customer-os/customer-services/shipment-list.html">Shipment list →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5M8 16h3"/></svg></div><h3>Quotes & pricing</h3><p>Request pricing and review provider offers, terms, revisions and decisions.</p><div class="module-links"><a href="quote-request.html">Request a quote →</a><a href="../shipper/quote-comparison.html">Compare quotes →</a><a href="quote-details.html">Quote details →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg></div><h3>Tracking & visibility</h3><p>Follow shipment milestones and exceptions when operational updates are received.</p><div class="module-links"><a href="tracking-map.html">Tracking map →</a><a href="shipment-timeline.html">Shipment timeline →</a><a href="../../tracking.html">Tracking portal →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 13h7M9 17h7"/></svg></div><h3>Delivery & documents</h3><p>Review delivery confirmation and authorized proof-of-delivery records.</p><div class="module-links"><a href="pod-download.html">Download ePOD →</a><a href="pod-capture.html">POD records →</a><a href="delivery-confirmation.html">Delivery confirmation →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div><h3>Payments & billing</h3><p>Access invoices, payment history, credit notes and refund information.</p><div class="module-links"><a href="invoices.html">Invoices →</a><a href="payment-history.html">Payment history →</a><a href="refunds.html">Refunds →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4zM8 9h8M8 12h5"/></svg></div><h3>Claims & customer support</h3><p>Raise a service concern, follow support responses and review claim progress.</p><div class="module-links"><a href="claims.html">Manage claims →</a><a href="dispute.html">Disputes →</a><a href="support.html">Contact support →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M8 20v-6h8v6M3 20h18"/></svg></div><h3>Company & team</h3><p>Maintain organization details, locations, team access and approval controls.</p><div class="module-links"><a href="company-profile.html">Company profile →</a><a href="team-members.html">Team members →</a><a href="approval-workflows.html">Approvals →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 2.9-.2-.1a1.7 1.7 0 0 0-1.8.2l-.1.1h-3.4l-.1-.2a1.7 1.7 0 0 0-1.6-1l-.2.1-2.9-1.7.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.1v-3.4l.2-.1a1.7 1.7 0 0 0 1-1.6l-.1-.2 1.7-2.9.2.1a1.7 1.7 0 0 0 1.8-.2l.1-.1h3.4l.1.2a1.7 1.7 0 0 0 1.6 1l.2-.1 2.9 1.7-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.1V15z"/></svg></div><h3>Account & preferences</h3><p>Manage saved locations, cargo details, shipping preferences and notifications.</p><div class="module-links"><a href="address-book.html">Address book →</a><a href="cargo-profiles.html">Cargo profiles →</a><a href="shipping-preferences.html">Preferences →</a></div></article>
+  <article class="module"><div class="module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg></div><h3>Reports & service insights</h3><p>Review available account reports, service feedback and performance summaries.</p><div class="module-links"><a href="reports.html">Reports →</a><a href="analytics.html">Analytics →</a><a href="ratings-reviews.html">Ratings & reviews →</a></div></article>
+ </div>
+</div></section>
 
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-sky-400 font-bold uppercase tracking-wider block">Phase II: Bidding & Booking</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="../shipper/quote-comparison.html" class="hover:text-sky-400 transition">→ Quote Comparison (`quote-comparison.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/quote-details.html" class="hover:text-sky-400 transition">→ Quote Details (`quote-details.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/quote-acceptance.html" class="hover:text-sky-400 transition">→ Quote Acceptance (`quote-acceptance.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/booking-confirmation.html" class="hover:text-sky-400 transition">→ Booking Confirmed (`booking-confirmation.html`)</a></li>
-                </ul>
-            </div>
+<section class="section"><div class="wrap">
+ <div class="notice"><div class="notice-icon" aria-hidden="true">i</div><div><h3>Important service notifications stay visible.</h3><p>Essential account, security and shipment updates are part of the customer service journey. Notification preferences may control optional channels or marketing messages, but must not silently suppress critical operational or security notices. Email, push, SMS or WhatsApp delivery is shown only when the relevant channel is configured, permitted and confirmed.</p></div></div>
+</div></section>
 
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-sky-400 font-bold uppercase tracking-wider block">Phase III: Shipment Lifecycle</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="/logistics-saas/public/customer/shipment-create.html" class="hover:text-sky-400 transition">→ Create Shipment (`shipment-create.html`)</a></li>
-                    <li><a href="../customer-os/customer-services/shipment-list.html" class="hover:text-sky-400 transition">→ Shipment Registry (`shipment-list.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/shipment-details.html" class="hover:text-sky-400 transition">→ Shipment Details (`shipment-details.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/shipment-timeline.html" class="hover:text-sky-400 transition">→ Timeline Audit (`shipment-timeline.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/tracking-map.html" class="hover:text-sky-400 transition">→ GPS Tracking Map (`tracking-map.html`)</a></li>
-                </ul>
-            </div>
+<section class="section section-soft"><div class="wrap">
+ <div class="section-head"><div><div class="kicker">YOUR SHIPMENT JOURNEY</div><h2>Know what happens next.</h2></div><p>Each step is connected to a clear customer action and the latest confirmed information available to the account.</p></div>
+ <div class="journey">
+  <article class="stage"><h3>Submit a request</h3><p>Share origin, destination, cargo and timing requirements.</p></article>
+  <article class="stage"><h3>Review available offers</h3><p>Compare confirmed provider options and commercial terms.</p></article>
+  <article class="stage"><h3>Confirm arrangements</h3><p>Proceed after service, capacity and responsibilities are agreed.</p></article>
+  <article class="stage"><h3>Follow progress</h3><p>View milestones and exceptions as verified updates arrive.</p></article>
+  <article class="stage"><h3>Complete & reconcile</h3><p>Review delivery evidence, billing and any open support actions.</p></article>
+ </div>
+</div></section>
 
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-emerald-400 font-bold uppercase tracking-wider block">Phase IV: Settlement & Audit</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="/logistics-saas/public/customer/pod-capture.html" class="hover:text-emerald-400 transition">→ ePOD Capture (`pod-capture.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/settlement.html" class="hover:text-emerald-400 transition">→ Escrow Settlement (`settlement.html`)</a></li>
-                </ul>
-            </div>
-
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-rose-400 font-bold uppercase tracking-wider block">Phase V: Exceptions & Intelligence</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="/logistics-saas/public/customer/dispute.html" class="hover:text-rose-400 transition">→ Dispute Management (`dispute.html`)</a></li>
-                    <li><a href="/logistics-saas/public/customer/analytics.html" class="hover:text-sky-400 transition">→ Performance Analytics (`analytics.html`)</a></li>
-                </ul>
-            </div>
-
-            <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 space-y-4 shadow-xl">
-                <span class="text-sky-400 font-bold uppercase tracking-wider block">Command Center</span>
-                <ul class="space-y-2 text-slate-300">
-                    <li><a href="/logistics-saas/public/customer/workspace.html" class="hover:text-sky-400 transition">→ Shipper Workspace (`workspace.html`)</a></li>
-                </ul>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-xs text-slate-500 font-mono text-center">
-        <p>KRIM Logistics OS Global Network © 2026. All rights reserved.</p>
-    </footer>
+<section class="section"><div class="wrap"><div class="global-panel">
+ <div><div class="kicker">GLOBAL-READY BY DESIGN</div><h2>Built for customer operations across borders.</h2><p>Designed for international addresses, local time zones, multi-currency workflows, multilingual access and responsive use across devices. Service availability remains subject to verified routes, partner capacity and applicable requirements.</p></div>
+ <div class="tags"><span>Multi-country addresses</span><span>Local time zones</span><span>Multi-currency workflows</span><span>Language options</span><span>Mobile-first responsive</span><span>Verified service access</span></div>
+</div></div></section>
+</main>
+<footer class="footer"><div class="wrap">
+ <div class="footer-top"><div><a class="footer-brand" href="../customer-os/index.html">KRIM Logistics</a><p>Global Logistics Operating System. Knowledge · Reliability · Integration · Movement.</p></div>
+ <nav class="footer-links" aria-label="Footer links"><a href="../customer-os/index.html">Customer homepage</a><a href="../../index.html">KRIM homepage</a><a href="../../contact.html">Contact KRIM</a><a href="../../privacy.html">Privacy</a><a href="../../terms.html">Terms</a></nav></div>
+ <div class="footer-bottom"><span>© <span id="year"></span> KRIM Logistics. All rights reserved.</span><span>Service availability and shipment commitments require route confirmation.</span></div>
+</div></footer>
+<script>
+(function(){
+ const button=document.getElementById('menu-toggle'),nav=document.getElementById('primary-nav');
+ function closeMenu(restore){if(!button||!nav)return;nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation');button.textContent='☰';if(restore)button.focus();}
+ if(button&&nav){
+  button.addEventListener('click',function(){const open=nav.classList.toggle('open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close navigation':'Open navigation');button.textContent=open?'×':'☰';});
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))closeMenu(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nav.classList.contains('open'))closeMenu(true);});
+  document.addEventListener('click',function(e){if(nav.classList.contains('open')&&!nav.contains(e.target)&&!button.contains(e.target))closeMenu(false);});
+  window.addEventListener('resize',function(){if(window.innerWidth>900)closeMenu(false);});
+ }
+ const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();
+})();
+</script>
+<script src="../../assets/krim-global-language.js?v=20261121-customer-portal" defer></script>
 </body>
 </html>

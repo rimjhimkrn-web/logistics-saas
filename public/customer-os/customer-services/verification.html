@@ -1,6 +1,126 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07152f"><title>Verification | KRIM Customer OS</title><style>body{margin:0;background:#f4f7fc;color:#172943;font:14px/1.6 system-ui}header{background:#07152f;color:#dbeafe;padding:12px 5vw;font-size:11px;letter-spacing:.1em}main{max-width:1000px;margin:28px auto;padding:0 16px}.hero{border-radius:20px;padding:clamp(24px,5vw,42px);background:linear-gradient(115deg,#07152f,#1769ff 68%,#0b9898);color:#fff}.hero h1{font-size:clamp(28px,4vw,42px);line-height:1.1}.hero p{color:#d9e8fa}.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}.card{background:white;border:1px solid #dfe7f2;border-radius:16px;padding:20px;margin-top:15px}.row{border:1px solid #e7edf5;border-radius:10px;padding:12px;margin:8px 0}a{color:#1769ff;text-decoration:none;font-weight:750}.muted{color:#64748b;font-size:12px}@media(max-width:650px){.layout{grid-template-columns:1fr}}</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../../../config.js"></script><script src="../assets/customer-workflow.js" defer></script><link rel="stylesheet" href="../assets/customer-os-global.css">
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
-</head><body><header>KRIM GLOBAL LOGISTICS OS · CUSTOMER OPERATIONS</header><main><section class="hero"><small>CUSTOMER ACCOUNT & SERVICES · WORKFLOW</small><h1>Verification</h1><p>Dedicated customer workflow page within KRIM’s shared global freight lifecycle. Preserve shipment, quote, finance and support context across workspaces.</p></section><div class="layout"><section class="card"><h2>Workflow controls</h2><div class="row">01 · Verify sign-in and active organization.</div><div class="row">02 · Use the canonical shipment, quote, invoice or case record.</div><div class="row">03 · Confirm the server saved changes before reporting success.</div><p><a href="../../../app/customer/index.html">Customer Workspace →</a></p></section><aside class="card"><h2>Connected destinations</h2><p><a href="../../../public/shipments/shipment-create.html">Shipment booking</a></p><p><a href="../../../public/customer/quote-request.html">Quote request</a></p><p><a href="../../../public/shipper/payment-checkout.html">Payment checkout</a></p><p><a href="../../../public/support/ticket-desk.html">Support desk</a></p><p><a href="../index.html">All 178 rebuilt pages</a></p><p class="muted">UI/navigation rebuilt. Live data writes, payment verification, uploads and record-level authorization require backend integration and tests.</p></aside></div></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="Understand and continue the secure KRIM customer organization verification process.">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="../../../assets/krim-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>Customer Verification | KRIM Logistics</title>
+<style>
+:root{color-scheme:light;--navy:#09243D;--navy2:#123B5A;--blue:#168FE0;--blue2:#0754A4;--sky:#45B8F0;--pale:#EAF5FC;--soft:#F3F7FB;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--white:#fff;--shadow:0 18px 48px rgba(9,36,61,.09);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*,*::before,*::after{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:130px}body{margin:0;background:#fff;color:var(--ink);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}img{max-width:100%}a:focus-visible,button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.wrap{width:min(1160px,calc(100% - 44px));margin-inline:auto}.skip{position:absolute;top:-80px;left:12px;z-index:600;padding:10px 14px;background:#fff;color:var(--navy);border:2px solid var(--blue);border-radius:8px}.skip:focus{top:12px}
+.site-head{position:sticky;top:0;z-index:500;isolation:isolate;background:rgba(255,255,255,.98);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:0 5px 20px rgba(9,36,61,.05)}
+.head-main{position:relative;z-index:2;min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:rgba(255,255,255,.98)}
+.brand img{display:block;width:205px;max-width:42vw;max-height:62px;object-fit:contain;object-position:left center}.head-actions{display:flex;align-items:center;gap:10px}
+.head-actions a,.head-actions button{min-height:42px;padding:9px 15px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.head-actions .primary{background:var(--blue);border-color:var(--blue);color:#fff}.menu-toggle{display:none!important;min-width:44px;min-height:44px;cursor:pointer;background:#fff!important;color:var(--navy)!important;border:1px solid var(--line)!important;font-size:20px!important}
+.nav-row,.nav-row.open{position:static!important;display:block!important;width:auto!important;max-height:none;overflow:visible;background:#fff;border-top:1px solid #edf2f6;box-shadow:none}
+.nav-inner{width:min(1200px,calc(100% - 44px));min-height:48px;margin-inline:auto;padding:0;display:flex!important;flex-direction:row;align-items:center;gap:5px}
+.nav-inner a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;white-space:nowrap;overflow-wrap:normal;border-radius:8px;color:#40556b;font-size:12px;font-weight:750}
+.nav-inner a:hover,.nav-inner a[aria-current=page]{background:var(--pale);color:var(--blue2)}.nav-inner .push{margin-left:auto!important;color:var(--blue2)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(115deg,#071d34 0%,#0b3154 55%,#0754a4 100%);color:#fff}.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 83% 20%,rgba(69,184,240,.25),transparent 34%),linear-gradient(130deg,transparent 48%,rgba(255,255,255,.035) 48%,rgba(255,255,255,.035) 49%,transparent 49%);pointer-events:none}
+.hero-inner{position:relative;min-height:330px;padding-block:56px;display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:34px}.eyebrow{font-size:11px;letter-spacing:.15em;font-weight:800;color:#a9dcfa;text-transform:uppercase}
+h1{margin:13px 0 14px;font-size:clamp(34px,5vw,54px);line-height:1.08;letter-spacing:-.04em;max-width:700px}.hero p{max-width:650px;color:#d7e8f6;font-size:16px;margin:0}
+.hero-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:25px}.btn{min-height:46px;padding:12px 18px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}.btn-light{background:#fff;color:var(--navy)}.btn-outline{border:1px solid rgba(255,255,255,.45);color:#fff;background:rgba(255,255,255,.06)}
+.hero-panel{border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:22px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);box-shadow:0 20px 45px rgba(0,0,0,.12)}.panel-label{color:#a9dcfa;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.hero-panel h2{font-size:20px;line-height:1.25;margin:9px 0;color:#fff}.hero-panel p{font-size:12px;color:#d7e8f6}
+.route-line{display:flex;align-items:center;gap:7px;margin-top:20px}.route-line span{height:7px;flex:1;border-radius:20px;background:rgba(255,255,255,.25)}.route-line span:first-child{background:#45B8F0}.route-caption{display:flex;justify-content:space-between;color:#c7deef;font-size:10px;margin-top:8px}
+.section{padding:54px 0}.section-head{max-width:760px;margin-bottom:25px}.kicker{color:var(--blue2);font-size:11px;letter-spacing:.13em;font-weight:850;text-transform:uppercase}h2{font-size:clamp(25px,3vw,34px);line-height:1.18;letter-spacing:-.025em;color:var(--navy);margin:8px 0 10px}.section-head p{color:var(--muted);margin:0;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.card{padding:22px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(9,36,61,.045)}.card h3{margin:0 0 7px;color:var(--navy);font-size:16px}.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+.number{width:42px;height:42px;margin-bottom:14px;border-radius:12px;background:var(--pale);color:var(--blue2);display:grid;place-items:center;font-weight:900;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.step{padding:20px;border:1px solid var(--line);border-radius:15px;background:#fff}.step strong{display:block;color:var(--navy);font-size:14px;margin-bottom:6px}.step p{margin:0;color:var(--muted);font-size:12px}
+.notice{margin-top:20px;padding:18px 20px;border:1px solid #bfe1f5;border-radius:14px;background:#f1f9fe;display:flex;gap:12px;align-items:flex-start}.notice-icon{width:28px;height:28px;flex:0 0 28px;border-radius:50%;display:grid;place-items:center;background:#d9f0fd;color:var(--blue2);font-weight:900}.notice strong{display:block;color:var(--navy);font-size:13px}.notice p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.cta{padding:24px;border-radius:18px;background:linear-gradient(115deg,#09243D,#123B5A);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px}.cta h2{margin:0 0 6px;color:#fff;font-size:23px}.cta p{margin:0;color:#c9dceb;font-size:12px}.cta .btn{flex-shrink:0}
+footer{background:#071d34;color:#d7e8f6;padding:34px 0 20px}.footer-top{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.14)}.footer-brand{font-weight:900;font-size:18px;color:#fff;letter-spacing:.02em}.footer-top p{max-width:460px;color:#b6ccdd;font-size:12px;margin:8px 0 0}.footer-links{display:flex;flex-wrap:wrap;gap:12px 20px}.footer-links a{font-size:12px;color:#d7e8f6}.footer-links a:hover{color:#8bd4ff}.footer-bottom{display:flex;justify-content:space-between;gap:12px;padding-top:17px;color:#9fb6c9;font-size:11px}
+#krim-language-control{display:none!important}
+@media(max-width:1100px){.head-main{min-height:74px}.menu-toggle{display:inline-flex!important;align-items:center;justify-content:center}.nav-row,.nav-row.open{position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;display:none!important;max-height:min(72dvh,620px);overflow-x:hidden;overflow-y:auto;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);box-shadow:0 18px 34px rgba(9,36,61,.16);z-index:1}.nav-row.open{display:block!important}.nav-inner{width:min(1200px,calc(100% - 32px));min-height:0;margin-inline:auto;padding:12px 0;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:5px 10px}.nav-inner a{display:flex;width:100%;min-width:0;min-height:46px;padding:11px 13px;white-space:normal;overflow-wrap:anywhere}.nav-inner .push{margin-left:0!important}}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;gap:24px;padding-block:44px}.hero-panel{max-width:560px}.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.wrap{width:calc(100% - 30px)}.head-main{min-height:70px}.brand img{width:174px}.nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}.nav-inner{width:calc(100% - 28px);grid-template-columns:minmax(0,1fr);padding:8px 0 12px;gap:2px}.nav-inner a{min-height:46px}.head-actions .login,.head-actions .primary{display:none!important}.hero-inner{min-height:auto;padding-block:38px}.hero p{font-size:14px}.section{padding:40px 0}.grid,.steps{grid-template-columns:1fr}.cta,.footer-top,.footer-bottom{flex-direction:column;align-items:flex-start}.footer-links{gap:12px 16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<script defer src="../assets/customer-os-globalization.js"></script></head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+ <div class="wrap head-main">
+  <a class="brand" href="../index.html" aria-label="KRIM Customer Ecosystem homepage"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71"></a>
+  <div class="head-actions"><a class="login" href="../../../auth/login.html">Sign in</a><a class="primary" href="../../../app/customer/index.html">Open workspace</a><button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open navigation">☰</button></div>
+ </div>
+ <div class="nav-row" id="primary-nav"><nav class="nav-inner" aria-label="Customer navigation">
+  <a href="../index.html">Customer homepage</a><a href="../../customer/index.html">Portal overview</a><a href="onboarding.html">Onboarding</a><a href="company-profile.html">Company profile</a><a href="verification.html" aria-current="page">Verification</a><a href="team-members.html">Team access</a><a class="push" href="../../../app/customer/index.html">Customer workspace →</a>
+ </nav></div>
+</header>
+<section class="hero">
+ <div class="wrap hero-inner">
+  <div><div class="eyebrow">KRIM CUSTOMER ACCOUNT · TRUST & SECURITY</div>
+   <h1>Verify your organization with confidence.</h1>
+   <p>Understand the customer verification journey, prepare the right business information and continue through KRIM’s secure account workflow. Verification is only complete when the authorized review process confirms it.</p>
+   <div class="hero-actions"><a class="btn btn-light" href="../../../auth/login.html">Sign in to continue →</a><a class="btn btn-outline" href="#verification-journey">Explore the process</a></div>
+  </div>
+  <aside class="hero-panel" aria-label="Verification overview">
+   <div class="panel-label">A secure review journey</div><h2>Clear information. Protected review. Confirmed outcome.</h2>
+   <p>Prepare → Submit securely → Review → Receive an account update.</p>
+   <div class="route-line" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+   <div class="route-caption"><span>Prepare</span><span>Secure review</span><span>Decision</span></div>
+  </aside>
+ </div>
+</section>
+<main id="main">
+ <section class="section" id="verification-journey">
+  <div class="wrap">
+   <div class="section-head"><div class="kicker">Customer verification</div><h2>What to expect during verification.</h2><p>Requirements may vary by organization type, jurisdiction, service requested and applicable compliance checks. Follow the requirements presented inside your authenticated KRIM workflow.</p></div>
+   <div class="steps">
+    <article class="step"><div class="number">01</div><strong>Confirm organization details</strong><p>Check that your legal or registered business name, business type, registered address and primary contact details are accurate.</p></article>
+    <article class="step"><div class="number">02</div><strong>Prepare supporting information</strong><p>Have relevant registration, tax or identity details available where requested. Only provide documents specifically required for your account.</p></article>
+    <article class="step"><div class="number">03</div><strong>Submit through secure sign-in</strong><p>Use the authenticated customer workflow for any requested information or evidence. Do not send sensitive identity or business documents through public forms.</p></article>
+    <article class="step"><div class="number">04</div><strong>Allow the review process</strong><p>Authorized review may require clarification or additional evidence. A submission is not the same as approval.</p></article>
+    <article class="step"><div class="number">05</div><strong>Check your account status</strong><p>Use the secure workspace and official account notifications to see the recorded outcome or any next action.</p></article>
+    <article class="step"><div class="number">06</div><strong>Keep records current</strong><p>Update organization information when material details change and follow any re-verification request shown in your account.</p></article>
+   </div>
+   <div class="notice"><div class="notice-icon" aria-hidden="true">i</div><div><strong>Important: this page does not verify your organization.</strong><p>No verification status, approval, compliance clearance or service eligibility is asserted here. Only a confirmed result recorded by KRIM’s authorized workflow can establish your account’s verification state.</p></div></div>
+  </div>
+ </section>
+ <section class="section" style="background:#F3F7FB">
+  <div class="wrap">
+   <div class="section-head"><div class="kicker">Protect your information</div><h2>Keep sensitive documents in the right place.</h2><p>Use secure, authenticated KRIM account workflows and take care when sharing business or personal information.</p></div>
+   <div class="grid">
+    <article class="card"><div class="number">A</div><h3>Use verified KRIM sign-in</h3><p>Access protected account functions only after signing in through the official KRIM website. Never share passwords or one-time verification codes.</p></article>
+    <article class="card"><div class="number">B</div><h3>Share only what is requested</h3><p>Provide only the documents and details requested for the relevant verification purpose. Avoid sending sensitive records through ordinary email or public contact forms.</p></article>
+    <article class="card"><div class="number">C</div><h3>Watch for official updates</h3><p>Essential account and security notifications should remain available through configured service channels. Optional marketing preferences are separate.</p></article>
+    <article class="card"><div class="number">D</div><h3>Ask for help when needed</h3><p>If a requirement is unclear, contact KRIM through the official contact page without attaching sensitive identity documents to an open enquiry.</p><a href="../../../contact.html" style="display:inline-flex;margin-top:12px;color:var(--blue2);font-size:12px;font-weight:850">Contact KRIM →</a></article>
+   </div>
+  </div>
+ </section>
+ <section class="section">
+  <div class="wrap">
+   <div class="cta"><div><h2>Ready to continue securely?</h2><p>Sign in to your customer account to access protected organization workflows and any verification actions available to your account.</p></div><a class="btn btn-light" href="../../../auth/login.html">Continue to sign in →</a></div>
+  </div>
+ </section>
+</main>
+<footer><div class="wrap">
+ <div class="footer-top"><div><a class="footer-brand" href="../../../index.html">KRIM Logistics</a><p>Global Logistics Operating System. Knowledge · Reliability · Integration · Movement.</p></div>
+  <nav class="footer-links" aria-label="Footer links"><a href="../index.html">Customer homepage</a><a href="../../../index.html">KRIM homepage</a><a href="../../../contact.html">Contact KRIM</a><a href="../../../privacy.html">Privacy</a><a href="../../../terms.html">Terms</a></nav>
+ </div>
+ <div class="footer-bottom"><span>© <span id="year"></span> KRIM Logistics. All rights reserved.</span><span>Knowledge · Reliability · Integration · Movement</span></div>
+</div></footer>
+<script>
+(function(){
+ const button=document.getElementById('menu-toggle'),nav=document.getElementById('primary-nav');
+ function closeMenu(restore){if(!button||!nav)return;nav.classList.remove('open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open navigation');button.textContent='☰';if(restore)button.focus();}
+ if(button&&nav){
+  button.addEventListener('click',function(){const open=nav.classList.toggle('open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Close navigation':'Open navigation');button.textContent=open?'×':'☰';});
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))closeMenu(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&nav.classList.contains('open'))closeMenu(true);});
+  document.addEventListener('click',function(e){if(nav.classList.contains('open')&&!nav.contains(e.target)&&!button.contains(e.target))closeMenu(false);});
+  window.addEventListener('resize',function(){if(window.innerWidth>1100)closeMenu(false);});
+ }
+ const year=document.getElementById('year');if(year)year.textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
