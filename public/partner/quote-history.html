@@ -1,122 +1,32 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#071a2d">
-<title>My Bids | KRIM Logistics Partner Workspace</title>
-<meta name="description" content="Review freight bids submitted by your KRIM partner organization.">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../config.js"></script>
-<script>
-(function(){var p=location.pathname,b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/",l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);window.KRIM_BASE_PATH=b;}());
-</script>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#09243D"><title>Quote History | KRIM Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#07111f;--panel:#101e30;--line:#26384e;--text:#f4f7fb;--muted:#a9b8ca;--cyan:#7dd3fc}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#07111f,#0b2035);color:var(--text);font:16px system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
-a{color:inherit;text-decoration:none}a:hover{text-decoration:underline}.wrap{width:min(100% - 32px,960px);margin:auto}
-header{position:sticky;top:0;z-index:10;background:#07111ff2;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-.header-row{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900;letter-spacing:.06em}.nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.nav a,.button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border:1px solid #34485f;border-radius:10px;font-size:13px;font-weight:750}.nav a.active{border-color:#38bdf8;background:#082f49;color:#bae6fd}.button.primary{background:#0284c7;border-color:#0284c7;color:white}.button.secondary{background:#101e30}.menu{display:none}
-main{padding:38px 0 60px}.eyebrow{color:#7dd3fc;font-size:11px;font-weight:850;letter-spacing:.18em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,44px);line-height:1.1;letter-spacing:-.03em;margin:10px 0}p{line-height:1.6}.muted{color:var(--muted)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}.status{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#101e30;color:#dbeafe;margin:22px 0}.status.error{border-color:#9f1239;background:#4c0519;color:#ffe4e6}.status.success{border-color:#065f46;background:#022c22;color:#d1fae5}.list{display:grid;gap:14px}.card{border:1px solid var(--line);border-radius:16px;background:#101e30;padding:20px;overflow-wrap:anywhere}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.quote-number{color:#7dd3fc;font-size:12px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.amount{font-size:25px;font-weight:900;margin:8px 0}.badge{display:inline-flex;padding:6px 10px;border:1px solid #475569;border-radius:999px;color:#e2e8f0;font-size:11px;font-weight:800;text-transform:capitalize}.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.detail{border:1px solid #26384e;border-radius:10px;padding:12px}.detail small{display:block;color:#94a3b8;font-size:10px;letter-spacing:.1em;text-transform:uppercase}.detail strong{display:block;margin-top:5px;font-size:13px;overflow-wrap:anywhere}.notes{border-top:1px solid #26384e;margin-top:15px;padding-top:12px;color:#cbd5e1;font-size:13px;white-space:pre-wrap}.empty{padding:30px 20px;text-align:center;border:1px dashed #475569;border-radius:16px;background:#101e30}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}footer{border-top:1px solid var(--line);padding:20px 0;color:#94a3b8;font-size:12px}
-@media(max-width:650px){.header-row{align-items:flex-start;padding:13px 0;flex-direction:column}.nav{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.nav a{width:100%}.details{grid-template-columns:1fr}main{padding-top:28px}.toolbar .button{width:100%}.toolbar{align-items:stretch}}
+:root{--n:#09243D;--n2:#123B5A;--b:#168FE0;--b2:#0754A4;--sky:#45B8F0;--ink:#14283E;--m:#60748A;--l:#DCE5EE;--bg:#F3F7FB;--green:#16836C}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7fbfe,#edf4f9);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif}a{text-decoration:none;color:inherit}button,input,select{font:inherit}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:3px}.wrap{width:min(1200px,100%);margin:auto;padding:0 22px}header{background:#fff;border-bottom:1px solid var(--l)}.top{min-height:78px;display:flex;justify-content:space-between;align-items:center;gap:16px}.logo{width:205px;height:62px;object-fit:contain;object-position:left}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{padding:9px 12px;border:1px solid var(--l);border-radius:9px;color:var(--n);font-size:11px;font-weight:750}.nav a:hover,.nav a[aria-current=page]{background:#edf6fc;border-color:#b8d8ed}.hero{margin-top:28px;padding:clamp(24px,4vw,42px);border-radius:23px;background:linear-gradient(120deg,var(--n),var(--n2) 65%,var(--b2));color:#fff;box-shadow:0 20px 48px #09243d20}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c9f1ff;font-weight:850}.hero h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1;letter-spacing:-.04em;margin:11px 0}.hero p{max-width:820px;color:#e0edf7;font-size:13px;margin:0}.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.btn{min-height:43px;padding:10px 14px;border:0;border-radius:10px;background:var(--b);color:#fff;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.btn:hover{background:var(--b2)}.btn-soft{background:#edf5fb;color:var(--b2);border:1px solid #d5e5f1}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:17px 0}.metric,.panel,.quote{background:white;border:1px solid var(--l);border-radius:15px;box-shadow:0 8px 24px #09243d08}.metric{padding:15px}.metric small{display:block;color:var(--m);font-size:10px;font-weight:750}.metric b{display:block;color:var(--n);font-size:24px;margin-top:3px}.metric span{font-size:10px;color:var(--m)}.panel{overflow:hidden}.head{padding:17px 19px;border-bottom:1px solid #e9eff5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.head h2{margin:0;color:var(--n);font-size:16px}.head p{margin:4px 0 0;color:var(--m);font-size:10px}.body{padding:17px 19px}.status{padding:12px;border:1px solid #c9e0f0;border-radius:11px;background:#f0f7fc;color:#285473;font-size:10px;line-height:1.7;margin-bottom:14px}.filters{display:grid;grid-template-columns:minmax(0,1fr) 170px 170px;gap:9px;margin-bottom:14px}.field{width:100%;min-height:43px;padding:10px 12px;border:1px solid #cbd8e4;border-radius:10px;background:white;color:var(--ink);font-size:11px}.list{display:grid;gap:11px}.quote{padding:16px;box-shadow:none}.quote-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.ref{color:var(--b2);font-size:9px;font-weight:850;letter-spacing:.1em}.quote h3{margin:5px 0;color:var(--n);font-size:15px}.amount{font-size:19px;font-weight:850;color:var(--n);white-space:nowrap}.badge{padding:5px 9px;border-radius:99px;font-size:9px;font-weight:850;white-space:nowrap;border:1px solid #d5e5f1;background:#edf6fc;color:#145c91;text-transform:capitalize}.badge.review{background:#fff8e9;border-color:#f1d7a7;color:#895b0a}.badge.awarded{background:#effaf4;border-color:#b7e7d0;color:#176b50}.badge.declined{background:#fff3f2;border-color:#f0c8c5;color:#a12b24}.details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}.detail{padding:10px;border-radius:9px;background:#f5f8fb}.detail small{display:block;color:var(--m);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.detail strong{display:block;margin-top:4px;color:var(--n);font-size:10px;overflow-wrap:anywhere}.notes{margin-top:12px;padding-top:10px;border-top:1px solid var(--l);font-size:10px;color:var(--m)}.empty{padding:30px 20px;text-align:center;border:1px dashed #cbd8e4;border-radius:13px;background:#f9fbfd;color:var(--m);font-size:11px}.empty b{display:block;color:var(--n);font-size:13px;margin-bottom:5px}.bottom{padding:16px 18px;margin:16px 0;border:1px solid #c9e0f0;border-radius:12px;background:#f0f7fc;color:#285473;font-size:10px;line-height:1.8}footer{padding:22px 0;border-top:1px solid var(--l);color:var(--m);font-size:10px}
+@media(max-width:850px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.details{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.wrap{padding:0 13px}.top{padding:10px 0;align-items:flex-start;flex-direction:column}.logo{width:180px;height:54px}.nav{display:grid;grid-template-columns:1fr 1fr;width:100%}.nav a{text-align:center}.hero{margin-top:16px;padding:23px 18px}.hero h1{font-size:30px}.hero p{font-size:11px}.hero-actions .btn{width:100%}.metrics{grid-template-columns:repeat(2,1fr);gap:7px}.metric{padding:11px}.metric b{font-size:20px}.body,.head{padding:14px}.filters{grid-template-columns:1fr}.filters input{grid-column:auto}.details{grid-template-columns:1fr 1fr}.quote{padding:13px}.amount{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
-</head>
-<body>
-<header><div class="wrap header-row">
-<a class="brand" href="../index.html" aria-label="KRIM Logistics home">KRIM LOGISTICS OS</a>
-<nav class="nav" aria-label="Partner navigation">
-<a href="available-loads.html">Available Loads</a>
-<a href="submit-quote.html">Submit a Bid</a>
-<a href="quote-history.html" class="active" aria-current="page">My Bids</a>
-<a href="../../auth/partner-signup.html">Partner Registration</a>
-<a href="../../auth/login.html">Sign In</a>
-</nav>
-</div></header>
-<main class="wrap">
-<p class="eyebrow">Partner workspace · Commercial offers</p>
-<h1>My Bids</h1>
-<p class="muted">View bids recorded for your active KRIM partner organization. A bid is an offer; shipment award, service delivery, invoicing and settlement are separate workflows.</p>
-<div class="toolbar">
-<div class="muted" id="count">Waiting for secure connection…</div>
-<button id="refresh" class="button secondary" type="button">↻ Refresh bids</button>
-</div>
-<div id="status" class="status" role="status" aria-live="polite">Connecting to KRIM securely…</div>
-<div id="quotes" class="list"></div>
-<div class="actions">
-<a class="button primary" href="available-loads.html">Browse Available Loads →</a>
-<a class="button secondary" href="submit-quote.html">Submit a Bid →</a>
-<a class="button secondary" href="../index.html">KRIM Home →</a>
-</div>
-</main>
-<footer><div class="wrap">KRIM Logistics · Only records allowed by your authenticated account and backend access policies can be shown.</div></footer>
+<link rel="stylesheet" href="../../assets/css/krim-global-partner.css?v=20261121">
+</head><body>
+<header><div class="wrap top"><a href="../../index.html"><img class="logo" src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics"></a><nav class="nav" aria-label="Partner navigation"><a href="available-loads.html">Available Loads</a><a href="submit-quote.html">Submit a Quote</a><a href="quote-history.html" aria-current="page">Quote History</a><a href="commercial-rates.html">Commercial Rates</a></nav></div></header>
+<main class="wrap"><section class="hero"><div class="eyebrow">Partner workspace · commercial management · Page 39</div><h1>Quote History</h1><p>A clear record of commercial offers, their references, submitted values, validity periods and review outcomes. Track each offer through its lifecycle while keeping quote status distinct from shipment award, execution and settlement.</p><div class="hero-actions"><a class="btn" href="submit-quote.html">＋ Prepare a Quote</a><a class="btn btn-soft" href="available-loads.html">Browse Opportunities</a></div></section>
+<section class="metrics" aria-label="Quote history summary"><article class="metric"><small>Total offers shown</small><b id="total">04</b><span>Illustrative records</span></article><article class="metric"><small>Under review</small><b id="review">01</b><span>Awaiting evaluation</span></article><article class="metric"><small>Shortlisted</small><b id="shortlisted">01</b><span>Further review required</span></article><article class="metric"><small>Awarded</small><b id="awarded">01</b><span>Separate award workflow</span></article></section>
+<section class="panel"><div class="head"><div><h2>Commercial offer register</h2><p>Search, filter and review the example quote records below.</p></div><span class="badge">Preview records</span></div><div class="body"><div class="status" id="status" role="status" aria-live="polite">Showing fictional examples to demonstrate the quote-history interface. No partner account or live quote records are accessed.</div><div class="filters"><input class="field" id="search" type="search" placeholder="Search quote, opportunity or route…" aria-label="Search quote history"><select class="field" id="status-filter" aria-label="Filter by quote status"><option value="all">All statuses</option><option value="under_review">Under review</option><option value="shortlisted">Shortlisted</option><option value="awarded">Awarded</option><option value="declined">Not selected</option></select><select class="field" id="sort" aria-label="Sort quote history"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highest">Highest amount</option><option value="lowest">Lowest amount</option></select></div><div class="list" id="list"></div></div></section>
+<div class="bottom"><strong>Commercial control note:</strong> In production, this register must show only quotes authorized for the signed-in user's active partner organization. Organization membership, role permissions, row-level security, status transitions and audit records must be enforced by the backend. A quote is not a shipment award, customer acceptance, invoice or payment guarantee. This staging preview does not access Supabase or any live records.</div>
+<footer><strong>KRIM Logistics</strong> · Knowledge · Reliability · Integration · Movement<br>Global Logistics Operating System · India initial market activation, global-ready by design.</footer></main>
 <script>
 (function(){
 "use strict";
-const client=window.KRIM_SUPABASE||window.supabaseClient;
-const status=document.getElementById("status"),list=document.getElementById("quotes"),count=document.getElementById("count"),refresh=document.getElementById("refresh");
-let loading=false;
-function message(text,type){status.textContent=text;status.className="status"+(type?" "+type:"");}
-function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function fmtDate(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString();}
-function money(amount,currency){const n=Number(amount);if(!Number.isFinite(n))return esc(amount==null?"Amount not provided":amount);try{return new Intl.NumberFormat(undefined,{style:"currency",currency:currency||"INR",maximumFractionDigits:2}).format(n);}catch(_){return esc(currency||"INR")+" "+n.toLocaleString();}}
-function empty(text){list.innerHTML='<section class="empty"><h2 style="margin:0 0 8px;font-size:20px">No bids to show</h2><p class="muted" style="margin:0">'+esc(text)+'</p><div class="actions" style="justify-content:center"><a class="button primary" href="available-loads.html">Browse available loads</a><a class="button secondary" href="submit-quote.html">Submit a bid</a></div></section>';}
-async function loadBids(){
- if(loading)return;loading=true;refresh.disabled=true;refresh.textContent="Loading…";list.innerHTML="";count.textContent="Loading records…";message("Checking your session and partner organization…");
- try{
-  if(!client)throw new Error("Supabase configuration did not load. Reload the page; if this continues, check config.js and the published deployment.");
-  const {data:sessionData,error:authError}=await client.auth.getSession();
-  if(authError)throw authError;
-  const session=sessionData&&sessionData.session;
-  if(!session){message("You are not signed in. Sign in with your partner account to view private bids.");count.textContent="Sign-in required";const next=encodeURIComponent(location.pathname+location.search);list.innerHTML='<section class="empty"><h2 style="margin:0 0 8px">Sign in to view your bids</h2><p class="muted">Your bid history is private and requires an authenticated session.</p><div class="actions" style="justify-content:center"><a class="button primary" href="../../auth/login.html?next='+next+'">Sign in →</a><a class="button secondary" href="available-loads.html">Available Loads</a></div></section>';return;}
-  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",session.user.id).eq("status","active");
-  if(memberError)throw memberError;
-  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];
-  if(!ids.length){count.textContent="Partner organization required";message("This account has no active organization membership. If you just registered, partner organization setup or activation may still be pending.");empty("Your account must be linked to an active organization before organization-scoped bids can be retrieved.");return;}
-  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status").in("id",ids);
-  if(orgError)throw orgError;
-  const partnerIds=(orgs||[]).filter(o=>["partner","carrier","forwarder","logistics_provider"].includes(String(o.organization_type_code||o.organization_type||"").toLowerCase())&&String(o.status||"").toLowerCase()==="active").map(o=>Number(o.id));
-  if(!partnerIds.length){count.textContent="Partner access required";message("No active partner, carrier, forwarder, or logistics-provider organization is linked to this account.");empty("Use partner registration if you have not registered yet, or contact support to activate your existing partner organization.");return;}
-  const {data:quotes,error:quoteError}=await client.from("krim_partner_quotes").select("id,opportunity_id,shipment_id,quote_number,amount,currency_code,status,submitted_at,valid_until,notes").in("partner_organization_id",partnerIds).order("submitted_at",{ascending:false}).limit(100);
-  if(quoteError)throw quoteError;
-  const rows=quotes||[];count.textContent=rows.length+" bid record"+(rows.length===1?"":"s");
-  if(!rows.length){message("Your partner organization has no bid records yet.","success");empty("When you submit a bid for an open opportunity, it should appear here if the backend accepts and stores it.");return;}
-  list.innerHTML=rows.map(q=>'<article class="card"><div class="card-head"><div><div class="quote-number">'+esc(q.quote_number||("Quote #"+q.id))+'</div><div class="amount">'+money(q.amount,q.currency_code)+'</div></div><span class="badge">'+esc(String(q.status||"unknown").replace(/[_-]/g," "))+'</span></div><div class="details"><div class="detail"><small>Shipment ID</small><strong>'+(q.shipment_id==null?"—":esc(q.shipment_id))+'</strong></div><div class="detail"><small>Opportunity ID</small><strong>'+(q.opportunity_id==null?"—":esc(q.opportunity_id))+'</strong></div><div class="detail"><small>Submitted</small><strong>'+esc(fmtDate(q.submitted_at))+'</strong></div><div class="detail"><small>Valid until</small><strong>'+esc(fmtDate(q.valid_until))+'</strong></div></div>'+(q.notes?'<div class="notes"><strong>Offer notes</strong><br>'+esc(q.notes)+'</div>':"")+'</article>').join("");
-  message("Bid history loaded from the KRIM backend.","success");
- }catch(e){const reason=e&&e.message?e.message:"Could not load your bids.";count.textContent="Unable to load";message("Could not load bid history: "+reason,"error");list.innerHTML='<section class="empty"><h2 style="margin:0 0 8px">Bid history unavailable</h2><p class="muted">'+esc(reason)+'</p><p class="muted">This may be a session, database schema, or row-level security issue. Refresh once; do not create duplicate bids to troubleshoot.</p><div class="actions" style="justify-content:center"><button class="button primary" type="button" id="retry">Try again</button><a class="button secondary" href="available-loads.html">Available Loads</a></div></section>';const retry=document.getElementById("retry");if(retry)retry.addEventListener("click",loadBids);}
- finally{loading=false;refresh.disabled=false;refresh.textContent="↻ Refresh bids";}
-}
-refresh.addEventListener("click",loadBids);
-loadBids();
+const rows=[
+{id:"KR-QT-PREVIEW-2408",op:"PREVIEW-OP-4102",route:"Ranchi → Kolkata",mode:"Road",amount:86500,currency:"INR",date:"2026-11-18",valid:"2026-11-27",status:"under_review",notes:"Illustrative offer: packaged industrial components. Subject to final capacity confirmation."},
+{id:"KR-QT-PREVIEW-2391",op:"PREVIEW-OP-4088",route:"Mumbai → Ahmedabad",mode:"Road",amount:124000,currency:"INR",date:"2026-11-15",valid:"2026-11-25",status:"shortlisted",notes:"Illustrative offer: dedicated vehicle and scheduled pickup, subject to agreed scope."},
+{id:"KR-QT-PREVIEW-2360",op:"PREVIEW-OP-4054",route:"Delhi → Jaipur",mode:"Rail",amount:54200,currency:"INR",date:"2026-11-10",valid:"2026-11-20",status:"awarded",notes:"Illustrative example only. Award status does not imply completed transport or settlement."},
+{id:"KR-QT-PREVIEW-2317",op:"PREVIEW-OP-3990",route:"Chennai → Bengaluru",mode:"Road",amount:39800,currency:"INR",date:"2026-11-04",valid:"2026-11-14",status:"declined",notes:"Illustrative example of an offer not selected for the opportunity."}
+];
+const $=id=>document.getElementById(id);
+const fmt=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);
+function badge(s){const label={under_review:"Under review",shortlisted:"Shortlisted",awarded:"Awarded",declined:"Not selected"}[s]||s;return '<span class="badge '+(s==="awarded"?"awarded":s==="under_review"||s==="shortlisted"?"review":s==="declined"?"declined":"")+'">'+label+'</span>';}
+function render(){const q=$("search").value.trim().toLowerCase(),st=$("status-filter").value,sort=$("sort").value;let data=rows.filter(x=>(st==="all"||x.status===st)&&[x.id,x.op,x.route,x.mode,x.status].join(" ").toLowerCase().includes(q));data.sort((a,b)=>sort==="oldest"?a.date.localeCompare(b.date):sort==="highest"?b.amount-a.amount:sort==="lowest"?a.amount-b.amount:b.date.localeCompare(a.date));$("list").innerHTML=data.length?data.map(x=>'<article class="quote"><div class="quote-top"><div><div class="ref">'+x.id+'</div><h3>'+x.route+'</h3><span class="badge">'+x.mode+'</span></div><div style="text-align:right"><div class="amount">'+fmt(x.amount)+'</div>'+badge(x.status)+'</div></div><div class="details"><div class="detail"><small>Opportunity</small><strong>'+x.op+'</strong></div><div class="detail"><small>Submitted</small><strong>'+x.date+'</strong></div><div class="detail"><small>Valid until</small><strong>'+x.valid+'</strong></div><div class="detail"><small>Currency</small><strong>'+x.currency+'</strong></div></div><div class="notes">'+x.notes+'</div></article>').join(""):'<div class="empty"><b>No matching quote records</b>Try another search term or choose a different status filter.</div>';$("status").textContent="Showing "+data.length+" of "+rows.length+" illustrative quote records. Values and references are fictional and are not live KRIM commercial data.";}
+["search","status-filter","sort"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));render();
 })();
-</script>
-
-<script>
-/* Keep partner navigation on the correct GitHub Pages base path. */
-(function(){
-  var base=window.KRIM_BASE_PATH||(location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/");
-  var routes={
-    "../index.html":"public/index.html",
-    "../../public/index.html":"public/index.html",
-    "../solutions.html":"public/solutions.html",
-    "../../public/solutions.html":"public/solutions.html",
-    "../global-coverage.html":"public/global-coverage.html",
-    "../../public/global-coverage.html":"public/global-coverage.html",
-    "available-loads.html":"public/partner/available-loads.html",
-    "quote-history.html":"public/partner/quote-history.html",
-    "submit-quote.html":"public/partner/submit-quote.html",
-    "../../auth/login.html":"auth/login.html",
-    "../../auth/partner-signup.html":"auth/partner-signup.html"
-  };
-  document.querySelectorAll('a[href]').forEach(function(a){
-    var raw=a.getAttribute('href');
-    if(!raw||raw.charAt(0)==='#'||/^(https?:|mailto:|tel:|javascript:)/i.test(raw))return;
-    var path=raw.split('?')[0].replace(/^\.\//,'');
-    if(routes[path])a.href=base+routes[path]+(raw.indexOf('?')>=0?raw.slice(raw.indexOf('?')):'');
-  });
-})();
-</script>
-</body>
-</html>
+</script></body></html>
