@@ -35,6 +35,19 @@
     formatDate(value, options) {
       const date = value instanceof Date ? value : new Date(value);
       if (Number.isNaN(date.getTime())) return '';
+      if (!options && state.dateFormat !== 'locale') {
+        const monthStyle = state.dateFormat === 'DD-MMM-YYYY' || state.dateFormat === 'MMM DD, YYYY' ? 'short' : '2-digit';
+        const parts = new Intl.DateTimeFormat(state.locale,{year:'numeric',month:monthStyle,day:'2-digit',timeZone:state.timeZone}).formatToParts(date);
+        const part = type => (parts.find(x=>x.type===type)||{}).value || '';
+        const y=part('year'),m=part('month'),day=part('day');
+        if(state.dateFormat==='YYYY-MM-DD') return y+'-'+m+'-'+day;
+        if(state.dateFormat==='YYYY/MM/DD') return y+'/'+m+'/'+day;
+        if(state.dateFormat==='DD/MM/YYYY') return day+'/'+m+'/'+y;
+        if(state.dateFormat==='MM/DD/YYYY') return m+'/'+day+'/'+y;
+        if(state.dateFormat==='DD.MM.YYYY') return day+'.'+m+'.'+y;
+        if(state.dateFormat==='DD-MMM-YYYY') return day+'-'+m+'-'+y;
+        if(state.dateFormat==='MMM DD, YYYY') return m+' '+day+', '+y;
+      }
       return new Intl.DateTimeFormat(state.locale, {...(options || {}), timeZone:state.timeZone}).format(date);
     },
     formatDateTime(value, options) {
