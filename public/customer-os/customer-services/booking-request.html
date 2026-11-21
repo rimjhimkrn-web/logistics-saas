@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#09243D">
 <meta name="description" content="Create a shipment in KRIM Global Logistics OS. Secure, organization-scoped shipment intake for global freight operations.">
 <title>Booking Request | KRIM Customer OS</title>
-<link rel="manifest" href="../../../manifest.json">
+<link rel="manifest" href="../../../manifest.json">\n<link rel="icon" href="../../../assets/krim-icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,6 +28,43 @@
 @media(max-width:620px){.customer-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.customer-nav a{text-align:center}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
 .booking-hold{margin:14px 0;padding:14px 16px;border:1px solid #C9F1FF;border-radius:12px;background:#EAF5FC;color:#174A78;font-size:11px;line-height:1.65}.booking-hold strong{color:#09243D}
+
+/* Consistent KRIM Customer OS masthead and responsive primary navigation */
+.topbar{min-height:82px;height:auto;padding:10px clamp(14px,3.5vw,48px);gap:16px}
+.brand{min-width:0;display:flex;align-items:center;gap:14px}
+.brand img{display:block;width:clamp(150px,19vw,224px);height:62px;max-width:45vw;object-fit:contain;object-position:left center;flex:none}
+.brand-caption{display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--line);padding-left:14px}
+.brand-caption strong{font:800 9px Manrope,sans-serif;letter-spacing:.12em;color:var(--navy)}
+.brand-caption small{font-size:9px;color:var(--muted);letter-spacing:.02em}
+.top-actions{gap:9px}
+.staging-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:#EAF5FC;color:#0754A4;font-size:10px;font-weight:800;white-space:nowrap}
+.nav-toggle{display:none;min-width:42px;min-height:42px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:21px;font-weight:800}
+.customer-nav{position:sticky;top:82px;z-index:9;display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:9px clamp(14px,3.5vw,48px);background:#fff;border-bottom:1px solid var(--line);box-shadow:0 5px 14px rgba(9,36,61,.04)}
+.customer-nav a{display:inline-flex;align-items:center;min-height:36px;padding:8px 11px;border-radius:8px;color:#40556b;font-size:10px;font-weight:800;white-space:nowrap}
+.customer-nav a:hover,.customer-nav a[aria-current=page]{background:#EAF5FC;color:#0754A4}
+.customer-nav a[aria-current=page]{box-shadow:inset 0 -2px #168FE0}
+.customer-nav .nav-home{margin-left:auto;color:#0754A4}
+@media(max-width:1050px){
+ .topbar{top:0}
+ .nav-toggle{display:inline-grid;place-items:center}
+ .customer-nav{display:none;position:sticky;top:82px;max-height:calc(100dvh - 90px);overflow:auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:12px clamp(14px,3.5vw,48px);box-shadow:0 14px 25px rgba(9,36,61,.12)}
+ .customer-nav.open{display:grid}
+ .customer-nav a{white-space:normal;min-height:42px;background:#F3F7FB}
+ .customer-nav .nav-home{margin-left:0}
+}
+@media(max-width:600px){
+ .topbar{min-height:72px;padding:8px 13px;gap:8px}
+ .brand{gap:8px}
+ .brand img{width:142px;height:49px;max-width:42vw}
+ .brand-caption{padding-left:8px}
+ .brand-caption strong{font-size:7px;letter-spacing:.06em}
+ .brand-caption small{font-size:7px;line-height:1.25}
+ .staging-pill{display:none}
+ .workspace-link{display:none}
+ .customer-nav{top:72px;grid-template-columns:1fr}
+ .customer-nav a{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.customer-nav,.nav-toggle{transition:none!important}}
 </style>
 <link rel="stylesheet" href="../../../core/krim-global-interface.css">
 
@@ -38,16 +75,27 @@
 <body class="krim-global-shell"><a class="krim-skip" href="#main">Skip to content</a>
 <div class="shell">
 <div class="topline"></div>
-<header class="topbar">
-  <a class="brand" href="../../../app/customer/index.html" aria-label="KRIM Customer Workspace">
-    <img src="../../../assets/krim-primary.svg?v=20261111-masterbrand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="display:block;width:220px;height:58px;max-width:100%;object-fit:contain;object-position:left center">
+<header class="topbar" id="page-top">
+  <a class="brand" href="../index.html" aria-label="KRIM Customer homepage">
+    <img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71">
+    <span class="brand-caption"><strong>GLOBAL LOGISTICS OPERATING SYSTEM</strong><small>Knowledge · Reliability · Integration · Movement</small></span>
   </a>
   <div class="top-actions">
-    <div class="session-pill"><span class="dot"></span><span id="session-identity-node">Checking secure session…</span></div>
-    <a class="btn btn-secondary" href="../../../app/customer/index.html">← Workspace</a>
+    <span class="staging-pill"><span class="dot"></span>Public staging preview</span>
+    <a class="btn btn-secondary workspace-link" href="../../../app/customer/index.html">Customer workspace ↗</a>
+    <button class="nav-toggle" id="customer-nav-toggle" type="button" aria-expanded="false" aria-controls="customer-primary-nav" aria-label="Open navigation">☰</button>
   </div>
 </header>
-<nav class="customer-nav" aria-label="Customer ecosystem navigation"><a href="../index.html">Customer homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">Active shipments</a><a href="shipment-details.html">Shipment details</a><a href="shipment-timeline.html">Shipment timeline</a><a href="booking-request.html" aria-current="page">Booking request</a><a href="../../../index.html">KRIM homepage</a></nav>
+<nav class="customer-nav" id="customer-primary-nav" aria-label="Primary customer navigation">
+  <a href="../index.html">Customer homepage</a>
+  <a href="shipment-list.html">Shipment overview</a>
+  <a href="shipment-create.html">Shipment creation</a>
+  <a href="active-shipments.html">Active shipments</a>
+  <a href="shipment-details.html">Shipment details</a>
+  <a href="shipment-timeline.html">Shipment timeline</a>
+  <a href="booking-request.html" aria-current="page">Booking request</a>
+  <a href="../../../index.html" class="nav-home">KRIM homepage ↗</a>
+</nav>
 <div class="layout">
   <aside class="rail" aria-label="Shipment journey">
     <div class="rail-label">Customer operations</div>
