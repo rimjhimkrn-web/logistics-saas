@@ -134,6 +134,36 @@ h1{max-width:680px;margin:18px 0 14px;font-size:clamp(38px,5vw,58px);line-height
  .head-main{min-height:70px}
  .nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}
 }
+/* Final navigation layout: one controlled toggle and a contained dropdown at every viewport width. */
+.site-head{position:sticky;top:0;z-index:500;isolation:isolate}
+.head-main{position:relative;z-index:2;background:rgba(255,255,255,.98)}
+.menu-toggle{display:inline-flex!important;align-items:center;justify-content:center;min-width:44px;min-height:44px;cursor:pointer;background:#fff!important;color:var(--navy)!important;border:1px solid var(--line)!important}
+.nav-row,.nav-row.open{
+ position:absolute!important;top:100%!important;left:0!important;right:0!important;width:100%!important;
+ display:none!important;max-height:min(72dvh,620px);overflow-x:hidden;overflow-y:auto;
+ background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+ box-shadow:0 18px 34px rgba(9,36,61,.16);z-index:1
+}
+.nav-row.open{display:block!important}
+.nav-inner{
+ width:min(1200px,calc(100% - 44px));min-height:0;margin-inline:auto;padding:14px 0 16px;
+ display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:6px 10px
+}
+.nav-inner a{
+ display:flex;align-items:center;min-width:0;min-height:44px;padding:11px 13px;
+ white-space:normal;overflow-wrap:anywhere;border-radius:8px
+}
+.nav-inner .push{margin-left:0!important}
+@media(max-width:900px){
+ .nav-inner{grid-template-columns:repeat(2,minmax(0,1fr));width:min(100% - 32px,760px)}
+}
+@media(max-width:680px){
+ .head-main{min-height:70px}
+ .nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}
+ .nav-inner{width:calc(100% - 28px);grid-template-columns:minmax(0,1fr);padding:8px 0 12px;gap:2px}
+ .nav-inner a{min-height:46px}
+ .head-actions .login,.head-actions .primary{display:none!important}
+}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
