@@ -79,6 +79,30 @@ body.krim-global-ui .driver-footer-links a{color:#fff;font-weight:800}
 @media(max-width:760px){body.krim-global-ui .nav{align-items:center;padding:10px 14px}body.krim-global-ui .nav .brand img{width:150px!important;max-height:48px!important}body.krim-global-ui .nav-actions{justify-content:flex-end}body.krim-global-ui .nav-actions .btn{font-size:10px;padding:8px 9px}}
 @media(max-width:480px){body.krim-global-ui .nav{gap:8px;flex-wrap:wrap}body.krim-global-ui .nav .brand img{width:132px!important;max-height:42px!important}body.krim-global-ui .nav-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}body.krim-global-ui .nav-actions .btn{width:100%}body.krim-global-ui .wrap{width:calc(100% - 22px);margin-top:13px}body.krim-global-ui .hero{border-radius:16px}body.krim-global-ui .panel{padding:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+body.krim-global-ui .nav{gap:14px}
+body.krim-global-ui .nav .brand{display:flex;align-items:center;gap:12px;min-width:0}
+body.krim-global-ui .nav .brand img{width:180px!important;max-width:clamp(132px,38vw,180px)!important;height:auto!important;max-height:58px!important;flex:none}
+body.krim-global-ui .brand-copy{display:grid;gap:2px;color:var(--navy);line-height:1.2;white-space:nowrap}
+body.krim-global-ui .brand-copy strong{font-size:11px;letter-spacing:.12em;font-weight:950}
+body.krim-global-ui .brand-copy small{font-size:10px;color:var(--muted);letter-spacing:.02em}
+body.krim-global-ui .menu-toggle{width:44px;height:42px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer}
+body.krim-global-ui .menu-toggle span{display:block;width:19px;height:2px;border-radius:2px;background:var(--navy);transition:transform .18s,opacity .18s}
+body.krim-global-ui .menu-toggle[aria-expanded="true"] span:first-child{transform:translateY(7px) rotate(45deg)}
+body.krim-global-ui .menu-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+body.krim-global-ui .menu-toggle[aria-expanded="true"] span:last-child{transform:translateY(-7px) rotate(-45deg)}
+body.krim-global-ui .driver-menu{position:sticky;top:82px;z-index:1100;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line);box-shadow:0 14px 26px rgba(9,36,61,.10);padding:16px 18px 20px}
+body.krim-global-ui .driver-menu[hidden]{display:none}
+body.krim-global-ui .driver-menu-inner{width:min(1220px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 18px}
+body.krim-global-ui .driver-menu-inner>a{min-height:44px;display:flex;align-items:center;padding:10px 7px;border-bottom:1px solid #edf1f5;color:#40556b;font-size:12px;font-weight:750}
+body.krim-global-ui .driver-menu-inner>a:hover{color:var(--blue-deep);background:#f4f9fd}
+body.krim-global-ui .driver-menu-inner .menu-feature{grid-column:1/-1;display:grid;gap:3px;margin-bottom:7px;border-bottom:1px solid var(--line);color:var(--navy)}
+body.krim-global-ui .driver-menu-inner .menu-feature strong{font-size:14px}
+body.krim-global-ui .driver-menu-inner .menu-feature small{font-size:11px;color:var(--muted);font-weight:500}
+html[data-krim-preview="true"] #refresh,html[data-krim-preview="true"] #signout{display:none!important}
+@media(max-width:900px){body.krim-global-ui .nav-actions>a{display:none}body.krim-global-ui .driver-menu-inner{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){body.krim-global-ui .nav{flex-wrap:nowrap;align-items:center}body.krim-global-ui .nav .brand img{width:132px!important;max-width:132px!important;max-height:42px!important}body.krim-global-ui .brand-copy strong{font-size:9px}body.krim-global-ui .brand-copy small{font-size:9px}body.krim-global-ui .nav-actions{width:auto;display:flex;flex:none}body.krim-global-ui .menu-toggle{width:42px;height:42px}body.krim-global-ui .driver-menu{top:64px;padding:10px 12px 16px}body.krim-global-ui .driver-menu-inner{grid-template-columns:1fr 1fr;gap:0 8px}body.krim-global-ui .driver-menu-inner>a{font-size:10px;padding:9px 4px}}
+@media(prefers-reduced-motion:reduce){body.krim-global-ui .menu-toggle span{transition:none}}
 </style>
 <style id="krim-public-preview-styles">
 .preview-banner{margin:0 0 14px;padding:12px 15px;border:1px solid #f0c66a;border-radius:12px;background:#fff8e7;color:#6d4a08;font:800 11px/1.5 Inter,system-ui,sans-serif;letter-spacing:.04em}
@@ -86,7 +110,15 @@ body.krim-global-ui .driver-footer-links a{color:#fff;font-weight:800}
 html[data-krim-preview="true"] .btn{cursor:not-allowed!important}
 html[data-krim-preview="true"] .assignment-empty{border:1px dashed #9eb5ca;background:#f8fbff}
 </style></head><body class="krim-global-ui">
-<header class="nav"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><div class="nav-actions"><a class="btn" href="#driver-operations-modules">Operations modules</a><a class="btn" href="#driver-profile">My profile</a><button class="btn" id="refresh">↻ Refresh</button><button class="btn dark" id="signout">Sign out</button></div></header>
+<header class="nav" id="driverHeader">
+<a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"><span class="brand-copy"><strong>KRIM DRIVE</strong><small>Driver workspace</small></span></a>
+<div class="nav-actions"><a class="btn" href="#driver-operations-modules">Operations modules</a><a class="btn" href="#driver-profile">My profile</a><button class="btn" id="refresh" type="button">↻ Refresh</button><button class="btn dark" id="signout" type="button">Sign out</button><button class="menu-toggle" id="driverMenuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="driverMenu"><span></span><span></span><span></span></button></div>
+</header>
+<nav class="driver-menu" id="driverMenu" aria-label="Driver workspace navigation" hidden>
+<div class="driver-menu-inner">
+<a href="#driver-operations-modules" class="menu-feature"><strong>All driver modules</strong><small>17 operational workspaces</small></a>
+<a href="./module-01-assignment-inbox.html">01 · Assignment inbox</a><a href="./module-02-assignment-details.html">02 · Assignment details</a><a href="./module-03-assignment-acceptance.html">03 · Assignment acceptance</a><a href="./module-04-driver-vehicle-readiness.html">04 · Driver & vehicle readiness</a><a href="./module-05-pickup-collection.html">05 · Pickup & collection</a><a href="./module-06-shipment-milestones.html">06 · Shipment milestones</a><a href="./module-07-route-stop-management.html">07 · Route & stops</a><a href="./module-08-live-tracking.html">08 · Live tracking</a><a href="./module-09-exceptions-incidents.html">09 · Exceptions & incidents</a><a href="./module-10-proof-of-delivery.html">10 · Proof of delivery</a><a href="./module-11-failed-delivery-returns.html">11 · Failed delivery & returns</a><a href="./module-12-delivery-history.html">12 · Delivery history</a><a href="./module-13-earnings-settlements.html">13 · Earnings & settlements</a><a href="./module-14-performance-quality.html">14 · Performance & quality</a><a href="./module-15-notifications-support.html">15 · Notifications & support</a><a href="./module-16-driver-profile-compliance.html">16 · Profile & compliance</a><a href="./module-17-security-audit.html">17 · Security & audit</a>
+</div></nav>
 <main class="wrap">
 <section class="hero"><div class="eyebrow">KRIM DRIVE · DRIVER DASHBOARD</div><h1>Your workday.<br>One clear view.</h1><p>See your assigned trips, review delivery activity and keep your driver profile current. Only records authorized for your signed-in driver account are shown.</p><div class="chips"><span class="chip">Role-verified session</span><span class="chip">Assigned trips only</span><span class="chip">Private delivery evidence</span><span class="chip">Global-ready profile</span></div><div class="statusbar"><span class="dot" id="statusDot"></span><span id="notice" role="status" aria-live="polite">Checking your secure session and driver permissions…</span></div></section>
 <section class="metrics"><article class="metric"><div class="label">MY ASSIGNMENTS</div><strong id="assignedCount">—</strong><small>Assigned directly to your account</small></article><article class="metric"><div class="label">ACTIVE TRIPS</div><strong id="activeCount">—</strong><small>Trips not yet closed</small></article><article class="metric"><div class="label">DELIVERY EVIDENCE</div><strong id="proofCount">—</strong><small>Evidence records you submitted</small></article></section>
@@ -107,6 +139,12 @@ html[data-krim-preview="true"] .assignment-empty{border:1px dashed #9eb5ca;backg
 'use strict';
 const $=id=>document.getElementById(id), client=window.KRIM_SUPABASE;
 let session=null, membership=null, profile=null, assignments=[], selectedId='';
+const menuToggle=document.getElementById('driverMenuToggle'), driverMenu=document.getElementById('driverMenu');
+if(menuToggle&&driverMenu){
+ menuToggle.addEventListener('click',()=>{const open=menuToggle.getAttribute('aria-expanded')!=='true';menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');driverMenu.hidden=!open;});
+ driverMenu.addEventListener('click',event=>{if(event.target.closest('a')){driverMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation menu');}});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!driverMenu.hidden){driverMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false');menuToggle.focus();}});
+}
 
 /* Public Cloudflare preview: presentation-only, no auth redirect and no backend reads/writes. */
 const KRIM_PUBLIC_PREVIEW = location.hostname.endsWith('.krim-staging.pages.dev');
@@ -130,7 +168,7 @@ if (KRIM_PUBLIC_PREVIEW) {
    const box=document.createElement('div');box.className='notice';box.textContent='Preview only — this secure driver action is disabled on the public staging site. Sign-in and server-side authorization are required in production.';
    form.replaceWith(box);
  });
- document.querySelectorAll('button,input,select,textarea').forEach(el=>{el.disabled=true;});
+ document.querySelectorAll('button:not(#driverMenuToggle),input,select,textarea').forEach(el=>{el.disabled=true;});
  document.querySelectorAll('#driverVerificationPanel,#driver-profile').forEach(el=>el.classList.add('preview-section'));
  const hero=document.querySelector('.hero p');if(hero)hero.textContent='Explore the KRIM driver workspace experience: dispatch visibility, trip activity, driver readiness and delivery operations. This is a public, read-only design preview.';
  const footer=document.querySelector('.footer small');if(footer)footer.textContent='© 2026 KRIM Logistics. Public staging preview only — production access remains authenticated and role-controlled.';
