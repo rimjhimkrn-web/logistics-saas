@@ -110,6 +110,30 @@ h1{max-width:680px;margin:18px 0 14px;font-size:clamp(38px,5vw,58px);line-height
 @media(max-width:680px){
  .nav-row{max-height:calc(100dvh - 70px)}
 }
+/* Navigation repair: use normal document flow when expanded. This prevents the dropdown from escaping its header/viewport on mobile and tablet. */
+@media(max-width:900px){
+ .site-head{position:sticky;top:0;z-index:300;isolation:isolate}
+ .head-main{position:relative;z-index:2;background:#fff}
+ .nav-row,.nav-row.open{
+  position:static!important;inset:auto!important;display:none;width:100%;max-height:min(70dvh,560px);
+  overflow-x:hidden;overflow-y:auto;background:#fff;border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);box-shadow:0 12px 22px rgba(9,36,61,.12);z-index:auto;
+ }
+ .nav-row.open{display:block!important}
+ .nav-inner{
+  width:min(100% - 28px,1200px);min-height:0;margin-inline:auto;padding:8px 0 12px;
+  display:flex;flex-direction:column;align-items:stretch;gap:2px;
+ }
+ .nav-inner a{
+  display:flex;align-items:center;width:100%;min-width:0;min-height:46px;padding:11px 14px;
+  white-space:normal;overflow-wrap:anywhere;border-radius:8px;
+ }
+ .nav-inner .push{margin-left:0}
+}
+@media(max-width:680px){
+ .head-main{min-height:70px}
+ .nav-row,.nav-row.open{max-height:calc(100dvh - 70px)}
+}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
