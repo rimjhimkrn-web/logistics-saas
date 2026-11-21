@@ -253,6 +253,28 @@ body.krim-global-shell .place-result{padding:12px!important;font-size:12px!impor
 @media(prefers-reduced-motion:reduce){body.krim-global-shell *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
 
+
+<style id="krim-booking-footer-refinement">
+body.krim-global-shell .krim-booking-footer{max-width:none!important;margin:34px 0 0!important;padding:34px clamp(18px,5vw,72px) 0!important;display:grid!important;grid-template-columns:minmax(230px,.9fr) minmax(0,1.4fr)!important;gap:30px 56px!important;background:#09243D!important;color:#d5e2ef!important;border-top:4px solid #168FE0!important}
+body.krim-global-shell .krim-booking-footer .footer-brand{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+body.krim-global-shell .krim-booking-footer .footer-brand-link{display:inline-flex;align-items:center;max-width:190px;min-height:48px}
+body.krim-global-shell .krim-booking-footer .footer-brand img{display:block;width:166px;height:52px;max-width:100%;object-fit:contain;object-position:left center;filter:brightness(0) invert(1);opacity:.96}
+body.krim-global-shell .krim-booking-footer .footer-brand p{margin:0;color:#fff;font:800 12px Manrope,sans-serif;letter-spacing:.04em}
+body.krim-global-shell .krim-booking-footer .footer-brand>span{font-size:10px;color:#b8cadd;line-height:1.6}
+body.krim-global-shell .krim-booking-footer .footer-navigation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+body.krim-global-shell .krim-booking-footer .footer-group{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+body.krim-global-shell .krim-booking-footer .footer-group h2{margin:3px 0 4px;color:#fff;font:800 11px Manrope,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+body.krim-global-shell .krim-booking-footer .footer-group a{font-size:11px;line-height:1.5;color:#c3d2e1;text-decoration:none}
+body.krim-global-shell .krim-booking-footer .footer-group a:hover,body.krim-global-shell .krim-booking-footer .footer-group a:focus-visible{color:#fff;text-decoration:underline;text-underline-offset:4px}
+body.krim-global-shell .krim-booking-footer .footer-bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #ffffff24;padding:16px 0 20px;color:#aebfd0;font-size:10px;line-height:1.6}
+@media(max-width:650px){
+ body.krim-global-shell .krim-booking-footer{grid-template-columns:1fr!important;gap:22px!important;margin-top:24px!important;padding:26px 18px 0!important}
+ body.krim-global-shell .krim-booking-footer .footer-navigation{gap:16px!important}
+ body.krim-global-shell .krim-booking-footer .footer-bottom{flex-direction:column;gap:5px;padding-bottom:18px}
+}
+@media(max-width:360px){body.krim-global-shell .krim-booking-footer .footer-navigation{grid-template-columns:1fr!important;gap:18px!important}}
+</style>
+
 </head>
 <body class="krim-global-shell"><a class="krim-skip" href="#main">Skip to content</a>
 <div class="shell">
@@ -376,10 +398,36 @@ body.krim-global-shell .place-result{padding:12px!important;font-size:12px!impor
     </div>
   </main>
 </div>
-<footer class="footer"><span>© KRIM Logistics · Knowledge · Reliability · Integration · Movement · Global Logistics Operating System</span><div class="footer-links"><a href="../index.html">Customer homepage</a><a href="../../../index.html">KRIM homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">My shipments</a><a href="../../../terms.html">Terms</a></div></footer>
+<footer class="footer krim-booking-footer" aria-label="KRIM site footer">
+  <div class="footer-brand">
+    <a class="footer-brand-link" href="../../../index.html" aria-label="KRIM Logistics homepage">
+      <img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics" width="166" height="52" loading="lazy">
+    </a>
+    <p>Global Logistics Operating System</p>
+    <span>Knowledge · Reliability · Integration · Movement</span>
+  </div>
+  <div class="footer-navigation">
+    <div class="footer-group">
+      <h2>Customer workspace</h2>
+      <a href="../index.html">Customer homepage</a>
+      <a href="shipment-list.html">Shipment overview</a>
+      <a href="active-shipments.html">My shipments</a>
+    </div>
+    <div class="footer-group">
+      <h2>KRIM Logistics</h2>
+      <a href="../../../index.html">KRIM homepage</a>
+      <a href="../../../terms.html">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="krim-footer-year">2026</span> KRIM Logistics. All rights reserved.</span>
+    <span>Global logistics, connected responsibly.</span>
+  </div>
+</footer>
 </div>
 <script>
 (function(){
+  const year=document.getElementById("krim-footer-year");if(year)year.textContent=String(new Date().getFullYear());
   const button=document.getElementById('customer-nav-toggle');
   const nav=document.getElementById('customer-primary-nav');
   if(!button||!nav)return;
