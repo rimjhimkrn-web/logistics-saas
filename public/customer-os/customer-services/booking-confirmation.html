@@ -41,17 +41,38 @@
 @media(max-width:900px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.side h2{grid-column:1/-1}.side .notice{grid-column:1/-1}}
 @media(max-width:700px){.topbar{min-height:68px;padding:9px 15px}.brand-mark{width:38px;height:38px}.topbar-title{font-size:12px}.customer-nav{position:sticky;top:68px;max-height:calc(100dvh - 76px);overflow:auto;grid-template-columns:1fr;padding:10px 15px;box-shadow:0 12px 24px #09243d18}.customer-nav.open{display:grid}.customer-nav a{background:var(--paper);min-height:42px}.customer-nav .home{margin-left:0}.wrap{width:min(100% - 28px,1160px)}.main{padding-top:22px}.hero{border-radius:17px}.panel-head,.panel-body{padding:18px}.side{display:block}.fields{grid-template-columns:1fr}.footer-inner{display:grid}.copy{flex-direction:column;gap:5px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Canonical KRIM customer header — match the approved shipment pages. */
+.krim-site-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.krim-head-inner{width:min(1220px,calc(100% - 36px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.krim-head-logo img{display:block;width:194px;max-width:44vw;max-height:58px;object-fit:contain;object-position:left}
+.krim-head-actions{display:flex;align-items:center;gap:8px}
+.krim-head-actions a,.krim-menu-toggle{padding:9px 12px;border:1px solid var(--line);border-radius:8px;color:var(--navy);font-size:10px;font-weight:850;background:#fff}
+.krim-menu-toggle{display:none;font-size:20px;min-width:44px;min-height:42px;cursor:pointer}
+.krim-site-nav{border-top:1px solid #edf2f6}
+.krim-site-nav-inner{width:min(1220px,calc(100% - 36px));margin:auto;display:flex;align-items:center;gap:4px;min-height:43px}
+.krim-site-nav a{padding:8px 9px;border-radius:7px;font-size:10px;font-weight:750;color:#40556b;white-space:nowrap}
+.krim-site-nav a:hover,.krim-site-nav a[aria-current=page]{background:var(--pale);color:var(--deep)}
+.krim-site-nav .krim-nav-home{margin-left:auto;color:var(--deep)}
+@media(max-width:1100px){.krim-menu-toggle{display:inline-flex;align-items:center;justify-content:center}.krim-site-nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:72dvh;overflow:auto;background:#fff;box-shadow:0 16px 30px #09243d26}.krim-site-nav.open{display:block}.krim-site-nav-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0}.krim-site-nav .krim-nav-home{margin:0}}
+@media(max-width:700px){.krim-head-inner,.krim-site-nav-inner{width:calc(100% - 28px)}.krim-head-logo img{width:170px;max-width:65vw}.krim-site-nav-inner{grid-template-columns:1fr}.krim-site-nav a{background:var(--paper);min-height:42px}}
 </style>
 </head>
 <body>
 <div class="topline"></div>
-<header class="topbar">
- <a class="brand" href="../index.html" aria-label="KRIM Customer homepage"><img class="brand-mark" src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a>
- <button class="nav-toggle" id="toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">☰</button>
+<header class="krim-site-header">
+ <div class="krim-head-inner">
+  <a class="krim-head-logo" href="../index.html" aria-label="KRIM Customer homepage"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" width="224" height="71"></a>
+  <div class="krim-head-actions">
+   <button class="krim-menu-toggle" id="toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open navigation">☰</button>
+  </div>
+ </div>
+ <div class="krim-site-nav" id="nav">
+  <nav class="krim-site-nav-inner" aria-label="Customer navigation">
+   <a href="../index.html">Customer homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">My shipments</a><a href="shipment-details.html">Shipment details</a><a href="shipment-timeline.html">Shipment timeline</a><a href="booking-request.html">Booking request</a><a href="booking-confirmation.html" aria-current="page">Booking confirmation</a><a class="krim-nav-home" href="../../../index.html">KRIM homepage</a>
+  </nav>
+ </div>
 </header>
-<nav class="customer-nav" id="nav" aria-label="Customer navigation">
- <a href="../index.html">Customer homepage</a><a href="shipment-list.html">Shipment overview</a><a href="active-shipments.html">My shipments</a><a href="shipment-details.html">Shipment details</a><a href="shipment-timeline.html">Shipment timeline</a><a href="booking-request.html">Booking request</a><a href="booking-confirmation.html" aria-current="page">Booking confirmation</a><a class="home" href="../../../index.html">KRIM homepage</a>
-</nav>
 <main class="main wrap">
  <p class="crumb"><a href="../index.html">Customer workspace</a> / <a href="shipment-list.html">Shipments</a> / Booking confirmation</p>
  <section class="hero" aria-labelledby="page-title">
@@ -142,6 +163,15 @@ async function production(){
 }
 Promise.resolve(window.KRIM_GLOBAL_CONTEXT?.ready).catch(()=>{}).finally(()=>{if(staging)sample();else production().catch(e=>{$('status-text').textContent='Unable to verify record';$('fields').replaceChildren();setFeedback(e?.message||'The shipment confirmation could not be loaded. No booking success has been assumed.','error');addLink('Shipment overview','shipment-list.html')})});
 })();
+
+const krimMenuToggle=document.getElementById('toggle');
+const krimCustomerNav=document.getElementById('nav');
+function closeKrimNav(){krimCustomerNav.classList.remove('open');krimMenuToggle.setAttribute('aria-expanded','false');krimMenuToggle.setAttribute('aria-label','Open navigation');krimMenuToggle.textContent='☰'}
+krimMenuToggle.addEventListener('click',()=>{const open=!krimCustomerNav.classList.contains('open');krimCustomerNav.classList.toggle('open',open);krimMenuToggle.setAttribute('aria-expanded',String(open));krimMenuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');krimMenuToggle.textContent=open?'×':'☰'});
+krimCustomerNav.addEventListener('click',e=>{if(e.target.closest('a'))closeKrimNav()});
+document.addEventListener('click',e=>{if(!krimCustomerNav.contains(e.target)&&!krimMenuToggle.contains(e.target))closeKrimNav()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeKrimNav()});
+window.addEventListener('resize',()=>{if(innerWidth>1100)closeKrimNav()});
 </script>
 </body>
 </html>
