@@ -21,7 +21,7 @@ The following 12 customer-facing pages now load the shared read-only global cust
 
 Shared runtime: `public/customer-os/assets/customer-os-globalization.js`
 
-The runtime reads saved regional preferences for an authenticated user and exposes locale-aware helpers for currency, numbers, dates, date-times, weights and lengths. It uses the device locale when no saved preference is available. It does not write data, activate markets or translate page content by itself.
+The runtime is linked on all 12 pages with the public Supabase client configuration and reads saved regional preferences for an authenticated user. It exposes locale-aware helpers for currency, numbers, dates, date-times, weights and lengths. The Customer OS homepage language selector reads and persists the account language preference when the user is signed in, while retaining a device-local fallback. The runtime itself is read-only; it does not activate markets or translate page content by itself.
 
 The Customer OS homepage remains the single customer-facing language selector. Its selector catalogue has been expanded to 100+ language choices, with right-to-left document direction support for RTL languages. Machine translation availability and quality remain dependent on the translation provider and must not be described as professionally localized content.
 
