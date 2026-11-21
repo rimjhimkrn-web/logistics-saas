@@ -96,7 +96,7 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
  function render(){
   updateCount();
   if(!profiles.length){$('profiles').innerHTML='<div class="empty"><strong>Your cargo library is ready for its first profile.</strong><p>Create a reusable cargo profile above. Saved records remain private to your signed-in account.</p></div>';return}
-  $('profiles').innerHTML=profiles.map(p=>'<article class="profile"><div class="profile-top"><h3>'+esc(p.name)+'</h3><span class="mode">'+esc(String(p.transport_mode||'').toUpperCase())+'</span></div><p>'+esc(p.description)+'</p><div class="profile-meta"><span>Typical weight · '+esc(p.weight_kg)+' kg</span><span>Reusable draft details</span></div><div class="profile-actions"><a class="btn primary" href="'+bookingUrl(p.id)+'">Use in shipment draft →</a><button class="btn" type="button" data-remove="'+esc(p.id)+'">Delete profile</button></div></article>').join('');
+  $('profiles').innerHTML=profiles.map(p=>{const weightLabel=window.KRIM_GLOBAL_CONTEXT?.formatWeight?window.KRIM_GLOBAL_CONTEXT.formatWeight(p.weight_kg):String(p.weight_kg)+' kg';return '<article class="profile"><div class="profile-top"><h3>'+esc(p.name)+'</h3><span class="mode">'+esc(String(p.transport_mode||'').toUpperCase())+'</span></div><p>'+esc(p.description)+'</p><div class="profile-meta"><span>Typical weight · '+esc(weightLabel)+'</span><span>Reusable draft details</span></div><div class="profile-actions"><a class="btn primary" href="'+bookingUrl(p.id)+'">Use in shipment draft →</a><button class="btn" type="button" data-remove="'+esc(p.id)+'">Delete profile</button></div></article>'}).join('');
  }
  $('profiles').addEventListener('click',async e=>{
   const btn=e.target.closest('[data-remove]');if(!btn||busy)return;
@@ -118,6 +118,7 @@ footer{background:#071d34;color:#d7e8f6;padding:25px 0 16px}.foot{display:flex;j
  });
  const stagingPreview=location.hostname.endsWith('.krim-staging.pages.dev');
  if(stagingPreview){$('save').disabled=true;$('save').textContent='Saving disabled in staging preview';$('form').querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=true);msg('Staging review mode: authentication is bypassed. No personal cargo records are loaded and all saving is disabled.');$('profiles').innerHTML='<div class="empty"><strong>Private cargo library hidden in staging.</strong><p>Sign in on the production customer workspace to access real account records.</p></div>';return}
+ document.addEventListener('krim:global-context-ready',()=>{if(profiles.length)render()});
  try{
   if(!client)throw new Error('KRIM backend configuration did not load. Check the configuration and reload this page.');
   const {data:a,error:ae}=await client.auth.getSession();if(ae)throw ae;
