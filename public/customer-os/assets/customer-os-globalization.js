@@ -7,7 +7,7 @@
   const staging = location.hostname.endsWith('.krim-staging.pages.dev');
   const rtl = new Set(['ar','fa','he','ur','ps','sd','yi']);
   const state = {
-    ready: false, staging, locale: navigator.language || 'en',
+    ready: false, languageSaved: false, staging, locale: navigator.language || 'en',
     language: (navigator.language || 'en').split('-')[0],
     country: null, currency: null, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     measurementSystem: 'metric', dateFormat: 'locale', numberFormat: 'locale'
@@ -83,7 +83,7 @@
         if (error) throw error;
         const p = data?.preferences || {}, r = p.customer_localization || {};
         if (typeof r.language_code === 'string' && /^[a-z]{2,3}(-[A-Z]{2})?$/.test(r.language_code)) {
-          state.language = r.language_code.split('-')[0]; state.locale = r.language_code.includes('-') ? r.language_code : (r.country_code ? r.language_code+'-'+r.country_code : r.language_code);
+          state.languageSaved = true; state.language = r.language_code.split('-')[0]; state.locale = r.language_code.includes('-') ? r.language_code : (r.country_code ? r.language_code+'-'+r.country_code : r.language_code);
           d.documentElement.lang = r.language_code;
           d.documentElement.dir = rtl.has(state.language) ? 'rtl' : 'ltr';
         }
