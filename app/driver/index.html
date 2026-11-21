@@ -80,7 +80,12 @@ body.krim-global-ui .driver-footer-links a{color:#fff;font-weight:800}
 @media(max-width:480px){body.krim-global-ui .nav{gap:8px;flex-wrap:wrap}body.krim-global-ui .nav .brand img{width:132px!important;max-height:42px!important}body.krim-global-ui .nav-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}body.krim-global-ui .nav-actions .btn{width:100%}body.krim-global-ui .wrap{width:calc(100% - 22px);margin-top:13px}body.krim-global-ui .hero{border-radius:16px}body.krim-global-ui .panel{padding:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 </style>
-</head><body class="krim-global-ui">
+<style id="krim-public-preview-styles">
+.preview-banner{margin:0 0 14px;padding:12px 15px;border:1px solid #f0c66a;border-radius:12px;background:#fff8e7;color:#6d4a08;font:800 11px/1.5 Inter,system-ui,sans-serif;letter-spacing:.04em}
+.preview-section{opacity:.88}
+html[data-krim-preview="true"] .btn{cursor:not-allowed!important}
+html[data-krim-preview="true"] .assignment-empty{border:1px dashed #9eb5ca;background:#f8fbff}
+</style></head><body class="krim-global-ui">
 <header class="nav"><a class="brand" href="../../index.html" aria-label="KRIM Logistics home"><img src="../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System" style="width:220px;height:58px;object-fit:contain;object-position:left center"></a><div class="nav-actions"><a class="btn" href="#driver-operations-modules">Operations modules</a><a class="btn" href="#driver-profile">My profile</a><button class="btn" id="refresh">↻ Refresh</button><button class="btn dark" id="signout">Sign out</button></div></header>
 <main class="wrap">
 <section class="hero"><div class="eyebrow">KRIM DRIVE · DRIVER DASHBOARD</div><h1>Your workday.<br>One clear view.</h1><p>See your assigned trips, review delivery activity and keep your driver profile current. Only records authorized for your signed-in driver account are shown.</p><div class="chips"><span class="chip">Role-verified session</span><span class="chip">Assigned trips only</span><span class="chip">Private delivery evidence</span><span class="chip">Global-ready profile</span></div><div class="statusbar"><span class="dot" id="statusDot"></span><span id="notice" role="status" aria-live="polite">Checking your secure session and driver permissions…</span></div></section>
@@ -102,6 +107,37 @@ body.krim-global-ui .driver-footer-links a{color:#fff;font-weight:800}
 'use strict';
 const $=id=>document.getElementById(id), client=window.KRIM_SUPABASE;
 let session=null, membership=null, profile=null, assignments=[], selectedId='';
+
+/* Public Cloudflare preview: presentation-only, no auth redirect and no backend reads/writes. */
+const KRIM_PUBLIC_PREVIEW = location.hostname.endsWith('.krim-staging.pages.dev');
+if (KRIM_PUBLIC_PREVIEW) {
+ document.documentElement.dataset.krimPreview='true';
+ const previewNotice='PUBLIC STAGING PREVIEW · illustrative interface only · no live driver records';
+ const notice=$('notice'); if(notice)notice.textContent=previewNotice;
+ const dot=$('statusDot'); if(dot)dot.style.background='#fbbf24';
+ const identity=$('identity'); if(identity)identity.textContent='PUBLIC PREVIEW';
+ const setText=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+ setText('assignedCount','—');setText('activeCount','—');setText('proofCount','—');
+ setText('assignmentBadge','Preview only');
+ setText('assignmentFeedback','No live dispatch data is loaded in public staging.');
+ const assignmentsBox=$('assignments');
+ if(assignmentsBox)assignmentsBox.innerHTML='<div class="assignment-empty"><div class="empty-icon">↗</div><h3>Driver assignment workspace</h3><p>This public preview shows the dashboard layout only. No real trips, driver identities, locations or dispatch records are displayed.</p><p><strong>Production:</strong> assignments will appear only after secure sign-in and active driver-membership verification.</p></div>';
+ const timeline=$('timeline');if(timeline)timeline.innerHTML='<div class="empty">Trip events are not loaded in public preview.</div>';
+ const evidence=$('evidenceList');if(evidence)evidence.innerHTML='<div class="empty">Private delivery evidence is not exposed in public preview.</div>';
+ const selectHint=$('assignmentSelectHint');if(selectHint)selectHint.textContent='Trip selection is disabled in public preview.';
+ const verification=$('verification');if(verification)verification.textContent='Not checked in preview';
+ document.querySelectorAll('form').forEach(form=>{
+   const box=document.createElement('div');box.className='notice';box.textContent='Preview only — this secure driver action is disabled on the public staging site. Sign-in and server-side authorization are required in production.';
+   form.replaceWith(box);
+ });
+ document.querySelectorAll('button,input,select,textarea').forEach(el=>{el.disabled=true;});
+ document.querySelectorAll('#driverVerificationPanel,#driver-profile').forEach(el=>el.classList.add('preview-section'));
+ const hero=document.querySelector('.hero p');if(hero)hero.textContent='Explore the KRIM driver workspace experience: dispatch visibility, trip activity, driver readiness and delivery operations. This is a public, read-only design preview.';
+ const footer=document.querySelector('.footer small');if(footer)footer.textContent='© 2026 KRIM Logistics. Public staging preview only — production access remains authenticated and role-controlled.';
+ const banner=document.createElement('div');banner.className='preview-banner';banner.textContent=previewNotice;
+ const main=document.querySelector('main');if(main)main.prepend(banner);
+ return;
+}
 const countrySelect=$('country');
 try{const display=new Intl.DisplayNames(['en'],{type:'region'});for(let a=65;a<=90;a++)for(let b=65;b<=90;b++){const code=String.fromCharCode(a,b),name=display.of(code);if(name&&name!==code){const o=document.createElement('option');o.value=code;o.textContent=name;countrySelect.appendChild(o)}}}catch(e){}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
