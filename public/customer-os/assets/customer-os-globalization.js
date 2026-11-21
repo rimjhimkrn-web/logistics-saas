@@ -15,7 +15,16 @@
   const api = {
     get preferences() { return Object.freeze({...state}); },
     formatNumber(value, options) {
-      return new Intl.NumberFormat(state.locale, options || {}).format(Number(value));
+      const n=Number(value);
+      if (!Number.isFinite(n)) return '';
+      if (!options && state.numberFormat !== 'locale') {
+        const raw = new Intl.NumberFormat('en-US',{useGrouping:false,maximumFractionDigits:20}).format(n).split('.');
+        const group = state.numberFormat === '1 234,56' ? ' ' : state.numberFormat === '1.234,56' ? '.' : ',';
+        const decimal = state.numberFormat === '1,234.56' ? '.' : ',';
+        const integer = raw[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, group);
+        return integer + (raw[1] ? decimal + raw[1] : '');
+      }
+      return new Intl.NumberFormat(state.locale, options || {}).format(n);
     },
     formatCurrency(value, currency) {
       const code = currency || state.currency;
@@ -35,7 +44,7 @@
       const kg = Number(valueKg);
       if (!Number.isFinite(kg)) return '';
       const chosen = unit || (state.measurementSystem === 'metric' ? 'kg' : state.measurementSystem === 'us_customary' ? 'lb' : 'lb');
-      const factors = {kg:1,g:1000,t:0.001,lb:2.2046226218,st:0.0009842065,lt:0.0009842065};
+      const factors = {kg:1,g:1000,t:0.001,lb:2.2046226218,short_ton:0.0011023113,long_ton:0.0009842065,stone:0.1574730444};
       const converted = kg * (factors[chosen] || 1);
       const digits = Math.abs(converted) < 1 ? 3 : 2;
       return api.formatNumber(Number(converted.toFixed(digits))) + ' ' + chosen;
@@ -57,7 +66,7 @@
         if (error) throw error;
         const p = data?.preferences || {}, r = p.customer_localization || {};
         if (typeof r.language_code === 'string' && /^[a-z]{2,3}(-[A-Z]{2})?$/.test(r.language_code)) {
-          state.language = r.language_code.split('-')[0]; state.locale = r.language_code;
+          state.language = r.language_code.split('-')[0]; state.locale = r.language_code.includes('-') ? r.language_code : (r.country_code ? r.language_code+'-'+r.country_code : r.language_code);
           d.documentElement.lang = r.language_code;
           d.documentElement.dir = rtl.has(state.language) ? 'rtl' : 'ltr';
         }
