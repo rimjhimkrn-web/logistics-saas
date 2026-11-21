@@ -21,8 +21,8 @@
 <link rel="stylesheet" href="../../../core/krim-global-interface.css">
 
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
-<link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
-<script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+
+
 </head>
 <body class="krim-global-shell">
 <div class="shell">
@@ -102,7 +102,7 @@
             </div>
           </form>
           <div id="booking-feedback" class="feedback" role="status" aria-live="polite"></div>
-          <div class="journey-banner" style="margin-top:14px"><span><b>Can't find your exact village, locality or route?</b> Keep the original location and ask KRIM to review coverage.</span><a class="btn btn-secondary" id="coverage-review-link" href="../../../shipper/coverage-review.html">Request coverage review →</a></div>
+          <div class="journey-banner" style="margin-top:14px"><span><b>Can't find your exact village, locality or route?</b> Keep the original location and ask KRIM to review coverage.</span><a class="btn btn-secondary" id="coverage-review-link" href="../../shipper/coverage-review.html">Request coverage review →</a></div>
         </div>
       </section>
       <aside>
@@ -195,7 +195,7 @@
     const routeType=$("booking-route-type");
     $("route-type-preview").textContent=routeType.options[routeType.selectedIndex]?.textContent.split(" — ")[0]||"Door-to-door";
     const coverageLink=$("coverage-review-link");
-    if(coverageLink){const params=new URLSearchParams();if(origin)params.set("origin",origin);if(destination)params.set("destination",destination);params.set("route_type",routeType.value);params.set("mode",mode.value.toUpperCase());if(Number.isFinite(weight)&&weight>0)params.set("weight",String(weight));coverageLink.href="../../../shipper/coverage-review.html"+(params.toString()?"?"+params.toString():"");}
+    if(coverageLink){const params=new URLSearchParams();if(origin)params.set("origin",origin);if(destination)params.set("destination",destination);params.set("route_type",routeType.value);params.set("mode",mode.value.toUpperCase());if(Number.isFinite(weight)&&weight>0)params.set("weight",String(weight));coverageLink.href="../../shipper/coverage-review.html"+(params.toString()?"?"+params.toString():"");}
     button.disabled=!isReady||submitting;
   }
   function normalizePlace(feature){
@@ -244,13 +244,21 @@
     document.addEventListener("click",event=>{["origin","destination"].forEach(kind=>{const box=$(kind+"-results");if(!box.contains(event.target)&&event.target!==$(kind+"-search"))box.hidden=true;});});
   }
   async function initBooking(){
+    if(STAGING_REVIEW){
+      $('org-preview').textContent='Staging · no account required';
+      loadBookingLocations();
+      showFeedback('STAGING REVIEW MODE · Public preview without sign-in. You can inspect the global booking form and search places. Submission is disabled; no customer data is loaded and no shipment or partner opportunity can be created.', 'info');
+      updatePreview();
+      button.disabled=true;
+      return;
+    }
     try{
       const {data,error} = await client.auth.getSession();
       if(error) throw error;
       const session = data && data.session;
       if(!session){
         const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-        window.location.replace("../../auth/login.html?role=customer&next=" + returnTo);
+        window.location.replace("../../../auth/login.html?role=customer&next=" + returnTo);
         return;
       }
       $("session-identity-node").textContent = session.user.email || "Authenticated customer";
@@ -366,7 +374,7 @@
       clearBookingRequestId();
       showFeedback("Shipment request created successfully. Reference: " + shipmentId + ". Opening the tariff and quote workflow…", "success");
       button.innerHTML = "Shipment created ✓";
-      window.setTimeout(()=>{window.location.href="../../../shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value)+"&route_type="+encodeURIComponent($("booking-route-type").value);},1000);
+      window.setTimeout(()=>{window.location.href="../../shipper/rate-calculator.html?shipment_id="+encodeURIComponent(String(shipmentId))+"&service_tier="+encodeURIComponent($("booking-service-tier").value)+"&transport_mode="+encodeURIComponent($("booking-transport-mode").value)+"&route_type="+encodeURIComponent($("booking-route-type").value);},1000);
     }catch(err){
       submitting = false;
       button.disabled = !isReady;
