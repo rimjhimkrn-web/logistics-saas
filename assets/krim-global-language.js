@@ -1,7 +1,8 @@
 (()=>{"use strict";
-const langs=[["en","English"],["ar","العربية"],["bn","বাংলা"],["de","Deutsch"],["es","Español"],["fr","Français"],["hi","हिन्दी"],["id","Bahasa Indonesia"],["it","Italiano"],["ja","日本語"],["pt","Português"],["ru","Русский"],["zh-CN","简体中文"],["tr","Türkçe"],["ur","اردو"]],rtl=["ar","ur"];
-function boot(){
+const langs=[["en","English"],["af","Afrikaans"],["sq","Shqip"],["am","አማርኛ"],["ar","العربية"],["hy","Հայերեն"],["az","Azərbaycanca"],["eu","Euskara"],["be","Беларуская"],["bn","বাংলা"],["bs","Bosanski"],["bg","Български"],["ca","Català"],["ceb","Cebuano"],["zh-CN","简体中文"],["zh-TW","繁體中文"],["co","Corsu"],["hr","Hrvatski"],["cs","Čeština"],["da","Dansk"],["nl","Nederlands"],["eo","Esperanto"],["et","Eesti"],["tl","Filipino"],["fi","Suomi"],["fr","Français"],["fy","Frysk"],["gl","Galego"],["ka","ქართული"],["de","Deutsch"],["el","Ελληνικά"],["gu","ગુજરાતી"],["ht","Kreyòl ayisyen"],["ha","Hausa"],["haw","ʻŌlelo Hawaiʻi"],["he","עברית"],["hi","हिन्दी"],["hu","Magyar"],["is","Íslenska"],["ig","Igbo"],["id","Bahasa Indonesia"],["ga","Gaeilge"],["it","Italiano"],["ja","日本語"],["jw","Basa Jawa"],["kn","ಕನ್ನಡ"],["kk","Қазақша"],["km","ខ្មែរ"],["ko","한국어"],["ku","Kurdî"],["ky","Кыргызча"],["lo","ລາວ"],["lv","Latviešu"],["lt","Lietuvių"],["lb","Lëtzebuergesch"],["mk","Македонски"],["mg","Malagasy"],["ms","Bahasa Melayu"],["ml","മലയാളം"],["mt","Malti"],["mi","Māori"],["mr","मराठी"],["mn","Монгол"],["my","မြန်မာ"],["ne","नेपाली"],["no","Norsk"],["ny","Chichewa"],["or","ଓଡ଼ିଆ"],["ps","پښتو"],["fa","فارسی"],["pl","Polski"],["pt","Português"],["pa","ਪੰਜਾਬੀ"],["ro","Română"],["ru","Русский"],["sm","Gagana Samoa"],["gd","Gàidhlig"],["sr","Српски"],["st","Sesotho"],["sn","chiShona"],["sd","سنڌي"],["si","සිංහල"],["sk","Slovenčina"],["sl","Slovenščina"],["so","Soomaali"],["es","Español"],["su","Basa Sunda"],["sw","Kiswahili"],["sv","Svenska"],["tg","Тоҷикӣ"],["ta","தமிழ்"],["tt","Татарча"],["te","తెలుగు"],["th","ไทย"],["tr","Türkçe"],["tk","Türkmençe"],["uk","Українська"],["ur","اردو"],["ug","ئۇيغۇرچە"],["uz","Oʻzbek"],["vi","Tiếng Việt"],["cy","Cymraeg"],["xh","isiXhosa"],["yi","ייִדיש"],["yo","Yorùbá"],["zu","isiZulu"]],rtl=["ar","fa","he","ps","sd","ug","ur","yi"];
+async function boot(){
  if(document.getElementById("krim-language-control"))return;
+ if(window.KRIM_GLOBAL_CONTEXT?.ready)await window.KRIM_GLOBAL_CONTEXT.ready;
  const mobile=matchMedia("(max-width:960px)").matches;
  const host=(document.querySelector("header .nav-actions")||(mobile?document.querySelector("header #primary-nav,header .nav-links,header nav"):document.querySelector("header #primary-nav,header nav"))||document.body);
  const floating=host===document.body;
@@ -20,12 +21,23 @@ function boot(){
 @media(min-width:961px){header .nav-actions #krim-language-control{margin:0 2px}header .nav-actions #krim-language-toggle .krim-language-word{display:inline}body>#krim-language-control{position:fixed;right:18px;bottom:18px;margin:0;padding:0}}
 `;document.head.appendChild(css);host.appendChild(box);
  const hidden=document.createElement("div");hidden.id="google_translate_element";document.body.appendChild(hidden);
- const toggle=box.querySelector("#krim-language-toggle"),menu=box.querySelector("#krim-language-menu"),sel=box.querySelector("select"),note=box.querySelector("#krim-language-note"),saved=localStorage.getItem("krim-language")||"en";sel.value=saved;
+ const toggle=box.querySelector("#krim-language-toggle"),menu=box.querySelector("#krim-language-menu"),sel=box.querySelector("select"),note=box.querySelector("#krim-language-note");const accountLocale=window.KRIM_GLOBAL_CONTEXT?.preferences?.locale;const accountLanguage=window.KRIM_GLOBAL_CONTEXT?.preferences?.languageSaved?(langs.some(x=>x[0]===accountLocale)?accountLocale:(window.KRIM_GLOBAL_CONTEXT.preferences.language==="zh"?"zh-CN":window.KRIM_GLOBAL_CONTEXT.preferences.language)):null;const saved=accountLanguage||localStorage.getItem("krim-language")||"en";sel.value=saved;
  toggle.addEventListener("click",()=>{const open=menu.hidden;menu.hidden=!open;toggle.setAttribute("aria-expanded",String(open));if(open)sel.focus()});
  document.addEventListener("click",e=>{if(!box.contains(e.target)){menu.hidden=true;toggle.setAttribute("aria-expanded","false")}});
  window.googleTranslateElementInit=()=>{if(!window.google?.translate?.TranslateElement)return;new google.translate.TranslateElement({pageLanguage:"en",includedLanguages:langs.map(x=>x[0]).filter(x=>x!=="en").join(","),autoDisplay:false},"google_translate_element");if(saved!=="en")setTimeout(()=>apply(saved),1200)};
  function apply(v){const combo=document.querySelector(".goog-te-combo");if(!combo){note.textContent="Translation loading…";return}combo.value=v;combo.dispatchEvent(new Event("change"));document.documentElement.lang=v;document.documentElement.dir=rtl.includes(v)?"rtl":"ltr";note.textContent="Machine translated"}
- sel.addEventListener("change",()=>{const v=sel.value;localStorage.setItem("krim-language",v);if(v==="en"){const c=document.querySelector(".goog-te-combo");if(c){c.value="";c.dispatchEvent(new Event("change"))}document.documentElement.lang="en";document.documentElement.dir="ltr";note.textContent="";return}apply(v)});
+ async function saveAccountLanguage(v){
+ const client=window.KRIM_SUPABASE||window.supabaseClient;
+ if(window.KRIM_STAGING_PREVIEW||location.hostname.endsWith(".krim-staging.pages.dev")||!client)return;
+ try{
+  const {data:auth,error:authError}=await client.auth.getSession();if(authError||!auth?.session?.user)return;
+  const {data:row,error:readError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",auth.session.user.id).maybeSingle();if(readError)throw readError;
+  const preferences=row?.preferences||{};preferences.customer_localization={...(preferences.customer_localization||{}),language_code:v};
+  const {error}=await client.from("krim_user_app_preferences").upsert({user_id:auth.session.user.id,preferences,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(error)throw error;
+  if(window.KRIM_GLOBAL_CONTEXT)await window.KRIM_GLOBAL_CONTEXT.refresh();
+ }catch(error){note.textContent="Language changed on this device; account sync is temporarily unavailable."}
+}
+sel.addEventListener("change",()=>{const v=sel.value;localStorage.setItem("krim-language",v);if(v==="en"){const c=document.querySelector(".goog-te-combo");if(c){c.value="";c.dispatchEvent(new Event("change"))}document.documentElement.lang="en";document.documentElement.dir="ltr";note.textContent="";saveAccountLanguage(v);return}apply(v);saveAccountLanguage(v)});
  const s=document.createElement("script");s.src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";s.async=true;s.onerror=()=>note.textContent="Translation unavailable";document.head.appendChild(s);
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
