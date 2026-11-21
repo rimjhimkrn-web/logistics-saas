@@ -82,7 +82,7 @@
   </a>
   <div class="top-actions">
     <span class="staging-pill"><span class="dot"></span>Public staging preview</span>
-    <a class="btn btn-secondary workspace-link" href="../../../app/customer/index.html">Customer workspace ↗</a>
+    <a class="btn btn-secondary workspace-link" href="shipment-list.html">Shipment overview ↗</a>
     <button class="nav-toggle" id="customer-nav-toggle" type="button" aria-expanded="false" aria-controls="customer-primary-nav" aria-label="Open navigation">☰</button>
   </div>
 </header>
@@ -108,7 +108,7 @@
     <div class="rail-note"><b style="color:#344b68">One connected platform</b><br>Shipment, quote, partner assignment and tracking must share the same verified shipment record. The customer pays the contracting logistics provider directly; KRIM does not collect or settle freight funds. A booking request is not a confirmed dispatch.</div>
   </aside>
   <main class="main" id="main">
-    <div class="crumb"><a href="../../../app/customer/index.html">Customer Workspace</a><span>/</span>Shipments<span>/</span><b>New booking</b></div>
+    <div class="crumb"><a href="../index.html">Customer homepage</a><span>/</span>Shipment management<span>/</span><b>Booking request</b></div>
     <section class="hero">
       <div class="hero-content">
         <div class="eyebrow"><i></i> Global shipment intake · Customer workspace</div>
@@ -194,7 +194,7 @@
     </div>
   </main>
 </div>
-<footer class="footer"><span>© KRIM Logistics · Knowledge · Reliability · Integration · Movement · Global Logistics Operating System</span><div class="footer-links"><a href="../index.html">Customer homepage</a><a href="../../../index.html">KRIM homepage</a><a href="../index.html">Customer homepage</a><a href="../../../index.html">KRIM homepage</a><a href="../../../app/customer/index.html">Customer workspace</a><a href="active-shipments.html">My shipments</a><a href="../../../terms.html">Terms</a></div></footer>
+<footer class="footer"><span>© KRIM Logistics · Knowledge · Reliability · Integration · Movement · Global Logistics Operating System</span><div class="footer-links"><a href="../index.html">Customer homepage</a><a href="../../../index.html">KRIM homepage</a><a href="../../../app/customer/index.html">Customer workspace</a><a href="active-shipments.html">My shipments</a><a href="../../../terms.html">Terms</a></div></footer>
 </div>
 <script>
 (function(){
@@ -213,7 +213,8 @@
 (function(){
   "use strict";
   const STAGING_REVIEW = location.hostname.endsWith('.krim-staging.pages.dev');
-  if(!STAGING_REVIEW){ window.location.replace('../../shipper/booking-request.html'+location.search); return; }
+  const stagePill=document.querySelector('.staging-pill');
+  if(stagePill&&!STAGING_REVIEW) stagePill.hidden=true;
   // Fail closed until the documented production RPC/trigger contract defect is remediated and verified.
   const BOOKING_CREATION_RELEASED = false;
   const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
@@ -468,7 +469,7 @@
       showFeedback("Shipment request failed: " + (err && err.message ? err.message : "Unknown error") + " No success has been assumed. If the connection timed out, check My Shipments before retrying.", "error");
     }
   });
-  initBooking();
+  Promise.resolve(window.KRIM_GLOBAL_CONTEXT && window.KRIM_GLOBAL_CONTEXT.ready).catch(()=>{}).finally(initBooking);
 })();
 </script>
 </body>
