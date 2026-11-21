@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           node scripts/audit-krim-links.mjs > krim-link-audit.json || true
-          node -e "const r=require('./krim-link-audit.json'); console.log('Scanned HTML files: '+r.html_files_scanned); console.log('Broken local references: '+r.broken_local_references); console.log('Operational risk review findings: '+(r.operational_risk_findings||0)); for(const f of (r.operational_risk_details||[]).slice(0,40)) console.log('- '+f.source+' ['+f.category+'] '+f.reason);" >> "$GITHUB_STEP_SUMMARY"
+          node -e "const r=require('./krim-link-audit.json'); console.log('Scanned HTML files: '+r.html_files_scanned); console.log('Broken local references: '+r.broken_local_references); for(const f of (r.findings||[])) console.log('- '+f.source+' -> '+(f.target||f.route||'')+' ['+f.reason+']'); console.log('Operational risk review findings: '+(r.operational_risk_findings||0)); for(const f of (r.operational_risk_details||[]).slice(0,40)) console.log('- '+f.source+' ['+f.category+'] '+f.reason);" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload full audit report
         uses: actions/upload-artifact@v4
         with:
