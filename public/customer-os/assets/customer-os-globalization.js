@@ -21,7 +21,7 @@
         const raw = new Intl.NumberFormat('en-US',{useGrouping:false,maximumFractionDigits:20}).format(n).split('.');
         const group = state.numberFormat === '1 234,56' ? ' ' : state.numberFormat === '1.234,56' ? '.' : ',';
         const decimal = state.numberFormat === '1,234.56' ? '.' : ',';
-        const integer = raw[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, group);
+        const integer = raw[0].replace(/\B(?=(\d{3})+(?!\d))/g, group);
         return integer + (raw[1] ? decimal + raw[1] : '');
       }
       return new Intl.NumberFormat(state.locale, options || {}).format(n);
@@ -51,7 +51,11 @@
       return new Intl.DateTimeFormat(state.locale, {...(options || {}), timeZone:state.timeZone}).format(date);
     },
     formatDateTime(value, options) {
-      return api.formatDate(value, {dateStyle:'medium',timeStyle:'short',...(options || {})});
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const datePart = api.formatDate(date);
+      const timeOptions = {hour:'2-digit',minute:'2-digit',timeZone:state.timeZone,...(options || {})};
+      return datePart + ' ' + new Intl.DateTimeFormat(state.locale,timeOptions).format(date);
     },
     formatWeight(valueKg, unit) {
       const kg = Number(valueKg);
