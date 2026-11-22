@@ -7,6 +7,9 @@ const corsHeaders = {
   "Cache-Control": "no-store"
 };
 
+
+import { readBoundedJson } from "./bounded-json.ts";
+
 function reply(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
     status,
@@ -18,30 +21,34 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return reply(405, { error: "POST required" });
 
-  const declaredLength = Number(req.headers.get("content-length") || "0");
-  if (declaredLength > 9000) return reply(413, { error: "Request is too large." });
-
   try {
     const url = Deno.env.get("SUPABASE_URL");
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return reply(503, { error: "Contact service is not configured." });
 
-    const body = await req.json().catch(() => null);
+    let body: unknown;
+    try {
+      body = await readBoundedJson(req);
+    } catch (error) {
+      if (error instanceof RangeError) return reply(413, { error: "Request is too large." });
+      return reply(400, { error: "Invalid request." });
+    }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return reply(400, { error: "Invalid request." });
     }
-    if (body.privacy_consent !== true) {
+    const payload = body as Record<string, unknown>;
+    if (payload.privacy_consent !== true) {
       return reply(400, { error: "Please accept the privacy notice before submitting your enquiry." });
     }
-    if (typeof body.website === "string" && body.website.trim()) {
+    if (typeof payload.website === "string" && payload.website.trim()) {
       return reply(200, { success: true });
     }
 
-    const full_name = String(body.full_name || "").trim();
-    const email = String(body.email || "").trim().toLowerCase();
-    const organization = String(body.organization || "").trim();
-    const message = String(body.message || "").trim();
-    const source_page = String(body.source_page || "");
+    const full_name = String(payload.full_name || "").trim();
+    const email = String(payload.email || "").trim().toLowerCase();
+    const organization = String(payload.organization || "").trim();
+    const message = String(payload.message || "").trim();
+    const source_page = String(payload.source_page || "");
 
     if (full_name.length < 2 || full_name.length > 120) {
       return reply(400, { error: "Enter a name between 2 and 120 characters." });
