@@ -15,18 +15,23 @@
 .brand img{display:block;width:190px;max-width:44vw;max-height:58px;object-fit:contain;object-position:left}.actions{align-items:center}.actions .primary{background:var(--blue);border-color:var(--blue);color:#fff}.toggle{display:none;min-width:44px;min-height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);font-size:21px;cursor:pointer}.primary-nav{border-top:1px solid #edf2f6;background:#fff}.navlinks{min-height:44px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}.navlinks a{padding:8px 10px;border-radius:8px;color:#40566c;font-size:10px;font-weight:800;white-space:nowrap}.navlinks a:hover{background:var(--pale);color:var(--deep)}#support-layout[hidden]{display:none!important}.gate[hidden]{display:none!important}.gate{margin:16px 0;padding:24px;border:1px solid var(--line);border-radius:14px;background:#fff}.gate h2{margin:0 0 8px;color:var(--navy);font-size:20px}.gate p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.7}@media(max-width:1000px){.toggle{display:inline-flex;align-items:center;justify-content:center}.primary-nav{display:none;position:absolute;left:0;right:0;top:100%;max-height:72dvh;overflow:auto;box-shadow:0 16px 30px #09243d24;z-index:5}.primary-nav.open{display:block}.navlinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0}.navlinks a{white-space:normal}}@media(max-width:620px){.brand img{width:155px}.actions .btn{display:none}.navlinks{grid-template-columns:1fr}}
 
 /* Keep the mobile menu control anchored to the far-right edge of the header. */
+/* Full-bleed header with a centered inner row: brand left, menu control at the viewport's right edge. */
+header{position:sticky;top:0;z-index:100;width:100vw;margin-left:calc(50% - 50vw);background:#fff;isolation:isolate}
+header > .shell.nav{width:min(1180px,calc(100% - 32px));max-width:1180px;margin:0 auto;padding:12px 0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:16px}
+header .brand{display:flex;align-items:center;flex:0 1 auto;min-width:0}
+header .brand img{display:block;width:190px;max-width:100%;max-height:58px;object-fit:contain;object-position:left center}
+header .actions{display:flex;flex:0 0 auto;flex-wrap:nowrap;align-items:center;justify-content:flex-end;margin-left:auto;gap:8px}
+header .toggle{display:none}
 @media(max-width:1000px){
- header > .shell.nav{width:100%;max-width:none;margin:0;padding:10px 0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:10px}
- header .brand{flex:0 1 auto;min-width:0}
- header .actions{display:flex;flex:0 0 auto;flex-wrap:nowrap;align-items:center;justify-content:flex-end;margin-left:auto;gap:0}
- header .actions .toggle{display:inline-flex;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 auto;align-items:center;justify-content:center}
-}
-@media(max-width:620px){
- header > .shell.nav{padding:9px 0;gap:8px}
+ header > .shell.nav{width:calc(100% - 32px);padding:9px 0;gap:10px}
  header .brand img{width:clamp(138px,43vw,160px);max-width:100%;max-height:52px}
+ header .actions{flex:0 0 auto;margin-left:auto;min-width:44px;gap:0}
  header .actions .btn{display:none}
- header .actions{margin-left:auto;min-width:44px}
- header .actions .toggle{margin-left:auto}
+ header .toggle{display:inline-flex;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;margin:0 0 0 auto;align-items:center;justify-content:center}
+}
+@media(max-width:360px){
+ header > .shell.nav{width:calc(100% - 24px)}
+ header .brand img{width:132px}
 }
 </style>
 
