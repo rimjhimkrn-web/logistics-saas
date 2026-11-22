@@ -78,7 +78,7 @@ The 33 legacy Driver Workspace routes are retained as compatibility entry points
 | `public/driver/trip-details.html` | Assignment Details |
 | `public/driver/trip-status.html` | Shipment Milestones |
 
-The existing `app/driver/index.html` is the legacy Driver Workspace landing page and maps to Driver Dashboard. It is a legacy landing route outside the 33 public legacy-route count above.
+The existing `app/driver/index.html` is the legacy Driver Workspace landing page and maps to Driver Dashboard. It is counted as the 33rd legacy Driver Workspace route (32 public routes plus this landing route).
 
 ## Additional legacy app route compatibility
 
@@ -104,4 +104,4 @@ They remain outside the 21-page Driver Ecosystem count.
 
 ## Verification note
 
-The 33 legacy public route files were checked on the staging branch and are compact redirect/compatibility pages pointing to canonical destinations (the login route points to Driver Sign In). The 18 canonical page files and three authentication routes exist on the staging branch. This is a repository-level inventory, not a substitute for browser, responsive-device, authenticated-RLS or live end-to-end verification.
+The 32 `public/driver/` legacy route files plus `app/driver/index.html` (33 Driver Workspace routes total) were checked on the staging branch and route to canonical destinations (the login route points to Driver Sign In). The 18 canonical page files and three authentication routes exist on the staging branch. This is a repository-level inventory, not a substitute for browser, responsive-device, authenticated-RLS or live end-to-end verification.
