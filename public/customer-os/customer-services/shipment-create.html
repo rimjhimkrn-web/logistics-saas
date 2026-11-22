@@ -181,8 +181,8 @@ async function initialize(){
   updateSummary();show('Your customer organization and active location catalogue are loaded. Complete the form to submit a shipment request.','success');
  }catch(error){$('session-state').textContent='Access needs attention';$('session-dot').classList.remove('ok');setFormEnabled(false);button.disabled=true;show(error?.message||'Customer booking setup could not be completed.','error');}
 }
-['goods','weight','mode','route-type'].forEach(id=>$(id).addEventListener('input',()=>{if(!submitting)clearRequestId();updateSummary()}));
-['organization','origin-country','destination-country','origin-location','destination-location','mode','route-type'].forEach(id=>$(id).addEventListener('change',()=>{if(!submitting)clearRequestId();updateSummary()}));
+['goods','weight','mode','route-type'].forEach(id=>$(id).addEventListener('input',updateSummary));
+['organization','origin-country','destination-country','origin-location','destination-location','mode','route-type'].forEach(id=>$(id).addEventListener('change',updateSummary));
 form.addEventListener('submit',async event=>{
  event.preventDefault();
  if(preview){show('Shipment requests are submitted from the secure, signed-in Customer Workspace. Open the workspace to continue.','info');return;}
