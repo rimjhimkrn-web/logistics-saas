@@ -32,15 +32,18 @@ header .brand img{display:block;width:190px;max-width:100%;max-height:58px;objec
 header .actions{display:flex;flex:0 0 auto;flex-wrap:nowrap;align-items:center;justify-content:flex-end;margin-left:auto;gap:8px}
 header .toggle{display:none}
 @media(max-width:1000px){
- header > .shell.nav{width:calc(100% - 32px);padding:9px 0;gap:10px}
+ /* Anchor the control to the header viewport, not the nested page shell. */
+ header > .shell.nav{position:relative;width:100%;max-width:none;margin:0;padding:9px 16px;min-height:62px;gap:10px;box-sizing:border-box}
+ header .brand{max-width:calc(100% - 68px)}
  header .brand img{width:clamp(138px,43vw,160px);max-width:100%;max-height:52px}
- header .actions{flex:0 0 auto;margin-left:auto;margin-right:8px;min-width:44px;gap:0}
+ header .actions{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;flex:0 0 44px;width:44px;min-width:44px;margin:0;padding:0;gap:0;justify-content:center;align-items:center}
  header .actions .btn{display:none}
- header .toggle{display:inline-flex;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;margin:0;align-items:center;justify-content:center}
+ header .toggle{display:inline-flex;position:static;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;margin:0;padding:0;align-items:center;justify-content:center}
 }
 @media(max-width:360px){
- header > .shell.nav{width:calc(100% - 24px)}
+ header > .shell.nav{padding-left:12px;padding-right:12px}
  header .brand img{width:132px}
+ header .actions{right:12px}
 }
 </style>
 
