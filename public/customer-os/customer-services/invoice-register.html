@@ -29,6 +29,12 @@ function render(){
 }
 $('search').addEventListener('input',render);$('status-filter').addEventListener('change',render);
 try{
+ if(location.hostname.endsWith('.krim-staging.pages.dev')||location.hostname==='krim-staging.pages.dev'){
+  ['metric-total','metric-open','metric-outstanding'].forEach(id=>$(id).textContent='—');
+  $('invoice-list').innerHTML='<div class="empty"><h3>Secure invoice register</h3><p>Sign-in and live customer data are intentionally not used in this public staging preview. No sample invoices, balances or payment records are displayed. In production, authorized members can sign in to view organization-scoped invoice records.</p><a class="btn" href="../index.html">Return to customer workspace →</a></div>';
+  say('Public preview: private invoice data is not loaded. Secure customer access remains enabled in production.','ok');
+  return;
+ }
  if(!client)throw new Error('KRIM backend configuration did not load. Refresh and try again.');
  const {data:auth,error:authError}=await client.auth.getSession();if(authError)throw authError;
  if(!auth?.session){location.href='../../../auth/login.html?next='+encodeURIComponent(location.pathname+location.search);return}
