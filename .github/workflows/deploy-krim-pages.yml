@@ -27,6 +27,21 @@ jobs:
           rsync -a --exclude='.git' --exclude='.github' --exclude='_site' ./ _site/
           mkdir -p _site/customer-os
           cp -a public/customer-os/. _site/customer-os/
+          # Repair logo URLs relative to each page's actual directory. The project
+          # is hosted below /logistics-saas/, so paths escaping to /assets fail.
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, re
+          root = Path("_site")
+          for page in (root / "customer-os").rglob("*.html"):
+              html = page.read_text(encoding="utf-8")
+              relative_logo = os.path.relpath(root / "assets" / "krim-primary.svg", page.parent)
+              pattern = r'((?:src|href)=["\'])[^"\']*krim-primary\.svg([^"\']*)(["\'])'
+              fixed = re.sub(pattern, lambda m: m.group(1) + relative_logo + m.group(2) + m.group(3), html)
+              if fixed != html:
+                  page.write_text(fixed, encoding="utf-8")
+          PY
+          test -f _site/assets/krim-primary.svg
           touch _site/.nojekyll
           test -f _site/index.html
           test -f _site/customer-os/INTEGRATION-MANIFEST.html
