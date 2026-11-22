@@ -4,16 +4,15 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#071a2e">
 <meta name="description" content="KRIM Driver OS — responsive driver dashboard for assignments, trip progress, readiness and support.">
-<title>Page 01 · Driver Dashboard | KRIM Logistics</title>
+<title>Driver Dashboard | KRIM Logistics</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../../../config.js"></script>
-<link rel="stylesheet" href="../../../assets/krim-global-brand.css?v=20261117-homepage-match-v2">
 <style>
 :root{--navy:#071a2e;--navy2:#0d2b48;--blue:#087fc1;--cyan:#70dff0;--ink:#142b43;--muted:#64778c;--line:#dce6ef;--paper:#f3f7fb;--white:#fff;--green:#087e5b;--amber:#946200;--red:#b42318;--shadow:0 12px 35px rgba(8,35,62,.07)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}
 .skip{position:absolute;left:-9999px;top:8px;background:#fff;padding:10px;z-index:99}.skip:focus{left:8px}
 
-.header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.header-inner{max-width:1440px;margin:auto;padding:12px clamp(14px,3vw,36px);display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;min-width:0}.brand img{width:clamp(145px,18vw,195px);height:auto;max-height:55px;object-fit:contain}.head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.identity{font-size:11px;color:var(--muted);max-width:260px;overflow-wrap:anywhere}.btn{border:1px solid var(--line);border-radius:10px;background:#fff;color:#203a54;padding:9px 13px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}
+.header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;padding-top:env(safe-area-inset-top)}.header-inner{width:100%;max-width:1440px;margin:auto;padding:10px clamp(12px,3vw,36px);min-height:70px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}.brand{display:flex;align-items:center;min-width:0;width:max-content;max-width:100%}.brand img{display:block;width:clamp(132px,17vw,190px);height:48px;max-width:100%;object-fit:contain;object-position:left center}.head-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;min-width:0;flex-wrap:nowrap}.menu-toggle{display:none!important;width:42px;height:42px;flex:none;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);align-items:center;justify-content:center;font-size:22px;font-weight:800;line-height:1}.nav-backdrop{display:none}.identity{font-size:11px;color:var(--muted);max-width:260px;overflow-wrap:anywhere}.btn{border:1px solid var(--line);border-radius:10px;background:#fff;color:#203a54;padding:9px 13px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}
 .layout{max-width:1440px;margin:0 auto;padding:24px clamp(14px,3vw,36px) 48px;display:grid;grid-template-columns:245px minmax(0,1fr);gap:22px;align-items:start}
 .sidebar{position:sticky;top:90px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}.side-title{font-size:10px;letter-spacing:.16em;font-weight:900;color:#71849a;padding:8px 10px}.side-link{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:#40566e;font-size:12px;font-weight:750}.side-link.active,.side-link:hover{background:#eaf5fb;color:#075c91}.side-icon{width:25px;height:25px;display:grid;place-items:center;background:#f0f5f9;border-radius:8px;font-size:13px}
 main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,#0a5a78 100%);border-radius:22px;padding:clamp(22px,4vw,38px);color:#fff;position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(6,30,51,.15)}.hero:after{content:"DRIVER";position:absolute;right:2%;top:-22px;font-size:clamp(70px,13vw,160px);font-weight:950;letter-spacing:-.09em;color:#fff;opacity:.055;pointer-events:none}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:900;color:#80e6f3}.hero h1{font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.045em;margin:12px 0}.hero p{max-width:760px;color:#c6d8e8;margin:0;line-height:1.8}.hero-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:22px}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid #42647e;border-radius:99px;padding:6px 10px;background:#0b2c48;font-size:10px;color:#e0f2fa}.hero-note{font-size:11px;color:#c5d9e9}
@@ -24,30 +23,20 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 .check-list{display:grid;gap:10px}.check{display:flex;gap:10px;align-items:flex-start;font-size:11px;color:#52677c}.check b{color:#243d56}.check-mark{width:23px;height:23px;flex:none;border-radius:8px;background:#edf4f8;display:grid;place-items:center;color:#28709a}
 .notice{background:#fff8e8;border:1px solid #f3e0b6;color:#775719;border-radius:12px;padding:12px;font-size:11px;line-height:1.7}.footer{text-align:center;color:#8292a3;font-size:10px;padding:16px}
 @media(max-width:1050px){.layout{grid-template-columns:205px minmax(0,1fr);gap:14px}.content-grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:720px){.layout{display:block;padding-top:14px}.sidebar{position:static;display:flex;overflow-x:auto;gap:4px;padding:8px;margin-bottom:14px;white-space:nowrap}.side-title{display:none}.side-link{flex:none;padding:9px}.side-icon{width:23px;height:23px}.header-inner{align-items:center}.identity{display:none}.hero{border-radius:17px}.panel{padding:15px}}
-@media(max-width:420px){.topline{font-size:9px}.head-actions .btn{padding:8px 9px;font-size:10px}.brand img{width:140px}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:24px}.quick-grid{grid-template-columns:1fr}.route{grid-template-columns:1fr}.hero-row{align-items:flex-start}}
+@media(max-width:720px){.header-inner{min-height:64px;padding:8px 12px;grid-template-columns:minmax(0,1fr) auto;gap:8px}.brand img{width:clamp(118px,42vw,158px);height:42px}.head-actions{gap:7px}.head-actions .identity{display:none}.head-actions>a.btn,.head-actions>#refresh{display:none}.menu-toggle{display:inline-flex!important}.layout{display:block;padding:14px 12px 36px}.sidebar{position:fixed;z-index:70;top:calc(64px + env(safe-area-inset-top) + 5px);right:12px;bottom:auto;width:min( min(88vw,320px), 320px);max-height:calc(100dvh - 86px - env(safe-area-inset-top));margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 38px rgba(7,26,46,.2);display:flex;flex-direction:column;align-items:stretch;gap:4px;overflow-y:auto;white-space:normal;transform:translateY(-8px) scale(.98);transform-origin:top right;opacity:0;visibility:hidden;pointer-events:none;transition:transform .18s ease,opacity .18s ease,visibility .18s ease}.sidebar.open{transform:translateY(0) scale(1);opacity:1;visibility:visible;pointer-events:auto}.side-title{display:block;padding:8px 10px}.side-link{flex:none;padding:12px}.side-icon{width:27px;height:27px}.nav-backdrop{display:block;position:fixed;inset:calc(64px + env(safe-area-inset-top)) 0 0;background:rgba(4,18,32,.22);z-index:60;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}.nav-backdrop.show{opacity:1;visibility:visible}.hero{border-radius:17px}.panel{padding:15px}}
+@media(max-width:420px){.head-actions .btn{padding:8px 9px;font-size:10px}.brand img{width:140px}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:24px}.quick-grid{grid-template-columns:1fr}.route{grid-template-columns:1fr}.hero-row{align-items:flex-start}}
 @media(min-width:1600px){.layout,.header-inner{max-width:1560px}}
 </style>
-<link rel="stylesheet" href="../../../assets/krim-global-brand.css?v=20261117-homepage-match-v2">
-<script defer src="../../../assets/krim-global-brand.js?v=20261117-master-lockup-v3"></script>
+
 </head>
 <body>
 <a class="skip" href="#main">Skip to dashboard</a>
-<div class="topline"><span>KRIM LOGISTICS · GLOBAL LOGISTICS OPERATING SYSTEM</span><span>DRIVER OS · PAGE 01 / 21</span></div>
 <header class="header"><div class="header-inner">
-<a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg" alt="KRIM Logistics"></a>
-<div class="head-actions"><span class="identity" id="identity">Checking secure session…</span><span class="btn" aria-label="Public preview">Preview mode · no sign-in</span><button class="btn dark" id="refresh" type="button">↻ Refresh</button><button class="btn" id="signout" type="button" hidden>Sign out</button></div>
+<a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg" alt="KRIM Logistics" width="190" height="60" loading="eager" decoding="async"></a>
+<div class="head-actions"><span class="identity" id="identity">Checking secure session…</span><a class="btn" href="../../../auth/driver-signin.html">Driver sign in</a><button class="btn dark" id="refresh" type="button">↻ Refresh</button><button class="btn" id="signout" type="button" hidden>Sign out</button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open driver navigation" aria-controls="driverNav" aria-expanded="false">☰</button></div>
 </div></header>
 <div class="layout">
-<nav class="sidebar" aria-label="Driver navigation">
-<div class="side-title">DRIVER OS</div>
-<a class="side-link active" href="page-01-driver-dashboard.html"><span class="side-icon">⌂</span>Dashboard</a>
-<a class="side-link" href="../module-01-assignment-inbox.html"><span class="side-icon">▤</span>Assignment inbox</a>
-<a class="side-link" href="../module-04-driver-vehicle-readiness.html"><span class="side-icon">✓</span>Readiness</a>
-<a class="side-link" href="../module-08-live-tracking.html"><span class="side-icon">⌖</span>Live tracking</a>
-<a class="side-link" href="../module-15-notifications-support.html"><span class="side-icon">◉</span>Notifications & support</a>
-<a class="side-link" href="../module-16-driver-profile-compliance.html"><span class="side-icon">♙</span>Profile & compliance</a>
-</nav>
+<div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div><nav class="sidebar" id="driverNav" aria-label="Driver navigation"><div class="side-title">DRIVER OS</div><a class="side-link active" href="page-01-driver-dashboard.html" aria-current="page"><span class="side-icon">⌂</span>Dashboard</a><a class="side-link" href="page-02-assignment-inbox.html"><span class="side-icon">▤</span>Assignment inbox</a><a class="side-link" href="page-03-assignment-details.html"><span class="side-icon">▣</span>Assignment details</a><a class="side-link" href="page-04-assignment-acceptance.html"><span class="side-icon">✓</span>Assignment acceptance</a><a class="side-link" href="page-05-driver-vehicle-readiness.html"><span class="side-icon">◈</span>Driver & vehicle readiness</a><a class="side-link" href="page-06-pickup-collection.html"><span class="side-icon">⇧</span>Pickup & collection</a><a class="side-link" href="page-07-shipment-milestones.html"><span class="side-icon">◷</span>Shipment milestones</a><a class="side-link" href="page-08-route-stop-management.html"><span class="side-icon">⌖</span>Route & stop management</a><a class="side-link" href="page-09-live-tracking.html"><span class="side-icon">◎</span>Live tracking</a><a class="side-link" href="page-10-exceptions-incidents.html"><span class="side-icon">⚑</span>Exceptions & incidents</a><a class="side-link" href="page-11-proof-of-delivery.html"><span class="side-icon">▣</span>Proof of delivery</a><a class="side-link" href="page-12-failed-delivery-returns.html"><span class="side-icon">↩</span>Failed delivery & returns</a><a class="side-link" href="page-13-delivery-history.html"><span class="side-icon">◷</span>Delivery history</a><a class="side-link" href="page-14-earnings-settlements.html"><span class="side-icon">₹</span>Earnings & settlements</a><a class="side-link" href="page-15-performance-quality.html"><span class="side-icon">★</span>Performance & quality</a><a class="side-link" href="page-16-notifications-support.html"><span class="side-icon">♧</span>Notifications & support</a><a class="side-link" href="page-17-driver-profile-compliance.html"><span class="side-icon">♙</span>Driver profile & compliance</a><a class="side-link" href="page-18-security-audit.html"><span class="side-icon">⛨</span>Security & audit</a></nav>
 <main id="main">
 <section class="hero">
 <div class="eyebrow">DRIVER OPERATIONS · SECURE WORKSPACE</div>
@@ -64,18 +53,18 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 </section>
 <div class="content-grid">
 <section class="panel">
-<div class="panel-head"><div><h2>My assignments</h2><p class="sub">Only assignments associated with your signed-in driver account are displayed.</p></div><a class="btn" href="../module-01-assignment-inbox.html">Open inbox →</a></div>
+<div class="panel-head"><div><h2>My assignments</h2><p class="sub">Only assignments associated with your signed-in driver account are displayed.</p></div><a class="btn" href="page-02-assignment-inbox.html">Open inbox →</a></div>
 <div id="assignments" class="assignment-list"><div class="empty">Your secure assignment list will appear here after access verification.</div></div>
 </section>
 <aside>
 <section class="panel"><h2>Quick access</h2><p class="sub">Open the workflow you need. Actions remain subject to server-side authorization.</p>
 <div class="quick-grid">
-<a class="quick" href="../module-02-assignment-details.html"><span class="quick-icon">▣</span><span><strong>Assignment details</strong><small>Route, cargo and dispatch</small></span></a>
-<a class="quick" href="../module-05-pickup-collection.html"><span class="quick-icon">⇧</span><span><strong>Pickup & collection</strong><small>Pickup workflow</small></span></a>
-<a class="quick" href="../module-06-shipment-milestones.html"><span class="quick-icon">◷</span><span><strong>Trip milestones</strong><small>Progress and events</small></span></a>
-<a class="quick" href="../module-09-exceptions-incidents.html"><span class="quick-icon">!</span><span><strong>Incidents</strong><small>Exceptions and delays</small></span></a>
-<a class="quick" href="../module-10-proof-of-delivery.html"><span class="quick-icon">▧</span><span><strong>Proof of delivery</strong><small>Delivery evidence</small></span></a>
-<a class="quick" href="../module-13-earnings-settlements.html"><span class="quick-icon">₹</span><span><strong>Earnings</strong><small>Statements and settlements</small></span></a>
+<a class="quick" href="page-03-assignment-details.html"><span class="quick-icon">▣</span><span><strong>Assignment details</strong><small>Route, cargo and dispatch</small></span></a>
+<a class="quick" href="page-06-pickup-collection.html"><span class="quick-icon">⇧</span><span><strong>Pickup & collection</strong><small>Pickup workflow</small></span></a>
+<a class="quick" href="page-07-shipment-milestones.html"><span class="quick-icon">◷</span><span><strong>Trip milestones</strong><small>Progress and events</small></span></a>
+<a class="quick" href="page-10-exceptions-incidents.html"><span class="quick-icon">!</span><span><strong>Incidents</strong><small>Exceptions and delays</small></span></a>
+<a class="quick" href="page-11-proof-of-delivery.html"><span class="quick-icon">▧</span><span><strong>Proof of delivery</strong><small>Delivery evidence</small></span></a>
+<a class="quick" href="page-14-earnings-settlements.html"><span class="quick-icon">₹</span><span><strong>Earnings</strong><small>Statements and settlements</small></span></a>
 </div></section>
 <section class="panel"><h2>Driver readiness</h2><p class="sub">Review these before accepting or executing a dispatch.</p>
 <div class="check-list">
@@ -87,22 +76,48 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 <section class="panel"><h2>Operational integrity</h2><div class="notice">This dashboard does not create assignments, simulate GPS, mark deliveries complete, or estimate earnings. Those actions require the corresponding verified backend workflow.</div></section>
 </aside>
 </div>
-<div class="footer">KRIM Logistics · Driver OS · Page 01 · Public visual preview · Production authentication required · Responsive across phones, tablets and desktops</div>
+<div class="footer">KRIM Logistics · Driver Operations</div>
 </main>
 </div>
 <script>
+(()=>{const btn=document.getElementById("menuToggle"),nav=document.getElementById("driverNav"),backdrop=document.getElementById("navBackdrop");if(!btn||!nav||!backdrop)return;const close=()=>{nav.classList.remove("open");backdrop.classList.remove("show");btn.setAttribute("aria-expanded","false");btn.setAttribute("aria-label","Open navigation menu");btn.textContent="☰";document.body.style.overflow="";};const open=()=>{nav.classList.add("open");backdrop.classList.add("show");btn.setAttribute("aria-expanded","true");btn.setAttribute("aria-label","Close navigation menu");btn.textContent="×";document.body.style.overflow="hidden";};btn.addEventListener("click",()=>nav.classList.contains("open")?close():open());backdrop.addEventListener("click",close);nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",close));document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});window.addEventListener("resize",()=>{if(window.innerWidth>720)close();});})();
 (()=>{'use strict';
-const $=id=>document.getElementById(id);
-$('identity').textContent='PUBLIC STAGING PREVIEW';
-$('signout').hidden=true;
-$('greeting').textContent='Your workday, clearly in view.';
-$('updated').textContent='Visual preview · no account required';
-$('status').textContent='Public staging preview. Authentication is intentionally disabled on this preview page. No private driver records or live operational data are loaded. Authentication and server-side authorization will be enforced on the production Driver OS.';
-$('status').className='status good';
-['allCount','openCount','activeCount','doneCount'].forEach(id=>$(id).textContent='—');
-$('assignments').innerHTML='<div class="empty"><b>Assignment preview</b><br>This public staging page contains no real driver assignments. In production, this area will show only assignments authorized for the signed-in driver account.</div>';
-$('refresh').addEventListener('click',()=>{$('updated').textContent='Preview refreshed · '+new Date().toLocaleTimeString();});
-$('signout').remove();
+const $=id=>document.getElementById(id);const db=window.KRIM_SUPABASE;let currentSession=null;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>{if(!v)return'Not scheduled';const d=new Date(v);return Number.isNaN(d.valueOf())?'—':d.toLocaleString();};
+function status(message,kind=''){const el=$('status');el.textContent=message;el.className='status'+(kind?' '+kind:'');}
+function render(rows){
+ const closed=x=>['delivered','cancelled','completed'].includes(String(x.status||'').toLowerCase());
+ const active=x=>['accepted','pickup_complete','in_transit','exception','arrived'].includes(String(x.status||'').toLowerCase());
+ $('allCount').textContent=rows.length;$('openCount').textContent=rows.filter(x=>!closed(x)).length;$('activeCount').textContent=rows.filter(active).length;$('doneCount').textContent=rows.filter(closed).length;
+ $('assignments').innerHTML=rows.length?rows.slice(0,8).map(x=>'<article class="assignment"><div class="assignment-top"><span class="assignment-title">'+esc(x.assignment_number||'Driver assignment')+'</span><span class="badge '+(active(x)?'active':closed(x)?'':'warn')+'">'+esc(String(x.status||'assigned').replaceAll('_',' '))+'</span></div><div class="route"><div class="route-box"><small>PICKUP</small><strong>'+esc(x.pickup_location||'Location pending')+'</strong></div><div class="route-box"><small>DELIVERY</small><strong>'+esc(x.delivery_location||'Location pending')+'</strong></div></div><div class="assignment-foot"><span>Pickup · '+esc(fmt(x.scheduled_pickup_at))+'</span><span>Delivery · '+esc(fmt(x.scheduled_delivery_at))+'</span></div><div style="margin-top:11px"><a class="btn" href="page-03-assignment-details.html">Open assignment workflow →</a></div></article>').join(''):'<div class="empty"><b>No assignments are currently available.</b><br>When an authorized carrier dispatcher assigns a trip to your driver account, it will appear here. Do not accept a trip through an external or unverified message.</div>';
+}
+async function load(){
+ $('refresh').disabled=true;$('updated').textContent='Checking secure connection…';
+ try{
+  if(!db){status('Secure connection is not configured. Please contact KRIM support; no operational data was loaded.','error');$('identity').textContent='CONNECTION NOT CONFIGURED';render([]);return;}
+  const s=await db.auth.getSession();if(s.error)throw s.error;currentSession=s.data.session;
+  if(!currentSession){$('identity').textContent='NOT SIGNED IN';$('signout').hidden=true;status('You are not signed in. This preview stays on this page—use Driver Sign In to access your protected driver workspace.');$('greeting').textContent='Welcome to KRIM Driver OS.';render([]);$('updated').textContent='No authenticated session';return;}
+  $('identity').textContent=currentSession.user.email||'Authenticated driver';$('signout').hidden=false;
+  const m=await db.from('krim_organization_members').select('organization_id,role,status').eq('user_id',currentSession.user.id).eq('status','active');
+  if(m.error)throw new Error('Driver membership could not be verified: '+m.error.message);
+  const drivers=(m.data||[]).filter(x=>String(x.role||'').toLowerCase()==='driver');
+  if(!drivers.length)throw new Error('No active driver membership is associated with this account. Ask your carrier administrator to provision access.');
+  if(drivers.length!==1)throw new Error('More than one active driver organization is linked to this account. Access is paused until the organization context is resolved.');
+  const a=await db.from('krim_driver_assignments').select('id,assignment_number,status,pickup_location,delivery_location,scheduled_pickup_at,scheduled_delivery_at,created_at,shipment_id').eq('user_id',currentSession.user.id).order('created_at',{ascending:false}).limit(100);
+  if(a.error)throw new Error('Assignments could not be loaded under your current permissions: '+a.error.message);
+  render(a.data||[]);
+  const profile=await db.from('krim_driver_profiles').select('full_name,verification_status,licence_expiry_date').eq('user_id',currentSession.user.id).maybeSingle();
+  const name=profile.data?.full_name||currentSession.user.user_metadata?.full_name;
+  if(name)$('greeting').textContent='Good to see you, '+String(name).split(' ')[0]+'.';
+  status('Secure session and active driver membership verified. Assignment data is scoped to your authenticated account.','good');
+  $('updated').textContent='Last refreshed · '+new Date().toLocaleTimeString();
+ }catch(e){console.error(e);status(e.message||'Driver dashboard could not load.','error');$('identity').textContent='ACCESS CHECK FAILED';render([]);$('updated').textContent='Data unavailable';}
+ finally{$('refresh').disabled=false;}
+}
+$('refresh').addEventListener('click',load);
+$('signout').addEventListener('click',async()=>{if(db){await db.auth.signOut();currentSession=null;}$('identity').textContent='SIGNED OUT';$('signout').hidden=true;status('You have signed out. This dashboard remains open; no redirect was performed.');render([]);});
+load();
 })();
-</script>>
+</script>
 </body></html>
