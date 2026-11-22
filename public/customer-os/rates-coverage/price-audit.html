@@ -87,7 +87,7 @@ if(tv===''||!Number.isFinite(t)||t<0){reset('Enter a non-negative review toleran
 const delta=r-q,pct=q===0?(delta===0?0:null):(delta/q)*100;
 $('quoted-out').textContent=money(q,c);$('recalc-out').textContent=money(r,c);$('variance-out').textContent=(delta>0?'+':'')+money(delta,c);
 const abs=Math.abs(delta);let label,detail;if(abs<=t){label='Within entered tolerance';detail='The absolute difference is within the tolerance you entered. This does not establish that either source amount is correct.'}else{label='Review difference';detail='The absolute difference exceeds the entered tolerance. Check line items, version, surcharges, tax basis, currency and approvals with the quote issuer.'}
-$('outcome').textContent=label;$('explanation').textContent='Reference '+ref+' · '+version+'. '+detail+(pct===null?'':' Percentage variance: '+pct.toFixed(3)+'% relative to the quoted total.')+' This comparison remains in this browser session and is not saved or submitted.'});
+$('outcome').textContent=label;$('explanation').textContent='Reference '+ref+' · '+version+'. '+detail+(pct===null?'':' Percentage variance: '+pct.toFixed(3)+'% relative to the quoted total.')+' This comparison is temporary in this browser session and is not saved or submitted.'});
 $('clear').addEventListener('click',()=>{['reference','version','currency','quoted','recalculated','basis'].forEach(id=>$(id).value='');$('tolerance').value='0';reset('Comparison cleared. No information was saved or submitted.')});
 $('year').textContent=new Date().getFullYear();
 })();
