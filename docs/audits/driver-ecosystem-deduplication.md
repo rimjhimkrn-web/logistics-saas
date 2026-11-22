@@ -80,6 +80,10 @@ The 33 legacy Driver Workspace routes are retained as compatibility entry points
 
 The existing `app/driver/index.html` is the legacy Driver Workspace landing page and maps to Driver Dashboard. It is a legacy landing route outside the 33 public legacy-route count above.
 
+## Additional legacy app route compatibility
+
+The repository also contained the legacy `app/driver/index.html` dashboard and 17 `app/driver/module-*.html` module routes. These are older duplicate entry points outside the supplied 54-candidate count. On the staging branch, the dashboard and all 17 module routes now redirect to the corresponding canonical page 01–18, preserving the old paths while preventing a second, divergent Driver OS implementation.
+
 ## Explicit exclusions
 
 These are adjacent partner/admin capabilities, not driver-owned workspace pages:
