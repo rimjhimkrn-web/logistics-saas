@@ -36,7 +36,7 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 <div class="topline"><span>KRIM LOGISTICS · GLOBAL LOGISTICS OPERATING SYSTEM</span><span>DRIVER OS · PAGE 01 / 21</span></div>
 <header class="header"><div class="header-inner">
 <a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg" alt="KRIM Logistics"></a>
-<div class="head-actions"><span class="identity" id="identity">Checking secure session…</span><a class="btn" href="../../../auth/driver-signin.html">Driver sign in</a><button class="btn dark" id="refresh" type="button">↻ Refresh</button><button class="btn" id="signout" type="button" hidden>Sign out</button></div>
+<div class="head-actions"><span class="identity" id="identity">Checking secure session…</span><span class="btn" aria-label="Public preview">Preview mode · no sign-in</span><button class="btn dark" id="refresh" type="button">↻ Refresh</button><button class="btn" id="signout" type="button" hidden>Sign out</button></div>
 </div></header>
 <div class="layout">
 <nav class="sidebar" aria-label="Driver navigation">
@@ -87,47 +87,22 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 <section class="panel"><h2>Operational integrity</h2><div class="notice">This dashboard does not create assignments, simulate GPS, mark deliveries complete, or estimate earnings. Those actions require the corresponding verified backend workflow.</div></section>
 </aside>
 </div>
-<div class="footer">KRIM Logistics · Driver OS · Page 01 · Secure operational data · Responsive across phones, tablets and desktops</div>
+<div class="footer">KRIM Logistics · Driver OS · Page 01 · Public visual preview · Production authentication required · Responsive across phones, tablets and desktops</div>
 </main>
 </div>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id);const db=window.KRIM_SUPABASE;let currentSession=null;
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt=v=>{if(!v)return'Not scheduled';const d=new Date(v);return Number.isNaN(d.valueOf())?'—':d.toLocaleString();};
-function status(message,kind=''){const el=$('status');el.textContent=message;el.className='status'+(kind?' '+kind:'');}
-function render(rows){
- const closed=x=>['delivered','cancelled','completed'].includes(String(x.status||'').toLowerCase());
- const active=x=>['accepted','pickup_complete','in_transit','exception','arrived'].includes(String(x.status||'').toLowerCase());
- $('allCount').textContent=rows.length;$('openCount').textContent=rows.filter(x=>!closed(x)).length;$('activeCount').textContent=rows.filter(active).length;$('doneCount').textContent=rows.filter(closed).length;
- $('assignments').innerHTML=rows.length?rows.slice(0,8).map(x=>'<article class="assignment"><div class="assignment-top"><span class="assignment-title">'+esc(x.assignment_number||'Driver assignment')+'</span><span class="badge '+(active(x)?'active':closed(x)?'':'warn')+'">'+esc(String(x.status||'assigned').replaceAll('_',' '))+'</span></div><div class="route"><div class="route-box"><small>PICKUP</small><strong>'+esc(x.pickup_location||'Location pending')+'</strong></div><div class="route-box"><small>DELIVERY</small><strong>'+esc(x.delivery_location||'Location pending')+'</strong></div></div><div class="assignment-foot"><span>Pickup · '+esc(fmt(x.scheduled_pickup_at))+'</span><span>Delivery · '+esc(fmt(x.scheduled_delivery_at))+'</span></div><div style="margin-top:11px"><a class="btn" href="../module-02-assignment-details.html">Open assignment workflow →</a></div></article>').join(''):'<div class="empty"><b>No assignments are currently available.</b><br>When an authorized carrier dispatcher assigns a trip to your driver account, it will appear here. Do not accept a trip through an external or unverified message.</div>';
-}
-async function load(){
- $('refresh').disabled=true;$('updated').textContent='Checking secure connection…';
- try{
-  if(!db){status('Secure connection is not configured. Please contact KRIM support; no operational data was loaded.','error');$('identity').textContent='CONNECTION NOT CONFIGURED';render([]);return;}
-  const s=await db.auth.getSession();if(s.error)throw s.error;currentSession=s.data.session;
-  if(!currentSession){$('identity').textContent='NOT SIGNED IN';$('signout').hidden=true;status('You are not signed in. This preview stays on this page—use Driver Sign In to access your protected driver workspace.');$('greeting').textContent='Welcome to KRIM Driver OS.';render([]);$('updated').textContent='No authenticated session';return;}
-  $('identity').textContent=currentSession.user.email||'Authenticated driver';$('signout').hidden=false;
-  const m=await db.from('krim_organization_members').select('organization_id,role,status').eq('user_id',currentSession.user.id).eq('status','active');
-  if(m.error)throw new Error('Driver membership could not be verified: '+m.error.message);
-  const drivers=(m.data||[]).filter(x=>String(x.role||'').toLowerCase()==='driver');
-  if(!drivers.length)throw new Error('No active driver membership is associated with this account. Ask your carrier administrator to provision access.');
-  if(drivers.length!==1)throw new Error('More than one active driver organization is linked to this account. Access is paused until the organization context is resolved.');
-  const a=await db.from('krim_driver_assignments').select('id,assignment_number,status,pickup_location,delivery_location,scheduled_pickup_at,scheduled_delivery_at,created_at,shipment_id').eq('user_id',currentSession.user.id).order('created_at',{ascending:false}).limit(100);
-  if(a.error)throw new Error('Assignments could not be loaded under your current permissions: '+a.error.message);
-  render(a.data||[]);
-  const profile=await db.from('krim_driver_profiles').select('full_name,verification_status,licence_expiry_date').eq('user_id',currentSession.user.id).maybeSingle();
-  const name=profile.data?.full_name||currentSession.user.user_metadata?.full_name;
-  if(name)$('greeting').textContent='Good to see you, '+String(name).split(' ')[0]+'.';
-  status('Secure session and active driver membership verified. Assignment data is scoped to your authenticated account.','good');
-  $('updated').textContent='Last refreshed · '+new Date().toLocaleTimeString();
- }catch(e){console.error(e);status(e.message||'Driver dashboard could not load.','error');$('identity').textContent='ACCESS CHECK FAILED';render([]);$('updated').textContent='Data unavailable';}
- finally{$('refresh').disabled=false;}
-}
-$('refresh').addEventListener('click',load);
-$('signout').addEventListener('click',async()=>{if(db){await db.auth.signOut();currentSession=null;}$('identity').textContent='SIGNED OUT';$('signout').hidden=true;status('You have signed out. This dashboard remains open; no redirect was performed.');render([]);});
-load();
+const $=id=>document.getElementById(id);
+$('identity').textContent='PUBLIC STAGING PREVIEW';
+$('signout').hidden=true;
+$('greeting').textContent='Your workday, clearly in view.';
+$('updated').textContent='Visual preview · no account required';
+$('status').textContent='Public staging preview. Authentication is intentionally disabled on this preview page. No private driver records or live operational data are loaded. Authentication and server-side authorization will be enforced on the production Driver OS.';
+$('status').className='status good';
+['allCount','openCount','activeCount','doneCount'].forEach(id=>$(id).textContent='—');
+$('assignments').innerHTML='<div class="empty"><b>Assignment preview</b><br>This public staging page contains no real driver assignments. In production, this area will show only assignments authorized for the signed-in driver account.</div>';
+$('refresh').addEventListener('click',()=>{$('updated').textContent='Preview refreshed · '+new Date().toLocaleTimeString();});
+$('signout').remove();
 })();
-</script>
+</script>>
 </body></html>
