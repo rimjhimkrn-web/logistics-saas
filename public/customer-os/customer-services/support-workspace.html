@@ -24,26 +24,24 @@ header .brand img.krim-official-brand-logo{display:block!important;visibility:vi
 @media(max-width:360px){
  header .brand img.krim-official-brand-logo{width:146px!important;max-width:146px!important}
 }
-/* Full-bleed header with a centered inner row: brand left, menu control at the viewport's right edge. */
-header{position:sticky;top:0;z-index:100;width:100vw;margin-left:calc(50% - 50vw);background:#fff;isolation:isolate}
-header > .shell.nav{width:min(1180px,calc(100% - 32px));max-width:1180px;margin:0 auto;padding:12px 0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:16px}
+/* Keep the header inside the page viewport; never offset a 100vw header from a nested shell. */
+header{position:sticky;top:0;z-index:100;width:100%;margin:0;background:#fff;isolation:isolate}
+header > .shell.nav{width:100%;max-width:none;margin:0;padding:12px 0;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:12px}
 header .brand{display:flex;align-items:center;flex:0 1 auto;min-width:0}
 header .brand img{display:block;width:190px;max-width:100%;max-height:58px;object-fit:contain;object-position:left center}
 header .actions{display:flex;flex:0 0 auto;flex-wrap:nowrap;align-items:center;justify-content:flex-end;margin-left:auto;gap:8px}
 header .toggle{display:none}
 @media(max-width:1000px){
- /* Anchor the control to the header viewport, not the nested page shell. */
- header > .shell.nav{position:relative;width:100%;max-width:none;margin:0;padding:9px 16px;min-height:62px;gap:10px;box-sizing:border-box}
- header .brand{max-width:calc(100% - 68px)}
- header .brand img{width:clamp(138px,43vw,160px);max-width:100%;max-height:52px}
- header .actions{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;flex:0 0 44px;width:44px;min-width:44px;margin:0;padding:0;gap:0;justify-content:center;align-items:center}
+ header > .shell.nav{position:relative;width:100%;max-width:none;margin:0;padding:9px 12px;min-height:62px;gap:8px;box-sizing:border-box}
+ header .brand{max-width:calc(100% - 56px);flex:0 1 auto}
+ header .brand img.krim-official-brand-logo{width:clamp(132px,42vw,158px)!important;max-width:100%!important;max-height:50px!important}
+ header .actions{position:static;top:auto;right:auto;transform:none;display:flex;flex:0 0 44px;width:44px;min-width:44px;margin:0 0 0 auto;padding:0;gap:0;justify-content:center;align-items:center}
  header .actions .btn{display:none}
  header .toggle{display:inline-flex;position:static;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;margin:0;padding:0;align-items:center;justify-content:center}
 }
 @media(max-width:360px){
- header > .shell.nav{padding-left:12px;padding-right:12px}
- header .brand img{width:132px}
- header .actions{right:12px}
+ header > .shell.nav{padding-left:10px;padding-right:10px}
+ header .brand img.krim-official-brand-logo{width:128px!important;max-width:100%!important}
 }
 </style>
 
