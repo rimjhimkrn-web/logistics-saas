@@ -72,7 +72,7 @@ th{font-size:10px}td{font-size:12px}
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
 <script defer src="../assets/customer-os-globalization.js"></script></head>
 <body>
-<div class="topline"><span><strong>KRIM LOGISTICS</strong> · CUSTOMER CARE</span><span id="session-state">SERVICE DESK</span></div>
+
 <header class="header"><div class="headinner"><a class="brand" href="/logistics-saas/app/customer/index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="headlinks">☰</button><nav class="headlinks" id="headlinks" aria-label="Customer navigation"><a class="btn" href="/logistics-saas/app/customer/index.html">Customer workspace</a><a class="btn" href="shipment-list.html">My shipments</a><a class="btn" href="support-workspace.html">Support desk</a><button class="btn primary" id="refresh-btn" type="button">↻ Refresh</button></nav></div></header>
 <main class="shell">
 <section class="hero"><div><div class="eyebrow">CUSTOMER SERVICE · SHIPMENT ASSISTANCE</div><h1>Shipper Support & Claims</h1><p>One connected workspace to raise service requests, follow support cases, review shipment claims and share feedback with the responsible logistics team.</p></div><div class="heroaside"><b id="identity">Your service workspace</b><span>Support cases · Claims visibility · Service feedback</span></div></section>
@@ -103,7 +103,7 @@ const date=v=>{if(!v)return "Not recorded";const d=new Date(v);return Number.isN
 const statusClass=v=>{const s=String(v||"").toLowerCase();if(["resolved","closed","approved","verified","complete","completed"].includes(s))return "good";if(["rejected","failed","cancelled","overdue"].includes(s))return "bad";if(["open","submitted","pending","in_progress","under_review","investigating","awaiting_customer"].includes(s))return "warn";return ""};
 const badge=v=>'<span class="badge '+statusClass(v)+'">'+esc(val(v))+'</span>';
 const money=(amount,currency)=>{const n=Number(amount),c=String(currency||"").toUpperCase();if(!Number.isFinite(n))return "Not recorded";if(!/^[A-Z]{3}$/.test(c))return "Currency not recorded · "+n.toLocaleString();try{return new Intl.NumberFormat(undefined,{style:"currency",currency:c,currencyDisplay:"code"}).format(n)}catch(_){return c+" "+n.toLocaleString()}};
-function setStatus(message,ok){$("status-text").textContent=message;$("status-dot").className="dot"+(ok?" good":"");$("session-state").textContent=ok?"AUTHENTICATED · RECORDS LOADED":"AUTHENTICATED · REVIEW REQUIRED"}
+function setStatus(message,ok){$("status-text").textContent=message;$("status-dot").className="dot"+(ok?" good":"")}
 function notice(message,kind){$("page-notice").textContent=message;$("page-notice").className="notice"+(kind?" "+kind:"")}
 function showError(message){$("access-notice").textContent=message;$("access-notice").classList.remove("hide")}
 function switchView(name){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("hide",v.id!=="view-"+name));document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.view===name))}
