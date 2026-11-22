@@ -58,6 +58,7 @@ async function loadShipments(){
  for(const s of shipments){const label=(s.shipment_number||('Shipment #'+s.id))+' · '+(s.origin_place_label||'Origin pending')+' → '+(s.destination_place_label||'Destination pending');select.add(new Option(label,String(s.id)))}
  select.disabled=false;
 }
+// Customer support tickets bind to the signed-in user and active organization; database RLS remains authoritative.
 async function loadTickets(){
  const ids=organizations.map(o=>Number(o.id)).filter(Number.isSafeInteger);
  if(!ids.length){$('tickets').innerHTML='<div class="empty"><h3>No customer organization</h3><p>Join or activate a customer organization before creating a support ticket.</p></div>';return}
@@ -87,6 +88,8 @@ try{
   if(shipmentId&&!shipments.some(s=>Number(s.id)===shipmentId)){say('The selected shipment is not in the current organization. Refresh and select it again.','error');return}
   button.disabled=true;button.textContent='Submitting securely…';
   try{
+   // Customer support page creates saved support tickets only for the signed-in user and selected active organization.
+   // Customer support verifies active organization membership before ticket creation through membership lookup and database RLS.
    const payload={user_id:session.user.id,krim_organization_id:Number(org.id),krim_shipment_id:shipmentId,category,subject,message};
    const {data,error}=await client.from('support_tickets').insert(payload).select('id,ticket_number,status').single();
    if(error)throw error;
