@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071a2c"><meta name="robots" content="noindex,nofollow">
+<title>Customs & Trade Dashboard | KRIM Logistics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../config.js"></script>
+<link rel="stylesheet" href="../../core/krim-global-interface.css">
+<link rel="stylesheet" href="../../assets/krim-global-brand.css">
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#142b43;background:#f3f7fb;--navy:#061a2d;--blue:#087fc1;--line:#dce6ef;--muted:#687b8e}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f7fbff,#edf4fa);min-height:100vh}.bar{background:#061a2d;color:#d8e8f5;padding:10px clamp(16px,4vw,48px);font-size:11px;letter-spacing:.08em}.nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;padding:12px clamp(16px,4vw,48px)}.navin{max-width:1360px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand img{width:210px;height:54px;object-fit:contain;object-position:left center}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid #cad8e5;background:#fff;color:#12304c;padding:10px 14px;border-radius:9px;font-weight:750;font-size:12px;text-decoration:none;cursor:pointer}.btn.primary{background:#087fc1;color:#fff;border-color:#087fc1}.wrap{max-width:1360px;margin:auto;padding:28px clamp(16px,4vw,48px)}.hero{background:linear-gradient(115deg,#061a2d,#07395e 65%,#087d91);color:#fff;border-radius:22px;padding:clamp(24px,4vw,44px);position:relative;overflow:hidden}.eyebrow{font-size:10px;letter-spacing:.17em;text-transform:uppercase;font-weight:850;color:#8ee1df}.hero h1{font-size:clamp(30px,5vw,48px);letter-spacing:-.04em;margin:12px 0}.hero p{max-width:760px;color:#d4e6f3;line-height:1.7;font-size:14px;margin:0}.guard{margin-top:16px;display:inline-flex;padding:8px 11px;border:1px solid #ffffff45;border-radius:30px;font-size:10px;font-weight:800;color:#e8f8ff}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:18px 0}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 10px 28px #102c470a;min-width:0}.label{font-size:11px;color:var(--muted);font-weight:700}.value{font-size:30px;font-weight:900;color:#0b2b49;margin-top:9px}.detail{font-size:10px;color:#718397;margin-top:4px}.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.8fr);gap:15px}.section{margin:22px 0 12px}.section h2{font-size:19px;color:#0b2945;margin:0}.section p{font-size:12px;color:var(--muted);margin:5px 0}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:14px;min-width:0}.panel h3{font-size:14px;color:#102e4b;margin:0}.panel p{font-size:11px;color:var(--muted);line-height:1.6}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:540px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf1f5;font-size:11px}th{background:#f4f8fb;color:#708196;font-size:9px;text-transform:uppercase;letter-spacing:.08em}td{color:#425b72}.empty{padding:20px;text-align:center;color:#718397;line-height:1.6}.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile{border:1px solid var(--line);border-radius:12px;padding:14px;text-decoration:none;color:#153451;background:#fbfdff}.tile strong{display:block;font-size:12px}.tile span{display:block;color:#73859a;font-size:10px;line-height:1.5;margin-top:5px}.notice{background:#eef6ff;border:1px solid #cfe0f4;border-radius:12px;padding:14px;color:#23496d;font-size:11px;line-height:1.6;margin-top:15px}.gate{max-width:620px;margin:55px auto;padding:28px;background:#fff;border:1px solid var(--line);border-radius:18px}.gate h1{color:#102d49}.gate p{color:#667b90;line-height:1.6;font-size:13px}.hidden{display:none!important}footer{padding:20px;text-align:center;color:#73859a;font-size:10px;border-top:1px solid var(--line)}@media(max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}}@media(max-width:560px){.navin{align-items:flex-start}.brand img{width:165px;height:45px}.hero{border-radius:16px}.stats{gap:8px}.card{padding:13px}.value{font-size:25px}.panel{padding:14px}.tiles{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bar">KRIM LOGISTICS &nbsp;·&nbsp; GLOBAL LOGISTICS OPERATING SYSTEM</div>
+<nav class="nav"><div class="navin"><a class="brand" href="../../index.html"><img src="../../assets/krim-primary.svg" alt="KRIM Logistics"></a><div class="actions"><a class="btn" href="../../index.html">Platform home</a><button class="btn" id="signout" type="button">Sign out</button></div></div></nav>
+<section id="gate" class="gate" aria-live="polite"><div class="eyebrow">Secure customs workspace</div><h1 id="gateTitle">Verifying access</h1><p id="gateMessage">Checking your authenticated session, organization membership and customs permissions.</p><a class="btn primary" href="../../auth/login.html?role=customs">Sign in</a></section>
+<main id="app" class="wrap hidden">
+<section class="hero"><div class="eyebrow">Cross-border operations · Customs & trade</div><h1>Customs & Trade Dashboard</h1><p>A controlled operational view of customs declarations, broker activity and trade-document readiness. KRIM coordinates workflow and evidence; customs authorities and duly authorized professionals retain regulatory decision-making.</p><span class="guard" id="sessionStatus">SECURE SESSION VERIFIED</span></section>
+<section class="stats" aria-label="Customs overview">
+<article class="card"><div class="label">Visible customs records</div><div class="value" id="total">—</div><div class="detail">Records permitted by your access policies</div></article>
+<article class="card"><div class="label">Pending / in review</div><div class="value" id="pending">—</div><div class="detail">Based on recorded workflow status</div></article>
+<article class="card"><div class="label">System-marked cleared</div><div class="value" id="cleared">—</div><div class="detail">Not independent proof of authority release</div></article>
+<article class="card"><div class="label">Open exceptions</div><div class="value" id="exceptions">—</div><div class="detail">Visible unresolved operational exceptions</div></article>
+</section>
+<div class="section"><h2>Operational overview</h2><p>Counts are shown only after successful data retrieval. Failed or incomplete checks are never represented as zero or as a compliance clearance.</p></div>
+<div class="layout"><div>
+<section class="panel"><h3>Customs declaration queue</h3><p>Latest customs records visible to your organization.</p><div class="tablewrap"><table><thead><tr><th>Shipment</th><th>Declaration reference</th><th>Type</th><th>Status</th><th>Updated</th></tr></thead><tbody id="queue"><tr><td colspan="5" class="empty">Loading permitted records…</td></tr></tbody></table></div></section>
+<section class="panel"><h3>Broker assignments</h3><p>Assignment status from the customs broker workflow.</p><div class="tablewrap"><table><thead><tr><th>Shipment</th><th>Broker organization</th><th>Assignment status</th><th>Assigned</th></tr></thead><tbody id="brokers"><tr><td colspan="4" class="empty">Loading assignments…</td></tr></tbody></table></div></section>
+</div><aside>
+<section class="panel" id="planned-pages"><h3>Customs & trade workspaces</h3><p>All 13 reviewed workflow interfaces are available from this protected dashboard. Each destination repeats the AAL2, active customs organization and compliance.view access checks.</p><div class="tiles">
+<a class="tile" href="./workflows/index.html"><strong>1 · Customs & Trade Dashboard</strong><span>Overview and navigation for all 13 modules</span></a>
+<a class="tile" href="./workflows/cases.html"><strong>2 · Case Management</strong><span>Case lifecycle, shipment binding and exceptions</span></a>
+<a class="tile" href="./workflows/brokers.html"><strong>3 · Broker Management & Assignments</strong><span>Broker directory and appointment controls</span></a>
+<a class="tile" href="./workflows/broker-licence.html"><strong>4 · Broker Licence & Verification</strong><span>Licence evidence, scope and independent review</span></a>
+<a class="tile" href="./workflows/documents.html"><strong>5 · Documentation & Evidence</strong><span>Document provenance, versions and review</span></a>
+<a class="tile" href="./workflows/declarations.html"><strong>6 · Declaration Management</strong><span>Preparation, submission evidence and authority responses</span></a>
+<a class="tile" href="./workflows/classification.html"><strong>7 · HS Code & Tariff Classification</strong><span>Jurisdiction-aware classification research</span></a>
+<a class="tile" href="./workflows/imports.html"><strong>8 · Import Management</strong><span>Inbound readiness and release hand-off</span></a>
+<a class="tile" href="./workflows/exports.html"><strong>9 · Export Management</strong><span>Export readiness, controls and departure evidence</span></a>
+<a class="tile" href="./workflows/sanctions.html"><strong>10 · Sanctions & Export Controls</strong><span>Party, goods, destination and end-use review</span></a>
+<a class="tile" href="./workflows/free-trade-zones.html"><strong>11 · Free Trade Zone Management</strong><span>Zone, inventory and movement controls</span></a>
+<a class="tile" href="./workflows/jurisdiction-requirements.html"><strong>12 · Jurisdiction Requirements & Single Window</strong><span>Official sources, effective dates and filing channels</span></a>
+<a class="tile" href="./workflows/audit-ledger.html"><strong>13 · Audit Ledger & Compliance History</strong><span>Event provenance, access history and audit controls</span></a>
+<a class="tile" href="./index.html"><strong>Existing Customs Workspace</strong><span>Current operational records and evidence workflows</span></a>
+</div><div class="notice"><strong>Regulatory and operational boundary</strong><br>These workflow interfaces currently contain no connected live customs records or authority integrations. Regulatory requirements are not yet legally approved. Missing jurisdiction data, unavailable sources or empty checks remain unverified—not clear. No customs release, licence approval, screening clearance or authority decision is asserted.</div></section>
+<section class="panel"><h3>Data refresh</h3><p id="refreshStatus">Waiting for secure session verification.</p><button class="btn primary" id="refresh" type="button">Refresh records</button></section>
+</aside></div>
+</main>
+<footer>KRIM Logistics · Knowledge · Reliability · Integration · Movement</footer>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),fail=(title,message)=>{$('gateTitle').textContent=title;$('gateMessage').textContent=message;$('gate').classList.remove('hidden');$('app').classList.add('hidden')};
+const db=window.KRIM_SUPABASE||window.supabaseClient;let signedIn=false;
+if(!db){fail('Workspace unavailable','The shared KRIM Supabase client is not configured. No customs data has been loaded.');return}
+const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date=v=>v?new Date(v).toLocaleString():'—';
+async function load(){if(!signedIn)return;$('refreshStatus').textContent='Refreshing permitted records…';
+const [c,e,b]=await Promise.all([
+db.from('krim_shipment_customs').select('id,shipment_id,customs_type,declaration_reference,status,created_at,updated_at').order('created_at',{ascending:false}).limit(50),
+db.from('krim_exceptions').select('id,status,shipment_id,detected_at').order('detected_at',{ascending:false}).limit(100),
+db.from('krim_customs_broker_assignments').select('id,shipment_id,broker_organization_id,assignment_status,assigned_at').order('assigned_at',{ascending:false}).limit(50)
+]);
+const errors=[c.error,e.error,b.error];if(errors.some(Boolean)){['total','pending','cleared','exceptions'].forEach(id=>$(id).textContent='!');$('queue').innerHTML='<tr><td colspan="5" class="empty">Customs records could not be fully retrieved. Counts withheld; check database policies and retry.</td></tr>';$('brokers').innerHTML='<tr><td colspan="4" class="empty">Broker assignments unavailable.</td></tr>';$('refreshStatus').textContent='Incomplete data response. No zero or clearance status inferred.';return}
+const rows=c.data||[],holds=(e.data||[]).filter(x=>!/(resolved|closed|released)/i.test(x.status||'')),assignments=b.data||[];
+$('total').textContent=rows.length;$('pending').textContent=rows.filter(x=>/(pending|submitted|review|processing|draft)/i.test(x.status||'')).length;$('cleared').textContent=rows.filter(x=>/clear/i.test(x.status||'')).length;$('exceptions').textContent=holds.length;
+$('queue').innerHTML=rows.length?rows.map(x=>'<tr><td>#'+esc(x.shipment_id)+'</td><td>'+esc(x.declaration_reference)+'</td><td>'+esc(x.customs_type)+'</td><td>'+esc(x.status)+'</td><td>'+esc(date(x.updated_at||x.created_at))+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">No customs records are visible under the current access policies. This does not establish regulatory compliance.</td></tr>';
+$('brokers').innerHTML=assignments.length?assignments.map(x=>'<tr><td>#'+esc(x.shipment_id)+'</td><td>Organization #'+esc(x.broker_organization_id)+'</td><td>'+esc(x.assignment_status)+'</td><td>'+esc(date(x.assigned_at))+'</td></tr>').join(''):'<tr><td colspan="4" class="empty">No broker assignments are visible.</td></tr>';
+$('refreshStatus').textContent='Last refreshed '+new Date().toLocaleString()+'. All counts reflect records visible to this session only.'}
+(async()=>{try{const {data:{session},error}=await db.auth.getSession();if(error)throw error;if(!session){fail('Sign-in required','Open the customs workspace after signing in with an authorized account.');return}
+const {data:a,error:ae}=await db.auth.mfa.getAuthenticatorAssuranceLevel();if(ae)throw ae;if(a.currentLevel!=='aal2'){fail('Multi-factor authentication required','This workspace requires an AAL2 session. Complete authenticator MFA, then reopen the dashboard.');return}
+const m=await db.from('krim_organization_members').select('organization_id,krim_organizations(organization_type,status)').eq('user_id',session.user.id).eq('status','active');if(m.error)throw Error('Organization membership could not be verified.');
+const orgs=(m.data||[]).filter(x=>String(x.krim_organizations?.organization_type||'').toLowerCase()==='customs'&&String(x.krim_organizations?.status||'').toLowerCase()==='active');if(!orgs.length){fail('Customs organization access required','No active customs organization membership was found for this account. A direct link does not grant access.');return}
+const perms=await Promise.all(orgs.map(x=>db.rpc('krim_has_permission',{p_user_id:session.user.id,p_organization_id:x.organization_id,p_permission_code:'compliance.view'})));if(perms.some(x=>x.error))throw Error('Customs permissions could not be verified. Access remains blocked.');if(!perms.some(x=>x.data===true)){fail('Customs permission required','Your organization membership does not include compliance.view. Ask an authorized organization administrator.');return}
+signedIn=true;$('gate').classList.add('hidden');$('app').classList.remove('hidden');await load()
+}catch(err){fail('Access verification failed',err.message||'Please sign in again.')} })();
+$('refresh').addEventListener('click',load);$('signout').addEventListener('click',async()=>{await db.auth.signOut();location.href='../../auth/login.html'});
+})();
+</script>
+</body></html>

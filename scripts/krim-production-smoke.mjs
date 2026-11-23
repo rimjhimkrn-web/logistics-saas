@@ -956,16 +956,12 @@ const phaseEightList = existsSync("public/customer-os/customer-services/shipment
 const phaseEightOps = existsSync("public/customer-os/assets/shipment-operations.js") ? readFileSync("public/customer-os/assets/shipment-operations.js", "utf8") : "";
 const phaseEightHub = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
 const phaseEightNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
-const phaseEightDriver = existsSync("app/driver/module-05-pickup-collection.html") ? readFileSync("app/driver/module-05-pickup-collection.html", "utf8") : "";
-for (const [file, source] of [
-  ["public/pickup-tracking.html", phaseEightPickup],
-  ["app/driver/module-05-pickup-collection.html", phaseEightDriver],
-]) {
-  const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  if (!source.includes("krim-global-interface.css")) failures.push("Phase 8 page is missing the shared KRIM interface stylesheet: " + file);
-  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 8 page is missing the KRIM global shell: " + file);
-  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 8 page must load exactly one shared global stylesheet: " + file);
-}
+const phaseEightDriver = existsSync("app/driver/staging/page-06-pickup-collection.html") ? readFileSync("app/driver/staging/page-06-pickup-collection.html", "utf8") : "";
+const pickupHead = phaseEightPickup.slice(0, phaseEightPickup.toLowerCase().lastIndexOf("</head>"));
+if (!phaseEightPickup.includes("krim-global-interface.css")) failures.push("Canonical customer pickup page is missing the shared KRIM interface stylesheet.");
+if (!phaseEightPickup.includes('class="krim-global-shell"')) failures.push("Canonical customer pickup page is missing the KRIM global shell.");
+if (pickupHead.split("krim-global-interface.css").length - 1 !== 1) failures.push("Canonical customer pickup page must load exactly one shared global stylesheet.");
+if (!phaseEightDriver.includes("auth.getSession") || !phaseEightDriver.includes("krim_organization_members") || !phaseEightDriver.includes("krim_driver_assignments") || !phaseEightDriver.includes("@media(max-width:720px)")) failures.push("Canonical driver pickup page must retain authenticated membership/assignment checks and responsive layout.");
 for (const [label, source, pattern] of [
   ["canonical pickup lookup uses the server-authorized shipment tracking RPC", phaseEightPickup, /rpc\(["']krim_get_shipment_tracking["']/],
   ["pickup event writes use the server-validated operational milestone RPC", phaseEightPickup, /rpc\(["']krim_record_operational_milestone["']/],
@@ -984,7 +980,9 @@ for (const [label, source, pattern] of [
 for (const [file, target] of [
   ["public/shipments/pickup.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
   ["public/partner/pickup-confirmation.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
-  ["public/driver/pickup-checklist.html", /location\.replace\(['"]\.\.\/\.\.\/app\/driver\/module-05-pickup-collection\.html/],
+  ["public/driver/pickup-checklist.html", /location\.replace\(['"]\.\.\/\.\.\/app\/driver\/staging\/page-06-pickup-collection\.html/],
+  ["app/driver/module-05-pickup-collection.html", /location\.replace\(['"]\.\/staging\/page-06-pickup-collection\.html/],
+  ["app/driver/module-05-pickup-collection.html", /location\.replace\(['"]\.\/staging\/page-06-pickup-collection\.html/],
 ]) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
   if (!target.test(source)) failures.push("Phase 8 compatibility route does not redirect to the canonical secured workflow: " + file);
@@ -1208,7 +1206,7 @@ const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorksp
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
-const driverWorkspacePage = existsSync("app/driver/index.html") ? readFileSync("app/driver/index.html", "utf8") : "";
+const driverWorkspacePage = existsSync("app/driver/staging/page-17-driver-profile-compliance.html") ? readFileSync("app/driver/staging/page-17-driver-profile-compliance.html", "utf8") : "";
 const driverVerificationAdminPage = existsSync("app/platform-admin/driver-verification.html") ? readFileSync("app/platform-admin/driver-verification.html", "utf8") : "";
 const partnerCapabilityAdminPage = existsSync("app/platform-admin/partner-capabilities.html") ? readFileSync("app/platform-admin/partner-capabilities.html", "utf8") : "";
 const partnerCapabilitySubmissionPage = existsSync("public/partner/services-capabilities.html") ? readFileSync("public/partner/services-capabilities.html", "utf8") : "";
@@ -1233,6 +1231,8 @@ const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170
   ? readFileSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql", "utf8") : "";
 const driverLicenceExpiryAdminMigration = existsSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql")
   ? readFileSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql", "utf8") : "";
+const driverLicenceExpiryAdminControlMigration = existsSync("supabase/migrations/20261123100000_admin_driver_licence_expiry_control.sql")
+  ? readFileSync("supabase/migrations/20261123100000_admin_driver_licence_expiry_control.sql", "utf8") : "";
 const driverProfileGuardMigration = existsSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql")
   ? readFileSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql", "utf8") : "";
 const driverProfileGuardConsolidationMigration = existsSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql")
@@ -1245,8 +1245,11 @@ const driverMobileRepository = existsSync("mobile/krim-driver/src/lib/driverRepo
 for (const token of ["licence_expiry_date", "krim_admin_review_driver_document", "krim_admin_review_driver_verification", "krim_driver_accept_assignment", "krim_vehicle_driver_bind", "krim_internal_dispatch_assigned_shipment", "current_date"]) {
   if (!driverLicenceExpiryMigration.includes(token)) failures.push("Driver licence expiry migration is missing operational enforcement: " + token);
 }
-for (const token of ['id="licenceExpiry"', "licence_expiry_date:licenceExpiry", "licence_expiry_date,verification_status"]) {
-  if (!driverWorkspacePage.includes(token)) failures.push("Driver workspace is missing licence expiry capture/persistence: " + token);
+for (const token of ["licence_expiry_date", "Licence expiry:"]) {
+  if (!driverWorkspacePage.includes(token)) failures.push("Driver compliance workspace must display the persisted licence expiry: " + token);
+}
+for (const token of ['id="licenceExpiry-', "p_licence_expiry_date:licenceExpiry", "krim_admin_update_driver_licence_expiry"]) {
+  if (!driverVerificationAdminPage.includes(token)) failures.push("AAL2 driver verification queue is missing authorized licence expiry capture/persistence: " + token);
 }
 if (!driverVerificationAdminPage.includes("krim_admin_list_driver_verification_with_expiry") || !driverVerificationAdminPage.includes("p.licence_expiry_date")) {
   failures.push("Driver verification queue must display the expiry date to the authorized reviewer.");
@@ -1294,8 +1297,8 @@ if (!driverProfileGuardConsolidationMigration.includes("new.licence_expiry_date 
 for (const token of ["driver.licence.details.changed", "review_status='pending'", "licence_front", "licence_back", "driver_profile_guard"]) {
   if (!driverLicenceEvidenceResetMigration.includes(token)) failures.push("Driver licence detail changes must reopen and audit previously accepted licence evidence: " + token);
 }
-if (!driverWorkspacePage.includes("Licence expired · dispatch blocked") || !driverWorkspacePage.includes("Licence expiry missing · dispatch blocked")) {
-  failures.push("Driver web workspace must disclose expired/missing licence state rather than showing stale verification.");
+if (!driverMobile.includes("Licence expired") || !driverMobile.includes("Licence expiry missing") || !driverMobile.includes("licence_expiry_date")) {
+  failures.push("Driver workspace must disclose expired/missing licence state rather than showing stale verification.");
 }
 if (!driverMobileRepository.includes("licence_expiry_date") || !driverMobile.includes("licenceCurrent") || !driverMobile.includes("Licence expiry missing")) {
   failures.push("Native driver workspace must reflect licence validity before displaying operational readiness.");
@@ -1303,6 +1306,9 @@ if (!driverMobileRepository.includes("licence_expiry_date") || !driverMobile.inc
 
 for (const token of ["krim_admin_list_driver_verification_with_expiry", "licence_expiry_date", "aal2", "revoke all", "TO authenticated"]) {
   if (!driverLicenceExpiryAdminMigration.toLowerCase().includes(token.toLowerCase())) failures.push("Driver expiry admin RPC migration is missing access/display control: " + token);
+}
+for (const token of ["krim_admin_update_driver_licence_expiry", "auth.jwt()->>'aal'", "private.krim_has_permission", "krim_audit_events", "verification_status='pending'", "revoke all", "TO authenticated"]) {
+  if (!driverLicenceExpiryAdminControlMigration.includes(token)) failures.push("Driver licence expiry admin update migration is missing authorization/audit/reset safeguard: " + token);
 }
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct payment guidance', 'does not create or collect freight-payment orders', 'openPartnerPaymentGuidance']],
@@ -1337,7 +1343,7 @@ const driverLocationSource = existsSync("mobile/krim-driver/src/lib/locationTrac
 const driverSessionFunction = existsSync("supabase/functions/krim-driver-tracking-session/index.ts") ? readFileSync("supabase/functions/krim-driver-tracking-session/index.ts", "utf8") : "";
 const driverGpsUpdateFunction = existsSync("supabase/functions/krim-driver-gps-update/index.ts") ? readFileSync("supabase/functions/krim-driver-gps-update/index.ts", "utf8") : "";
 const publicShipmentTracking = existsSync("supabase/functions/public-shipment-tracking/index.ts") ? readFileSync("supabase/functions/public-shipment-tracking/index.ts", "utf8") : "";
-const driverBrowserTracking = existsSync("app/driver/module-08-live-tracking.html") ? readFileSync("app/driver/module-08-live-tracking.html", "utf8") : "";
+const driverBrowserTracking = existsSync("app/driver/staging/page-09-live-tracking.html") ? readFileSync("app/driver/staging/page-09-live-tracking.html", "utf8") : "";
 const driverMobileWorkspace = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx")
   ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const customerTrackingPage = existsSync("tracking.html") ? readFileSync("tracking.html", "utf8") : "";
