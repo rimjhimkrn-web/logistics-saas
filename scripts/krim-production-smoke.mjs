@@ -957,15 +957,11 @@ const phaseEightOps = existsSync("public/customer-os/assets/shipment-operations.
 const phaseEightHub = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
 const phaseEightNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
 const phaseEightDriver = existsSync("app/driver/staging/page-06-pickup-collection.html") ? readFileSync("app/driver/staging/page-06-pickup-collection.html", "utf8") : "";
-for (const [file, source] of [
-  ["public/pickup-tracking.html", phaseEightPickup],
-  ["app/driver/module-05-pickup-collection.html", phaseEightDriver],
-]) {
-  const head = source.slice(0, source.toLowerCase().lastIndexOf("</head>"));
-  if (!source.includes("krim-global-interface.css")) failures.push("Phase 8 page is missing the shared KRIM interface stylesheet: " + file);
-  if (!/<body\b[^>]*class=["'][^"']*\bkrim-global-shell\b/i.test(source)) failures.push("Phase 8 page is missing the KRIM global shell: " + file);
-  if ((head.match(/krim-global-interface\.css/g) || []).length !== 1) failures.push("Phase 8 page must load exactly one shared global stylesheet: " + file);
-}
+const pickupHead = phaseEightPickup.slice(0, phaseEightPickup.toLowerCase().lastIndexOf("</head>"));
+if (!phaseEightPickup.includes("krim-global-interface.css")) failures.push("Canonical customer pickup page is missing the shared KRIM interface stylesheet.");
+if (!/<body\\b[^>]*class=["'][^"']*\\bkrim-global-shell\\b/i.test(phaseEightPickup)) failures.push("Canonical customer pickup page is missing the KRIM global shell.");
+if ((pickupHead.match(/krim-global-interface\\.css/g) || []).length !== 1) failures.push("Canonical customer pickup page must load exactly one shared global stylesheet.");
+if (!phaseEightDriver.includes("auth.getSession") || !phaseEightDriver.includes("krim_organization_members") || !phaseEightDriver.includes("krim_driver_assignments") || !phaseEightDriver.includes("@media(max-width:720px)")) failures.push("Canonical driver pickup page must retain authenticated membership/assignment checks and responsive layout.");
 for (const [label, source, pattern] of [
   ["canonical pickup lookup uses the server-authorized shipment tracking RPC", phaseEightPickup, /rpc\(["']krim_get_shipment_tracking["']/],
   ["pickup event writes use the server-validated operational milestone RPC", phaseEightPickup, /rpc\(["']krim_record_operational_milestone["']/],
