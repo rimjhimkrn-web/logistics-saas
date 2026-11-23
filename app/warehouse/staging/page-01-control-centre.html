@@ -45,6 +45,76 @@ main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,
 }
 @media(max-width:720px){.header-inner{min-height:64px;padding:8px 12px;grid-template-columns:minmax(0,1fr) auto;gap:8px}.brand img{width:clamp(118px,42vw,158px);height:42px}.head-actions{gap:7px}.head-actions .identity,.head-actions>a.btn,.head-actions>#refresh{display:none}.menu-toggle{display:inline-flex!important}.layout{display:block;padding:14px 12px 36px}.sidebar{position:fixed;z-index:70;top:calc(64px + env(safe-area-inset-top) + 5px);right:12px;bottom:auto;width:min(88vw,320px);max-height:calc(100dvh - 86px - env(safe-area-inset-top));margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 38px rgba(7,26,46,.2);display:flex;flex-direction:column;align-items:stretch;gap:4px;overflow-y:auto;transform:translateY(-8px) scale(.98);transform-origin:top right;opacity:0;visibility:hidden;pointer-events:none;transition:transform .18s ease,opacity .18s ease,visibility .18s ease}.sidebar.open{transform:translateY(0) scale(1);opacity:1;visibility:visible;pointer-events:auto}.side-link{flex:none;padding:12px}.nav-backdrop{display:block;position:fixed;inset:calc(64px + env(safe-area-inset-top)) 0 0;background:rgba(4,18,32,.22);z-index:60;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}.nav-backdrop.show{opacity:1;visibility:visible}.hero{border-radius:17px}.panel{padding:15px}}
 @media(max-width:440px){.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:24px}.module-grid{grid-template-columns:1fr}.hero-row{align-items:flex-start}.hero:after{right:-12px;top:8px;font-size:60px}}
+/* Final responsive refinement: prevent cramped cards, clipped headings and mobile overflow. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+img,svg{max-width:100%}
+.layout,main,.content-grid,.panel,.hero,.metrics,.module-grid{min-width:0;max-width:100%}
+.hero h1,.hero p,.panel h2,.module strong,.module small{overflow-wrap:anywhere}
+@media(min-width:721px) and (max-width:1100px){
+ .layout{padding:20px 22px 42px}
+ .sidebar{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .side-link{justify-content:flex-start;min-height:42px}
+ .content-grid{grid-template-columns:minmax(0,1fr)}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+ body{font-size:14px}
+ .header{position:sticky;top:0}
+ .header-inner{min-height:60px;padding:7px 12px;gap:8px}
+ .brand{min-width:0}
+ .brand img{width:132px;height:38px}
+ .head-actions{gap:6px}
+ .menu-toggle{width:42px;height:42px;border-radius:12px}
+ .layout{display:block;width:100%;padding:12px 12px 30px}
+ main{width:100%;min-width:0}
+ .hero{padding:23px 19px 20px;border-radius:16px;min-height:0}
+ .hero:after{display:none}
+ .eyebrow{font-size:9px;letter-spacing:.14em;line-height:1.5}
+ .hero h1{font-size:clamp(29px,8.4vw,38px);line-height:1.04;letter-spacing:-.04em;margin:11px 0 10px}
+ .hero p{font-size:13px;line-height:1.68;max-width:none}
+ .hero-row{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:17px}
+ .chips{gap:7px}
+ .chip{font-size:9px;padding:6px 9px}
+ .hero-note{font-size:10px;line-height:1.5}
+ .status{margin:11px 0;padding:11px 12px;font-size:11px}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:11px 0}
+ .metric{padding:13px 12px;border-radius:13px}
+ .metric small{font-size:9px;line-height:1.45;letter-spacing:.045em;min-height:26px}
+ .metric strong{font-size:clamp(23px,7vw,28px);line-height:1.1;margin-top:7px}
+ .metric span{font-size:9px;line-height:1.45}
+ .content-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+ .panel{padding:15px 13px;margin-bottom:11px;border-radius:14px}
+ .panel h2{font-size:16px}
+ .sub{font-size:11px;line-height:1.65;margin:5px 0 12px}
+ .module-grid{grid-template-columns:minmax(0,1fr);gap:8px}
+ .module{padding:12px;gap:10px;border-radius:12px;min-height:68px}
+ .module-icon{width:35px;height:35px;border-radius:10px}
+ .module strong{font-size:11px;line-height:1.45}
+ .module small{font-size:10px;line-height:1.5}
+ .check-list{gap:10px}
+ .check{font-size:10px;line-height:1.55}
+ .notice{font-size:10px;padding:11px;line-height:1.65}
+ .sidebar{top:calc(60px + env(safe-area-inset-top) + 7px);right:10px;left:10px;width:auto;max-height:calc(100dvh - 78px - env(safe-area-inset-top));padding:11px;border-radius:15px}
+ .side-title{font-size:9px;padding:7px 9px}
+ .side-link{min-height:43px;padding:10px;font-size:11px}
+ .nav-backdrop{inset:calc(60px + env(safe-area-inset-top)) 0 0}
+ .footer{font-size:9px;line-height:1.6;padding:14px 8px}
+}
+@media(max-width:380px){
+ .layout{padding-left:10px;padding-right:10px}
+ .hero{padding:20px 16px}
+ .metrics{gap:7px}
+ .metric{padding:11px 10px}
+ .metric small{font-size:8px}
+ .metric span{font-size:8px}
+ .panel{padding:13px 11px}
+ .module{padding:11px 10px}
+ .brand img{width:122px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
 @media(min-width:1600px){.layout,.header-inner{max-width:1600px}}
 </style>
 </head>
