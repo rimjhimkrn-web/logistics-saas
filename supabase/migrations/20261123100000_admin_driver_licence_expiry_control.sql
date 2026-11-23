@@ -76,4 +76,4 @@ end;
 $$;
 
 revoke all on function public.krim_admin_update_driver_licence_expiry(uuid,date,text) from public,anon;
-grant execute on function public.krim_admin_update_driver_licence_expiry(uuid,date,text) to authenticated;
+grant execute on function public.krim_admin_update_driver_licence_expiry(uuid,date,text) TO authenticated;
