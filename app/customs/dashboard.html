@@ -43,9 +43,8 @@
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),fail=(title,message)=>{$('gateTitle').textContent=title;$('gateMessage').textContent=message;$('gate').classList.remove('hidden');$('app').classList.add('hidden')};
-const cfg=window.KRIM_CONFIG||window.krimConfig||{},url=cfg.supabaseUrl||cfg.SUPABASE_URL||window.SUPABASE_URL,key=cfg.supabaseAnonKey||cfg.SUPABASE_ANON_KEY||window.SUPABASE_ANON_KEY;
-if(!window.supabase||!url||!key){fail('Workspace unavailable','The secure database configuration could not be verified. No customs data has been loaded.');return}
-const db=window.supabase.createClient(url,key);let signedIn=false;
+const db=window.KRIM_SUPABASE||window.supabaseClient;let signedIn=false;
+if(!db){fail('Workspace unavailable','The shared KRIM Supabase client is not configured. No customs data has been loaded.');return}
 const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=v=>v?new Date(v).toLocaleString():'—';
 async function load(){if(!signedIn)return;$('refreshStatus').textContent='Refreshing permitted records…';
