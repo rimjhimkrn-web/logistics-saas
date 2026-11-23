@@ -1,177 +1,85 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102b4e">
-<meta name="description" content="KRIM Finance and Treasury command centre — controlled financial operations and reporting workspace.">
-<title>Finance & Treasury | KRIM Logistics</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09243D">
+<meta name="description" content="KRIM Finance and Treasury — a controlled finance workspace for logistics operations.">
+<link rel="icon" type="image/svg+xml" href="../../../assets/krim-icon.svg">
+<title>Finance &amp; Treasury | KRIM Logistics</title>
 <style>
-:root{font-family:"DM Sans",system-ui,sans-serif;color:#172f4c;background:#f3f7fc;--navy:#102b4e;--blue:#2768d7;--cyan:#13869b;--muted:#637890;--line:#dce6f1;--card:#fff;--shadow:0 14px 38px rgba(19,47,82,.065}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#edf4fb 0,#f5f8fc 430px)}
-a{color:inherit}.topline{height:5px;background:linear-gradient(90deg,#102b4e,#2768d7,#1a9aab)}
-.header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.header-inner{max-width:1460px;margin:auto;padding:12px clamp(16px,3vw,42px);display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand img{display:block;width:188px;max-width:42vw;height:auto;max-height:58px;object-fit:contain;object-position:left center}
-.desktop-nav{display:flex;align-items:center;gap:9px}.desktop-nav a,.mobile-drawer a{font-size:12px;font-weight:700;text-decoration:none;color:#405a76;padding:10px 12px;border-radius:9px}.desktop-nav a:hover{background:#edf4fc;color:var(--blue)}
-.header-actions{display:flex;align-items:center;gap:9px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid #d1deeb;border-radius:10px;background:#fff;color:var(--navy);font-size:12px;font-weight:800;text-decoration:none;cursor:pointer}.btn.primary{background:var(--navy);border-color:var(--navy);color:white}.btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px #12345612}
-.menu-toggle{display:none}.mobile-drawer{display:none}
-.container{max-width:1460px;margin:auto;padding:25px clamp(14px,3vw,42px) 0}
-.breadcrumb{font-size:11px;color:#73869b;font-weight:700;margin:0 0 15px}
-.hero{position:relative;overflow:hidden;padding:clamp(24px,4vw,48px);border-radius:24px;background:linear-gradient(115deg,#102b4e 0%,#164b75 60%,#117f91 100%);color:#fff;box-shadow:0 18px 48px #173c6426}
-.hero:after{content:"";position:absolute;width:360px;height:360px;border:1px solid #ffffff20;border-radius:50%;right:-95px;top:-170px;box-shadow:0 0 0 35px #ffffff08,0 0 0 75px #ffffff06}
-.hero-content{position:relative;z-index:1;max-width:900px}.eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;color:#a6eaf0;text-transform:uppercase}
-h1,h2,h3{font-family:Manrope,"DM Sans",sans-serif}.hero h1{font-size:clamp(31px,5vw,52px);line-height:1.04;letter-spacing:-.045em;margin:13px 0}.hero p{max-width:800px;margin:0;color:#d9e8f6;font-size:14px;line-height:1.8}
-.hero-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.hero-meta span{font-size:10px;font-weight:700;color:#e7f5fc;padding:8px 11px;border:1px solid #ffffff38;border-radius:99px;background:#ffffff0b}
-.notice{display:flex;align-items:flex-start;gap:12px;margin:16px 0 0;padding:15px 17px;border:1px solid #ead9ad;border-radius:14px;background:#fffaf0;color:#70541b;font-size:12px;line-height:1.7}
-.notice-icon{display:grid;place-items:center;flex:0 0 29px;height:29px;border-radius:9px;background:#fff0c9;font-weight:900}
-.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:27px 2px 13px}.section-head h2{font-size:18px;margin:0;color:var(--navy)}.section-head p{font-size:11px;color:var(--muted);margin:5px 0 0;line-height:1.6}.label{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#5b7390;background:#f0f5fb;border:1px solid #dce7f2;padding:7px 9px;border-radius:8px}
-.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.metric{padding:17px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);min-height:128px}.metric-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.metric-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:#edf4ff;color:var(--blue);font-weight:900}.metric .status{font-size:9px;font-weight:800;color:#8b6a24;background:#fff7e6;border:1px solid #f1dfb7;border-radius:7px;padding:5px 7px}.metric strong{display:block;font:800 25px Manrope,sans-serif;color:var(--navy);margin-top:13px}.metric p{font-size:11px;color:var(--muted);margin:4px 0 0}
-.grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr);gap:15px;margin-top:15px}.panel{min-width:0;padding:19px;border:1px solid var(--line);border-radius:17px;background:#fff;box-shadow:var(--shadow);margin-bottom:15px}.panel h2{font-size:15px;margin:0;color:var(--navy)}.panel-intro{font-size:11px;line-height:1.7;color:var(--muted);margin:6px 0 14px}
-.empty-state{display:flex;gap:12px;align-items:flex-start;padding:15px;border:1px dashed #cfdae7;border-radius:12px;background:#fbfdff;color:#60758c;font-size:11px;line-height:1.7}.empty-symbol{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:10px;background:#edf4fb;color:#4b6e96;font-size:15px;font-weight:900}
-.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.flow-step{padding:12px;border:1px solid #e3ebf4;border-radius:12px;background:linear-gradient(145deg,#fff,#f7faff)}.flow-step b{display:block;color:#2b6bba;font-size:10px}.flow-step strong{display:block;margin-top:7px;font-size:11px;color:var(--navy)}.flow-step span{display:block;margin-top:5px;color:var(--muted);font-size:10px;line-height:1.55}
-.module-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.module{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #e3ebf4;border-radius:12px;background:#fff}.module-icon{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:10px;background:#edf4ff;color:#2768d7;font-size:11px;font-weight:900}.module strong{display:block;font-size:11px;color:var(--navy)}.module small{display:block;font-size:10px;line-height:1.5;color:var(--muted);margin-top:4px}.module .planned{display:inline-block;margin-top:6px;font-size:8px;letter-spacing:.06em;font-weight:900;color:#8b6a24;background:#fff7e6;border:1px solid #f0dfba;padding:4px 6px;border-radius:6px}
-.controls{display:grid;gap:10px}.control{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #e4ebf3;border-radius:11px}.control-mark{color:#16816f;font-weight:900}.control strong{font-size:11px;color:var(--navy)}.control p{font-size:10px;line-height:1.55;color:var(--muted);margin:4px 0 0}
-.footer{max-width:1460px;margin:auto;padding:25px 16px 32px;text-align:center;color:#7a8da2;font-size:10px;line-height:1.8}
-@media(max-width:1050px){.desktop-nav{display:none}.menu-toggle{display:inline-flex}.mobile-drawer{position:fixed;top:76px;right:0;bottom:0;z-index:30;width:min(390px,100%);padding:20px;background:linear-gradient(145deg,#071a33,#0c3156 72%,#105477);overflow:auto;box-shadow:-18px 0 38px #071a3330}.mobile-drawer.open{display:block}.mobile-drawer .drawer-title{font-size:10px;font-weight:900;letter-spacing:.15em;color:#9bd6f3;margin:0 0 13px}.mobile-drawer a{display:block;margin:6px 0;padding:13px;border:1px solid #315a7f;background:#10385e;color:#e7f2ff}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
-@media(max-width:650px){.header-inner{padding:10px 13px;gap:8px}.brand img{width:150px;max-width:40vw}.header-actions{gap:6px}.btn{min-height:38px;padding:8px 10px;font-size:10px}.mobile-drawer{top:66px}.container{padding:18px 12px 0}.hero{border-radius:18px}.hero:after{right:-235px}.hero p{font-size:12px}.section-head{align-items:flex-start;flex-direction:column}.metrics{gap:9px}.metric{padding:13px;min-height:116px}.metric strong{font-size:22px}.grid{gap:8px}.panel{padding:14px}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.module-list{grid-template-columns:1fr}.notice{padding:12px}.label{white-space:normal}}
-@media(max-width:360px){.brand img{width:126px}.header-actions .home-link{display:none}.metrics{grid-template-columns:1fr 1fr}.metric strong{font-size:20px}}
-
-/* KRIM homepage visual system — shared brand palette and component language */
-:root{
- --navy:#09243D;--navy2:#123B5A;--blue:#F47A24;--cyan:#F9B06B;
- --ink:#14283e;--muted:#60748a;--line:#dce5ee;--soft:#f3f7fb;
- --card:#fff;--shadow:0 22px 60px rgba(4,23,43,.10)
-}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#fff}
-.topline{height:4px;background:linear-gradient(90deg,#09243D 0%,#123B5A 48%,#F47A24 78%,#F9B06B 100%)}
-.header{background:rgba(255,255,255,.97);border-bottom:1px solid #e8edf2}
-.desktop-nav a,.mobile-drawer a{color:#40556b}
-.desktop-nav a:hover{background:#f3f7fb;color:var(--blue)}
-.btn{border-radius:8px;font-weight:900}
-.btn.primary{background:var(--blue);border-color:var(--blue);box-shadow:0 9px 22px #f47a2426}
-.btn.primary:hover{background:#df6818}
-.hero{border-radius:18px;background:var(--navy);box-shadow:0 22px 55px #09243d26}
-.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 24%,#15577a 0,transparent 40%),radial-gradient(ellipse at 4% 100%,#143b5c 0,transparent 43%),linear-gradient(115deg,#04101e,#0a2947 58%,#07182b)}
-.hero:after{content:"";position:absolute;inset:0;width:auto;height:auto;right:0;top:0;border:0;border-radius:0;box-shadow:none;opacity:.14;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(90deg,transparent,#000 55%)}
-.hero-content{max-width:940px}
-.eyebrow{color:var(--cyan)}
-.hero h1{color:#fff;letter-spacing:-.065em;font-weight:900}
-.hero p{color:#c4d5e3}
-.hero-meta span{border-radius:7px;border-color:#ffffff35;background:#ffffff09;color:#e5eff7}
-.notice{border-color:#f0d5bb;background:#fff8f1;color:#75451f;border-radius:12px}
-.notice-icon{background:#ffead8;color:#c65d13}
-.section-head h2,.panel h2,.metric strong,.module strong,.control strong{color:var(--navy)}
-.label{color:#a65318;background:#fff5ec;border-color:#f4d2b7;border-radius:7px}
-.metric,.panel{border-color:var(--line);border-radius:14px;box-shadow:0 10px 28px #07182b08}
-.metric-icon{background:#fff0e4;color:#c85c13;border-radius:10px}
-.metric .status{color:#a65318;background:#fff5ec;border-color:#f4d2b7}
-.empty-state{border-color:#d4e0ea;background:#f8fafc;border-radius:11px}
-.empty-symbol{background:#fff0e4;color:#c85c13}
-.flow-step{background:linear-gradient(145deg,#fff,#f5f8fb);border-color:#e3ebf2}
-.flow-step b{color:var(--blue)}
-.module{border-color:#e3ebf2;border-radius:10px}
-.module-icon{background:#fff0e4;color:#c85c13;border-radius:8px}
-.module .planned{color:#a65318;background:#fff5ec;border-color:#f4d2b7}
-.control-mark{color:#16836c}
-.mobile-drawer{background:linear-gradient(145deg,#04101e,#09243D 70%,#123B5A)}
-.mobile-drawer .drawer-title{color:var(--cyan)}
-.mobile-drawer a{border-color:#31516b;background:#123B5A;color:#f0f6fb}
-.footer{color:#8399ad}
-@media(max-width:650px){.hero{border-radius:14px}}
-
+:root{--navy:#09243D;--navy2:#123B5A;--blue:#F47A24;--amber:#F9B06B;--ink:#14283E;--muted:#60748A;--line:#DCE5EE;--soft:#F3F7FB;--white:#fff;--green:#16836C;--shadow:0 18px 48px rgba(4,23,43,.09)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;color:var(--ink);background:#fff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(1220px,calc(100% - 48px));margin:auto}.topline{height:4px;background:linear-gradient(90deg,var(--navy),var(--navy2) 48%,var(--blue) 78%,var(--amber))}
+header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.97);backdrop-filter:blur(15px);border-bottom:1px solid #e8edf2}.nav{height:78px;display:flex;align-items:center;justify-content:space-between;gap:22px}.brand{display:flex;align-items:center;flex:none}.brand img{width:190px;max-height:48px;object-fit:contain}.navlinks{display:flex;align-items:center;gap:22px;color:#40556b;font-size:12px;font-weight:850}.navlinks a:hover{color:var(--blue)}.navright{display:flex;align-items:center;gap:12px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 17px;border:1px solid transparent;border-radius:8px;font-size:11px;font-weight:900;letter-spacing:.035em;cursor:pointer;transition:.2s}.btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 20px #f47a2426}.btn-primary:hover{background:#df6818;transform:translateY(-1px)}.btn-outline{border-color:#c8d5e1;color:var(--navy);background:#fff}.btn-outline:hover{background:#f4f8fc}.menu{display:none;background:#fff;border:1px solid var(--line);border-radius:8px;color:var(--navy);padding:8px 12px;font-size:19px}.drawer{display:none}
+main{padding:34px 0 80px}.crumb{margin:0 0 16px;color:#71849a;font-size:11px;font-weight:750}.hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:1.04fr .96fr;gap:28px;align-items:center;min-height:370px;padding:clamp(28px,4.5vw,58px);border-radius:19px;background:var(--navy);color:#fff;box-shadow:0 22px 55px #09243d24}.hero:before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 77% 35%,#15577a 0,transparent 38%),radial-gradient(ellipse at 4% 100%,#143b5c 0,transparent 43%),linear-gradient(115deg,#04101e,#0a2947 58%,#07182b)}.hero:after{content:"";position:absolute;inset:0;z-index:-1;opacity:.14;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:52px 52px;mask-image:linear-gradient(90deg,transparent,#000 55%)}.eyebrow{display:flex;align-items:center;gap:10px;color:var(--amber);font-size:10px;font-weight:950;letter-spacing:.17em;text-transform:uppercase}.eyebrow:before{content:"";width:27px;height:2px;background:var(--amber)}h1{margin:17px 0 14px;max-width:650px;font-size:clamp(38px,5.1vw,64px);line-height:.99;letter-spacing:-.07em;font-weight:900}h1 span{color:#83eadd}.hero-copy{max-width:570px;color:#c4d5e3;font-size:14px;line-height:1.9;margin:0}.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:23px}.hero-tags span{padding:7px 10px;border:1px solid #ffffff38;border-radius:6px;background:#ffffff09;color:#e4eff7;font-size:9px;font-weight:800}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.hero-art{position:relative;min-height:255px;display:grid;place-items:center}.orbit{position:absolute;width:min(340px,85%);aspect-ratio:1;border:1px solid #ffffff25;border-radius:50%;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff05}.orbit:before,.orbit:after{content:"";position:absolute;border:1px dashed #ffffff30;border-radius:50%;inset:14%}.orbit:after{inset:29%}.core{position:relative;z-index:2;width:132px;height:132px;display:grid;place-items:center;text-align:center;border:1px solid #ffffff4c;border-radius:24px;background:linear-gradient(145deg,#164d70,#09243d);box-shadow:0 20px 50px #0005}.core b{display:block;font-size:15px;letter-spacing:.08em}.core small{display:block;color:#b9d3e4;font-size:8px;letter-spacing:.13em}.node{position:absolute;z-index:3;display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid #ffffff38;border-radius:10px;background:#0b233beF;box-shadow:0 12px 28px #0003;backdrop-filter:blur(10px)}.node i{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;background:#f47a242b;color:var(--amber);font-style:normal;font-size:14px}.node b{display:block;color:#fff;font-size:9px}.node small{display:block;color:#afc4d7;font-size:8px}.n1{top:3%;left:0}.n2{top:7%;right:0}.n3{bottom:3%;left:3%}.n4{bottom:0;right:0}
+.notice{display:flex;gap:13px;align-items:flex-start;margin:18px 0 28px;padding:15px 18px;border:1px solid #f0d5bb;border-radius:11px;background:#fff8f1;color:#75451f;font-size:12px;line-height:1.75}.notice-icon{width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:8px;background:#ffead8;color:#c65d13;font-weight:950}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:36px 0 16px}.section-head h2{margin:0;color:var(--navy);font-size:clamp(24px,3vw,34px);line-height:1.1;letter-spacing:-.055em}.section-head p{margin:7px 0 0;color:var(--muted);font-size:12px}.section-kicker{color:var(--blue);font-size:9px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}.state{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #f4d2b7;border-radius:6px;background:#fff5ec;color:#a65318;font-size:9px;font-weight:900;white-space:nowrap}.state:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.kpi{position:relative;overflow:hidden;padding:19px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 8px 25px #07182b08}.kpi:after{content:"";position:absolute;right:-22px;top:-28px;width:78px;height:78px;border:1px solid #f4d2b7;border-radius:50%;box-shadow:0 0 0 10px #fff8f2,0 0 0 21px #fffaf6}.kpi-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.kpi-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:10px;background:#fff0e4;color:#c85c13;font-size:16px;font-weight:900}.kpi small{color:#9a6a42;font-size:9px;font-weight:850}.kpi strong{display:block;margin-top:17px;color:var(--navy);font-size:29px;line-height:1;font-weight:900;letter-spacing:-.05em}.kpi p{margin:7px 0 0;color:var(--muted);font-size:11px}
+.content-grid{display:grid;grid-template-columns:1.35fr .85fr;gap:15px;margin-top:16px}.card{min-width:0;padding:21px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 8px 25px #07182b07}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px}.card h3{margin:0;color:var(--navy);font-size:16px;letter-spacing:-.025em}.card-sub{margin:0 0 16px;color:var(--muted);font-size:11px;line-height:1.7}.empty{display:flex;align-items:flex-start;gap:12px;padding:17px;border:1px dashed #cbd8e4;border-radius:10px;background:#f8fafc}.empty-icon{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:9px;background:#fff0e4;color:#c85c13;font-size:16px}.empty b{display:block;color:var(--navy);font-size:11px}.empty p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.7}.activity-bars{display:grid;grid-template-columns:repeat(8,1fr);align-items:end;gap:8px;height:105px;margin:18px 2px 0;padding:0 4px 21px;border-bottom:1px solid var(--line)}.activity-bars span{display:block;height:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#f9b06b,#f47a24);opacity:.18}.activity-labels{display:flex;justify-content:space-between;margin-top:-13px;color:#8a9bad;font-size:8px}.control-list{display:grid;gap:10px}.control{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #edf1f5}.control:last-child{border:0;padding-bottom:0}.check{width:23px;height:23px;flex:none;display:grid;place-items:center;border-radius:7px;background:#e8f5f1;color:var(--green);font-size:12px;font-weight:950}.control b{display:block;color:var(--navy);font-size:11px}.control p{margin:3px 0 0;color:var(--muted);font-size:10px;line-height:1.6}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.flow article{position:relative;min-height:140px;padding:17px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(145deg,#fff,#f6f9fc)}.flow article:not(:last-child):after{content:"›";position:absolute;right:-9px;top:48%;z-index:2;width:18px;height:22px;display:grid;place-items:center;background:#fff;color:var(--blue);font-size:20px;font-weight:900}.flow small{color:var(--blue);font-size:9px;font-weight:950;letter-spacing:.12em}.flow b{display:block;margin-top:10px;color:var(--navy);font-size:13px}.flow p{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.65}
+.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.module{display:flex;gap:12px;align-items:flex-start;padding:15px;border:1px solid var(--line);border-radius:10px;background:#fff;transition:.2s}.module:hover{transform:translateY(-2px);border-color:#b8cbdc;box-shadow:0 10px 22px #07182b0b}.module-no{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:9px;background:#fff0e4;color:#bd5b18;font-size:10px;font-weight:950}.module b{display:block;color:var(--navy);font-size:11px}.module small{display:block;margin-top:4px;color:var(--muted);font-size:9px;line-height:1.55}.module em{display:inline-block;margin-top:7px;color:#9b6a40;font-size:8px;font-style:normal;font-weight:900;letter-spacing:.08em}
+.footer{padding:29px 0;background:#04101e;color:#9db1c3}.footer-inner{display:flex;justify-content:space-between;gap:20px;align-items:center}.footer-brand{color:#fff;font-size:12px;font-weight:950;letter-spacing:.13em}.footer small{display:block;margin-top:5px;color:#8fa6ba;font-size:9px}.footer-values{font-size:10px;color:#b9cad8}
+:focus-visible{outline:3px solid #168fe0;outline-offset:3px}
+@media(max-width:1050px){.navlinks{gap:13px}.navlinks a{font-size:10px}.brand img{width:165px}.hero{grid-template-columns:1fr  .85fr}.modules{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.wrap{width:calc(100% - 34px)}.nav{height:68px}.brand img{width:155px}.navlinks{display:none}.menu{display:block}.navright>.btn{display:none}.drawer{position:fixed;top:72px;left:0;right:0;z-index:35;padding:15px 20px 20px;background:#06172a;box-shadow:0 18px 28px #07182b30}.drawer.open{display:grid;gap:5px}.drawer a{padding:12px;border:1px solid #ffffff25;border-radius:7px;color:#e8f1f8;font-size:12px;font-weight:800}.drawer .drawer-label{padding:4px 2px;color:var(--amber);font-size:9px;font-weight:950;letter-spacing:.14em}.hero{grid-template-columns:1fr;gap:12px;padding:29px 23px;border-radius:15px}.hero-art{min-height:245px}.hero-copy{font-size:12px}.hero-tags span{font-size:8px}.section-head{align-items:flex-start;flex-direction:column;margin-top:29px}.kpis{grid-template-columns:repeat(2,1fr);gap:9px}.kpi{padding:14px}.kpi strong{font-size:25px}.content-grid{grid-template-columns:1fr}.flow{grid-template-columns:repeat(2,1fr)}.flow article:nth-child(2):after{display:none}.modules{grid-template-columns:repeat(2,1fr)}main{padding-top:21px}.footer-inner{align-items:flex-start;flex-direction:column}}
+@media(max-width:430px){.wrap{width:calc(100% - 26px)}.hero{padding:25px 18px}.hero h1{font-size:39px}.hero-art{min-height:215px}.orbit{width:230px}.core{width:105px;height:105px}.core b{font-size:12px}.node{padding:8px 9px;gap:6px}.node i{width:24px;height:24px}.node b{font-size:8px}.node small{font-size:7px}.n1{left:-5px}.n2{right:-5px}.n3{left:-5px}.n4{right:-5px}.kpi{padding:12px}.kpi strong{font-size:23px}.kpi p{font-size:9px}.card{padding:15px}.flow{gap:8px}.flow article{padding:13px;min-height:130px}.modules{grid-template-columns:1fr}.notice{font-size:10px;padding:12px}.state{white-space:normal}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="topline"></div>
-<header class="header">
- <div class="header-inner">
-  <a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a>
-  <nav class="desktop-nav" aria-label="Primary navigation"><a href="#overview">Overview</a><a href="#financial-flow">Financial flow</a><a href="#modules">Finance modules</a><a href="#controls">Controls</a></nav>
-  <div class="header-actions">
-   <a class="btn home-link" href="../../../index.html">Platform home</a>
-   <button class="btn primary menu-toggle" id="menuToggle" type="button" aria-controls="mobileDrawer" aria-expanded="false">☰ Menu</button>
-  </div>
- </div>
-</header>
-<nav class="mobile-drawer" id="mobileDrawer" aria-label="Finance navigation">
- <div class="drawer-title">FINANCE &amp; TREASURY</div>
- <a href="#overview">Overview</a><a href="#financial-flow">Financial flow</a><a href="#modules">Finance modules</a><a href="#controls">Controls</a><a href="../../../index.html">Platform home ↗</a>
-</nav>
-<main class="container" id="overview">
- <div class="breadcrumb">KRIM Logistics / Finance &amp; Treasury</div>
- <section class="hero">
-  <div class="hero-content">
-   <div class="eyebrow">Financial operations · Governance · Visibility</div>
-   <h1>Finance &amp; Treasury<br>Command Centre</h1>
-   <p>A unified workspace for finance operations across KRIM’s logistics network — designed around traceable records, controlled approvals, accurate reconciliation and clear separation between KRIM’s own revenue and partner freight transactions.</p>
-   <div class="hero-meta"><span>Organization-scoped access</span><span>Evidence-led workflows</span><span>Global-ready architecture</span><span>India market activation</span></div>
-  </div>
- </section>
- <div class="notice" role="note"><div class="notice-icon">!</div><div><strong>Financial data is not connected in this preview.</strong> No live balances, revenue, invoices, transactions or settlement figures are displayed here. The initial partner-direct model remains in force: customers pay the logistics partner directly; KRIM does not hold, split or disburse partner freight funds. KRIM’s own separately contracted fees must be accounted for independently.</div></div>
- <div class="section-head"><div><h2>Financial position</h2><p>Live figures will appear only after authorized source records are connected and reconciled.</p></div><span class="label">Data not connected</span></div>
- <section class="metrics" aria-label="Financial position summary">
-  <article class="metric"><div class="metric-top"><span class="metric-icon">₹</span><span class="status">Awaiting data</span></div><strong>—</strong><p>KRIM revenue · reconciled</p></article>
-  <article class="metric"><div class="metric-top"><span class="metric-icon">↗</span><span class="status">Awaiting data</span></div><strong>—</strong><p>Outstanding receivables</p></article>
-  <article class="metric"><div class="metric-top"><span class="metric-icon">⇄</span><span class="status">Awaiting data</span></div><strong>—</strong><p>Provider / bank reconciliation</p></article>
-  <article class="metric"><div class="metric-top"><span class="metric-icon">▤</span><span class="status">Awaiting data</span></div><strong>—</strong><p>Approved expenses</p></article>
- </section>
- <div class="grid">
-  <div>
-   <section class="panel">
-    <h2>Financial activity</h2><p class="panel-intro">A period-based view of KRIM-owned financial activity, populated only from authorized and reconciled records.</p>
-    <div class="empty-state"><div class="empty-symbol">▥</div><div><strong>No financial activity loaded.</strong><br>Charts and transaction summaries remain empty until verified invoices, receipts, expenses and ledger postings are available. No sample activity is generated.</div></div>
-   </section>
-   <section class="panel" id="financial-flow">
-    <h2>Financial control lifecycle</h2><p class="panel-intro">Every recognized KRIM fee follows a traceable path. A payment event alone is not proof of earned revenue or bank settlement.</p>
-    <div class="flow">
-     <div class="flow-step"><b>01 · COMMERCIAL</b><strong>Contract &amp; fee</strong><span>Agreed payer, scope, fee trigger and terms.</span></div>
-     <div class="flow-step"><b>02 · EVIDENCE</b><strong>Service completed</strong><span>Objective delivery evidence and approval.</span></div>
-     <div class="flow-step"><b>03 · BILLING</b><strong>Invoice &amp; collection</strong><span>Correct entity, invoice and verified receipt.</span></div>
-     <div class="flow-step"><b>04 · ACCOUNTING</b><strong>Reconcile &amp; report</strong><span>Balanced ledger, tax review and reporting.</span></div>
-    </div>
-   </section>
-  </div>
-  <aside>
-   <section class="panel">
-    <h2>Attention &amp; exceptions</h2><p class="panel-intro">Operational exceptions will be surfaced here when trusted finance sources are connected.</p>
-    <div class="empty-state"><div class="empty-symbol">✓</div><div><strong>No exception feed connected.</strong><br>This does not mean there are zero outstanding exceptions. Exception status is currently unknown.</div></div>
-   </section>
-   <section class="panel" id="controls">
-    <h2>Financial integrity controls</h2><p class="panel-intro">Foundational safeguards for a dependable finance operating system.</p>
-    <div class="controls">
-     <div class="control"><span class="control-mark">✓</span><div><strong>Legal-entity separation</strong><p>Keep KRIM service fees separate from partner freight charges and collections.</p></div></div>
-     <div class="control"><span class="control-mark">✓</span><div><strong>Evidence before recognition</strong><p>Contract, completion evidence, invoice and verified receipt are distinct states.</p></div></div>
-     <div class="control"><span class="control-mark">✓</span><div><strong>Approval separation</strong><p>Material financial actions require role-scoped authorization and review.</p></div></div>
-     <div class="control"><span class="control-mark">✓</span><div><strong>Immutable audit trail</strong><p>Corrections use traceable reversals and reasoned audit events.</p></div></div>
-    </div>
-   </section>
-  </aside>
- </div>
- <section class="panel" id="modules">
-  <div class="section-head" style="margin:0 0 14px"><div><h2>Finance workspace</h2><p>12 coordinated modules make up the Finance Ecosystem.</p></div><span class="label">Page 1 of 12</span></div>
-  <div class="module-list">
-   <article class="module"><span class="module-icon">01</span><div><strong>Finance &amp; Treasury Dashboard</strong><small>Command centre for authorized financial position and exceptions.</small><span class="planned">CURRENT PREVIEW</span></div></article>
-   <article class="module"><span class="module-icon">02</span><div><strong>Accounts Payable</strong><small>Supplier obligations, evidence, approvals and due-date controls.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">03</span><div><strong>Accounts Receivable</strong><small>KRIM-owned invoices, collections, ageing and credit status.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">04</span><div><strong>Invoice &amp; Billing Management</strong><small>Controlled billing for separately contracted KRIM services.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">05</span><div><strong>Transactions &amp; Payment History</strong><small>Payment events, provider references and verified receipt states.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">06</span><div><strong>Partner Settlements &amp; Payables</strong><small>Partner-facing records with the current non-custodial boundary enforced.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">07</span><div><strong>Refunds &amp; Dispute Management</strong><small>Evidence-based claims, reversals, credits and dispute tracking.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">08</span><div><strong>Revenue &amp; Commission Management</strong><small>Earned referral and service fees with contractual triggers.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">09</span><div><strong>Tax Compliance</strong><small>Jurisdiction-aware tax evidence and reviewed configuration.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">10</span><div><strong>Multi-Currency Management</strong><small>Currency precision, rate sources and valuation controls.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">11</span><div><strong>Financial Reporting &amp; Analytics</strong><small>Evidence-backed reporting with accrual and cash views distinguished.</small><span class="planned">UPCOMING</span></div></article>
-   <article class="module"><span class="module-icon">12</span><div><strong>Treasury, Reconciliation &amp; Audit</strong><small>Provider and bank matching, variance queues and audit history.</small><span class="planned">UPCOMING</span></div></article>
-  </div>
- </section>
+<header><div class="wrap nav">
+<a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg?v=20261117-transparent-brand-v3" alt="KRIM Logistics — Global Logistics Operating System"></a>
+<nav class="navlinks" aria-label="Main navigation"><a href="#overview">Overview</a><a href="#position">Financial position</a><a href="#workflow">Workflow</a><a href="#modules">Finance modules</a></nav>
+<div class="navright"><a class="btn btn-outline" href="../../../index.html">Platform home</a><button class="menu" id="menu" aria-expanded="false" aria-controls="drawer" aria-label="Open navigation">☰</button></div>
+</div></header>
+<nav class="drawer" id="drawer" aria-label="Mobile navigation"><div class="drawer-label">FINANCE &amp; TREASURY</div><a href="#overview">Overview</a><a href="#position">Financial position</a><a href="#workflow">Workflow</a><a href="#modules">Finance modules</a><a href="../../../index.html">Platform home ↗</a></nav>
+<main class="wrap" id="overview">
+<div class="crumb">KRIM Logistics <span> / </span> Finance &amp; Treasury</div>
+<section class="hero">
+<div><div class="eyebrow">Knowledge · Reliability · Integration · Movement</div><h1>Finance &amp; Treasury<br><span>Command Centre</span></h1><p class="hero-copy">A connected financial workspace for the KRIM logistics network — bringing billing, receivables, expenses, approvals and reconciliation into one controlled operating view.</p><div class="hero-tags"><span>Evidence-led finance</span><span>Role-based controls</span><span>Global-ready architecture</span></div><div class="hero-actions"><a class="btn btn-primary" href="#position">View financial position ↓</a><a class="btn btn-outline" href="#modules">Explore finance workspace</a></div></div>
+<div class="hero-art" aria-label="Illustration of connected finance functions"><div class="orbit"></div><div class="core"><div><b>KRIM CORE</b><small>FINANCE OS</small></div></div><div class="node n1"><i>₹</i><div><b>Receivables</b><small>Invoices &amp; collections</small></div></div><div class="node n2"><i>↗</i><div><b>Payables</b><small>Costs &amp; approvals</small></div></div><div class="node n3"><i>⇄</i><div><b>Reconciliation</b><small>Evidence &amp; matching</small></div></div><div class="node n4"><i>▤</i><div><b>Reporting</b><small>Controlled insights</small></div></div></div>
+</section>
+<div class="notice" role="note"><div class="notice-icon">!</div><div><b>Preview environment — financial data is not connected.</b> This workspace currently displays no live balances, invoices, payments or settlements. KRIM’s initial partner-direct model remains separate: customers pay logistics partners directly; KRIM does not hold, split or disburse partner freight funds. KRIM’s own contracted service or referral fees are accounted for independently.</div></div>
+<section id="position"><div class="section-head"><div><div class="section-kicker">At a glance</div><h2>Financial position</h2><p>Authorized figures will appear here only after source records are connected and reconciled.</p></div><span class="state">Source data not connected</span></div>
+<div class="kpis">
+<article class="kpi"><div class="kpi-top"><span class="kpi-icon">₹</span><small>KRIM OWNED</small></div><strong>—</strong><p>Recognized revenue</p></article>
+<article class="kpi"><div class="kpi-top"><span class="kpi-icon">↗</span><small>COLLECTIONS</small></div><strong>—</strong><p>Outstanding receivables</p></article>
+<article class="kpi"><div class="kpi-top"><span class="kpi-icon">▤</span><small>EXPENDITURE</small></div><strong>—</strong><p>Approved expenses</p></article>
+<article class="kpi"><div class="kpi-top"><span class="kpi-icon">⇄</span><small>CONTROL</small></div><strong>—</strong><p>Reconciliation status</p></article>
+</div></section>
+<div class="content-grid">
+<section class="card"><div class="card-head"><h3>Financial activity</h3><span class="state">Awaiting connection</span></div><p class="card-sub">Period view of KRIM-owned income and expenditure. No illustrative transactions or sample values are inserted.</p><div class="empty"><div class="empty-icon">▥</div><div><b>No financial activity loaded</b><p>Connect authorized invoice, receipt, expense and ledger sources to populate this view. Amounts and trends will remain blank until verified.</p></div></div><div class="activity-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="activity-labels"><span>Period start</span><span>Period end</span></div></section>
+<aside class="card"><div class="card-head"><h3>Financial safeguards</h3><span class="state">Design controls</span></div><p class="card-sub">The rules that protect financial accuracy and organizational accountability.</p><div class="control-list">
+<div class="control"><span class="check">✓</span><div><b>Separate financial ownership</b><p>KRIM revenue is not mixed with partner freight charges.</p></div></div>
+<div class="control"><span class="check">✓</span><div><b>Evidence before recognition</b><p>Contract, delivery evidence, invoice and receipt remain distinct states.</p></div></div>
+<div class="control"><span class="check">✓</span><div><b>Controlled approvals</b><p>Financial actions require role-scoped access and review.</p></div></div>
+<div class="control"><span class="check">✓</span><div><b>Traceable corrections</b><p>Adjustments retain reason, approver and audit history.</p></div></div>
+</div></aside>
+</div>
+<section id="workflow"><div class="section-head"><div><div class="section-kicker">From agreement to accounts</div><h2>Financial control lifecycle</h2><p>Each KRIM fee follows a documented, verifiable path.</p></div></div><div class="flow">
+<article><small>01 · COMMERCIAL</small><b>Agreement &amp; fee</b><p>Define payer, service scope, fee trigger and agreed terms.</p></article>
+<article><small>02 · EVIDENCE</small><b>Service confirmation</b><p>Record completion evidence and authorized approval.</p></article>
+<article><small>03 · BILLING</small><b>Invoice &amp; receipt</b><p>Issue the correct invoice and verify the receipt state.</p></article>
+<article><small>04 · ACCOUNTING</small><b>Reconcile &amp; report</b><p>Post, reconcile and report with appropriate tax review.</p></article>
+</div></section>
+<section id="modules"><div class="section-head"><div><div class="section-kicker">One coordinated workspace</div><h2>Finance ecosystem</h2><p>12 distinct modules covering KRIM financial operations and governance.</p></div><span class="state">12 modules planned</span></div>
+<div class="modules">
+<article class="module"><span class="module-no">01</span><div><b>Finance &amp; Treasury Dashboard</b><small>Financial position, operational signals and exceptions.</small><em>CURRENT PREVIEW</em></div></article>
+<article class="module"><span class="module-no">02</span><div><b>Accounts Payable</b><small>Supplier obligations, approvals and due-date controls.</small><em>UP NEXT</em></div></article>
+<article class="module"><span class="module-no">03</span><div><b>Accounts Receivable</b><small>KRIM-owned invoices, collections and ageing.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">04</span><div><b>Invoice &amp; Billing Management</b><small>Billing for separately contracted KRIM services.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">05</span><div><b>Transactions &amp; Payment History</b><small>Provider events, references and verified receipts.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">06</span><div><b>Partner Settlements &amp; Payables</b><small>Partner-facing records with non-custodial boundaries.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">07</span><div><b>Refunds &amp; Dispute Management</b><small>Claims, evidence, reversals and dispute tracking.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">08</span><div><b>Revenue &amp; Commission Management</b><small>Earned referral and service fees with clear triggers.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">09</span><div><b>Tax Compliance</b><small>Jurisdiction-aware tax records and reviewed settings.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">10</span><div><b>Multi-Currency Management</b><small>Currency precision, exchange sources and valuation.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">11</span><div><b>Financial Reporting &amp; Analytics</b><small>Evidence-backed cash and accrual reporting.</small><em>PLANNED</em></div></article>
+<article class="module"><span class="module-no">12</span><div><b>Treasury, Reconciliation &amp; Audit</b><small>Bank matching, variance queues and audit history.</small><em>PLANNED</em></div></article>
+</div></section>
 </main>
-<footer class="footer">KRIM Logistics · Global Logistics Operating System<br>Knowledge · Reliability · Integration · Movement</footer>
+<footer class="footer"><div class="wrap footer-inner"><div><div class="footer-brand">KRIM LOGISTICS</div><small>Global Logistics Operating System</small></div><div class="footer-values">Knowledge · Reliability · Integration · Movement</div></div></footer>
 <script>
-(()=>{const toggle=document.getElementById("menuToggle"),drawer=document.getElementById("mobileDrawer");if(!toggle||!drawer)return;const close=()=>{drawer.classList.remove("open");toggle.setAttribute("aria-expanded","false")};toggle.addEventListener("click",()=>{const open=!drawer.classList.contains("open");drawer.classList.toggle("open",open);toggle.setAttribute("aria-expanded",String(open))});drawer.querySelectorAll("a").forEach(a=>a.addEventListener("click",close));document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});document.addEventListener("click",e=>{if(drawer.classList.contains("open")&&!drawer.contains(e.target)&&!toggle.contains(e.target))close()});window.addEventListener("resize",()=>{if(window.innerWidth>1050)close()})})();
+(()=>{const b=document.getElementById('menu'),d=document.getElementById('drawer');if(!b||!d)return;const close=()=>{d.classList.remove('open');b.setAttribute('aria-expanded','false')};b.addEventListener('click',()=>{const open=!d.classList.contains('open');d.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open))});d.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});window.addEventListener('resize',()=>{if(innerWidth>760)close()})})();
 </script>
-</body>
-</html>
+</body></html>
