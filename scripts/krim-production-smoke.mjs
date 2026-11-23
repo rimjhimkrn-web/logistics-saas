@@ -12,6 +12,21 @@ const required = [
   "public/partner/accepted-loads.html",
   "public/partner/dispatch-assignment.html",
   "app/customs/index.html",
+  "app/customs/dashboard.html",
+  "app/customs/secure-workspace.js",
+  "app/customs/workflows/index.html",
+  "app/customs/workflows/cases.html",
+  "app/customs/workflows/brokers.html",
+  "app/customs/workflows/broker-licence.html",
+  "app/customs/workflows/documents.html",
+  "app/customs/workflows/declarations.html",
+  "app/customs/workflows/classification.html",
+  "app/customs/workflows/imports.html",
+  "app/customs/workflows/exports.html",
+  "app/customs/workflows/sanctions.html",
+  "app/customs/workflows/free-trade-zones.html",
+  "app/customs/workflows/jurisdiction-requirements.html",
+  "app/customs/workflows/audit-ledger.html",
   "app/warehouse/index.html",
   "app/operations/index.html",
   "app/operations/route-planning.html",
@@ -1310,6 +1325,11 @@ for (const token of ["krim_admin_list_driver_verification_with_expiry", "licence
 for (const token of ["krim_admin_update_driver_licence_expiry", "auth.jwt()->>'aal'", "private.krim_has_permission", "krim_audit_events", "verification_status='pending'", "revoke all", "TO authenticated"]) {
   if (!driverLicenceExpiryAdminControlMigration.includes(token)) failures.push("Driver licence expiry admin update migration is missing authorization/audit/reset safeguard: " + token);
 }
+const driverLicenceExpiryAdminSecurityMigrationPath = "supabase/migrations/20261123101000_refine_admin_driver_licence_expiry_rpc_security.sql";
+const driverLicenceExpiryAdminSecurityMigration = existsSync(driverLicenceExpiryAdminSecurityMigrationPath) ? readFileSync(driverLicenceExpiryAdminSecurityMigrationPath, "utf8") : "";
+for (const token of ["private.krim_admin_update_driver_licence_expiry", "security invoker", "security definer", "revoke all", "TO authenticated"]) {
+  if (!driverLicenceExpiryAdminSecurityMigration.toLowerCase().includes(token.toLowerCase())) failures.push("Driver expiry RPC must keep the guarded definer helper private and expose only an invoker wrapper: " + token);
+}
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct payment guidance', 'does not create or collect freight-payment orders', 'openPartnerPaymentGuidance']],
   ["Partner mobile", partnerMobile, ['krim_submit_partner_quote', 'krim_respond_to_partner_assignment', 'loadPartnerAssignments', 'response_deadline.gt.', 'registered_business']],
@@ -2083,6 +2103,31 @@ for (const token of [
  ]) {
   if (!dispatchReplayMigration.includes(token)) failures.push("Dispatch authorization replay safeguard is missing: " + token);
  }
+
+// Customs & Trade production release: 13 protected workflow pages must exist,
+// repeat the AAL2 + active customs membership + compliance.view gate, and remain noindex.
+const customsWorkflowFiles = [
+  "index.html","cases.html","brokers.html","broker-licence.html","documents.html",
+  "declarations.html","classification.html","imports.html","exports.html","sanctions.html",
+  "free-trade-zones.html","jurisdiction-requirements.html","audit-ledger.html",
+].map((name) => "app/customs/workflows/" + name);
+for (const file of customsWorkflowFiles) {
+  const page = existsSync(file) ? readFileSync(file, "utf8") : "";
+  for (const token of ['id="krimCustomsAuthGate"', 'name="robots" content="noindex,nofollow"', "../secure-workspace.js"]) {
+    if (!page.includes(token)) failures.push("Protected Customs workflow page is missing its access/noindex control: " + file + " · " + token);
+  }
+  if (/staging preview/i.test(page)) failures.push("Production Customs workflow page still exposes staging-only copy: " + file);
+}
+const customsAccessGuard = existsSync("app/customs/secure-workspace.js") ? readFileSync("app/customs/secure-workspace.js", "utf8") : "";
+for (const token of ["aal2","krim_organization_members","compliance.view","krim_has_permission","krim_organizations"]) {
+  if (!customsAccessGuard.includes(token)) failures.push("Shared Customs page access guard is missing: " + token);
+}
+const customsProductionDashboard = existsSync("app/customs/dashboard.html") ? readFileSync("app/customs/dashboard.html", "utf8") : "";
+const customsWorkspaceIndex = existsSync("app/customs/index.html") ? readFileSync("app/customs/index.html", "utf8") : "";
+for (const href of ["./workflows/index.html","./workflows/cases.html","./workflows/brokers.html","./workflows/broker-licence.html","./workflows/documents.html","./workflows/declarations.html","./workflows/classification.html","./workflows/imports.html","./workflows/exports.html","./workflows/sanctions.html","./workflows/free-trade-zones.html","./workflows/jurisdiction-requirements.html","./workflows/audit-ledger.html"]) {
+  if (!customsProductionDashboard.includes('href="' + href + '"')) failures.push("Protected Customs dashboard is missing module link: " + href);
+}
+if (!customsWorkspaceIndex.includes('href="dashboard.html"')) failures.push("Existing Customs workspace must link to the 13-module protected dashboard.");
 
 console.log(`KRIM production smoke check: ${required.length} required paths, ${checkedScripts} inline scripts checked, ${customerOsPages.length} Customer OS pages / ${checkedCustomerOsLinks} Customer OS links, ${allHtmlFiles.length} HTML pages / ${checkedAllSiteLinks} site links audited.`);
 if (failures.length) {
