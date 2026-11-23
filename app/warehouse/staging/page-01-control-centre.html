@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a2e">
+<meta name="description" content="KRIM Warehouse OS — secure warehouse control centre for facility operations, inventory and fulfilment.">
+<title>Warehouse Control Centre | KRIM Logistics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../../config.js"></script>
+<style>
+:root{--navy:#071a2e;--navy2:#0d2b48;--blue:#087fc1;--cyan:#70dff0;--ink:#142b43;--muted:#64778c;--line:#dce6ef;--paper:#f3f7fb;--white:#fff;--green:#087e5b;--amber:#946200;--red:#b42318;--shadow:0 12px 35px rgba(8,35,62,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}
+.header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;padding-top:env(safe-area-inset-top)}.header-inner{width:100%;max-width:1500px;margin:auto;padding:10px clamp(12px,3vw,36px);min-height:70px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}.brand{display:flex;align-items:center;min-width:0;width:max-content;max-width:100%}.brand img{display:block;width:clamp(132px,17vw,190px);height:48px;max-width:100%;object-fit:contain;object-position:left center}.head-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;min-width:0;flex-wrap:nowrap}.identity{font-size:11px;color:var(--muted);max-width:250px;overflow-wrap:anywhere}.btn{border:1px solid var(--line);border-radius:10px;background:#fff;color:#203a54;padding:9px 13px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}.menu-toggle{display:none!important;width:42px;height:42px;flex:none;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--navy);align-items:center;justify-content:center;font-size:22px;font-weight:800;line-height:1}
+.layout{max-width:1500px;margin:0 auto;padding:24px clamp(14px,3vw,36px) 48px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:22px;align-items:start}.sidebar{position:sticky;top:90px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}.side-title{font-size:10px;letter-spacing:.16em;font-weight:900;color:#71849a;padding:8px 10px}.side-link{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:#40566e;font-size:12px;font-weight:750}.side-link.active,.side-link:hover{background:#eaf5fb;color:#075c91}.side-icon{width:25px;height:25px;display:grid;place-items:center;background:#f0f5f9;border-radius:8px;font-size:13px}
+main{min-width:0}.hero{background:linear-gradient(118deg,#061a2d 0%,#0b3453 57%,#0a5a78 100%);border-radius:22px;padding:clamp(22px,4vw,38px);color:#fff;position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(6,30,51,.15)}.hero:after{content:"WAREHOUSE";position:absolute;right:2%;top:-14px;font-size:clamp(54px,10vw,132px);font-weight:950;letter-spacing:-.09em;color:#fff;opacity:.055;pointer-events:none;white-space:nowrap}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:900;color:#80e6f3}.hero h1{font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.045em;margin:12px 0}.hero p{max-width:780px;color:#c6d8e8;margin:0;line-height:1.8}.hero-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:22px}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid #42647e;border-radius:99px;padding:6px 10px;background:#0b2c48;font-size:10px;color:#e0f2fa}.hero-note{font-size:11px;color:#c5d9e9}
+.status{margin:14px 0;padding:12px 14px;border:1px solid #cfe1ed;background:#edf7fc;border-radius:12px;color:#315a76;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.status.error{border-color:#f2c8c5;background:#fff1f0;color:#922b25}.status.good{border-color:#b8e4d2;background:#effaf5;color:#08704f}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:15px 0}.metric,.panel,.module{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-width:0}.metric{padding:17px}.metric small{display:block;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.08em}.metric strong{display:block;font-size:clamp(23px,3vw,31px);letter-spacing:-.04em;color:var(--navy);margin-top:6px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.8fr);gap:14px;align-items:start}.panel{padding:19px;margin-bottom:14px}.panel h2{font-size:17px;color:var(--navy);margin:0;letter-spacing:-.02em}.sub{font-size:11px;color:var(--muted);line-height:1.7;margin:5px 0 14px}.module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.module{display:flex;gap:11px;align-items:flex-start;padding:13px;background:#fbfdff;transition:border-color .15s,transform .15s}.module:hover{border-color:#9cc9df;transform:translateY(-1px)}.module-icon{width:36px;height:36px;flex:none;display:grid;place-items:center;background:#eaf5fb;border-radius:11px;color:#075d91;font-size:16px}.module strong{display:block;font-size:11px;color:var(--navy)}.module small{display:block;font-size:10px;color:var(--muted);margin-top:3px;line-height:1.55}.module.disabled{opacity:.62;cursor:default}.module.disabled:hover{transform:none;border-color:var(--line)}
+.check-list{display:grid;gap:11px}.check{display:flex;gap:10px;align-items:flex-start;font-size:11px;color:#52677c}.check b{color:#243d56}.check-mark{width:24px;height:24px;flex:none;border-radius:8px;background:#edf4f8;display:grid;place-items:center;color:#28709a}.notice{background:#fff8e8;border:1px solid #f3e0b6;color:#775719;border-radius:12px;padding:12px;font-size:11px;line-height:1.7}.notice strong{color:#674700}.footer{text-align:center;color:#8292a3;font-size:10px;padding:16px}
+/* Desktop-first layout: keep the control centre balanced on wide and mid-size screens. */
+@media(min-width:1101px){
+ .layout{max-width:1540px;grid-template-columns:258px minmax(0,1fr);gap:24px;padding:28px clamp(24px,3vw,44px) 54px}
+ .sidebar{top:94px;padding:16px}
+ main{min-width:0;width:100%}
+ .hero{min-height:270px;padding:38px 42px}
+ .hero p{max-width:760px}
+ .metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
+ .metric{padding:19px}
+ .content-grid{grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);gap:18px}
+ .panel{padding:22px}
+ .module-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+}
+@media(min-width:721px) and (max-width:1100px){
+ .layout{display:block;max-width:1000px;padding:22px 24px 44px}
+ .sidebar{position:static;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:18px;padding:12px}
+ .side-title{grid-column:1/-1}
+ .side-link{min-width:0;padding:10px 8px;font-size:11px}
+ .side-link .side-icon{flex:none}
+ .hero{padding:30px 32px}
+ .content-grid{grid-template-columns:minmax(0,1.35fr) minmax(270px,.85fr);gap:14px}
+ .metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+ .metric{padding:14px}
+ .metric strong{font-size:25px}
+ .module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){.header-inner{min-height:64px;padding:8px 12px;grid-template-columns:minmax(0,1fr) auto;gap:8px}.brand img{width:clamp(118px,42vw,158px);height:42px}.head-actions{gap:7px}.head-actions .identity,.head-actions>a.btn,.head-actions>#refresh{display:none}.menu-toggle{display:inline-flex!important}.layout{display:block;padding:14px 12px 36px}.sidebar{position:fixed;z-index:70;top:calc(64px + env(safe-area-inset-top) + 5px);right:12px;bottom:auto;width:min(88vw,320px);max-height:calc(100dvh - 86px - env(safe-area-inset-top));margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 38px rgba(7,26,46,.2);display:flex;flex-direction:column;align-items:stretch;gap:4px;overflow-y:auto;transform:translateY(-8px) scale(.98);transform-origin:top right;opacity:0;visibility:hidden;pointer-events:none;transition:transform .18s ease,opacity .18s ease,visibility .18s ease}.sidebar.open{transform:translateY(0) scale(1);opacity:1;visibility:visible;pointer-events:auto}.side-link{flex:none;padding:12px}.nav-backdrop{display:block;position:fixed;inset:calc(64px + env(safe-area-inset-top)) 0 0;background:rgba(4,18,32,.22);z-index:60;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}.nav-backdrop.show{opacity:1;visibility:visible}.hero{border-radius:17px}.panel{padding:15px}}
+@media(max-width:440px){.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:24px}.module-grid{grid-template-columns:1fr}.hero-row{align-items:flex-start}.hero:after{right:-12px;top:8px;font-size:60px}}
+/* Final responsive refinement: prevent cramped cards, clipped headings and mobile overflow. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+img,svg{max-width:100%}
+.layout,main,.content-grid,.panel,.hero,.metrics,.module-grid{min-width:0;max-width:100%}
+.hero h1,.hero p,.panel h2,.module strong,.module small{overflow-wrap:anywhere}
+@media(min-width:721px) and (max-width:1100px){
+ .layout{padding:20px 22px 42px}
+ .sidebar{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .side-link{justify-content:flex-start;min-height:42px}
+ .content-grid{grid-template-columns:minmax(0,1fr)}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+ body{font-size:14px}
+ .header{position:sticky;top:0}
+ .header-inner{min-height:60px;padding:7px 12px;gap:8px}
+ .brand{min-width:0}
+ .brand img{width:132px;height:38px}
+ .head-actions{gap:6px}
+ .menu-toggle{width:42px;height:42px;border-radius:12px}
+ .layout{display:block;width:100%;padding:12px 12px 30px}
+ main{width:100%;min-width:0}
+ .hero{padding:23px 19px 20px;border-radius:16px;min-height:0}
+ .hero:after{display:none}
+ .eyebrow{font-size:9px;letter-spacing:.14em;line-height:1.5}
+ .hero h1{font-size:clamp(29px,8.4vw,38px);line-height:1.04;letter-spacing:-.04em;margin:11px 0 10px}
+ .hero p{font-size:13px;line-height:1.68;max-width:none}
+ .hero-row{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:17px}
+ .chips{gap:7px}
+ .chip{font-size:9px;padding:6px 9px}
+ .hero-note{font-size:10px;line-height:1.5}
+ .status{margin:11px 0;padding:11px 12px;font-size:11px}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:11px 0}
+ .metric{padding:13px 12px;border-radius:13px}
+ .metric small{font-size:9px;line-height:1.45;letter-spacing:.045em;min-height:26px}
+ .metric strong{font-size:clamp(23px,7vw,28px);line-height:1.1;margin-top:7px}
+ .metric span{font-size:9px;line-height:1.45}
+ .content-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+ .panel{padding:15px 13px;margin-bottom:11px;border-radius:14px}
+ .panel h2{font-size:16px}
+ .sub{font-size:11px;line-height:1.65;margin:5px 0 12px}
+ .module-grid{grid-template-columns:minmax(0,1fr);gap:8px}
+ .module{padding:12px;gap:10px;border-radius:12px;min-height:68px}
+ .module-icon{width:35px;height:35px;border-radius:10px}
+ .module strong{font-size:11px;line-height:1.45}
+ .module small{font-size:10px;line-height:1.5}
+ .check-list{gap:10px}
+ .check{font-size:10px;line-height:1.55}
+ .notice{font-size:10px;padding:11px;line-height:1.65}
+ .sidebar{top:calc(60px + env(safe-area-inset-top) + 7px);right:10px;left:10px;width:auto;max-height:calc(100dvh - 78px - env(safe-area-inset-top));padding:11px;border-radius:15px}
+ .side-title{font-size:9px;padding:7px 9px}
+ .side-link{min-height:43px;padding:10px;font-size:11px}
+ .nav-backdrop{inset:calc(60px + env(safe-area-inset-top)) 0 0}
+ .footer{font-size:9px;line-height:1.6;padding:14px 8px}
+}
+@media(max-width:380px){
+ .layout{padding-left:10px;padding-right:10px}
+ .hero{padding:20px 16px}
+ .metrics{gap:7px}
+ .metric{padding:11px 10px}
+ .metric small{font-size:8px}
+ .metric span{font-size:8px}
+ .panel{padding:13px 11px}
+ .module{padding:11px 10px}
+ .brand img{width:122px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+@media(min-width:1600px){.layout,.header-inner{max-width:1600px}}
+
+/* Unified KRIM navigation: hamburger on desktop, tablet and mobile. */
+.header{z-index:100!important}
+.menu-toggle,.toggle{display:inline-flex!important;align-items:center;justify-content:center;flex:none;width:44px;height:44px;border:1px solid var(--line,#dce6ef);border-radius:12px;background:#fff;color:var(--navy,var(--n,#071a2e));font-size:22px;font-weight:800;line-height:1;box-shadow:0 2px 8px rgba(7,26,46,.06)}
+.menu-toggle:hover,.toggle:hover{background:#f3f7fb;border-color:#9bb7cc}
+.sidebar{position:fixed!important;z-index:90!important;top:calc(78px + env(safe-area-inset-top))!important;right:clamp(10px,2.2vw,28px)!important;left:auto!important;bottom:auto!important;width:min(360px,calc(100vw - 20px))!important;max-height:calc(100dvh - 96px - env(safe-area-inset-top))!important;margin:0!important;padding:14px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;overflow-y:auto!important;overscroll-behavior:contain;border:1px solid var(--line,#dce6ef)!important;border-radius:16px!important;background:#fff!important;box-shadow:0 20px 55px rgba(7,26,46,.22)!important;transform:translateY(-8px) scale(.98)!important;transform-origin:top right!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:transform .18s ease,opacity .18s ease,visibility .18s ease!important}
+.sidebar.open{transform:translateY(0) scale(1)!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+.sidebar .side-title{display:block!important;position:sticky;top:-14px;z-index:1;background:#fff;padding:10px 9px!important;border-bottom:1px solid var(--line,#dce6ef);font-size:10px!important;letter-spacing:.12em}
+.sidebar .side-link{display:flex!important;align-items:center;gap:10px;min-height:44px!important;padding:10px 12px!important;border-radius:10px;white-space:normal!important;overflow-wrap:anywhere;font-size:13px!important;line-height:1.35}
+.sidebar .side-link:hover{background:#f1f6fa}
+.nav-backdrop,.backdrop{display:block!important;position:fixed!important;z-index:80!important;inset:calc(72px + env(safe-area-inset-top)) 0 0!important;background:rgba(7,26,46,.28)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .18s ease,visibility .18s ease!important}
+.nav-backdrop.show,.backdrop.show{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+@media(max-width:720px){.sidebar{top:calc(68px + env(safe-area-inset-top) + 5px)!important;right:10px!important;left:auto!important;width:min(360px,calc(100vw - 20px))!important;max-height:calc(100dvh - 82px - env(safe-area-inset-top))!important}.nav-backdrop,.backdrop{inset:calc(60px + env(safe-area-inset-top)) 0 0!important}.menu-toggle,.toggle{width:42px;height:42px}}
+@media(prefers-reduced-motion:reduce){.sidebar,.nav-backdrop,.backdrop{transition:none!important}}
+.sidebar .signout-nav{width:100%;text-align:left;border:0;background:transparent;color:#40566e;font:inherit;font-size:12px;font-weight:800;cursor:pointer;margin-top:6px;border-top:1px solid var(--line,#dce6ef);padding-top:14px}.sidebar .signout-nav:hover{background:#fff1f0;color:#a12b24}</style>
+</head>
+<body>
+<header class="header"><div class="header-inner">
+<a class="brand" href="../../../index.html" aria-label="KRIM Logistics home"><img src="../../../assets/krim-primary.svg" alt="KRIM Logistics" width="190" height="60"></a>
+<div class="head-actions"><span class="identity" id="identity">Staging review · private data locked</span><a class="btn" href="../../../auth/login.html?role=warehouse">Warehouse sign in</a><button class="btn dark" id="refresh" type="button">↻ Refresh</button><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open warehouse navigation" aria-controls="warehouseNav" aria-expanded="false">☰</button></div>
+</div></header>
+<div class="layout">
+<div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+<nav class="sidebar" id="warehouseNav" aria-label="Warehouse navigation">
+<div class="side-title">WAREHOUSE WORKSPACE</div>
+<a class="side-link active" href="page-01-control-centre.html" aria-current="page"><span class="side-icon">⌂</span>Control centre</a>
+<a class="side-link" href="../index.html"><span class="side-icon">▦</span>Warehouse review index</a>
+<a class="side-link" href="../../../public/warehouse/facility-management.html"><span class="side-icon">⌖</span>Facility management</a>
+<a class="side-link" href="../../../public/warehouse/inbound-receiving.html"><span class="side-icon">⇩</span>Inbound receiving</a>
+<a class="side-link" href="../../../public/warehouse/inventory-ledger.html"><span class="side-icon">▤</span>Inventory ledger</a>
+<a class="side-link" href="../../../public/warehouse/dispatch-handover.html"><span class="side-icon">⇧</span>Dispatch & handover</a>
+<a class="side-link" href="../allocation.html"><span class="side-icon">◈</span>Shipment allocation</a>
+<a class="side-link" href="../reverse-logistics.html"><span class="side-icon">↩</span>Reverse logistics</a>
+<button class="side-link signout-nav" id="signout" type="button">Sign out</button></nav>
+<main id="main">
+<section class="hero">
+<div class="eyebrow">KRIM WAREHOUSE OS · SECURE OPERATIONS</div>
+<h1>Every unit.<br>Accounted for.</h1>
+<p>A connected warehouse workspace for facility readiness, inbound handling, quality-controlled inventory, fulfilment and dispatch. One clear operating picture—built around verified records, accountable actions and traceable stock movement.</p>
+<div class="hero-row"><div class="chips"><span class="chip">Facility-scoped access</span><span class="chip">Quality-first inventory</span><span class="chip">Mobile · Tablet · Desktop</span></div><span class="hero-note" id="updated">Private operational data is locked until sign-in</span></div>
+</section>
+<div id="status" class="status" role="status" aria-live="polite">Staging preview: visual shell available. Sign in to verify your warehouse access; no operational records are exposed in this preview.</div>
+<section class="metrics" aria-label="Warehouse activity summary">
+<div class="metric"><small>OPEN WORK QUEUE</small><strong id="openCount">—</strong><span>Authenticated facility data only</span></div>
+<div class="metric"><small>INBOUND RECEIPTS</small><strong id="inboundCount">—</strong><span>Verified records only</span></div>
+<div class="metric"><small>STOCK ON QUALITY HOLD</small><strong id="holdCount">—</strong><span>Awaiting independent review</span></div>
+<div class="metric"><small>RELEASED INVENTORY</small><strong id="releasedCount">—</strong><span>Approved stock balances only</span></div>
+</section>
+<div class="content-grid">
+<section class="panel">
+<h2>Warehouse operations</h2><p class="sub">Open a workflow. Every action must be authorised for the active organisation and approved facility; unavailable backend operations remain disabled rather than simulated.</p>
+<div class="module-grid">
+<a class="module" href="../../../public/warehouse/facility-management.html"><span class="module-icon">⌖</span><span><strong>Facility management</strong><small>Register facilities and review approval status.</small></span></a>
+<a class="module" href="../../../public/warehouse/inbound-receiving.html"><span class="module-icon">⇩</span><span><strong>Inbound receiving</strong><small>Manage arrivals, dock intake and seal checks.</small></span></a>
+<a class="module" href="../../../public/warehouse/goods-receipt.html"><span class="module-icon">▣</span><span><strong>Goods receipt</strong><small>Record inspected quantities and receipt evidence.</small></span></a>
+<a class="module" href="../../../public/warehouse/putaway-storage.html"><span class="module-icon">▤</span><span><strong>Put-away & storage</strong><small>Assign approved stock to traceable locations.</small></span></a>
+<a class="module" href="../../../public/warehouse/inventory-ledger.html"><span class="module-icon">◫</span><span><strong>Inventory ledger</strong><small>Review stock balances and auditable movements.</small></span></a>
+<a class="module" href="../allocation.html"><span class="module-icon">◈</span><span><strong>Shipment allocation</strong><small>Reserve released stock against eligible shipment legs.</small></span></a>
+<a class="module" href="../../../public/warehouse/picking-packing.html"><span class="module-icon">▧</span><span><strong>Picking & packing</strong><small>Process eligible reservations with stock controls.</small></span></a>
+<a class="module" href="../../../public/warehouse/quality-control.html"><span class="module-icon">✓</span><span><strong>Quality review</strong><small>Independent inspection and release decisions.</small></span></a>
+<a class="module" href="../../../public/warehouse/dispatch-handover.html"><span class="module-icon">⇧</span><span><strong>Dispatch & handover</strong><small>Prepare verified consignments for handover.</small></span></a>
+<a class="module" href="../reverse-logistics.html"><span class="module-icon">↩</span><span><strong>Returns & transfers</strong><small>Controlled returns, transfer receipt and QC.</small></span></a>
+<a class="module" href="../../../public/warehouse/warehouse-evidence.html"><span class="module-icon">▣</span><span><strong>Warehouse evidence</strong><small>Access authorised records and evidence trails.</small></span></a>
+<a class="module" href="../../../public/warehouse/warehouse-performance.html"><span class="module-icon">⌁</span><span><strong>Performance & alerts</strong><small>Facility-scoped operational visibility.</small></span></a>
+</div>
+</section>
+<aside>
+<section class="panel"><h2>Access & control</h2><p class="sub">Warehouse records are never shown from a public preview.</p><div class="check-list">
+<div class="check"><span class="check-mark">✓</span><span><b>Authenticated identity</b><br>Signed-in account required for private records and actions.</span></div>
+<div class="check"><span class="check-mark">✓</span><span><b>Approved facility</b><br>Access is limited to an active, administrator-approved facility.</span></div>
+<div class="check"><span class="check-mark">✓</span><span><b>Independent quality review</b><br>Creators cannot approve their own inspection work.</span></div>
+<div class="check"><span class="check-mark">✓</span><span><b>Auditable stock movement</b><br>Inventory changes must use authorised database workflows.</span></div>
+</div></section>
+<section class="notice"><strong>Operational integrity notice</strong><br>Stock reservation, picking, transfer and quality-release actions must pass server-side validation. If a required guard or verified backend contract is unavailable, the affected action stays paused. This page does not display sample counts or invent warehouse activity.</section>
+</aside>
+</div>
+<footer class="footer">KRIM Global Logistics OS · Knowledge · Reliability · Integration · Movement</footer>
+</main>
+</div>
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const client=window.KRIM_SUPABASE;
+const status=(message,kind="")=>{const el=$("status");el.textContent=message;el.className="status"+(kind?" "+kind:"");};
+const menu=$("menuToggle"),nav=$("warehouseNav"),backdrop=$("navBackdrop");
+function closeMenu(){nav.classList.remove("open");backdrop.classList.remove("show");menu.setAttribute("aria-expanded","false");menu.setAttribute("aria-label","Open warehouse navigation");}
+function toggleMenu(){const open=!nav.classList.contains("open");nav.classList.toggle("open",open);backdrop.classList.toggle("show",open);menu.setAttribute("aria-expanded",String(open));menu.setAttribute("aria-label",open?"Close warehouse navigation":"Open warehouse navigation");}
+menu.addEventListener("click",toggleMenu);backdrop.addEventListener("click",closeMenu);document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",closeMenu));
+async function verifySession(){
+ if(!client){status("Supabase configuration is unavailable. Private warehouse data remains locked.","error");return;}
+ try{
+  const {data,error}=await client.auth.getSession();if(error)throw error;
+  if(!data.session){$("identity").textContent="Staging review · sign in required";status("Staging preview is available, but private warehouse records and all operational actions require an authenticated session. Sign in to continue.");return;}
+  $("identity").textContent=data.session.user.email||"Authenticated warehouse user";$("signout").hidden=false;
+  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id").eq("user_id",data.session.user.id).eq("status","active");
+  if(memberError)throw memberError;
+  if(!members||!members.length){status("Signed in, but no active organisation membership was found. No warehouse records or actions are available.","error");return;}
+  status("Authenticated. Active organisation membership detected. Facility approval and warehouse-role permissions must be verified by each workflow before any private data or action is enabled.","good");
+  $("updated").textContent="Session verified · facility scope not yet confirmed";
+ }catch(error){status("Warehouse access verification could not be completed. Private data remains locked. "+(error.message||""),"error");}
+}
+$("refresh").addEventListener("click",verifySession);
+$("signout").addEventListener("click",async()=>{if(client)await client.auth.signOut();location.reload();});
+verifySession();
+})();
+</script>
+</body></html>
