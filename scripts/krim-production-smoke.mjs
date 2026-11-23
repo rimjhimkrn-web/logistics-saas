@@ -980,7 +980,8 @@ for (const [label, source, pattern] of [
 for (const [file, target] of [
   ["public/shipments/pickup.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
   ["public/partner/pickup-confirmation.html", /location\.replace\(['"]\.\.\/pickup-tracking\.html/],
-  ["public/driver/pickup-checklist.html", /location\.replace\(['"]\.\.\/\.\.\/app\/driver\/staging\/page-06-pickup-collection\.html/],
+  ["public/driver/pickup-checklist.html", /location\.replace\(['"]\.\.\/\.\.\/app\/driver\/module-05-pickup-collection\.html/],
+  ["app/driver/module-05-pickup-collection.html", /location\.replace\(['"]\.\/staging\/page-06-pickup-collection\.html/],
   ["app/driver/module-05-pickup-collection.html", /location\.replace\(['"]\.\/staging\/page-06-pickup-collection\.html/],
 ]) {
   const source = existsSync(file) ? readFileSync(file, "utf8") : "";
