@@ -1230,6 +1230,8 @@ const driverLicenceExpiryMigration = existsSync("supabase/migrations/20261115170
   ? readFileSync("supabase/migrations/20261115170000_enforce_driver_licence_expiry_across_operations.sql", "utf8") : "";
 const driverLicenceExpiryAdminMigration = existsSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql")
   ? readFileSync("supabase/migrations/20261115170500_expose_driver_licence_expiry_to_admin_review.sql", "utf8") : "";
+const driverLicenceExpiryAdminControlMigration = existsSync("supabase/migrations/20261123100000_admin_driver_licence_expiry_control.sql")
+  ? readFileSync("supabase/migrations/20261123100000_admin_driver_licence_expiry_control.sql", "utf8") : "";
 const driverProfileGuardMigration = existsSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql")
   ? readFileSync("supabase/migrations/20261115171000_prevent_driver_self_approval_and_reset_on_licence_change.sql", "utf8") : "";
 const driverProfileGuardConsolidationMigration = existsSync("supabase/migrations/20261115171500_consolidate_driver_licence_profile_guard.sql")
@@ -1303,6 +1305,9 @@ if (!driverMobileRepository.includes("licence_expiry_date") || !driverMobile.inc
 
 for (const token of ["krim_admin_list_driver_verification_with_expiry", "licence_expiry_date", "aal2", "revoke all", "TO authenticated"]) {
   if (!driverLicenceExpiryAdminMigration.toLowerCase().includes(token.toLowerCase())) failures.push("Driver expiry admin RPC migration is missing access/display control: " + token);
+}
+for (const token of ["krim_admin_update_driver_licence_expiry", "auth.jwt()->>'aal'", "private.krim_has_permission", "krim_audit_events", "verification_status='pending'", "revoke all", "TO authenticated"]) {
+  if (!driverLicenceExpiryAdminControlMigration.includes(token)) failures.push("Driver licence expiry admin update migration is missing authorization/audit/reset safeguard: " + token);
 }
 for (const [label, source, tokens] of [
   ["Customer mobile", customerMobile, ['krim_create_global_shipment_idempotent', 'krim_accept_global_quote', 'loadCustomerShipments', 'loadCustomerQuotes', 'Partner-direct payment guidance', 'does not create or collect freight-payment orders', 'openPartnerPaymentGuidance']],
