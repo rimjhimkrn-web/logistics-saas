@@ -956,7 +956,7 @@ const phaseEightList = existsSync("public/customer-os/customer-services/shipment
 const phaseEightOps = existsSync("public/customer-os/assets/shipment-operations.js") ? readFileSync("public/customer-os/assets/shipment-operations.js", "utf8") : "";
 const phaseEightHub = existsSync("public/customer-os/index.html") ? readFileSync("public/customer-os/index.html", "utf8") : "";
 const phaseEightNav = existsSync("public/customer-os/assets/customer-workflow.js") ? readFileSync("public/customer-os/assets/customer-workflow.js", "utf8") : "";
-const phaseEightDriver = existsSync("app/driver/module-05-pickup-collection.html") ? readFileSync("app/driver/module-05-pickup-collection.html", "utf8") : "";
+const phaseEightDriver = existsSync("app/driver/staging/page-06-pickup-collection.html") ? readFileSync("app/driver/staging/page-06-pickup-collection.html", "utf8") : "";
 for (const [file, source] of [
   ["public/pickup-tracking.html", phaseEightPickup],
   ["app/driver/module-05-pickup-collection.html", phaseEightDriver],
@@ -1208,7 +1208,7 @@ const partnerMobileWorkspace = existsSync("mobile/krim-partner/src/PartnerWorksp
 const partnerRepository = existsSync("mobile/krim-partner/src/lib/partnerRepository.ts") ? readFileSync("mobile/krim-partner/src/lib/partnerRepository.ts", "utf8") : "";
 const partnerMobile = partnerMobileWorkspace + "\\n" + partnerRepository;
 const driverMobile = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx") ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
-const driverWorkspacePage = existsSync("app/driver/index.html") ? readFileSync("app/driver/index.html", "utf8") : "";
+const driverWorkspacePage = existsSync("app/driver/staging/page-17-driver-profile-compliance.html") ? readFileSync("app/driver/staging/page-17-driver-profile-compliance.html", "utf8") : "";
 const driverVerificationAdminPage = existsSync("app/platform-admin/driver-verification.html") ? readFileSync("app/platform-admin/driver-verification.html", "utf8") : "";
 const partnerCapabilityAdminPage = existsSync("app/platform-admin/partner-capabilities.html") ? readFileSync("app/platform-admin/partner-capabilities.html", "utf8") : "";
 const partnerCapabilitySubmissionPage = existsSync("public/partner/services-capabilities.html") ? readFileSync("public/partner/services-capabilities.html", "utf8") : "";
@@ -1337,7 +1337,7 @@ const driverLocationSource = existsSync("mobile/krim-driver/src/lib/locationTrac
 const driverSessionFunction = existsSync("supabase/functions/krim-driver-tracking-session/index.ts") ? readFileSync("supabase/functions/krim-driver-tracking-session/index.ts", "utf8") : "";
 const driverGpsUpdateFunction = existsSync("supabase/functions/krim-driver-gps-update/index.ts") ? readFileSync("supabase/functions/krim-driver-gps-update/index.ts", "utf8") : "";
 const publicShipmentTracking = existsSync("supabase/functions/public-shipment-tracking/index.ts") ? readFileSync("supabase/functions/public-shipment-tracking/index.ts", "utf8") : "";
-const driverBrowserTracking = existsSync("app/driver/module-08-live-tracking.html") ? readFileSync("app/driver/module-08-live-tracking.html", "utf8") : "";
+const driverBrowserTracking = existsSync("app/driver/staging/page-09-live-tracking.html") ? readFileSync("app/driver/staging/page-09-live-tracking.html", "utf8") : "";
 const driverMobileWorkspace = existsSync("mobile/krim-driver/src/DriverWorkspace.tsx")
   ? readFileSync("mobile/krim-driver/src/DriverWorkspace.tsx", "utf8") : "";
 const customerTrackingPage = existsSync("tracking.html") ? readFileSync("tracking.html", "utf8") : "";
