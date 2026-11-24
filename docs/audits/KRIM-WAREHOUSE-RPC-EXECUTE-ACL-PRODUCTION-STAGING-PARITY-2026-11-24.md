@@ -290,3 +290,25 @@ Effective grants differ for several changed functions:
 - The two formatting-only changes and the verification-case result-field addition are low-risk, but should still be tracked in parity reconciliation.
 
 No live database changes were made. All function definitions, effective grants, and referenced table columns were inspected read-only. The findings do not establish successful real partner onboarding, verified route capacity, or successful commercial dispatch.
+
+
+## Proposed production repair for confirmed country-pack column defect
+
+Added a guarded, forward-only proposal:
+`docs/proposed-migrations/20261124_fix_partner_service_area_country_pack_status_reference.sql`
+
+It:
+- Requires `public.krim_country_operating_packs.pack_status` to exist and refuses if a `status` column unexpectedly exists.
+- Locates the exact `public.krim_admin_review_partner_service_area(bigint,text,text)` overload.
+- Requires exactly one `cp.status='approved'` reference before replacing it with `cp.pack_status='approved'`.
+- Refuses unknown function definitions and verifies the resulting function definition.
+- Uses `CREATE OR REPLACE` from the existing function definition so the existing owner, SECURITY DEFINER setting, search_path and grants are preserved.
+
+An isolated PostgreSQL 16 fixture, assertions, and GitHub Actions workflow were added:
+- `tests/sql/country-pack-status-reference-fixture.sql`
+- `tests/sql/country-pack-status-reference-assertions.sql`
+- `.github/workflows/country-pack-status-reference-test.yml`
+
+The fixture includes only synthetic schema/function data and creates isolated `anon` and `authenticated` roles. Assertions check the repaired column reference, preservation of SECURITY DEFINER and the authenticated grant, denial of anon EXECUTE, and successful execution against an approved synthetic country pack.
+
+**Verification status:** workflow files are committed, but no GitHub Actions run was visible for the latest branch head at the time of this update. The SQL proposal has not been executed against production or staging. It is not an applied migration and is not authorization to modify production. Do not promote until the isolated workflow passes and the broader migration-ledger reconciliation/release approval is complete.
