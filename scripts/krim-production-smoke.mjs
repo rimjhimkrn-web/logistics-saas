@@ -134,8 +134,12 @@ for (const token of [
 ]) {
   if (!notificationCentre.includes(token)) failures.push("Authenticated notification centre is missing required feed behavior: " + token);
 }
-if (!notificationStore.includes("export const supabase = createClient(")) {
-  failures.push("Shared app Supabase client is not exported for authenticated notification pages.");
+if (!notificationStore.includes("export const supabase = window.KRIM_SUPABASE || window.supabaseClient || createClient(") ||
+    !notificationStore.includes("hostname.endsWith(\".krim-staging.pages.dev\")") ||
+    !notificationStore.includes("https://qrpcivhdxobiaofppbkl.supabase.co") ||
+    !notificationStore.includes("https://ebltviniygljwwseplph.supabase.co") ||
+    !notificationStore.includes("window.KRIM_SUPABASE = supabase")) {
+  failures.push("Shared app Supabase client must be exported and isolate all staging hosts from production.");
 }
 if (notificationCentre.includes("TKT-2026-9912") || notificationCentre.includes("sample alert") || notificationCentre.includes("Demo notification")) {
   failures.push("Notification centre must not contain fabricated notification content.");
