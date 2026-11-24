@@ -1,0 +1,40 @@
+name: KRIM notification resolver isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_krim_notification_recipient_resolver.sql'
+      - 'tests/sql/notification-recipient-resolver-*.sql'
+      - '.github/workflows/notification-resolver-sql-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  resolver-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: krim_resolver_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_resolver_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare isolated fixture schema
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_resolver_test -v ON_ERROR_STOP=1 -f tests/sql/notification-recipient-resolver.test.sql
+      - name: Compile proposed resolver against fixture schema
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_resolver_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_krim_notification_recipient_resolver.sql
+      - name: Run behavior and privilege assertions
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_resolver_test -v ON_ERROR_STOP=1 -f tests/sql/notification-recipient-resolver-assertions.sql
