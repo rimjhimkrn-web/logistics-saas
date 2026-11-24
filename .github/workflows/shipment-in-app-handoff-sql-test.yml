@@ -1,0 +1,40 @@
+name: KRIM shipment in-app notification handoff isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_shipment_workflow_in_app_notification_handoff.sql'
+      - 'tests/sql/shipment-in-app-handoff-*'
+      - '.github/workflows/shipment-in-app-handoff-sql-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/proposed-migrations/20261124_shipment_workflow_in_app_notification_handoff.sql'
+      - 'tests/sql/shipment-in-app-handoff-*'
+      - '.github/workflows/shipment-in-app-handoff-sql-test.yml'
+jobs:
+  handoff-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: krim_handoff_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_handoff_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare synthetic handoff schema
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_handoff_test -v ON_ERROR_STOP=1 -f tests/sql/shipment-in-app-handoff-fixture.sql
+      - name: Compile proposed handoff migration
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_handoff_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_shipment_workflow_in_app_notification_handoff.sql
+      - name: Verify customer, partner, idempotency and no-recipient paths
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_handoff_test -v ON_ERROR_STOP=1 -f tests/sql/shipment-in-app-handoff-assertions.sql
