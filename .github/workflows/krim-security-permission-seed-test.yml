@@ -1,0 +1,47 @@
+name: KRIM staging security permission seed isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_restore_staging_security_permission_catalogue.sql'
+      - 'tests/sql/krim-security-permission-seed-fixture.sql'
+      - 'tests/sql/krim-security-permission-seed-assertions.sql'
+      - '.github/workflows/krim-security-permission-seed-test.yml'
+  push:
+    branches:
+      - 'feat/notification-recipient-resolver-draft-2026-11-24'
+    paths:
+      - 'docs/proposed-migrations/20261124_restore_staging_security_permission_catalogue.sql'
+      - 'tests/sql/krim-security-permission-seed-fixture.sql'
+      - 'tests/sql/krim-security-permission-seed-assertions.sql'
+      - '.github/workflows/krim-security-permission-seed-test.yml'
+jobs:
+  permission-seed:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create minimal staging catalogue fixture
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f tests/sql/krim-security-permission-seed-fixture.sql
+      - name: Apply proposed seed in isolated database
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f docs/proposed-migrations/20261124_restore_staging_security_permission_catalogue.sql
+      - name: Assert exact seed and least-privilege mapping
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres -f tests/sql/krim-security-permission-seed-assertions.sql
