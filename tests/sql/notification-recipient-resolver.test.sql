@@ -75,3 +75,11 @@ insert into public.krim_shipment_partner_assignments values
   (70,100,20,'accepted'),
   (71,100,20,'active');
 
+
+-- Negative-path fixtures: inactive/suspended members and cancelled assignments.
+insert into public.krim_shipments values (101,10);
+insert into public.krim_organization_members values
+  (63,10,'00000000-0000-0000-0000-000000000063','finance','suspended'),
+  (64,20,'00000000-0000-0000-0000-000000000064','manager','suspended');
+insert into public.krim_shipment_partner_assignments values
+  (72,101,20,'cancelled');
