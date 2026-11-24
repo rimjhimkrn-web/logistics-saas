@@ -31,4 +31,5 @@ BEGIN
 END;
 $function$;
 
+REVOKE ALL ON FUNCTION public.krim_admin_review_partner_service_area(bigint,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.krim_admin_review_partner_service_area(bigint,text,text) TO authenticated;
