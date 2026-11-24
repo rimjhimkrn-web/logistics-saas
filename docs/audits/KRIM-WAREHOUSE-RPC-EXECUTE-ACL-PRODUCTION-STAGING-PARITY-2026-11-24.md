@@ -242,3 +242,51 @@ A second catalog pass compared structural fingerprints for all common base table
 - The other 19 changed shared function definitions require targeted diff/review; their hashes alone do not classify the changes as safe or unsafe.
 
 The two signature-only production functions and 15 staging functions, 24 storage-policy deltas, two staging-only triggers, and two missing production extensions are detailed in the preceding baseline section. No live changes were made.
+
+
+## Twenty shared function-definition differences — targeted review — 2026-11-24
+
+Full `pg_get_functiondef` text and effective EXECUTE grants were compared for all 20 common public/private signatures whose definition hashes differ. The differences are not one uniform drift: staging contains multiple later safety controls, one confirmed production function defect, some privilege differences requiring call-path validation, and two formatting-only rewrites.
+
+### Functional changes observed in staging
+
+1. **Partner route capability helpers** — `private.krim_partner_capability_covers_shipment` and `..._shipment_leg` additionally require active service-area coverage at both endpoints. The helpers also use explicitly qualified `pg_catalog` functions in staging. Production's versions omit the active-service-area checks.
+2. **Customer quote acceptance** — staging additionally requires current partner compliance at the acceptance/finalization boundary.
+3. **Country operating-pack review** — staging adds evidence-source and independent-review checks (including reviewer identity distinct from creator/reviewer), rather than relying only on a control's status/expiry. This aligns with the repository's country-pack approval-control work.
+4. **Service-area admin review** — staging checks `krim_country_operating_packs.pack_status='approved'`. Production checks `krim_country_operating_packs.status='approved'`, but that table has no `status` column in either project; its status column is `pack_status`. This is a confirmed production function-definition defect: the approval path can fail at runtime with an undefined-column error. The staging expression matches the live schema.
+5. **Leg and shipment-wide partner awards** — staging additionally verifies current route capacity for the requested service date before creating assignments.
+6. **Partner matching** — staging additionally requires active registered-business partners, current compliance, active service areas at both endpoints, and verified route capacity. The result metadata also records the capacity gate. Production matching is less restrictive.
+7. **Market activation** — staging adds country-pack version selection and checks mandatory control evidence, current effective dates, source/jurisdiction validity, reviewer identity and separation of duties. Production's gate has materially weaker evidence/reviewer checks.
+8. **Partner location coverage scoring** — staging requires active country/market records, an approved current country pack and an approved service-area workflow. Production uses a broader service-area/capability fallback. This is a deliberate-looking tightening, but it can reduce eligible scoring where only capability records exist; verify intended onboarding data model before promotion.
+9. **Dispatchable driver list** — staging adds exclusion of drivers already assigned through active vehicle bindings, requires an unexpired licence, accepted identity evidence, a verified/active vehicle, and all required vehicle documents accepted and unexpired. Production checks driver licence front/back and driver verification but does not enforce those additional driver/vehicle gates.
+10. **Capacity reservation and assignment acceptance** — staging finalizes a confirmed shipment assignment only after the capacity reservation is confirmed; otherwise assignment finalization is deferred. Production finalizes immediately on the corresponding confirmed-shipment path.
+11. **Partner onboarding v1** — staging requires AAL2 MFA before verification submission; production does not.
+12. **Partner onboarding v2 resubmission** — staging clears prior review notes and resets the verification case's decision/status/completion state on resubmission. Production updates submission metadata without the same explicit reset.
+13. **Partner quote submission** — staging checks the current time-limited compliance review, not only historical organization status fields.
+
+The repository contains relevant implementation migrations, including `20261104103538_quote_orchestration_verified_capacity_matching.sql`, `20261104221500_krim_country_pack_status_approval_controls.sql`, `20261105200000_require_current_partner_compliance_for_commercial_actions.sql`, `20261107093000_partner_compliance_review_workflow.sql`, `20261116012000_add_authorized_leg_partner_quote_award_rpc.sql`, and `20261123101000_refine_admin_driver_licence_expiry_rpc_security.sql`. These provide source intent for the newer safeguards, but their presence in Git does not prove the migration was applied to either environment.
+
+### Non-functional and presentation changes
+
+- `private.krim_admin_update_driver_licence_expiry` and `public.krim_admin_update_driver_licence_expiry` differ only in formatting/qualification; the guarded MFA + platform-admin checks and SECURITY INVOKER public wrapper remain.
+- `public.krim_admin_list_partner_verification_cases` adds `partner_review_notes` and `partner_onboarding_status` to its result payload; consumers should tolerate/benefit from these additional fields.
+
+### Function privilege drift requiring explicit resolution
+
+Effective grants differ for several changed functions:
+- `public.krim_award_leg_partner_quote(bigint)`: authenticated EXECUTE is true in production and false in staging. The repository migration `20261116012000_add_authorized_leg_partner_quote_award_rpc.sql` explicitly grants EXECUTE to authenticated after revoking PUBLIC/anon. Staging therefore does not match the checked-in authorized RPC migration; verify whether a later deliberate revoke exists before restoring access.
+- `public.krim_submit_partner_onboarding_global_v2(...)`: authenticated EXECUTE is true in production and false in staging. V2 may be a legacy path after v1 adoption; confirm current frontend/API call sites before changing the grant.
+- `public.krim_submit_partner_quote(...)`: authenticated EXECUTE is true in production and false in staging. This is a likely partner-bidding workflow blocker if the UI still calls this RPC; trace the active UI/RPC path before changing ACLs.
+- `private.krim_partner_capability_covers_shipment(bigint,bigint)`: production grants authenticated EXECUTE but not service_role; staging denies authenticated and grants service_role. Since this helper lives in the private schema and is called by privileged workflow functions, staging's narrower direct access may be intentional.
+- `private.krim_partner_capability_covers_shipment_leg(bigint,bigint)`: staging grants service_role while production grants neither authenticated nor service_role. Review the exact internal callers and expected execution role.
+- `public.krim_customer_prepare_partner_quote(bigint,timestamptz)`: production is SECURITY INVOKER; staging is SECURITY DEFINER. Both allow authenticated execution. The delegated `krim_award_partner_quote_for_checkout` is authenticated-executable in production but not in staging. Staging's definer wrapper appears to be an intentional narrow entry point around a service-only delegated function; do not convert it to INVOKER or grant the underlying RPC without testing the intended boundary.
+
+### Review disposition
+
+- **Confirmed defect to repair in a reviewed forward-only production migration:** `krim_admin_review_partner_service_area` references nonexistent `krim_country_operating_packs.status`; staging's `pack_status` reference matches the actual table.
+- **Likely intentional safety improvements to preserve:** verified capacity checks, current compliance checks, stronger country-pack review, driver/vehicle dispatch readiness, MFA onboarding and capacity-gated assignment finalization.
+- **Do not blindly copy staging functions to production.** The changes alter partner eligibility, scoring, dispatch availability, onboarding friction, and assignment state transitions. They need regression tests and explicit acceptance of the intended policy.
+- **Release blockers still open:** resolve the three authenticated-RPC grant differences against actual frontend call sites; review the two private helper ACL differences; add positive and negative end-to-end tests for capacity-gated quote award/acceptance, driver+vehicle dispatch readiness, and partner onboarding/resubmission; then prepare forward-only SQL for the confirmed production column-reference defect.
+- The two formatting-only changes and the verification-case result-field addition are low-risk, but should still be tracked in parity reconciliation.
+
+No live database changes were made. All function definitions, effective grants, and referenced table columns were inspected read-only. The findings do not establish successful real partner onboarding, verified route capacity, or successful commercial dispatch.
