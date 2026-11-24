@@ -32,7 +32,6 @@ declare
   v_title text;
   v_message text;
   v_notification_type text;
-  v_created integer := 0;
   v_recipient_count integer := 0;
 begin
   select ae.id, ae.action_type, wr.workflow_id, wr.entity_id,
@@ -115,10 +114,6 @@ begin
     on conflict (event_id, user_id, notification_type)
       where event_id is not null and user_id is not null
     do nothing;
-
-    get diagnostics v_created = row_count;
-    -- Accumulate inserted rows without confusing conflict/no-op with delivery.
-    v_created := v_created;
   end loop;
 
   return jsonb_build_object(
