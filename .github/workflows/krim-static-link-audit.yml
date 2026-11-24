@@ -24,6 +24,19 @@ jobs:
         run: |
           node scripts/audit-krim-links.mjs > krim-link-audit.json || true
           node -e "const r=require('./krim-link-audit.json'); console.log('Scanned HTML files: '+r.html_files_scanned); console.log('Broken local references: '+r.broken_local_references); console.log('Operational risk review findings: '+(r.operational_risk_findings||0)); for(const f of (r.operational_risk_details||[]).slice(0,40)) console.log('- '+f.source+' ['+f.category+'] '+f.reason);" >> "$GITHUB_STEP_SUMMARY"
+      - name: Run complete static page and redirect audit
+        shell: bash
+        run: |
+          mkdir -p audit-output
+          node scripts/krim-complete-static-audit.mjs | tee audit-output/console-summary.txt
+          node -e "const r=require('./audit-output/krim-complete-audit.json'); console.log('Complete HTML pages: '+r.totals.htmlPages); console.log('Exact duplicate groups: '+r.totals.duplicateGroups); console.log('Redirect aliases: '+(r.totals.redirectRoutes||0)); console.log('Integration candidates (redirects excluded): '+r.totals.operationalPagesWithoutVisibleSupabaseSignals); console.log('Placeholder wording signals: '+r.totals.placeholderPages);" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload complete static audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-complete-static-audit
+          path: audit-output/
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload full audit report
         uses: actions/upload-artifact@v4
         with:
