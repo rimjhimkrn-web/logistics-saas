@@ -115,7 +115,8 @@ begin
         into v_attempt, v_max_attempts, v_run_step_id
       from public.krim_workflow_action_executions
       where id = v_claim.action_execution_id
-        and (lease_id = v_claim.lease_id or lease_id is null);
+        and lease_id = v_claim.lease_id
+          and request_snapshot->>'worker_id' = p_worker_id;
 
       if not found then
         -- Lease was replaced; stale worker must not mutate the new owner's row.
@@ -131,7 +132,8 @@ begin
             error_code = v_error_code, error_message = v_error_message,
             lease_id = null, lease_expires_at = null, updated_at = clock_timestamp()
         where id = v_claim.action_execution_id
-          and (lease_id = v_claim.lease_id or lease_id is null);
+          and lease_id = v_claim.lease_id
+          and request_snapshot->>'worker_id' = p_worker_id;
 
         update public.krim_workflow_run_steps
         set status = 'failed', error_message = v_error_message,
@@ -148,7 +150,8 @@ begin
             error_code = v_error_code, error_message = v_error_message,
             lease_id = null, lease_expires_at = null, updated_at = clock_timestamp()
         where id = v_claim.action_execution_id
-          and (lease_id = v_claim.lease_id or lease_id is null);
+          and lease_id = v_claim.lease_id
+          and request_snapshot->>'worker_id' = p_worker_id;
 
         update public.krim_workflow_run_steps
         set status = 'pending', error_message = null, completed_at = null
