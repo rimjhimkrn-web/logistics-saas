@@ -29,6 +29,10 @@ begin
  request_snapshot=ae.request_snapshot||jsonb_build_object('worker_id',p_worker_id,'run_step_id',100),
  attempt_number=ae.attempt_number+1,updated_at=clock_timestamp()
  where ae.id=v_id;
+ if (select mode from public.krim_batch_test_control where singleton)='stale_replace' then
+   update public.krim_workflow_action_executions set lease_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+     request_snapshot=jsonb_set(request_snapshot,'{worker_id}','"worker-b"') where id=v_id;
+ end if;
  action_execution_id:=v_id; lease_id:=v_lease; action_type:='test_action'; return next;
 end $$;
 create function krim_internal.execute_workflow_action_fenced(p_action_execution_id bigint,p_lease_id uuid,p_worker_id text)
@@ -42,11 +46,7 @@ begin
    raise exception 'workflow_action_lease_stale_or_not_owned';
  end if;
  select mode,response into v_mode,v_response from public.krim_batch_test_control where singleton;
- if v_mode='stale_replace' then
-   update public.krim_workflow_action_executions set lease_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-     request_snapshot=jsonb_set(request_snapshot,'{worker_id}','"worker-b"') where id=p_action_execution_id;
-   raise exception 'simulated stale worker after lease replacement';
- elsif v_mode='raise' then
+ if v_mode='raise' then
    raise exception 'simulated executor failure';
  elsif coalesce(v_response->>'status','')='succeeded' then
    update public.krim_workflow_action_executions set status='succeeded' where id=p_action_execution_id;
