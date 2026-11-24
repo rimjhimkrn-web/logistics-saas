@@ -55,3 +55,11 @@ A separate read-only catalog pass confirmed the resolver's remaining referenced 
 - The `krim_internal` schema grants USAGE to `service_role`, but not to `authenticated` or `anon`. This is consistent with the intended internal service-role-only invocation.
 
 This is catalog/constraint verification only. It does not establish that the SQL compiles or behaves correctly. The resolver function does not yet exist in production, and no migration was applied. Runtime/transactional tests remain outstanding.
+
+
+## Recipient-scope review — additional gate before approval
+The live role constraint includes `owner`, `admin`, `operator`, `dispatcher`, `finance`, `manager`, `member`, and `driver`. The current resolver excludes only `driver`, so it can return finance and general member accounts for partner shipment events. That may be broader than the operational audience for assignment/dispatch/status intents.
+
+**Required before this resolver is approved for enqueue:** define an explicit recipient-role policy per notification intent/event (for example, assignment offers vs. shipment status vs. billing events), and pass the intent/event context into resolution or enforce the role filter in the trusted caller. Do not guess a universal allow-list. Verify that the role policy still includes all intended customer account owners and authorized operational contacts. Until then, the function remains a draft and must not be used to enqueue notifications.
+
+This review also confirms that the function only returns user IDs. It does not prove a user's email/phone is verified, and it does not authorize external delivery. A separate server-side destination resolver must inspect the authoritative auth identity confirmation fields and apply channel-specific suppression/consent rules before an external destination can be used. Durable in-app service notices remain a separate required path.
