@@ -91,3 +91,17 @@ Reproducible staging-only script:
 `tests/sql/staging-tenant-boundary-vehicle-registration.sql`
 
 This is one proven negative case (partner vehicle registration). It does not replace the remaining customer quote, driver assignment, warehouse facility/evidence and partner capacity cross-tenant test matrix.
+
+
+## Second dynamic staging negative test: customer shipment creation
+A separate synthetic two-user transaction was executed in staging:
+1. Tenant A provisioned a customer organization through `krim_provision_customer_organization`.
+2. Tenant B attempted to create a shipment using Tenant A's organization ID through the real `krim_create_global_shipment_from_places` RPC chain, with otherwise valid route/place/cargo inputs.
+3. The call was denied with insufficient privilege before shipment/location creation.
+4. The test asserted no shipment row existed for Tenant A's organization and rolled back all synthetic users, organization and audit rows.
+5. Post-rollback counts remained 1 Auth user, 0 organizations, 0 shipments, 0 locations and 0 customer-provisioning audit rows.
+
+Reproducible staging-only script:
+`tests/sql/staging-customer-shipment-tenant-isolation.sql`
+
+Two cross-tenant negative cases now pass in staging: foreign partner vehicle registration and foreign customer shipment creation. Other matrix cases remain outstanding.
