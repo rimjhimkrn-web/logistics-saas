@@ -43,3 +43,15 @@ Adds a service-role-only database resolver that returns eligible user IDs and or
 - Partner assignment statuses: offered, accepted, rejected, cancelled, active, completed, failed.
 - Partner lifecycle, verification and compliance constraints were checked against the live catalog.
 - Live acquisition profiles, identity links, workspace profiles, partner assignments, capacity bindings, and communication recipients currently contain zero rows; production fixtures were not inserted.
+
+
+## Follow-up live catalog verification — 2026-11-24
+A separate read-only catalog pass confirmed the resolver's remaining referenced constraints and schema access:
+- `krim_customer_acquisition_profiles.status` allows `discovered`, `engaged`, `registered`, `active`, `inactive`, and `suppressed`; the resolver's `active` filter is valid.
+- `krim_organizations.organization_type` allows `customer`, `partner`, `enterprise`, `carrier`, `warehouse`, `forwarder`, `platform`, `customs`, `finance`, and `operations`; all resolver type values are valid.
+- Organization status allows `active`, `inactive`, `suspended`. Partner lifecycle allows `active` among its enumerated values; verification allows `verified`; compliance allows `compliant`.
+- Organization member roles are constrained to `owner`, `admin`, `operator`, `dispatcher`, `finance`, `manager`, `member`, `driver`; the explicit `role <> 'driver'` predicate is valid.
+- Partner assignment statuses include `offered`, `accepted`, `active`; the resolver's included assignment statuses are valid.
+- The `krim_internal` schema grants USAGE to `service_role`, but not to `authenticated` or `anon`. This is consistent with the intended internal service-role-only invocation.
+
+This is catalog/constraint verification only. It does not establish that the SQL compiles or behaves correctly. The resolver function does not yet exist in production, and no migration was applied. Runtime/transactional tests remain outstanding.
