@@ -62,6 +62,8 @@ footer{text-align:center;color:#64748b;font-size:12px}
   try{
    const target=new URL(requested,location.href);
    const allowed=/^\/logistics-saas\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname)
+    || /^\/logistics-saas\/public\/partner\/(capacity-resources|service-coverage)\.html$/.test(target.pathname)
+    || /^\/public\/partner\/(capacity-resources|service-coverage)\.html$/.test(target.pathname);
     || /^\/app\/(customer|partner|driver|warehouse|customs|finance|operations|enterprise|platform-admin)\/index\.html$/.test(target.pathname);
    if(target.origin===location.origin&&allowed)return target.href;
   }catch(_){}
