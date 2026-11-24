@@ -102,9 +102,11 @@ for (const file of htmlFiles) {
   const noindex = /\bnoindex\b/i.test(robotsContent);
   if (noindex) noindexPages.push(file);
   if (compatibilityRedirect) redirectRoutes.push({path:file,target:refreshTarget || "script-driven redirect"});
-  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
+  // Do not call an admin connection prompt a placeholder, and do not count
+  // intentionally retired compatibility redirects as unfinished pages.
+  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|not connected to live|integration not implemented|backend not implemented)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
   if (operational && !hasSupabaseSignal && !compatibilityRedirect) integrationCandidates.push(file);
-  if (placeholder) placeholderPages.push(file);
+  if (placeholder && !compatibilityRedirect) placeholderPages.push(file);
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,noindex,compatibilityRedirect,redirectTarget:refreshTarget || null,backendReview:compatibilityRedirect ? "compatibility-redirect" : operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
 }
 const report = {generatedAt:new Date().toISOString(),scope:"Static analysis only; redirect aliases are classified separately and excluded from integration candidates. Not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,redirectRoutes:redirectRoutes.length,noindexPages:noindexPages.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,placeholderPages,redirectRoutes,noindexPages,integrationCandidates,pages:pageRows};
