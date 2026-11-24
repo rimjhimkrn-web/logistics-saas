@@ -44,3 +44,26 @@ This is a systemic staging seed/catalogue gap, not just a warehouse-specific iss
 ## Release decision
 
 Staging is not currently a valid production-like environment for full end-to-end verification. The seven reference datasets above are materially incomplete or divergent. The audit does not authorize direct SQL copying or ad hoc production changes. A canonical, versioned seed repair and migration-history reconciliation are required before staging can serve as a reliable acceptance environment.
+
+
+## Exact active production pilot catalogue
+
+The six active production countries/markets are:
+- AE — United Arab Emirates — AED — Asia/Dubai
+- DE — Germany — EUR — Europe/Berlin
+- GB — United Kingdom — GBP — Europe/London
+- IN — India — INR — Asia/Kolkata
+- SG — Singapore — SGD — Asia/Singapore
+- US — United States — USD — America/New_York
+
+The six active production currencies are AED, EUR, GBP, INR, SGD and USD. These are the currently activated pilot catalogue entries, not a declaration that every country or currency is commercially or operationally enabled.
+
+The staging transport-mode set is AIR, MULTIMODAL, OCEAN, RAIL, ROAD, SPECIALIST and WAREHOUSE. Production's active set is AIR, MULTIMODAL, OCEAN, RAIL, ROAD and WAREHOUSE. The extra staging-only active code is SPECIALIST; it should be reconciled with product/service semantics before changing either environment.
+
+## Canonical source interpretation
+
+Repository migrations include a deliberate inactive global country baseline (`20261025161000_seed_inactive_global_country_catalogue_baseline.sql`, `20261025162500_seed_complete_iso3166_alpha2_country_catalogue.sql`) and a global currency reference catalogue (`20261105171000_expand_global_currency_reference_catalogue.sql`). Those migrations intentionally keep new catalogue entries inactive. A later migration populates country defaults where known; it does not itself authorize every country for live operations.
+
+Therefore the correct staging repair is **not** to activate all 246/249 countries or all currencies. Rebuild the canonical catalogue and then reproduce only the reviewed production pilot activations and market records (AE, DE, GB, IN, SG, US), with their reviewed currencies/time zones, while keeping all other countries/currencies inactive until separate market readiness approval. Role/permission definitions and role mappings also require their canonical source recovery; the staging bootstrap documentation states that only the 11 role definitions were seeded, not assignments or full permission data.
+
+The repository's `KRIM-STAGING-OWNER-TESTING.md` and schema-bootstrap workflow describe a schema-only, locked-down staging project and explicitly avoid copying production operational rows. The live staging project is no longer empty (it has application schema objects), so the empty-project bootstrap workflow must not be rerun against it.
