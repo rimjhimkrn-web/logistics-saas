@@ -95,3 +95,21 @@ insert into public.krim_organization_members values
   (67,20,'00000000-0000-0000-0000-000000000067','member','active');
 insert into public.krim_shipment_partner_assignments values
   (72,101,20,'cancelled');
+
+
+-- Minimal isolated workflow action fixture for lease-fencing primitive tests.
+create table public.krim_workflow_action_executions (
+  id bigint primary key,
+  status text not null,
+  lease_id uuid,
+  lease_expires_at timestamptz,
+  request_snapshot jsonb not null default '{}'::jsonb
+);
+grant select, update on public.krim_workflow_action_executions to service_role;
+insert into public.krim_workflow_action_executions
+  (id,status,lease_id,lease_expires_at,request_snapshot)
+values
+  (900,'running','90000000-0000-0000-0000-000000000900',now()+interval '5 minutes','{"worker_id":"worker-a"}'),
+  (901,'running','90000000-0000-0000-0000-000000000901',now()-interval '1 minute','{"worker_id":"worker-a"}'),
+  (902,'running','90000000-0000-0000-0000-000000000902',now()+interval '5 minutes','{"worker_id":"worker-b"}'),
+  (903,'queued',null,null,'{}');
