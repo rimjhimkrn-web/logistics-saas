@@ -68,3 +68,16 @@ Do not expose service_role credentials to the browser. Do not bulk grant authent
 2. A trusted warehouse Edge Function adapter: verify JWT with `auth.getUser()`, derive actor from verified token, enforce current membership and facility scope on every action, call only explicitly allow-listed RPCs using user-scoped authorization (never trust caller-supplied user IDs), and return tenant-scoped data. Any service-role use must be paired with complete explicit authorization in the adapter.
 
 Because staging seed/catalogue parity and migration-history reconciliation are still unresolved, neither route was deployed. No production or staging schema, grants, policies, data, or Edge Functions were changed by this review.
+
+
+## Production ACL baseline confirmed — 2026-11-24
+
+A read-only production comparison now confirms the intended browser access pattern for the warehouse module:
+
+- All 10 `krim_warehouse_*` base tables inspected have RLS enabled and authenticated SELECT privilege in production; authenticated INSERT/UPDATE/DELETE are denied on all 10.
+- Of the 20 `krim_warehouse_*` RPC signatures inspected, 19 have authenticated EXECUTE in production. The remaining function, `krim_warehouse_record_movement(...)`, is an internal movement helper and remains service_role-only.
+- In staging, all 10 inspected tables have authenticated SELECT/INSERT/UPDATE/DELETE denied, and all 20 inspected warehouse RPCs have authenticated EXECUTE denied; service_role retains EXECUTE on the functions.
+
+This confirms a consistent production model: browser users receive RLS-filtered read access to warehouse tables and invoke only the intended authenticated, actor-checking RPCs for writes; internal inventory movement remains unavailable directly to browser users. Staging currently does not match that model.
+
+This is effective-privilege catalog evidence, not a successful browser E2E. It does not justify blindly copying every production grant: the exact frontend-required overloads and RLS predicates still need a reviewed migration, plus authorized same-tenant and denied cross-tenant tests. No grants, policies, data or functions were changed in either environment.
