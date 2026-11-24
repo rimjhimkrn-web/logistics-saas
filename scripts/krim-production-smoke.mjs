@@ -2,6 +2,7 @@ import { readFileSync, existsSync, writeFileSync, unlinkSync, readdirSync } from
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve as pathResolve } from "node:path";
+import { runInNewContext } from "node:vm";
 
 const required = [
   "public/quote-result.html",
@@ -114,6 +115,40 @@ const required = [
 ];
 
 const failures = [];
+
+ // Environment isolation regression: production hosts use production Supabase;
+ // every development/preview host must use the isolated staging project.
+ const environmentConfig = readFileSync("config.js", "utf8");
+ for (const testCase of [
+   { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
+   { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
+   { host: "localhost", expectedEnvironment: "development", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
+   { host: "rimjhimkrn-web.github.io", expectedEnvironment: "production", expectedUrl: "https://ebltviniygljwwseplph.supabase.co", authDisabled: false },
+ ]) {
+   let connectedUrl = "";
+   let connectedKey = "";
+   const sandbox = {
+     window: {
+       location: { hostname: testCase.host, pathname: "/logistics-saas/" },
+       supabase: { createClient: (url, key) => { connectedUrl = url; connectedKey = key; return { url, key }; } },
+     },
+     document: { querySelector: () => null },
+     URL,
+     Object,
+     String,
+   };
+   runInNewContext(environmentConfig, sandbox);
+   if (sandbox.window.KRIM_ENVIRONMENT !== testCase.expectedEnvironment) {
+     failures.push(`Environment detection mismatch for ${testCase.host}: ${sandbox.window.KRIM_ENVIRONMENT}`);
+   }
+   if (connectedUrl !== testCase.expectedUrl) {
+     failures.push(`Unsafe Supabase target for ${testCase.host}: ${connectedUrl}`);
+   }
+   if (sandbox.window.KRIM_AUTH_DISABLED !== testCase.authDisabled) {
+     failures.push(`Unexpected auth-disable state for ${testCase.host}`);
+   }
+   if (!connectedKey) failures.push(`Supabase publishable key missing for ${testCase.host}`);
+ }
 // Historic migration timestamp collisions are documented and must not be
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
 // new collisions in the current release stream from adding to that risk.
