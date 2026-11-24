@@ -19,7 +19,7 @@ No migration repair, schema change, migration execution, or history mutation was
 | Repository versions absent from production ledger | 286 |
 | Repository duplicate-version groups | 13 |
 | Repository duplicate files beyond unique versions | 15 |
-| Same migration names present on both sides with different version IDs | 109 |
+| Same-name/different-version entries (name matches with a different timestamp; not necessarily unique migration names) | 209 |
 
 Production ledger range: `20260929043657` through `20261124071550`.
 
