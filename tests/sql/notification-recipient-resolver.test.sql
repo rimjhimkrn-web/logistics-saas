@@ -80,6 +80,9 @@ insert into public.krim_shipment_partner_assignments values
 insert into public.krim_shipments values (101,10);
 insert into public.krim_organization_members values
   (63,10,'00000000-0000-0000-0000-000000000063','finance','suspended'),
-  (64,20,'00000000-0000-0000-0000-000000000064','manager','suspended');
+  (64,20,'00000000-0000-0000-0000-000000000064','manager','suspended'),
+  (65,10,'00000000-0000-0000-0000-000000000065','finance','active'),
+  (66,20,'00000000-0000-0000-0000-000000000066','finance','active'),
+  (67,20,'00000000-0000-0000-0000-000000000067','member','active');
 insert into public.krim_shipment_partner_assignments values
   (72,101,20,'cancelled');
