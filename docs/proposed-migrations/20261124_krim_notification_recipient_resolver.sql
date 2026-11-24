@@ -231,3 +231,42 @@ grant execute on function krim_internal.assert_workflow_action_lease(bigint,uuid
 
 comment on function krim_internal.assert_workflow_action_lease(bigint,uuid,text)
 is 'Locking lease ownership assertion for the future workflow action executor; not yet wired into the production batch path.';
+
+
+-- Fenced execution bridge. The active batch must pass all three claim values
+-- to this function; until that batch replacement is reviewed and deployed,
+-- the existing one-argument executor remains the active path.
+create or replace function krim_internal.execute_workflow_action_fenced(
+  p_action_execution_id bigint,
+  p_lease_id uuid,
+  p_worker_id text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_result jsonb;
+begin
+  perform krim_internal.assert_workflow_action_lease(
+    p_action_execution_id, p_lease_id, p_worker_id
+  );
+
+  -- The assertion takes a row lock that remains held through this transaction,
+  -- preventing lease recovery/reclaim between validation and execution.
+  execute 'select public.krim_internal_execute_workflow_action($1)'
+    into v_result
+    using p_action_execution_id;
+
+  return v_result;
+end;
+$function$;
+
+revoke all on function krim_internal.execute_workflow_action_fenced(bigint,uuid,text) from public;
+revoke all on function krim_internal.execute_workflow_action_fenced(bigint,uuid,text) from anon;
+revoke all on function krim_internal.execute_workflow_action_fenced(bigint,uuid,text) from authenticated;
+grant execute on function krim_internal.execute_workflow_action_fenced(bigint,uuid,text) to service_role;
+
+comment on function krim_internal.execute_workflow_action_fenced(bigint,uuid,text)
+is 'Validates and locks the current action lease before delegating to the existing executor; the active batch must be updated to call this bridge.';
