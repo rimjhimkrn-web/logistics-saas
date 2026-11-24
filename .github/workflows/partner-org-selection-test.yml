@@ -1,0 +1,24 @@
+name: KRIM partner organisation selection contract tests
+on:
+  pull_request:
+    paths:
+      - 'app/partner/index.html'
+      - 'app/partner/development/index.html'
+      - 'app/partner/individual/index.html'
+      - 'app/partner/business/index.html'
+      - 'public/app/app-store.js'
+      - 'tests/partner-org-selection.test.mjs'
+      - '.github/workflows/partner-org-selection-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify partner organisation access contracts
+        run: node --test tests/partner-org-selection.test.mjs
