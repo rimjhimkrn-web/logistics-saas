@@ -1,10 +1,27 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-export const supabase = createClient(
-  "https://ebltviniygljwwseplph.supabase.co",
-  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
+// Match the repository-wide environment isolation contract: all preview and
+// local hosts use the isolated staging Supabase project; only the production
+// GitHub Pages host may use production. Staging hostname wins over page globals.
+const hostname = window.location.hostname.toLowerCase();
+const isStagingHost = hostname === "krim-staging.pages.dev" || hostname.endsWith(".krim-staging.pages.dev");
+const configuredEnvironment = window.KRIM_ENVIRONMENT;
+const isProductionHost = hostname === "rimjhimkrn-web.github.io";
+const useProduction = !isStagingHost && isProductionHost && configuredEnvironment !== "preview";
+const SUPABASE_URL = useProduction
+  ? "https://ebltviniygljwwseplph.supabase.co"
+  : "https://qrpcivhdxobiaofppbkl.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = useProduction
+  ? "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+  : "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
+
+export const supabase = window.KRIM_SUPABASE || window.supabaseClient || createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
 );
+window.KRIM_SUPABASE = supabase;
+window.supabaseClient = supabase;
 
 class AppStore {
   constructor() {
