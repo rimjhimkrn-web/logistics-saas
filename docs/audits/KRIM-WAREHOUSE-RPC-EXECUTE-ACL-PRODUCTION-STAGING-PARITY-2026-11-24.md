@@ -226,3 +226,19 @@ The SECURITY DEFINER warning counts are not automatically vulnerabilities: many 
 ### Verification boundary
 
 This is a read-only structural and security metadata comparison. It does not compare row data, sequence states, cron job definitions, Vault secrets, Auth provider settings, Storage bucket configuration/objects, Edge Function environment variables, realtime publication membership, or runtime behavior. Those require separate scoped checks. No production or staging data, schema, grants, policies, functions, triggers, extensions or secrets were modified.
+
+
+## Function-definition and table-structure refinement — 2026-11-24
+
+A second catalog pass compared structural fingerprints for all common base tables and full `pg_get_functiondef` hashes for public/private functions.
+
+- Common table/column definition differences: **0**. The only relation security-state difference remains `private.krim_driver_invitations` (RLS off in production, on in staging).
+- Shared function signatures with differing definitions: **20**.
+- The most important difference is `public.krim_customer_prepare_partner_quote(bigint,timestamptz)`:
+  - Production wrapper: SECURITY INVOKER; requires `auth.uid()`; delegates to `public.krim_award_partner_quote_for_checkout(...)`.
+  - Staging wrapper: SECURITY DEFINER; requires `auth.uid()`; delegates to the same named checkout function.
+  - In both environments, the delegated checkout function is SECURITY DEFINER, owner postgres, reads `auth.uid()`, verifies customer organization access and `quote.update` + `shipment.update`, validates the partner quote/opportunity/shipment relationship and lifecycle, rejects unsupported multi-leg shipment-wide award, and creates the assignment/customer quote/version/event atomically.
+  - Effective EXECUTE on the delegated checkout function is authenticated=true and anon=false in production; authenticated=false and anon=false in staging. The staging wrapper itself is also not authenticated-executable in the captured inventory. This is therefore a parity mismatch and future-change hazard, not evidence that anonymous users can invoke the flow. Do not grant the staging wrapper until its intended authenticated call path and all underlying ACLs are verified.
+- The other 19 changed shared function definitions require targeted diff/review; their hashes alone do not classify the changes as safe or unsafe.
+
+The two signature-only production functions and 15 staging functions, 24 storage-policy deltas, two staging-only triggers, and two missing production extensions are detailed in the preceding baseline section. No live changes were made.
