@@ -5,7 +5,8 @@
 
 create or replace function krim_internal.resolve_shipment_notification_recipients(
   p_shipment_id bigint,
-  p_recipient_type text
+  p_recipient_type text,
+  p_intent_code text
 )
 returns table (
   recipient_type text,
@@ -27,6 +28,23 @@ begin
 
   if p_recipient_type is null or p_recipient_type not in ('customer', 'partner') then
     raise exception 'unsupported_recipient_type' using errcode = '22023';
+  end if;
+
+  if p_intent_code is null or p_intent_code not in (
+    'shipment.lifecycle.confirmed',
+    'shipment.lifecycle.dispatched',
+    'shipment.lifecycle.delivered',
+    'shipment.lifecycle.exception',
+    'shipment.lifecycle.assigned'
+  ) then
+    raise exception 'unsupported_notification_intent' using errcode = '22023';
+  end if;
+
+  if (p_recipient_type = 'customer' and p_intent_code not in (
+        'shipment.lifecycle.confirmed','shipment.lifecycle.dispatched',
+        'shipment.lifecycle.delivered','shipment.lifecycle.exception'))
+     or (p_recipient_type = 'partner' and p_intent_code <> 'shipment.lifecycle.assigned') then
+    raise exception 'notification_intent_recipient_mismatch' using errcode = '22023';
   end if;
 
   if not exists (
@@ -69,9 +87,10 @@ begin
       on m.organization_id = org.id
      and m.user_id = cil.user_id
      and m.status = 'active'
-     and m.role <> 'driver'
+     and m.role in ('owner','admin','operator','member')
     where s.id = p_shipment_id
-      and s.customer_organization_id is not null;
+      and s.customer_organization_id is not null
+      and p_intent_code in ('shipment.lifecycle.confirmed','shipment.lifecycle.dispatched','shipment.lifecycle.delivered','shipment.lifecycle.exception');
     return;
   end if;
 
@@ -95,16 +114,17 @@ begin
   join public.krim_organization_members m
     on m.organization_id = org.id
    and m.status = 'active'
-   and m.role <> 'driver'
+   and m.role in ('owner','admin','manager','dispatcher','operator')
   where a.shipment_id = p_shipment_id
-    and a.status in ('offered', 'accepted', 'active');
+    and a.status in ('offered', 'accepted', 'active')
+    and p_intent_code = 'shipment.lifecycle.assigned';
 end;
 $function$;
 
-revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text) from public;
-revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text) from anon;
-revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text) from authenticated;
-grant execute on function krim_internal.resolve_shipment_notification_recipients(bigint, text) to service_role;
+revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text) from public;
+revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text) from anon;
+revoke all on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text) from authenticated;
+grant execute on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text) to service_role;
 
-comment on function krim_internal.resolve_shipment_notification_recipients(bigint, text)
-is 'Internal identity-only resolver for shipment customer/partner notification recipients; service_role only; never sends messages.';
+comment on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text)
+is 'Internal identity-only resolver for shipment notification recipients with workflow-code role allowlists; service_role only; never sends messages.';
