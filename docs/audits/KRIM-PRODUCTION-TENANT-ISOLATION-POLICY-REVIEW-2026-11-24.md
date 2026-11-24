@@ -69,3 +69,26 @@ Recommendation: decide whether users should retain read-only access to their own
 ## Release decision
 
 **Tenant-isolation gate remains OPEN.** The review found useful canonical controls, but F-01 and F-02 require dependency analysis and remediation/acceptance. No production changes were made. Do not represent this review as proof of end-to-end tenant isolation.
+
+
+## Follow-up dependency trace — legacy tenant-policy findings (2026-11-24)
+
+A further read-only production catalog review traced foreign-key dependencies for the three legacy tables flagged above. This confirms that these tables cannot be treated as isolated or safely retired as a quick policy fix.
+
+### Confirmed foreign-key dependency surface
+
+- `shipment_requests` is referenced by `ai_actions`, `ai_conversations`, `delivery_proofs`, `krim_shipments` (legacy link), `notifications`, `partner_payouts`, `payments`, `shipment_dispatches`, `shipment_financials`, `shipment_pod_documents`, `shipment_ratings`, and `support_tickets`.
+- `partners` is referenced by `delivery_proofs`, `krim_organization_members` (legacy partner link), `partner_documents`, `partner_drivers`, `partner_fleet`, `partner_payouts`, `shipment_dispatches`, `shipment_pod_documents`, and `shipment_requests`.
+- `krim_driver_profiles` is referenced by `krim_driver_verification_documents` and `krim_vehicle_driver_bindings`; the latter uses `ON DELETE RESTRICT`. The profile itself references the organization and Auth user.
+
+### Exact production policy observations reconfirmed
+
+- `shipment_requests` SELECT resolves partner access through `partners.user_id = auth.uid()`; UPDATE uses the same user-linked partner lookup for both USING and WITH CHECK.
+- `partners` SELECT and UPDATE remain linked to `partners.user_id = auth.uid()`, without checking active organization membership/status.
+- `krim_driver_profiles` SELECT remains `user_id = auth.uid()`; INSERT and UPDATE additionally require an active driver membership, while UPDATE WITH CHECK preserves user ownership and active membership.
+
+### Remediation consequence
+
+Do not drop, rename, truncate, or broadly rewrite these legacy tables or their policies as a shortcut. Before a forward-only policy migration, map each dependent workflow and its canonical organization relationship, identify legitimate self-service profile access after membership revocation, and test both permitted and denied access under two synthetic tenants. In particular, preserve finance, payout, delivery-proof, notification, AI-history, dispatch, fleet, driver-document, and vehicle-binding relationships.
+
+This dependency trace is catalog evidence only. It does not establish exploitability, and no production data, policies, grants, or schema were changed.
