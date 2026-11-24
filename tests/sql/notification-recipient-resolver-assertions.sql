@@ -5,12 +5,12 @@ begin
   if c <> 1 then raise exception 'customer expected 1 recipient, got %',c; end if;
   select count(*) into p from krim_internal.resolve_shipment_notification_recipients(100,'partner','shipment.lifecycle.assigned');
   if p <> 1 then raise exception 'partner expected 1 non-driver recipient despite duplicate assignments, got %',p; end if;
-  select count(*) into d from krim_internal.resolve_shipment_notification_recipients(100,'partner') where member_role='driver';
+  select count(*) into d from krim_internal.resolve_shipment_notification_recipients(100,'partner','shipment.lifecycle.assigned') where member_role='driver';
   if d <> 0 then raise exception 'driver unexpectedly returned'; end if;
   if has_function_privilege('anon','krim_internal.resolve_shipment_notification_recipients(bigint,text,text)','EXECUTE') then
     raise exception 'anon unexpectedly has execute';
   end if;
-  if has_function_privilege('authenticated','krim_internal.resolve_shipment_notification_recipients(bigint,text)','EXECUTE') then
+  if has_function_privilege('authenticated','krim_internal.resolve_shipment_notification_recipients(bigint,text,text)','EXECUTE') then
     raise exception 'authenticated unexpectedly has execute';
   end if;
   if not has_function_privilege('service_role','krim_internal.resolve_shipment_notification_recipients(bigint,text)','EXECUTE') then
