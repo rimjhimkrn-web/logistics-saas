@@ -75,9 +75,12 @@ for (const file of htmlFiles) {
       localScriptSources.push(resolvedScript);
     }
   }
-  const backendSignalRe = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|fetch\s*\(/i;
+  // Some KRIM pages load the shared Supabase client through a dynamic module import
+  // rather than a <script src> or inline createClient() call. Treat that explicit
+  // shared-client import as a backend signal, but keep it separate from runtime proof.
+  const backendSignalRe = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|platform\/krim-supabase\.js|krim-supabase\.js|fetch\s*\(/i;
   const linkedScriptSignals = [...new Set(localScriptSources)].filter(scriptPath => backendSignalRe.test(readFileSync(scriptPath, "utf8")));
-  const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient/i.test(html);
+  const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|platform\/krim-supabase\.js|krim-supabase\.js/i.test(html);
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
   const operational = /(?:dashboard|workspace|shipment|booking|quote|payment|invoice|tracking|warehouse|customs|finance|operations|partner|enterprise|driver|global-operations)/i.test(file);
   const visiblePageText = html
@@ -86,7 +89,10 @@ for (const file of htmlFiles) {
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi, " ");
-  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
+  // A page inviting an administrator to connect a secured backend is not itself
+  // a placeholder. Flag explicit demo/sample/mock data and incomplete integration
+  // states instead; all matches still require human triage.
+  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|not connected to live|integration not implemented|backend not implemented)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
   if (operational && !hasSupabaseSignal) integrationCandidates.push(file);
   if (placeholder) placeholderPages.push(file);
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,backendReview:operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
