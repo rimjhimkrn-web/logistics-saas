@@ -105,8 +105,16 @@ async function productionAccess(){
  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",data.user.id).eq("status","active");if(memberError)throw memberError;
  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){setError("Partner organisation required","Your account does not currently have an active organisation membership. Continue through partner onboarding.");return}
  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,display_name,legal_name,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);if(orgError)throw orgError;
- const accepted=["partner","carrier","forwarder","logistics_provider","warehouse_operator"],matches=(orgs||[]).filter(o=>accepted.includes(String(o.organization_type||"").toLowerCase())||accepted.includes(String(o.organization_type_code||"").toLowerCase()));
- if(matches.length>1){setError("Organisation selection required","Your account has multiple active partner organisations. Automatic workspace access is paused to prevent cross-organisation data exposure.");return}
+ const accepted=["partner","carrier","forwarder","logistics_provider","warehouse_operator"],allMatches=(orgs||[]).filter(o=>accepted.includes(String(o.organization_type||"").toLowerCase())||accepted.includes(String(o.organization_type_code||"").toLowerCase()));
+ let matches=allMatches;
+  if(matches.length>1){
+   const {data:preferenceRow,error:preferenceError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",data.user.id).maybeSingle();
+   if(preferenceError)throw preferenceError;
+   const selectedId=String(preferenceRow?.preferences?.activeOrganizationId||"");
+   const selected=matches.find(o=>String(o.id)===selectedId&&String(o.status||"").toLowerCase()==="active");
+   if(!selected){location.replace("../../../app/partner/index.html");return}
+   matches=[selected];
+  }
  const org=matches[0];if(!org){setError("Partner access required","This account is not linked to a recognised partner organisation.");return}if(String(org.status||"").toLowerCase()!=="active"){setError("Organisation inactive","Your organisation is not active. Contact KRIM support.");return}
  const mode=String(org.partner_account_mode||"").trim().toLowerCase(),routes={development_test:"development",individual_interest:"individual",registered_business:"business"};if(!routes[mode]){location.replace("../../../public/partner/partner-onboarding.html");return}if(mode!== "individual_interest"){location.replace("../../../app/partner/"+routes[mode]+"/index.html");return}
  const verification=String(org.partner_verification_status||"pending").toLowerCase(),lifecycle=String(org.partner_lifecycle_status||"verification_pending").toLowerCase(),compliance=String(org.partner_compliance_status||"pending").toLowerCase();
