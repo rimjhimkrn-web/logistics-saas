@@ -148,7 +148,7 @@ if (notificationCentre.includes("TKT-2026-9912") || notificationCentre.includes(
 // Execute the actual app-store Supabase bootstrap against synthetic hostnames.
 // This prevents a preview page from accidentally opening a production session.
 const bootstrapStart = notificationStore.indexOf("// Match the repository-wide environment isolation contract:");
-const bootstrapEnd = notificationStore.indexOf("\\nclass AppStore", bootstrapStart);
+const bootstrapEnd = notificationStore.indexOf("\nclass AppStore", bootstrapStart);
 if (bootstrapStart < 0 || bootstrapEnd < 0) {
   failures.push("App-store environment bootstrap boundaries are missing.");
 } else {
