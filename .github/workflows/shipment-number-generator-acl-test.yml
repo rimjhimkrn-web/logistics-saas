@@ -1,0 +1,42 @@
+name: KRIM shipment number generator ACL isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_restrict_public_shipment_number_generator.sql'
+      - 'tests/sql/shipment-number-generator-acl-*.sql'
+      - '.github/workflows/shipment-number-generator-acl-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shipment-number-acl-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: krim_shipment_acl_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_shipment_acl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare intentionally over-permissive fixture
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_shipment_acl_test -v ON_ERROR_STOP=1 -f tests/sql/shipment-number-generator-acl-fixture.sql
+      - name: Apply proposed least-privilege ACL migration
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_shipment_acl_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_restrict_public_shipment_number_generator.sql
+      - name: Assert anonymous denial and service-role shipment numbering
+        env:
+          PGPASSWORD: test-only
+        run: |
+          psql -h localhost -U postgres -d krim_shipment_acl_test -v ON_ERROR_STOP=1 -f tests/sql/shipment-number-generator-acl-assertions.sql
+          psql -h localhost -U postgres -d krim_shipment_acl_test -v ON_ERROR_STOP=1 -c "SET ROLE service_role; INSERT INTO public.krim_shipments DEFAULT VALUES; RESET ROLE;"
