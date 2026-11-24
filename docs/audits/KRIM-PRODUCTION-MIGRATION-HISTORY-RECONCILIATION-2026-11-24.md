@@ -102,3 +102,51 @@ A separate migration-name collision inventory found three names used at multiple
 For every duplicate-version group, fetch the full SQL bodies and compare normalized and exact content hashes. Classify each as identical duplicate, partial overlap, independent migration, or conflicting rewrite. Then inspect historical commit order and production ledger/name evidence. Do not renumber or delete any file until dependency order and production representation are established.
 
 This inventory is static evidence only. No migration SQL was run and no production history was changed.
+
+
+## Follow-up: duplicate-version files mapped against production migration names
+
+The 13 duplicate-version groups were compared by filename stem against the live production migration ledger. This is a name/version mapping only; it does not establish SQL-content equivalence.
+
+| Repository duplicate version | Repository migration name | Production ledger match |
+|---|---|---|
+| `20261025150000` | `krim_ensure_initial_shipment_leg` | Two production entries: `20261025110931`, `20261025112519` |
+| `20261025150000` | `seed_country_localization_and_units` | `20261025143459` |
+| `20261104190000` | `allow_driver_profile_transfer_on_valid_invitation` | No same-name production row |
+| `20261104190000` | `driver_carrier_invitation_and_membership_workflow` | `20261104123850` |
+| `20261104190000` | `driver_verification_documents_and_review` | No same-name production row |
+| `20261104190000` | `partner_route_scope_and_driver_verification` | No same-name production row |
+| `20261104191500` | `align_driver_review_with_invitation_gates` | No same-name production row |
+| `20261104191500` | `require_confirmed_email_for_driver_invitation` | `20261104124749` |
+| `20261104192500` | `fix_driver_invitation_profile_branch` | `20261104125108` |
+| `20261104192500` | `scope_driver_document_upload_to_pending_profile` | `20261104134348` |
+| `20261104193000` | `reverify_driver_after_identity_changes` | `20261104134336` |
+| `20261104193000` | `secure_driver_membership_invitations` | No same-name production row |
+| `20261104223000` | `krim_country_pack_admin_mobile_performance` | `20261104154412` |
+| `20261104223000` | `krim_enforce_market_activation_on_shipment_creation` | `20261104153026` |
+| `20261104230000` | `krim_global_corridor_compliance_engine` | No same-name production row |
+| `20261104230000` | `krim_unify_market_activation_booking_gate` | `20261104153210` |
+| `20261104234500` | `seed_india_domestic_pilot_corridor_candidate` | No same-name production row |
+| `20261104234500` | `seed_proposed_corridor_catalogue` | No same-name production row |
+| `20261105153000` | `add_evidence_backed_partner_capability_submission` | `20261105151950` |
+| `20261105153000` | `enforce_partner_quote_create_permission` | `20261105041122` |
+| `20261106160000` | `create_customs_broker_assignment_foundation` | `20261106044553` |
+| `20261106160000` | `linked_goods_receipt_workflow` | No same-name production row |
+| `20261106180000` | `driver_assignment_acceptance_gate` | `20261105072829` |
+| `20261106180000` | `operations_dispatch_readiness_register` | No same-name production row |
+| `20261106190000` | `driver_assignment_leg_integrity` | No same-name production row |
+| `20261106190000` | `global_vehicle_registry_foundation` | `20261105073241` |
+| `20261115151000` | `require_all_driver_documents_for_verification` | `20261115093706` |
+| `20261115151000` | `schedule_private_vehicle_evidence_expiry_worker` | `20261115093414` |
+
+### What this proves — and what it does not
+
+- Several repository migration files clearly use a timestamp different from the production ledger entry with the same name.
+- Ten file-name entries in these duplicate-version groups have no exact same-name production row. They may be superseded, combined into differently named production migrations, unapplied, or missing from the ledger. This cannot be decided from names alone.
+- The `20261025150000_seed_country_localization_and_units.sql` file is a 217-character no-op explicitly identifying the production-applied migration as `20261025143459_seed_country_localization_and_units.sql`; this particular duplicate is documented as a superseded no-op.
+- The `20261025150000_krim_ensure_initial_shipment_leg.sql` file is substantive and shares its version with that no-op file, so the repository version collision remains material.
+- All remaining same-version collisions require exact SQL-body and historical-order comparison. Do not assume the files are safe to combine or renumber.
+
+### Decision
+
+The repository migration directory is not currently a deterministic replay set. Continue with per-file content comparison and historical commit tracing in an isolated reconstruction workflow. Production remains untouched.
