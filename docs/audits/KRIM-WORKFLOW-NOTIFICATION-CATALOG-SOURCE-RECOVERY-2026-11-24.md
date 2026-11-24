@@ -79,3 +79,13 @@ A second catalog comparison covered indexes, non-internal triggers and RLS polic
 - `notifications` has 7 indexes and 2 policies; each workflow table has its matching single organization-access policy.
 
 This closes the table-level comparison for columns, constraints, indexes, user-defined triggers and RLS policy definitions on these eight objects. It still does not compare grants, ownership, publication membership, all dependent objects or the full schema.
+
+
+## Table privilege difference discovered
+The normalized table-grant comparison found one intentional-or-unresolved environment difference:
+- Production grants `authenticated SELECT` on the seven workflow metadata/execution tables covered here (`krim_workflows`, `krim_workflow_steps`, `krim_workflow_runs`, `krim_workflow_run_steps`, `krim_workflow_action_executions`, `krim_workflow_dead_letters`, `krim_workflow_dead_letter_events`).
+- Staging does not grant `authenticated SELECT` on those seven tables.
+- Both environments have matching `authenticated SELECT, UPDATE` grants on `notifications`, with RLS policies restricting users to their own `user_id`.
+- Both environments grant `service_role` the same listed table privileges on these eight tables.
+
+This is a real staging/prod API-access difference. The workflow UI/API must not assume staging authenticated users can read workflow tables. Before changing grants, verify which admin/control-tower pages require them and confirm the production RLS policies provide the intended organization boundary. No grant was added or removed in this work.
