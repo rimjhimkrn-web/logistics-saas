@@ -25,7 +25,7 @@ begin
     raise exception 'invalid_shipment_id' using errcode = '22023';
   end if;
 
-  if p_recipient_type not in ('customer', 'partner') then
+  if p_recipient_type is null or p_recipient_type not in ('customer', 'partner') then
     raise exception 'unsupported_recipient_type' using errcode = '22023';
   end if;
 
@@ -58,6 +58,8 @@ begin
      and cil.verified_at is not null
     join public.krim_customer_acquisition_profiles cap
       on cap.id = cil.customer_profile_id
+     and (cap.organization_id is null or cap.organization_id = org.id)
+     and cap.status = 'active'
     join public.krim_customer_workspace_profiles wp
       on wp.customer_profile_id = cap.id
      and wp.organization_id = org.id
@@ -67,6 +69,7 @@ begin
       on m.organization_id = org.id
      and m.user_id = cil.user_id
      and m.status = 'active'
+     and m.role <> 'driver'
     where s.id = p_shipment_id
       and s.customer_organization_id is not null;
     return;
