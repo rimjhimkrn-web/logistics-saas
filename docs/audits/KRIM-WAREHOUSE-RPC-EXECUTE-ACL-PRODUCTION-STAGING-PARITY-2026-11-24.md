@@ -97,3 +97,21 @@ The reviewed SELECT predicates are tenant/facility scoped:
 This narrows the confirmed environment drift: the ten RLS policy definitions are identical, but staging lacks authenticated table SELECT grants and the exact browser-facing RPC EXECUTE grants present in production. The existing ACL proposal covers only the 14 browser-facing RPC overloads; it intentionally does not grant the internal movement helper. A separate least-privilege table SELECT grant set must be validated against the full browser call-site inventory before staging remediation.
 
 No policy, grant, schema, or data was changed. Hash parity is not a dynamic tenant-isolation test; the staging project still has no synthetic warehouse users, eligible warehouse organizations, approved facilities, or tasks with which to prove same-tenant allow and cross-tenant deny behavior.
+
+
+
+## Complete browser table-read call-site inventory and least-privilege proposal — 2026-11-24
+
+Inspected all 32 HTML pages under `public/warehouse/` on this branch and inventoried direct Supabase `.from(...)` calls. The warehouse-owned tables directly read by browser pages are:
+- `krim_warehouse_facilities` — facility management and related workspace context.
+- `krim_warehouse_inventory` — inventory ledger and quality-control views.
+- `krim_warehouse_tasks` — quality-control task detail reads.
+- `krim_warehouse_shipment_allocations` — dispatch handover allocation reads.
+
+The facility-management, goods-receipt, inbound-receiving, picking/packing, putaway, damage-exceptions and dispatch-handover pages also read shared organization/member/partner-capability tables; these are not warehouse-owned tables and are not included in the warehouse grant proposal. Evidence storage bucket access is separate from SQL table privileges.
+
+Added `docs/proposed-migrations/20261124_warehouse_browser_table_read_acl.sql`. It grants authenticated SELECT only on the four warehouse tables with direct browser reads, explicitly revokes PUBLIC/anon access and authenticated direct DML, and refuses to proceed if RLS or a SELECT policy is absent. It does not alter RLS policies, grant writes, or modify service_role privileges. This is intentionally narrower than production's current authenticated SELECT grants on all ten warehouse tables.
+
+Extended the isolated PostgreSQL 16 warehouse ACL fixture/assertions/workflow to start from over-permissive grants, apply both exact RPC and table-read proposals, verify authenticated SELECT / anon denial / authenticated DML denial / service_role preservation, and verify tenant filtering under fixture RLS policies. These tests validate the grant mechanics and a synthetic RLS fixture; they do not substitute for dynamic tests against the actual staging policy expressions and real authorized warehouse membership.
+
+No grants, policies, schema, functions, or data were changed in production or staging. Migration-ledger reconciliation remains a hard blocker to applying either proposal to staging. The staging warehouse seed prerequisites and lack of real warehouse test identities/facilities remain unresolved.
