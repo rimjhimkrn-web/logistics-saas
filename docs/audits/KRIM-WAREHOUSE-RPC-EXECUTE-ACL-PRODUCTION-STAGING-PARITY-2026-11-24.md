@@ -158,3 +158,71 @@ Read-only Supabase MCP migration inventory was retrieved directly from both conn
 This confirms the five names/versions are recorded as applied in production, but the migration ledger stores metadata, not the SQL bodies. No migration SQL was recovered by this check. No database changes were made.
 
 **Next recovery route:** obtain the original SQL from the deployment machine/artifact or the source-control commit that executed these migrations. If those artifacts are unavailable, perform a separately reviewed forward-only baseline/reconciliation plan based on exact production schema, function definitions, triggers, policies, grants, extensions and seed data. Do not insert synthetic ledger rows or replay guessed SQL.
+
+
+## Production-to-staging schema/security baseline comparison — 2026-11-24
+
+Read-only catalog inventories were collected directly from both healthy Supabase projects. Scope: `public`, `private`, and `storage` relations; public/private function signatures and definitions; RLS policies; non-internal triggers; extensions; and Supabase security advisor findings. No database changes were made.
+
+### Structural inventory
+
+| Catalog item | Production | Staging |
+|---|---:|---:|
+| Relations (tables/views/materialized views/foreign tables) | 408 | 408 |
+| Base tables / partitioned tables | 407 | 407 |
+| Views/materialized views | 1 | 1 |
+| RLS policies in inspected schemas | 438 | 415 |
+| Public/private functions | 422 | 435 |
+| SECURITY DEFINER functions | 386 | 400 |
+| Non-internal triggers | 124 | 126 |
+| Extensions | 7 | 5 |
+| Relations with RLS disabled | 1 | 0 |
+
+All common table/column definitions in the inspected schemas have matching structural fingerprints (0 common-table column-definition differences). One relation has a security-state difference: `private.krim_driver_invitations` exists in both projects with the same table columns, but production has RLS disabled while staging has RLS enabled. This needs explicit intent review; do not automatically copy either state.
+
+### Object inventory deltas
+
+**Functions**
+- Production-only signatures (2): `public.krim_customer_prepare_partner_quote(...)` and `public.krim_report_operational_exception(...)`.
+- Staging-only signatures (15): private verified-capacity/service-area helpers, a warehouse dispatch guard trigger function, market-readiness admin list, partner verification information request, driver assignment audit trigger function, location-based shipment creation, resend worker internals, partner dispatch/capacity state and partner resubmission RPCs.
+- Twenty shared function signatures have different function-definition hashes.
+- One security-critical difference among those is `public.krim_customer_prepare_partner_quote(bigint,timestamptz)`: production is SECURITY INVOKER; staging is SECURITY DEFINER. The same signature is also reported production-only/staging-only in the function security-state inventory because its SECURITY DEFINER attribute differs. This must be investigated as a high-priority parity/security drift; do not assume either body/privilege state is correct without reviewing the full function body and grants.
+- The remaining 19 shared function body differences are not yet classified as harmless or behavior/security relevant. They require function-by-function diff and call-site review before any reconciliation.
+
+**Policies**
+- Production has 24 storage.objects policies not present in staging, covering scoped customer POD, customs documents/licenses, driver evidence, claims, partner capacity/service-area/verification evidence, and warehouse evidence read/upload/cleanup.
+- Staging has one storage.objects policy not present in production: `krim_partner_verification_upload_require_aal2`.
+- The 23-policy net difference is concentrated in Storage object authorization, not just ordinary table RLS. Storage policy reconciliation is a release blocker for evidence upload/read workflows. Do not blindly copy production policies; compare bucket names, object path conventions, membership predicates and MFA/evidence lifecycle rules first.
+
+**Triggers**
+- Staging has two non-internal triggers not present in production:
+  - `public.trg_krim_audit_driver_assignment_acceptance` on `krim_driver_assignments`.
+  - `public.trg_krim_require_warehouse_handover_before_shipment_dispatch` on `krim_shipments`.
+- No production-only trigger was found in this inspected schema scope. These staging-only triggers may be intentional forward changes, but they must be matched to their source migrations and tested for duplicate effects before release.
+
+**Extensions**
+- Production has `pg_cron 1.6.4` and `pg_net 0.20.4`; staging does not.
+- Both projects share `pg_stat_statements 1.11`, `pgcrypto 1.3`, `plpgsql 1.0`, `supabase_vault 0.3.1`, and `uuid-ossp 1.1`.
+- Since staging lacks pg_cron/pg_net, scheduler and outbound HTTP-dependent workflows cannot be considered equivalent based on schema alone. Verify required jobs, net usage and secret configuration before enabling extensions or migrating scheduled work.
+
+### Security advisor snapshot
+
+Supabase security advisor counts at inspection time:
+- Production: 29 `rls_enabled_no_policy` informational findings; 151 `authenticated_security_definer_function_executable` warnings; 1 leaked-password-protection warning.
+- Staging: 30 `rls_enabled_no_policy` informational findings; 45 `authenticated_security_definer_function_executable` warnings; 1 leaked-password-protection warning.
+
+The SECURITY DEFINER warning counts are not automatically vulnerabilities: many functions are intentional authenticated RPCs with explicit actor/tenant checks. Each exposed function needs review of body, EXECUTE grants, search_path, input validation and row authorization. The 106-count difference reinforces that staging's callable RPC surface is materially different from production. Leaked-password protection is a common outstanding Auth hardening item in both environments; enablement requires an intentional Auth configuration change and validation.
+
+### Release-blocking conclusions
+
+1. **No wholesale schema replay.** The matching relation counts and common column fingerprints do not mean the projects are functionally equivalent.
+2. **Resolve function drift first.** Review the 20 changed shared function bodies, especially the SECURITY INVOKER vs SECURITY DEFINER difference in customer quote preparation, plus the two/15 signature-only deltas.
+3. **Resolve storage authorization.** Review the 24 production-only and one staging-only Storage policies against real bucket paths and evidence ownership.
+4. **Resolve trigger provenance.** Confirm source migrations and idempotency for the two staging-only triggers.
+5. **Resolve extension/runtime parity.** Determine whether staging must host pg_cron/pg_net-backed workflows and, if so, use reviewed enablement and job/secret setup.
+6. **Review private driver invitation RLS divergence** and ensure schema/table grants do not accidentally expose the private table through the Data API.
+7. **Keep historical migration ledger reconciliation open.** The catalog snapshot is evidence for a forward-only reconciliation plan, not permission to invent old migration files, edit migration ledgers, reset staging, or bulk copy production ACLs.
+
+### Verification boundary
+
+This is a read-only structural and security metadata comparison. It does not compare row data, sequence states, cron job definitions, Vault secrets, Auth provider settings, Storage bucket configuration/objects, Edge Function environment variables, realtime publication membership, or runtime behavior. Those require separate scoped checks. No production or staging data, schema, grants, policies, functions, triggers, extensions or secrets were modified.
