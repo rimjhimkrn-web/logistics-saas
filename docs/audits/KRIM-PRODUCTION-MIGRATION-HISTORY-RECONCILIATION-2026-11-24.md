@@ -19,7 +19,7 @@ No migration repair, schema change, migration execution, or history mutation was
 | Repository versions absent from production ledger | 286 |
 | Repository duplicate-version groups | 13 |
 | Repository duplicate files beyond unique versions | 15 |
-| Same-name/different-version entries (name matches with a different timestamp; not necessarily unique migration names) | 209 |
+| Unique migration names present on both sides with different version IDs | 209 |
 
 Production ledger range: `20260929043657` through `20261124071550`.
 
@@ -29,7 +29,7 @@ Repository migration file range: `20261016120808` through `20261124120000`.
 
 The counts above are **version-ID comparisons**, not a list of migrations safe to replay.
 
-The name-based comparison shows that many apparent repository-only versions are already represented in production under a different timestamp. Examples:
+The name-based comparison shows 209 unique migration names represented on both sides with different version IDs (211 repository-to-production version pairings). Many apparent repository-only versions are already represented in production under a different timestamp. Examples:
 
 | Migration name | Repository version | Production version |
 |---|---|---|
@@ -41,7 +41,7 @@ The name-based comparison shows that many apparent repository-only versions are 
 
 There are also repository duplicate timestamp groups. A migration ledger keyed by version cannot safely distinguish multiple different SQL files carrying the same version. The 13 duplicate groups must be resolved in repository history with a reviewed, unique version strategy before a clean replayable baseline can be produced.
 
-The repository currently has 77 migration names not found in the production ledger by name, while production has 270 names not found in the repository by name. These need file/content-level comparison and schema-state evidence; they must not be blindly marked applied or replayed.
+The repository currently has 76 migration names not found in the production ledger by name, while production has 270 names not found in the repository by name. These need file/content-level comparison and schema-state evidence; they must not be blindly marked applied or replayed.
 
 ## Reconciliation procedure — required before database DDL
 
