@@ -51,22 +51,22 @@
         summaryEl.textContent = 'Please sign in to view records permitted to your organization or platform role.';
         rowsEl.replaceChildren();
       } else {
-        const { data, error } = await supabase.from('krim_growth_opportunities')
-          .select('id,opportunity_type,organization_id,external_reference,region_code,country_code,status,consent_status,metadata,created_at')
-          .order('created_at', { ascending: false }).limit(200);
+        const { data, error } = await supabase.functions.invoke('krim-global-growth-operations', {
+          body: { action: 'list_opportunities', limit: 100 }
+        });
         if (error) throw error;
-        const records = data || [];
-        statusEl.textContent = 'Live Supabase connection verified';
+        if (!data || data.ok !== true) throw new Error(data?.error || 'Authorized opportunity query failed');
+        const records = Array.isArray(data.opportunities) ? data.opportunities : [];
+        statusEl.textContent = 'Live, administrator-authorized backend connection verified';
         statusEl.className = 'text-[10px] text-emerald-300';
-        summaryEl.textContent = records.length + ' opportunity record(s) visible to this account. No synthetic records are added.';
+        summaryEl.textContent = records.length + ' opportunity record(s) returned by the secured administrator endpoint. No synthetic records are added.';
         rowsEl.replaceChildren();
         if (!records.length) {
-          const tr=document.createElement('tr'); const td=cell('No growth-opportunity records are currently visible. Add verified opportunities through an authorized backend workflow.'); td.colSpan=5; tr.append(td); rowsEl.append(tr);
+          const tr=document.createElement('tr'); const td=cell('No growth-opportunity records are currently available. Add verified opportunities through an authorized backend workflow.'); td.colSpan=5; tr.append(td); rowsEl.append(tr);
         } else {
           for (const item of records) {
             const tr=document.createElement('tr');
-            const metadata = item.metadata && typeof item.metadata === 'object' ? item.metadata : {};
-            tr.append(cell(metadata.organization_name || metadata.company_name || item.external_reference || ('Opportunity #' + item.id)));
+            tr.append(cell(item.external_reference || ('Opportunity #' + item.id)));
             tr.append(cell(item.opportunity_type));
             tr.append(cell([item.region_code,item.country_code].filter(Boolean).join(' / ')));
             tr.append(cell(item.status));
@@ -78,7 +78,7 @@
     } catch (error) {
       statusEl.textContent = 'Database access not verified';
       statusEl.className = 'text-[10px] text-red-300';
-      summaryEl.textContent = 'Could not load live records. Check sign-in, Data API grants, and the table’s RLS policies. No demo data is shown.';
+      summaryEl.textContent = 'Could not load live records. Check sign-in, platform-admin role, and the growth-operations Edge Function. No demo data is shown.';
       rowsEl.replaceChildren();
       const tr=document.createElement('tr'); const td=cell(error?.message || 'Supabase request failed.'); td.colSpan=5; tr.append(td); rowsEl.append(tr);
     }
