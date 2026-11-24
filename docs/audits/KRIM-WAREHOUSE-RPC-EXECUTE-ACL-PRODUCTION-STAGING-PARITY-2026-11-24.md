@@ -312,3 +312,8 @@ An isolated PostgreSQL 16 fixture, assertions, and GitHub Actions workflow were 
 The fixture includes only synthetic schema/function data and creates isolated `anon` and `authenticated` roles. Assertions check the repaired column reference, preservation of SECURITY DEFINER and the authenticated grant, denial of anon EXECUTE, and successful execution against an approved synthetic country pack.
 
 **Verification status:** workflow files are committed, but no GitHub Actions run was visible for the latest branch head at the time of this update. The SQL proposal has not been executed against production or staging. It is not an applied migration and is not authorization to modify production. Do not promote until the isolated workflow passes and the broader migration-ledger reconciliation/release approval is complete.
+
+
+### Isolated repair test result update
+
+The first fixture run correctly exposed a test-fixture issue: PostgreSQL's default PUBLIC EXECUTE grant meant the synthetic `anon` role inherited EXECUTE. The fixture was corrected to revoke PUBLIC/anon before granting authenticated, matching the least-privilege target ACL. The repair workflow then passed on commit `d2dd3bbe93413547d36e1dd27109938ee2ed1ddd` (GitHub Actions run `45451429867`). It verified the column-reference replacement, preservation of SECURITY DEFINER and authenticated EXECUTE, anon denial, and successful execution against the synthetic approved pack. This is isolated SQL evidence only; it does not apply or test the repair against either live Supabase project.
