@@ -1,0 +1,60 @@
+name: Partner capacity RPC ACL fixture
+
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_restore_authenticated_partner_capacity_rpc.sql'
+      - 'tests/sql/partner-capacity-rpc-acl-*.sql'
+      - '.github/workflows/partner-capacity-rpc-acl-fixture.yml'
+  push:
+    branches:
+      - feat/notification-recipient-resolver-draft-2026-11-24
+    paths:
+      - 'docs/proposed-migrations/20261124_restore_authenticated_partner_capacity_rpc.sql'
+      - 'tests/sql/partner-capacity-rpc-acl-*.sql'
+      - '.github/workflows/partner-capacity-rpc-acl-fixture.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-postgres-acl-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: krim_acl_fixture
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_acl_fixture"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for disposable PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: |
+          for attempt in $(seq 1 30); do
+            if pg_isready -h 127.0.0.1 -U postgres -d krim_acl_fixture; then exit 0; fi
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready" >&2
+          exit 1
+      - name: Create isolated function and role fixture
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d krim_acl_fixture -f tests/sql/partner-capacity-rpc-acl-fixture.sql
+      - name: Apply proposed ACL migration in fixture only
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d krim_acl_fixture -f docs/proposed-migrations/20261124_restore_authenticated_partner_capacity_rpc.sql
+      - name: Assert final ACL and function hardening
+        env:
+          PGPASSWORD: postgres
+        run: psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d krim_acl_fixture -f tests/sql/partner-capacity-rpc-acl-assertions.sql
