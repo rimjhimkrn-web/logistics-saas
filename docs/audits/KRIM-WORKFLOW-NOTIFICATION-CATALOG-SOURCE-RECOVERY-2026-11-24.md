@@ -89,3 +89,16 @@ The normalized table-grant comparison found one intentional-or-unresolved enviro
 - Both environments grant `service_role` the same listed table privileges on these eight tables.
 
 This is a real staging/prod API-access difference. The workflow UI/API must not assume staging authenticated users can read workflow tables. Before changing grants, verify which admin/control-tower pages require them and confirm the production RLS policies provide the intended organization boundary. No grant was added or removed in this work.
+
+
+## Git history recovery attempt
+For five high-impact missing ledger entries, I checked the exact expected migration paths against GitHub file history and inspected three related lifecycle/foundation/audit branch trees:
+- `20260929043657_add_global_partner_lifecycle.sql`
+- `20260929044040_add_shipment_partner_assignments.sql`
+- `20260929044351_harden_global_notification_delivery.sql`
+- `20260929044417_harden_global_workflow_automation.sql`
+- `20261011161742_complete_workflow_action_dead_letter_quarantine_and_retry_runtime.sql`
+
+No exact-path commit history or matching files were found in those inspected branches. A commit search for the notification hardening name returned a large UI release commit, but its available diff did not contain the migration SQL. This means these five files were not recovered from the inspected Git history; it does not prove no other uninspected branch or external backup contains them.
+
+Do not reconstruct historical migrations from the current catalog and pretend they are originals. Retain a current-state schema/function export separately and label it as a baseline snapshot.
