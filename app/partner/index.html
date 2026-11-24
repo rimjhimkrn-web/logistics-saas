@@ -208,7 +208,7 @@ if(isStaging){
     return;
    }
    state("Identifying your partner organisation","KRIM is confirming the organisation type and current account status.","The gateway will not infer or create organisation permissions.");
-   const {data:organisations,error:organisationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode").in("id",ids);
+   const {data:organisations,error:organisationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode,display_name,legal_name").in("id",ids);
    if(organisationError)throw organisationError;
    const validTypes=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
    const matches=(organisations||[]).filter(org=>validTypes.includes(String(org.organization_type||"").toLowerCase())||validTypes.includes(String(org.organization_type_code||"").toLowerCase()));
@@ -224,9 +224,10 @@ if(isStaging){
      if(savedRoute){state("Opening your selected workspace","Your saved organisation is still an active membership.","You can change organisation from the workspace when needed.");redirect("app/partner/"+savedRoute+"/index.html");return;}
     }
     choice.replaceChildren();
+    const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Select an organisation";placeholder.disabled=true;placeholder.selected=true;choice.appendChild(placeholder);
     matches.filter(org=>String(org.status||"").toLowerCase()==="active").forEach(org=>{
      const option=document.createElement("option");option.value=String(org.id);
-     option.textContent=(org.organization_type||org.organization_type_code||"Partner organisation")+" · "+String(org.id);choice.appendChild(option);
+     option.textContent=org.display_name||org.legal_name||((org.organization_type||org.organization_type_code||"Partner organisation")+" · "+String(org.id));choice.appendChild(option);
     });
     if(!choice.options.length){state("No active partner organisation","Your memberships do not currently include an active partner organisation.","Refresh access or contact KRIM support.");return;}
     picker.hidden=false;
