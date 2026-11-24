@@ -14,7 +14,7 @@ const workspaces = [
 test("partner gateway derives organisations from authenticated active memberships", () => {
   assert.match(gateway, /from\("krim_organization_members"\)[\s\S]{0,180}\.eq\("user_id",data\.user\.id\)[\s\S]{0,80}\.eq\("status","active"\)/);
   assert.match(gateway, /from\("krim_organizations"\)[\s\S]{0,250}\.in\("id",ids\)/);
-  assert.match(gateway, /String\(org\.status\|\|"\)\.toLowerCase\(\)!=="active"/);
+  assert.match(gateway, /String\(org\.status\|\|"\)\.toLowerCase\(\)==="active"/);
 });
 
 test("multiple organisations require an explicit selection and a fresh active membership match", () => {
@@ -29,7 +29,7 @@ test("each partner pathway revalidates the saved selection against active member
   for (const source of workspaces) {
     assert.match(source, /from\("krim_organization_members"\)/);
     assert.match(source, /from\("krim_user_app_preferences"\)/);
-    assert.match(source, /String\(o\.id\)===selectedId&&String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);
+    assert.match(source, /String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);\n    assert.match(source, /String\(o\.id\)===selectedId&&String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);
     assert.match(source, /location\.replace\("\.\.\/\.\.\/\.\.\/app\/partner\/index\.html"\)/);
     assert.doesNotMatch(source, /if\(matches\.length>1\)\{setError\("Organisation selection required"/);
   }
