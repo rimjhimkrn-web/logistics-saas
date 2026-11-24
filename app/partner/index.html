@@ -211,7 +211,7 @@ if(isStaging){
    const {data:organisations,error:organisationError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,partner_account_mode,display_name,legal_name").in("id",ids);
    if(organisationError)throw organisationError;
    const validTypes=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
-   const matches=(organisations||[]).filter(org=>validTypes.includes(String(org.organization_type||"").toLowerCase())||validTypes.includes(String(org.organization_type_code||"").toLowerCase()));
+   const matches=(organisations||[]).filter(org=>String(org.status||"").toLowerCase()==="active"&&(validTypes.includes(String(org.organization_type||"").toLowerCase())||validTypes.includes(String(org.organization_type_code||"").toLowerCase())));
    if(matches.length>1){
     const picker=$("organisation-picker"),choice=$("organisation-choice");
     const {data:preferenceRow,error:preferenceError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",data.user.id).maybeSingle();
