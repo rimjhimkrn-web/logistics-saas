@@ -123,6 +123,30 @@ begin
         continue;
       end if;
 
+      if v_sqlstate = '55000'
+         and v_error_message = 'workflow_action_lease_stale_or_not_owned' then
+        -- The lease assertion failed before the executor began. Do not burn an attempt.
+        continue;
+      end if;
+
+      -- The current legacy executor catches exceptions in a PL/pgSQL exception
+      -- block. PostgreSQL rolls back statements in that block before entering
+      -- its handler, including its attempt_number increment. The batch owns
+      -- the failed-attempt increment on this exception path.
+      v_attempt := least(coalesce(v_attempt, 0) + 1, greatest(coalesce(v_max_attempts, 1), 1));
+      update public.krim_workflow_action_executions
+      set attempt_number = greatest(attempt_number, v_attempt),
+          updated_at = clock_timestamp()
+      where id = v_claim.action_execution_id
+        and lease_id = v_claim.lease_id
+        and request_snapshot->>'worker_id' = p_worker_id
+      returning attempt_number into v_attempt;
+
+      if not found then
+        -- Ownership changed while failure accounting was being applied.
+        continue;
+      end if;
+
       v_error_code := coalesce(v_sqlstate, 'WORKFLOW_ACTION_ERROR');
 
       if v_attempt >= v_max_attempts then
