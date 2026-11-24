@@ -165,12 +165,12 @@ async function boot(){
  }catch(err){console.error("KRIM capacity workspace:",err);gate("Resource workspace could not be loaded",err.message||"Reload the page and try again.");}
 }
 async function ensureEvidenceMfa(){
- const partnerWorkspace=new URL("../../app/partner/index.html",window.location.href).href;
+ const evidenceReturn=new URL(window.location.href);evidenceReturn.search="";evidenceReturn.hash="";
  const factors=await client.auth.mfa.listFactors();if(factors.error)throw factors.error;
  const verified=(factors.data?.totp||[]).some(f=>f.status==="verified");
- if(!verified){message("Authenticator setup is required before uploading private capacity evidence. Complete setup, return to Partner Workspace, then reopen Capacity & Resources.","error");window.location.assign("../../auth/mfa-enroll.html?returnTo="+encodeURIComponent(partnerWorkspace));return false;}
+ if(!verified){message("Authenticator setup is required before uploading private capacity evidence. Complete setup, return to Partner Workspace, then reopen Capacity & Resources.","error");window.location.assign("../../auth/mfa-enroll.html?returnTo="+encodeURIComponent(evidenceReturn.href));return false;}
  const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error)throw assurance.error;
- if(assurance.data?.currentLevel!=="aal2"){message("Complete the authenticator challenge before uploading private capacity evidence.","error");window.location.assign("../../auth/mfa-challenge.html?returnTo="+encodeURIComponent(partnerWorkspace));return false;}
+ if(assurance.data?.currentLevel!=="aal2"){message("Complete the authenticator challenge before uploading private capacity evidence.","error");window.location.assign("../../auth/mfa-challenge.html?returnTo="+encodeURIComponent(evidenceReturn.href));return false;}
  return true;
 }
 async function submitResource(e){
