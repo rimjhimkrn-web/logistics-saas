@@ -69,3 +69,12 @@ A second comparison matched Supabase ledger `name` values against repository mig
 - Staging has 3 basename matches but still zero exact version matches with repository files.
 
 This refines the interpretation: 479 production versions have no exact repository timestamp file, but many are not entirely source-less—207 distinct migration names can be matched to a file by basename despite timestamp drift. Do not rename or mark these applied automatically: compare file contents and the actual production catalog before treating them as equivalent.
+
+
+## Critical workflow / notification / shipment source subset
+A focused filter of the production ledger for migration names containing workflow, notification, shipment, customer, identity or partner returned **215 rows**:
+- **24** rows have exact version + basename matches.
+- **84** rows have a basename match but a different timestamp.
+- **107** rows have no matching repository basename.
+
+This includes foundational workflow runtime, retry/dead-letter, notification delivery, shipment lifecycle, customer provisioning and partner assignment migrations. Therefore the PR #245 full-schema staging transaction is useful validation of the proposed delta, but it cannot replace reconstructing the missing historical source for the workflow/notification runtime itself.
