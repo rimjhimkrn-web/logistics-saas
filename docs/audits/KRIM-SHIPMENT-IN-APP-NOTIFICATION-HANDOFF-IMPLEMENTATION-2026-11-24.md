@@ -18,6 +18,10 @@ All six checks passed:
 5. Shipment in-app handoff isolated PostgreSQL 16 tests: customer recipients, partner recipient, duplicate event idempotency, explicit no-recipient outcome.
 6. Cloudflare Pages preview build/deployment check.
 
+
+- Fixed a critical environment-isolation gap in the shared app store: it now selects the isolated staging Supabase project on all `.krim-staging.pages.dev` hosts and local/preview hosts, and production only on the canonical GitHub Pages production host (unless an already initialized shared client is supplied). The production smoke suite executes the actual bootstrap against five synthetic hostnames; all cases passed.
+- Latest Cloudflare Pages preview build succeeded at commit `df6ee404ad133cc2c901accb105e8c60b7a09163`. Branch preview: `https://feat-notification-recipient.krim-staging.pages.dev`.
+
 ## Production compatibility evidence (read-only)
 - `public.notifications` currently has 5 rows and 0 null user IDs.
 - `public.notifications.event_id` does not yet exist in production.
