@@ -115,3 +115,28 @@ Added `docs/proposed-migrations/20261124_warehouse_browser_table_read_acl.sql`. 
 Extended the isolated PostgreSQL 16 warehouse ACL fixture/assertions/workflow to start from over-permissive grants, apply both exact RPC and table-read proposals, verify authenticated SELECT / anon denial / authenticated DML denial / service_role preservation, and verify tenant filtering under fixture RLS policies. These tests validate the grant mechanics and a synthetic RLS fixture; they do not substitute for dynamic tests against the actual staging policy expressions and real authorized warehouse membership.
 
 No grants, policies, schema, functions, or data were changed in production or staging. Migration-ledger reconciliation remains a hard blocker to applying either proposal to staging. The staging warehouse seed prerequisites and lack of real warehouse test identities/facilities remain unresolved.
+
+
+## Isolated ACL verification result — 2026-11-24
+
+Commit `62dffade424bc97d1beb0f8f56db8628d563a6ec` completed all nine associated GitHub Actions workflows successfully:
+- Warehouse RPC ACL isolated PostgreSQL test (run 45448493233): passed. Steps confirmed fixture creation, exact RPC proposal application, browser table-read proposal application, and ACL/RLS assertions.
+- Staging security permission seed isolated test (run 45448493440): passed.
+- Static link audit (run 45448493173): passed.
+- Production smoke checks (run 45448493210): passed.
+- Partner organization selection, shipment-number ACL, notification resolver, shipment notification handoff and workflow-action batch isolated tests: passed.
+
+These are repository CI and isolated database tests. They do not mean the proposed warehouse grants or permission seed have been applied to either Supabase environment, and they do not prove live authenticated warehouse workflows.
+
+## Historical migration source recovery checkpoint — 2026-11-24
+
+Searched GitHub commit history and pull-request metadata for all five missing migration version/name identifiers, then inspected the relevant historical onboarding, verified-audit and automation PR file lists. No exact source SQL for the five missing migrations was recovered from the inspected repository commits/PRs. Later migration files and current database definitions are not valid substitutes for original migration source.
+
+The five missing source files therefore remain unresolved:
+- `20260929043657_add_global_partner_lifecycle.sql`
+- `20260929044040_add_shipment_partner_assignments.sql`
+- `20260929044351_harden_global_notification_delivery.sql`
+- `20260929044417_harden_global_workflow_automation.sql`
+- `20261011161742_complete_workflow_action_dead_letter_quarantine_and_retry_runtime.sql`
+
+Next recovery source must be the original deployment artifact, archived SQL export, Supabase migration/deployment logs, or the original authoring environment. Until exact source is recovered and checked against production schema/function/policy/ACL state, do not synthesize historical files, edit migration ledgers, reset staging, or replay migrations into populated projects.
