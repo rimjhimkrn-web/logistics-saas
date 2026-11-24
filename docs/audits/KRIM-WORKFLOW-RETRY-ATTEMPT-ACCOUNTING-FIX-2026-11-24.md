@@ -24,3 +24,10 @@ All assertions passed. The transaction was rolled back. A follow-up read-only qu
 
 ## Release boundary
 This validates the corrected retry/dead-letter path against the staging database's real schema and runtime functions. It does not authorize production migration deployment. Production migration-ledger reconciliation, broader RLS/API regression, real recipient provisioning and provider readiness remain separate gates.
+
+
+## Privilege verification
+A separate staging transaction applied the proposed migrations and asserted function privileges:
+- `anon` and `authenticated` cannot execute the recipient resolver, fenced executor, in-app persistence function or public workflow wrapper.
+- `service_role` can execute each required function.
+- All privilege assertions passed; the transaction was rolled back.
