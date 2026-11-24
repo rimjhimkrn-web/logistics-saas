@@ -5,6 +5,8 @@ import { join, dirname, resolve as pathResolve } from "node:path";
 import { runInNewContext } from "node:vm";
 
 const required = [
+  "public/app/notifications.html",
+  "public/app/app-store.js",
   "public/quote-result.html",
   "public/payment-verification.html",
   "public/shipment-confirmation.html",
@@ -115,6 +117,31 @@ const required = [
 ];
 
 const failures = [];
+
+// Authenticated notification centre regression: it must read the signed-in
+// user's durable feed and never render fabricated/sample notification records.
+const notificationCentrePath = "public/app/notifications.html";
+const notificationStorePath = "public/app/app-store.js";
+const notificationCentre = existsSync(notificationCentrePath) ? readFileSync(notificationCentrePath, "utf8") : "";
+const notificationStore = existsSync(notificationStorePath) ? readFileSync(notificationStorePath, "utf8") : "";
+for (const token of [
+  "from('notifications')",
+  ".eq('user_id',currentUser.id)",
+  ".order('created_at',{ascending:false})",
+  ".update({is_read:true})",
+  ".eq('user_id',currentUser.id)",
+  "postgres_changes",
+  "No notifications yet",
+]) {
+  if (!notificationCentre.includes(token)) failures.push("Authenticated notification centre is missing required feed behavior: " + token);
+}
+if (!notificationStore.includes("export const supabase = createClient(")) {
+  failures.push("Shared app Supabase client is not exported for authenticated notification pages.");
+}
+if (notificationCentre.includes("TKT-2026-9912") || notificationCentre.includes("sample alert") || notificationCentre.includes("Demo notification")) {
+  failures.push("Notification centre must not contain fabricated notification content.");
+}
+
 
  // Environment isolation regression: production hosts use production Supabase;
  // every development/preview host must use the isolated staging project.
