@@ -140,3 +140,21 @@ The five missing source files therefore remain unresolved:
 - `20261011161742_complete_workflow_action_dead_letter_quarantine_and_retry_runtime.sql`
 
 Next recovery source must be the original deployment artifact, archived SQL export, Supabase migration/deployment logs, or the original authoring environment. Until exact source is recovered and checked against production schema/function/policy/ACL state, do not synthesize historical files, edit migration ledgers, reset staging, or replay migrations into populated projects.
+
+
+## Supabase migration-ledger source check — 2026-11-24
+
+Read-only Supabase MCP migration inventory was retrieved directly from both connected projects.
+
+**Production project** `ebltviniygljwwseplph` is healthy and its migration ledger contains all five previously identified missing version/name entries:
+- `20260929043657 / add_global_partner_lifecycle`
+- `20260929044040 / add_shipment_partner_assignments`
+- `20260929044351 / harden_global_notification_delivery`
+- `20260929044417 / harden_global_workflow_automation`
+- `20261011161742 / complete_workflow_action_dead_letter_quarantine_and_retry_runtime`
+
+**Staging project** `qrpcivhdxobiaofppbkl` is healthy, but its ledger contains only 34 entries beginning `20261117135137`; it does not contain the September foundational versions above. Its current ledger therefore does not provide an original SQL recovery source.
+
+This confirms the five names/versions are recorded as applied in production, but the migration ledger stores metadata, not the SQL bodies. No migration SQL was recovered by this check. No database changes were made.
+
+**Next recovery route:** obtain the original SQL from the deployment machine/artifact or the source-control commit that executed these migrations. If those artifacts are unavailable, perform a separately reviewed forward-only baseline/reconciliation plan based on exact production schema, function definitions, triggers, policies, grants, extensions and seed data. Do not insert synthetic ledger rows or replay guessed SQL.
