@@ -61,7 +61,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #22d3ee;outline-offset:3p
 import { supabase } from './app-store.js';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let currentUser=null,channel=null,loading=false;
+let currentUser=null,loading=false;
 function setStatus(message,isError=false){$('status').textContent=message;$('status').style.borderColor=isError?'#9f1239':'#164e63';$('status').style.background=isError?'#4c0519':'#082f49';}
 function dateLabel(value){const d=new Date(value);return Number.isFinite(d.getTime())?d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Date unavailable';}
 function typeLabel(value){return String(value||'general').replaceAll('_',' ');}
@@ -82,7 +82,7 @@ async function load(){
   const {data:rows,error:queryError}=await supabase.from('notifications').select('id,title,message,notification_type,is_read,created_at,krim_shipment_id').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(100);
   if(queryError)throw queryError;
   render(Array.isArray(rows)?rows:[]);
-  setStatus('Notifications loaded for your signed-in account. Refresh remains available if live database subscriptions are unavailable.');
+  setStatus('Notifications loaded for your signed-in account. Use Refresh to check for new records; live database updates are not enabled for this feed yet.');
  }catch(error){$('feed').innerHTML='<p class="rounded-xl border border-rose-900 bg-rose-950/40 p-4 text-sm text-rose-200">Notifications could not be loaded. '+esc(error?.message||'Please try again.')+'</p>';setStatus('Feed unavailable. No notification was marked read or changed.',true);}
  finally{loading=false;$('refresh').disabled=false;}
 }
@@ -102,12 +102,6 @@ $('mark-all').addEventListener('click',async()=>{
  await load();
 });
 await load();
-if(currentUser){
- channel=supabase.channel('krim-user-notifications-'+currentUser.id)
- .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+currentUser.id},()=>load())
- .subscribe(status=>{if(status==='SUBSCRIBED')setStatus('Live in-app updates connected for your account.');});
-}
-window.addEventListener('beforeunload',()=>{if(channel)supabase.removeChannel(channel);});
 </script>
 <script type="module" src="./app-runtime.js"></script>
 </body>
