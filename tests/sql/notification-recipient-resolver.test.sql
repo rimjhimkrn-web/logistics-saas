@@ -4,6 +4,7 @@ create role authenticated nologin;
 create role service_role nologin;
 
 create schema krim_internal;
+grant usage on schema krim_internal to service_role;
 create table public.krim_shipments (
   id bigint primary key,
   customer_organization_id bigint
