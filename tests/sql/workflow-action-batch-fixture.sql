@@ -22,7 +22,7 @@ returns table(action_execution_id bigint,lease_id uuid,action_type text)
 language plpgsql as $$
 declare v_id bigint; v_lease uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 begin
- select id into v_id from public.krim_workflow_action_executions where status in ('queued','retry_wait') order by id limit 1;
+ select id into v_id from public.krim_workflow_action_executions where status='queued' or (status='retry_wait' and coalesce(next_retry_at,clock_timestamp())<=clock_timestamp()) order by id limit 1;
  if v_id is null then return; end if;
  update public.krim_workflow_action_executions ae
  set status='running',lease_id=v_lease,lease_expires_at=clock_timestamp()+make_interval(secs=>greatest(60,p_lease_seconds)),
