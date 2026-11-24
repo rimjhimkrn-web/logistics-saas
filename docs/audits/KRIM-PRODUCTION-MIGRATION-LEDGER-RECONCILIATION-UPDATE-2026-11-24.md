@@ -56,3 +56,16 @@ A matching schema slice is not proof of a matching full schema history. The rece
 
 ## Release gate
 Do not run `apply_migration`, migration repair, `db push`, or any production DDL as a shortcut. No production migration should be applied until source-to-catalog reconciliation is complete and reviewed.
+
+
+## Basename/source mapping refinement
+A second comparison matched Supabase ledger `name` values against repository migration basenames (the filename suffix after the timestamp), not only the timestamp version:
+- 289 distinct production migration names have at least one exact repository basename match, representing 291 production ledger rows.
+- Of those, 82 have exact version + name matches; 207 distinct migration names map to repository files whose timestamp differs from the production ledger version.
+- 270 production ledger rows have no matching repository basename.
+- Repository has 365 distinct migration basenames; 76 have no matching production ledger name.
+- Repository has 3 duplicate basenames: `enforce_active_markets_for_shipment_booking`, `seed_country_localization_and_units`, and `add_missing_foreign_key_indexes`.
+- Production has 2 duplicate migration-name groups: `krim_warehouse_atomic_inventory_movements` and `krim_ensure_initial_shipment_leg`, each recorded under two different versions.
+- Staging has 3 basename matches but still zero exact version matches with repository files.
+
+This refines the interpretation: 479 production versions have no exact repository timestamp file, but many are not entirely source-less—207 distinct migration names can be matched to a file by basename despite timestamp drift. Do not rename or mark these applied automatically: compare file contents and the actual production catalog before treating them as equivalent.
