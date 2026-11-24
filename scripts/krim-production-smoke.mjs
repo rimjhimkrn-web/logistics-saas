@@ -145,6 +145,34 @@ if (notificationCentre.includes("TKT-2026-9912") || notificationCentre.includes(
   failures.push("Notification centre must not contain fabricated notification content.");
 }
 
+// Execute the actual app-store Supabase bootstrap against synthetic hostnames.
+// This prevents a preview page from accidentally opening a production session.
+const bootstrapStart = notificationStore.indexOf("// Match the repository-wide environment isolation contract:");
+const bootstrapEnd = notificationStore.indexOf("\\nclass AppStore", bootstrapStart);
+if (bootstrapStart < 0 || bootstrapEnd < 0) {
+  failures.push("App-store environment bootstrap boundaries are missing.");
+} else {
+  const bootstrap = notificationStore.slice(bootstrapStart, bootstrapEnd)
+    .replace("export const supabase =", "const supabase =");
+  for (const testCase of [
+    { host: "feat-notification-recipient.krim-staging.pages.dev", environment: "production", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "krim-staging.pages.dev", environment: "preview", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "localhost", environment: "development", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "rimjhimkrn-web.github.io", environment: "production", expected: "https://ebltviniygljwwseplph.supabase.co" },
+    { host: "other-preview.example.net", environment: "preview", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+  ]) {
+    let connectedUrl = "";
+    const sandbox = {
+      window: { location: { hostname: testCase.host }, KRIM_ENVIRONMENT: testCase.environment },
+      createClient: (url) => { connectedUrl = url; return { url }; },
+    };
+    runInNewContext(bootstrap, sandbox);
+    if (connectedUrl !== testCase.expected) {
+      failures.push("App-store Supabase environment isolation mismatch for " + testCase.host + ": " + connectedUrl);
+    }
+  }
+}
+
 
  // Environment isolation regression: production hosts use production Supabase;
  // every development/preview host must use the isolated staging project.
