@@ -30,3 +30,13 @@ Warehouse authenticated-user workflow readiness is not signed off. Keep PR #245 
 
 ## Evidence boundaries
 This finding records effective ACL state at the time of inspection. It does not establish whether the frontend uses RPC directly or a trusted server-side wrapper, and it does not replace dynamic RLS/tenant tests.
+
+
+## Frontend call-path trace — confirmed direct browser RPC calls
+Inspected the current branch's warehouse pages and confirmed the browser uses the Supabase publishable client directly for warehouse operations, rather than routing these calls through a server/Edge Function:
+- `public/warehouse/facility-management.html` calls `krim_warehouse_register_facility` through `c.rpc(...)`.
+- `public/warehouse/goods-receipt.html` calls `krim_warehouse_list_tasks`, `krim_warehouse_transition_task`, `krim_warehouse_create_linked_goods_receipt_task` and `krim_warehouse_list_assigned_shipment_legs` directly through `c.rpc(...)`.
+- `public/warehouse/inbound-receiving.html` calls `krim_warehouse_list_tasks`, `krim_warehouse_transition_task`, `krim_warehouse_create_linked_inbound_task` and `krim_warehouse_list_assigned_shipment_legs` directly through `c.rpc(...)`.
+- `public/warehouse/dispatch-handover.html` calls `krim_warehouse_list_tasks`, `krim_warehouse_transition_task`, `krim_warehouse_create_linked_handover_task` and `krim_warehouse_list_assigned_shipment_legs` directly through `c.rpc(...)`.
+
+Therefore the staging service_role-only ACLs for these user-facing warehouse RPCs are not consistent with the current browser implementation. The pages are expected to fail with permission denied in staging unless an alternate grant path exists. Do not work around this by exposing service_role keys in the browser. The next safe fix is a narrowly scoped staging migration that grants EXECUTE only on the user-facing RPCs whose full function bodies have been verified to derive the actor from `auth.uid()` and enforce organization/facility authorization, followed by authenticated positive/negative staging tests. Production remains unchanged. The migration-history drift still must be reconciled before any production rollout.
