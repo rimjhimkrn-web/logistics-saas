@@ -92,3 +92,23 @@ A further read-only production catalog review traced foreign-key dependencies fo
 Do not drop, rename, truncate, or broadly rewrite these legacy tables or their policies as a shortcut. Before a forward-only policy migration, map each dependent workflow and its canonical organization relationship, identify legitimate self-service profile access after membership revocation, and test both permitted and denied access under two synthetic tenants. In particular, preserve finance, payout, delivery-proof, notification, AI-history, dispatch, fleet, driver-document, and vehicle-binding relationships.
 
 This dependency trace is catalog evidence only. It does not establish exploitability, and no production data, policies, grants, or schema were changed.
+
+
+## Dynamic staging test — foreign driver assignment acceptance (2026-11-24)
+
+A third synthetic two-user negative test was executed against isolated Supabase staging inside an explicit transaction:
+
+1. Created two disposable, email-confirmed Auth users using `.example.invalid` addresses.
+2. User A provisioned a partner organization through the actual `krim_provision_partner_organization` RPC; the resulting owner membership was changed to an active driver membership within the same test transaction.
+3. Created a minimal pending driver-assignment row owned by User A in that organization.
+4. Switched the request JWT subject to User B and invoked the real `krim_driver_accept_assignment` RPC with User A's assignment UUID.
+5. The RPC raised the expected insufficient-privilege error because the assignment is not owned by the authenticated driver. The test also asserted the assignment remained in `assigned` state.
+6. Rolled back the complete transaction.
+
+The first fixture attempt exposed a uniqueness constraint because the provisioning RPC already creates the owner membership. The fixture was corrected to update that membership to driver for the isolated test, rather than inserting a duplicate membership. The corrected test passed.
+
+Reproducible script: `tests/sql/staging-driver-assignment-ownership-isolation.sql`.
+
+Post-rollback staging check: 1 Auth user, 0 organizations, 0 driver assignments — matching the pre-test baseline. No persistent test data remains.
+
+This proves the foreign-assignment ownership rejection path only. It does not test a legitimate driver's successful acceptance, licence/vehicle/compliance prerequisites, trip events, POD, or the remaining tenant matrix. Production remains unchanged.
