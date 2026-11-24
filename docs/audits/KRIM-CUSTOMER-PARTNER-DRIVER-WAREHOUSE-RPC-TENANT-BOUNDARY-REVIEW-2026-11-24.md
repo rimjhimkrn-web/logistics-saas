@@ -74,3 +74,20 @@ The selected customer, partner, driver and warehouse RPCs are authenticated-exec
 
 ## Release decision
 Static guards look well-structured in this selected set, but no synthetic two-tenant dynamic negative tests were run in this pass. Build and run those tests in isolated staging using disposable users/organizations and rolled-back transactions. Keep PR #245 draft and do not claim tenant-isolation certification until the negative tests pass.
+
+
+## Dynamic staging negative test executed
+A two-user synthetic test was executed in Supabase staging inside one explicit transaction:
+1. Created two synthetic, email-confirmed Auth users with `.example.invalid` addresses.
+2. User A provisioned a new partner organization through the actual `krim_provision_partner_organization` RPC.
+3. Switched the JWT subject to user B and attempted `krim_vehicle_register` against user A's organization.
+4. The RPC raised the expected insufficient-privilege error; the test would fail if the insert succeeded.
+5. Verified no vehicle row was created for the foreign organization.
+6. Rolled back the complete transaction.
+
+Post-rollback catalog/data check returned the original staging counts: 1 auth user, 0 organizations, 0 vehicles, and 0 partner-registration audit rows. No persistent staging test data remains.
+
+Reproducible staging-only script:
+`tests/sql/staging-tenant-boundary-vehicle-registration.sql`
+
+This is one proven negative case (partner vehicle registration). It does not replace the remaining customer quote, driver assignment, warehouse facility/evidence and partner capacity cross-tenant test matrix.
