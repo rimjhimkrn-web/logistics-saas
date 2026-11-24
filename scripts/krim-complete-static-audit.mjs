@@ -13,7 +13,7 @@ function walk(dir) {
 const files = walk(".").map(p => normalize(p).replace(/^\.\//, ""));
 const htmlFiles = files.filter(p => p.toLowerCase().endsWith(".html"));
 const fileSet = new Set(files);
-const hashOwners = new Map(), duplicateGroups = [], linkIssues = [], pageRows = [], integrationCandidates = [], placeholderPages = [], redirectRoutes = [], noindexPages = [];
+const hashOwners = new Map(), duplicateGroups = [], linkIssues = [], pageRows = [], integrationCandidates = [], stagingIntegrationCandidates = [], placeholderPages = [], redirectRoutes = [], noindexPages = [], stagingPages = [];
 const attrRe = /(?:^|\s)(?:href|src|action|data-href|formaction)\s*=\s*["']([^"']+)["']/gi;
 const schemeRe = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#|mailto:|tel:|javascript:|data:)/i;
 function existsCandidate(c) {
@@ -100,14 +100,21 @@ for (const file of htmlFiles) {
   const headRedirect = /(?:window\.)?location\.replace\(/i.test(headMarkup) && /(?:redirect|continue|moved|replaced|consolidat)/i.test(titleText + " " + visiblePageText);
   const compatibilityRedirect = Boolean(refreshTag) || headRedirect;
   const noindex = /\bnoindex\b/i.test(robotsContent);
+  const isStaging = /(?:^|\/)staging(?:\/|$)/i.test(file);
   if (noindex) noindexPages.push(file);
+  if (isStaging) stagingPages.push(file);
   if (compatibilityRedirect) redirectRoutes.push({path:file,target:refreshTarget || "script-driven redirect"});
-  const placeholder = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat|connect to supabase)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
-  if (operational && !hasSupabaseSignal && !compatibilityRedirect) integrationCandidates.push(file);
+  const explicitPlaceholderWording = /\b(?:coming soon|demo data|sample data|mock data|TODO:.*integrat)\b/i.test(visiblePageText.replace(/\bno demo data is used\b|\bnot replaced with sample data\b/gi, " "));
+  const placeholder = !compatibilityRedirect && (explicitPlaceholderWording || (!hasSupabaseSignal && /\bconnect to supabase\b/i.test(visiblePageText)));
+  if (operational && !hasSupabaseSignal && !compatibilityRedirect) {
+    if (isStaging) stagingIntegrationCandidates.push(file);
+    else integrationCandidates.push(file);
+  }
   if (placeholder) placeholderPages.push(file);
-  pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,noindex,compatibilityRedirect,redirectTarget:refreshTarget || null,backendReview:compatibilityRedirect ? "compatibility-redirect" : operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose"});
+  const backendReview = compatibilityRedirect ? "compatibility-redirect" : isStaging ? (operational && !hasSupabaseSignal ? "staging-integration-review" : "staging-review-required") : operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose";
+  pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,noindex,compatibilityRedirect,redirectTarget:refreshTarget || null,isStaging,backendReview});
 }
-const report = {generatedAt:new Date().toISOString(),scope:"Static analysis only; redirect aliases are classified separately and excluded from integration candidates. Not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,redirectRoutes:redirectRoutes.length,noindexPages:noindexPages.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,placeholderPages,redirectRoutes,noindexPages,integrationCandidates,pages:pageRows};
+const report = {generatedAt:new Date().toISOString(),scope:"Static analysis only. Compatibility redirects and staging routes are classified separately; integration candidates exclude both. Not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,redirectRoutes:redirectRoutes.length,noindexPages:noindexPages.length,stagingPages:stagingPages.length,stagingPagesWithoutVisibleSupabaseSignals:stagingIntegrationCandidates.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,placeholderPages,redirectRoutes,noindexPages,stagingPages,stagingIntegrationCandidates,integrationCandidates,pages:pageRows};
 mkdirSync("audit-output",{recursive:true});
 writeFileSync("audit-output/krim-complete-audit.json",JSON.stringify(report,null,2));
 const lines = [
@@ -121,6 +128,8 @@ const lines = [
 "- Unresolved local/root link references: "+linkIssues.length,
 "- Pages with placeholder/demo/TODO wording signals: "+placeholderPages.length,
 "- Compatibility redirect routes (excluded from integration candidates): "+redirectRoutes.length,
+"- Staging pages (not counted as production integration gaps): "+stagingPages.length,
+"- Staging pages without visible backend signals: "+stagingIntegrationCandidates.length,
 "- noindex routes: "+noindexPages.length,
 "- Operational-looking pages without visible Supabase signals in their own HTML: "+integrationCandidates.length,"",
 "- HTML pages with direct backend/client signals: "+report.totals.htmlPagesWithDirectBackendSignals,
@@ -133,6 +142,8 @@ const lines = [
 ...(linkIssues.length>300 ? ["- ... "+(linkIssues.length-300)+" additional findings are in the JSON artifact."] : []),"",
 "## Operational-looking pages without visible Supabase references","",
 ...(integrationCandidates.length ? integrationCandidates.map(p=>"- "+p) : ["- None detected."]),"",
+"## Staging routes requiring release review","",
+...(stagingPages.length ? stagingPages.map(p=>"- "+p) : ["- None detected."]),"",
 "## Compatibility redirect routes","",
 ...(redirectRoutes.length ? redirectRoutes.map(r=>"- "+r.path+" → "+r.target) : ["- None detected."]),"",
 "## Placeholder/demo/TODO wording signals","",
@@ -144,4 +155,4 @@ const lines = [
 "- A passing source-level smoke check does not verify login, RLS, payments, partner payouts or live operational transactions."
 ];
 writeFileSync("audit-output/krim-complete-audit.md",lines.join("\n"));
-console.log(JSON.stringify({output:"audit-output/",totals:report.totals,duplicateGroups,linkIssues:linkIssues.slice(0,100),redirectRoutes:redirectRoutes.slice(0,100),integrationCandidates:integrationCandidates.slice(0,60),placeholderPages:placeholderPages.slice(0,60)},null,2));
+console.log(JSON.stringify({output:"audit-output/",totals:report.totals,duplicateGroups,linkIssues:linkIssues.slice(0,100),redirectRoutes:redirectRoutes.slice(0,100),stagingIntegrationCandidates:stagingIntegrationCandidates.slice(0,100),integrationCandidates:integrationCandidates.slice(0,100),placeholderPages:placeholderPages.slice(0,60)},null,2));
