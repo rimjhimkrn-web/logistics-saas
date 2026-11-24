@@ -81,3 +81,19 @@ A read-only production comparison now confirms the intended browser access patte
 This confirms a consistent production model: browser users receive RLS-filtered read access to warehouse tables and invoke only the intended authenticated, actor-checking RPCs for writes; internal inventory movement remains unavailable directly to browser users. Staging currently does not match that model.
 
 This is effective-privilege catalog evidence, not a successful browser E2E. It does not justify blindly copying every production grant: the exact frontend-required overloads and RLS predicates still need a reviewed migration, plus authorized same-tenant and denied cross-tenant tests. No grants, policies, data or functions were changed in either environment.
+
+
+## Warehouse RLS policy parity confirmed — 2026-11-24
+
+Compared normalized `pg_policies` contents (policy name, command, roles, USING expression and WITH CHECK expression) for every `public.krim_warehouse_%` table in production and staging. All 10 table policy hashes match exactly, with one SELECT policy per table in both environments.
+
+The reviewed SELECT predicates are tenant/facility scoped:
+- Evidence, inventory, inventory movements, receipts, task events and tasks require an active membership in the row's organization, an active approved facility matching the row's facility, and `private.krim_warehouse_org_eligible(organization_id)`.
+- Facilities require active membership in the facility organization plus warehouse organization eligibility.
+- Shipment allocations require either `partner.manage` for the allocation organization or `shipment.view` for the shipment's customer organization.
+- Transfer quality reviews use `private.krim_warehouse_is_operator(auth.uid(), organization_id, facility_id)`.
+- Transfers require operator authorization for the source or destination facility.
+
+This narrows the confirmed environment drift: the ten RLS policy definitions are identical, but staging lacks authenticated table SELECT grants and the exact browser-facing RPC EXECUTE grants present in production. The existing ACL proposal covers only the 14 browser-facing RPC overloads; it intentionally does not grant the internal movement helper. A separate least-privilege table SELECT grant set must be validated against the full browser call-site inventory before staging remediation.
+
+No policy, grant, schema, or data was changed. Hash parity is not a dynamic tenant-isolation test; the staging project still has no synthetic warehouse users, eligible warehouse organizations, approved facilities, or tasks with which to prove same-tenant allow and cross-tenant deny behavior.
