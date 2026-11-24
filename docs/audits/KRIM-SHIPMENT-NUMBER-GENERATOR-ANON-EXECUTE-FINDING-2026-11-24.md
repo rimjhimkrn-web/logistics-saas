@@ -46,3 +46,8 @@ A second read-only comparison confirmed:
 - Both environments deny direct INSERT on `public.krim_shipments` to anon/authenticated and grant INSERT to service_role.
 
 The proposed migration and assertions were refined to match the actual service-role-only shipment insertion model. It now removes EXECUTE and sequence privileges from PUBLIC, anon and authenticated, while preserving service_role. This avoids granting authenticated users a capability they do not need.
+
+
+## Wider anonymous-function scan
+A read-only production scan of all ordinary functions in the exposed `public` schema that anon can execute, excluding functions attached to triggers, returned exactly one function: `generate_krim_shipment_number()`. It is the sequence-consuming function described above. The other anon-executable functions seen in the focused shipment scan were trigger functions; trigger functions are not ordinary RPC endpoints.
+This scan is limited to `public` ordinary functions and does not claim that all schemas, views, operators or storage policies have been audited.
