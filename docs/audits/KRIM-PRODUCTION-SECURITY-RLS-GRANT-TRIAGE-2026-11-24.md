@@ -17,7 +17,7 @@ A direct catalog query on public tables with RLS enabled and no matching `pg_pol
 
 RLS enabled with no policies denies ordinary roles by default. The direct privilege check found no anon or authenticated data grants on this set. The 21 service_role grants are consistent with server-side service access, which bypasses RLS by design and must remain restricted to trusted backend code.
 
-The Supabase Security Advisor previously reported 29 RLS-enabled tables without policies. The direct public-schema query returned 24. The five-object discrepancy is unresolved; the Advisor may include a different object scope or a different snapshot. Re-run the Advisor and enumerate all schemas/object types before closing the discrepancy.
+A second query across all schemas returned 55 RLS-enabled tables without policies: auth 16, private 5, public 24, realtime 1, and storage 9. This is not directly comparable to the Security Advisor's earlier count of 29 because the catalog query includes system/managed schemas and may count objects outside the Advisor's scope. Within the public schema, 24 were found. No anon or authenticated data privileges were found on those 24. The all-schema query did find anon and authenticated data privileges on one realtime object and six storage objects; these may be expected managed-service grants and require object-level review rather than blanket revocation. The earlier Advisor count of 29 remains a separate snapshot until its exact object list can be retrieved.
 
 ## Objects returned by the public-schema query
 
@@ -46,7 +46,7 @@ The Supabase Security Advisor previously reported 29 RLS-enabled tables without 
 - krim_shipment_leg_dispatch_authorizations
 - shipment_pod_documents
 
-## SECURITY DEFINER spot checks
+## Cross-schema catalog summary\n\n| Schema | RLS-enabled tables without policies | Tables with anon data privilege | Tables with authenticated data privilege |\n|---|---:|---:|---:|\n| auth | 16 | 0 | 0 |\n| private | 5 | 0 | 0 |\n| public | 24 | 0 | 0 |\n| realtime | 1 | 1 | 1 |\n| storage | 9 | 6 | 6 |\n| **Total** | **55** | **7** | **7** |\n\nThe realtime and storage grants must be checked against the managed service's expected ACL model and specific object identities. They are not grounds for blanket revocation.\n\n## SECURITY DEFINER spot checks
 
 1. `krim_accept_driver_invitation(text)`: checks authenticated user, confirmed email, a 64-character token format, token hash, invitation expiry/revocation/reuse, exact invited-email match, and current carrier eligibility before accepting.
 2. `krim_vehicle_requirement_list()` and `krim_vehicle_set_document_requirement(...)`: delegate authorization to `krim_vehicle_admin_guard()`; the guard requires an authenticated AAL2 session and `admin.platform` permission. The mutation writes an audit event.
@@ -56,7 +56,7 @@ These are spot checks only, not a complete audit of all 151 authenticated-callab
 
 ## Next steps — zero-cost and read-only until proven
 
-1. Reconcile the 29 Security Advisor findings with the 24 public catalog rows, including schema and object scope.
+1. Retrieve the Security Advisor's exact 29-object finding list and reconcile it against the 55 all-schema catalog rows, separating managed auth/realtime/storage objects from application-owned tables.
 2. Enumerate effective grants for all affected objects and verify no unintended roles inherit privileges.
 3. Review service-role access paths and Edge Function secret boundaries.
 4. Continue the 151-function review by classifying direct authorization, delegated guard, tenant scoping, MFA requirements, and dynamic SQL.
