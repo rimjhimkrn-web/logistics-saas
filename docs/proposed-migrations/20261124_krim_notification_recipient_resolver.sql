@@ -128,3 +128,53 @@ grant execute on function krim_internal.resolve_shipment_notification_recipients
 
 comment on function krim_internal.resolve_shipment_notification_recipients(bigint, text, text)
 is 'Internal identity-only resolver for shipment notification recipients with workflow-code role allowlists; service_role only; never sends messages.';
+
+
+-- Maps only the five verified live shipment workflow/action pairs.
+-- No default or inferred mapping is allowed.
+create or replace function krim_internal.resolve_shipment_notification_intent(
+  p_workflow_code text,
+  p_action_type text
+)
+returns table (recipient_type text, intent_code text)
+language plpgsql
+immutable
+set search_path = ''
+as $function$
+begin
+  if p_workflow_code is null or p_action_type is null then
+    raise exception 'workflow_notification_mapping_required' using errcode = '22023';
+  end if;
+
+  if p_workflow_code in (
+       'shipment.lifecycle.confirmed',
+       'shipment.lifecycle.dispatched',
+       'shipment.lifecycle.delivered',
+       'shipment.lifecycle.exception'
+     )
+     and p_action_type = 'prepare_customer_notification' then
+    recipient_type := 'customer';
+    intent_code := p_workflow_code;
+    return next;
+    return;
+  end if;
+
+  if p_workflow_code = 'shipment.lifecycle.assigned'
+     and p_action_type = 'prepare_partner_notification' then
+    recipient_type := 'partner';
+    intent_code := 'shipment.lifecycle.assigned';
+    return next;
+    return;
+  end if;
+
+  raise exception 'unsupported_workflow_notification_mapping' using errcode = '22023';
+end;
+$function$;
+
+revoke all on function krim_internal.resolve_shipment_notification_intent(text, text) from public;
+revoke all on function krim_internal.resolve_shipment_notification_intent(text, text) from anon;
+revoke all on function krim_internal.resolve_shipment_notification_intent(text, text) from authenticated;
+grant execute on function krim_internal.resolve_shipment_notification_intent(text, text) to service_role;
+
+comment on function krim_internal.resolve_shipment_notification_intent(text, text)
+is 'Fail-closed mapping of verified shipment workflow/action pairs to recipient type and intent code; service_role only.';
