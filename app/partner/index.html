@@ -58,7 +58,7 @@ h1{max-width:740px;margin:18px 0 16px;color:#fff;font-size:clamp(36px,5vw,58px);
 .status-icon svg{width:22px;height:22px}
 .status-panel strong{display:block;color:#fff;font-size:16px;line-height:1.35}
 .status-panel p{margin:8px 0 0;color:#D8EAF6;font-size:11px;line-height:1.8}
-.status-detail{margin-top:15px;padding-top:14px;border-top:1px solid #ffffff30;color:#C9F1FF;font-size:10px;line-height:1.75}
+.status-detail{margin-top:15px;padding-top:14px;border-top:1px solid #ffffff30;color:#C9F1FF;font-size:10px;line-height:1.75}.org-picker{margin-top:16px;padding:14px;border:1px solid #ffffff45;border-radius:10px;background:#06192b66}.org-picker label{display:block;margin-bottom:7px;color:#fff;font-size:11px;font-weight:800}.org-picker select{width:100%;min-height:44px;padding:9px;border:1px solid #b8d7e9;border-radius:8px;background:#fff;color:#14283e}.org-picker button{width:100%;margin-top:10px;min-height:44px;border:0;border-radius:8px;background:#45b8f0;color:#09243d;font-weight:850;cursor:pointer}.org-picker p{margin:8px 0 0;color:#d8eaf6;font-size:10px}
 .pathways{padding:64px 0 0}
 .section-heading{max-width:800px;margin:0 auto 25px;text-align:center}
 .section-heading .eyebrow{color:var(--blue2)}
@@ -123,7 +123,7 @@ h1{max-width:740px;margin:18px 0 16px;color:#fff;font-size:clamp(36px,5vw,58px);
    <div class="status-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 4.8-2.8 8-7 10-4.2-2-7-5.2-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></div>
    <strong id="status-title">Workspace access is controlled</strong>
    <p id="message">Production access is checked against authenticated identity, active organisation membership, organisation status and the selected partner pathway.</p>
-   <div class="status-detail" id="status-detail">A successful sign-in does not bypass verification, service approval or commercial activation requirements.</div>
+   <div class="status-detail" id="status-detail">A successful sign-in does not bypass verification, service approval or commercial activation requirements.</div><form class="org-picker" id="organisation-picker" hidden><label for="organisation-choice">Choose your organisation</label><select id="organisation-choice" required></select><button type="submit">Continue</button><p>Only active memberships are listed. Access is checked again when your workspace opens.</p></form>
   </aside>
  </section>
  <section class="pathways" aria-labelledby="pathways-title">
@@ -213,7 +213,36 @@ if(isStaging){
    const validTypes=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
    const matches=(organisations||[]).filter(org=>validTypes.includes(String(org.organization_type||"").toLowerCase())||validTypes.includes(String(org.organization_type_code||"").toLowerCase()));
    if(matches.length>1){
-    state("Organisation selection required","Your account has more than one active partner organisation. Automatic routing is paused to prevent opening the wrong organisation workspace.","Contact KRIM support to establish an explicit organisation context before continuing.");
+    const picker=$("organisation-picker"),choice=$("organisation-choice");
+    const {data:preferenceRow,error:preferenceError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",data.user.id).maybeSingle();
+    if(preferenceError)throw preferenceError;
+    const savedId=String(preferenceRow?.preferences?.activeOrganizationId||"");
+    const saved=matches.find(org=>String(org.id)===savedId&&String(org.status||"").toLowerCase()==="active");
+    if(saved){
+     const routes={development_test:"development",individual_interest:"individual",registered_business:"business"};
+     const savedRoute=routes[String(saved.partner_account_mode||"").trim().toLowerCase()];
+     if(savedRoute){state("Opening your selected workspace","Your saved organisation is still an active membership.","You can change organisation from the workspace when needed.");redirect("app/partner/"+savedRoute+"/index.html");return;}
+    }
+    choice.replaceChildren();
+    matches.filter(org=>String(org.status||"").toLowerCase()==="active").forEach(org=>{
+     const option=document.createElement("option");option.value=String(org.id);
+     option.textContent=(org.organization_type||org.organization_type_code||"Partner organisation")+" · "+String(org.id);choice.appendChild(option);
+    });
+    if(!choice.options.length){state("No active partner organisation","Your memberships do not currently include an active partner organisation.","Refresh access or contact KRIM support.");return;}
+    picker.hidden=false;
+    picker.addEventListener("submit",async event=>{
+     event.preventDefault();
+     const selected=matches.find(org=>String(org.id)===choice.value&&String(org.status||"").toLowerCase()==="active");
+     if(!selected){state("Selection could not be confirmed","Your organisation membership may have changed. Refresh and try again.","No workspace was opened.");return;}
+     const routes={development_test:"development",individual_interest:"individual",registered_business:"business"};
+     const route=routes[String(selected.partner_account_mode||"").trim().toLowerCase()];
+     if(!route){state("Partner pathway setup required","This organisation needs its partner pathway completed before its workspace can open.","Continue through partner onboarding.");return;}
+     const preferences={...(preferenceRow?.preferences||{}),activeOrganizationId:selected.id};
+     const {error:saveError}=await client.from("krim_user_app_preferences").upsert({user_id:data.user.id,preferences,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+     if(saveError){state("Could not save your selection","Your choice was not saved. Please retry.","No workspace was opened.");return;}
+     state("Opening your selected workspace","Your active membership and partner pathway have been confirmed.","Commercial actions remain subject to verification and permissions.");
+     redirect("app/partner/"+route+"/index.html");
+    });
     return;
    }
    const organisation=matches[0];
