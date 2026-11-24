@@ -55,3 +55,12 @@ This scan is limited to `public` ordinary functions and does not claim that all 
 
 ## Staging assertion
 The ACL assertion block was executed read-only against the existing staging catalog and passed: anon/authenticated cannot execute the generator or use/update the sequence; service_role retains the function/sequence privileges; authenticated has no direct shipment INSERT; service_role does. This verifies staging's existing state only. It does not validate the proposed migration against a fresh database or change production.
+
+
+## Isolated migration CI
+Added a PostgreSQL 16 GitHub Actions test that starts from an intentionally over-permissive function/sequence ACL, applies the proposed migration, runs the privilege assertions, and attempts a shipment insert as `service_role`:
+- `.github/workflows/shipment-number-generator-acl-test.yml`
+- `tests/sql/shipment-number-generator-acl-fixture.sql`
+- `tests/sql/shipment-number-generator-acl-assertions.sql`
+
+The workflow is running on the current PR head. Its result must be checked before this proposed change can be marked validated.
