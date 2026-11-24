@@ -26,8 +26,10 @@ begin
   perform set_config('request.jwt.claim.sub',v_user_a::text,true);
   v_org := public.krim_provision_partner_organization('KRIM Isolated Driver Tenant A');
 
-  insert into public.krim_organization_members(organization_id,user_id,role,status)
-  values(v_org,v_user_a,'driver','active');
+  update public.krim_organization_members
+  set role='driver',status='active'
+  where organization_id=v_org and user_id=v_user_a;
+  if not found then raise exception 'FAIL: provisioned driver membership missing'; end if;
 
   insert into public.krim_driver_assignments(
     id,user_id,organization_id,status,created_by
