@@ -34,11 +34,19 @@ try {
  if(sessionError) throw sessionError;
  if(!session){status.textContent='Sign in required to view secured pipeline data.';summary.textContent='Use the Prospect Registry after signing in.';}
  else {
-  const {count,error}=await supabase.from('krim_growth_opportunities').select('id',{count:'exact',head:true});
+  const {data,error}=await supabase.functions.invoke('krim-global-growth-operations',{body:{action:'overview'}});
   if(error) throw error;
-  status.textContent='Secured administrator access verified. Database query succeeded.';
-  summary.textContent=(count??0)+' growth opportunity record(s) visible under current database permissions. This is not a count of customers or revenue.';
+  if(!data||data.ok!==true) throw new Error(data?.error||'Authorized growth overview unavailable');
+  const counts=data.counts||{};
+  status.textContent='Secured administrator endpoint verified. Live counts loaded.';
+  summary.textContent=[
+   (counts.sources??0)+' configured source record(s)',
+   (counts.signals??0)+' growth signal(s)',
+   (counts.opportunities??0)+' growth opportunity record(s)',
+   (counts.partner_discovery_profiles??0)+' partner discovery profile(s)',
+   (counts.customer_acquisition_profiles??0)+' customer acquisition profile(s)'
+  ].join(' · ')+'. These are pipeline records, not verified partners, customers, bookings or revenue.';
  }
-} catch(e) {status.textContent='Live pipeline metrics unavailable.';summary.textContent=(e&&e.message)?e.message:'Check the Supabase configuration and permissions.';}
+} catch(e) {status.textContent='Live pipeline metrics unavailable.';summary.textContent=(e&&e.message)?e.message:'Check sign-in, platform-admin role, and the growth-operations Edge Function.';}
 </script>
 </body></html>
