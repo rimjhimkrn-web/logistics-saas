@@ -1,3 +1,10 @@
+DO $roles$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
+END
+$roles$;
+
 -- Isolated PostgreSQL 16 fixture for the proposed country-pack column-reference repair.
 CREATE TABLE public.krim_country_operating_packs (
   id bigint PRIMARY KEY,
