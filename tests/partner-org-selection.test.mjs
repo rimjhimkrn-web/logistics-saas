@@ -29,7 +29,8 @@ test("each partner pathway revalidates the saved selection against active member
   for (const source of workspaces) {
     assert.match(source, /from\("krim_organization_members"\)/);
     assert.match(source, /from\("krim_user_app_preferences"\)/);
-    assert.match(source, /String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);\n    assert.match(source, /String\(o\.id\)===selectedId&&String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);
+    assert.match(source, /String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);
+    assert.match(source, /String\(o\.id\)===selectedId&&String\(o\.status\|\|"\)\.toLowerCase\(\)==="active"/);
     assert.match(source, /location\.replace\("\.\.\/\.\.\/\.\.\/app\/partner\/index\.html"\)/);
     assert.doesNotMatch(source, /if\(matches\.length>1\)\{setError\("Organisation selection required"/);
   }
