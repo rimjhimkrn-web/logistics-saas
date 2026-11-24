@@ -145,3 +145,49 @@ begin
   exception when sqlstate '55000' then null;
   end;
 end $$;
+
+
+do $$
+declare r jsonb;
+begin
+  r := krim_internal.execute_workflow_action_fenced(
+    900,'90000000-0000-0000-0000-000000000900','worker-a');
+  if r->>'status' <> 'succeeded' or (r->>'action_execution_id')::bigint <> 900 then
+    raise exception 'fenced executor did not delegate expected action: %',r;
+  end if;
+
+  begin
+    perform krim_internal.execute_workflow_action_fenced(
+      900,'90000000-0000-0000-0000-000000000999','worker-a');
+    raise exception 'fenced executor accepted stale lease UUID';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.execute_workflow_action_fenced(
+      900,'90000000-0000-0000-0000-000000000900','worker-b');
+    raise exception 'fenced executor accepted wrong worker';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.execute_workflow_action_fenced(
+      901,'90000000-0000-0000-0000-000000000901','worker-a');
+    raise exception 'fenced executor accepted expired lease';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.execute_workflow_action_fenced(
+      903,'90000000-0000-0000-0000-000000000903','worker-a');
+    raise exception 'fenced executor accepted unclaimed action';
+  exception when sqlstate '55000' then null;
+  end;
+
+  if has_function_privilege('anon','krim_internal.execute_workflow_action_fenced(bigint,uuid,text)','EXECUTE') then
+    raise exception 'anon unexpectedly has fenced executor execute';
+  end if;
+  if has_function_privilege('authenticated','krim_internal.execute_workflow_action_fenced(bigint,uuid,text)','EXECUTE') then
+    raise exception 'authenticated unexpectedly has fenced executor execute';
+  end if;
+  if not has_function_privilege('service_role','krim_internal.execute_workflow_action_fenced(bigint,uuid,text)','EXECUTE') then
+    raise exception 'service_role missing fenced executor execute';
+  end if;
+end $$;
