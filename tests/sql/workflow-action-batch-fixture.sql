@@ -27,7 +27,7 @@ begin
  update public.krim_workflow_action_executions ae
  set status='running',lease_id=v_lease,lease_expires_at=clock_timestamp()+make_interval(secs=>greatest(60,p_lease_seconds)),
  request_snapshot=ae.request_snapshot||jsonb_build_object('worker_id',p_worker_id,'run_step_id',100),
- attempt_number=ae.attempt_number+1,updated_at=clock_timestamp()
+ updated_at=clock_timestamp()
  where ae.id=v_id;
  if (select mode from public.krim_batch_test_control where singleton)='stale_replace' then
    update public.krim_workflow_action_executions set lease_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
@@ -36,7 +36,7 @@ begin
  action_execution_id:=v_id; lease_id:=v_lease; action_type:='test_action'; return next;
 end $$;
 create function krim_internal.execute_workflow_action_fenced(p_action_execution_id bigint,p_lease_id uuid,p_worker_id text)
-returns jsonb language plpgsql security definer set search_path='public','pg_temp' as $$
+returns jsonb language plpgsql security definer set search_path='public','pg_temp' as $
 declare a public.krim_workflow_action_executions%rowtype; v_mode text; v_response jsonb;
 begin
  select * into a from public.krim_workflow_action_executions where id=p_action_execution_id for update;
@@ -46,12 +46,22 @@ begin
    raise exception 'workflow_action_lease_stale_or_not_owned';
  end if;
  select mode,response into v_mode,v_response from public.krim_batch_test_control where singleton;
- if v_mode='raise' then
-   raise exception 'simulated executor failure';
- elsif coalesce(v_response->>'status','')='succeeded' then
-   update public.krim_workflow_action_executions set status='succeeded' where id=p_action_execution_id;
- end if;
- return v_response;
-end $$;
+ begin
+   update public.krim_workflow_action_executions
+   set attempt_number=attempt_number+1,status='succeeded'
+   where id=p_action_execution_id;
+   if v_mode='raise' then
+     raise exception 'simulated executor failure';
+   end if;
+   return v_response;
+ exception when others then
+   -- Mirror the live executor's exception handler: the increment above rolls
+   -- back with this block, while the failed status survives in the handler.
+   update public.krim_workflow_action_executions
+   set status='failed',error_message=sqlerrm
+   where id=p_action_execution_id;
+   raise;
+ end;
+end $;
 create function public.krim_internal_quarantine_workflow_action(bigint,text)
 returns bigint language sql as $$ select 1::bigint $$;
