@@ -68,3 +68,37 @@ The notification database remediation remains blocked until the migration baseli
 ## Safety decision
 
 **NO-GO for applying notification DDL or migration-history repair directly to production at this stage.** The mismatch is a source-of-truth problem requiring a controlled baseline reconstruction. No production changes were made during this audit.
+
+
+## Follow-up: exact repository duplicate-version collision inventory
+
+A fresh GitHub directory inventory confirmed 13 distinct migration version IDs are each assigned to more than one SQL file. These are **version-key collisions**, not merely repeated migration names:
+
+| Version | Files sharing the version |
+|---|---|
+| `20261025150000` | `krim_ensure_initial_shipment_leg`; `seed_country_localization_and_units` |
+| `20261104190000` | `allow_driver_profile_transfer_on_valid_invitation`; `driver_carrier_invitation_and_membership_workflow`; `driver_verification_documents_and_review`; `partner_route_scope_and_driver_verification` |
+| `20261104191500` | `align_driver_review_with_invitation_gates`; `require_confirmed_email_for_driver_invitation` |
+| `20261104192500` | `fix_driver_invitation_profile_branch`; `scope_driver_document_upload_to_pending_profile` |
+| `20261104193000` | `reverify_driver_after_identity_changes`; `secure_driver_membership_invitations` |
+| `20261104223000` | `krim_country_pack_admin_mobile_performance`; `krim_enforce_market_activation_on_shipment_creation` |
+| `20261104230000` | `krim_global_corridor_compliance_engine`; `krim_unify_market_activation_booking_gate` |
+| `20261104234500` | `seed_india_domestic_pilot_corridor_candidate`; `seed_proposed_corridor_catalogue` |
+| `20261105153000` | `add_evidence_backed_partner_capability_submission`; `enforce_partner_quote_create_permission` |
+| `20261106160000` | `create_customs_broker_assignment_foundation`; `linked_goods_receipt_workflow` |
+| `20261106180000` | `driver_assignment_acceptance_gate`; `operations_dispatch_readiness_register` |
+| `20261106190000` | `driver_assignment_leg_integrity`; `global_vehicle_registry_foundation` |
+| `20261115151000` | `require_all_driver_documents_for_verification`; `schedule_private_vehicle_evidence_expiry_worker` |
+
+These 13 groups account for 15 additional files beyond one file per unique version. A version-keyed migration ledger cannot unambiguously represent all files in these groups. This is a repository replay blocker even before comparing the contents.
+
+A separate migration-name collision inventory found three names used at multiple repository versions:
+- `enforce_active_markets_for_shipment_booking`: `20261025143059`, `20261025143500`.
+- `seed_country_localization_and_units`: `20261025143459`, `20261025150000`.
+- `add_missing_foreign_key_indexes`: `20261104235000`, `20261115072000`.
+
+### Next forensic gate
+
+For every duplicate-version group, fetch the full SQL bodies and compare normalized and exact content hashes. Classify each as identical duplicate, partial overlap, independent migration, or conflicting rewrite. Then inspect historical commit order and production ledger/name evidence. Do not renumber or delete any file until dependency order and production representation are established.
+
+This inventory is static evidence only. No migration SQL was run and no production history was changed.
