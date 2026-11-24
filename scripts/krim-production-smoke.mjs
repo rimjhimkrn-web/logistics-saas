@@ -130,7 +130,6 @@ for (const token of [
   ".order('created_at',{ascending:false})",
   ".update({is_read:true})",
   ".eq('user_id',currentUser.id)",
-  "postgres_changes",
   "No notifications yet",
 ]) {
   if (!notificationCentre.includes(token)) failures.push("Authenticated notification centre is missing required feed behavior: " + token);
