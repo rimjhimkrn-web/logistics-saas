@@ -45,3 +45,61 @@ begin
   exception when sqlstate 'P0002' then null;
   end;
 end $$;
+
+
+do $$
+declare m record; n integer;
+begin
+  select * into m from krim_internal.resolve_shipment_notification_intent(
+    'shipment.lifecycle.confirmed','prepare_customer_notification');
+  if m.recipient_type <> 'customer' or m.intent_code <> 'shipment.lifecycle.confirmed' then
+    raise exception 'confirmed workflow mapping incorrect';
+  end if;
+
+  select * into m from krim_internal.resolve_shipment_notification_intent(
+    'shipment.lifecycle.dispatched','prepare_customer_notification');
+  if m.recipient_type <> 'customer' or m.intent_code <> 'shipment.lifecycle.dispatched' then
+    raise exception 'dispatched workflow mapping incorrect';
+  end if;
+
+  select * into m from krim_internal.resolve_shipment_notification_intent(
+    'shipment.lifecycle.delivered','prepare_customer_notification');
+  if m.recipient_type <> 'customer' or m.intent_code <> 'shipment.lifecycle.delivered' then
+    raise exception 'delivered workflow mapping incorrect';
+  end if;
+
+  select * into m from krim_internal.resolve_shipment_notification_intent(
+    'shipment.lifecycle.exception','prepare_customer_notification');
+  if m.recipient_type <> 'customer' or m.intent_code <> 'shipment.lifecycle.exception' then
+    raise exception 'exception workflow mapping incorrect';
+  end if;
+
+  select * into m from krim_internal.resolve_shipment_notification_intent(
+    'shipment.lifecycle.assigned','prepare_partner_notification');
+  if m.recipient_type <> 'partner' or m.intent_code <> 'shipment.lifecycle.assigned' then
+    raise exception 'assigned workflow mapping incorrect';
+  end if;
+
+  if has_function_privilege('anon','krim_internal.resolve_shipment_notification_intent(text,text)','EXECUTE') then
+    raise exception 'anon unexpectedly has intent mapper execute';
+  end if;
+  if has_function_privilege('authenticated','krim_internal.resolve_shipment_notification_intent(text,text)','EXECUTE') then
+    raise exception 'authenticated unexpectedly has intent mapper execute';
+  end if;
+  if not has_function_privilege('service_role','krim_internal.resolve_shipment_notification_intent(text,text)','EXECUTE') then
+    raise exception 'service_role missing intent mapper execute';
+  end if;
+
+  begin
+    perform * from krim_internal.resolve_shipment_notification_intent(
+      'shipment.lifecycle.assigned','prepare_customer_notification');
+    raise exception 'workflow/action mismatch should fail';
+  exception when sqlstate '22023' then null;
+  end;
+  begin
+    perform * from krim_internal.resolve_shipment_notification_intent(
+      'shipment.lifecycle.unknown','prepare_customer_notification');
+    raise exception 'unknown workflow should fail';
+  exception when sqlstate '22023' then null;
+  end;
+end $$;
