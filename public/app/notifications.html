@@ -1,79 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KRIM OS — Real-Time Notification & Event Center</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              dark: '#02050e',
-              panel: '#081020',
-              cyan: '#06b6d4',
-              emerald: '#10b981',
-              amber: '#f59e0b',
-              rose: '#f43f5e'
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-<!-- KRIM_UNIFIED_LIGHT_THEME_BATCH_2 -->
-<script>(function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());</script>
-
-<!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>KRIM OS — Notifications Centre</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{dark:'#02050e',panel:'#081020',cyan:'#06b6d4',emerald:'#10b981',amber:'#f59e0b',rose:'#f43f5e'}}}}};
+</script>
+<script>(function(){var p=location.pathname;var b=p.indexOf('/logistics-saas/')===0?'/logistics-saas/':'/';var l=document.createElement('link');l.rel='stylesheet';l.href=b+'core/krim-unified-page.css';document.head.appendChild(l);}());</script>
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
 <script defer src="/logistics-saas/assets/krim-global-brand.js?v=20261111-global-brand-v1"></script>
+<style>
+:root{color-scheme:dark}body{background:#02050e;color:#e2e8f0;font-family:Inter,system-ui,sans-serif}
+.panel{background:#081020;border:1px solid #243247;border-radius:16px;padding:20px}
+.notice{border:1px solid #164e63;background:#082f49;border-radius:12px;padding:13px;color:#bae6fd;font-size:12px}
+.item{border:1px solid #263449;background:#0b1728;border-radius:12px;padding:15px}
+.item.unread{border-left:3px solid #06b6d4;background:#0b1e31}
+.badge{display:inline-flex;border-radius:99px;padding:3px 8px;background:#132b43;color:#93c5fd;font-size:10px;font-weight:800;text-transform:uppercase}
+button:focus-visible,a:focus-visible{outline:2px solid #22d3ee;outline-offset:3px}
+</style>
 </head>
-<body class="bg-[#02050e] text-slate-200 font-sans antialiased min-h-screen flex flex-col justify-between">
-
-  <!-- ==================== HEADER / TOP CONTROL BAR ==================== -->
-  <header class="h-14 bg-[#040814]/95 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-40 backdrop-blur-md">
-    <div class="flex items-center space-x-4 font-mono">
-      <a href="/logistics-saas/public/app/app-shell.html" class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">K</div>
-        <span class="font-extrabold text-white text-sm tracking-wide">KRIM OS</span>
-      </a>
-      <div class="h-5 w-px bg-slate-800"></div>
-      <span class="text-xs font-bold text-slate-400">Real-Time Event Stream</span>
-    </div>
-
-    <div class="flex items-center space-x-3 font-mono text-xs">
-      <a href="/logistics-saas/public/app/app-shell.html" class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg transition-all">
-        ← App Core Shell
-      </a>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN EVENT CENTER ==================== -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-mono text-xs">
-    <section class="bg-[#081020] border border-amber-500/40 rounded-2xl p-6">
-      <span class="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Notification delivery · not connected</span>
-      <h1 class="text-xl font-extrabold text-white mt-2">Notifications Centre</h1>
-      <p class="text-slate-300 mt-3">No live user notification feed or WebSocket subscription is connected on this page. Previous sample alerts have been removed so they cannot be mistaken for real shipment events.</p>
-      <p class="text-amber-300 font-bold mt-3">Status: NOT CONNECTED — no notifications were marked read or changed.</p>
-    </section>
-    <section class="bg-[#081020] border border-slate-800 rounded-2xl p-6">
-      <h2 class="font-bold text-white">Notification feed</h2>
-      <p class="text-slate-400 mt-3">No verified notification records are available in this workspace. Notification preferences, delivery receipts, unread counts and recipient-level authorization must be connected before this page can be used operationally.</p>
-    </section>
-  </main>
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="bg-[#02050e] border-t border-slate-800 text-slate-400 text-xs py-6">
-    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between font-mono">
-      <span class="font-extrabold text-white text-xs">KRIM LOGISTICS OS</span>
-      <p class="text-[10px] text-slate-600">© 2026 KRIM System Technologies Ltd. Event Engine.</p>
-    </div>
-  </footer>
-
-  <script type="module" src="/logistics-saas/platform/krim-config.js"></script>
-  <script type="module" src="/logistics-saas/public/app/app-runtime.js"></script>
+<body class="min-h-screen flex flex-col">
+<header class="border-b border-slate-800 bg-slate-950/90 px-4 py-3">
+ <div class="mx-auto flex max-w-5xl items-center justify-between gap-3">
+  <a href="/logistics-saas/public/app/app-shell.html" class="flex items-center gap-3 text-white no-underline">
+   <span class="grid h-9 w-9 place-items-center rounded-lg bg-cyan-500 font-black text-slate-950">K</span>
+   <span class="text-sm font-extrabold tracking-wide">KRIM LOGISTICS OS</span>
+  </a>
+  <a href="/logistics-saas/public/app/app-shell.html" class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200">← App Core</a>
+ </div>
+</header>
+<main class="mx-auto w-full max-w-5xl flex-1 space-y-5 px-4 py-8">
+ <section class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-6">
+  <p class="text-[10px] font-bold uppercase tracking-[.2em] text-cyan-300">Account communications</p>
+  <h1 class="mt-2 text-2xl font-extrabold text-white sm:text-3xl">Notifications Centre</h1>
+  <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Your authenticated in-app service updates, shipment events and operational alerts. This feed displays persisted records for your signed-in account only.</p>
+ </section>
+ <div id="status" class="notice" role="status" aria-live="polite">Verifying your session and loading notifications…</div>
+ <section class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+  <div class="panel"><p class="text-xs text-slate-400">Total loaded</p><strong id="total" class="mt-1 block text-2xl text-white">—</strong></div>
+  <div class="panel"><p class="text-xs text-slate-400">Unread</p><strong id="unread" class="mt-1 block text-2xl text-cyan-300">—</strong></div>
+  <div class="panel col-span-2 sm:col-span-1"><p class="text-xs text-slate-400">Feed scope</p><strong class="mt-1 block text-sm text-white">Your account</strong></div>
+ </section>
+ <section class="panel">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+   <div><h2 class="font-bold text-white">Your notification feed</h2><p class="mt-1 text-xs text-slate-400">Latest 100 records · newest first</p></div>
+   <div class="flex flex-wrap gap-2">
+    <button id="refresh" type="button" class="rounded-lg border border-slate-600 px-3 py-2 text-xs font-bold text-slate-100">Refresh</button>
+    <button id="mark-all" type="button" class="rounded-lg bg-cyan-500 px-3 py-2 text-xs font-bold text-slate-950 disabled:opacity-40" disabled>Mark all read</button>
+   </div>
+  </div>
+  <div id="feed" class="mt-4 space-y-3"><p class="text-sm text-slate-400">Loading…</p></div>
+ </section>
+ <p class="text-[11px] leading-5 text-slate-500">Essential in-app service notices are separate from marketing preferences. This page does not claim email, SMS, WhatsApp or push delivery. A notification appears here only after a durable database record is created.</p>
+</main>
+<footer class="border-t border-slate-800 px-4 py-5 text-center text-[10px] text-slate-500">KRIM Logistics · Global Logistics Operating System</footer>
+<script type="module">
+import { supabase } from './app-store.js';
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let currentUser=null,channel=null,loading=false;
+function setStatus(message,isError=false){$('status').textContent=message;$('status').style.borderColor=isError?'#9f1239':'#164e63';$('status').style.background=isError?'#4c0519':'#082f49';}
+function dateLabel(value){const d=new Date(value);return Number.isFinite(d.getTime())?d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Date unavailable';}
+function typeLabel(value){return String(value||'general').replaceAll('_',' ');}
+function render(rows){
+ const unread=rows.filter(x=>!x.is_read).length;
+ $('total').textContent=String(rows.length);$('unread').textContent=String(unread);
+ $('mark-all').disabled=unread===0;
+ if(!rows.length){$('feed').innerHTML='<div class="rounded-xl border border-dashed border-slate-700 p-8 text-center"><p class="font-semibold text-slate-200">No notifications yet</p><p class="mt-2 text-xs text-slate-400">New verified service updates will appear here when available.</p></div>';return;}
+ $('feed').innerHTML=rows.map(row=>'<article class="item '+(!row.is_read?'unread':'')+'"><div class="flex flex-wrap items-start justify-between gap-2"><span class="badge">'+esc(typeLabel(row.notification_type))+'</span><span class="text-[10px] text-slate-500">'+esc(dateLabel(row.created_at))+'</span></div><h3 class="mt-3 font-bold text-white">'+esc(row.title)+'</h3><p class="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-300">'+esc(row.message)+'</p>'+(row.krim_shipment_id?'<p class="mt-2 text-[11px] text-slate-400">KRIM shipment ID: '+esc(row.krim_shipment_id)+'</p>':'')+(!row.is_read?'<div class="mt-3"><button data-read="'+esc(row.id)+'" class="rounded-lg border border-cyan-700 px-3 py-2 text-[11px] font-bold text-cyan-200">Mark as read</button></div>':'<p class="mt-3 text-[10px] text-slate-500">Read</p>')+'</article>').join('');
+}
+async function load(){
+ if(loading)return;loading=true;$('refresh').disabled=true;
+ try{
+  const {data,error}=await supabase.auth.getUser();
+  if(error)throw error;
+  currentUser=data?.user||null;
+  if(!currentUser){location.replace('../../auth/login.html?next='+encodeURIComponent(location.pathname));return;}
+  const {data:rows,error:queryError}=await supabase.from('notifications').select('id,title,message,notification_type,is_read,created_at,krim_shipment_id').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(100);
+  if(queryError)throw queryError;
+  render(Array.isArray(rows)?rows:[]);
+  setStatus('Notifications loaded for your signed-in account. Refresh remains available if live database subscriptions are unavailable.');
+ }catch(error){$('feed').innerHTML='<p class="rounded-xl border border-rose-900 bg-rose-950/40 p-4 text-sm text-rose-200">Notifications could not be loaded. '+esc(error?.message||'Please try again.')+'</p>';setStatus('Feed unavailable. No notification was marked read or changed.',true);}
+ finally{loading=false;$('refresh').disabled=false;}
+}
+async function markRead(id){
+ const button=document.querySelector('[data-read="'+CSS.escape(String(id))+'"]');if(button)button.disabled=true;
+ const {data,error}=await supabase.from('notifications').update({is_read:true}).eq('id',id).eq('user_id',currentUser.id).eq('is_read',false).select('id');
+ if(error){setStatus('Could not update read status: '+error.message,true);if(button)button.disabled=false;return;}
+ if(!data?.length){setStatus('No row was changed. Refreshing the authorized feed.');}
+ await load();
+}
+$('feed').addEventListener('click',event=>{const button=event.target.closest('[data-read]');if(button)markRead(button.dataset.read).catch(error=>setStatus(error.message,true));});
+$('refresh').addEventListener('click',()=>load());
+$('mark-all').addEventListener('click',async()=>{
+ if(!currentUser)return;$('mark-all').disabled=true;
+ const {error}=await supabase.from('notifications').update({is_read:true}).eq('user_id',currentUser.id).eq('is_read',false);
+ if(error){setStatus('Could not mark notifications read: '+error.message,true);$('mark-all').disabled=false;return;}
+ await load();
+});
+await load();
+if(currentUser){
+ channel=supabase.channel('krim-user-notifications-'+currentUser.id)
+ .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+currentUser.id},()=>load())
+ .subscribe(status=>{if(status==='SUBSCRIBED')setStatus('Live in-app updates connected for your account.');});
+}
+window.addEventListener('beforeunload',()=>{if(channel)supabase.removeChannel(channel);});
+</script>
+<script type="module" src="./app-runtime.js"></script>
 </body>
 </html>
