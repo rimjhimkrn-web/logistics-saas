@@ -37,3 +37,7 @@ An isolated PostgreSQL 16 CI workflow builds an intentionally over-permissive fi
 - Staging remains unchanged because its migration history is unreconciled; adding an untracked direct ACL change would worsen drift.
 - Once the migration ledger is reconciled, apply the migration to staging through the normal reviewed migration path, then run dynamic allowed/foreign-tenant tests against synthetic identities and facilities.
 - Keep PR #245 draft until dynamic warehouse regression, migration reconciliation, and remaining release gates pass.
+
+
+## Cross-environment function-definition parity
+A direct read-only hash comparison of `pg_get_functiondef` for all 14 exact overloads returned identical hashes in production and staging. The discrepancy is therefore isolated to effective EXECUTE ACLs for these selected functions, not their function bodies. This supports a narrow privilege correction, but does not substitute for the dynamic authorized/foreign-tenant workflow tests.
