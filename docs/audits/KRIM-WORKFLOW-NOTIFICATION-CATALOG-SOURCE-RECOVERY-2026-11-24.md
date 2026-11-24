@@ -68,3 +68,14 @@ The following nine runtime function definitions had identical MD5 fingerprints i
 
 ## Release decision
 No migration repair, production DDL, or ledger mutation is authorized by this audit. PR #245 remains draft.
+
+
+## Additional index / trigger / RLS policy comparison
+A second catalog comparison covered indexes, non-internal triggers and RLS policies on the same eight tables:
+- All eight tables have identical index counts and index-definition fingerprints in production and staging.
+- Neither database has user-defined triggers on these eight tables (zero each).
+- Policy definitions, commands, permissive flags and role names were normalized and compared. All eight policy fingerprints match exactly, including both authenticated ownership policies on `notifications`.
+- Initial raw policy hashes differed only because the first comparison included database-specific role OIDs; re-hashing with role names removed that false difference.
+- `notifications` has 7 indexes and 2 policies; each workflow table has its matching single organization-access policy.
+
+This closes the table-level comparison for columns, constraints, indexes, user-defined triggers and RLS policy definitions on these eight objects. It still does not compare grants, ownership, publication membership, all dependent objects or the full schema.
