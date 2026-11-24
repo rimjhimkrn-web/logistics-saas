@@ -37,3 +37,12 @@ Other functions with anon EXECUTE in the shipment query were trigger functions (
 
 ## Decision
 Do not apply directly to production. Keep PR #245 draft until this ACL change is staged and verified and broader migration/security gates are cleared.
+
+
+## Production/staging comparison and least-privilege refinement
+A second read-only comparison confirmed:
+- Production: anon, authenticated and service_role can execute the generator; anon and authenticated have sequence USAGE/UPDATE.
+- Staging: only service_role can execute the generator; only service_role has sequence USAGE/UPDATE.
+- Both environments deny direct INSERT on `public.krim_shipments` to anon/authenticated and grant INSERT to service_role.
+
+The proposed migration and assertions were refined to match the actual service-role-only shipment insertion model. It now removes EXECUTE and sequence privileges from PUBLIC, anon and authenticated, while preserving service_role. This avoids granting authenticated users a capability they do not need.
