@@ -180,7 +180,7 @@ async function productionAccess(){
   const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,display_name,legal_name,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);
   if(orgError)throw orgError;
   const valid=["partner","carrier","forwarder","logistics_provider","warehouse_operator"];
-  const allMatches=(orgs||[]).filter(o=>valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase()));
+  const allMatches=(orgs||[]).filter(o=>String(o.status||"").toLowerCase()==="active"&&(valid.includes(String(o.organization_type||"").toLowerCase())||valid.includes(String(o.organization_type_code||"").toLowerCase())));
   let matches=allMatches;
   if(matches.length>1){
    const {data:preferenceRow,error:preferenceError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",data.user.id).maybeSingle();
