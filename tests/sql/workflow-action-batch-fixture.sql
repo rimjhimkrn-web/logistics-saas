@@ -36,7 +36,7 @@ begin
  action_execution_id:=v_id; lease_id:=v_lease; action_type:='test_action'; return next;
 end $$;
 create function krim_internal.execute_workflow_action_fenced(p_action_execution_id bigint,p_lease_id uuid,p_worker_id text)
-returns jsonb language plpgsql security definer set search_path='public','pg_temp' as $
+returns jsonb language plpgsql security definer set search_path='public','pg_temp' as $fixture$
 declare a public.krim_workflow_action_executions%rowtype; v_mode text; v_response jsonb;
 begin
  select * into a from public.krim_workflow_action_executions where id=p_action_execution_id for update;
@@ -62,6 +62,6 @@ begin
    where id=p_action_execution_id;
    raise;
  end;
-end $;
+end $fixture$;
 create function public.krim_internal_quarantine_workflow_action(bigint,text)
 returns bigint language sql as $$ select 1::bigint $$;
