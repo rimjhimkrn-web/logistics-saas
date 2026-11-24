@@ -13,7 +13,7 @@ begin
   if has_function_privilege('authenticated','krim_internal.resolve_shipment_notification_recipients(bigint,text,text)','EXECUTE') then
     raise exception 'authenticated unexpectedly has execute';
   end if;
-  if not has_function_privilege('service_role','krim_internal.resolve_shipment_notification_recipients(bigint,text)','EXECUTE') then
+  if not has_function_privilege('service_role','krim_internal.resolve_shipment_notification_recipients(bigint,text,text)','EXECUTE') then
     raise exception 'service_role is missing execute';
   end if;
   select count(*) into c from krim_internal.resolve_shipment_notification_recipients(101,'customer','shipment.lifecycle.exception');
