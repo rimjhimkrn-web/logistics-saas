@@ -64,3 +64,14 @@ For each approved notification action, a future implementation should perform th
 
 ## Scope and status
 This is an implementation design based on read-only production definitions and counts. It changes no production schema, rows, secrets, routes, providers, cron jobs or notification settings. Do not apply a migration or enable external sends from this document alone.
+
+
+## Additional executor/lease audit — verified 2026-11-24
+- public.krim_internal_claim_workflow_actions(text,integer,integer) returns action_execution_id, lease_id and action_type. It assigns a fresh UUID to krim_workflow_action_executions.lease_id and a lease expiry.
+- public.krim_internal_process_workflow_action_batch(text,integer,integer) receives that claim row but invokes public.krim_internal_execute_workflow_action(v_claim.action_execution_id) only. It does not pass v_claim.lease_id or worker ID to the executor.
+- The current executor locks the action row but accepts only the action ID; it does not compare the current lease UUID, worker ID or expiry before changing action status. The current batch therefore does not provide a complete lease-fencing boundary for this action path.
+- This is a separate, high-priority integration blocker. A safe patch must update the claim → executor → completion contract as one unit and prove stale-worker rejection in concurrent tests. Do not add a new helper that is never invoked by the active batch, and do not report the action complete merely because the resolver succeeded.
+- The new resolve_shipment_notification_intent(text,text) helper and five mapping assertions are included in this draft. The isolated PostgreSQL 16 resolver workflow passed after those assertions were added.
+
+## Current implementation boundary
+The recipient resolver and workflow/action mapper are implemented as proposed SQL in this draft and pass isolated compilation/behavior/privilege tests. The transactional handoff, lease-fenced executor integration, outbox enqueue loop, delivery deduplication and provider adapter integration are not implemented or production-tested. The live communication intent/route/provider/recipient tables are empty, so even a code-complete enqueue path would currently fail closed until configuration and verified identities exist.
