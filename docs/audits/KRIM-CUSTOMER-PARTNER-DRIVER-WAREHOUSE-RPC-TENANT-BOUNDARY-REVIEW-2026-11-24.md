@@ -56,8 +56,20 @@ Read-only source review of selected production RPC definitions and effective EXE
 - Enforces legal task transitions and requires shipment-linked receipt/picking prerequisites for sensitive completion actions.
 - Follow-up negative tests: foreign task ID, wrong facility operator, replay with altered status, invalid terminal transition and cross-shipment linked task.
 
-## Execution grants
-The selected customer, partner, driver and warehouse RPCs are authenticated-executable and not anon-executable in the production catalog. Their SECURITY DEFINER bodies use explicit empty search_path and schema-qualified object references.
+## Verified staging EXECUTE ACL correction — 2026-11-24
+A direct read-only query against the isolated staging catalog checked both `proacl` and effective `has_function_privilege` for the selected SECURITY DEFINER functions. This corrects an over-broad statement in the earlier source-review section:
+
+- Customer quote listing and quote acceptance: `authenticated` EXECUTE is granted; `anon` is denied.
+- Driver assignment acceptance, trip-event recording and delivery-POD submission: `authenticated` EXECUTE is granted; `anon` is denied.
+- The selected warehouse task, evidence and transition RPCs: EXECUTE is granted to `service_role` (and postgres), **not** to `authenticated` or `anon` in staging.
+- The wider SECURITY DEFINER warehouse RPC family inspected in staging (task creation, facility registration, task listing, evidence listing/registration, transitions, inventory movements, transfer and quality review) is likewise service-role-only.
+
+This is an important integration/release gate: do not expose warehouse RPCs directly to browser authenticated clients and do not add broad authenticated grants. Establish and test the intended trusted server/Edge Function mediation, including caller authentication, warehouse membership/facility authorization, request validation and response scoping. Until that is verified end-to-end, warehouse user-facing RPC availability is **not established**. The SQL bodies contain operator checks, but those checks do not make a service-role-only function directly callable by authenticated clients.
+
+No ACLs or schema were changed. This was read-only staging catalog inspection. Production parity for this complete function family has not yet been verified.
+
+## Execution grants (corrected after direct staging ACL inspection)
+Customer quote list/accept and driver assignment accept/trip-event/POD RPCs are authenticated-executable and not anon-executable in staging. The selected warehouse task/evidence/transition RPCs are **service_role-only**, not authenticated-executable. Do not add browser grants without proving the trusted Edge/server mediation design. Production ACL parity remains to be checked. The reviewed SECURITY DEFINER bodies use explicit search_path settings and schema-qualified object references.
 
 ## Dynamic regression matrix still required
 | Actor | Foreign object attempt | Expected result |
