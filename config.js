@@ -1,8 +1,3 @@
-const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-
 function detectKrimEnvironment() {
   const hostname = window.location.hostname.toLowerCase();
   // Staging hostname takes priority over any page-level environment setting.
@@ -28,6 +23,19 @@ function detectKrimEnvironment() {
 }
 
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
+
+// Non-production hosts must never connect to the production database. Local
+// development and all preview/staging deployments use the isolated staging project.
+const PRODUCTION_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+const PRODUCTION_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const STAGING_SUPABASE_URL = "https://qrpcivhdxobiaofppbkl.supabase.co";
+const STAGING_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
+const SUPABASE_URL = window.KRIM_ENVIRONMENT === "production"
+  ? PRODUCTION_SUPABASE_URL
+  : STAGING_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = window.KRIM_ENVIRONMENT === "production"
+  ? PRODUCTION_SUPABASE_PUBLISHABLE_KEY
+  : STAGING_SUPABASE_PUBLISHABLE_KEY;
 window.KRIM_STAGING_PREVIEW = window.KRIM_ENVIRONMENT === "preview";
 window.KRIM_AUTH_DISABLED = window.KRIM_STAGING_PREVIEW;
 
