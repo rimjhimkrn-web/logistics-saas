@@ -65,7 +65,7 @@ class AppStore {
       const [prefResult, memberResult] = await Promise.all([
         supabase.from("krim_user_app_preferences").select("preferences").eq("user_id", authUser.id).maybeSingle(),
         supabase.from("krim_organization_members")
-          .select("organization_id,role,status,krim_organizations(id,display_name,legal_name,default_currency_code,timezone)")
+          .select("organization_id,role,status,krim_organizations(id,display_name,legal_name,status,default_currency_code,timezone)")
           .eq("user_id", authUser.id)
           .eq("status", "active")
       ]);
@@ -82,16 +82,18 @@ class AppStore {
         };
       }
       if (!memberResult.error && Array.isArray(memberResult.data)) {
-        this.state.availableOrgs = memberResult.data.map(m => {
-          const org = m.krim_organizations || {};
-          return {
-            id: m.organization_id,
-            name: org.display_name || org.legal_name || ("Organization " + m.organization_id),
-            role: m.role,
-            currency: org.default_currency_code || null,
-            timezone: org.timezone || null
-          };
-        });
+        this.state.availableOrgs = memberResult.data
+          .filter(m => m.status === "active" && String(m.krim_organizations?.status || "").toLowerCase() === "active")
+          .map(m => {
+            const org = m.krim_organizations || {};
+            return {
+              id: m.organization_id,
+              name: org.display_name || org.legal_name || ("Organization " + m.organization_id),
+              role: m.role,
+              currency: org.default_currency_code || null,
+              timezone: org.timezone || null
+            };
+          });
       }
       // Never silently select the first tenant when a user belongs to multiple
       // organisations. A saved choice is only a UI preference: it is accepted
