@@ -6,7 +6,7 @@
 - Handoff accepts only the five explicitly mapped shipment lifecycle/action pairs; it uses the verified identity-only recipient resolver and fails closed for unknown mappings.
 - Customer/partner in-app notification rows are inserted only for resolved user IDs. Duplicate event/user/type notifications are suppressed by the unique index.
 - No-recipient outcome is recorded in the action response and workflow step result as `no_eligible_recipients`; it is not represented as delivered.
-- Notification Centre now reads the authenticated user's `public.notifications` rows, scopes queries and read-state updates by the signed-in user ID, escapes rendered content, and attempts user-filtered Realtime updates. Refresh remains available.
+- Notification Centre now reads the authenticated user's `public.notifications` rows, scopes queries and read-state updates by the signed-in user ID, escapes rendered content, and provides an explicit Refresh action.
 - Shared application Supabase client is exported from `public/app/app-store.js`; no service-role credential is exposed.
 
 ## CI validation at head 5bd79b1aaac92e1d6a4069cbd6a52b4af9e20e30
