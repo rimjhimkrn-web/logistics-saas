@@ -27,6 +27,14 @@ All nine inspected communication/notification tables have RLS enabled. The inspe
 
 This inspection did not test every policy predicate or every RPC execution path. No policy or grant changes were made.
 
+
+
+### Direct table grants (separate from RLS)
+
+The inspected nine tables have no direct `anon` table grants. The eight `krim_communication_*` / `krim_notification_*` tables grant `authenticated` SELECT and `service_role` table privileges. The legacy `notifications` table grants `authenticated` SELECT and UPDATE, plus service-role privileges. RLS remains enabled on all nine tables; the policies listed above remain the row-level restriction layer.
+
+No direct grants were revoked or changed.
+
 ## 3. Existing database workflow findings
 
 ### `krim_internal.enqueue_communication_intent(...)`
