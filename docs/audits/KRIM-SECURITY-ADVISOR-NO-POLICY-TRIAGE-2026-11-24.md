@@ -41,3 +41,15 @@ Leaked-password protection remains disabled. Enable it in Supabase Auth settings
 
 ## Decision
 No broad policy/grant changes are justified by these findings alone. Production remains unchanged.
+
+
+## Custody / dispatch table access-path follow-up
+The three public tables without service_role table grants are not unused:
+- `krim_authorize_leg_dispatch` is SECURITY DEFINER and callable by authenticated users; it checks `auth.uid()`, the `shipment.dispatch` permission for the assigned partner, accepted exact-leg assignment, confirmed capacity binding/reservation, and for ROAD mode verified driver/licence/vehicle documents. For later legs it requires an accepted custody transfer from the immediately preceding leg.
+- `krim_create_leg_custody_transfer` is SECURITY DEFINER and checks authenticated identity, adjacent legs in the same active route plan, completed releasing leg, releasing-partner `partner.manage`, accepted receiving assignment, confirmed receiving capacity, exact cargo manifest, and uploader-owned private evidence.
+- `krim_respond_to_leg_custody_transfer` is SECURITY DEFINER and checks authenticated identity plus receiving-partner `partner.manage`, revalidates receiving assignment and confirmed capacity at acceptance, and records an immutable event.
+- `krim_revoke_leg_dispatch_authorization` is SECURITY DEFINER and checks authenticated identity plus partner `shipment.dispatch`; it blocks revocation after pickup/transit.
+- Trigger functions on `krim_shipment_leg_dispatch_authorizations` additionally enforce warehouse handover and exact assignment binding.
+- Private helper functions are not directly executable by authenticated or service_role, but are invoked internally by owner-executed functions/triggers.
+
+This establishes a concrete owner-executed RPC/trigger access path; it does **not** justify granting service_role direct table access. Keep the no-policy tables without anon/authenticated grants and test the public RPCs with cross-partner/forged-ID negative cases before live use.
