@@ -75,3 +75,9 @@ This is an implementation design based on read-only production definitions and c
 
 ## Current implementation boundary
 The recipient resolver and workflow/action mapper are implemented as proposed SQL in this draft and pass isolated compilation/behavior/privilege tests. The transactional handoff, lease-fenced executor integration, outbox enqueue loop, delivery deduplication and provider adapter integration are not implemented or production-tested. The live communication intent/route/provider/recipient tables are empty, so even a code-complete enqueue path would currently fail closed until configuration and verified identities exist.
+
+
+## Lease assertion draft added — 2026-11-24
+The proposed migration now includes `krim_internal.assert_workflow_action_lease(bigint,uuid,text)`. It locks the action execution row and fails closed unless the action is running, the lease UUID matches, the recorded worker ID matches, and the lease has not expired. Execute is revoked from PUBLIC/anon/authenticated and granted only to service_role. The isolated PostgreSQL test fixture covers a valid lease, stale UUID, wrong worker, expired lease and an unclaimed action.
+
+Latest PR head `6806b07e73a781fa42dcf893c89e42f58cff4708` passed Cloudflare Pages, repository smoke-check, local-link audit and the isolated PostgreSQL resolver/lease-assertion test workflow. This validates the draft helper only. It is **not yet invoked by** `krim_internal_process_workflow_action_batch` or `krim_internal_execute_workflow_action`; production lease-fenced execution and outbox insertion remain unimplemented. No production migration was applied.
