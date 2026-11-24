@@ -105,7 +105,7 @@ async function productionAccess(){
  const {data:members,error:memberError}=await client.from("krim_organization_members").select("organization_id,status").eq("user_id",data.user.id).eq("status","active");if(memberError)throw memberError;
  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(n=>Number.isSafeInteger(n)&&n>0))];if(!ids.length){setError("Partner organisation required","Your account does not currently have an active organisation membership. Continue through partner onboarding.");return}
  const {data:orgs,error:orgError}=await client.from("krim_organizations").select("id,organization_type,organization_type_code,status,display_name,legal_name,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status").in("id",ids);if(orgError)throw orgError;
- const accepted=["partner","carrier","forwarder","logistics_provider","warehouse_operator"],allMatches=(orgs||[]).filter(o=>accepted.includes(String(o.organization_type||"").toLowerCase())||accepted.includes(String(o.organization_type_code||"").toLowerCase()));
+ const accepted=["partner","carrier","forwarder","logistics_provider","warehouse_operator"],allMatches=(orgs||[]).filter(o=>String(o.status||"").toLowerCase()==="active"&&(accepted.includes(String(o.organization_type||"").toLowerCase())||accepted.includes(String(o.organization_type_code||"").toLowerCase())));
  let matches=allMatches;
   if(matches.length>1){
    const {data:preferenceRow,error:preferenceError}=await client.from("krim_user_app_preferences").select("preferences").eq("user_id",data.user.id).maybeSingle();
