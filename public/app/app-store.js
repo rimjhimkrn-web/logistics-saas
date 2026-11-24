@@ -93,8 +93,11 @@ class AppStore {
           };
         });
       }
+      // Never silently select the first tenant when a user belongs to multiple
+      // organisations. A saved choice is only a UI preference: it is accepted
+      // only when it still appears in the freshly fetched active memberships.
       const savedOrg = this.state.availableOrgs.find(o => String(o.id) === String(this.state.preferences.activeOrganizationId));
-      this.state.currentOrg = savedOrg || this.state.availableOrgs[0] || null;
+      this.state.currentOrg = savedOrg || (this.state.availableOrgs.length === 1 ? this.state.availableOrgs[0] : null);
       this.state.error = prefResult.error?.message || memberResult.error?.message || null;
       await this.recordActivity("app_opened", { source: "app-shell" });
     } catch (error) {
@@ -130,10 +133,17 @@ class AppStore {
 
   async setOrganization(orgId) {
     const target = this.state.availableOrgs.find(o => String(o.id) === String(orgId));
-    if (!target) throw new Error("Organization membership not found.");
+    if (!target) throw new Error("Active organisation membership not found. Refresh your access and try again.");
+    const nextPreferences = { ...this.state.preferences, activeOrganizationId: target.id };
+    // Persist first so a failed save cannot leave the UI showing an uncommitted choice.
+    const { error } = await supabase.from("krim_user_app_preferences").upsert({
+      user_id: this.state.user?.id,
+      preferences: nextPreferences,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    if (error) throw error;
     this.state.currentOrg = target;
-    this.state.preferences = { ...this.state.preferences, activeOrganizationId: target.id };
-    await this.savePreferences();
+    this.state.preferences = nextPreferences;
     this.notify("ORGANIZATION_CHANGED");
     await this.recordActivity("preferences_saved", { activeOrganizationId: target.id });
   }
