@@ -178,3 +178,56 @@ grant execute on function krim_internal.resolve_shipment_notification_intent(tex
 
 comment on function krim_internal.resolve_shipment_notification_intent(text, text)
 is 'Fail-closed mapping of verified shipment workflow/action pairs to recipient type and intent code; service_role only.';
+
+
+-- Lease-fencing primitive for the future workflow executor/outbox handoff.
+-- This helper is intentionally not wired into the live executor in this draft.
+create or replace function krim_internal.assert_workflow_action_lease(
+  p_action_execution_id bigint,
+  p_lease_id uuid,
+  p_worker_id text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_status text;
+  v_lease_id uuid;
+  v_lease_expires_at timestamptz;
+  v_worker_id text;
+begin
+  if p_action_execution_id is null or p_lease_id is null
+     or p_worker_id is null or btrim(p_worker_id) = '' then
+    raise exception 'workflow_action_lease_arguments_required' using errcode = '22023';
+  end if;
+
+  select ae.status, ae.lease_id, ae.lease_expires_at,
+         ae.request_snapshot->>'worker_id'
+    into v_status, v_lease_id, v_lease_expires_at, v_worker_id
+  from public.krim_workflow_action_executions ae
+  where ae.id = p_action_execution_id
+  for update;
+
+  if not found then
+    raise exception 'workflow_action_execution_not_found' using errcode = 'P0002';
+  end if;
+
+  if v_status <> 'running'
+     or v_lease_id is distinct from p_lease_id
+     or v_worker_id is distinct from p_worker_id
+     or v_lease_expires_at is null
+     or v_lease_expires_at <= clock_timestamp() then
+    raise exception 'workflow_action_lease_stale_or_not_owned' using errcode = '55000';
+  end if;
+end;
+$function$;
+
+revoke all on function krim_internal.assert_workflow_action_lease(bigint,uuid,text) from public;
+revoke all on function krim_internal.assert_workflow_action_lease(bigint,uuid,text) from anon;
+revoke all on function krim_internal.assert_workflow_action_lease(bigint,uuid,text) from authenticated;
+grant execute on function krim_internal.assert_workflow_action_lease(bigint,uuid,text) to service_role;
+
+comment on function krim_internal.assert_workflow_action_lease(bigint,uuid,text)
+is 'Locking lease ownership assertion for the future workflow action executor; not yet wired into the production batch path.';
