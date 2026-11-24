@@ -113,3 +113,14 @@ values
   (901,'running','90000000-0000-0000-0000-000000000901',now()-interval '1 minute','{"worker_id":"worker-a"}'),
   (902,'running','90000000-0000-0000-0000-000000000902',now()+interval '5 minutes','{"worker_id":"worker-b"}'),
   (903,'queued',null,null,'{}');
+
+
+-- Stub the live executor boundary so the fenced bridge can be tested without
+-- invoking any production workflow side effects.
+create function public.krim_internal_execute_workflow_action(p_action_execution_id bigint)
+returns jsonb
+language sql
+as $function$
+  select jsonb_build_object('ok',true,'action_execution_id',p_action_execution_id,'status','succeeded');
+$function$;
+grant execute on function public.krim_internal_execute_workflow_action(bigint) to service_role;
