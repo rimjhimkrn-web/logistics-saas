@@ -103,3 +103,45 @@ begin
   exception when sqlstate '22023' then null;
   end;
 end $$;
+
+
+do $$
+begin
+  perform krim_internal.assert_workflow_action_lease(
+    900,'90000000-0000-0000-0000-000000000900','worker-a');
+
+  if has_function_privilege('anon','krim_internal.assert_workflow_action_lease(bigint,uuid,text)','EXECUTE') then
+    raise exception 'anon unexpectedly has workflow lease assertion execute';
+  end if;
+  if has_function_privilege('authenticated','krim_internal.assert_workflow_action_lease(bigint,uuid,text)','EXECUTE') then
+    raise exception 'authenticated unexpectedly has workflow lease assertion execute';
+  end if;
+  if not has_function_privilege('service_role','krim_internal.assert_workflow_action_lease(bigint,uuid,text)','EXECUTE') then
+    raise exception 'service_role missing workflow lease assertion execute';
+  end if;
+
+  begin
+    perform krim_internal.assert_workflow_action_lease(
+      900,'90000000-0000-0000-0000-000000000999','worker-a');
+    raise exception 'stale lease UUID should fail';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.assert_workflow_action_lease(
+      900,'90000000-0000-0000-0000-000000000900','worker-b');
+    raise exception 'wrong worker should fail';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.assert_workflow_action_lease(
+      901,'90000000-0000-0000-0000-000000000901','worker-a');
+    raise exception 'expired lease should fail';
+  exception when sqlstate '55000' then null;
+  end;
+  begin
+    perform krim_internal.assert_workflow_action_lease(
+      903,'90000000-0000-0000-0000-000000000903','worker-a');
+    raise exception 'unclaimed action should fail';
+  exception when sqlstate '55000' then null;
+  end;
+end $$;
