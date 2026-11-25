@@ -22,8 +22,9 @@ function resolveCandidate(c) {
   const opts = [c, join(c, "index.html")];
   if (c.startsWith("public/")) opts.push(c.slice(7), join(c.slice(7), "index.html"));
   else opts.push(join("public", c), join("public", c, "index.html"));
-  return opts.some(x => fileSet.has(x) || fileSet.has(x + ".html"));
+  return opts.find(x => fileSet.has(x)) || opts.find(x => fileSet.has(x + ".html")) || null;
 }
+function existsCandidate(c) { return Boolean(resolveCandidate(c)); }
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const hash = createHash("sha256").update(html).digest("hex");
