@@ -9,10 +9,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const IGNORE_DIRS = new Set([".git", "node_modules", ".next", "dist", "build"]);
-const ATTR_RE = /(?:^|\\s)(href|src|action|data-href|formaction)\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))/gi;
-const SCRIPT_RE = /<script\\b[^>]*>[\\s\\S]*?<\\/script\\s*>/gi;
-const STYLE_RE = /<style\\b[^>]*>[\\s\\S]*?<\\/style\\s*>/gi;
-const COMMENT_RE = /<!--[\\s\\S]*?-->/g;
+const ATTR_RE = /(?:^|\s)(href|src|action|data-href|formaction)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+const SCRIPT_RE = /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+const STYLE_RE = /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi;
+const COMMENT_RE = /<!--[\s\S]*?-->/g;
 
 function decodePath(value) {
   try { return decodeURIComponent(value); }
@@ -20,7 +20,7 @@ function decodePath(value) {
 }
 function stripSuffix(value) { return value.split(/[?#]/, 1)[0]; }
 function isExternal(value) {
-  return /^(?:[a-z][a-z0-9+.-]*:|\\/\\/|#)/i.test(value);
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value);
 }
 
 /** Normalize a literal local reference to a tracked HTML path. */
@@ -46,7 +46,7 @@ export function normalizeLocalTarget(sourcePath, rawValue, knownPaths) {
   candidate = parts.join("/");
   const candidates = [candidate];
   if (candidate && !candidate.endsWith(".html")) candidates.push(candidate + ".html");
-  candidates.push(candidate ? candidate.replace(/\\/$/, "") + "/index.html" : "index.html");
+  candidates.push(candidate ? candidate.replace(/\/$/, "") + "/index.html" : "index.html");
   if (candidate.startsWith("public/")) {
     const short = candidate.slice("public/".length);
     candidates.push(short, short + ".html", short + "/index.html");
@@ -59,7 +59,7 @@ export function normalizeLocalTarget(sourcePath, rawValue, knownPaths) {
 
 function attributes(tag) {
   const result = {};
-  for (const match of tag.matchAll(/([\\w:-]+)\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))/g)) {
+  for (const match of tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g)) {
     result[match[1].toLowerCase()] = match[2] ?? match[3] ?? match[4] ?? "";
   }
   return result;
@@ -67,9 +67,9 @@ function attributes(tag) {
 export function extractHtmlReferences(html) {
   const clean = html.replace(COMMENT_RE, " ").replace(SCRIPT_RE, " ").replace(STYLE_RE, " ");
   const refs = [];
-  for (const match of clean.matchAll(/<(?:a|area|link|script|img|iframe|form|source|video|audio|button)\\b[^>]*>/gi)) {
+  for (const match of clean.matchAll(/<(?:a|area|link|script|img|iframe|form|source|video|audio|button)\b[^>]*>/gi)) {
     const tag = match[0];
-    const tagName = (tag.match(/^<([\\w-]+)/) || [,""])[1].toLowerCase();
+    const tagName = (tag.match(/^<([\w-]+)/) || [,""])[1].toLowerCase();
     const attrs = attributes(tag);
     for (const name of ["href", "src", "action", "data-href", "formaction"]) {
       if (attrs[name] !== undefined) refs.push({ attribute: name, tag: tagName, raw: attrs[name] });
@@ -78,26 +78,26 @@ export function extractHtmlReferences(html) {
   return refs;
 }
 function hasNoindex(html) {
-  const head = (html.match(/<head\\b[\\s\\S]*?<\\/head\\s*>/i) || [html])[0];
-  for (const tag of head.matchAll(/<meta\\b[^>]*>/gi)) {
+  const head = (html.match(/<head\b[\s\S]*?<\/head\s*>/i) || [html])[0];
+  for (const tag of head.matchAll(/<meta\b[^>]*>/gi)) {
     const attrs = attributes(tag[0]);
-    if ((attrs.name || "").toLowerCase() === "robots" && /\\bnoindex\\b/i.test(attrs.content || "")) return true;
+    if ((attrs.name || "").toLowerCase() === "robots" && /\bnoindex\b/i.test(attrs.content || "")) return true;
   }
   return false;
 }
 function redirectCandidates(html) {
   const results = [];
-  const head = (html.match(/<head\\b[\\s\\S]*?<\\/head\\s*>/i) || [html])[0];
-  for (const tag of head.matchAll(/<meta\\b[^>]*>/gi)) {
+  const head = (html.match(/<head\b[\s\S]*?<\/head\s*>/i) || [html])[0];
+  for (const tag of head.matchAll(/<meta\b[^>]*>/gi)) {
     const attrs = attributes(tag[0]);
     if ((attrs["http-equiv"] || "").toLowerCase() === "refresh") {
-      const match = (attrs.content || "").match(/(?:^|;)\\s*\\d+\\s*;\\s*url\\s*=\\s*["']?([^"']+)["']?/i);
+      const match = (attrs.content || "").match(/(?:^|;)\s*\d+\s*;\s*url\s*=\s*["']?([^"']+)["']?/i);
       results.push({ mechanism: "meta-refresh", target: match ? match[1].trim() : null });
     }
   }
-  for (const match of html.matchAll(/(?:window\\.)?location\\.replace\\s*\\(\\s*["'`]([^"'`]+)["'`]\\s*\\)/gi))
+  for (const match of html.matchAll(/(?:window\.)?location\.replace\s*\(\s*["'`]([^"'`]+)["'`]\s*\)/gi))
     results.push({ mechanism: "location.replace-literal", target: match[1] });
-  for (const match of html.matchAll(/(?:window\\.)?location(?:\\.href)?\\s*=\\s*["'`]([^"'`]+)["'`]/gi))
+  for (const match of html.matchAll(/(?:window\.)?location(?:\.href)?\s*=\s*["'`]([^"'`]+)["'`]/gi))
     results.push({ mechanism: "location-assignment-literal", target: match[1] });
   return results;
 }
@@ -154,10 +154,10 @@ function main() {
   const map = new Map(paths.map(p=>[p,fs.readFileSync(path.join(root,p),"utf8")]));
   const report = auditHtmlFiles(map);
   fs.mkdirSync(outDir,{recursive:true});
-  fs.writeFileSync(path.join(outDir,"krim-route-graph.json"),JSON.stringify(report,null,2)+"\\n");
+  fs.writeFileSync(path.join(outDir,"krim-route-graph.json"),JSON.stringify(report,null,2)+"\n");
   const csv = ["path,inbound_edges,unique_inbound_sources,noindex,redirect_candidate",...report.pages.map(p=>[
     p.path,p.inbound_edges,p.unique_inbound_sources,report.noindex_paths.includes(p.path),report.redirects.some(r=>r.path===p.path)
-  ].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(","))].join("\\n")+"\\n";
+  ].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(","))].join("\n")+"\n";
   fs.writeFileSync(path.join(outDir,"krim-route-graph.csv"),csv);
   console.log(JSON.stringify({output:outDir,totals:report.totals},null,2));
 }
