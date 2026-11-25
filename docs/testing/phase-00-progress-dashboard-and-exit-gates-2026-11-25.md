@@ -8,7 +8,7 @@
 
 ## Executive progress
 
-There are **88 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
+There are **90 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
 
 The report count measures recorded audit work, not the percentage of the platform that is correct or ready.
 
@@ -40,7 +40,7 @@ This is a genuine browser automation pass for the isolated fixture. It is **not*
 |---|---|---|
 | Repository and infrastructure baseline | Extensive source, workflow, route and dependency inventory | Confirm hosting ownership and live Staging deployment provenance |
 | Environment isolation | QA allowlist implementation; VM tests and Chromium fixture CI both pass | Verify actual deployed Staging hostname and project identity; test actual browser-to-Supabase identity |
-| Nine-workspace workflows | Representative route-to-RPC/backend maps and authorization reviews for all nine ecosystems | Complete safe authenticated runtime tests and resolve known page/RPC/ACL gaps |
+| Nine-workspace workflows | Representative route-to-RPC/backend maps and authorization reviews for all nine ecosystems; canonical driver-review browser RPC caller identified | Complete safe authenticated runtime tests and resolve known page/RPC/ACL gaps |
 | Authentication and tenant isolation | Source and database catalog security reviews | Synthetic multi-tenant identities; real JWT allow/deny tests; callback/MFA/session runtime tests |
 | Notifications | Event producers, outbox, worker, recipient and inbox audits; remediation design documented | Implement and verify one durable, idempotent pipeline; workspace inboxes; safe provider sink; callback and retry tests |
 | Storage and evidence | Bucket/policy inventory, ownership and signed-link reviews; current Staging AAL2 INSERT policy is RESTRICTIVE and composes with the organization/uploader policy | Record assurance decision; provision three missing Staging evidence buckets/policies; resolve reviewer ACL; synthetic upload/read/deny tests |
@@ -98,3 +98,8 @@ No Production or Staging schema, policies, data, Auth users, Storage objects, se
 
 ## Subsequent live Storage recheck
 A fresh read-only catalog query on 2026-11-25 found the Staging partner-verification AAL2 INSERT policy is currently `RESTRICTIVE`, not `PERMISSIVE`. This corrects the earlier historical finding; see `phase-00-live-storage-policy-recheck-and-prior-finding-correction-2026-11-25.md`. The current catalog composition is structurally restrictive, but runtime JWT tests and the Production/Staging assurance decision remain open.
+
+
+## Additional read-only reconciliation
+- Current Staging partner-verification AAL2 INSERT policy is `RESTRICTIVE` and therefore combines with the organization/uploader permissive policy; see the live Storage recheck report.
+- The canonical driver-review UI caller and exact Production/Staging EXECUTE ACL mismatch are now verified; see the driver-reviewer RPC reconciliation report.
