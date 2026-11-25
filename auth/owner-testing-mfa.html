@@ -27,7 +27,7 @@
 </main>
 <script>
 (async()=>{
- if(window.KRIM_ENVIRONMENT!=="preview" || window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl") throw new Error("Owner MFA setup is restricted to the verified staging environment.");
+ if(window.KRIM_ENVIRONMENT!=="preview" || window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl"){document.getElementById("feedback").textContent="Owner MFA setup is available only on the verified staging environment.";document.getElementById("setup").hidden=true;return;}
  const client=window.KRIM_SUPABASE;
  const $=id=>document.getElementById(id);
  const say=m=>$("feedback").textContent=m;
