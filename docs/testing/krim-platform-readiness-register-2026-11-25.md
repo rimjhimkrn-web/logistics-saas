@@ -370,3 +370,10 @@ Main baseline commit `72d75a18f985ceb09e468839435ee95700e11e46` was enumerated u
 Twenty Edge Function entrypoints include Razorpay order/webhook/refund/verification, legacy Cashfree aliases, notification adapter/retry worker, driver GPS/tracking, public shipment tracking, global admin, KRIM AI and public inquiry. No deployed status or runtime behavior inferred.
 
 Targeted page samples show Enterprise referencing both canonical `krim_shipments` and legacy `shipment_requests`; Cashfree aliases remain tracked despite Razorpay-only direction; notification function surface remains limited and generic all-workspace delivery is not proven. Exhaustive route-to-RPC/function/table/bucket mapping remains NOT TESTED. Gate C1 is PARTIAL PASS / BLOCKED pending full static extraction and accepted Staging runtime validation. No code or environment changed.
+
+
+## 23. Gate C2 — complete HTML page-route manifest (2026-11-25)
+
+Generated `phase-00-page-route-manifest-2026-11-25.csv` from immutable main tree commit `72d75a18f985ceb09e468839435ee95700e11e46`. GitHub recursive tree returned `truncated=false`; all 1,023 tracked HTML files are represented as individual CSV rows. Path-based primary candidates: 103 staging-only, 13 workflow, 38 index/dashboard entry candidates, 869 active/other candidates. Zero explicit legacy path candidates detected.
+
+These are structural filename/path candidates only. Redirect behavior, inbound-link/orphan status, deployed routes, actual legacy use and browser functionality have not been verified. All rows remain NOT TESTED at runtime. No deletion/retirement is authorized. Gate C2 PARTIAL PASS / BLOCKED. Method and limits are documented in `phase-00-gate-c2-page-route-manifest-method-and-disposition-2026-11-25.md`.
