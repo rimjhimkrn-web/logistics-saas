@@ -33,3 +33,22 @@ Gate 01O **IMPLEMENTED / VALIDATION PENDING**. Phase 01 remains IN PROGRESS. Pha
 ## Next gate
 
 Gate 01P — inspect the completed CI run, test results, 1,017-page JSON/CSV artifact and checksums; fix any parser/test/inventory mismatch before reconciling historical zero-inbound, redirect and noindex path identities.
+
+## CI validation update (run 45653698622)
+
+The workflow completed successfully against immutable baseline SHA `72d75a18f985ceb09e468839435ee95700e11e46` using QA extractor commit `e694aae7cae977c53a0a955dda1e6817717f7e7e`. Node unit tests passed; exact HTML inventory assertion passed at **1,017 pages**; JSON and CSV artifacts uploaded successfully.
+
+Observed output from that run:
+- HTML pages: **1,017**
+- Literal HTML inbound edges: **9,285**
+- Pages with inbound edges: **757**
+- Zero-inbound pages: **260**
+- Redirect candidate pages: **499**
+- robots noindex pages: **529**
+- Unresolved local HTML route references: **0**
+
+Artifact: `krim-exact-baseline-route-graph`, artifact ID `15040563725`, SHA-256 `75f181a9bdce92364d2eed544af94ff7cab3a628ef0bd2ec8da716058cac0809`. It contains per-page JSON and CSV evidence and is retained in GitHub Actions through 2026-12-25.
+
+**Interpretation cautions:** the 499 are broad source-pattern redirect candidates, including literal `location.href` assignments and `location.replace` calls; they are not yet 499 confirmed compatibility redirects. The 260 zero-inbound count is for the complete 1,017-file HTML census, not the narrower 89-candidate subset from the earlier route-triage summary. The 529 noindex count is the new parser's metadata result. The zero unresolved count is for HTML route references after excluding static assets and non-navigation resource attributes; it is not a full asset audit. These counts must be path-reconciled and manually classified before retirement decisions.
+
+A ninth test covering asset exclusion and non-navigation resource attributes was added after this successful run. A follow-up CI run is required to verify that final test revision. Gate 01O is therefore **PASS for the run's 8-test parser revision and 1,017-page extraction; final branch revision validation remains pending**.
