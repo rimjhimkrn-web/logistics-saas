@@ -85,6 +85,16 @@ for (const [path, forbidden] of staticGuards) {
   assert.equal(readFileSync(path, "utf8").includes(forbidden), false, path + " must not hard-code a project URL");
 }
 
+const customerBooking = readFileSync("public/shipper/booking-request.html", "utf8");
+assert.ok(customerBooking.includes("const client = window.KRIM_SUPABASE;"),
+  "customer booking must use the hostname-verified shared client");
+assert.equal(customerBooking.includes("https://ebltviniygljwwseplph.supabase.co"), false,
+  "customer booking must not hard-code the Production Supabase URL");
+assert.equal(customerBooking.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"), false,
+  "customer booking must not hard-code the Production publishable key");
+assert.equal(customerBooking.includes("window.supabase.createClient"), false,
+  "customer booking must not create a page-local Supabase client");
+
 const bootstraps = [
   ["public/admin/security-desk.html", "../../config.js"],
   ["public/app/shared/security-manager.html", "../../../config.js"],
