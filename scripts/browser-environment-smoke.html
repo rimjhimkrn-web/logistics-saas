@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KRIM browser environment smoke fixture</title>
+</head>
+<body>
+  <main id="result">Environment fixture loading</main>
+  <script>
+    window.__krimCreateClientCalls = [];
+    window.KRIM_SUPABASE = { legacy: true };
+    window.supabaseClient = { legacy: true };
+    window.supabase = {
+      createClient(url, key, options) {
+        const client = { url, key, options, fixture: true };
+        window.__krimCreateClientCalls.push({ url, key, options });
+        return client;
+      }
+    };
+  </script>
+  <script src="../config.js"></script>
+  <script>
+    window.__krimFixtureLoaded = true;
+    document.getElementById("result").textContent =
+      window.KRIM_ENVIRONMENT + ":" + window.KRIM_SUPABASE_PROJECT_REF;
+  </script>
+</body>
+</html>
