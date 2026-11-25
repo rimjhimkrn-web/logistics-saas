@@ -30,7 +30,7 @@ jobs:
       - name: Check out immutable source baseline
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.baseline_sha }}
+          ref: ${{ inputs.baseline_sha || '72d75a18f985ceb09e468839435ee95700e11e46' }}
           path: source-baseline
       - name: Generate exact-baseline route graph
         run: node scripts/krim-route-graph-audit.mjs source-baseline audit-output
