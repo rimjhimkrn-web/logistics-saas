@@ -73,10 +73,10 @@ Severity: P0 = release blocker; P1 = must resolve before enabling affected workf
 | KR-002 | P0 | Staging deployment | Staging Pages origin not proven reachable; Auth redirect settings previously mismatched | Prove exact deployed commit, HTTPS origin, DNS/TLS/HTTP; then review Auth Site URL and redirect allowlist | BLOCKED |
 | KR-003 | P0 | Staging Storage | Prior audit found permissive AAL2 INSERT policy on krim-partner-verification that may OR-compose around stricter path/org policy | Correct in isolated environment; prove same-tenant allowed and wrong-path/cross-tenant/direct API denied | OPEN |
 | KR-004 | P0 | Tenant isolation | No runtime two-tenant cross-org suite | Synthetic tenant tests for reads, writes, RPCs, Storage, signed links, exports and admin boundaries | NOT TESTED |
-| KR-005 | P0 | Notifications | Universal nine-workspace event-to-delivery chain incomplete; legacy triggers mainly create in-app rows | Event → recipient → outbox → dispatcher → controlled sink → status/retry/dead-letter/monitoring tests | OPEN |
+| KR-005 | P0 | Notifications | Refreshed live snapshot: Production legacy in-app 5; generic outbox/deliveries/retries/preferences/provider configs/operational runs all 0. Staging all 0. Eight triggers cover selected legacy shipment/payment/payout/support events only; no generic nine-workspace dispatcher proven | Canonical KRIM Core event map; recipient/tenant resolver; mandatory service-notice rules; provider dispatcher; controlled-sink delivery, retry, callback, dead-letter and alert evidence | OPEN |
 | KR-006 | P0 | Partner supply | Prior catalog showed zero verified partner orgs/capabilities and no accepted assignments | Verified onboarding, document review, capability/service-area approval and assignment evidence | OPEN |
 | KR-007 | P0 | Customer booking | Booking release flag was fail-closed; no complete booking-to-assignment journey proof | Staging registration, org membership, booking validation, quote, acceptance, assignment, idempotency, audit and notification tests | BLOCKED |
-| KR-008 | P0 | Payments | Historical pending/unprocessed webhook states require read-only reconciliation; double-entry ledger had no transaction entries in prior snapshot; refunds unproven | Provider dashboard reconciliation, sandbox order/signature/duplicate/failure/refund and balanced ledger tests | OPEN |
+| KR-008 | P0 | Payments | Refreshed snapshot: payment_orders 6 (1 paid/5 created); payments 4 (2 paid/2 pending); webhook events 10 (6 processed/4 unprocessed); revenue_ledger 1; double-entry ledger 14 accounts but 0 transactions/entries; refunds 0; one legacy payout marked paid is not bank settlement evidence | Read-only correlate four unprocessed webhook events; sandbox order/signature/duplicate/failure/refund tests; canonical payment model; balanced double-entry posting/reversal and independently verified payout settlement | OPEN |
 | KR-009 | P0 | Document lifecycle | Signed-link authorization/revocation/audit and orphan cleanup not proven; partner compliance upload can leave unregistered private objects | Lifecycle state machine, safe orphan reconciliation, reviewer auth, short-lived links, access audit, retention and tenant tests | OPEN |
 | KR-010 | P0 | POD evidence | pod-documents bucket lacked bucket-level size/MIME limits in prior audit; complete intended upload path not proven | Keep disabled until strict bucket constraints, byte validation, malware quarantine and tenant authorization are verified | OPEN |
 | KR-011 | P1 | Driver | Prior snapshots had no driver profiles, assignments, trips, GPS sessions or POD evidence; GPS consent gate disabled | Synthetic assignment → pickup → transit → POD journey; consent, expiry, revocation, rate limits and audit tests | NOT TESTED |
@@ -153,3 +153,78 @@ This register indexes the detailed Phase 00 reports already committed under docs
 ## 11. Change record
 
 Documentation-only commit to QA branch. No application source, database, Storage, Auth, secrets, external providers, Production deployment or Staging deployment changed.
+
+## 12. Refreshed evidence and consolidated remediation execution register — 2026-11-25
+
+This section supersedes older snapshot wording where newer subsystem audits provide a fresher count or more precise source-level finding. It does not convert source/catalog inspection into runtime PASS.
+
+### 12.1 Refreshed high-priority evidence
+
+| Domain | Current evidence from latest focused audit | Release disposition |
+|---|---|---|
+| RLS / tenant boundaries | Production and Staging: 391 public tables, 6 private tables; 0 public tables with RLS disabled; 367 public tables with policies; 24 without policies (sampled grants are service_role-only or absent). Production finance-control tables have broad authenticated write grants and organization-level policies. Staging critical-table authenticated grants are absent. | BLOCKED — runtime tenant tests absent; finance control writes unsafe until narrowed |
+| Privileged RPCs | Production: 632 non-system functions, 474 SECURITY DEFINER; 0 anon-executable, 174 authenticated-executable; no unpinned search_path found. Fourteen authenticated-executable definer functions lack literal auth.uid in their own body and require delegated-authorization review. Staging: 626 total, 488 definer; one anon-executable trigger function has default ACL hygiene issue; no unpinned search_path found. | NOT CERTIFIED — source/catalog review only; delegated identity and caller-supplied actor/org tests absent |
+| Payments | Production: 6 payment_orders (5 created, 1 paid); 4 payments (2 paid, 2 pending); 10 webhook events (6 processed, 4 unprocessed); 1 revenue_ledger row; 14 ledger accounts but 0 double-entry transactions and 0 entries; 0 refund requests/events; 1 legacy payout marked paid without bank-settlement proof. Staging payment tables sampled at zero. | BLOCKED — four unprocessed events need safe correlation; accounting/refund/payout lifecycle unproven |
+| Notifications | Production: 5 legacy in-app rows; generic outbox, delivery, retry, preference, provider-config, operational-run and run-event tables all zero. Staging all zero. Eight legacy triggers cover selected shipment/payment/payout/support events. Reviewed provider adapter is diagnostic/test-oriented; retry worker is founder Telegram-specific; Resend worker is partner-application follow-up-specific. | BLOCKED — no generic nine-workspace dispatcher or delivery evidence |
+| Staging readiness | Staging deployment origin remains unverified/inconclusive; previous migration ledger snapshot 561 Production vs 34 Staging; permission/reference data and auth/storage parity gaps remain. Do not reset or blindly copy environments. | BLOCKED — no synthetic identities or writes until acceptance |
+| Browser security | Sampled source has inline scripts/handlers and DOM HTML sinks; no common repo header config/CSP meta in samples; live response headers not verified. | NOT VERIFIED — deployed header and full data-flow tests required |
+| Document and Storage | Private buckets in prior snapshot; POD bucket lacked bucket-level size/MIME limits; byte-signature validation/malware quarantine, signed-link revocation/audit and orphan cleanup not proven; enterprise vault includes static/prototype routes. | BLOCKED for affected evidence workflows |
+| Booking / supply | Booking release flag was fail-closed in prior source review; prior catalog had zero verified partner orgs/capabilities and zero accepted assignments. | BLOCKED — only verified route/service can be piloted after end-to-end proof |
+| Driver / warehouse / customs | Prior snapshots show no operational driver assignments/tracking/POD, warehouse task/inventory evidence or customs assignment/custody evidence. | NOT TESTED — isolated synthetic journeys required |
+| CI / browser automation | QA smoke workflows passed source assertions and local Chromium environment fixture. No deployed-Staging authenticated Playwright E2E, API contract, RLS adversarial or k6 capacity suite is evidenced. | PASS only for named CI jobs; business journeys remain NOT TESTED |
+
+### 12.2 Ordered remediation backlog
+
+The order below minimizes risk and avoids building test evidence on an untrusted environment. A later item must not be treated as permission to skip an earlier gate.
+
+| Order | Work item | Priority | Required completion evidence | Gate |
+|---:|---|---|---|---|
+| 1 | Freeze release-sensitive changes; name canonical Production and Staging project/origin/branch ownership; capture immutable commit and environment fingerprints | P0 | Signed-off environment map, deployed commit and origin, project IDs, DNS/TLS/HTTP proof; no secrets in artifacts | Gate A — environment identity |
+| 2 | Reconcile Staging migrations/schema without reset or blind copy; compare extensions, tables/columns, indexes, constraints, triggers, functions, grants, RLS, Storage policies and reference data | P0 | Reviewed delta report, migration lineage explanation, approved safe plan and repeatable parity diff | Gate B — staging parity |
+| 3 | Fix Staging Storage partner-verification policy composition and verify least-privilege bucket/path/tenant boundaries | P0 | Same-tenant allow + wrong-path/cross-tenant/anonymous/direct-API deny evidence | Gate C — storage isolation |
+| 4 | Close Production financial-control direct-write gap using narrow server/RPC transitions; enforce finance permission, AAL2 where required, maker-checker and creator/approver separation | P0 | Catalog/grant/policy proof plus negative tests for ordinary member, wrong org, creator-self-approval, stale role and non-AAL2 | Gate D — privileged finance controls |
+| 5 | Review all authenticated-executable SECURITY DEFINER functions, delegated guards and caller-supplied actor/org IDs; remove unintended anon/default ACLs | P0 | Function-by-function authorization matrix and adversarial RPC tests | Gate E — RPC authorization |
+| 6 | Reconcile four unprocessed Razorpay webhook events read-only; establish canonical payment/order/ledger model | P0 | Provider-side correlation evidence; no blind replay; idempotent sandbox webhook tests | Gate F — payment integrity |
+| 7 | Implement and verify balanced double-entry posting, fee/commission/payable, refund reversal and payout settlement reconciliation | P0 | Debit=credit evidence for all test cases, duplicate/reversal/retry cases, bank/provider settlement status | Gate G — financial correctness |
+| 8 | Build canonical notification event contract and recipient resolver for all nine workspaces and new KRIM Core lifecycle | P0 | Event catalog, recipient/tenant/role tests, mandatory service notice vs marketing preference rules | Gate H — notification correctness |
+| 9 | Complete generic notification dispatcher, controlled providers/sinks, idempotency, retries, dead-letter, callbacks and operational alerting | P0 | Synthetic event → scoped recipient → outbox → provider test sink → accepted/delivered/failure/retry/dead-letter evidence | Gate I — communication reliability |
+| 10 | Verify customer booking → quote → payment → partner assignment → shipment milestones; retain fail-closed behavior until all steps pass | P0 | Repeatable staging Playwright/API/DB audit trace with duplicate and unauthorized attempts | Gate J — customer booking |
+| 11 | Verify partner onboarding, evidence review, capability/service-area approval and partner quote/assignment acceptance | P0 | Verified synthetic partner journey and reviewer/tenant audit trail | Gate K — supply activation |
+| 12 | Secure document/POD lifecycle: byte validation, size/MIME limits, malware quarantine, signed-link broker/revocation, access audit and orphan reconciliation | P0 | Allowed/denied file matrix, expired/revoked URL denial, tenant isolation and cleanup evidence | Gate L — evidence integrity |
+| 13 | Complete driver pickup/transit/delivery/POD journey with consent, GPS expiry/revocation and rate limiting | P1 | Synthetic driver journey and consent/security negative tests | Gate M — driver operations |
+| 14 | Complete warehouse QC/custody/inventory and customs dossier/clearance/hold workflows | P1 | Dual-review, inventory quality segregation, custody chain and customs state-transition evidence | Gate N — operational custody |
+| 15 | Complete enterprise/admin permission matrix, export worker and signed-download lifecycle | P1 | Tenant-scoped role matrix, least-privilege export and audit trail | Gate O — enterprise governance |
+| 16 | Verify browser response headers, CSP strategy, DOM sink data flow, redirect validation, auth storage and token non-leakage | P1 | Captured deployed headers and harmless adversarial browser tests | Gate P — browser security |
+| 17 | Add monitoring, backup verification, restore drill, incident runbooks and queue/payment/notification alerts | P1 | Alert injection, owner acknowledgement, backup integrity and restore evidence | Gate Q — operations resilience |
+| 18 | Complete locale/currency/time-zone and supported-route rules | P2 | India-first supported market matrix and rounding/time-zone test suite | Gate R — market correctness |
+| 19 | Run compatibility, accessibility and staged performance tests only on approved isolated Staging | P2 | Browser/device matrix and staged load results; no Production load | Gate S — scale confidence |
+| 20 | Independent regression/security/release review and controlled pilot approval | P0 final gate | All P0 gates closed; affected P1 gates closed; no unresolved critical/high defects; signed evidence pack | Gate T — pilot authorization |
+
+### 12.3 Release policy
+
+- **No unrestricted onboarding, public booking release, real payment collection for unverified flows, or general partner activation** while any P0 gate remains open.
+- A limited India-first pilot may be considered only after all relevant P0 gates close and the exact route, mode, partner capability, capacity, pricing, insurance/compliance, service support and exception ownership are independently verified.
+- Payment success, a legacy payout status, an in-app notification row, a successful source-level CI job or an empty error table is not proof of the full business outcome.
+- Runtime tests remain NOT TESTED until executed with approved synthetic identities and controlled provider sinks in an accepted Staging environment.
+- Any production change requires its own explicit approval and rollback plan; this register is not change authorization.
+
+### 12.4 Evidence index — primary detailed reports
+
+The following focused reports are primary evidence and should be read alongside this register:
+
+- `phase-00-live-rls-grants-and-tenant-isolation-audit-2026-11-25.md`
+- `phase-00-security-definer-and-privileged-rpc-authorization-audit-2026-11-25.md`
+- `phase-00-razorpay-payment-webhook-ledger-refund-payout-audit-2026-11-25.md`
+- `phase-00-notification-communication-delivery-reliability-audit-2026-11-25.md`
+- `phase-00-staging-deployment-origin-and-callback-reachability-2026-11-25.md`
+- `phase-00-browser-security-headers-storage-and-dom-injection-audit-2026-11-25.md`
+- `phase-00-storage-upload-evidence-ownership-signed-url-security-audit-2026-11-25.md`
+- `phase-00-document-route-authentication-authorization-boundary-audit-2026-11-25.md`
+- `phase-00-shared-authentication-session-lifecycle-source-audit-2026-11-25.md`
+- `phase-00-warehouse-customs-operations-custody-chain-audit-2026-11-25.md`
+
+### 12.5 Current disposition
+
+**Phase 00 remains IN PROGRESS. Staging remains BLOCKED. KRIM is NOT RELEASE-READY.** The next safe engineering action is not to enable live features or generate test users: it is to establish and approve the Staging environment identity/parity baseline, then close the P0 authorization and financial-control defects in a controlled non-production workflow.
+
+No application, database, Storage, Auth, provider, deployment or Production configuration was changed by this register update.
