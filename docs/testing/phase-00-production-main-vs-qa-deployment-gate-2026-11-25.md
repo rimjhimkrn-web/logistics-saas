@@ -60,3 +60,33 @@ The main-branch resolver's production fallback and page/meta environment overrid
 
 ## Readiness decision
 Do not certify Production environment isolation or overall Phase 00 readiness yet. The hardening implementation is in QA only; release and runtime verification are separate future gates. No merge, deployment, Supabase setting change, database mutation, user operation, or provider call was performed. NO EVIDENCE = NO PASS.
+
+
+## QA workflow verification for this report commit
+The workflow was run against the exact report commit `9673549fab305a07fb436eaf99baa14e5ea03c78`.
+- GitHub Actions run: `45559294832`
+- Conclusion: **success**
+- Critical workflow smoke checks: PASS
+- Shared authentication module syntax: PASS
+- Fail-closed environment isolation tests: PASS
+- Repository-wide static audit: PASS
+- Audit artifact upload: PASS
+- Artifact: `krim-complete-static-audit` (31,350 bytes; retained through 2026-12-25)
+
+The static audit log reported:
+- 1,017 HTML pages scanned.
+- 0 duplicate groups.
+- 0 unresolved local references.
+- 0 placeholder pages.
+- 343 redirect routes.
+- 523 noindex pages.
+- 103 staging pages.
+- 48 staging pages without visible Supabase signals.
+- 67 operational pages without visible Supabase signals.
+- 311 HTML pages with direct backend signals.
+- 349 pages with linked-script backend signals.
+- 194 operational pages with backend signals.
+
+These are static-source heuristics, not runtime behavior. In particular, a page without visible Supabase signals is not automatically broken; it may use a shared script, a different integration, or be a static informational page. Likewise, zero unresolved local references does not prove every route loads or every user journey succeeds in a browser.
+
+Run URL: https://github.com/rimjhimkrn-web/logistics-saas/actions/runs/45559294832
