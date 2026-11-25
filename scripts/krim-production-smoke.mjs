@@ -119,7 +119,7 @@ const failures = [];
 // Environment isolation regression: only explicit hosts may initialize a Supabase client.
 const environmentConfig = readFileSync("config.js", "utf8");
 for (const testCase of [
-  { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
+  { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
   { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
   { host: "localhost", expectedEnvironment: "development", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
   { host: "rimjhimkrn-web.github.io", expectedEnvironment: "production", expectedRef: "ebltviniygljwwseplph", expectedUrl: "https://ebltviniygljwwseplph.supabase.co", authDisabled: false },
@@ -128,13 +128,14 @@ for (const testCase of [
   let connectedKey = "";
   const sandbox = {
     window: {
-      location: { hostname: testCase.host, pathname: "/logistics-saas/" },
+      location: { hostname: testCase.host, pathname: "/logistics-saas/", search: "" },
       KRIM_SUPABASE: { legacy: true },
       supabaseClient: { legacy: true },
       supabase: { createClient: (url, key) => { connectedUrl = url; connectedKey = key; return { url, key }; } },
     },
     document: { querySelector: () => null },
     URL,
+    URLSearchParams,
     Object,
     String,
   };
@@ -143,6 +144,7 @@ for (const testCase of [
   if (connectedUrl !== testCase.expectedUrl) failures.push(`Unsafe Supabase target for ${testCase.host}: ${connectedUrl}`);
   if (sandbox.window.KRIM_SUPABASE_PROJECT_REF !== testCase.expectedRef) failures.push(`Wrong Supabase project ref for ${testCase.host}`);
   if (sandbox.window.KRIM_AUTH_DISABLED !== testCase.authDisabled) failures.push(`Unexpected auth-disable state for ${testCase.host}`);
+  if (sandbox.window.KRIM_STAGING_REVIEW_MODE !== false) failures.push(`Staging review mode must default off for ${testCase.host}`);
   if (!connectedKey) failures.push(`Supabase publishable key missing for ${testCase.host}`);
   if (!sandbox.window.KRIM_SUPABASE || sandbox.window.KRIM_SUPABASE.legacy) failures.push(`Unverified pre-existing client was reused for ${testCase.host}`);
 }
