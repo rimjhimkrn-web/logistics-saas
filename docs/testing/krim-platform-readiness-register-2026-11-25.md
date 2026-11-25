@@ -465,3 +465,14 @@ Reconciled all 33 aliases into `app/driver/staging/*`: 31 legacy public driver a
 Canonical route chain: `config.js` driver route → `app/driver/index.html` → `app/driver/dashboard.html`; assignment inbox alias redirects to dashboard `#assignments`. Keep existing registry entry and aliases; do not rename or rewrite routes in this gate. Earnings page explicitly says its earnings feed is not connected. POD evidence upload was not established by this page inspection.
 
 Gate C3.6 PARTIAL PASS / BLOCKED. Runtime HTTP/auth/RLS/write-path verification remains blocked by staging deployment and migration-parity gates. Detailed disposition: `phase-00-gate-c3-6-driver-route-environment-disposition-2026-11-25.md`. No route, environment, database, account, provider or deployment was changed.
+
+
+## 32. Gate C3.7 — driver workflow RPC authorization and lifecycle audit
+
+Reviewed source for driver acceptance, assignment-to-partner binding, pickup/transit/exception event RPC, exact-leg dispatch authorization, POD evidence registration, driver POD submission, admin POD review and final delivery authorization.
+
+Positive source controls: authenticated assignment ownership and active driver membership; verified driver profile/licence/identity and expiry; active vehicle/binding/document checks; exact shipment/leg/partner linkage; multi-leg dispatch authorization with capability/compliance/capacity/custody checks; ROAD-only multi-leg driver pickup/transit; pickup-before-transit; delivery excluded from driver event RPC and separated into independently reviewed POD authorization.
+
+Open findings: (P1) driver acceptance's active vehicle binding join does not explicitly bind `driver_profile_id` to the exact verified profile row; (P1) admin POD review updates driver assignments by partner_assignment_id without proving the full POD shipment/leg/org/driver tuple; (P1) POD wrapper/internal creator/reviewer still require canonical exact tuple and evidence-object binding, with direct internal-call ACL verification; (P2) trip-event replay lacks stable idempotency key and payload equivalence; (P2) exception/revocation lifecycle and service-role/internal ACL behavior lack runtime evidence.
+
+Gate C3.7 PARTIAL PASS / BLOCKED. No SQL was executed; no RPC, Production or Staging data, schema, policy, grant, account, provider or deployment was changed. Runtime test matrix is deferred until Staging deployment and migration parity gates pass. Detailed report: `phase-00-gate-c3-7-driver-rpc-authorization-audit-2026-11-25.md`.
