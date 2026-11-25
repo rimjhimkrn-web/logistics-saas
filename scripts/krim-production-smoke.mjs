@@ -170,6 +170,17 @@ for (const host of ["unknown.example", "attacker.krimlogistics.example", "random
   if (sandbox.window.KRIM_SUPABASE !== null || sandbox.window.supabaseClient !== null) failures.push(`Unknown hostname retained an unverified client: ${host}`);
 }
 
+// Customer booking must use only the hostname-verified shared client; no Production fallback.
+const customerBookingSource = readFileSync("public/shipper/booking-request.html", "utf8");
+if (!customerBookingSource.includes("const client = window.KRIM_SUPABASE;")) {
+  failures.push("Customer booking must use the shared hostname-verified Supabase client");
+}
+if (customerBookingSource.includes("https://ebltviniygljwwseplph.supabase.co") ||
+    customerBookingSource.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa") ||
+    customerBookingSource.includes("window.supabase.createClient")) {
+  failures.push("Customer booking must not contain a page-local Production URL/key/client fallback");
+}
+
 // Environment-sensitive privileged routes must use the shared client, not embed project URLs.
 for (const [path, forbidden] of [
   ["app/platform-admin/index.html", "https://ebltviniygljwwseplph.supabase.co"],
