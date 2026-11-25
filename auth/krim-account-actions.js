@@ -1,7 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
-const SUPABASE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+import { supabase as sb } from "../platform/krim-supabase.js";
 const $=s=>document.querySelector(s);
 const status=$("#status"), form=$("#action-form"), fields=$("#fields"), title=$("#title"), desc=$("#description"), submit=$("#submit");
 const page=document.body.dataset.page;
