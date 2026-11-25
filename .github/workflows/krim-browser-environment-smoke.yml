@@ -1,0 +1,47 @@
+name: KRIM Chromium environment isolation smoke
+
+on:
+  push:
+    branches: [qa/phase-00-baseline-2026-11-25]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromium-environment-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out QA source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static fixture server
+        run: |
+          python3 -m http.server 4173 --bind 0.0.0.0 >/tmp/krim-static-server.log 2>&1 &
+          echo $! > /tmp/krim-static-server.pid
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/scripts/browser-environment-smoke.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/krim-static-server.log
+          exit 1
+      - name: Run real Chromium environment isolation checks
+        run: node scripts/krim-browser-environment-smoke.mjs
+      - name: Stop local fixture server
+        if: always()
+        run: |
+          if [ -f /tmp/krim-static-server.pid ]; then
+            kill "$(cat /tmp/krim-static-server.pid)" || true
+          fi
