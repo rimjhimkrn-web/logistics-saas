@@ -391,3 +391,12 @@ Sample includes homepage, about, contact, admin shell, Customer, Partner, Wareho
 Reviewed existing QA branch scripts `scripts/audit-krim-links.mjs`, `scripts/krim-complete-static-audit.mjs`, and workflow `.github/workflows/krim-static-link-audit.yml`. They recursively scan HTML, resolve literal local paths and GitHub Pages base-prefix references, check canonical route registry destinations, count static inbound HTML edges, and produce zero-inbound candidate lists and artifacts. Zero-inbound is not proof of orphan status. The first link-audit command uses `|| true`, but a later enforcement step fails if the reported broken reference count is positive.
 
 A new QA-branch documentation commit triggers the existing push workflow. Repository-wide counts and findings remain PENDING until its run and artifacts are inspected; no results are inferred. Deployed HTTP routes, runtime redirects and genuine orphan status remain NOT TESTED. Detailed note: `phase-00-gate-c3-1-repository-wide-static-link-audit-2026-11-25.md`.
+
+
+## 25. Gate C3 — repository-wide static link graph (2026-11-25)
+
+GitHub Actions run `45593997090` completed SUCCESS at QA branch source commit `3f37e0817bee4ba1ae773f18f9ef5a7ed0e934c0`. Complete static audit scanned 2,131 files / 1,018 HTML pages, generated 9,453 literal static HTML-to-HTML edges, found 0 unresolved local/root references, 0 exact duplicate groups and 0 placeholder/demo/TODO signals. Independent local-link audit also found 0 broken references and validated 27 canonical route destinations.
+
+Graph results: 757 HTML pages have inbound literal static links; 89 zero-inbound candidates remain NOT TESTED as true orphans. There are 343 redirect/compatibility routes, 523 noindex pages, 103 staging pages (48 without visible backend signals), 67 operational-looking non-staging pages without visible Supabase signals, and 194 operational pages with backend-related signals. These are source-level review classifications, not runtime proof.
+
+Gate C3 static link resolution PASS; true orphan status, deployed HTTP/redirect behavior and runtime navigation NOT TESTED. Overall PARTIAL PASS / BLOCKED. No application pages deleted, no live deployment, database or provider state changed. Detailed report: `phase-00-gate-c3-repository-wide-link-graph-2026-11-25.md`.
