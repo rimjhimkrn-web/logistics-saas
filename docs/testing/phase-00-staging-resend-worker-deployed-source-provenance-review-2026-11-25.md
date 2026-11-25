@@ -38,7 +38,7 @@ The cron-secret check is a useful authentication barrier, but it does not replac
 
 ## Required actions before any test invocation
 
-- Commit the exact retrieved source under `supabase/functions/krim-resend-email-worker/index.ts` on the QA branch, with the retrieved deployment version/hash recorded. Do not deploy it as part of that commit.
+- Completed: preserved the exact retrieved source under `supabase/functions/krim-resend-email-worker/index.ts` on the QA branch and verified byte-for-byte equality with the deployed Staging version 1. This is source provenance only; it was not deployed.
 - Add a project-ref assertion against the known Staging project.
 - Add a mandatory recipient allowlist and sink-only mode; reject all non-allowlisted addresses before queue claim.
 - Add a dry-run that does not claim queue records and cannot call Resend.
