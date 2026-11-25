@@ -8,7 +8,7 @@
 
 ## Executive progress
 
-There are **87 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
+There are **88 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
 
 The report count measures recorded audit work, not the percentage of the platform that is correct or ready.
 
@@ -43,7 +43,7 @@ This is a genuine browser automation pass for the isolated fixture. It is **not*
 | Nine-workspace workflows | Representative route-to-RPC/backend maps and authorization reviews for all nine ecosystems | Complete safe authenticated runtime tests and resolve known page/RPC/ACL gaps |
 | Authentication and tenant isolation | Source and database catalog security reviews | Synthetic multi-tenant identities; real JWT allow/deny tests; callback/MFA/session runtime tests |
 | Notifications | Event producers, outbox, worker, recipient and inbox audits; remediation design documented | Implement and verify one durable, idempotent pipeline; workspace inboxes; safe provider sink; callback and retry tests |
-| Storage and evidence | Bucket/policy inventory, ownership and signed-link reviews; remediation gates documented | Decide AAL2 rule; provision missing Staging buckets/policies; resolve reviewer ACL; synthetic upload/read/deny tests |
+| Storage and evidence | Bucket/policy inventory, ownership and signed-link reviews; current Staging AAL2 INSERT policy is RESTRICTIVE and composes with the organization/uploader policy | Record assurance decision; provision three missing Staging evidence buckets/policies; resolve reviewer ACL; synthetic upload/read/deny tests |
 | Payments and finance | Razorpay, refunds, ledger and finance authorization source reviews | Isolated payment simulation/test-mode verification, reconciliation and tenant-safe runtime tests; no real charges |
 | Browser test infrastructure | Chromium CI now green | Expand from environment fixture to public-route and signed-in synthetic-workspace suites |
 | Release safety | QA-only work; no merge or deployment | Full diff review, explicit owner approval, deployment/rollback plan and post-deploy verification |
@@ -55,7 +55,7 @@ These gates must not be confused with audit-document completion.
 | Gate | Required proof | Current state |
 |---|---|---|
 | G0 — Environment identity | Canonical Staging origin, actual deployed commit and Supabase project ref proven together | **BLOCKED / NOT VERIFIED** |
-| G1 — Partner upload assurance | Written AAL2 decision and one effective policy with correct membership/path checks | **OPEN — decision required** |
+| G1 — Partner upload assurance | Written assurance decision plus runtime AAL1/AAL2 JWT allow/deny tests | **PARTIAL PASS:** current Staging catalog enforces AAL2 through a RESTRICTIVE policy; Production has no matching AAL2 INSERT restriction; owner decision and runtime tests remain open |
 | G2 — Staging Storage parity | Required private evidence buckets and scoped policies present; no permissive-policy bypass | **OPEN — known gaps** |
 | G3 — Driver reviewer authorization | Actual caller and intended EXECUTE ACL confirmed | **OPEN** |
 | G4 — Synthetic identities | Isolated users and at least two separate organizations with role/assurance coverage | **NOT ESTABLISHED** |
@@ -67,7 +67,7 @@ These gates must not be confused with audit-document completion.
 ## Critical known blockers carried into remediation
 
 1. The Staging website origin and deployed commit are not proven. Repository inspection found the GitHub Pages deployment workflow deploys `main`; it does not establish a deployment to `krim-staging.pages.dev`.
-2. Staging partner verification has two permissive INSERT policies; PostgreSQL OR-composition means the AAL2-only policy does not strengthen the organization-scoped policy.
+2. **Corrected live finding:** current Staging catalog shows the AAL2 INSERT policy is RESTRICTIVE, so it combines with the permissive organization/uploader policy as an AND condition. The earlier two-permissive finding is historical/stale. Production does not show the matching AAL2 INSERT restriction; the intended parity decision remains open.
 3. Staging lacks the reviewed driver-verification, driver-evidence and warehouse-evidence buckets.
 4. Driver-review function execution privileges differ between Production and Staging; the intended caller must be identified before changing ACLs.
 5. Notifications remain a launch blocker: source audits show gaps in end-to-end recipient routing, inboxes, provider delivery evidence, callbacks, retries and safe test-send controls.
@@ -94,3 +94,7 @@ Recommended next sequence:
 No Production or Staging schema, policies, data, Auth users, Storage objects, secrets or provider settings were changed in this progress update. No Production merge or deployment occurred. The Chromium test used a local fixture and mocked Supabase SDK; it did not access live customer or partner data and did not send communications or charges.
 
 **Decision:** Continue Phase 00 through environment proof and remediation readiness. Audit coverage is extensive, but the platform is not yet certified for real onboarding or revenue-generating use.
+
+
+## Subsequent live Storage recheck
+A fresh read-only catalog query on 2026-11-25 found the Staging partner-verification AAL2 INSERT policy is currently `RESTRICTIVE`, not `PERMISSIVE`. This corrects the earlier historical finding; see `phase-00-live-storage-policy-recheck-and-prior-finding-correction-2026-11-25.md`. The current catalog composition is structurally restrictive, but runtime JWT tests and the Production/Staging assurance decision remain open.
