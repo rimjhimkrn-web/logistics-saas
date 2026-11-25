@@ -315,3 +315,14 @@ The existing workflow requires the GitHub repository secrets `KRIM_PRODUCTION_DB
 Historical 2026-11-07 documents described an earlier Staging snapshot with zero application tables; that historical state is not current. Current 2026-11-25 live Staging has 391 public tables and 34 migration records. A Production schema export can support a controlled baseline reconstruction but cannot prove the exact SQL provenance of each Staging ledger row.
 
 **Disposition: B1 BLOCKED.** Next step is operator verification of existing secrets and a manually authorized fresh export, followed by private offline review and isolated baseline reconstruction. This audit did not dispatch the workflow, access secrets, decrypt SQL, modify either database, or deploy anything.
+
+
+## 19. Gate B1.4 — export workflow execution and artifact availability (2026-11-25)
+
+Focused report: `phase-00-gate-b1-4-export-workflow-and-artifact-availability-2026-11-25.md`.
+
+Read-only GitHub verification confirms the encrypted schema export workflow exists on `main` and the QA baseline with identical blob SHA `1cb04eaa45b4a2a77ef42a4885c3418ace6a5835`. Historical Actions run `43793099331` (run attempt 2) completed successfully on 2026-11-16. Its secret-check, CLI install, URI validation, schema export/encryption, and artifact upload steps all succeeded. This establishes secrets were present at that historical time only.
+
+The current artifact inventory for that run returns zero artifacts. The historical export cannot currently be downloaded. The GitHub connector does not expose the repository Secrets API; current secret presence remains NOT TESTED. An authorized owner must privately verify `KRIM_PRODUCTION_DB_URL` and `KRIM_SCHEMA_EXPORT_PASSPHRASE`, then manually dispatch a fresh export. No dispatch was performed because it creates a sensitive artifact and reads the Production schema.
+
+**Disposition: B1 BLOCKED.** Workflow implementation and historical execution verified; current secret presence, fresh export, and private review pending. No secrets were read, no workflow was run, and no Production/Staging database or deployment changes occurred.
