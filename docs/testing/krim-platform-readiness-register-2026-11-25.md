@@ -445,3 +445,12 @@ All 89 candidates from the repository-wide C3.1 list are individually assigned o
 Key controls: do not retire any route without owner/dependency approval; `app/index.html` remains a weaker legacy customer workspace; auth callback/reset are direct-entry routes; invitation sender/acceptance remains unverified; staging preview routes remain restricted; internal control/admin/growth/developer/chaos surfaces require server-side access controls; preserve all 343 compatibility redirects pending runtime chain tests.
 
 Gate C3.4 PARTIAL PASS / BLOCKED. Static route disposition is complete, but full 89-page dependency review, owner approvals and browser/HTTP/auth runtime tests remain NOT TESTED/BLOCKED. No page or environment was changed.
+
+
+## 30. Gate C3.5 — compatibility redirect safety register
+
+Parsed all 343 redirect records from successful static-audit artifact run `45594112014` (artifact SHA-256 `bc8b73df21ee0cca5d0066435f7fb8dd2be184cb7dacc14b9411fed889e38c39`). 338 static targets resolve to HTML paths in repository inventory; five redirects are script-driven and were source-inspected. Static redirect-map traversal found 22 redirect-chain edges and zero static cycles. These are source/path checks, not deployed HTTP proof.
+
+**Critical risk:** 33 aliases point into `app/driver/staging/*` (two app-level and 31 legacy public driver routes). Their targets exist in the repository but their deployed environment isolation, authentication and backend status are unverified. Treat as blocked for production driver workflow release until resolved. Five dynamic redirects: auth/login role=driver; SIEM admin guard; facility matrix admin guard; pickup confirmation (staging preview vs production redirect); shipment milestones (query/hash forwarding).
+
+Gate C3.5 PARTIAL PASS / BLOCKED. Full route-family findings and runtime test matrix: `phase-00-gate-c3-5-compatibility-redirect-safety-register-2026-11-25.md`. No route, alias or environment changed.
