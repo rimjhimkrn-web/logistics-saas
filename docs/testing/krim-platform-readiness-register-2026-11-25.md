@@ -287,3 +287,18 @@ Focused report: `phase-00-gate-b1-1-staging-migration-git-history-search-2026-11
 **Result: BLOCKED; no historical source recovered.** GitHub exact-path commit-history queries for all 27 normal-form unmatched Staging migration names returned no commits. Eight representative exact-name code searches against the repository default branch returned no matches. This does not exclude alternate filenames, deleted/renamed files, inaccessible branches/tags, other repositories, operator workstations, backups, SQL editor history, or external deployment bundles.
 
 Four unusual ledger records remain for separate inspection, including two timestamp-prefixed country-pack entries. Staging migration provenance is still not established. Required next evidence: exhaustive accessible branch/tag tree and rename search, then the original Staging bootstrap source and historical SQL/checksums from the project operator. No database writes, migration execution, ledger edits, reset, or deployment occurred.
+
+
+## 17. Gate B1.2 — repository branch and alternate migration-path sweep (2026-11-25)
+
+Focused report: `phase-00-gate-b1-2-all-branches-migration-path-sweep-2026-11-25.md`.
+
+GitHub branch pagination returned **256 visible branches** (100 + 100 + 56). Targeted migration-related refs inspected:
+- `main`: 368 migrations
+- QA baseline: 368 migrations, same inventory/blob SHAs as main
+- `audit/migration-baseline-collision-inventory-2026-11-24`: 368, no missing Staging names
+- `audit/migration-collision-content-review-2026-11-24`: 368, no missing Staging names
+- `testing/secure-staging-supabase-target`: 368, no missing Staging names
+- `fix/platform-admin-canonical-schema`: 26, no missing Staging names
+
+This was a targeted branch/path check, not a recursive all-branch/all-tag tree scan. Several staging-named branches do not contain `supabase/migrations` at the inspected ref. No original Staging SQL source or bootstrap provenance was recovered. **B1 remains BLOCKED.** Next required source is the original Staging provisioning/bootstrap evidence or an exhaustive recursive branch/tag object search. No database or provider changes occurred.
