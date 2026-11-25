@@ -142,9 +142,19 @@
   "use strict";
   // Fail closed until the documented production booking RPC/trigger contract is remediated and verified.
   const BOOKING_CREATION_RELEASED = false;
-  const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-  const client = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+  // Never create a page-local client or fall back to Production. config.js
+  // must have selected the environment from the hostname allowlist first.
+  const client = window.KRIM_SUPABASE;
+  if (!client || !client.auth || typeof client.from !== "function") {
+    const feedback = document.getElementById("booking-feedback");
+    if (feedback) {
+      feedback.textContent = "Secure environment configuration is unavailable. This page cannot connect to a logistics account. Please return to the KRIM workspace and retry.";
+      feedback.className = "feedback show error";
+    }
+    const submit = document.getElementById("btn-submit-booking");
+    if (submit) submit.disabled = true;
+    return;
+  }
   let currentUserOrgId = null;
   let isReady = false;
   let submitting = false;

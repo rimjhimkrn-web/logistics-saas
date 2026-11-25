@@ -1,18 +1,9 @@
 // js/auth-core.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { supabase, SUPABASE_URL, SUPABASE_PROJECT_REF } from './platform/krim-supabase.js';
 
-// Global KRIM OS Configuration
-export const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  }
-});
+// This module never creates a client or chooses an environment. config.js must
+// run first and establish the approved host-to-project mapping.
+export { supabase, SUPABASE_URL, SUPABASE_PROJECT_REF };
 
 // Centralized Navigation Matrix
 export const AUTH_ROUTES = {
