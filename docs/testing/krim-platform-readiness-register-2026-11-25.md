@@ -257,3 +257,15 @@ Focused report: `phase-00-gate-b-live-production-staging-schema-migration-parity
 - Production has `pg_cron` and `pg_net`; Staging does not.
 
 **Interpretation:** Staging is not simply a later/earlier point in the same recorded migration chain. Establish its bootstrap provenance and create exact object-level diffs before any repair. No reset, blind replay, rebase, merge, DDL/DML or deployment. Synthetic identities remain BLOCKED until Gate A deployment binding and Gate B reconciliation are accepted.
+
+
+## 15. Gate B1 execution result — Staging migration provenance (2026-11-25)
+
+Focused report: `phase-00-gate-b1-staging-migration-provenance-investigation-2026-11-25.md`.
+
+**B1: BLOCKED.** Current `supabase/migrations` contains 368 files on both `main` and QA, with identical filenames and blob SHAs. Comparing live migration ledger names to exact current SQL filenames:
+- Production: 291/561 exact name matches; 270 ledger names have no exact current file.
+- Staging: 3/34 exact name matches; 31 ledger names have no exact current file.
+- Staging's three exact-name matches: `restore_driver_trip_event_rpc_access`, `admin_driver_licence_expiry_control`, `refine_admin_driver_licence_expiry_rpc_security`.
+
+Some Staging ledger names appear timestamp-prefixed or malformed; this requires historical provenance investigation. Current repository files do not prove the SQL that was applied. Search deleted/renamed Git history and obtain the original Staging bootstrap/provisioning evidence before proposing changes. Do not edit migration ledgers or reset/replay migrations. No DB changes were made.
