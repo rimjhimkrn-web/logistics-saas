@@ -330,7 +330,7 @@ The current artifact inventory for that run returns zero artifacts. The historic
 
 ## 18. Gate C — Live Edge Function Deployment Parity (25 Nov 2026)
 - Production and Staging Supabase projects both report `ACTIVE_HEALTHY`.
-- Live deployed Edge Function inventory: Production 24 ACTIVE; Staging 3 ACTIVE.
+- Live deployed Edge Function inventory: Production 22 ACTIVE; Staging 3 ACTIVE.
 - Only common slug: `global-admin-control`; function deployment parity is therefore not established.
 - Production still contains legacy Cashfree order, verification and webhook functions; no deletion or invocation performed.
 - Staging-only functions include `krim-resend-email-worker` and `owner-testing-authorize`.
