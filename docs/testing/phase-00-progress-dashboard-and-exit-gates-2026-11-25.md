@@ -8,7 +8,7 @@
 
 ## Executive progress
 
-There are **90 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
+There are **91 Phase 00 audit/report documents** in `docs/testing/` on the QA branch. They cover infrastructure, environment separation, route inventory, nine workspaces, authentication, tenant authorization, SQL/RPC security, notifications, payment/refund flows, partner/driver/warehouse/customs/finance/operations/enterprise/admin workflows, Storage, uploads/downloads, signed URLs, CI and browser-test readiness.
 
 The report count measures recorded audit work, not the percentage of the platform that is correct or ready.
 
@@ -107,3 +107,15 @@ A fresh read-only catalog query on 2026-11-25 found the Staging partner-verifica
 
 ## Customer booking environment hardening (QA only)
 The canonical `public/shipper/booking-request.html` page previously created a hard-coded Production Supabase client whenever the shared client was absent. That fallback has now been removed on the QA branch. The page uses only `window.KRIM_SUPABASE` and displays a fail-closed configuration message if the shared client is unavailable. Static regression guards were added to both the repository smoke script and environment-isolation test. Booking creation remains deliberately disabled (`BOOKING_CREATION_RELEASED = false`) pending backend contract remediation and runtime verification. CI for commit `6be07a0b986bcfb60e19902ce46dbe567f8d1772` was queued at dashboard update time; this change is not yet counted as verified until both workflows pass.
+
+
+## Latest CI and G0 follow-up (2026-11-25)
+The latest QA commit before this dashboard update, `ae1bbe86e1d0378c8e860d43d689a6961bf45b6a`, has both CI workflows completed successfully:
+- Repository smoke: run `45573084338` — SUCCESS.
+- Chromium environment isolation: run `45573084316` — SUCCESS.
+
+The Chromium run uses a local HTTPS fixture with a mocked Supabase SDK. It proves browser-side hostname resolution and fail-closed behavior, not live Cloudflare deployment identity.
+
+A further read-only G0 investigation is documented in `phase-00-g0-staging-deployment-identity-investigation-2026-11-25.md`. The connected toolset has no Cloudflare Pages deployment/DNS access, and the external fetch of `krim-staging.pages.dev` was inconclusive. The canonical origin, deployment branch and deployed commit remain unproven. The next decisive input is the Cloudflare Pages Deployments record showing project, production URL, branch, commit SHA and deployment status.
+
+The new G0 report is documentation-only and will trigger the QA CI workflows. Its own commit must not be treated as CI-verified until those runs complete.
