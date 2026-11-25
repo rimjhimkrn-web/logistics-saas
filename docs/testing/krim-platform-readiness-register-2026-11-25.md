@@ -1125,3 +1125,8 @@ Onboarding: only limited founder-led, non-binding partner discovery/interest col
 
 No Production/Staging SQL/RPC, Auth creation, synthetic users, provider/bank calls, notification send, Storage operation, data export/deletion, secrets read, live security scan, load test, deployment or DDL/DML performed. Detailed final report: `phase-00-gate-c3-64-final-consolidated-audit-and-release-readiness-decision-2026-11-25.md`.
 
+
+## 90. Phase 01 — Gate 01A: Repository-wide website route and page inventory
+
+**PASS — repository census and baseline page inventory established. PARTIAL / IN PROGRESS — full navigation graph, per-page classification, backend dependency map and deployed reachability remain outstanding.** Immutable baseline `72d75a18f985ceb09e468839435ee95700e11e46` recursive tree returned `truncated=false`: 2,256 tree entries, 2,180 blobs, 1,023 HTML files, 134 JS, 8 MJS, 36 TS, 15 TSX, 31 CSS, 23 JSON and 377 SQL files. Existing candidate manifest contains 1,023 rows: 869 ACTIVE/OTHER, 103 STAGING-ONLY, 38 ACTIVE-ENTRY and 13 WORKFLOW candidates; these are path heuristics, not deployed/reachable/functional route verdicts. Sitemap has 36 public URL entries. Canonical registry has 27 keys / 25 unique destinations; previously reviewed source reveals aliases, preview/read-only shells and restricted routes. P1: conflicting PWA/base-path conventions remain; root-absolute paths in `public/manifest.webmanifest` and service-worker precache may escape `/logistics-saas/`. No runtime browser crawl, auth, forms, RPCs, backend writes, synthetic users or deployment performed. Phase 01 remains IN PROGRESS; next is 01B static navigation graph. Detailed report: `phase-01-gate-01a-repository-wide-website-route-and-page-inventory-2026-11-25.md`.
+
