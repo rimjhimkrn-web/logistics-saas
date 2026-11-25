@@ -23,6 +23,11 @@ jobs:
           node-version: 22
       - name: Validate critical KRIM workflows
         run: node scripts/krim-production-smoke.mjs
+      - name: Check shared authentication module syntax
+        run: |
+          node --check --input-type=module < platform/krim-supabase.js
+          node --check --input-type=module < auth-core.js
+          node --check --input-type=module < auth/krim-account-actions.js
       - name: Verify fail-closed environment isolation
         run: node scripts/krim-environment-isolation.test.mjs
       - name: Run repository-wide static audit
