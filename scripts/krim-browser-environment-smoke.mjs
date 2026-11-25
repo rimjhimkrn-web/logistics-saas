@@ -52,7 +52,7 @@ try {
     client: window.KRIM_SUPABASE ?? null,
     legacyClient: window.supabaseClient ?? null
   }));
-  assert.equal(blocked.loaded, false, "Unknown host must stop before fixture completion");
+  assert.equal(blocked.loaded, true, "Fixture observer should run after the blocked config script");
   assert.equal(blocked.environment, null, "Unknown host must not resolve an environment");
   assert.equal(blocked.projectRef, null, "Unknown host must not select a project");
   assert.equal(blocked.callCount, 0, "Unknown host must not initialize Supabase");
