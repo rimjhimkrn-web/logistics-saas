@@ -55,8 +55,13 @@ if (!selectedSupabaseConfig) {
 window.KRIM_SUPABASE_CONFIG = Object.freeze({ ...selectedSupabaseConfig });
 window.KRIM_SUPABASE_PROJECT_REF = selectedSupabaseConfig.projectRef;
 window.KRIM_STAGING_PREVIEW = window.KRIM_ENVIRONMENT === "preview";
-// Preview review mode is UI behavior only, never an authorization boundary.
-window.KRIM_AUTH_DISABLED = window.KRIM_STAGING_PREVIEW;
+// Review mode is an explicit, read-only UI mode. The staging environment itself
+// keeps Supabase Authentication enabled; backend authorization remains RLS/RPC.
+window.KRIM_STAGING_REVIEW_MODE =
+  window.KRIM_STAGING_PREVIEW &&
+  new URLSearchParams(window.location.search).get("mode") === "review";
+// Deprecated compatibility flag: staging authentication is enabled.
+window.KRIM_AUTH_DISABLED = false;
 
 if (!window.supabase || typeof window.supabase.createClient !== "function") {
   throw new Error("KRIM Supabase SDK is unavailable; client initialization stopped.");
