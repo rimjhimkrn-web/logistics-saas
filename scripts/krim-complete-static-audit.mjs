@@ -13,10 +13,10 @@ function walk(dir) {
 const files = walk(".").map(p => normalize(p).replace(/^\.\//, ""));
 const htmlFiles = files.filter(p => p.toLowerCase().endsWith(".html"));
 const fileSet = new Set(files);
-const hashOwners = new Map(), duplicateGroups = [], linkIssues = [], pageRows = [], integrationCandidates = [], stagingIntegrationCandidates = [], placeholderPages = [], redirectRoutes = [], noindexPages = [], stagingPages = [];
+const hashOwners = new Map(), duplicateGroups = [], linkIssues = [], pageRows = [], integrationCandidates = [], stagingIntegrationCandidates = [], placeholderPages = [], redirectRoutes = [], noindexPages = [], stagingPages = [], inboundHtml = new Map(), staticHtmlEdges = [];
 const attrRe = /(?:^|\s)(?:href|src|action|data-href|formaction)\s*=\s*["']([^"']+)["']/gi;
 const schemeRe = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#|mailto:|tel:|javascript:|data:)/i;
-function existsCandidate(c) {
+function resolveCandidate(c) {
   c = normalize(c).replace(/^\.\//, "").replace(/\/$/, "");
   if (!c) c = "index.html";
   const opts = [c, join(c, "index.html")];
@@ -44,7 +44,7 @@ for (const file of htmlFiles) {
     links++;
     if (clean.startsWith("/logistics-saas/")) {
       const target = clean.slice("/logistics-saas/".length);
-      if (!existsCandidate(target)) { bad++; linkIssues.push({type:"missing-project-route",source:file,href:raw}); }
+      const resolved = resolveCandidate(target);\n      if (!resolved) { bad++; linkIssues.push({type:"missing-project-route",source:file,href:raw}); }\n      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
     } else if (clean.startsWith("/")) {
       absoluteRoot++;
       const target = clean.slice(1);
@@ -53,7 +53,7 @@ for (const file of htmlFiles) {
       }
     } else {
       const target = normalize(join(dirname(file),clean));
-      if (!existsCandidate(target)) { bad++; linkIssues.push({type:"missing-local-target",source:file,href:raw,resolved:target}); }
+      const resolved = resolveCandidate(target);\n      if (!resolved) { bad++; linkIssues.push({type:"missing-local-target",source:file,href:raw,resolved:target}); }\n      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
     }
   }
   const localScriptSources = [];
@@ -114,7 +114,7 @@ for (const file of htmlFiles) {
   const backendReview = compatibilityRedirect ? "compatibility-redirect" : isStaging ? (operational && !hasSupabaseSignal ? "staging-integration-review" : "staging-review-required") : operational ? (hasSupabaseSignal ? "signal-found-review-required" : "integration-candidate") : "classify-page-purpose";
   pageRows.push({path:file,links,unresolved:bad,absoluteRootPaths:absoluteRoot,directSupabaseSignal,linkedScriptSignals,localScriptSources:[...new Set(localScriptSources)],supabaseSignals:hasSupabaseSignal,placeholderSignals:placeholder,noindex,compatibilityRedirect,redirectTarget:refreshTarget || null,isStaging,backendReview});
 }
-const report = {generatedAt:new Date().toISOString(),scope:"Static analysis only. Compatibility redirects and staging routes are classified separately; integration candidates exclude both. Not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,placeholderPages:placeholderPages.length,redirectRoutes:redirectRoutes.length,noindexPages:noindexPages.length,stagingPages:stagingPages.length,stagingPagesWithoutVisibleSupabaseSignals:stagingIntegrationCandidates.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,placeholderPages,redirectRoutes,noindexPages,stagingPages,stagingIntegrationCandidates,integrationCandidates,pages:pageRows};
+const entryPageNames = new Set(["index.html","404.html"]);\nconst zeroInboundHtmlCandidates = htmlFiles.filter(p => !entryPageNames.has(p) && !redirectRoutes.some(r=>r.path===p) && !inboundHtml.has(p));\nconst report = {generatedAt:new Date().toISOString(),scope:"Static analysis only. Compatibility redirects and staging routes are classified separately; integration candidates exclude both. Not a browser crawl or live transaction test.",totals:{files:files.length,htmlPages:htmlFiles.length,duplicateGroups:duplicateGroups.length,unresolvedLocalReferences:linkIssues.length,htmlPagesWithInboundStaticLinks:inboundHtml.size,zeroInboundHtmlCandidates:zeroInboundHtmlCandidates.length,staticHtmlEdges:staticHtmlEdges.length,placeholderPages:placeholderPages.length,redirectRoutes:redirectRoutes.length,noindexPages:noindexPages.length,stagingPages:stagingPages.length,stagingPagesWithoutVisibleSupabaseSignals:stagingIntegrationCandidates.length,operationalPagesWithoutVisibleSupabaseSignals:integrationCandidates.length,htmlPagesWithDirectBackendSignals:pageRows.filter(p=>p.directSupabaseSignal).length,htmlPagesWithLinkedScriptBackendSignals:pageRows.filter(p=>p.linkedScriptSignals.length>0).length,operationalPagesWithBackendSignals:pageRows.filter(p=>p.backendReview==="signal-found-review-required").length},duplicateGroups,linkIssues,zeroInboundHtmlCandidates,staticHtmlEdges,placeholderPages,redirectRoutes,noindexPages,stagingPages,stagingIntegrationCandidates,integrationCandidates,pages:pageRows};
 mkdirSync("audit-output",{recursive:true});
 writeFileSync("audit-output/krim-complete-audit.json",JSON.stringify(report,null,2));
 const lines = [
@@ -125,7 +125,7 @@ const lines = [
 "- Files scanned: "+files.length,
 "- HTML pages scanned: "+htmlFiles.length,
 "- Exact duplicate-content groups: "+duplicateGroups.length,
-"- Unresolved local/root link references: "+linkIssues.length,
+"- Unresolved local/root link references: "+linkIssues.length,\n"- HTML pages with inbound literal static links: "+inboundHtml.size,\n"- Zero-inbound HTML candidates (not proven orphans): "+zeroInboundHtmlCandidates.length,
 "- Pages with placeholder/demo/TODO wording signals: "+placeholderPages.length,
 "- Compatibility redirect routes (excluded from integration candidates): "+redirectRoutes.length,
 "- Staging pages (not counted as production integration gaps): "+stagingPages.length,
@@ -140,7 +140,7 @@ const lines = [
 "## Unresolved link references (first 300)","",
 ...(linkIssues.length ? linkIssues.slice(0,300).map(x=>"- "+x.type+" — "+x.source+": "+x.href+(x.resolved ? " → "+x.resolved : "")) : ["- None detected by this static parser."]),
 ...(linkIssues.length>300 ? ["- ... "+(linkIssues.length-300)+" additional findings are in the JSON artifact."] : []),"",
-"## Operational-looking pages without visible Supabase references","",
+"## Zero-inbound HTML candidates (not proven orphans)","",\n...(zeroInboundHtmlCandidates.length ? zeroInboundHtmlCandidates.map(p=>"- "+p) : ["- None detected."]),\n"",\n"## Operational-looking pages without visible Supabase references","",
 ...(integrationCandidates.length ? integrationCandidates.map(p=>"- "+p) : ["- None detected."]),"",
 "## Staging routes requiring release review","",
 ...(stagingPages.length ? stagingPages.map(p=>"- "+p) : ["- None detected."]),"",
@@ -155,4 +155,4 @@ const lines = [
 "- A passing source-level smoke check does not verify login, RLS, payments, partner payouts or live operational transactions."
 ];
 writeFileSync("audit-output/krim-complete-audit.md",lines.join("\n"));
-console.log(JSON.stringify({output:"audit-output/",totals:report.totals,duplicateGroups,linkIssues:linkIssues.slice(0,100),redirectRoutes:redirectRoutes.slice(0,100),stagingIntegrationCandidates:stagingIntegrationCandidates.slice(0,100),integrationCandidates:integrationCandidates.slice(0,100),placeholderPages:placeholderPages.slice(0,60)},null,2));
+console.log(JSON.stringify({output:"audit-output/",totals:report.totals,duplicateGroups,linkIssues:linkIssues.slice(0,100),zeroInboundHtmlCandidates,redirectRoutes:redirectRoutes.slice(0,100),stagingIntegrationCandidates:stagingIntegrationCandidates.slice(0,100),integrationCandidates:integrationCandidates.slice(0,100),placeholderPages:placeholderPages.slice(0,60)},null,2));
