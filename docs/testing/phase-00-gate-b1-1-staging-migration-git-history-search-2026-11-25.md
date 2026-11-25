@@ -46,7 +46,7 @@ audit_driver_assignment_acceptance
 customer_shipment_creation_location_rpc
 ```
 
-Three additional unusual ledger names were not treated as normal filenames:
+Four additional unusual ledger records were not treated as normal filenames:
 - `20261117143136 / 20261117180000_grant_partner_network_submission_rpcs`
 - `20261117143400 / 20261117190000_grant_country_pack_admin_review_rpcs`
 - `20261117144642 / 20261117240000_align_country_pack_readiness_gates.sql`
