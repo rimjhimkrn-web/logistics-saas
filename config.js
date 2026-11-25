@@ -1,43 +1,75 @@
 function detectKrimEnvironment() {
-  const hostname = window.location.hostname.toLowerCase();
-  // Staging hostname takes priority over any page-level environment setting.
-  if (hostname === "krim-staging.pages.dev" || hostname.endsWith(".krim-staging.pages.dev")) {
-    return "preview";
-  }
+  const hostname = String(window.location.hostname || "").toLowerCase();
 
-  const configured = window.KRIM_ENVIRONMENT ||
-    document.querySelector('meta[name="krim-environment"]')?.content;
-  const supported = ["development", "preview", "production"];
-  if (supported.includes(configured)) return configured;
-  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
-    return "development";
-  }
+  // Explicit host allowlist. Never infer production from an unknown hostname.
   if (
-    hostname.includes(".preview.") ||
-    /^pr-\d+--.+\.netlify\.app$/.test(hostname) ||
-    /-git-[^.]+\.vercel\.app$/.test(hostname)
-  ) {
-    return "preview";
-  }
-  return "production";
+    hostname === "krim-staging.pages.dev" ||
+    hostname.endsWith(".krim-staging.pages.dev")
+  ) return "preview";
+
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1"
+  ) return "development";
+
+  // GitHub Pages is the currently verified public production hostname.
+  if (hostname === "rimjhimkrn-web.github.io") return "production";
+
+  throw new Error(
+    "KRIM environment blocked: this hostname is not allowlisted. No Supabase client was initialized."
+  );
 }
 
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
 
-// Non-production hosts must never connect to the production database. Local
-// development and all preview/staging deployments use the isolated staging project.
-const PRODUCTION_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-const PRODUCTION_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-const STAGING_SUPABASE_URL = "https://qrpcivhdxobiaofppbkl.supabase.co";
-const STAGING_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
-const SUPABASE_URL = window.KRIM_ENVIRONMENT === "production"
-  ? PRODUCTION_SUPABASE_URL
-  : STAGING_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = window.KRIM_ENVIRONMENT === "production"
-  ? PRODUCTION_SUPABASE_PUBLISHABLE_KEY
-  : STAGING_SUPABASE_PUBLISHABLE_KEY;
+// Browser configuration contains publishable keys only; never put service-role or secret keys here.
+const KRIM_SUPABASE_ENVIRONMENTS = Object.freeze({
+  production: Object.freeze({
+    projectRef: "ebltviniygljwwseplph",
+    url: "https://ebltviniygljwwseplph.supabase.co",
+    publishableKey: "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+  }),
+  preview: Object.freeze({
+    projectRef: "qrpcivhdxobiaofppbkl",
+    url: "https://qrpcivhdxobiaofppbkl.supabase.co",
+    publishableKey: "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3"
+  }),
+  development: Object.freeze({
+    projectRef: "qrpcivhdxobiaofppbkl",
+    url: "https://qrpcivhdxobiaofppbkl.supabase.co",
+    publishableKey: "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3"
+  })
+});
+
+const selectedSupabaseConfig = KRIM_SUPABASE_ENVIRONMENTS[window.KRIM_ENVIRONMENT];
+if (!selectedSupabaseConfig) {
+  throw new Error("KRIM environment has no approved Supabase project mapping.");
+}
+window.KRIM_SUPABASE_CONFIG = Object.freeze({ ...selectedSupabaseConfig });
+window.KRIM_SUPABASE_PROJECT_REF = selectedSupabaseConfig.projectRef;
 window.KRIM_STAGING_PREVIEW = window.KRIM_ENVIRONMENT === "preview";
+// Preview review mode is UI behavior only, never an authorization boundary.
 window.KRIM_AUTH_DISABLED = window.KRIM_STAGING_PREVIEW;
+
+if (!window.supabase || typeof window.supabase.createClient !== "function") {
+  throw new Error("KRIM Supabase SDK is unavailable; client initialization stopped.");
+}
+
+const krimSupabaseClient =
+  window.KRIM_SUPABASE ||
+  window.supabaseClient ||
+  window.supabase.createClient(selectedSupabaseConfig.url, selectedSupabaseConfig.publishableKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: "pkce"
+    }
+  });
+
+window.KRIM_SUPABASE = krimSupabaseClient;
+window.supabaseClient = krimSupabaseClient;
 
 const krimBasePath =
   window.location.hostname.endsWith("github.io") &&
