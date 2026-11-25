@@ -35,7 +35,7 @@ function cleanExpression(expr) {
 }
 function classifyTarget(expr) {
   const s=cleanExpression(expr);
-  const literal=s.match(/^(["'`])([\s\S]*?)\1$/);
+  const literal=s.match(/^(\x22|\x27)([\\s\\S]*?)\\1$/);
   if(literal) return {target:literal[2],target_type:"literal",route_like:ROUTE_EXT.test(literal[2]) || /\/(?:auth|app|public|customer|partner|driver|warehouse|customs|finance|operations)(?:\/|\?|#|$)/i.test(literal[2])};
   const template=s.match(/^`([\s\S]*?)`$/);
   if(template) return {target:template[1],target_type:/\$\{/.test(template[1])?"template-dynamic":"template-static",route_like:ROUTE_EXT.test(template[1]) || /\/(?:auth|app|public|customer|partner|driver|warehouse|customs|finance|operations)/i.test(template[1])};
