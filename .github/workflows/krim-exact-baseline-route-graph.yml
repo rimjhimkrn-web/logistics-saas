@@ -16,16 +16,22 @@ jobs:
   route-graph:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out QA extractor and tests
+        uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.baseline_sha }}
+          ref: qa/phase-00-baseline-2026-11-25
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Unit tests
         run: node --test scripts/krim-route-graph-audit.test.mjs
+      - name: Check out immutable source baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.baseline_sha }}
+          path: source-baseline
       - name: Generate exact-baseline route graph
-        run: node scripts/krim-route-graph-audit.mjs . audit-output
+        run: node scripts/krim-route-graph-audit.mjs source-baseline audit-output
       - name: Verify inventory count
         run: |
           node -e "const r=require('./audit-output/krim-route-graph.json'); if(r.totals.html_pages!==1017) { console.error(r.totals); process.exit(1) }"
