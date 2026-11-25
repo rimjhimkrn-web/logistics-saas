@@ -348,3 +348,14 @@ Focused report: `phase-00-gate-a2-website-deployment-and-environment-routing-202
 Live origin fetches were inconclusive: available web retrieval returned errors and direct DNS resolution was unavailable from the execution environment. This is NOT evidence that either origin is down. Production served commit/config and Staging hosting project/deployment SHA/DNS/TLS/HTTP remain NOT TESTED.
 
 **Required:** verify the real Staging hosting project and deployment record, served config and Supabase project ref; confirm Auth Site URL/redirect allowlists; separately review and remediate the main-branch fail-open environment selection before deploying the safer allowlist. No merge, deployment, workflow dispatch, database write, secret access or provider operation occurred. No synthetic users are authorized.
+
+
+## 21. Gate A3 — authentication redirect and client-initialization source audit (2026-11-25)
+
+Focused report: `phase-00-gate-a3-authentication-redirect-and-client-audit-2026-11-25.md`.
+
+**Gate A3: BLOCKED.** Main `auth-core.js` creates a separate Supabase client using a hardcoded Production URL/key, bypassing the environment resolver and potentially connecting non-production pages to Production Auth/data. Main config also retains page/meta override, unknown-host Production fallback and pre-existing global client reuse. QA source instead imports a shared client whose project ref and URL are checked against the approved Production/Staging project IDs; this is source-only and is not deployed by the inspected Pages workflow. Main auth-core also imports a floating Supabase JS v2 CDN URL.
+
+Production and Staging Supabase Auth Site URL/redirect allowlists were not inspected. Exact runtime callback flows and deployed Auth journeys remain NOT TESTED. Guessed callback source paths were not present at those exact paths; this does not prove callbacks are absent.
+
+Required: privately verify both projects' Auth URL settings; map every actual auth redirect target; unify all pages on one hostname-verified client; pin the Supabase JS version; then run isolated PKCE/recovery/invitation/MFA redirect tests only after Staging acceptance. No Auth settings, secrets, users, emails, databases or deployments were changed.
