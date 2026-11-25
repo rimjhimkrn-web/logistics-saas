@@ -326,3 +326,14 @@ Read-only GitHub verification confirms the encrypted schema export workflow exis
 The current artifact inventory for that run returns zero artifacts. The historical export cannot currently be downloaded. The GitHub connector does not expose the repository Secrets API; current secret presence remains NOT TESTED. An authorized owner must privately verify `KRIM_PRODUCTION_DB_URL` and `KRIM_SCHEMA_EXPORT_PASSPHRASE`, then manually dispatch a fresh export. No dispatch was performed because it creates a sensitive artifact and reads the Production schema.
 
 **Disposition: B1 BLOCKED.** Workflow implementation and historical execution verified; current secret presence, fresh export, and private review pending. No secrets were read, no workflow was run, and no Production/Staging database or deployment changes occurred.
+
+
+## 18. Gate C — Live Edge Function Deployment Parity (25 Nov 2026)
+- Production and Staging Supabase projects both report `ACTIVE_HEALTHY`.
+- Live deployed Edge Function inventory: Production 24 ACTIVE; Staging 3 ACTIVE.
+- Only common slug: `global-admin-control`; function deployment parity is therefore not established.
+- Production still contains legacy Cashfree order, verification and webhook functions; no deletion or invocation performed.
+- Staging-only functions include `krim-resend-email-worker` and `owner-testing-authorize`.
+- Gate C: **BLOCKED** pending canonical manifest, source/version provenance, endpoint dependency mapping, JWT policy review and approved Staging deployment plan.
+- Evidence: [Gate C report](phase-00-gate-c-edge-function-deployment-parity-2026-11-25.md).
+- Safety: metadata inventory only; no function invocation, secrets, SQL, auth/provider operation, workflow dispatch or environment write.
