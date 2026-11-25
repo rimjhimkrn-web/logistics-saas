@@ -377,3 +377,10 @@ Targeted page samples show Enterprise referencing both canonical `krim_shipments
 Generated `phase-00-page-route-manifest-2026-11-25.csv` from immutable main tree commit `72d75a18f985ceb09e468839435ee95700e11e46`. GitHub recursive tree returned `truncated=false`; all 1,023 tracked HTML files are represented as individual CSV rows. Path-based primary candidates: 103 staging-only, 13 workflow, 38 index/dashboard entry candidates, 869 active/other candidates. Zero explicit legacy path candidates detected.
 
 These are structural filename/path candidates only. Redirect behavior, inbound-link/orphan status, deployed routes, actual legacy use and browser functionality have not been verified. All rows remain NOT TESTED at runtime. No deletion/retirement is authorized. Gate C2 PARTIAL PASS / BLOCKED. Method and limits are documented in `phase-00-gate-c2-page-route-manifest-method-and-disposition-2026-11-25.md`.
+
+
+## 24. Gate C3 — HTML internal-link graph sample (2026-11-25)
+
+Inspected eight representative public/workspace entry pages against the complete tracked Git tree at immutable main commit `72d75a18f985ceb09e468839435ee95700e11e46`. Extracted 289 literal local href/src references; all 289 resolve to tracked targets after correctly normalizing GitHub Pages `/logistics-saas/` base-path links. The first raw pass flagged 20 such base-path assets, but these were false positives and were resolved after base-prefix normalization. No fetch errors.
+
+Sample includes homepage, about, contact, admin shell, Customer, Partner, Warehouse and Enterprise entry pages. Whole-repository links, JS-generated navigation, CSS references, form actions, redirects, deployed HTTP and orphan detection remain NOT TESTED. Gate C3 PARTIAL PASS / BLOCKED. Detailed evidence: `phase-00-gate-c3-html-link-graph-sample-2026-11-25.md`. No app or environment changes.
