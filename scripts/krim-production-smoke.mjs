@@ -205,8 +205,9 @@ for (const path of sharedAuthModules) {
     continue;
   }
   const source = readFileSync(path, "utf8");
-  if (/https:\\/\\/(?:ebltviniygljwwseplph|qrpcivhdxobiaofppbkl)\\.supabase\\.co/.test(source) ||
-      /sb_publishable_[A-Za-z0-9_-]{20,}/.test(source)) {
+  if (source.includes("https://ebltviniygljwwseplph.supabase.co") ||
+      source.includes("https://qrpcivhdxobiaofppbkl.supabase.co") ||
+      source.includes("sb_publishable_")) {
     failures.push("Authentication module must not embed Supabase URLs or publishable keys: " + path);
   }
 }
