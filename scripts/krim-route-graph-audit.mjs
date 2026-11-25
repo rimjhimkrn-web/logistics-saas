@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const IGNORE_DIRS = new Set([".git", "node_modules", ".next", "dist", "build"]);
 const ATTR_RE = /(?:^|\s)(href|src|action|data-href|formaction)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
-const SCRIPT_RE = /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+const SCRIPT_RE = /(<script\b[^>]*>)[\s\S]*?<\/script\s*>/gi;
 const STYLE_RE = /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi;
 const COMMENT_RE = /<!--[\s\S]*?-->/g;
 
@@ -65,7 +65,7 @@ function attributes(tag) {
   return result;
 }
 export function extractHtmlReferences(html) {
-  const clean = html.replace(COMMENT_RE, " ").replace(SCRIPT_RE, " ").replace(STYLE_RE, " ");
+  const clean = html.replace(COMMENT_RE, " ").replace(SCRIPT_RE, "$1").replace(STYLE_RE, " ");
   const refs = [];
   for (const match of clean.matchAll(/<(?:a|area|link|script|img|iframe|form|source|video|audio|button)\b[^>]*>/gi)) {
     const tag = match[0];
