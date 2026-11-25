@@ -1,0 +1,38 @@
+name: KRIM exact-baseline route graph audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: Immutable source commit to audit
+        required: true
+        default: 72d75a18f985ceb09e468839435ee95700e11e46
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  route-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.baseline_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Unit tests
+        run: node --test scripts/krim-route-graph-audit.test.mjs
+      - name: Generate exact-baseline route graph
+        run: node scripts/krim-route-graph-audit.mjs . audit-output
+      - name: Verify inventory count
+        run: |
+          node -e "const r=require('./audit-output/krim-route-graph.json'); if(r.totals.html_pages!==1017) { console.error(r.totals); process.exit(1) }"
+      - name: Upload route graph evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-exact-baseline-route-graph
+          path: audit-output/
+          if-no-files-found: error
+          retention-days: 30
