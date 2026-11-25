@@ -116,39 +116,165 @@ const required = [
 
 const failures = [];
 
- // Environment isolation regression: production hosts use production Supabase;
- // every development/preview host must use the isolated staging project.
- const environmentConfig = readFileSync("config.js", "utf8");
- for (const testCase of [
-   { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
-   { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
-   { host: "localhost", expectedEnvironment: "development", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
-   { host: "rimjhimkrn-web.github.io", expectedEnvironment: "production", expectedUrl: "https://ebltviniygljwwseplph.supabase.co", authDisabled: false },
- ]) {
-   let connectedUrl = "";
-   let connectedKey = "";
-   const sandbox = {
-     window: {
-       location: { hostname: testCase.host, pathname: "/logistics-saas/" },
-       supabase: { createClient: (url, key) => { connectedUrl = url; connectedKey = key; return { url, key }; } },
-     },
-     document: { querySelector: () => null },
-     URL,
-     Object,
-     String,
-   };
-   runInNewContext(environmentConfig, sandbox);
-   if (sandbox.window.KRIM_ENVIRONMENT !== testCase.expectedEnvironment) {
-     failures.push(`Environment detection mismatch for ${testCase.host}: ${sandbox.window.KRIM_ENVIRONMENT}`);
-   }
-   if (connectedUrl !== testCase.expectedUrl) {
-     failures.push(`Unsafe Supabase target for ${testCase.host}: ${connectedUrl}`);
-   }
-   if (sandbox.window.KRIM_AUTH_DISABLED !== testCase.authDisabled) {
-     failures.push(`Unexpected auth-disable state for ${testCase.host}`);
-   }
-   if (!connectedKey) failures.push(`Supabase publishable key missing for ${testCase.host}`);
- }
+// Environment isolation regression: only explicit hosts may initialize a Supabase client.
+const environmentConfig = readFileSync("config.js", "utf8");
+for (const testCase of [
+  { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
+  { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
+  { host: "localhost", expectedEnvironment: "development", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
+  { host: "rimjhimkrn-web.github.io", expectedEnvironment: "production", expectedRef: "ebltviniygljwwseplph", expectedUrl: "https://ebltviniygljwwseplph.supabase.co", authDisabled: false },
+]) {
+  let connectedUrl = "";
+  let connectedKey = "";
+  const sandbox = {
+    window: {
+      location: { hostname: testCase.host, pathname: "/logistics-saas/", search: "" },
+      KRIM_SUPABASE: { legacy: true },
+      supabaseClient: { legacy: true },
+      supabase: { createClient: (url, key) => { connectedUrl = url; connectedKey = key; return { url, key }; } },
+    },
+    document: { querySelector: () => null },
+    URL,
+    URLSearchParams,
+    Object,
+    String,
+  };
+  runInNewContext(environmentConfig, sandbox);
+  if (sandbox.window.KRIM_ENVIRONMENT !== testCase.expectedEnvironment) failures.push(`Environment detection mismatch for ${testCase.host}: ${sandbox.window.KRIM_ENVIRONMENT}`);
+  if (connectedUrl !== testCase.expectedUrl) failures.push(`Unsafe Supabase target for ${testCase.host}: ${connectedUrl}`);
+  if (sandbox.window.KRIM_SUPABASE_PROJECT_REF !== testCase.expectedRef) failures.push(`Wrong Supabase project ref for ${testCase.host}`);
+  if (sandbox.window.KRIM_AUTH_DISABLED !== testCase.authDisabled) failures.push(`Unexpected auth-disable state for ${testCase.host}`);
+  if (sandbox.window.KRIM_STAGING_REVIEW_MODE !== false) failures.push(`Staging review mode must default off for ${testCase.host}`);
+  if (!connectedKey) failures.push(`Supabase publishable key missing for ${testCase.host}`);
+  if (!sandbox.window.KRIM_SUPABASE || sandbox.window.KRIM_SUPABASE.legacy) failures.push(`Unverified pre-existing client was reused for ${testCase.host}`);
+}
+
+// Unknown host must fail before createClient is called, even if page metadata tries to force production.
+for (const host of ["unknown.example", "attacker.krimlogistics.example", "random.pages.dev", "krimlogistics.com"]) {
+  let createClientCalled = false;
+  const sandbox = {
+    window: {
+      location: { hostname: host, pathname: "/" },
+      KRIM_ENVIRONMENT: "production",
+      KRIM_SUPABASE: { legacy: true },
+      supabaseClient: { legacy: true },
+      supabase: { createClient: () => { createClientCalled = true; return {}; } },
+    },
+    document: { querySelector: () => ({ content: "production" }) },
+    URL, Object, String,
+  };
+  let blocked = false;
+  try { runInNewContext(environmentConfig, sandbox); } catch { blocked = true; }
+  if (!blocked) failures.push(`Unknown hostname was not blocked: ${host}`);
+  if (createClientCalled) failures.push(`Unknown hostname initialized a Supabase client: ${host}`);
+  if (sandbox.window.KRIM_SUPABASE !== null || sandbox.window.supabaseClient !== null) failures.push(`Unknown hostname retained an unverified client: ${host}`);
+}
+
+// Customer booking must use only the hostname-verified shared client; no Production fallback.
+const customerBookingSource = readFileSync("public/shipper/booking-request.html", "utf8");
+if (!customerBookingSource.includes("const client = window.KRIM_SUPABASE;")) {
+  failures.push("Customer booking must use the shared hostname-verified Supabase client");
+}
+if (customerBookingSource.includes("https://ebltviniygljwwseplph.supabase.co") ||
+    customerBookingSource.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa") ||
+    customerBookingSource.includes("window.supabase.createClient")) {
+  failures.push("Customer booking must not contain a page-local Production URL/key/client fallback");
+}
+
+// Environment-sensitive privileged routes must use the shared client, not embed project URLs.
+for (const [path, forbidden] of [
+  ["app/platform-admin/index.html", "https://ebltviniygljwwseplph.supabase.co"],
+  ["auth/krim-admin-guard.js", "https://ebltviniygljwwseplph.supabase.co"],
+  ["auth/krim-admin-access.html", "https://qrpcivhdxobiaofppbkl.supabase.co"],
+  ["platform/krim-config.js", "https://ebltviniygljwwseplph.supabase.co"],
+]) {
+  const source = readFileSync(path, "utf8");
+  if (source.includes(forbidden)) failures.push(`Hard-coded Supabase project URL remains in ${path}`);
+}
+// Shared environment bootstrap must precede privileged guards on every legacy security route.
+for (const [path, configPath] of [
+  ["public/admin/security-desk.html", "../../config.js"],
+  ["public/app/shared/security-manager.html", "../../../config.js"],
+  ["public/production/security-hardening.html", "../../config.js"],
+]) {
+  const page = readFileSync(path, "utf8");
+  const sdkIndex = page.indexOf("cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+  const configIndex = page.indexOf(`src="${configPath}"`);
+  const guardIndex = page.indexOf("krim-admin-guard.js");
+  if (sdkIndex < 0 || configIndex < 0 || guardIndex < 0 || !(sdkIndex < configIndex && configIndex < guardIndex)) {
+    failures.push(`Shared Supabase SDK/config must load before the admin guard: ${path}`);
+  }
+}
+// Shared authentication client regression guards. These checks prevent auth
+// modules from silently selecting a different project or falling back to prod.
+const sharedAuthModules = [
+  "auth-core.js",
+  "auth/krim-account-actions.js",
+  "platform/krim-supabase.js",
+];
+for (const path of sharedAuthModules) {
+  if (!existsSync(path)) {
+    failures.push("Shared authentication module is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (source.includes("https://ebltviniygljwwseplph.supabase.co") ||
+      source.includes("https://qrpcivhdxobiaofppbkl.supabase.co") ||
+      source.includes("sb_publishable_")) {
+    failures.push("Authentication module must not embed Supabase URLs or publishable keys: " + path);
+  }
+}
+const sharedAuthConsumers = [
+  "auth/account-deactivation.html",
+  "auth/account-deletion.html",
+  "auth/account-recovery-status.html",
+  "auth/active-sessions.html",
+  "auth/change-email.html",
+  "auth/change-password.html",
+  "auth/logout.html",
+  "auth/disabled.html",
+];
+for (const path of sharedAuthConsumers) {
+  if (!existsSync(path)) {
+    failures.push("Shared-auth consumer page is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (!source.includes("../config.js") ||
+      !source.includes("cdn.jsdelivr.net/npm/@supabase/supabase-js@2")) {
+    failures.push("Auth consumer must load the SDK and verified config before its module: " + path);
+  }
+}
+for (const path of [
+  "auth/owner-testing-forgot-password.html",
+  "auth/owner-testing-reset-password.html",
+  "auth/owner-testing-mfa.html",
+]) {
+  if (!existsSync(path)) {
+    failures.push("Owner-testing auth page is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (!source.includes("../config.js") ||
+      !source.includes('window.KRIM_ENVIRONMENT!=="preview"') ||
+      !source.includes('window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl"')) {
+    failures.push("Owner-testing auth page must use the verified staging client and reject non-staging hosts: " + path);
+  }
+}
+const accountActionsSource = readFileSync("auth/krim-account-actions.js", "utf8");
+if (!accountActionsSource.includes('from "../platform/krim-supabase.js"')) {
+  failures.push("Account actions must import the shared verified Supabase client.");
+}
+const authCoreSource = readFileSync("auth-core.js", "utf8");
+if (!authCoreSource.includes("from './platform/krim-supabase.js'")) {
+  failures.push("Auth core must import the shared verified Supabase client.");
+}
+const sharedSupabaseSource = readFileSync("platform/krim-supabase.js", "utf8");
+if (sharedSupabaseSource.includes("||\n  \"https://") ||
+    sharedSupabaseSource.includes("||\n  \"sb_publishable_")) {
+  failures.push("Shared Supabase module must not contain a production fallback.");
+}
+
 // Historic migration timestamp collisions are documented and must not be
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
 // new collisions in the current release stream from adding to that risk.
