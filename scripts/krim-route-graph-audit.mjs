@@ -29,6 +29,9 @@ export function normalizeLocalTarget(sourcePath, rawValue, knownPaths) {
   if (!raw || isExternal(raw) || raw.includes("${") || raw.includes("{{")) return { kind: "skip" };
   const clean = stripSuffix(raw);
   if (!clean) return { kind: "skip" };
+  // This graph is for HTML routes, not static assets (images, scripts, stylesheets, PDFs, fonts, etc.).
+  const extension = path.posix.extname(clean).toLowerCase();
+  if (extension && extension !== ".html" && extension !== ".htm") return { kind: "skip" };
   const decoded = decodePath(clean);
   if (decoded === null) return { kind: "unresolved", reason: "invalid-url-encoding" };
   let candidate;
@@ -71,7 +74,11 @@ export function extractHtmlReferences(html) {
     const tag = match[0];
     const tagName = (tag.match(/^<([\w-]+)/) || [,""])[1].toLowerCase();
     const attrs = attributes(tag);
-    for (const name of ["href", "src", "action", "data-href", "formaction"]) {
+    const routeAttributes = tagName === "a" || tagName === "area" ? ["href"]
+      : tagName === "form" ? ["action"]
+      : tagName === "button" ? ["data-href", "formaction"]
+      : tagName === "iframe" ? ["src"] : [];
+    for (const name of routeAttributes) {
       if (attrs[name] !== undefined) refs.push({ attribute: name, tag: tagName, raw: attrs[name] });
     }
   }
@@ -159,6 +166,6 @@ function main() {
     p.path,p.inbound_edges,p.unique_inbound_sources,report.noindex_paths.includes(p.path),report.redirects.some(r=>r.path===p.path)
   ].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(","))].join("\n")+"\n";
   fs.writeFileSync(path.join(outDir,"krim-route-graph.csv"),csv);
-  console.log(JSON.stringify({output:outDir,totals:report.totals},null,2));
+  console.log(JSON.stringify({output:outDir,totals:report.totals,zero_inbound_sample:report.zero_inbound_paths.slice(0,30),redirect_sample:report.redirects.slice(0,30),unresolved_sample:report.unresolved.slice(0,30)},null,2));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
