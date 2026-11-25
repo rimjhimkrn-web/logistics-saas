@@ -436,3 +436,12 @@ Source-backed direct-entry routes: customer signup `auth/signup.html` sends conf
 Prior auth follow-up records corrected callback authorization bypass and driver MFA AAL2 issue; nevertheless Supabase Site URL, redirect allowlist, email templates, rate limits and MFA settings remain unverified. No emails or Auth actions were executed. Legacy `app/index.html` remains a weaker customer route than `app/customer/index.html`; other duplicate/unconfirmed paths require owner review.
 
 Gate C3.3 PARTIAL PASS / BLOCKED. Full evidence: `phase-00-gate-c3-3-canonical-route-and-auth-deeplink-reconciliation-2026-11-25.md`.
+
+
+## 29. Gate C3.4 — complete zero-inbound route disposition register
+
+All 89 candidates from the repository-wide C3.1 list are individually assigned one conservative disposition: KEEP, KEEP AS DIRECT ENTRY, RESTRICT, CONSOLIDATE REVIEW, or RETIRE REVIEW. The full route-by-route register is `phase-00-gate-c3-4-zero-inbound-route-disposition-register-2026-11-25.md`.
+
+Key controls: do not retire any route without owner/dependency approval; `app/index.html` remains a weaker legacy customer workspace; auth callback/reset are direct-entry routes; invitation sender/acceptance remains unverified; staging preview routes remain restricted; internal control/admin/growth/developer/chaos surfaces require server-side access controls; preserve all 343 compatibility redirects pending runtime chain tests.
+
+Gate C3.4 PARTIAL PASS / BLOCKED. Static route disposition is complete, but full 89-page dependency review, owner approvals and browser/HTTP/auth runtime tests remain NOT TESTED/BLOCKED. No page or environment was changed.
