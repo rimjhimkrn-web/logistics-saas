@@ -45,41 +45,10 @@
     }
 
     function detectEnvironment() {
-        const configured =
-            window.KRIM_ENVIRONMENT ||
-            document.querySelector(
-                'meta[name="krim-environment"]'
-            )?.content;
-        const supported = [
-            "development",
-            "preview",
-            "production"
-        ];
-
-        if (supported.includes(configured)) {
-            return configured;
+        if (!window.KRIM_ENVIRONMENT || !window.KRIM_SUPABASE_CONFIG) {
+            throw new Error("KRIM shared environment configuration must load before platform configuration.");
         }
-
-        const hostname =
-            window.location.hostname.toLowerCase();
-
-        if (
-            hostname === "localhost" ||
-            hostname === "127.0.0.1" ||
-            hostname === "::1"
-        ) {
-            return "development";
-        }
-
-        if (
-            hostname.includes(".preview.") ||
-            /^pr-\d+--.+\.netlify\.app$/.test(hostname) ||
-            /-git-[^.]+\.vercel\.app$/.test(hostname)
-        ) {
-            return "preview";
-        }
-
-        return "production";
+        return window.KRIM_ENVIRONMENT;
     }
 
     const BASE_PATH = detectBasePath();
@@ -112,9 +81,9 @@
         }),
 
         supabase: Object.freeze({
-            url: "https://ebltviniygljwwseplph.supabase.co",
-            publishableKey:
-                "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+            url: window.KRIM_SUPABASE_CONFIG.url,
+            publishableKey: window.KRIM_SUPABASE_CONFIG.publishableKey,
+            projectRef: window.KRIM_SUPABASE_CONFIG.projectRef
         }),
 
         routes: Object.freeze({
