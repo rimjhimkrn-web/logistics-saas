@@ -18,7 +18,7 @@ function boot(hostname, search = "") {
       },
     },
   };
-  const sandbox = { window, document: { querySelector: () => ({ content: "production" }) }, URL, Object, String };
+  const sandbox = { window, document: { querySelector: () => ({ content: "production" }) }, URL, URLSearchParams, Object, String };
   return { window, created: () => created, sandbox };
 }
 
