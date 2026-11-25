@@ -416,3 +416,12 @@ GitHub Actions run `45594112014` completed SUCCESS on QA commit `47d38c9bc96266f
 Graph findings: 757 HTML pages have inbound static HTML links; 89 have zero inbound static HTML edges and are only orphan *candidates* (not confirmed orphans). The 89 comprise 39 public, 28 auth, 7 app, 5 src, and 10 other/root paths; 26 of 89 carry noindex, and 2 are staging paths. 343 compatibility redirect candidates detected, 335 with noindex. 103 staging pages; 48 without visible Supabase/backend signals. 67 operational-looking pages without visible backend signals, and 194 operational pages with some backend-related signal. These signal counts are heuristics and are not runtime proof.
 
 Gate C3.1 PASS for repository-wide literal static reference scan and canonical route existence. Redirect-chain/browser checks, genuine orphan classification, and backend/runtime verification remain NOT TESTED. Overall PARTIAL PASS / BLOCKED. Full results and all 89 candidates: `phase-00-gate-c3-1-repository-wide-static-link-audit-results-2026-11-25.md`. Workflow: run 45594112014.
+
+
+## 27. Gate C3.2 — zero-inbound route and redirect classification
+
+Classified all 89 zero-inbound HTML candidates from the repository-wide CI artifact: auth 28; public 39; app 7; root 5; src 5; control/docs/platform/scripts/templates 1 each. 26 carry noindex, 63 do not; 42 show direct backend signals and 47 do not; two are staging paths. Auth routes and system fallbacks are likely legitimate direct-entry routes, not public-navigation orphans. Public routes require discoverability/route-owner review. src/platform/template/test fixtures require explicit internal-vs-live classification.
+
+Reviewed all 343 redirect candidates by namespace: public 324, app 11, partner 3, root 2, legal 2, auth 1. 335/343 are noindex; eight are not. All eight non-noindex destinations exist in the tracked source tree after relative-path normalization, but browser redirects, status codes, query/hash preservation, auth context and loops are NOT TESTED. Two of the eight target a staging-named driver page and need release scrutiny. No route was removed or changed.
+
+Gate C3.2 PARTIAL PASS / BLOCKED. No page is confirmed orphaned or approved for deletion. Full classification: `phase-00-gate-c3-2-zero-inbound-route-and-redirect-classification-2026-11-25.md`.
