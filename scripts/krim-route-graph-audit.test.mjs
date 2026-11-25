@@ -40,3 +40,9 @@ test("builds per-page inbound graph, noindex and redirect evidence",()=>{
   assert.deepEqual(report.noindex_paths,["index.html"]);
   assert.equal(report.redirects[0].candidates[0].mechanism,"meta-refresh");
 });
+
+test("excludes static assets and non-navigation resource attributes",()=>{
+  assert.equal(normalizeLocalTarget("index.html","/assets/logo.svg",known).kind,"skip");
+  const html='<script src="assets/app.js"></script><img src="logo.png"><link rel="stylesheet" href="site.css"><a href="about.html">About</a>';
+  assert.deepEqual(extractHtmlReferences(html).map(x=>x.raw),["about.html"]);
+});
