@@ -487,3 +487,14 @@ Positive source controls: driver metadata registration requires auth.uid ownersh
 Open P1: driver POD wrapper does not compare driver assignment leg with linked partner assignment leg; admin POD review updates driver assignments by partner_assignment_id without exact shipment/leg/org/driver tuple or uniqueness assertion; internal POD creator trusts evidence JSON and does not independently prove each evidence row/object's full driver-assignment/shipment/leg/org tuple. Open P2: signed URL lifecycle/cache/revocation and content-signature/malware scanning are unproven. Legacy private `pod-documents` bucket remains retirement review.
 
 Gate C3.8 PARTIAL PASS / BLOCKED; NO-GO for live driver POD, verification and customer evidence download certification. No Storage objects, SQL/RPC, Production/Staging data, schema, policies, grants, bucket settings, accounts, providers or deployments were changed. Detailed report: `phase-00-gate-c3-8-driver-evidence-storage-pod-integrity-audit-2026-11-25.md`.
+
+
+## 34. Gate C3.9 — driver tracking, GPS consent, location privacy and real-time tracking security
+
+Source-reviewed GPS update and tracking-session Edge Functions, mobile location collector, driver tracking page, tracking session schema/RLS, merged tracking-event read policy, customer tracking RPC and idle-session expiry worker.
+
+Positive controls: server and mobile GPS launch gates remain hard-disabled because the notice is explicitly unapproved; driver web page is read-only; start/upload checks authenticated driver, active membership/organization, verified profile/licence, in-transit assignment, active partner assignment, exact shipment/organization/leg and active consent session; coordinates/accuracy/time/platform are validated; no-store response and one-active-session uniqueness exist.
+
+Open P1: retention schedule, deletion and legal-hold controls absent; customer tracking RPC validates only notice non-empty/hash syntax, not approved consent version/hash. Open P2: rate limiter is read-then-insert (raceable) and not session-scoped; revocation lifecycle needs immediate session closure; wildcard CORS and no explicit body/burst controls; client-reported mock flag is not attestation; pg_cron expiry job and RLS OR-composition require runtime proof. Native Android/iOS permission/background/stop behavior NOT TESTED.
+
+Gate C3.9 PARTIAL PASS / BLOCKED; NO-GO for live GPS collection or real-time tracking claims. Keep server and mobile GPS gates disabled until remediation and isolated Staging verification. No Production/Staging coordinates, permissions, sessions, SQL/RPC, schema, policies, grants, functions or deployment were changed. Detailed report: `phase-00-gate-c3-9-driver-tracking-gps-consent-privacy-audit-2026-11-25.md`.
