@@ -56,17 +56,20 @@ if (!window.supabase || typeof window.supabase.createClient !== "function") {
   throw new Error("KRIM Supabase SDK is unavailable; client initialization stopped.");
 }
 
-const krimSupabaseClient =
-  window.KRIM_SUPABASE ||
-  window.supabaseClient ||
-  window.supabase.createClient(selectedSupabaseConfig.url, selectedSupabaseConfig.publishableKey, {
+// Always create the client from the hostname-verified mapping. Do not trust
+// a pre-existing global client whose project identity cannot be proven.
+const krimSupabaseClient = window.supabase.createClient(
+  selectedSupabaseConfig.url,
+  selectedSupabaseConfig.publishableKey,
+  {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: "pkce"
     }
-  });
+  }
+);
 
 window.KRIM_SUPABASE = krimSupabaseClient;
 window.supabaseClient = krimSupabaseClient;
