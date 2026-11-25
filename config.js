@@ -84,13 +84,7 @@ window.krimPath = function (path = "") {
 };
 
 
-const krimSupabaseClient =
-  window.KRIM_SUPABASE ||
-  window.supabaseClient ||
-  window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-window.KRIM_SUPABASE = krimSupabaseClient;
-window.supabaseClient = krimSupabaseClient;
 /*
  * Canonical KRIM route registry.
  * Keep one approved destination for each core workflow; legacy pages should
