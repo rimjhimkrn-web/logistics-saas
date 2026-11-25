@@ -4,10 +4,10 @@ import { runInNewContext } from "node:vm";
 
 const configSource = readFileSync("config.js", "utf8");
 
-function boot(hostname) {
+function boot(hostname, search = "") {
   let created = null;
   const window = {
-    location: { hostname, pathname: "/logistics-saas/" },
+    location: { hostname, pathname: "/logistics-saas/", search },
     KRIM_ENVIRONMENT: "production",
     KRIM_SUPABASE: { legacy: true },
     supabaseClient: { legacy: true },
@@ -37,6 +37,8 @@ for (const [host, environment, projectRef] of allowed) {
   assert.equal(state.window.KRIM_SUPABASE_PROJECT_REF, projectRef, host + " project ref");
   assert.equal(state.created()?.url, "https://" + projectRef + ".supabase.co", host + " project URL");
   assert.equal(state.window.KRIM_SUPABASE, state.created(), host + " shared client");
+  assert.equal(state.window.KRIM_AUTH_DISABLED, false, host + " authentication remains enabled");
+  assert.equal(state.window.KRIM_STAGING_REVIEW_MODE, false, host + " defaults to authenticated/non-review mode");
   assert.notEqual(state.window.KRIM_SUPABASE?.legacy, true, host + " legacy client must not be reused");
 }
 
@@ -47,6 +49,25 @@ for (const host of ["unknown.example", "random.pages.dev", "krimlogistics.com"])
   assert.equal(state.window.KRIM_SUPABASE, null, host + " must clear stale client");
   assert.equal(state.window.supabaseClient, null, host + " must clear legacy alias");
 }
+
+
+for (const [search, expected] of [["?mode=review", true], ["?mode=authenticated", false], ["", false]]) {
+  const state = boot("krim-staging.pages.dev", search);
+  runInNewContext(configSource, state.sandbox);
+  assert.equal(state.window.KRIM_STAGING_REVIEW_MODE, expected, "explicit staging review selector " + search);
+  assert.equal(state.window.KRIM_AUTH_DISABLED, false, "review selector never disables Supabase auth");
+}
+
+const partnerOnboarding = readFileSync("public/partner/partner-onboarding.html", "utf8");
+assert.ok(partnerOnboarding.includes("window.KRIM_STAGING_REVIEW_MODE === true"),
+  "partner onboarding must use explicit review-mode flag");
+assert.equal(partnerOnboarding.includes('location.hostname === "krim-staging.pages.dev" ||'), false,
+  "partner onboarding must not force review mode for every staging visitor");
+const partnerSignIn = readFileSync("auth/partner-signin.html", "utf8");
+assert.ok(partnerSignIn.includes("window.KRIM_STAGING_REVIEW_MODE===true"),
+  "partner sign-in must use explicit review-mode flag");
+assert.equal(partnerSignIn.includes('location.hostname==="krim-staging.pages.dev"||'), false,
+  "partner sign-in must not disable credentials for every staging visitor");
 
 const staticGuards = [
   ["app/platform-admin/index.html", "https://ebltviniygljwwseplph.supabase.co"],
@@ -71,4 +92,4 @@ for (const [path, relativeConfig] of bootstraps) {
   assert.ok(sdk >= 0 && config > sdk && guard > config, path + " SDK/config must load before admin guard");
 }
 
-console.log("KRIM environment isolation tests passed: " + allowed.length + " allowed hosts, 3 blocked hosts, 4 static guards, 3 privileged bootstraps.");
+console.log("KRIM environment isolation tests passed: " + allowed.length + " allowed hosts, 3 blocked hosts, explicit review/authenticated staging mode checks, 4 static guards, 3 privileged bootstraps.");
