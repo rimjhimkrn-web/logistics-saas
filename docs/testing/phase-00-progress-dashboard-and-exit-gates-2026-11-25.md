@@ -40,7 +40,7 @@ This is a genuine browser automation pass for the isolated fixture. It is **not*
 |---|---|---|
 | Repository and infrastructure baseline | Extensive source, workflow, route and dependency inventory | Confirm hosting ownership and live Staging deployment provenance |
 | Environment isolation | QA allowlist implementation; VM tests and Chromium fixture CI both pass | Verify actual deployed Staging hostname and project identity; test actual browser-to-Supabase identity |
-| Nine-workspace workflows | Representative route-to-RPC/backend maps and authorization reviews for all nine ecosystems; canonical driver-review browser RPC caller identified | Complete safe authenticated runtime tests and resolve known page/RPC/ACL gaps |
+| Nine-workspace workflows | Representative route-to-RPC/backend maps and authorization reviews for all nine ecosystems; canonical driver-review browser RPC caller identified; customer booking page-local Production fallback removed on QA and static regression guards added | Verify latest CI, then complete safe authenticated runtime tests and resolve remaining page/RPC/ACL gaps |
 | Authentication and tenant isolation | Source and database catalog security reviews | Synthetic multi-tenant identities; real JWT allow/deny tests; callback/MFA/session runtime tests |
 | Notifications | Event producers, outbox, worker, recipient and inbox audits; remediation design documented | Implement and verify one durable, idempotent pipeline; workspace inboxes; safe provider sink; callback and retry tests |
 | Storage and evidence | Bucket/policy inventory, ownership and signed-link reviews; current Staging AAL2 INSERT policy is RESTRICTIVE and composes with the organization/uploader policy | Record assurance decision; provision three missing Staging evidence buckets/policies; resolve reviewer ACL; synthetic upload/read/deny tests |
@@ -103,3 +103,7 @@ A fresh read-only catalog query on 2026-11-25 found the Staging partner-verifica
 ## Additional read-only reconciliation
 - Current Staging partner-verification AAL2 INSERT policy is `RESTRICTIVE` and therefore combines with the organization/uploader permissive policy; see the live Storage recheck report.
 - The canonical driver-review UI caller and exact Production/Staging EXECUTE ACL mismatch are now verified; see the driver-reviewer RPC reconciliation report.
+
+
+## Customer booking environment hardening (QA only)
+The canonical `public/shipper/booking-request.html` page previously created a hard-coded Production Supabase client whenever the shared client was absent. That fallback has now been removed on the QA branch. The page uses only `window.KRIM_SUPABASE` and displays a fail-closed configuration message if the shared client is unavailable. Static regression guards were added to both the repository smoke script and environment-isolation test. Booking creation remains deliberately disabled (`BOOKING_CREATION_RELEASED = false`) pending backend contract remediation and runtime verification. CI for commit `6be07a0b986bcfb60e19902ce46dbe567f8d1772` was queued at dashboard update time; this change is not yet counted as verified until both workflows pass.
