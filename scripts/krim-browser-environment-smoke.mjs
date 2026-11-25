@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 
 const browser = await chromium.launch({
   headless: true,
-  args: ["--no-sandbox", "--host-resolver-rules=MAP krim-staging.pages.dev 127.0.0.1,MAP unknown.krim-test.invalid 127.0.0.1"]
+  args: ["--no-sandbox", "--no-proxy-server", "--host-resolver-rules=MAP krim-staging.pages.dev 127.0.0.1,MAP unknown.krim-test.invalid 127.0.0.1"]
 });
 
 const pageErrors = [];
