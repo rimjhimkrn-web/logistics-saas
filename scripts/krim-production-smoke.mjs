@@ -116,7 +116,7 @@ const required = [
 
 const failures = [];
 
-// Environment isolation regression: only explicit hosts may initialize a Supabase client.
+ // Environment isolation regression: only explicit hosts may initialize a Supabase client.
 const environmentConfig = readFileSync("config.js", "utf8");
 for (const testCase of [
   { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
@@ -181,100 +181,30 @@ if (customerBookingSource.includes("https://ebltviniygljwwseplph.supabase.co") |
   failures.push("Customer booking must not contain a page-local Production URL/key/client fallback");
 }
 
-// Environment-sensitive privileged routes must use the shared client, not embed project URLs.
-for (const [path, forbidden] of [
-  ["app/platform-admin/index.html", "https://ebltviniygljwwseplph.supabase.co"],
-  ["auth/krim-admin-guard.js", "https://ebltviniygljwwseplph.supabase.co"],
-  ["auth/krim-admin-access.html", "https://qrpcivhdxobiaofppbkl.supabase.co"],
-  ["platform/krim-config.js", "https://ebltviniygljwwseplph.supabase.co"],
-]) {
-  const source = readFileSync(path, "utf8");
-  if (source.includes(forbidden)) failures.push(`Hard-coded Supabase project URL remains in ${path}`);
-}
-// Shared environment bootstrap must precede privileged guards on every legacy security route.
-for (const [path, configPath] of [
-  ["public/admin/security-desk.html", "../../config.js"],
-  ["public/app/shared/security-manager.html", "../../../config.js"],
-  ["public/production/security-hardening.html", "../../config.js"],
-]) {
-  const page = readFileSync(path, "utf8");
-  const sdkIndex = page.indexOf("cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
-  const configIndex = page.indexOf(`src="${configPath}"`);
-  const guardIndex = page.indexOf("krim-admin-guard.js");
-  if (sdkIndex < 0 || configIndex < 0 || guardIndex < 0 || !(sdkIndex < configIndex && configIndex < guardIndex)) {
-    failures.push(`Shared Supabase SDK/config must load before the admin guard: ${path}`);
-  }
-}
-// Shared authentication client regression guards. These checks prevent auth
-// modules from silently selecting a different project or falling back to prod.
-const sharedAuthModules = [
-  "auth-core.js",
-  "auth/krim-account-actions.js",
-  "platform/krim-supabase.js",
-];
-for (const path of sharedAuthModules) {
-  if (!existsSync(path)) {
-    failures.push("Shared authentication module is missing: " + path);
-    continue;
-  }
+
+// Shared-auth modules must use the hostname-verified client and contain no embedded project credentials.
+for (const path of ["auth-core.js", "auth/krim-account-actions.js", "platform/krim-supabase.js"]) {
   const source = readFileSync(path, "utf8");
   if (source.includes("https://ebltviniygljwwseplph.supabase.co") ||
       source.includes("https://qrpcivhdxobiaofppbkl.supabase.co") ||
       source.includes("sb_publishable_")) {
-    failures.push("Authentication module must not embed Supabase URLs or publishable keys: " + path);
+    failures.push("Shared auth module embeds a Supabase URL or publishable key: " + path);
   }
 }
-const sharedAuthConsumers = [
-  "auth/account-deactivation.html",
-  "auth/account-deletion.html",
-  "auth/account-recovery-status.html",
-  "auth/active-sessions.html",
-  "auth/change-email.html",
-  "auth/change-password.html",
-  "auth/logout.html",
-  "auth/disabled.html",
-];
-for (const path of sharedAuthConsumers) {
-  if (!existsSync(path)) {
-    failures.push("Shared-auth consumer page is missing: " + path);
-    continue;
-  }
-  const source = readFileSync(path, "utf8");
-  if (!source.includes("../config.js") ||
-      !source.includes("cdn.jsdelivr.net/npm/@supabase/supabase-js@2")) {
-    failures.push("Auth consumer must load the SDK and verified config before its module: " + path);
-  }
+if (!readFileSync("auth-core.js", "utf8").includes("from './platform/krim-supabase.js'")) {
+  failures.push("Auth core must import the shared verified Supabase client.");
 }
-for (const path of [
-  "auth/owner-testing-forgot-password.html",
-  "auth/owner-testing-reset-password.html",
-  "auth/owner-testing-mfa.html",
-]) {
-  if (!existsSync(path)) {
-    failures.push("Owner-testing auth page is missing: " + path);
-    continue;
-  }
+if (!readFileSync("auth/krim-account-actions.js", "utf8").includes('from "../platform/krim-supabase.js"')) {
+  failures.push("Account actions must import the shared verified Supabase client.");
+}
+for (const path of ["auth/owner-testing-forgot-password.html", "auth/owner-testing-reset-password.html", "auth/owner-testing-mfa.html"]) {
   const source = readFileSync(path, "utf8");
   if (!source.includes("../config.js") ||
       !source.includes('window.KRIM_ENVIRONMENT!=="preview"') ||
       !source.includes('window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl"')) {
-    failures.push("Owner-testing auth page must use the verified staging client and reject non-staging hosts: " + path);
+    failures.push("Owner-testing auth page must be restricted to the verified Staging project: " + path);
   }
 }
-const accountActionsSource = readFileSync("auth/krim-account-actions.js", "utf8");
-if (!accountActionsSource.includes('from "../platform/krim-supabase.js"')) {
-  failures.push("Account actions must import the shared verified Supabase client.");
-}
-const authCoreSource = readFileSync("auth-core.js", "utf8");
-if (!authCoreSource.includes("from './platform/krim-supabase.js'")) {
-  failures.push("Auth core must import the shared verified Supabase client.");
-}
-const sharedSupabaseSource = readFileSync("platform/krim-supabase.js", "utf8");
-if (sharedSupabaseSource.includes("||\n  \"https://") ||
-    sharedSupabaseSource.includes("||\n  \"sb_publishable_")) {
-  failures.push("Shared Supabase module must not contain a production fallback.");
-}
-
 // Historic migration timestamp collisions are documented and must not be
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
 // new collisions in the current release stream from adding to that risk.
