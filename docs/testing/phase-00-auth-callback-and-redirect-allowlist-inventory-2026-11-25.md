@@ -65,3 +65,13 @@ The repository's host allowlist identifies `krim-staging.pages.dev` as staging, 
 
 ## Readiness decision
 Authentication URL configuration is **PARTIALLY REVIEWED — NOT PASSED**. Do not declare Phase 00 complete. No settings were changed. NO EVIDENCE = NO PASS.
+
+
+## Additional invitation-path cross-check
+A review of the existing authentication lifecycle and organization-invitation audit records confirms:
+- The generic `auth/invitation.html` page is a Supabase Auth invitation/password-setup handler, but the generic organization membership invitation lifecycle was previously found incomplete; no current generic invitation sender was established in this pass.
+- The secure driver invitation flow is a separate KRIM token-based workflow. Its acceptance path is not evidence that Supabase Auth should redirect to `auth/invitation.html`.
+- The prior audit specifically distinguishes Supabase Auth invitations from organization membership invitations and records that they must not be treated as the same flow.
+- No OAuth sign-in call was identified in the callback/registration source files directly reviewed here. Provider enablement and external OAuth redirect configuration remain unverified.
+
+This reinforces that `auth/invitation.html` should not be added to the Production allowlist solely because the page exists. It does not yet justify removing the wildcard because the complete sender/provider inventory and dashboard provider configuration are not independently verified.
