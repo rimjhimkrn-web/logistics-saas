@@ -21,7 +21,7 @@
 
 
 
-<script>document.addEventListener("DOMContentLoaded",function(){if(location.hostname==="krim-staging.pages.dev"||new URLSearchParams(location.search).get("mode")==="review"){const n=document.getElementById("krim-staging-review-banner");if(n)n.hidden=false;}});</script>
+<script>document.addEventListener("DOMContentLoaded",function(){if(window.KRIM_STAGING_REVIEW_MODE){const n=document.getElementById("krim-staging-review-banner");if(n)n.hidden=false;}});</script>
 
 
 
@@ -346,7 +346,7 @@ small,.eyebrow,.tag,.badge,.pill,.state,.num,.section-tag{letter-spacing:.045em}
 
   <script>
     const onboardingClient = window.KRIM_SUPABASE || window.supabaseClient;
-    const stagingReviewMode = location.hostname === "krim-staging.pages.dev" || new URLSearchParams(location.search).get("mode") === "review";
+    const stagingReviewMode = window.KRIM_STAGING_REVIEW_MODE === true;
     let onboardingSession = null;
     let onboardingOrganizationId = null;
     let uploadedDocumentPaths = [];
