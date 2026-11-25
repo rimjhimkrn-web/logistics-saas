@@ -1,0 +1,128 @@
+{
+  "prodOnly": [
+    "public.krim_report_operational_exception(p_shipment_id bigint, p_exception_type text, p_severity text, p_description text)"
+  ],
+  "stageOnly": [
+    "private.krim_internal_partner_has_verified_capacity(p_organization_id bigint, p_origin_location_id bigint, p_destination_location_id bigint, p_transport_mode_id bigint, p_weight_kg numeric, p_service_date date)",
+    "private.krim_partner_has_active_service_area_for_location(p_organization_id bigint, p_location_id bigint, p_transport_mode_id bigint)",
+    "private.krim_require_warehouse_handover_before_shipment_dispatch()",
+    "public.krim_admin_list_market_readiness_requirements()",
+    "public.krim_admin_request_partner_verification_information(p_case_id bigint, p_request text)",
+    "public.krim_audit_driver_assignment_acceptance()",
+    "public.krim_create_global_shipment_from_locations_idempotent(p_customer_organization_id bigint, p_origin_location_id bigint, p_destination_location_id bigint, p_goods_description text, p_total_weight_kg numeric, p_transport_mode text, p_route_type text, p_booking_request_id uuid)",
+    "public.krim_internal_claim_resend_email_batch(p_limit integer)",
+    "public.krim_internal_finish_resend_email(p_outbox_id bigint, p_delivery_id bigint, p_success boolean, p_provider_message_id text, p_error_code text, p_error text)",
+    "public.krim_partner_dispatch_assigned_shipment(p_partner_assignment_id bigint, p_idempotency_key text)",
+    "public.krim_partner_list_assignment_capacity_states(p_assignment_ids bigint[])",
+    "public.krim_partner_resolve_driver_exception(p_assignment_id uuid, p_resolution_notes text)",
+    "public.krim_partner_resubmit_rejected_capacity_resource(p_resource_id bigint, p_resource_type text, p_resource_name text, p_transport_mode_id bigint, p_location_id bigint, p_capacity_value numeric, p_capacity_unit text, p_availability_type text, p_available_from timestamp with time zone, p_available_until timestamp with time zone, p_document_paths text[], p_notes text)",
+    "public.krim_partner_resubmit_service_area(p_service_area_id bigint, p_organization_id bigint, p_coverage_type text, p_scope_id bigint, p_service_type text, p_transport_mode_id bigint, p_evidence_paths text[], p_notes text, p_effective_from timestamp with time zone, p_effective_until timestamp with time zone)"
+  ],
+  "changed": [
+    {
+      "identity": "krim_internal.release_capacity_on_assignment_terminal()",
+      "production_hash": "517bedbfdf2bf409733aa5042f75a089",
+      "staging_hash": "f0027c78121f919a84483f0aa0847ec5"
+    },
+    {
+      "identity": "private.krim_admin_update_driver_licence_expiry(p_profile_id uuid, p_licence_expiry_date date, p_reason text)",
+      "production_hash": "d70983476ccacf764f498ff227ac739f",
+      "staging_hash": "bffe0d433909ff20169c6c9c26897df6"
+    },
+    {
+      "identity": "private.krim_partner_capability_covers_shipment(p_organization_id bigint, p_shipment_id bigint)",
+      "production_hash": "4d5b3e0452bb0d83e5aa73f6d16bf16a",
+      "staging_hash": "adf44a8651cbbcec70b92fe486aa4c6f"
+    },
+    {
+      "identity": "private.krim_partner_capability_covers_shipment_leg(p_organization_id bigint, p_shipment_leg_id bigint)",
+      "production_hash": "ba91279d18c133a011fb594a481f47a9",
+      "staging_hash": "554c1ba8fba639cc26898f74093a11be"
+    },
+    {
+      "identity": "public.krim_accept_global_quote(p_quote_id bigint)",
+      "production_hash": "52a450b8968cf4721f8c4a691c25354a",
+      "staging_hash": "eb91525bb65c0146c58ccecc2e3d1d6d"
+    },
+    {
+      "identity": "public.krim_admin_list_country_packs()",
+      "production_hash": "d1cd832ed266b69b6997f8687f1f6e89",
+      "staging_hash": "704097ef6a139d9be713b13a63445e6e"
+    },
+    {
+      "identity": "public.krim_admin_list_partner_verification_cases()",
+      "production_hash": "847f8d575f8d7863c2a300d66dbff7bb",
+      "staging_hash": "19c6d38bb4bca554a60203832716e275"
+    },
+    {
+      "identity": "public.krim_admin_review_partner_service_area(p_service_area_id bigint, p_decision text, p_reason text)",
+      "production_hash": "c7afc3088b3ebeef7157f411b9cc5983",
+      "staging_hash": "75e99037c88e65215e0f6417abc76f5a"
+    },
+    {
+      "identity": "public.krim_admin_update_driver_licence_expiry(p_profile_id uuid, p_licence_expiry_date date, p_reason text)",
+      "production_hash": "26b256ec1477bfcb13ae3d9a1fb9a584",
+      "staging_hash": "719d864f96111208eed928a7e3c21e46"
+    },
+    {
+      "identity": "public.krim_award_leg_partner_quote(p_partner_quote_id bigint)",
+      "production_hash": "5074580fab93c28096e775e928ae53e1",
+      "staging_hash": "488e7eaaab9aa9bfad5415aa8d823a5d"
+    },
+    {
+      "identity": "public.krim_award_partner_quote(p_partner_quote_id bigint)",
+      "production_hash": "e0874bf1f9d952ee0cda461786f77678",
+      "staging_hash": "e7c1d50e2cef487751f8bac30364518b"
+    },
+    {
+      "identity": "public.krim_customer_prepare_partner_quote(p_partner_quote_id bigint, p_valid_until timestamp with time zone)",
+      "production_hash": "94ff71265ef4eb9bb0c11e9726614b7d",
+      "staging_hash": "d8a2f83066daf6bea7b4cd48898fd186"
+    },
+    {
+      "identity": "public.krim_internal_create_partner_matching_run(p_orchestration_run_id bigint, p_shipment_id bigint)",
+      "production_hash": "fb3b59941ba7b3de4d45c2532f94e7e6",
+      "staging_hash": "ebe67d4aabab90676ad76f8ed426d3de"
+    },
+    {
+      "identity": "public.krim_internal_market_activation_gate(p_market_id bigint)",
+      "production_hash": "98a7fdcca9c80696117a878f4f24c046",
+      "staging_hash": "ca2eaa5e0d0e8555542442e5adab8f87"
+    },
+    {
+      "identity": "public.krim_internal_partner_location_coverage_score(p_partner_organization_id bigint, p_location_id bigint, p_transport_mode_id bigint, p_service_type text)",
+      "production_hash": "ed2c80051df5f44b1f964e41d624b297",
+      "staging_hash": "fbb557a9804c0826c4d1837fa7c4e9e1"
+    },
+    {
+      "identity": "public.krim_list_dispatchable_drivers(p_partner_assignment_id bigint)",
+      "production_hash": "3824dad50dff8adebaa195a910b0a6ff",
+      "staging_hash": "23b304d77cbd112ebbee42785a08dafa"
+    },
+    {
+      "identity": "public.krim_partner_reserve_shipment_leg_capacity(p_assignment_id bigint, p_planned_departure timestamp with time zone, p_planned_arrival timestamp with time zone, p_idempotency_key text)",
+      "production_hash": "bf27ff73801d9199b5353e76ba328927",
+      "staging_hash": "0cfaabd087247b4a80724b83edc809c5"
+    },
+    {
+      "identity": "public.krim_respond_to_partner_assignment(p_assignment_id bigint, p_accept boolean, p_reason text)",
+      "production_hash": "e3be9e6d3bd539e4f6c5fa15365bb361",
+      "staging_hash": "1b7409ec80210819508ea5b41ff97079"
+    },
+    {
+      "identity": "public.krim_submit_partner_onboarding_global_multi_v1(p_legal_name text, p_country_code text, p_authority_id text, p_operational_categories text[], p_document_paths text[], p_operating_country_code text, p_registered_address text, p_registered_city text, p_operating_region text, p_operating_city text, p_postal_code text, p_website text, p_registered_region text, p_registered_postal_code text, p_category_coverage jsonb)",
+      "production_hash": "72ac7944d89e588380f584a074c14725",
+      "staging_hash": "b2924b0dba721767a87f296956907b73"
+    },
+    {
+      "identity": "public.krim_submit_partner_onboarding_global_v2(p_legal_name text, p_country_code text, p_authority_id text, p_operational_category text, p_document_paths text[], p_operating_country_code text, p_registered_address text, p_registered_city text, p_operating_region text, p_operating_city text, p_postal_code text, p_website text, p_registered_region text, p_registered_postal_code text)",
+      "production_hash": "44518453a2f5a29a65000256a0d2622f",
+      "staging_hash": "cf890db9f377fa7ed26478a70ff1343d"
+    },
+    {
+      "identity": "public.krim_submit_partner_quote(p_opportunity_id bigint, p_amount numeric, p_currency_code text, p_valid_until timestamp with time zone, p_notes text)",
+      "production_hash": "bf96fd4c59acb3974df74e27adea42e1",
+      "staging_hash": "84b3d5c1f4cb3b3e19754757ea61f808"
+    }
+  ]
+}
