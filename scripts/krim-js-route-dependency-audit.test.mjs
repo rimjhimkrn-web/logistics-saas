@@ -15,7 +15,7 @@ test("extracts history, router and window.open navigation",()=>{
  assert(rows.some(x=>x.mechanism==="window-open"));
 });
 test("flags dynamic templates as low-confidence candidates",()=>{
- const rows=extractNavigation('window.location.href = `/src/shipments/details.html?id=${id}`;',"c.js");
+ const rows=extractNavigation('window.location.href = `/app/shipments/details.html?id=${id}`;',"c.js");
  assert(rows.some(x=>x.target_type==="template-dynamic" && x.route_like && x.confidence==="low"));
 });
 test("records href assignment and setAttribute targets",()=>{
