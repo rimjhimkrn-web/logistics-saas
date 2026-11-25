@@ -21,6 +21,12 @@ function detectKrimEnvironment() {
   );
 }
 
+// Clear any page-injected or legacy client before resolving the host.
+window.KRIM_SUPABASE = null;
+window.supabaseClient = null;
+window.KRIM_SUPABASE_CONFIG = null;
+window.KRIM_SUPABASE_PROJECT_REF = null;
+
 window.KRIM_ENVIRONMENT = detectKrimEnvironment();
 
 // Browser configuration contains publishable keys only; never put service-role or secret keys here.
