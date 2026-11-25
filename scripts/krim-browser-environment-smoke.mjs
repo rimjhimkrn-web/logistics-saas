@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 
 const browser = await chromium.launch({
   headless: true,
-  args: ["--no-sandbox", "--no-proxy-server", "--host-resolver-rules=MAP krim-staging.pages.dev 127.0.0.1,MAP unknown.krim-test.invalid 127.0.0.1"]
+  args: ["--no-sandbox", "--no-proxy-server", "--ignore-certificate-errors", "--host-resolver-rules=MAP krim-staging.pages.dev 127.0.0.1,MAP unknown.krim-test.invalid 127.0.0.1"]
 });
 
 const pageErrors = [];
@@ -14,7 +14,7 @@ try {
 
   // Use the exact allowlisted Staging hostname while routing it to the local
   // static fixture server. No request is sent to the real Staging site.
-  await page.goto("http://krim-staging.pages.dev:4173/scripts/browser-environment-smoke.html?mode=review");
+  await page.goto("https://krim-staging.pages.dev:4173/scripts/browser-environment-smoke.html?mode=review");
   const staging = await page.evaluate(() => ({
     loaded: window.__krimFixtureLoaded === true,
     environment: window.KRIM_ENVIRONMENT,
@@ -43,7 +43,7 @@ try {
 
   // Unknown host is deliberately mapped to the local fixture server. The
   // config must throw before createClient; no external Supabase request exists.
-  await page.goto("http://unknown.krim-test.invalid:4173/scripts/browser-environment-smoke.html");
+  await page.goto("https://unknown.krim-test.invalid:4173/scripts/browser-environment-smoke.html");
   const blocked = await page.evaluate(() => ({
     loaded: window.__krimFixtureLoaded === true,
     environment: window.KRIM_ENVIRONMENT ?? null,
