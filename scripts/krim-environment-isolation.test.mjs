@@ -63,6 +63,12 @@ assert.ok(partnerOnboarding.includes("window.KRIM_STAGING_REVIEW_MODE === true")
   "partner onboarding must use explicit review-mode flag");
 assert.equal(partnerOnboarding.includes('location.hostname === "krim-staging.pages.dev" ||'), false,
   "partner onboarding must not force review mode for every staging visitor");
+const partnerSignup = readFileSync("auth/partner-signup.html", "utf8");
+assert.ok(partnerSignup.includes("window.KRIM_STAGING_REVIEW_MODE===true"),
+  "partner signup must use explicit review-mode flag");
+assert.equal(partnerSignup.includes('location.hostname.endsWith(".pages.dev")'), false,
+  "partner signup must not treat every Pages preview hostname as review mode");
+
 const partnerSignIn = readFileSync("auth/partner-signin.html", "utf8");
 assert.ok(partnerSignIn.includes("window.KRIM_STAGING_REVIEW_MODE===true"),
   "partner sign-in must use explicit review-mode flag");
