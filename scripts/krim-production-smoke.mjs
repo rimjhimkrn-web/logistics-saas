@@ -129,6 +129,8 @@ for (const testCase of [
   const sandbox = {
     window: {
       location: { hostname: testCase.host, pathname: "/logistics-saas/" },
+      KRIM_SUPABASE: { legacy: true },
+      supabaseClient: { legacy: true },
       supabase: { createClient: (url, key) => { connectedUrl = url; connectedKey = key; return { url, key }; } },
     },
     document: { querySelector: () => null },
@@ -142,15 +144,18 @@ for (const testCase of [
   if (sandbox.window.KRIM_SUPABASE_PROJECT_REF !== testCase.expectedRef) failures.push(`Wrong Supabase project ref for ${testCase.host}`);
   if (sandbox.window.KRIM_AUTH_DISABLED !== testCase.authDisabled) failures.push(`Unexpected auth-disable state for ${testCase.host}`);
   if (!connectedKey) failures.push(`Supabase publishable key missing for ${testCase.host}`);
+  if (!sandbox.window.KRIM_SUPABASE || sandbox.window.KRIM_SUPABASE.legacy) failures.push(`Unverified pre-existing client was reused for ${testCase.host}`);
 }
 
 // Unknown host must fail before createClient is called, even if page metadata tries to force production.
-for (const host of ["unknown.example", "attacker.krimlogistics.example", "random.pages.dev"]) {
+for (const host of ["unknown.example", "attacker.krimlogistics.example", "random.pages.dev", "krimlogistics.com"]) {
   let createClientCalled = false;
   const sandbox = {
     window: {
       location: { hostname: host, pathname: "/" },
       KRIM_ENVIRONMENT: "production",
+      KRIM_SUPABASE: { legacy: true },
+      supabaseClient: { legacy: true },
       supabase: { createClient: () => { createClientCalled = true; return {}; } },
     },
     document: { querySelector: () => ({ content: "production" }) },
@@ -160,6 +165,7 @@ for (const host of ["unknown.example", "attacker.krimlogistics.example", "random
   try { runInNewContext(environmentConfig, sandbox); } catch { blocked = true; }
   if (!blocked) failures.push(`Unknown hostname was not blocked: ${host}`);
   if (createClientCalled) failures.push(`Unknown hostname initialized a Supabase client: ${host}`);
+  if (sandbox.window.KRIM_SUPABASE !== null || sandbox.window.supabaseClient !== null) failures.push(`Unknown hostname retained an unverified client: ${host}`);
 }
 
 // Environment-sensitive privileged routes must use the shared client, not embed project URLs.
@@ -171,6 +177,20 @@ for (const [path, forbidden] of [
 ]) {
   const source = readFileSync(path, "utf8");
   if (source.includes(forbidden)) failures.push(`Hard-coded Supabase project URL remains in ${path}`);
+}
+// Shared environment bootstrap must precede privileged guards on every legacy security route.
+for (const [path, configPath] of [
+  ["public/admin/security-desk.html", "../../config.js"],
+  ["public/app/shared/security-manager.html", "../../../config.js"],
+  ["public/production/security-hardening.html", "../../config.js"],
+]) {
+  const page = readFileSync(path, "utf8");
+  const sdkIndex = page.indexOf("cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+  const configIndex = page.indexOf(`src="${configPath}"`);
+  const guardIndex = page.indexOf("krim-admin-guard.js");
+  if (sdkIndex < 0 || configIndex < 0 || guardIndex < 0 || !(sdkIndex < configIndex && configIndex < guardIndex)) {
+    failures.push(`Shared Supabase SDK/config must load before the admin guard: ${path}`);
+  }
 }
 // Historic migration timestamp collisions are documented and must not be
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
