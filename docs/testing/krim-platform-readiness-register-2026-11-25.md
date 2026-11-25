@@ -269,3 +269,12 @@ Focused report: `phase-00-gate-b1-staging-migration-provenance-investigation-202
 - Staging's three exact-name matches: `restore_driver_trip_event_rpc_access`, `admin_driver_licence_expiry_control`, `refine_admin_driver_licence_expiry_rpc_security`.
 
 Some Staging ledger names appear timestamp-prefixed or malformed; this requires historical provenance investigation. Current repository files do not prove the SQL that was applied. Search deleted/renamed Git history and obtain the original Staging bootstrap/provisioning evidence before proposing changes. Do not edit migration ledgers or reset/replay migrations. No DB changes were made.
+
+
+## 16. Gate B1b — historical Git provenance search (2026-11-25)
+
+Focused report: `phase-00-gate-b1b-historical-git-provenance-search-2026-11-25.md`.
+
+**B1b: PARTIAL PASS; B1 remains BLOCKED.** The 31 Staging migration names without exact current source files were each checked against exact GitHub `supabase/migrations/<name>.sql` path history; all 31 returned zero commits. The repository migration-directory history returned 466 commits from 2026-10-16 through 2026-11-24, so it does not cover Production's initial 2026-09-29 migration history. A 2026-11-17 historical tree and ten Staging-named branches were also inspected; none supplied the missing 31-file Staging bundle. One historical driver-trip migration matches by name but has a different timestamp from the Staging ledger version. Two other name matches have source files dated 2026-11-23, also with different ledger timestamps.
+
+This is not proof that no external/local SQL bundle exists or that SQL was never applied manually. Original Staging provisioning records and applied SQL checksums remain NOT TESTED. Do not edit or replay migration ledgers. No database writes or deployments were made.
