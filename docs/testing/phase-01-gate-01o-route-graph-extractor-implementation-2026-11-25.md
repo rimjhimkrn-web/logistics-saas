@@ -52,3 +52,17 @@ Artifact: `krim-exact-baseline-route-graph`, artifact ID `15040563725`, SHA-256 
 **Interpretation cautions:** the 499 are broad source-pattern redirect candidates, including literal `location.href` assignments and `location.replace` calls; they are not yet 499 confirmed compatibility redirects. The 260 zero-inbound count is for the complete 1,017-file HTML census, not the narrower 89-candidate subset from the earlier route-triage summary. The 529 noindex count is the new parser's metadata result. The zero unresolved count is for HTML route references after excluding static assets and non-navigation resource attributes; it is not a full asset audit. These counts must be path-reconciled and manually classified before retirement decisions.
 
 A ninth test covering asset exclusion and non-navigation resource attributes was added after this successful run. A follow-up CI run is required to verify that final test revision. Gate 01O is therefore **PASS for the run's 8-test parser revision and 1,017-page extraction; final branch revision validation remains pending**.
+
+
+## Final parser revision validation (run 45653728284)
+
+The follow-up workflow for QA extractor/test commit `7c385898cb8c6d7b653c530b19c44821ba5f0c1f` completed **SUCCESS** against the immutable baseline. All nine Node tests passed, the 1,017-page inventory assertion passed, and the JSON/CSV artifact was uploaded.
+
+- Run: `45653728284` (success)
+- Artifact ID: `15041742755`
+- Artifact SHA-256: `4904e3c1cd7d6bf7d263aba811036ac531d8237a321e4f7c01532f51901429db`
+- Observed counts remained: 1,017 HTML pages; 9,285 literal inbound edges; 757 pages with inbound; 260 whole-inventory zero-inbound pages; 499 broad redirect candidates; 529 robots noindex pages; zero unresolved local HTML route references.
+
+The parser implementation and nine tests now have successful CI evidence. The 499 redirect records remain candidates, not verified effective redirects; the 260 zero-inbound paths need direct-entry/auth/deep-link/owner triage; noindex is not a retirement signal. JavaScript-generated navigation remains outside the parser. The artifact is the authoritative per-path evidence for Gate 01P review.
+
+**Gate 01O disposition: PASS — extractor and tests validated in CI; route classification and runtime verification remain open.**
