@@ -454,3 +454,14 @@ Parsed all 343 redirect records from successful static-audit artifact run `45594
 **Critical risk:** 33 aliases point into `app/driver/staging/*` (two app-level and 31 legacy public driver routes). Their targets exist in the repository but their deployed environment isolation, authentication and backend status are unverified. Treat as blocked for production driver workflow release until resolved. Five dynamic redirects: auth/login role=driver; SIEM admin guard; facility matrix admin guard; pickup confirmation (staging preview vs production redirect); shipment milestones (query/hash forwarding).
 
 Gate C3.5 PARTIAL PASS / BLOCKED. Full route-family findings and runtime test matrix: `phase-00-gate-c3-5-compatibility-redirect-safety-register-2026-11-25.md`. No route, alias or environment changed.
+
+
+## 31. Gate C3.6 — driver route and environment disposition
+
+Reconciled all 33 aliases into `app/driver/staging/*`: 31 legacy public driver aliases plus two app-level aliases. Inspected the 15 distinct target pages, driver dashboard, canonical route registry, driver sign-in flow and shared `config.js` resolver.
+
+**Correction to interpretation:** `app/driver/staging/` is a source folder name, not proof of an isolated staging deployment. The pages load shared `config.js`; GitHub Pages resolves to Production by default and therefore uses Production Supabase. Candidate `krim-staging.pages.dev` resolves to preview/Staging in source configuration, but its deployment/reachability remains unverified. Driver pages show unauthenticated preview copy while manually checking Supabase sessions and active membership/org context before private reads. Some pages invoke operational write RPCs or support/notification writes; these require dedicated server-side policy and lifecycle testing.
+
+Canonical route chain: `config.js` driver route → `app/driver/index.html` → `app/driver/dashboard.html`; assignment inbox alias redirects to dashboard `#assignments`. Keep existing registry entry and aliases; do not rename or rewrite routes in this gate. Earnings page explicitly says its earnings feed is not connected. POD evidence upload was not established by this page inspection.
+
+Gate C3.6 PARTIAL PASS / BLOCKED. Runtime HTTP/auth/RLS/write-path verification remains blocked by staging deployment and migration-parity gates. Detailed disposition: `phase-00-gate-c3-6-driver-route-environment-disposition-2026-11-25.md`. No route, environment, database, account, provider or deployment was changed.
