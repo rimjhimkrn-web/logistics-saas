@@ -1,35 +1,23 @@
 /**
- * KRIM OS — Supabase Client Initializer
- * Uses the shared browser configuration from platform/krim-config.js
- * or the legacy config.js globals. Never place service-role secrets here.
+ * KRIM OS — Shared Supabase Client Access
+ * Requires config.js to resolve the current hostname and initialize the
+ * approved project client first. No production fallback is permitted.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const config = globalThis.KRIM_SUPABASE_CONFIG;
+const client = globalThis.KRIM_SUPABASE;
+const expectedProjectRef = config?.projectRef;
 
-const sharedConfig = globalThis.KRIM_CONFIG;
-const supabaseConfig = sharedConfig?.supabase;
-
-const SUPABASE_URL =
-  supabaseConfig?.url ||
-  "https://ebltviniygljwwseplph.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  supabaseConfig?.publishableKey ||
-  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("KRIM Supabase configuration is missing.");
+if (!config || !expectedProjectRef || !client ||
+    globalThis.KRIM_SUPABASE_PROJECT_REF !== expectedProjectRef) {
+  throw new Error("KRIM shared Supabase client is unavailable or its project identity is unverified.");
 }
 
-export const supabase =
-  globalThis.KRIM_SUPABASE ||
-  globalThis.supabaseClient ||
-  createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  });
+const approvedRefs = new Set(["ebltviniygljwwseplph", "qrpcivhdxobiaofppbkl"]);
+if (!approvedRefs.has(expectedProjectRef) ||
+    config.url !== "https://" + expectedProjectRef + ".supabase.co") {
+  throw new Error("KRIM Supabase project mapping failed identity validation.");
+}
 
-globalThis.KRIM_SUPABASE = supabase;
-globalThis.supabaseClient = supabase;
+export const supabase = client;
+export const SUPABASE_URL = config.url;
+export const SUPABASE_PROJECT_REF = expectedProjectRef;
