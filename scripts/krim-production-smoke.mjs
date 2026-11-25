@@ -192,6 +192,75 @@ for (const [path, configPath] of [
     failures.push(`Shared Supabase SDK/config must load before the admin guard: ${path}`);
   }
 }
+// Shared authentication client regression guards. These checks prevent auth
+// modules from silently selecting a different project or falling back to prod.
+const sharedAuthModules = [
+  "auth-core.js",
+  "auth/krim-account-actions.js",
+  "platform/krim-supabase.js",
+];
+for (const path of sharedAuthModules) {
+  if (!existsSync(path)) {
+    failures.push("Shared authentication module is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (/https:\\/\\/(?:ebltviniygljwwseplph|qrpcivhdxobiaofppbkl)\\.supabase\\.co/.test(source) ||
+      /sb_publishable_[A-Za-z0-9_-]{20,}/.test(source)) {
+    failures.push("Authentication module must not embed Supabase URLs or publishable keys: " + path);
+  }
+}
+const sharedAuthConsumers = [
+  "auth/account-deactivation.html",
+  "auth/account-deletion.html",
+  "auth/account-recovery-status.html",
+  "auth/active-sessions.html",
+  "auth/change-email.html",
+  "auth/change-password.html",
+  "auth/logout.html",
+  "auth/disabled.html",
+];
+for (const path of sharedAuthConsumers) {
+  if (!existsSync(path)) {
+    failures.push("Shared-auth consumer page is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (!source.includes("../config.js") ||
+      !source.includes("cdn.jsdelivr.net/npm/@supabase/supabase-js@2")) {
+    failures.push("Auth consumer must load the SDK and verified config before its module: " + path);
+  }
+}
+for (const path of [
+  "auth/owner-testing-forgot-password.html",
+  "auth/owner-testing-reset-password.html",
+  "auth/owner-testing-mfa.html",
+]) {
+  if (!existsSync(path)) {
+    failures.push("Owner-testing auth page is missing: " + path);
+    continue;
+  }
+  const source = readFileSync(path, "utf8");
+  if (!source.includes("../config.js") ||
+      !source.includes('window.KRIM_ENVIRONMENT!=="preview"') ||
+      !source.includes('window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl"')) {
+    failures.push("Owner-testing auth page must use the verified staging client and reject non-staging hosts: " + path);
+  }
+}
+const accountActionsSource = readFileSync("auth/krim-account-actions.js", "utf8");
+if (!accountActionsSource.includes('from "../platform/krim-supabase.js"')) {
+  failures.push("Account actions must import the shared verified Supabase client.");
+}
+const authCoreSource = readFileSync("auth-core.js", "utf8");
+if (!authCoreSource.includes("from './platform/krim-supabase.js'")) {
+  failures.push("Auth core must import the shared verified Supabase client.");
+}
+const sharedSupabaseSource = readFileSync("platform/krim-supabase.js", "utf8");
+if (sharedSupabaseSource.includes("||\n  \"https://") ||
+    sharedSupabaseSource.includes("||\n  \"sb_publishable_")) {
+  failures.push("Shared Supabase module must not contain a production fallback.");
+}
+
 // Historic migration timestamp collisions are documented and must not be
 // renamed/replayed until the production ledger crosswalk is complete. Prevent
 // new collisions in the current release stream from adding to that risk.
