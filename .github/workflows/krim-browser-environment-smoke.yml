@@ -25,12 +25,13 @@ jobs:
         run: npm install --no-save --no-package-lock playwright
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Start local static fixture server
+      - name: Start local HTTPS fixture server
         run: |
-          python3 -m http.server 4173 --bind 0.0.0.0 >/tmp/krim-static-server.log 2>&1 &
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/krim-test.key -out /tmp/krim-test.crt -days 1 -subj "/CN=krim-staging.pages.dev" -addext "subjectAltName=DNS:krim-staging.pages.dev,DNS:unknown.krim-test.invalid"
+          python3 scripts/serve-https-fixture.py /tmp/krim-test.crt /tmp/krim-test.key >/tmp/krim-static-server.log 2>&1 &
           echo $! > /tmp/krim-static-server.pid
           for attempt in $(seq 1 20); do
-            if curl --fail --silent http://127.0.0.1:4173/scripts/browser-environment-smoke.html >/dev/null; then
+            if curl --insecure --fail --silent https://127.0.0.1:4173/scripts/browser-environment-smoke.html >/dev/null; then
               exit 0
             fi
             sleep 1
