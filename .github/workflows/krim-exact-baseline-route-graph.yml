@@ -37,6 +37,11 @@ jobs:
       - name: Verify inventory count
         run: |
           node -e "const r=require('./audit-output/krim-route-graph.json'); if(r.totals.html_pages!==1017) { console.error(r.totals); process.exit(1) }"
+      - name: Generate JavaScript and TypeScript route dependency inventory
+        run: node scripts/krim-js-route-dependency-audit.mjs source-baseline audit-output
+      - name: Verify JavaScript inventory is non-empty
+        run: |
+          node -e "const r=require('./audit-output/krim-js-route-dependencies.json'); if(r.totals.source_files===0 || r.totals.navigation_findings===0) { console.error(r.totals); process.exit(1) }"
       - name: Upload route graph evidence
         uses: actions/upload-artifact@v4
         with:
