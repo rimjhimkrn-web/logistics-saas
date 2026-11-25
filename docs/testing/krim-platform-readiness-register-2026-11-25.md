@@ -359,3 +359,14 @@ Focused report: `phase-00-gate-a3-authentication-redirect-and-client-audit-2026-
 Production and Staging Supabase Auth Site URL/redirect allowlists were not inspected. Exact runtime callback flows and deployed Auth journeys remain NOT TESTED. Guessed callback source paths were not present at those exact paths; this does not prove callbacks are absent.
 
 Required: privately verify both projects' Auth URL settings; map every actual auth redirect target; unify all pages on one hostname-verified client; pin the Supabase JS version; then run isolated PKCE/recovery/invitation/MFA redirect tests only after Staging acceptance. No Auth settings, secrets, users, emails, databases or deployments were changed.
+
+
+## 22. Gate C1 — frontend-to-backend integration inventory baseline (2026-11-25)
+
+Focused report: `phase-00-gate-c1-frontend-backend-integration-inventory-2026-11-25.md`.
+
+Main baseline commit `72d75a18f985ceb09e468839435ee95700e11e46` was enumerated using the recursive Git tree API (`truncated=false`): 2,180 blobs, 1,023 HTML, 134 JS, 377 SQL, and 20 Edge Function entrypoints. Workspace nested HTML counts: Customer 2; Partner 19; Driver 39; Warehouse 26; Customs 29; Finance 24; Operations 28; Enterprise 14; Admin 22. Counts include staging/workflow copies and are not unique deployed route counts.
+
+Twenty Edge Function entrypoints include Razorpay order/webhook/refund/verification, legacy Cashfree aliases, notification adapter/retry worker, driver GPS/tracking, public shipment tracking, global admin, KRIM AI and public inquiry. No deployed status or runtime behavior inferred.
+
+Targeted page samples show Enterprise referencing both canonical `krim_shipments` and legacy `shipment_requests`; Cashfree aliases remain tracked despite Razorpay-only direction; notification function surface remains limited and generic all-workspace delivery is not proven. Exhaustive route-to-RPC/function/table/bucket mapping remains NOT TESTED. Gate C1 is PARTIAL PASS / BLOCKED pending full static extraction and accepted Staging runtime validation. No code or environment changed.
