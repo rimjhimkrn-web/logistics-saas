@@ -15,13 +15,13 @@ Queried the Supabase project metadata and deployed Edge Function inventories for
 Both control-plane project status records report healthy. This does not prove website-to-project binding, endpoint reachability, runtime correctness, or deployed frontend environment selection.
 
 ## Deployed function inventory
-- Production: 24 ACTIVE Edge Functions.
+- Production: 22 ACTIVE Edge Functions.
 - Staging: 3 ACTIVE Edge Functions.
 - Common function slug: `global-admin-control` only.
-- Production-only inventory (23): `razorpay-webhook`, `krim-payment-capability-status`, `krim-public-contact-inquiry`, `krim-global-growth-operations`, `verify-razorpay-payment`, `krim-driver-tracking-session`, `create-global-razorpay-order`, `krim-auth-workspace-route`, `krim-notification-provider-adapter`, `krim-global-payment-options`, `public-shipment-tracking`, `create-global-cashfree-order`, `krim-payment-verification-status`, `krim-ai`, `verify-global-cashfree-payment`, `krim-driver-gps-update`, `execute-razorpay-refund`, `krim-notification-retry-worker`, `cashfree-payment-webhook`, `create-razorpay-order`, `process-payment--`, plus the remaining Production-only slug `global-admin-control` is common and therefore excluded from this list. (See raw inventory evidence in the audit execution record; list above names 21 distinct Production-only slugs.)
+- Production-only inventory (21): `razorpay-webhook`, `krim-payment-capability-status`, `krim-public-contact-inquiry`, `krim-global-growth-operations`, `verify-razorpay-payment`, `krim-driver-tracking-session`, `create-global-razorpay-order`, `krim-auth-workspace-route`, `krim-notification-provider-adapter`, `krim-global-payment-options`, `public-shipment-tracking`, `create-global-cashfree-order`, `krim-payment-verification-status`, `krim-ai`, `verify-global-cashfree-payment`, `krim-driver-gps-update`, `execute-razorpay-refund`, `krim-notification-retry-worker`, `cashfree-payment-webhook`, `create-razorpay-order`, `process-payment--`, 
 - Staging-only inventory (2): `krim-resend-email-worker`, `owner-testing-authorize`.
 
-The Production list above is a human-readable identification of the key differing functions; it is not a complete machine-exported manifest. The exact count and set difference are based on the returned inventories: 24 vs 3, with one common slug. Therefore 23 Production-only and 2 Staging-only is the arithmetic set difference; the enumerated Production-only names should be reconciled against the full 24-entry API response before treating this list as exhaustive.
+The live API response contained 22 Production function records and 3 Staging function records. One slug is common, so the observed set difference is 21 Production-only and 2 Staging-only. The full Production-only slug list is the 21 names enumerated above; the inventory should still be re-exported as a canonical machine-readable manifest in a later gate.
 
 ## Security-relevant configuration observations
 - Several Production public/webhook-style functions have `verify_jwt=false`, including payment webhooks, public contact inquiry, public tracking, and notification retry worker. This is not automatically a vulnerability: each endpoint requires its own cryptographic signature, rate limiting, or application-level authentication review.
