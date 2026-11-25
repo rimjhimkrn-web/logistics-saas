@@ -337,3 +337,14 @@ The current artifact inventory for that run returns zero artifacts. The historic
 - Gate C: **BLOCKED** pending canonical manifest, source/version provenance, endpoint dependency mapping, JWT policy review and approved Staging deployment plan.
 - Evidence: [Gate C report](phase-00-gate-c-edge-function-deployment-parity-2026-11-25.md).
 - Safety: metadata inventory only; no function invocation, secrets, SQL, auth/provider operation, workflow dispatch or environment write.
+
+
+## 20. Gate A2 — website deployment and environment-routing source verification (2026-11-25)
+
+Focused report: `phase-00-gate-a2-website-deployment-and-environment-routing-2026-11-25.md`.
+
+**Gate A2: BLOCKED.** Read-only GitHub inspection confirms the `main` Pages workflow deploys GitHub Pages from `main` only; it has no Cloudflare Pages/Staging deployment job. The current `main` `config.js` accepts a page-injected environment override, defaults unknown hostnames to Production, and reuses a pre-existing global Supabase client. The QA branch version is safer (explicit host allowlist, fail-closed unknown hosts, clears injected client globals, and maps the candidate Staging hostname to the Staging Supabase project), but it is not deployed by the inspected workflow.
+
+Live origin fetches were inconclusive: available web retrieval returned errors and direct DNS resolution was unavailable from the execution environment. This is NOT evidence that either origin is down. Production served commit/config and Staging hosting project/deployment SHA/DNS/TLS/HTTP remain NOT TESTED.
+
+**Required:** verify the real Staging hosting project and deployment record, served config and Supabase project ref; confirm Auth Site URL/redirect allowlists; separately review and remediate the main-branch fail-open environment selection before deploying the safer allowlist. No merge, deployment, workflow dispatch, database write, secret access or provider operation occurred. No synthetic users are authorized.
