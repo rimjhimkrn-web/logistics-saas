@@ -243,3 +243,17 @@ The focused report `phase-00-gate-a-staging-environment-identity-baseline-2026-1
 - QA `config.js` maps `krim-staging.pages.dev` to the Staging project, but deployed hosting identity and deployed commit are not proven.
 
 **Gate A disposition: PARTIAL PASS / BLOCKED.** Project identity is proven; staging website-to-project binding is not. No synthetic users or authenticated tests are authorized. Continue with obtaining the actual hosting deployment record, then Gate B migration/schema reconciliation. No Production/Staging changes were made.
+
+
+## 14. Gate B execution result — live schema/migration parity (2026-11-25)
+
+Focused report: `phase-00-gate-b-live-production-staging-schema-migration-parity-2026-11-25.md`.
+
+**Gate B: BLOCKED.** Read-only live comparison found:
+- Production migration history 561; Staging 34; **zero shared migration version identifiers**.
+- Public tables 391 and public columns 4,964 in both; table-name, column-definition and public RLS policy fingerprints match.
+- Public functions differ (366 vs 376 and different definitions fingerprint); public triggers differ (113 vs 115); public index and constraint fingerprints differ despite equal counts (1,561 indexes; 1,807 constraints).
+- All-schema inventory differs (443 vs 439 base tables; 5,516 vs 5,483 columns; 118 vs 24 non-system schemas).
+- Production has `pg_cron` and `pg_net`; Staging does not.
+
+**Interpretation:** Staging is not simply a later/earlier point in the same recorded migration chain. Establish its bootstrap provenance and create exact object-level diffs before any repair. No reset, blind replay, rebase, merge, DDL/DML or deployment. Synthetic identities remain BLOCKED until Gate A deployment binding and Gate B reconciliation are accepted.
