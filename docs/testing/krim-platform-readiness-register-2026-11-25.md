@@ -476,3 +476,14 @@ Positive source controls: authenticated assignment ownership and active driver m
 Open findings: (P1) driver acceptance's active vehicle binding join does not explicitly bind `driver_profile_id` to the exact verified profile row; (P1) admin POD review updates driver assignments by partner_assignment_id without proving the full POD shipment/leg/org/driver tuple; (P1) POD wrapper/internal creator/reviewer still require canonical exact tuple and evidence-object binding, with direct internal-call ACL verification; (P2) trip-event replay lacks stable idempotency key and payload equivalence; (P2) exception/revocation lifecycle and service-role/internal ACL behavior lack runtime evidence.
 
 Gate C3.7 PARTIAL PASS / BLOCKED. No SQL was executed; no RPC, Production or Staging data, schema, policy, grant, account, provider or deployment was changed. Runtime test matrix is deferred until Staging deployment and migration parity gates pass. Detailed report: `phase-00-gate-c3-7-driver-rpc-authorization-audit-2026-11-25.md`.
+
+
+## 33. Gate C3.8 — driver evidence, storage permissions and POD integrity
+
+Source-reviewed driver evidence metadata INSERT policy, private evidence bucket controls from prior read-only storage audit, customer verified-POD Storage/POD-row policies, AAL2 admin preview/review, driver POD wrapper, internal POD creator, customer ePOD vault and admin POD preview.
+
+Positive source controls: driver metadata registration requires auth.uid ownership, own assignment, active membership, exact three-segment user/assignment path, owned object in `krim-driver-evidence`, 10 MiB cap and MIME allowlist. Customer evidence reads require verified POD, verified timestamp, path reference and customer organization access. Admin preview/review requires AAL2 and platform permission. Prior Production catalog audit recorded private evidence buckets and zero objects at that time; this is historical evidence, not a fresh live query.
+
+Open P1: driver POD wrapper does not compare driver assignment leg with linked partner assignment leg; admin POD review updates driver assignments by partner_assignment_id without exact shipment/leg/org/driver tuple or uniqueness assertion; internal POD creator trusts evidence JSON and does not independently prove each evidence row/object's full driver-assignment/shipment/leg/org tuple. Open P2: signed URL lifecycle/cache/revocation and content-signature/malware scanning are unproven. Legacy private `pod-documents` bucket remains retirement review.
+
+Gate C3.8 PARTIAL PASS / BLOCKED; NO-GO for live driver POD, verification and customer evidence download certification. No Storage objects, SQL/RPC, Production/Staging data, schema, policies, grants, bucket settings, accounts, providers or deployments were changed. Detailed report: `phase-00-gate-c3-8-driver-evidence-storage-pod-integrity-audit-2026-11-25.md`.
