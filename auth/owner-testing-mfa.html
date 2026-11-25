@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#071426">
 <title>KRIM Staging Owner MFA | KRIM Logistics</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:#061426;color:#f4f8ff;font:15px/1.6 system-ui,sans-serif}.card{width:min(520px,100%);padding:28px;border:1px solid #28435f;border-radius:18px;background:#102943}h1{font-size:26px;margin:8px 0}.muted{color:#a8bad0;font-size:13px}.eyebrow{color:#64dfeb;font-size:10px;font-weight:900;letter-spacing:.16em}.qr{display:grid;place-items:center;padding:15px;margin:18px 0;background:#fff;border-radius:12px;min-height:170px}.qr img{max-width:220px;max-height:220px}.secret{padding:12px;background:#07182a;border:1px solid #385572;border-radius:8px;word-break:break-all;font:13px monospace}.code{width:100%;padding:14px;border:1px solid #385572;border-radius:9px;background:#07182a;color:white;font-size:20px;letter-spacing:.3em;text-align:center}.btn{width:100%;padding:13px;margin-top:14px;border:0;border-radius:9px;background:#168fe0;color:white;font-weight:850;cursor:pointer}.btn:disabled{opacity:.5}#feedback{min-height:24px;font-size:12px;color:#ffb2b9}.hidden{display:none!important}
 </style>
@@ -26,9 +27,8 @@
 </main>
 <script>
 (async()=>{
- const URL="https://qrpcivhdxobiaofppbkl.supabase.co";
- const KEY="sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3";
- const client=window.supabase.createClient(URL,KEY);
+ if(window.KRIM_ENVIRONMENT!=="preview" || window.KRIM_SUPABASE_PROJECT_REF!=="qrpcivhdxobiaofppbkl"){document.getElementById("feedback").textContent="Owner MFA setup is available only on the verified staging environment.";document.getElementById("setup").hidden=true;return;}
+ const client=window.KRIM_SUPABASE;
  const $=id=>document.getElementById(id);
  const say=m=>$("feedback").textContent=m;
  const parts=location.pathname.split("/").filter(Boolean);
