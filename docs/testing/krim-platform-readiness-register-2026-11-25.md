@@ -425,3 +425,14 @@ Classified all 89 zero-inbound HTML candidates from the repository-wide CI artif
 Reviewed all 343 redirect candidates by namespace: public 324, app 11, partner 3, root 2, legal 2, auth 1. 335/343 are noindex; eight are not. All eight non-noindex destinations exist in the tracked source tree after relative-path normalization, but browser redirects, status codes, query/hash preservation, auth context and loops are NOT TESTED. Two of the eight target a staging-named driver page and need release scrutiny. No route was removed or changed.
 
 Gate C3.2 PARTIAL PASS / BLOCKED. No page is confirmed orphaned or approved for deletion. Full classification: `phase-00-gate-c3-2-zero-inbound-route-and-redirect-classification-2026-11-25.md`.
+
+
+## 28. Gate C3.3 — canonical route registry and auth/email deep-link reconciliation
+
+Read `config.js` canonical `window.KRIM_ROUTES` (27 routes). Exactly one of the 89 zero-inbound candidates is explicitly registered: `app/driver/module-01-assignment-inbox.html`. This confirms zero-inbound does not mean orphan. The registry is not a complete catalogue of all HTML routes.
+
+Source-backed direct-entry routes: customer signup `auth/signup.html` sends confirmation to `auth/auth-callback.html`; callback exchanges the code and routes by account type to role-specific sign-in, not direct workspace. `auth/forgot-password.html` sends reset links to `auth/reset-password.html`. `auth/verify-email.html` implements manual OTP/resend. Driver invite token is handed from callback query to sessionStorage then accepted in driver sign-in RPC. Organization invitation UI exists but issuer/template and completed backend acceptance are not proven. `auth/partner-redirect.html` has no inbound from inspected partner sign-in.
+
+Prior auth follow-up records corrected callback authorization bypass and driver MFA AAL2 issue; nevertheless Supabase Site URL, redirect allowlist, email templates, rate limits and MFA settings remain unverified. No emails or Auth actions were executed. Legacy `app/index.html` remains a weaker customer route than `app/customer/index.html`; other duplicate/unconfirmed paths require owner review.
+
+Gate C3.3 PARTIAL PASS / BLOCKED. Full evidence: `phase-00-gate-c3-3-canonical-route-and-auth-deeplink-reconciliation-2026-11-25.md`.
