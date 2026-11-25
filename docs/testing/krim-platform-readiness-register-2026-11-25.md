@@ -69,8 +69,8 @@ Severity: P0 = release blocker; P1 = must resolve before enabling affected workf
 
 | ID | Severity | Area | Finding | Required acceptance evidence | Status |
 |---|---|---|---|---|---|
-| KR-001 | P0 | Staging parity | Prior discovery: Production 561 migration ledger entries vs Staging 34; same table count does not prove schema equivalence | Explain schema, extension, grant, policy, function, trigger, index, constraint and reference-data deltas; reviewed safe reconciliation plan; repeat diff | BLOCKED |
-| KR-002 | P0 | Staging deployment | Staging Pages origin not proven reachable; Auth redirect settings previously mismatched | Prove exact deployed commit, HTTPS origin, DNS/TLS/HTTP; then review Auth Site URL and redirect allowlist | BLOCKED |
+| KR-001 | P0 | Staging parity | Refreshed live migration history: Production 561 vs Staging 34 (527-record difference); this is not a schema diff. Staging has selective/later-starting migration history; Postgres minor versions differ (17.6.1.165 vs 17.11.0.018) | Classify both ordered manifests; explain extension/schema/grant/policy/function/trigger/index/constraint/reference-data deltas; reviewed forward-only reconciliation plan; repeat diff. No reset or blind replay | BLOCKED |
+| KR-002 | P0 | Staging deployment | Supabase project identity is verified (Production ebltviniygljwwseplph; Staging qrpcivhdxobiaofppbkl, distinct healthy projects). Candidate krim-staging.pages.dev deployment/commit remains unverified; main workflow deploys GitHub Pages only; QA config mapping is source-only | Obtain hosting deployment record, exact deployed SHA, domain/DNS/TLS/HTTP evidence; verify deployed config points to Staging; then review Auth Site URL and redirect allowlist | BLOCKED |
 | KR-003 | P0 | Staging Storage | Prior audit found permissive AAL2 INSERT policy on krim-partner-verification that may OR-compose around stricter path/org policy | Correct in isolated environment; prove same-tenant allowed and wrong-path/cross-tenant/direct API denied | OPEN |
 | KR-004 | P0 | Tenant isolation | No runtime two-tenant cross-org suite | Synthetic tenant tests for reads, writes, RPCs, Storage, signed links, exports and admin boundaries | NOT TESTED |
 | KR-005 | P0 | Notifications | Refreshed live snapshot: Production legacy in-app 5; generic outbox/deliveries/retries/preferences/provider configs/operational runs all 0. Staging all 0. Eight triggers cover selected legacy shipment/payment/payout/support events only; no generic nine-workspace dispatcher proven | Canonical KRIM Core event map; recipient/tenant resolver; mandatory service-notice rules; provider dispatcher; controlled-sink delivery, retry, callback, dead-letter and alert evidence | OPEN |
@@ -228,3 +228,18 @@ The following focused reports are primary evidence and should be read alongside 
 **Phase 00 remains IN PROGRESS. Staging remains BLOCKED. KRIM is NOT RELEASE-READY.** The next safe engineering action is not to enable live features or generate test users: it is to establish and approve the Staging environment identity/parity baseline, then close the P0 authorization and financial-control defects in a controlled non-production workflow.
 
 No application, database, Storage, Auth, provider, deployment or Production configuration was changed by this register update.
+
+
+## 13. Gate A execution result — 2026-11-25
+
+The focused report `phase-00-gate-a-staging-environment-identity-baseline-2026-11-25.md` is committed on this QA branch.
+
+- Production Supabase identity: PASS — `ebltviniygljwwseplph`, region `ap-northeast-1`, ACTIVE_HEALTHY.
+- Staging Supabase identity: PASS — `qrpcivhdxobiaofppbkl`, region `ap-south-1`, ACTIVE_HEALTHY.
+- Project refs/API URLs are distinct; both belong to organization `mwvzahnqzveoapjggsug`.
+- Migration history reconfirmed: Production 561, Staging 34. This is a migration-history difference, not a complete schema diff.
+- GitHub `main` SHA: `72d75a18f985ceb09e468839435ee95700e11e46`; QA branch SHA at inspection: `b28c8e8251297ba1923b1de2c5d7fd327e91eb6b`.
+- The inspected main deployment workflow deploys GitHub Pages from `main`; no Cloudflare Pages deployment step is present.
+- QA `config.js` maps `krim-staging.pages.dev` to the Staging project, but deployed hosting identity and deployed commit are not proven.
+
+**Gate A disposition: PARTIAL PASS / BLOCKED.** Project identity is proven; staging website-to-project binding is not. No synthetic users or authenticated tests are authorized. Continue with obtaining the actual hosting deployment record, then Gate B migration/schema reconciliation. No Production/Staging changes were made.
