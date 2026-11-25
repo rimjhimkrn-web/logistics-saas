@@ -44,7 +44,9 @@ for (const file of htmlFiles) {
     links++;
     if (clean.startsWith("/logistics-saas/")) {
       const target = clean.slice("/logistics-saas/".length);
-      const resolved = resolveCandidate(target);\n      if (!resolved) { bad++; linkIssues.push({type:"missing-project-route",source:file,href:raw}); }\n      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
+      const resolved = resolveCandidate(target);
+      if (!resolved) { bad++; linkIssues.push({type:"missing-project-route",source:file,href:raw}); }
+      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
     } else if (clean.startsWith("/")) {
       absoluteRoot++;
       const target = clean.slice(1);
@@ -53,7 +55,9 @@ for (const file of htmlFiles) {
       }
     } else {
       const target = normalize(join(dirname(file),clean));
-      const resolved = resolveCandidate(target);\n      if (!resolved) { bad++; linkIssues.push({type:"missing-local-target",source:file,href:raw,resolved:target}); }\n      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
+      const resolved = resolveCandidate(target);
+      if (!resolved) { bad++; linkIssues.push({type:"missing-local-target",source:file,href:raw,resolved:target}); }
+      else if (resolved.toLowerCase().endsWith(".html")) { inboundHtml.set(resolved,(inboundHtml.get(resolved)||0)+1); staticHtmlEdges.push({source:file,target:resolved,href:raw}); }
     }
   }
   const localScriptSources = [];
