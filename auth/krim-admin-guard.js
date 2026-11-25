@@ -1,7 +1,5 @@
 (function(){
 "use strict";
-const URL="https://ebltviniygljwwseplph.supabase.co";
-const KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
 const parts=location.pathname.split("/").filter(Boolean);
 const base=location.hostname.endsWith("github.io")?"/"+(parts[0]||"logistics-saas"):"";
 const gate=base+"/auth/login.html?workspace=platform_admin&reason=required";
@@ -14,7 +12,8 @@ async function loadSdk(){
  try{
   await loadSdk();
   if(!window.supabase)throw new Error("Auth SDK unavailable");
-  const client=window.supabase.createClient(URL,KEY);
+  const client=window.KRIM_SUPABASE;
+  if(!client || !window.KRIM_SUPABASE_PROJECT_REF) throw new Error("Shared KRIM environment client unavailable");
   const {data,error}=await client.auth.getSession();
   if(error||!data.session){deny();return}
   const {data:result,error:invokeError}=await client.functions.invoke("global-admin-control",{body:{action:"overview"}});
