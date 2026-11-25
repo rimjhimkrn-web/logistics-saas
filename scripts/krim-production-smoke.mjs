@@ -120,7 +120,7 @@ const failures = [];
 const environmentConfig = readFileSync("config.js", "utf8");
 for (const testCase of [
   { host: "krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
-  { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: true },
+  { host: "pr-42.krim-staging.pages.dev", expectedEnvironment: "preview", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
   { host: "localhost", expectedEnvironment: "development", expectedRef: "qrpcivhdxobiaofppbkl", expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co", authDisabled: false },
   { host: "rimjhimkrn-web.github.io", expectedEnvironment: "production", expectedRef: "ebltviniygljwwseplph", expectedUrl: "https://ebltviniygljwwseplph.supabase.co", authDisabled: false },
 ]) {
