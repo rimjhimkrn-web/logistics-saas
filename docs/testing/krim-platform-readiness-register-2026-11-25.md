@@ -384,3 +384,10 @@ These are structural filename/path candidates only. Redirect behavior, inbound-l
 Inspected eight representative public/workspace entry pages against the complete tracked Git tree at immutable main commit `72d75a18f985ceb09e468839435ee95700e11e46`. Extracted 289 literal local href/src references; all 289 resolve to tracked targets after correctly normalizing GitHub Pages `/logistics-saas/` base-path links. The first raw pass flagged 20 such base-path assets, but these were false positives and were resolved after base-prefix normalization. No fetch errors.
 
 Sample includes homepage, about, contact, admin shell, Customer, Partner, Warehouse and Enterprise entry pages. Whole-repository links, JS-generated navigation, CSS references, form actions, redirects, deployed HTTP and orphan detection remain NOT TESTED. Gate C3 PARTIAL PASS / BLOCKED. Detailed evidence: `phase-00-gate-c3-html-link-graph-sample-2026-11-25.md`. No app or environment changes.
+
+
+## 25. Gate C3.1 — repository-wide static link graph audit execution
+
+Reviewed existing QA branch scripts `scripts/audit-krim-links.mjs`, `scripts/krim-complete-static-audit.mjs`, and workflow `.github/workflows/krim-static-link-audit.yml`. They recursively scan HTML, resolve literal local paths and GitHub Pages base-prefix references, check canonical route registry destinations, count static inbound HTML edges, and produce zero-inbound candidate lists and artifacts. Zero-inbound is not proof of orphan status. The first link-audit command uses `|| true`, but a later enforcement step fails if the reported broken reference count is positive.
+
+A new QA-branch documentation commit triggers the existing push workflow. Repository-wide counts and findings remain PENDING until its run and artifacts are inspected; no results are inferred. Deployed HTTP routes, runtime redirects and genuine orphan status remain NOT TESTED. Detailed note: `phase-00-gate-c3-1-repository-wide-static-link-audit-2026-11-25.md`.
