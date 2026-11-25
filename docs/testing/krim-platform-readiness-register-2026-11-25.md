@@ -302,3 +302,16 @@ GitHub branch pagination returned **256 visible branches** (100 + 100 + 56). Tar
 - `fix/platform-admin-canonical-schema`: 26, no missing Staging names
 
 This was a targeted branch/path check, not a recursive all-branch/all-tag tree scan. Several staging-named branches do not contain `supabase/migrations` at the inspected ref. No original Staging SQL source or bootstrap provenance was recovered. **B1 remains BLOCKED.** Next required source is the original Staging provisioning/bootstrap evidence or an exhaustive recursive branch/tag object search. No database or provider changes occurred.
+
+
+## 18. Gate B1.3 — historical migration-recovery artifacts and schema-export path (2026-11-25)
+
+Focused report: `phase-00-gate-b1-3-historical-schema-export-recovery-path-2026-11-25.md`.
+
+**Important discovery:** Existing repository history contains a guarded encrypted Production schema-only export workflow, operator instructions, and historical successful export records. The latest documented run is GitHub Actions run `43793099331`, artifact ID `14193475858`, created 2026-11-16 and expired 2026-11-17. Its archive and encrypted SQL checksums were verified, but the SQL was not decrypted. The earlier 2026-11-09 artifact also expired. Neither historical export is evidence of an import into the current Staging project.
+
+The existing workflow requires the GitHub repository secrets `KRIM_PRODUCTION_DB_URL` and `KRIM_SCHEMA_EXPORT_PASSPHRASE`, exports only `public,private,krim_internal,graphql_public`, runs data-statement and common-credential scans, encrypts the dump, and uploads ciphertext/checksum only for one day. It does not automatically apply SQL. Manual offline secret/ownership/grant/extension review is still mandatory.
+
+Historical 2026-11-07 documents described an earlier Staging snapshot with zero application tables; that historical state is not current. Current 2026-11-25 live Staging has 391 public tables and 34 migration records. A Production schema export can support a controlled baseline reconstruction but cannot prove the exact SQL provenance of each Staging ledger row.
+
+**Disposition: B1 BLOCKED.** Next step is operator verification of existing secrets and a manually authorized fresh export, followed by private offline review and isolated baseline reconstruction. This audit did not dispatch the workflow, access secrets, decrypt SQL, modify either database, or deploy anything.
