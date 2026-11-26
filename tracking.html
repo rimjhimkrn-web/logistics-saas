@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
 <!-- Page-specific responsive styles below are authoritative. -->
 <style id="krim-responsive-tracking-fix">
@@ -146,8 +147,8 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
 
     <!-- Secure public tracking uses the server-side tracking gateway; never query shipment tables from this page. -->
     <script>
-        const KRIM_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+        const KRIM_SUPABASE_URL = "window.KRIM_CONFIG?.supabase?.url";
+        const KRIM_PUBLISHABLE_KEY = "window.KRIM_CONFIG?.supabase?.publishableKey";
         let activeTrackingNumber = "";
         let trackingRefreshTimer = null;
 
