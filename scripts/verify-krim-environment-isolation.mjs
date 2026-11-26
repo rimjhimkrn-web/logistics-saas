@@ -109,8 +109,22 @@ assert.ok(shipments.includes("reason=session_required"),
   "Shipment page must redirect unauthenticated users to sign-in");
 assert.ok(shipments.includes(".eq('customer_organization_id', activeCustomerOrganizationId)"),
   "Shipment reads must be scoped to the verified customer organization");
-assert.ok(shipments.includes("customer_organization_id: activeCustomerOrganizationId"),
-  "Shipment creation must bind records to the verified customer organization");
+assert.ok(shipments.includes("p_customer_organization_id: Number(activeCustomerOrganizationId)"),
+  "Shipment creation RPC must receive the verified customer organization");
+assert.ok(shipments.includes("rpc('krim_create_global_shipment_from_locations_idempotent'"),
+  "Shipment creation must use the authorized server-side RPC");
+assert.ok(shipments.includes("p_origin_location_id:") && shipments.includes("p_destination_location_id:"),
+  "Shipment creation must use selected active location IDs");
+assert.ok(shipments.includes("p_booking_request_id: crypto.randomUUID()"),
+  "Shipment creation must use a unique idempotency reference");
+assert.ok(shipments.includes(".from('krim_locations')") && shipments.includes(".eq('is_active', true)"),
+  "Shipment form must offer only active KRIM locations");
+assert.ok(!shipments.includes(".from('krim_shipments')\n                    .insert("),
+  "Shipment page must not bypass the authorized shipment creation RPC");
+assert.ok(shipments.includes("cell.textContent = item.text") && shipments.includes("badge.textContent = item.text"),
+  "Shipment data must be rendered as text, not executable HTML");
+assert.ok(!shipments.includes("tbody.innerHTML +="),
+  "Shipment rows must not interpolate untrusted database values into innerHTML");
 assert.ok(!shipments.includes("Guest Mode Active"),
   "Shipment page must not offer guest access to protected shipment workflows");
 
