@@ -6,7 +6,7 @@
  * and IoT predictive fleet maintenance models.
  */
 
-import { store } from "/app/app-store.js";
+import { store } from "../app/app-store.js";
 
 class AIRuntime {
   constructor() {
