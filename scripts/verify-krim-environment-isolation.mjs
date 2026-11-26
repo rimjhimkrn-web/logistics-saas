@@ -91,28 +91,28 @@ assert.ok(!shipments.includes("SUPABASE_ANON_KEY"),
   "Shipment page must not retain its legacy hardcoded anon key");
 
 
-function collectHtmlFiles(directory, results = []) {
+function collectFiles(directory, extension, results = []) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.name === "node_modules" || entry.name === ".git" ||
         entry.name === "audit-output" || entry.name === "_site") continue;
     const fullPath = join(directory, entry.name);
-    if (entry.isDirectory()) collectHtmlFiles(fullPath, results);
-    else if (entry.isFile() && entry.name.endsWith(".html")) results.push(fullPath);
+    if (entry.isDirectory()) collectFiles(fullPath, extension, results);
+    else if (entry.isFile() && entry.name.endsWith(extension)) results.push(fullPath);
   }
   return results;
 }
 
-const htmlFiles = collectHtmlFiles(".");
-const unsafeHtmlReferences = [];
+const htmlFiles = collectFiles(".", ".html");
+const jsFiles = collectFiles(".", ".js");
+const unsafeReferences = [];
 const clientWithoutConfig = [];
+
 for (const path of htmlFiles) {
   const html = readFileSync(path, "utf8");
   if (
     html.includes("ebltviniygljwwseplph.supabase.co") ||
     html.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa")
-  ) {
-    unsafeHtmlReferences.push(path);
-  }
+  ) unsafeReferences.push(path);
 
   const configIndex = html.indexOf("platform/krim-config.js");
   const clientIndex = html.indexOf("platform/krim-supabase.js");
@@ -120,16 +120,32 @@ for (const path of htmlFiles) {
     clientWithoutConfig.push(path);
   }
 }
-assert.deepEqual(
-  unsafeHtmlReferences,
-  [],
-  "HTML pages must not hardcode the production Supabase URL or legacy anon key"
-);
-assert.deepEqual(
-  clientWithoutConfig,
-  [],
-  "Pages loading the shared Supabase client must load environment config first"
-);
-console.log(`Scanned ${htmlFiles.length} first-party HTML files for environment leakage.`);
+
+for (const path of jsFiles) {
+  // These two files are the approved environment-to-project mapping sources.
+  if (path === "platform/krim-config.js" || path === "config.js") continue;
+  const source = readFileSync(path, "utf8");
+  if (
+    source.includes("ebltviniygljwwseplph.supabase.co") ||
+    source.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa")
+  ) unsafeReferences.push(path);
+}
+
+const adminGuard = readFileSync("auth/krim-admin-guard.js", "utf8");
+assert.ok(adminGuard.includes("platform/krim-config.js"),
+  "Admin guard must load the canonical environment configuration");
+assert.ok(adminGuard.includes("config.url") && adminGuard.includes("config.publishableKey"),
+  "Admin guard must use environment-specific Supabase settings");
+assert.ok(!adminGuard.includes("ebltviniygljwwseplph.supabase.co"),
+  "Admin guard must not hardcode the production Supabase URL");
+assert.ok(!adminGuard.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"),
+  "Admin guard must not hardcode the production publishable key");
+
+assert.deepEqual(unsafeReferences, [],
+  "First-party HTML/JS must not hardcode production Supabase credentials");
+assert.deepEqual(clientWithoutConfig, [],
+  "Pages importing the shared Supabase client must load environment config first");
+
+console.log(`Scanned ${htmlFiles.length} HTML and ${jsFiles.length} JS files for environment leakage.`);
 
 console.log("PASS: KRIM environment isolation runtime regression checks.");
