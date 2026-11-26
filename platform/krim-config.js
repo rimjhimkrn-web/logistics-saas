@@ -81,8 +81,8 @@
 
         if (
             hostname.includes(".preview.") ||
-            /^pr-\\d+--.+\\.netlify\\.app$/.test(hostname) ||
-            /-git-[^.]+\\.vercel\\.app$/.test(hostname)
+            /^pr-\d+--.+\.netlify\\.app$/.test(hostname) ||
+            /-git-[^.]+\.vercel\\.app$/.test(hostname)
         ) {
             return "preview";
         }
