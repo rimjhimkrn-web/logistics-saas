@@ -54,7 +54,7 @@ $old$;
  ) THEN
   RAISE EXCEPTION USING errcode='42501',message='One or more assignments are outside your active partner organization membership';
  END IF;
-$ new$;
+$new$;
 
   IF position('private.krim_has_permission(v_user_id,a.partner_organization_id,' || quote_literal('shipment.assign') || ')' in v_def)=0 THEN
     IF position(v_old in v_def)=0 THEN
