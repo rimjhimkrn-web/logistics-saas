@@ -9,6 +9,7 @@
 <link rel="manifest" href="/logistics-saas/manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../config.js"></script>
 <script>
 tailwind.config={theme:{extend:{colors:{krim:{navy:'#10243a',blue:'#1769aa',pale:'#eef6fc'}}}}};
 (function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
@@ -126,8 +127,8 @@ a:not(.btn){text-decoration-color:#38bdf870}
 (function(){
  const BASE=location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";
  document.querySelectorAll('a[href^="/logistics-saas/"]').forEach(a=>{a.href=BASE+a.getAttribute("href").slice("/logistics-saas/".length);});
- const SUPABASE_PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
- const SUPABASE_ANON_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+ const SUPABASE_PROJECT_URL="window.KRIM_CONFIG?.supabase?.url";
+ const SUPABASE_ANON_KEY="window.KRIM_CONFIG?.supabase?.publishableKey";
  const client=window.KRIM_SUPABASE||window.supabase.createClient(SUPABASE_PROJECT_URL,SUPABASE_ANON_KEY);
  let loadedShipmentData=null;
  const $=id=>document.getElementById(id);
