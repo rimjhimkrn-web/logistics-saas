@@ -262,6 +262,7 @@ BEGIN
       now(),now(),now()
     ) RETURNING id INTO v_id;
   END IF;
+  END IF;
 
   UPDATE public.krim_shipment_partner_assignments
   SET status='active',capacity_binding_id=v_binding_id,accepted_at=coalesce(accepted_at,now()),updated_at=now()
