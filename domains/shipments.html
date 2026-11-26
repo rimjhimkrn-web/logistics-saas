@@ -168,12 +168,18 @@
         KRIM Logistics OS Enterprise Network © 2026. All rights reserved.
     </footer>
 
+    <!-- Environment-aware Supabase configuration; do not hardcode project credentials in pages. -->
+    <script src="../platform/krim-config.js"></script>
     <!-- Integration Logic -->
     <script>
-        const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVibHR2aW5peWdsandsZXNwbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyOTIzMjksImV4cCI6MjA1Njg2ODMyOX0.9W2xZ47Lg2MvS8r1Z6N3q5t8v9w0x1y2z3A4B5C6D7E";
-        
-        const supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        const supabaseConfig = window.KRIM_CONFIG?.supabase;
+        if (!supabaseConfig?.url || !supabaseConfig?.publishableKey) {
+            throw new Error("KRIM environment Supabase configuration is unavailable.");
+        }
+        const supabaseClient = window.supabase.createClient(
+            supabaseConfig.url,
+            supabaseConfig.publishableKey
+        );
 
         async function initSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
