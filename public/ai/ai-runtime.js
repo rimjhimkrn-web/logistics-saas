@@ -31,22 +31,29 @@
   }
 
   async function getClient() {
-    const configUrl = new URL("../../platform/krim-config.js", base).href;
-    await loadScript(configUrl);
+    // Initialization order is intentional: SDK -> host-validated root config -> platform config.
     if (!window.supabase || typeof window.supabase.createClient !== "function") {
       await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
     }
-    const config = window.KRIM_CONFIG && window.KRIM_CONFIG.supabase;
-    if (!config || !config.url || !config.publishableKey) {
-      throw new Error("KRIM Supabase configuration is missing.");
+    const rootConfigUrl = new URL("../../config.js", base).href;
+    await loadScript(rootConfigUrl);
+    const platformConfigUrl = new URL("../../platform/krim-config.js", base).href;
+    await loadScript(platformConfigUrl);
+
+    const client = window.KRIM_SUPABASE;
+    const config = window.KRIM_SUPABASE_CONFIG;
+    if (
+      !client ||
+      !config ||
+      !config.url ||
+      !config.publishableKey ||
+      window.KRIM_SUPABASE_PROJECT_REF !== config.projectRef ||
+      !window.KRIM_CONFIG ||
+      window.KRIM_CONFIG.supabase.projectRef !== config.projectRef
+    ) {
+      throw new Error("KRIM shared Supabase client or environment identity is unavailable; AI request blocked.");
     }
-    if (!window.__KRIM_AI_SUPABASE__) {
-      window.__KRIM_AI_SUPABASE__ = window.supabase.createClient(
-        config.url, config.publishableKey,
-        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-      );
-    }
-    return window.__KRIM_AI_SUPABASE__;
+    return client;
   }
 
   function setStatus(form, message) {
