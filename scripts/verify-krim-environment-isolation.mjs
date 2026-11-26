@@ -102,6 +102,19 @@ assert.ok(!shipments.includes("ebltviniygljwwseplph.supabase.co"),
 assert.ok(!shipments.includes("SUPABASE_ANON_KEY"),
   "Shipment page must not retain its legacy hardcoded anon key");
 
+// Protected shipment workflows must fail closed and remain organization-scoped.
+assert.ok(shipments.includes("krim_organization_members"),
+  "Shipment page must verify active organization membership");
+assert.ok(shipments.includes("reason=session_required"),
+  "Shipment page must redirect unauthenticated users to sign-in");
+assert.ok(shipments.includes(".eq('customer_organization_id', activeCustomerOrganizationId)"),
+  "Shipment reads must be scoped to the verified customer organization");
+assert.ok(shipments.includes("customer_organization_id: activeCustomerOrganizationId"),
+  "Shipment creation must bind records to the verified customer organization");
+assert.ok(!shipments.includes("Guest Mode Active"),
+  "Shipment page must not offer guest access to protected shipment workflows");
+
+
 
 function collectFiles(directory, extension, results = []) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
