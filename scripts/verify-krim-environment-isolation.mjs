@@ -130,6 +130,27 @@ function collectFiles(directory, extension, results = []) {
 const htmlFiles = collectFiles(".", ".html");
 const jsFiles = collectFiles(".", ".js");
 
+const legacySecurityFiles = new Set([
+  "core/krim-config.js",
+  "js/guards.js",
+  "js/session.js"
+]);
+const legacySecurityConsumers = [...htmlFiles, ...jsFiles]
+  .filter(path => !legacySecurityFiles.has(path))
+  .map(path => ({
+    path,
+    content: readFileSync(path, "utf8")
+  }))
+  .filter(({ content }) =>
+    /(?:\\.\\.?\\/)*core\\/krim-config\\.js|(?:\\.\\.?\\/)*js\\/guards\\.js|\\bKrimSession\\b/.test(content)
+  )
+  .map(({ path }) => path);
+assert.deepEqual(
+  legacySecurityConsumers,
+  [],
+  "Legacy core config, local-storage session manager, and route guard must not be consumed by first-party pages or scripts"
+);
+
 const authBypassToken = ["KRIM", "AUTH", "DISABLED"].join("_");
 const authBypassReferences = [...htmlFiles, ...jsFiles]
   .filter(path => readFileSync(path, "utf8").includes(authBypassToken));
