@@ -116,6 +116,15 @@ function collectFiles(directory, extension, results = []) {
 
 const htmlFiles = collectFiles(".", ".html");
 const jsFiles = collectFiles(".", ".js");
+
+const authBypassToken = ["KRIM", "AUTH", "DISABLED"].join("_");
+const authBypassReferences = [...htmlFiles, ...jsFiles]
+  .filter(path => readFileSync(path, "utf8").includes(authBypassToken));
+assert.deepEqual(
+  authBypassReferences,
+  [],
+  "No HTML or JavaScript file may enable or consume a global preview authentication bypass"
+);
 const unsafeReferences = [];
 const clientWithoutConfig = [];
 const sharedModuleNames = [
