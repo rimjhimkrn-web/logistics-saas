@@ -3,13 +3,14 @@
    ========================================================================== */
 
 const KRIM_CONFIG = {
-  ENV: "production",
+  // Legacy compatibility values derive only from the approved shared environment.
+  // If config.js has not initialized, backend values remain null (fail closed).
+  ENV: window.KRIM_ENVIRONMENT || "unconfigured",
   VERSION: "2026.4.0",
   SYSTEM_CLOCK_YEAR: 2026,
-  
-  // Backend Integration Endpoint
-  SUPABASE_URL: "https://your-supabase-instance.supabase.co", 
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  SUPABASE_URL: window.KRIM_SUPABASE_CONFIG?.url || null,
+  SUPABASE_ANON_KEY: window.KRIM_SUPABASE_CONFIG?.publishableKey || null,
 
   // Roles & Access Levels
   ROLES: {
