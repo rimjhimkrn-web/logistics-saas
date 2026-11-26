@@ -22,6 +22,18 @@ const cases = [
     expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
   },
   {
+    hostname: "pr-123--krim.netlify.app",
+    presetEnvironment: "",
+    expectedEnvironment: "preview",
+    expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
+  },
+  {
+    hostname: "krim-git-feature.vercel.app",
+    presetEnvironment: "",
+    expectedEnvironment: "preview",
+    expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
+  },
+  {
     hostname: "rimjhimkrn-web.github.io",
     presetEnvironment: "",
     expectedEnvironment: "production",
