@@ -467,9 +467,9 @@ body.krim-global-shell .krim-booking-footer .footer-group a:hover,body.krim-glob
   if(stagePill&&!STAGING_REVIEW) stagePill.hidden=true;
   // Fail closed until the documented production RPC/trigger contract defect is remediated and verified.
   const BOOKING_CREATION_RELEASED = false;
-  const SUPABASE_PROJECT_URL = "https://ebltviniygljwwseplph.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-  const client = window.KRIM_SUPABASE || window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+  // Use only the hostname-validated client initialized by the shared config.js.
+  // Never create a page-local fallback that can silently target Production.
+  const client = window.KRIM_SUPABASE;
   let currentUserOrgId = null;
   let isReady = false;
   let submitting = false;
@@ -580,6 +580,12 @@ body.krim-global-shell .krim-booking-footer .footer-group a:hover,body.krim-glob
       showFeedback('STAGING REVIEW MODE · Public preview without sign-in. You can inspect the global booking form and search places. Submission is disabled; no customer data is loaded and no shipment or partner opportunity can be created.', 'info');
       updatePreview();
       button.disabled=true;
+      return;
+    }
+    if(!client || !window.KRIM_SUPABASE_CONFIG || window.KRIM_SUPABASE_PROJECT_REF !== window.KRIM_SUPABASE_CONFIG.projectRef){
+      $("org-preview").textContent = "Environment not verified";
+      showFeedback("KRIM could not verify the approved backend environment. Booking access is blocked; no request was submitted.", "error");
+      button.disabled = true;
       return;
     }
     try{
