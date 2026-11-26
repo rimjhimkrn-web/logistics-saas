@@ -127,8 +127,8 @@ a:not(.btn){text-decoration-color:#38bdf870}
 (function(){
  const BASE=location.pathname.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";
  document.querySelectorAll('a[href^="/logistics-saas/"]').forEach(a=>{a.href=BASE+a.getAttribute("href").slice("/logistics-saas/".length);});
- const SUPABASE_PROJECT_URL="window.KRIM_CONFIG?.supabase?.url";
- const SUPABASE_ANON_KEY="window.KRIM_CONFIG?.supabase?.publishableKey";
+ const SUPABASE_PROJECT_URL=window.KRIM_CONFIG?.supabase?.url;
+ const SUPABASE_ANON_KEY=window.KRIM_CONFIG?.supabase?.publishableKey;
  const client=window.KRIM_SUPABASE||window.supabase.createClient(SUPABASE_PROJECT_URL,SUPABASE_ANON_KEY);
  let loadedShipmentData=null;
  const $=id=>document.getElementById(id);
