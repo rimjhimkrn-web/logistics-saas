@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import assert from "node:assert/strict";
 import { runInNewContext } from "node:vm";
 
@@ -88,5 +89,47 @@ assert.ok(!shipments.includes("ebltviniygljwwseplph.supabase.co"),
   "Shipment page must not hardcode the production project URL");
 assert.ok(!shipments.includes("SUPABASE_ANON_KEY"),
   "Shipment page must not retain its legacy hardcoded anon key");
+
+
+function collectHtmlFiles(directory, results = []) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name === ".git" ||
+        entry.name === "audit-output" || entry.name === "_site") continue;
+    const fullPath = join(directory, entry.name);
+    if (entry.isDirectory()) collectHtmlFiles(fullPath, results);
+    else if (entry.isFile() && entry.name.endsWith(".html")) results.push(fullPath);
+  }
+  return results;
+}
+
+const htmlFiles = collectHtmlFiles(".");
+const unsafeHtmlReferences = [];
+const clientWithoutConfig = [];
+for (const path of htmlFiles) {
+  const html = readFileSync(path, "utf8");
+  if (
+    html.includes("ebltviniygljwwseplph.supabase.co") ||
+    html.includes("SUPABASE_ANON_KEY")
+  ) {
+    unsafeHtmlReferences.push(path);
+  }
+
+  const configIndex = html.indexOf("platform/krim-config.js");
+  const clientIndex = html.indexOf("platform/krim-supabase.js");
+  if (clientIndex !== -1 && (configIndex === -1 || configIndex > clientIndex)) {
+    clientWithoutConfig.push(path);
+  }
+}
+assert.deepEqual(
+  unsafeHtmlReferences,
+  [],
+  "HTML pages must not hardcode the production Supabase URL or legacy anon key"
+);
+assert.deepEqual(
+  clientWithoutConfig,
+  [],
+  "Pages loading the shared Supabase client must load environment config first"
+);
+console.log(`Scanned ${htmlFiles.length} first-party HTML files for environment leakage.`);
 
 console.log("PASS: KRIM environment isolation runtime regression checks.");
