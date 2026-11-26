@@ -9,21 +9,20 @@ class KrimBackendDriver {
   }
 
   init() {
-    if (typeof window.supabase !== "undefined") {
-      this.client = window.supabase.createClient(
-        KRIM_CONFIG.SUPABASE_URL,
-        KRIM_CONFIG.SUPABASE_ANON_KEY,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        }
-      );
-      console.log("[KRIM CORE] Supabase backend engine initialized successfully.");
+    // Legacy core modules must reuse the single hostname-validated platform client.
+    // No independent URL/key or Production fallback is permitted here.
+    const client = window.KRIM_SUPABASE;
+    const config = window.KRIM_SUPABASE_CONFIG;
+    if (
+      client &&
+      config &&
+      window.KRIM_SUPABASE_PROJECT_REF === config.projectRef
+    ) {
+      this.client = client;
+      console.log("[KRIM CORE] Shared environment-validated Supabase client attached.");
     } else {
-      console.warn("[KRIM CORE] Supabase client SDK missing from global window. Running in fallback mode.");
+      this.client = null;
+      console.error("[KRIM CORE] Approved shared Supabase client unavailable; backend operations are blocked.");
     }
   }
 
