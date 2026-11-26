@@ -1,41 +1,92 @@
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
+import { runInNewContext } from "node:vm";
 
 const config = readFileSync("platform/krim-config.js", "utf8");
 const client = readFileSync("platform/krim-supabase.js", "utf8");
 const shipments = readFileSync("domains/shipments.html", "utf8");
 
-assert.match(config, /hostname\s*===\s*"krim-staging\.pages\.dev"/,
-  "Cloudflare staging hostname must be explicitly recognized");
-assert.match(config, /hostname\.endsWith\("\.krim-staging\.pages\.dev"\)/,
-  "Cloudflare staging preview subdomains must be recognized");
-assert.match(config, /ENVIRONMENT === "production"\s*\?/,
-  "Supabase project selection must be environment-dependent");
-assert.match(config, /qrpcivhdxobiaofppbkl\.supabase\.co/,
-  "Non-production configuration must point to the staging Supabase project");
-assert.match(config, /ebltviniygljwwseplph\.supabase\.co/,
-  "Production configuration must retain the production Supabase project");
-assert.doesNotMatch(client, /\|\|\s*"https:\/\/ebltviniygljwwseplph\.supabase\.co"/,
-  "Supabase client must not silently fall back to production");
-assert.doesNotMatch(client, /\|\|\s*"sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"/,
-  "Supabase client must not silently fall back to the production publishable key");
-assert.match(client, /throw new Error\(/,
-  "Missing environment config must fail closed");
+// Execute the real configuration in isolated browser-like contexts.
+const cases = [
+  {
+    hostname: "krim-staging.pages.dev",
+    presetEnvironment: "production",
+    expectedEnvironment: "preview",
+    expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
+  },
+  {
+    hostname: "feature.krim-staging.pages.dev",
+    presetEnvironment: "production",
+    expectedEnvironment: "preview",
+    expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
+  },
+  {
+    hostname: "rimjhimkrn-web.github.io",
+    presetEnvironment: "",
+    expectedEnvironment: "production",
+    expectedUrl: "https://ebltviniygljwwseplph.supabase.co"
+  },
+  {
+    hostname: "localhost",
+    presetEnvironment: "",
+    expectedEnvironment: "development",
+    expectedUrl: "https://qrpcivhdxobiaofppbkl.supabase.co"
+  }
+];
 
+for (const testCase of cases) {
+  const window = {
+    location: {
+      hostname: testCase.hostname,
+      pathname: "/logistics-saas/workspaces/customer-workspace.html"
+    },
+    KRIM_ENVIRONMENT: testCase.presetEnvironment
+  };
+  const document = {
+    scripts: [],
+    querySelector: () => null
+  };
 
+  runInNewContext(config, { window, document, URL, console });
+
+  assert.equal(
+    window.KRIM_CONFIG.platform.environment,
+    testCase.expectedEnvironment,
+    `Unexpected environment for ${testCase.hostname}`
+  );
+  assert.equal(
+    window.KRIM_CONFIG.supabase.url,
+    testCase.expectedUrl,
+    `Unexpected Supabase project for ${testCase.hostname}`
+  );
+}
+
+// Staging hostname must override a conflicting page/global environment value.
 assert.ok(
   config.indexOf('hostname === "krim-staging.pages.dev"') <
     config.indexOf("const configured ="),
   "Cloudflare staging host must override page metadata and global environment flags"
 );
 
-assert.match(shipments, /platform\\/krim-config\\.js/,
+// Supabase client must fail closed rather than silently default to production.
+assert.ok(
+  !client.includes('||\n  "https://ebltviniygljwwseplph.supabase.co"'),
+  "Supabase client must not silently fall back to production URL"
+);
+assert.ok(
+  !client.includes('||\n  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"'),
+  "Supabase client must not silently fall back to production key"
+);
+assert.ok(client.includes("throw new Error("), "Missing config must fail closed");
+
+// Shipment page must use the shared environment-aware config, not old hardcoding.
+assert.ok(shipments.includes("../platform/krim-config.js"),
   "Shipment page must load canonical environment configuration");
-assert.match(shipments, /window\\.KRIM_CONFIG\\?\\.supabase/,
-  "Shipment page must select the environment-specific Supabase configuration");
-assert.doesNotMatch(shipments, /https:\\/\\/ebltviniygljwwseplph\\.supabase\\.co/,
+assert.ok(shipments.includes("window.KRIM_CONFIG?.supabase"),
+  "Shipment page must use the environment-specific Supabase config");
+assert.ok(!shipments.includes("ebltviniygljwwseplph.supabase.co"),
   "Shipment page must not hardcode the production project URL");
-assert.doesNotMatch(shipments, /SUPABASE_ANON_KEY/,
+assert.ok(!shipments.includes("SUPABASE_ANON_KEY"),
   "Shipment page must not retain its legacy hardcoded anon key");
 
-console.log("PASS: static KRIM environment-isolation safeguards verified.");
+console.log("PASS: KRIM environment isolation runtime regression checks.");
