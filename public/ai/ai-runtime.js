@@ -36,9 +36,13 @@
       await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
     }
     const rootConfigUrl = new URL("../../config.js", base).href;
-    await loadScript(rootConfigUrl);
+    if (!window.KRIM_SUPABASE_CONFIG || !window.KRIM_SUPABASE_PROJECT_REF) {
+      await loadScript(rootConfigUrl);
+    }
     const platformConfigUrl = new URL("../../platform/krim-config.js", base).href;
-    await loadScript(platformConfigUrl);
+    if (!window.KRIM_CONFIG || !window.KRIM_CONFIG.supabase) {
+      await loadScript(platformConfigUrl);
+    }
 
     const client = window.KRIM_SUPABASE;
     const config = window.KRIM_SUPABASE_CONFIG;
