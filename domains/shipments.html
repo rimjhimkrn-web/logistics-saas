@@ -97,14 +97,12 @@
                 <form id="shipment-creation-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Origin Hub / Location</label>
-                        <input type="text" id="shipment-origin" required placeholder="e.g., Jharkhand Hub (Ranchi)" 
-                               class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                        <select id="shipment-origin" required disabled class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition font-mono text-sm"><option value="">Loading active locations…</option></select>
                     </div>
 
                     <div>
                         <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Destination Terminal</label>
-                        <input type="text" id="shipment-destination" required placeholder="e.g., New Delhi Distribution Terminal" 
-                               class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
+                        <select id="shipment-destination" required disabled class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition font-mono text-sm"><option value="">Loading active locations…</option></select>
                     </div>
 
                     <div>
@@ -115,10 +113,13 @@
 
                     <div>
                         <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Total Weight (kg)</label>
-                        <input type="number" id="total-weight" required placeholder="1250" 
+                        <input type="number" id="total-weight" required min="0.01" max="100000000" step="0.01" placeholder="1250" 
                                class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition font-mono text-sm">
                     </div>
 
+                    <div><label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Transport Mode</label><select id="transport-mode" required class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white font-mono text-sm"><option value="road">Road</option><option value="rail">Rail</option><option value="ocean">Ocean</option><option value="air">Air</option><option value="multimodal">Multimodal</option><option value="warehouse_transfer">Warehouse Transfer</option><option value="specialist">Specialist</option></select></div>
+                    <div><label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Route Type</label><select id="route-type" required class="w-full bg-[#090d16] border border-gray-700/80 rounded-xl px-4 py-3 text-white font-mono text-sm"><option value="domestic">Domestic</option><option value="cross_border">Cross-border</option><option value="door_to_door">Door to Door</option><option value="airport_to_airport">Airport to Airport</option><option value="port_to_port">Port to Port</option><option value="terminal_to_terminal">Terminal to Terminal</option><option value="warehouse_to_warehouse">Warehouse to Warehouse</option><option value="first_last_mile">First / Last Mile</option><option value="multimodal_end_to_end">Multimodal End-to-End</option></select></div>
+                    <div id="shipment-form-notice" class="md:col-span-2 text-xs text-amber-300" role="status" aria-live="polite"></div>
                     <div class="md:col-span-2 pt-2">
                         <button type="submit" id="submit-shipment-btn" 
                                 class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 px-6 rounded-xl transition duration-200 shadow-lg shadow-purple-600/20 cursor-pointer uppercase text-xs font-mono tracking-wider">
@@ -217,6 +218,7 @@
                 activeCustomerOrganizationId = organizationIds[0];
                 badge.innerText = `Node: ${session.user.email || 'Authenticated customer'}`;
                 submitButton.disabled = false;
+                await loadActiveLocations();
                 await loadUserShipments();
             } catch (error) {
                 console.error("Shipment workspace access verification failed:", error);
@@ -246,65 +248,123 @@
                 }
 
                 data.forEach(s => {
-                    const statusColor = s.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/40 border-emerald-900' : 'text-amber-400 bg-amber-950/40 border-amber-900';
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-900/40 transition">
-                            <td class="py-4 px-4 font-mono font-medium text-white">#${s.id}</td>
-                            <td class="py-4 px-4 text-gray-300 font-medium">${s.origin || 'Ranchi'} → ${s.destination || 'New Delhi'}</td>
-                            <td class="py-4 px-4 text-gray-400">${s.goods_description || 'Standard Freight'}</td>
-                            <td class="py-4 px-4 font-mono">${s.total_weight_kg || '1,250'} kg</td>
-                            <td class="py-4 px-4">
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-mono border ${statusColor}">
-                                    ${s.status || 'pending'}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-right">
-                                <a href="/logistics-saas/public/customer-os/quotes-pricing/quote-list.html?shipment_id=${s.id}" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition">
-                                    Proceed to Quote →
-                                </a>
-                            </td>
-                        </tr>
-                    `;
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-900/40 transition';
+                    const values = [
+                        { text: '#' + String(s.id), className: 'py-4 px-4 font-mono font-medium text-white' },
+                        { text: (s.origin_place_label || 'Origin pending') + ' → ' + (s.destination_place_label || 'Destination pending'), className: 'py-4 px-4 text-gray-300 font-medium' },
+                        { text: s.goods_description || 'Standard Freight', className: 'py-4 px-4 text-gray-400' },
+                        { text: String(s.total_weight_kg ?? '—') + ' kg', className: 'py-4 px-4 font-mono' },
+                        { text: s.status || 'draft', className: 'px-2.5 py-1 rounded-full text-[11px] font-mono border ' + (s.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/40 border-emerald-900' : 'text-amber-400 bg-amber-950/40 border-amber-900') }
+                    ];
+                    values.forEach((item, index) => {
+                        const cell = document.createElement('td');
+                        cell.className = index === 4 ? 'py-4 px-4' : item.className;
+                        if (index === 4) {
+                            const badge = document.createElement('span');
+                            badge.className = item.className;
+                            badge.textContent = item.text;
+                            cell.appendChild(badge);
+                        } else {
+                            cell.className = item.className;
+                            cell.textContent = item.text;
+                        }
+                        row.appendChild(cell);
+                    });
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'py-4 px-4 text-right';
+                    const action = document.createElement('a');
+                    action.href = '/logistics-saas/public/customer-os/quotes-pricing/quote-list.html?' + new URLSearchParams({ shipment_id: String(s.id) });
+                    action.className = 'bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition';
+                    action.textContent = 'Proceed to Quote →';
+                    actionCell.appendChild(action);
+                    row.appendChild(actionCell);
+                    tbody.appendChild(row);
                 });
             } catch (err) {
                 console.error("Error loading shipments:", err);
             }
         }
 
+        async function loadActiveLocations() {
+            const originSelect = document.getElementById('shipment-origin');
+            const destinationSelect = document.getElementById('shipment-destination');
+            const notice = document.getElementById('shipment-form-notice');
+            const submitButton = document.getElementById('submit-shipment-btn');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('krim_locations')
+                    .select('id,city,state_region,region,location_code,location_type,country_id')
+                    .eq('is_active', true)
+                    .order('city', { ascending: true });
+                if (error) throw error;
+                const locations = data || [];
+                [originSelect, destinationSelect].forEach(select => {
+                    select.replaceChildren(new Option('Select an active KRIM location', ''));
+                    locations.forEach(location => {
+                        const label = [location.city, location.state_region || location.region, location.location_code].filter(Boolean).join(' · ');
+                        select.add(new Option(label || ('Location #' + location.id), String(location.id)));
+                    });
+                    select.disabled = locations.length === 0;
+                });
+                if (locations.length < 2) {
+                    notice.textContent = 'Shipment creation is paused: at least two active KRIM locations must be configured and verified.';
+                    submitButton.disabled = true;
+                } else {
+                    notice.textContent = 'Choose verified active KRIM locations. The server validates the organization, route and booking reference.';
+                    submitButton.disabled = false;
+                }
+            } catch (error) {
+                notice.textContent = 'Locations could not be loaded. Shipment creation is disabled until this is resolved.';
+                submitButton.disabled = true;
+                console.error('Active location loading failed:', error);
+            }
+        }
+
         document.getElementById('shipment-creation-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-shipment-btn');
+            const notice = document.getElementById('shipment-form-notice');
+            if (!activeCustomerOrganizationId) {
+                notice.textContent = 'Verified customer organization access is required.';
+                return;
+            }
+            const originId = document.getElementById('shipment-origin').value;
+            const destinationId = document.getElementById('shipment-destination').value;
+            if (!originId || !destinationId || originId === destinationId) {
+                notice.textContent = 'Select two different active KRIM locations.';
+                return;
+            }
             btn.disabled = true;
-            btn.innerText = "Registering Shipment in Backend...";
-
+            btn.textContent = 'Registering securely…';
             try {
-                const origin = document.getElementById('shipment-origin').value;
-                const destination = document.getElementById('shipment-destination').value;
-                const goods_description = document.getElementById('goods-description').value;
-                const total_weight_kg = Number(document.getElementById('total-weight').value);
-
-                const { data, error } = await supabaseClient
-                    .from('krim_shipments')
-                    .insert([{
-                        origin,
-                        destination,
-                        goods_description,
-                        total_weight_kg,
-                        status: 'pending',
-                        customer_organization_id: activeCustomerOrganizationId
-                    }])
-                    .select();
-
+                const goods = document.getElementById('goods-description').value.trim();
+                const weight = Number(document.getElementById('total-weight').value);
+                if (!goods || goods.length > 500 || !Number.isFinite(weight) || weight <= 0 || weight > 100000000) {
+                    throw new Error('Enter a goods description (maximum 500 characters) and a valid positive weight.');
+                }
+                const { data, error } = await supabaseClient.rpc('krim_create_global_shipment_from_locations_idempotent', {
+                    p_customer_organization_id: Number(activeCustomerOrganizationId),
+                    p_origin_location_id: Number(originId),
+                    p_destination_location_id: Number(destinationId),
+                    p_goods_description: goods,
+                    p_total_weight_kg: weight,
+                    p_transport_mode: document.getElementById('transport-mode').value,
+                    p_route_type: document.getElementById('route-type').value,
+                    p_booking_request_id: crypto.randomUUID()
+                });
                 if (error) throw error;
-
-                alert("Shipment registered successfully!");
+                notice.textContent = 'Shipment request created securely. Reference: ' + String(data?.shipment_number || data?.id || 'created');
                 document.getElementById('shipment-creation-form').reset();
-                loadUserShipments();
-            } catch (err) {
-                alert("Failed to register shipment: " + err.message);
+                await loadUserShipments();
+            } catch (error) {
+                notice.textContent = 'Shipment was not created: ' + (error.message || 'Unknown error');
+                console.error('Secure shipment creation failed:', error);
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Register & Initialize Shipment →";
+                btn.textContent = 'Register & Initialize Shipment →';
+                btn.disabled = !activeCustomerOrganizationId ||
+                    document.getElementById('shipment-origin').options.length < 3 ||
+                    document.getElementById('shipment-destination').options.length < 3;
             }
         });
 
