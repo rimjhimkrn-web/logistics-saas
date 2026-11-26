@@ -224,27 +224,44 @@ BEGIN
   IF FOUND THEN
     IF v_existing.shipment_id IS DISTINCT FROM v_assignment.shipment_id
        OR v_existing.shipment_leg_id IS DISTINCT FROM v_assignment.shipment_leg_id
-       OR v_existing.capacity_binding_id IS DISTINCT FROM v_binding_id
        OR v_existing.requested_by IS DISTINCT FROM p_requested_by
        OR v_existing.idempotency_key IS DISTINCT FROM p_idempotency_key THEN
       RAISE EXCEPTION 'activation_idempotency_conflict';
     END IF;
-    IF v_assignment.status='active' THEN RETURN v_existing.id; END IF;
-    RAISE EXCEPTION 'activation_record_exists_but_assignment_is_not_active';
-  END IF;
+    IF v_assignment.status='active'
+       AND v_existing.capacity_binding_id IS NOT DISTINCT FROM v_binding_id
+       AND v_existing.status='activated' THEN
+      RETURN v_existing.id;
+    END IF;
+    IF v_assignment.status='accepted'
+       AND v_existing.status='pending'
+       AND v_existing.capacity_binding_id IS NULL THEN
+      UPDATE public.krim_partner_assignment_activations
+      SET capacity_binding_id=v_binding_id,status='activated',
+          validation_snapshot=jsonb_build_object('readiness_id',v_readiness.id,'reservation_id',v_reservation.id),
+          result_snapshot=jsonb_build_object('assignment_id',p_assignment_id,'capacity_binding_id',v_binding_id,'reservation_id',v_reservation.id),
+          started_at=coalesce(started_at,now()),completed_at=now(),updated_at=now()
+      WHERE id=v_existing.id;
+      v_id:=v_existing.id;
+    ELSE
+      RAISE EXCEPTION 'activation_record_exists_with_conflicting_state';
+    END IF;
+  ELSE
 
-  INSERT INTO public.krim_partner_assignment_activations(
-    shipment_id,shipment_leg_id,assignment_id,capacity_binding_id,
-    activation_number,status,requested_by,idempotency_key,
-    validation_snapshot,result_snapshot,started_at,completed_at,updated_at
-  ) VALUES (
-    v_assignment.shipment_id,v_assignment.shipment_leg_id,p_assignment_id,v_binding_id,
-    'PA-'||p_assignment_id||'-'||extract(epoch from clock_timestamp())::bigint,
-    'activated',p_requested_by,p_idempotency_key,
-    jsonb_build_object('readiness_id',v_readiness.id,'reservation_id',v_reservation.id),
-    jsonb_build_object('assignment_id',p_assignment_id,'capacity_binding_id',v_binding_id,'reservation_id',v_reservation.id),
-    now(),now(),now()
-  ) RETURNING id INTO v_id;
+  IF v_id IS NULL THEN
+    INSERT INTO public.krim_partner_assignment_activations(
+      shipment_id,shipment_leg_id,assignment_id,capacity_binding_id,
+      activation_number,status,requested_by,idempotency_key,
+      validation_snapshot,result_snapshot,started_at,completed_at,updated_at
+    ) VALUES (
+      v_assignment.shipment_id,v_assignment.shipment_leg_id,p_assignment_id,v_binding_id,
+      'PA-'||p_assignment_id||'-'||extract(epoch from clock_timestamp())::bigint,
+      'activated',p_requested_by,p_idempotency_key,
+      jsonb_build_object('readiness_id',v_readiness.id,'reservation_id',v_reservation.id),
+      jsonb_build_object('assignment_id',p_assignment_id,'capacity_binding_id',v_binding_id,'reservation_id',v_reservation.id),
+      now(),now(),now()
+    ) RETURNING id INTO v_id;
+  END IF;
 
   UPDATE public.krim_shipment_partner_assignments
   SET status='active',capacity_binding_id=v_binding_id,accepted_at=coalesce(accepted_at,now()),updated_at=now()
