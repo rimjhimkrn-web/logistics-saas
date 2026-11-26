@@ -45,6 +45,17 @@
     }
 
     function detectEnvironment() {
+        const hostname =
+            window.location.hostname.toLowerCase();
+
+        // Staging host detection takes priority over page metadata or globals.
+        if (
+            hostname === "krim-staging.pages.dev" ||
+            hostname.endsWith(".krim-staging.pages.dev")
+        ) {
+            return "preview";
+        }
+
         const configured =
             window.KRIM_ENVIRONMENT ||
             document.querySelector(
@@ -60,17 +71,6 @@
             return configured;
         }
 
-        const hostname =
-            window.location.hostname.toLowerCase();
-
-        // Staging host detection takes priority over page metadata or globals.
-        if (
-            hostname === "krim-staging.pages.dev" ||
-            hostname.endsWith(".krim-staging.pages.dev")
-        ) {
-            return "preview";
-        }
-
         if (
             hostname === "localhost" ||
             hostname === "127.0.0.1" ||
@@ -81,8 +81,8 @@
 
         if (
             hostname.includes(".preview.") ||
-            /^pr-\d+--.+\.netlify\.app$/.test(hostname) ||
-            /-git-[^.]+\.vercel\.app$/.test(hostname)
+            /^pr-\\d+--.+\\.netlify\\.app$/.test(hostname) ||
+            /-git-[^.]+\\.vercel\\.app$/.test(hostname)
         ) {
             return "preview";
         }
