@@ -63,6 +63,14 @@
         const hostname =
             window.location.hostname.toLowerCase();
 
+        // Staging host detection takes priority over page metadata or globals.
+        if (
+            hostname === "krim-staging.pages.dev" ||
+            hostname.endsWith(".krim-staging.pages.dev")
+        ) {
+            return "preview";
+        }
+
         if (
             hostname === "localhost" ||
             hostname === "127.0.0.1" ||
@@ -111,10 +119,15 @@
             defaultLanguage: "en-IN"
         }),
 
-        supabase: Object.freeze({
+        // Non-production environments must always use the isolated staging project.
+        supabase: Object.freeze(ENVIRONMENT === "production" ? {
             url: "https://ebltviniygljwwseplph.supabase.co",
             publishableKey:
                 "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+        } : {
+            url: "https://qrpcivhdxobiaofppbkl.supabase.co",
+            publishableKey:
+                "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3"
         }),
 
         routes: Object.freeze({
