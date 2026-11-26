@@ -31,6 +31,7 @@
     </script>
     <!-- Supabase Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
 
 <!-- Page-specific responsive styles below are authoritative. -->
 <style id="krim-responsive-tracking-fix">
@@ -146,8 +147,10 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
 
     <!-- Secure public tracking uses the server-side tracking gateway; never query shipment tables from this page. -->
     <script>
-        const KRIM_SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-        const KRIM_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+        const trackingSupabaseConfig = window.KRIM_SUPABASE_CONFIG;
+        if (!trackingSupabaseConfig || !trackingSupabaseConfig.url || !trackingSupabaseConfig.publishableKey) {
+            throw new Error("KRIM environment configuration is unavailable; tracking requests are blocked.");
+        }
         let activeTrackingNumber = "";
         let trackingRefreshTimer = null;
 
@@ -166,9 +169,9 @@ footer>div{width:100%;min-width:0;flex-wrap:wrap}
             const container = document.getElementById("tracking-results-container");
             if (!quiet) container.replaceChildren(trackingText("p", "Searching for this shipment reference…", "text-slate-500 text-center py-4"));
             try {
-                const response = await fetch(KRIM_SUPABASE_URL + "/functions/v1/public-shipment-tracking", {
+                const response = await fetch(trackingSupabaseConfig.url + "/functions/v1/public-shipment-tracking", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "apikey": KRIM_PUBLISHABLE_KEY },
+                    headers: { "Content-Type": "application/json", "apikey": trackingSupabaseConfig.publishableKey },
                     body: JSON.stringify({ tracking_number: trackingNumber }),
                     cache: "no-store"
                 });
