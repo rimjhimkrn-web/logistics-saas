@@ -141,6 +141,7 @@ const legacySecurityConsumers = [...htmlFiles, ...jsFiles]
     const content = readFileSync(path, "utf8");
     return content.includes("core/krim-config.js") ||
       content.includes("js/guards.js") ||
+      content.includes("js/session.js") ||
       /\\bKrimSession\\b/.test(content);
   });
 assert.deepEqual(
