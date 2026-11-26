@@ -174,10 +174,25 @@ assert.deepEqual(unsafeReferences, [],
   "First-party HTML/JS must not hardcode production Supabase credentials");
 assert.deepEqual(clientWithoutConfig, [],
   "Pages importing the shared Supabase client must load environment config first");
-assert.deepEqual(sharedModulePagesWithoutConfig, [],
-  "HTML pages referencing repaired shared modules must load canonical config before module scripts");
+const sharedModulePaths = [
+  ["auth/krim-account-actions.js", "../platform/krim-config.js"],
+  ["auth-core.js", "./platform/krim-config.js"],
+  ["public/app/app-store.js", "../../platform/krim-config.js"],
+  ["public/app/backend-modules.js", "../../platform/krim-config.js"]
+];
+for (const [path, relativeConfigPath] of sharedModulePaths) {
+  const source = readFileSync(path, "utf8");
+  assert.ok(source.includes("KRIM.platformConfigLoad"),
+    `${path} must coordinate a single shared config-load promise`);
+  assert.ok(source.includes(`new URL("${relativeConfigPath}", import.meta.url)`),
+    `${path} must resolve canonical config relative to its own module URL`);
+  assert.ok(source.includes("await globalThis[loadKey]"),
+    `${path} must await config initialization before creating a Supabase client`);
+  assert.ok(source.indexOf("const config = await") < source.indexOf("createClient("),
+    `${path} must initialize config before createClient`);
+}
 
 console.log(`Scanned ${htmlFiles.length} HTML and ${jsFiles.length} JS files for environment leakage.`);
-console.log(`Found ${sharedModuleConsumers.length} HTML pages referencing repaired shared modules: ${JSON.stringify(sharedModuleConsumers)}`);
+console.log(`Found ${sharedModuleConsumers.length} HTML pages referencing repaired shared modules; those modules now bootstrap canonical config themselves.`);
 
 console.log("PASS: KRIM environment isolation runtime regression checks.");
