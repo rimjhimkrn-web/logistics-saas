@@ -137,14 +137,12 @@ const legacySecurityFiles = new Set([
 ]);
 const legacySecurityConsumers = [...htmlFiles, ...jsFiles]
   .filter(path => !legacySecurityFiles.has(path))
-  .map(path => ({
-    path,
-    content: readFileSync(path, "utf8")
-  }))
-  .filter(({ content }) =>
-    /(?:\\.\\.?\\/)*core\\/krim-config\\.js|(?:\\.\\.?\\/)*js\\/guards\\.js|\\bKrimSession\\b/.test(content)
-  )
-  .map(({ path }) => path);
+  .filter(path => {
+    const content = readFileSync(path, "utf8");
+    return content.includes("core/krim-config.js") ||
+      content.includes("js/guards.js") ||
+      /\\bKrimSession\\b/.test(content);
+  });
 assert.deepEqual(
   legacySecurityConsumers,
   [],
