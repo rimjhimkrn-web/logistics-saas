@@ -37,7 +37,6 @@ const SUPABASE_PUBLISHABLE_KEY = window.KRIM_ENVIRONMENT === "production"
   ? PRODUCTION_SUPABASE_PUBLISHABLE_KEY
   : STAGING_SUPABASE_PUBLISHABLE_KEY;
 window.KRIM_STAGING_PREVIEW = window.KRIM_ENVIRONMENT === "preview";
-window.KRIM_AUTH_DISABLED = window.KRIM_STAGING_PREVIEW;
 
 const krimBasePath =
   window.location.hostname.endsWith("github.io") &&
