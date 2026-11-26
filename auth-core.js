@@ -1,16 +1,18 @@
 // js/auth-core.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-// Global KRIM OS Configuration
-export const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-
+const config = globalThis.KRIM_CONFIG?.supabase;
+if (!config?.url || !config?.publishableKey) {
+  throw new Error("Load platform/krim-config.js before auth-core.js.");
+}
+export const SUPABASE_URL = config.url;
+export const SUPABASE_ANON_KEY = config.publishableKey;
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: "pkce"
   }
 });
 
