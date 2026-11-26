@@ -37,7 +37,7 @@ $old$;
    where id=v_assignment.id and capacity_binding_id is distinct from v_binding.id;
   return jsonb_build_object('assignment_id',v_assignment.id,'reservation_id',v_binding.reservation_id,'binding_id',v_binding.id,'status',v_binding.status,'idempotent_reuse',true);
  end if;
-$ new$;
+$new$;
   v_old_key text := $old$
  if v_reservation_id is not null then
   if not exists(select 1 from public.krim_capacity_reservations r where r.id=v_reservation_id and r.shipment_id=v_assignment.shipment_id and r.shipment_leg_id=v_leg.id) then
@@ -73,7 +73,7 @@ $old$;
   end if;
   return jsonb_build_object('assignment_id',v_assignment.id,'reservation_id',v_reservation_id,'binding_id',v_binding_id,'status',v_reservation_status,'idempotent_reuse',true);
  end if;
-$ new$;
+$new$;
 BEGIN
   SELECT pg_get_functiondef(p.oid) INTO v_definition
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
