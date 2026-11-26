@@ -118,9 +118,26 @@ const htmlFiles = collectFiles(".", ".html");
 const jsFiles = collectFiles(".", ".js");
 const unsafeReferences = [];
 const clientWithoutConfig = [];
+const sharedModuleNames = [
+  "krim-account-actions.js",
+  "auth-core.js",
+  "app-store.js",
+  "backend-modules.js"
+];
+const sharedModuleConsumers = [];
+const sharedModulePagesWithoutConfig = [];
 
 for (const path of htmlFiles) {
   const html = readFileSync(path, "utf8");
+  const referencedModules = sharedModuleNames.filter(name => html.includes(name));
+  if (referencedModules.length) {
+    sharedModuleConsumers.push({ path, modules: referencedModules });
+    const configTag = html.search(/<script[^>]+src=["'][^"']*platform\/krim-config\.js[^"']*["'][^>]*>/i);
+    const moduleTag = html.search(/<script[^>]*type=["']module["'][^>]*>/i);
+    if (configTag === -1 || (moduleTag !== -1 && configTag > moduleTag)) {
+      sharedModulePagesWithoutConfig.push(path);
+    }
+  }
   if (
     html.includes("ebltviniygljwwseplph.supabase.co") ||
     html.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa")
@@ -157,7 +174,10 @@ assert.deepEqual(unsafeReferences, [],
   "First-party HTML/JS must not hardcode production Supabase credentials");
 assert.deepEqual(clientWithoutConfig, [],
   "Pages importing the shared Supabase client must load environment config first");
+assert.deepEqual(sharedModulePagesWithoutConfig, [],
+  "HTML pages referencing repaired shared modules must load canonical config before module scripts");
 
 console.log(`Scanned ${htmlFiles.length} HTML and ${jsFiles.length} JS files for environment leakage.`);
+console.log(`Found ${sharedModuleConsumers.length} HTML pages referencing repaired shared modules: ${JSON.stringify(sharedModuleConsumers)}`);
 
 console.log("PASS: KRIM environment isolation runtime regression checks.");
