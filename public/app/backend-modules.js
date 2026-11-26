@@ -1,8 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+const config = globalThis.KRIM_CONFIG?.supabase;
+if (!config?.url || !config?.publishableKey) {
+  throw new Error("Load platform/krim-config.js before backend-modules.js.");
+}
+const supabase = createClient(config.url, config.publishableKey, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
