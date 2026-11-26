@@ -181,21 +181,60 @@
             supabaseConfig.publishableKey
         );
 
+        let activeCustomerOrganizationId = null;
+
         async function initSession() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                document.getElementById('user-session-badge').innerText = "Guest Mode Active";
-            } else {
-                document.getElementById('user-session-badge').innerText = `Node: ${session.user.email}`;
+            const badge = document.getElementById('user-session-badge');
+            const submitButton = document.getElementById('submit-shipment-btn');
+            submitButton.disabled = true;
+            try {
+                const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                const session = sessionData?.session;
+                if (!session) {
+                    badge.innerText = "Sign-in required";
+                    window.location.replace("../auth/login.html?role=customer&reason=session_required");
+                    return;
+                }
+
+                const { data: memberships, error: membershipError } = await supabaseClient
+                    .from('krim_organization_members')
+                    .select('organization_id,role,status')
+                    .eq('user_id', session.user.id)
+                    .eq('status', 'active');
+                if (membershipError) throw membershipError;
+
+                const organizationIds = [...new Set((memberships || [])
+                    .filter(m => /customer|shipper|client/i.test(String(m.role || '')))
+                    .map(m => String(m.organization_id || ''))
+                    .filter(Boolean))];
+                if (organizationIds.length !== 1) {
+                    throw new Error(organizationIds.length
+                        ? "Multiple customer organizations are linked to this account. Access is paused until the organization context is resolved."
+                        : "An active customer organization membership is required to manage shipments.");
+                }
+
+                activeCustomerOrganizationId = organizationIds[0];
+                badge.innerText = `Node: ${session.user.email || 'Authenticated customer'}`;
+                submitButton.disabled = false;
+                await loadUserShipments();
+            } catch (error) {
+                console.error("Shipment workspace access verification failed:", error);
+                badge.innerText = "Access verification failed";
+                document.getElementById('shipments-table-body').innerHTML =
+                    '<tr><td colspan="6" class="py-8 text-center text-red-600">Secure access could not be verified. No shipment data was loaded.</td></tr>';
             }
-            loadUserShipments();
         }
 
         async function loadUserShipments() {
+            if (!activeCustomerOrganizationId) {
+                throw new Error("A verified customer organization is required.");
+            }
             try {
                 const { data, error } = await supabaseClient
                     .from('krim_shipments')
                     .select('*')
+                    .eq('customer_organization_id', activeCustomerOrganizationId)
                     .order('created_at', { ascending: false });
 
                 const tbody = document.getElementById('shipments-table-body');
@@ -251,7 +290,8 @@
                         destination,
                         goods_description,
                         total_weight_kg,
-                        status: 'pending'
+                        status: 'pending',
+                        customer_organization_id: activeCustomerOrganizationId
                     }])
                     .select();
 
