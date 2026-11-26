@@ -7,7 +7,7 @@
 <title>KRIM Global Logistics OS | Support, Claims & Feedback</title>
 <link rel="manifest" href="/logistics-saas/manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/logistics-saas/config.js"></script>
+<script src="../../config.js"></script>
 <style>
 :root{color-scheme:light;--navy:#0b1f33;--navy2:#17364f;--blue:#285d82;--teal:#3b8191;--ink:#182d3e;--muted:#607384;--line:#cbd6df;--bg:#edf1f5;--white:#fff;--good:#176846;--warn:#83580d;--bad:#9a302a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 Inter,"Segoe UI",Arial,sans-serif}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button,a{touch-action:manipulation}
@@ -47,8 +47,8 @@
 <script>
 (function(){
 "use strict";
-const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
-const PUBLISHABLE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const PROJECT_URL="window.KRIM_CONFIG?.supabase?.url";
+const PUBLISHABLE_KEY="window.KRIM_CONFIG?.supabase?.publishableKey";
 const db=window.KRIM_SUPABASE||(window.supabase&&window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY));
 const $=id=>document.getElementById(id);
 const state={session:null,orgs:[],shipments:[],tickets:[],claims:[],ratings:[],rating:0,errors:[]};
