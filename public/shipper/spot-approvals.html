@@ -8,7 +8,7 @@
 <meta name="description" content="KRIM customer quote review: inspect authorized freight quotations, commercial terms and acceptance eligibility.">
 <title>KRIM Logistics | Customer Quote Review</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/logistics-saas/config.js"></script>
+<script src="../../config.js"></script>
 <script>
 (function(){var p=location.pathname;var b=p.indexOf("/logistics-saas/")===0?"/logistics-saas/":"/";var l=document.createElement("link");l.rel="stylesheet";l.href=b+"core/krim-unified-page.css";document.head.appendChild(l);}());
 </script>
@@ -51,8 +51,8 @@ main{max-width:1240px;margin:auto;padding:30px 24px 48px;width:100%}.hero{positi
 <script>
 (function(){
 "use strict";
-const PROJECT_URL="https://ebltviniygljwwseplph.supabase.co";
-const ANON_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const PROJECT_URL="window.KRIM_CONFIG?.supabase?.url";
+const ANON_KEY="window.KRIM_CONFIG?.supabase?.publishableKey";
 const client=window.KRIM_SUPABASE||(window.supabase&&window.supabase.createClient(PROJECT_URL,ANON_KEY));
 const $=id=>document.getElementById(id);
 let session=null, quotes=[], selectedId=null, busy=false;
