@@ -1,0 +1,26 @@
+name: KRIM environment isolation regression
+
+on:
+  push:
+    branches:
+      - staging/phase00-env-isolation
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  environment-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify KRIM environment isolation
+        run: node scripts/verify-krim-environment-isolation.mjs
