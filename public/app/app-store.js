@@ -1,10 +1,13 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const supabase = createClient(
-  "https://ebltviniygljwwseplph.supabase.co",
-  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa",
-  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-);
+// Reuse the single client initialized by the hostname-validated root config.js.
+// Do not create a page-local Supabase client or fall back to Production.
+const supabase = window.KRIM_SUPABASE;
+if (
+  !supabase ||
+  !window.KRIM_SUPABASE_CONFIG ||
+  window.KRIM_SUPABASE_PROJECT_REF !== window.KRIM_SUPABASE_CONFIG.projectRef
+) {
+  throw new Error("KRIM shared Supabase client is unavailable or its project identity is unverified.");
+}
 
 class AppStore {
   constructor() {
