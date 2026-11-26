@@ -8,16 +8,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const sharedConfig = globalThis.KRIM_CONFIG;
 const supabaseConfig = sharedConfig?.supabase;
 
-const SUPABASE_URL =
-  supabaseConfig?.url ||
-  "https://ebltviniygljwwseplph.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  supabaseConfig?.publishableKey ||
-  "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+const SUPABASE_URL = supabaseConfig?.url;
+const SUPABASE_PUBLISHABLE_KEY = supabaseConfig?.publishableKey;
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("KRIM Supabase configuration is missing.");
+  throw new Error(
+    "KRIM Supabase configuration is missing. Load platform/krim-config.js before the client initializer."
+  );
 }
 
 export const supabase =
