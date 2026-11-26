@@ -21,4 +21,11 @@ assert.doesNotMatch(client, /\|\|\s*"sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4Rk
 assert.match(client, /throw new Error\(/,
   "Missing environment config must fail closed");
 
+
+assert.ok(
+  config.indexOf('hostname === "krim-staging.pages.dev"') <
+    config.indexOf("const configured ="),
+  "Cloudflare staging host must override page metadata and global environment flags"
+);
+
 console.log("PASS: static KRIM environment-isolation safeguards verified.");
