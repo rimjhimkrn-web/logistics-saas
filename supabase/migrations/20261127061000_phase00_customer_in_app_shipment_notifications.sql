@@ -4,10 +4,6 @@
 ALTER TABLE public.notifications
   ADD COLUMN IF NOT EXISTS source_event_id uuid;
 
--- Existing notification writers omit id; restore the owned serial default if absent.
-ALTER TABLE public.notifications
-  ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
-
 CREATE UNIQUE INDEX IF NOT EXISTS uq_notifications_source_event_user
   ON public.notifications (source_event_id, user_id)
   WHERE source_event_id IS NOT NULL;
