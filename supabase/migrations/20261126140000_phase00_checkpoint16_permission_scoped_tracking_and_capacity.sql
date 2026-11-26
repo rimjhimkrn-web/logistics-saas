@@ -136,7 +136,7 @@ $oldcan$;
     )
 $newcan$;
 
-  IF position('private.krim_has_permission(v_uid, v_shipment.customer_organization_id,' || quote_literal('tracking.view') || ')' in v_def)=0 THEN
+  IF position('private.krim_has_permission(v_uid, v_shipment.customer_organization_id, ' || quote_literal('tracking.view') || ')' in v_def)=0 THEN
     IF position(v_old in v_def)=0 OR position(v_old_can in v_def)=0 THEN
       RAISE EXCEPTION 'Tracking function source did not match expected safe patch; aborting migration';
     END IF;
