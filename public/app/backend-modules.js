@@ -1,10 +1,13 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
+// Reuse the single client initialized by the hostname-validated root config.js.
+// Do not create a page-local Supabase client or fall back to Production.
+const supabase = window.KRIM_SUPABASE;
+if (
+  !supabase ||
+  !window.KRIM_SUPABASE_CONFIG ||
+  window.KRIM_SUPABASE_PROJECT_REF !== window.KRIM_SUPABASE_CONFIG.projectRef
+) {
+  throw new Error("KRIM shared Supabase client is unavailable or its project identity is unverified.");
+}
 
 const page = location.pathname.split("/").pop() || "app-shell.html";
 const styles = "mt-6 rounded-2xl border border-slate-700 bg-slate-800 p-5 text-sm text-slate-100 space-y-4";
