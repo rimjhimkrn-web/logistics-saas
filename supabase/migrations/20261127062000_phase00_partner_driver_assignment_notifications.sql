@@ -86,6 +86,7 @@ DECLARE
   v_partner_org_id bigint;
   v_driver_user_id uuid;
   v_assignment_id bigint;
+  v_driver_assignment_id uuid;
   v_title text;
   v_message text;
   v_status text;
@@ -155,11 +156,11 @@ BEGIN
   END IF;
 
   IF NEW.event_type='driver.assignment_created' AND NEW.entity_type='driver_assignment' THEN
-    v_assignment_id := (NEW.payload->>'driver_assignment_id')::uuid;
+    v_driver_assignment_id := (NEW.payload->>'driver_assignment_id')::uuid;
     SELECT da.user_id,da.shipment_id
       INTO v_driver_user_id,v_shipment_id
     FROM public.krim_driver_assignments da
-    WHERE da.id=v_assignment_id
+    WHERE da.id=v_driver_assignment_id
       AND da.organization_id=NEW.organization_id
       AND da.user_id=(NEW.payload->>'driver_user_id')::uuid
       AND da.partner_assignment_id=(NEW.payload->>'partner_assignment_id')::bigint
@@ -181,7 +182,7 @@ $function$;
 
 DROP TRIGGER IF EXISTS trg_krim_partner_assignment_in_app_event ON public.krim_shipment_partner_assignments;
 CREATE TRIGGER trg_krim_partner_assignment_in_app_event
-AFTER INSERT OR UPDATE OF status ON public.krim_shipment_partner_assignments
+AFTER INSERT OR UPDATE ON public.krim_shipment_partner_assignments
 FOR EACH ROW EXECUTE FUNCTION public.krim_internal_emit_partner_assignment_event();
 
 DROP TRIGGER IF EXISTS trg_krim_driver_assignment_in_app_event ON public.krim_driver_assignments;
