@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const config = readFileSync("platform/krim-config.js", "utf8");
 const client = readFileSync("platform/krim-supabase.js", "utf8");
+const shipments = readFileSync("domains/shipments.html", "utf8");
 
 assert.match(config, /hostname\s*===\s*"krim-staging\.pages\.dev"/,
   "Cloudflare staging hostname must be explicitly recognized");
@@ -27,5 +28,14 @@ assert.ok(
     config.indexOf("const configured ="),
   "Cloudflare staging host must override page metadata and global environment flags"
 );
+
+assert.match(shipments, /platform\\/krim-config\\.js/,
+  "Shipment page must load canonical environment configuration");
+assert.match(shipments, /window\\.KRIM_CONFIG\\?\\.supabase/,
+  "Shipment page must select the environment-specific Supabase configuration");
+assert.doesNotMatch(shipments, /https:\\/\\/ebltviniygljwwseplph\\.supabase\\.co/,
+  "Shipment page must not hardcode the production project URL");
+assert.doesNotMatch(shipments, /SUPABASE_ANON_KEY/,
+  "Shipment page must not retain its legacy hardcoded anon key");
 
 console.log("PASS: static KRIM environment-isolation safeguards verified.");
