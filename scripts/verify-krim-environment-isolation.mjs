@@ -109,7 +109,7 @@ for (const path of htmlFiles) {
   const html = readFileSync(path, "utf8");
   if (
     html.includes("ebltviniygljwwseplph.supabase.co") ||
-    html.includes("SUPABASE_ANON_KEY")
+    html.includes("sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa")
   ) {
     unsafeHtmlReferences.push(path);
   }
