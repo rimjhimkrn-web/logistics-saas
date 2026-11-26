@@ -1,7 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const SUPABASE_URL="https://ebltviniygljwwseplph.supabase.co";
-const SUPABASE_KEY="sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
-const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const config = globalThis.KRIM_CONFIG?.supabase;
+if (!config?.url || !config?.publishableKey) {
+  throw new Error("Load platform/krim-config.js before account actions.");
+}
+const sb = createClient(config.url, config.publishableKey, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
 const $=s=>document.querySelector(s);
 const status=$("#status"), form=$("#action-form"), fields=$("#fields"), title=$("#title"), desc=$("#description"), submit=$("#submit");
 const page=document.body.dataset.page;
