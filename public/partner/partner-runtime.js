@@ -6,7 +6,7 @@
  * tariff lookup utilities, and carrier verification state.
  */
 
-import { store } from "/app/app-store.js";
+import { store } from "../app/app-store.js";
 
 class PartnerRuntime {
   constructor() {
