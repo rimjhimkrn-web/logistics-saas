@@ -8,6 +8,7 @@
   <title>Customer Workspace | KRIM Logistics</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
 
   <style>
     :root {
@@ -498,9 +499,9 @@
 
     // This is a public publishable key, intended for browser use.
     // NEVER place a Supabase service_role or secret key in this file.
-    const SUPABASE_URL = "https://ebltviniygljwwseplph.supabase.co";
+    const SUPABASE_URL = window.KRIM_CONFIG?.supabase?.url;
     const SUPABASE_PUBLISHABLE_KEY =
-      "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa";
+      window.KRIM_CONFIG?.supabase?.publishableKey;
 
     const db = window.supabase.createClient(
       SUPABASE_URL,
