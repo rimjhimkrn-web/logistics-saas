@@ -1,10 +1,27 @@
 // js/auth-core.js
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const config = globalThis.KRIM_CONFIG?.supabase;
-if (!config?.url || !config?.publishableKey) {
-  throw new Error("Load platform/krim-config.js before auth-core.js.");
-}
+// Ensure environment-specific configuration exists even when this module is
+// loaded directly by a page that omitted the classic config script tag.
+const config = await (async () => {
+  if (globalThis.KRIM_CONFIG?.supabase) return globalThis.KRIM_CONFIG.supabase;
+  const loadKey = Symbol.for("KRIM.platformConfigLoad");
+  if (!globalThis[loadKey]) {
+    globalThis[loadKey] = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = new URL("./platform/krim-config.js", import.meta.url).href;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("Unable to load KRIM environment configuration."));
+      document.head.appendChild(script);
+    });
+  }
+  await globalThis[loadKey];
+  const value = globalThis.KRIM_CONFIG?.supabase;
+  if (!value?.url || !value?.publishableKey) {
+    throw new Error("KRIM environment configuration did not initialize correctly.");
+  }
+  return value;
+})();
 export const SUPABASE_URL = config.url;
 export const SUPABASE_ANON_KEY = config.publishableKey;
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
