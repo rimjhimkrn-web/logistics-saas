@@ -7,8 +7,8 @@
   const staging = location.hostname.endsWith('.krim-staging.pages.dev');
   const rtl = new Set(['ar','fa','he','ur','ps','sd','yi']);
   const state = {
-    ready: false, languageSaved: false, staging, locale: navigator.language || 'en',
-    language: (navigator.language || 'en').split('-')[0],
+    ready: false, languageSaved: false, staging, locale: localStorage.getItem('krim-language') || navigator.language || 'en',
+    language: (localStorage.getItem('krim-language') || navigator.language || 'en').split('-')[0],
     country: null, currency: null, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     measurementSystem: 'metric', dateFormat: 'locale', numberFormat: 'locale'
   };
