@@ -43,7 +43,7 @@ function mount(){
  w.krimGoogleTranslateReady=function(){if(!w.google?.translate?.TranslateElement)return;new w.google.translate.TranslateElement({pageLanguage:'en',includedLanguages:LANGS.map(x=>x[0]).filter(x=>x!=='en').join(','),autoDisplay:false},'google_translate_element');apply(selected);};
  const script=d.createElement('script');script.src='https://translate.google.com/translate_a/element.js?cb=krimGoogleTranslateReady';script.async=true;script.onerror=()=>note('Translation service unavailable on this page');d.head.appendChild(script);
 }
-async function start(){docLang(selected);cookie(selected);mount();await loadAccount();const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;apply(selected);}
+async function start(){docLang(selected);cookie(selected);mount();await loadAccount();const client=w.KRIM_SUPABASE||w.supabaseClient;if(client?.auth?.onAuthStateChange)client.auth.onAuthStateChange((event)=>{if(event==='SIGNED_IN')setTimeout(()=>loadAccount(),0);});const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;apply(selected);}
 if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',start,{once:true});else start();
 w.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){selected=normalize(e.newValue);const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;apply(selected);}});
 w.KRIM_LANGUAGE={get current(){return selected;},set:choose,languages:LANGS.map(x=>({code:x[0],name:x[1]}))};
