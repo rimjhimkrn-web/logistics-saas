@@ -39,7 +39,7 @@ function mount(){
  toggle.addEventListener('click',()=>{const open=menu.hidden;menu.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)sel.focus();});
  d.addEventListener('click',e=>{if(!box.contains(e.target)){menu.hidden=true;toggle.setAttribute('aria-expanded','false');}});
  sel.addEventListener('change',()=>choose(sel.value,true));
- const pageSelect=d.getElementById('language');if(pageSelect){pageSelect.addEventListener('change',()=>choose(pageSelect.value,true));}
+ const pageSelect=d.getElementById('language');if(pageSelect){pageSelect.addEventListener('change',()=>choose(pageSelect.value,false));}
  w.krimGoogleTranslateReady=function(){if(!w.google?.translate?.TranslateElement)return;new w.google.translate.TranslateElement({pageLanguage:'en',includedLanguages:LANGS.map(x=>x[0]).filter(x=>x!=='en').join(','),autoDisplay:false},'google_translate_element');apply(selected);};
  const script=d.createElement('script');script.src='https://translate.google.com/translate_a/element.js?cb=krimGoogleTranslateReady';script.async=true;script.onerror=()=>note('Translation service unavailable on this page');d.head.appendChild(script);
 }
