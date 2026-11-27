@@ -56,6 +56,7 @@ footer{margin-top:38px;background:#071a35;color:#d7e5f3}.footer-inner{width:min(
 <article class="work-card"><div class="card-top"><span class="card-tag">04 · QUOTATIONS</span><span class="card-icon">◇</span></div><h3>Quote management</h3><p>Prepare and review service-specific quotations against verified scope, customer requirements and applicable terms.</p><a class="card-link" href="../public/partner/quote-history.html"><span>Review quote history</span><span>→</span></a></article>
 <article class="work-card"><div class="card-top"><span class="card-tag">05 · RATE CONTROL</span><span class="card-icon">₹</span></div><h3>Commercial rates</h3><p>Maintain and review applicable rate information. Never treat an indicative rate as a confirmed booking or guaranteed service.</p><a class="card-link" href="../public/partner/commercial-rates.html"><span>Review commercial rates</span><span>→</span></a></article>
 <article class="work-card"><div class="card-top"><span class="card-tag">06 · SETTLEMENTS</span><span class="card-icon">↗</span></div><h3>Payment model and records</h3><p>Review partner commercial records and agreed payment responsibilities. Customer-to-partner freight payments remain separate from KRIM fees.</p><a class="card-link" href="../public/partner/settlements.html"><span>Review payment model</span><span>→</span></a></article></div></section>
+<section class="section" aria-labelledby="partner-response-evidence-title"><div class="section-heading"><div><span class="section-kicker">COMMERCIAL AUDIT TRAIL</span><h2 id="partner-response-evidence-title">Your assignment responses</h2><p>Review the acceptance and rejection events recorded for your organisation. Partner quote snapshots are returned only to the responding partner organisation.</p></div><span class="hero-label" id="partner-response-evidence-count">Not loaded</span></div><div class="panel" style="padding:20px"><div id="partner-response-evidence-list" aria-live="polite">Evidence will load after secure organisation verification.</div><p style="font-size:12px;color:var(--muted)">These events document an assignment response. They are not a signed service contract, freight invoice or proof of completed shipment.</p></div></section>
 <section class="section" aria-labelledby="network-title"><div class="section-heading"><div><span class="section-kicker">NETWORK &amp; RESOURCES</span><h2 id="network-title">Manage the organization behind the service</h2><p>Keep declared capabilities, coverage, equipment, people and operating documents aligned with current evidence.</p></div></div><div class="workspace-grid">
 <article class="work-card"><div class="card-top"><span class="card-tag">07 · CAPABILITIES</span><span class="card-icon">◎</span></div><h3>Services and coverage</h3><p>Review declared service types, approved capabilities and operating territories. Actual service availability is confirmed separately.</p><a class="card-link" href="../public/partner/services-capabilities.html"><span>Review capabilities</span><span>→</span></a></article>
 <article class="work-card"><div class="card-top"><span class="card-tag">08 · RESOURCES</span><span class="card-icon">▦</span></div><h3>Capacity, fleet and team</h3><p>Maintain resource information, vehicle records, assigned personnel and organization membership under appropriate controls.</p><a class="card-link" href="../public/partner/capacity-resources.html"><span>Manage resources</span><span>→</span></a></article>
@@ -83,6 +84,29 @@ const staging=location.hostname==="krim-staging.pages.dev";
 if(staging){document.documentElement.dataset.environment="preview";return;}
 const main=document.getElementById("main"),gate=document.getElementById("gate");main.hidden=true;
 function fail(title,message){document.getElementById("gate-title").textContent=title;document.getElementById("gate-message").textContent=message;gate.hidden=false;main.hidden=true;}
+async function loadPartnerResponseEvidence(client){
+const host=document.getElementById("partner-response-evidence-list"),count=document.getElementById("partner-response-evidence-count");
+if(!host||!client)return;
+host.textContent="Loading your organisation-scoped response history…";
+try{
+const {data,error}=await client.rpc("krim_get_partner_response_evidence",{p_quote_id:null,p_limit:100});
+if(error)throw error;
+const rows=Array.isArray(data)?data:[];
+count.textContent=rows.length+" recorded response"+(rows.length===1?"":"s");
+host.replaceChildren();
+if(!rows.length){const empty=document.createElement("p");empty.textContent="No partner acceptance or rejection events are recorded for your organisation yet.";host.appendChild(empty);return;}
+for(const row of rows){
+const card=document.createElement("article");card.style.cssText="padding:14px 0;border-bottom:1px solid #dbe7f2";
+const title=document.createElement("h3");title.textContent=String(row.event_type||"Partner response").replace(/[._]/g," ");
+const meta=document.createElement("p");meta.textContent="Customer quote #"+row.quote_id+" · Your partner quote #"+(row.partner_quote_id??"not recorded")+" · Assignment "+(row.assignment_number||row.assignment_id||"not recorded");
+const status=document.createElement("p");status.textContent="Previous: "+(row.previous_status||"not recorded")+" · Response: "+(row.new_status||"not recorded");
+const when=document.createElement("small");when.textContent=row.event_time?"Recorded "+new Date(row.event_time).toLocaleString():"Response time not recorded";
+card.append(title,meta,status,when);
+if(row.partner_quote_snapshot){const snapshot=document.createElement("details");const summary=document.createElement("summary");summary.textContent="View your recorded quote snapshot";const pre=document.createElement("pre");pre.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px";pre.textContent=JSON.stringify(row.partner_quote_snapshot,null,2);snapshot.append(summary,pre);card.appendChild(snapshot);}
+host.appendChild(card);
+}
+}catch(error){console.error("KRIM partner response evidence:",error);count.textContent="Unavailable";host.textContent="Your response history could not be loaded. Other workspace access is unchanged. "+(error&&error.message?error.message:"Please retry.");}
+}
 function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("A required security component could not be loaded."));document.head.appendChild(s);});}
 (async()=>{try{
 await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");await loadScript("../config.js");
@@ -106,6 +130,7 @@ document.getElementById("workspace-status").textContent=eligible?"Organization v
 document.getElementById("access-badge").textContent=eligible?"PARTNER ORGANIZATION VERIFIED":"COMMERCIAL ACCESS RESTRICTED";
 if(!eligible)document.getElementById("access-note").textContent="Organization access is not yet eligible for commercial partner operations. Complete the applicable verification, lifecycle and compliance requirements. Every shipment, quote, capability and financial action remains subject to its own authorization.";
 main.hidden=false;
+await loadPartnerResponseEvidence(client);
 }catch(error){console.error("KRIM partner command centre access check:",error);fail("Workspace access could not be verified",error&&error.message?error.message:"Sign in again and retry.");}})();
 })();
 </script>
