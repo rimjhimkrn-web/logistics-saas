@@ -82,8 +82,8 @@ for (const file of htmlFiles) {
   const linkedScriptSignals = [...new Set(localScriptSources)].filter(scriptPath => backendSignalRe.test(readFileSync(scriptPath, "utf8")));
   const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|platform\/krim-supabase\.js|krim-supabase\.js/i.test(html);
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
-  const hasLanguageBootstrap = /krim-global-language\\.js/i.test(html) ||
-    [...new Set(localScriptSources)].some(scriptPath => /krim-global-language\\.js/i.test(readFileSync(scriptPath, "utf8")));
+  const hasLanguageBootstrap = /krim-global-language\.js/i.test(html) ||
+    [...new Set(localScriptSources)].some(scriptPath => /krim-global-language\.js/i.test(readFileSync(scriptPath, "utf8")));
   const operational = /(?:dashboard|workspace|shipment|booking|quote|payment|invoice|tracking|warehouse|customs|finance|operations|partner|enterprise|driver|global-operations)/i.test(file);
   const visiblePageText = html
     .replace(/<!--[\s\S]*?-->/g, " ")
