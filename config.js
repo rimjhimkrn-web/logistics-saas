@@ -109,6 +109,6 @@ window.krimRoute = function (routeName, query = {}) {
    KRIM config, so the saved preference survives navigation between modules. */
 (function(){
   if(window.KRIM_LANGUAGE_BOOTSTRAPPED||document.querySelector('script[data-krim-language-loader]'))return;
-  var s=document.createElement('script');s.src=(window.KRIM_BASE_PATH||'')+'/assets/krim-global-language.js';
+  var s=document.createElement('script');s.src=(window.KRIM_BASE_PATH||'')+'/assets/krim-global-language.js?v=20261127-global-language-v1';
   s.defer=true;s.dataset.krimLanguageLoader='1';document.head.appendChild(s);
 })();
