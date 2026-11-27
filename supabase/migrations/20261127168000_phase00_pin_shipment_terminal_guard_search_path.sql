@@ -1,0 +1,1 @@
+ALTER FUNCTION private.krim_guard_shipment_terminal_state() SET search_path = '';
