@@ -79,7 +79,7 @@ for (const file of htmlFiles) {
   // rather than a <script src> or inline createClient() call. Treat that explicit
   // shared-client import as a backend signal, but keep it separate from runtime proof.
   const backendSignalRe = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|platform\/krim-supabase\.js|krim-supabase\.js|fetch\s*\(/i;
-  const linkedScriptSignals = [...new Set(localScriptSources)].filter(scriptPath => backendSignalRe.test(readFileSync(scriptPath, "utf8")));
+  const linkedScriptSignals = [...new Set(localScriptSources)].filter(scriptPath => !/krim-global-language\.js$/i.test(scriptPath) && backendSignalRe.test(readFileSync(scriptPath, "utf8")));
   const directSupabaseSignal = /createClient|supabase\.from\(|\.rpc\(|functions\.invoke\(|SUPABASE_URL|supabase-js|KRIM_SUPABASE|supabaseClient|platform\/krim-supabase\.js|krim-supabase\.js/i.test(html);
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
   const hasLanguageBootstrap = /krim-global-language\.js/i.test(html) ||
