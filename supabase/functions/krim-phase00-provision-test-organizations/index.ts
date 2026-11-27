@@ -87,55 +87,17 @@ Deno.serve(async (req: Request) => {
   const ids = roles.map(role => users.get(role).id);
   if (new Set(ids).size !== 4) return response({ ok: false, error: "Four distinct Auth identities are required." }, 409, origin);
 
-  const orgResults: Array<{ role: FixtureRole; organization_id: number; membership: string }> = [];
+  const orgResults: Array<{ role: FixtureRole; organization_id: number }> = [];
   for (const role of roles) {
-    const isPartner = role.startsWith("partner");
-    const label = role.toUpperCase().replace("_", " ");
-    const legalName = `KRIM TEST ONLY | ${label} | ${runId}`;
-    const { data: found, error: findError } = await admin.from("krim_organizations")
-      .select("id,organization_type,legal_name").eq("legal_name", legalName).maybeSingle();
-    if (findError) return response({ ok: false, error: "Could not safely check existing fixture organisation." }, 500, origin);
-    let organizationId: number;
-    if (found) {
-      if (found.organization_type !== (isPartner ? "partner" : "customer")) {
-        return response({ ok: false, error: "Existing fixture organisation has an unexpected type." }, 409, origin);
-      }
-      organizationId = found.id;
-    } else {
-      const row: Record<string, unknown> = {
-        organization_type: isPartner ? "partner" : "customer",
-        organization_type_code: isPartner ? "partner" : "customer",
-        legal_name: legalName,
-        display_name: `KRIM TEST ONLY — ${label}`,
-        status: "active",
-      };
-      if (isPartner) {
-        row.partner_account_mode = "development_test";
-        row.partner_lifecycle_status = "registered";
-        row.partner_verification_status = "not_started";
-        row.partner_compliance_status = "not_started";
-        row.partner_onboarding_status = "not_started";
-        row.partner_metadata = { krim_phase00_fixture: true, krim_fixture_run_id: runId, krim_fixture_role: role };
-      }
-      const { data: inserted, error: insertError } = await admin.from("krim_organizations").insert(row).select("id").single();
-      if (insertError || !inserted) return response({ ok: false, error: "Organisation creation failed; retry is safe after reviewing this run." }, 500, origin);
-      organizationId = inserted.id;
-    }
-
     const userId = users.get(role).id;
-    const { data: member, error: memberError } = await admin.from("krim_organization_members")
-      .select("id,role,status").eq("organization_id", organizationId).eq("user_id", userId).maybeSingle();
-    if (memberError) return response({ ok: false, error: "Membership verification failed." }, 500, origin);
-    let membership = "existing";
-    if (member) {
-      if (member.role !== "owner" || member.status !== "active") return response({ ok: false, error: "Existing fixture membership conflicts with expected owner role." }, 409, origin);
-    } else {
-      const { error: insertMemberError } = await admin.from("krim_organization_members")
-        .insert({ organization_id: organizationId, user_id: userId, role: "owner", status: "active" });
-      if (insertMemberError) return response({ ok: false, error: "Membership creation failed; review audit trail before retrying." }, 500, origin);
-      membership = "created";
+    const { data: organizationId, error: provisionError } = await admin.rpc(
+      "krim_phase00_provision_fixture_organization",
+      { p_run_id: runId, p_fixture_role: role, p_user_id: userId, p_actor_user_id: caller.id }
+    );
+    if (provisionError || typeof organizationId !== "number") {
+      return response({ ok: false, error: "Atomic organisation provisioning failed; inspect the private fixture ledger before retrying." }, 500, origin);
     }
-    orgResults.push({ role, organization_id: organizationId, membership });
+    orgResults.push({ role, organization_id: organizationId });
   }
   return response({
     ok: true, staging_project: PROJECT_ID, run_id: runId,
