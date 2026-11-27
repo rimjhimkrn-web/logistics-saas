@@ -111,6 +111,6 @@
 (function(){
   if(window.KRIM_LANGUAGE_BOOTSTRAPPED||document.querySelector('script[data-krim-language-loader]'))return;
   var current=document.currentScript;
-  var src=current&&current.src?new URL('../../../assets/krim-global-language.js',current.src).href:'../../../assets/krim-global-language.js';
+  var src=current&&current.src?new URL('../../../assets/krim-global-language.js?v=20261127-global-language-v1',current.src).href:'../../../assets/krim-global-language.js?v=20261127-global-language-v1';
   var script=document.createElement('script');script.src=src;script.defer=true;script.dataset.krimLanguageLoader='1';document.head.appendChild(script);
 })();
