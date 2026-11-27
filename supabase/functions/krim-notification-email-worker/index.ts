@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";\nimport { EMAIL_OUTBOX_SELECT, isSupportedEssentialEmailEvent } from "./policy.ts";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: outbox, error: outboxError } = await db
       .from("krim_notification_outbox")
-      .select("id,organization_id,recipient_type,recipient_reference,subject,message,provider,idempotency_key,metadata,status")
+      .select(EMAIL_OUTBOX_SELECT)
       .eq("id", outboxId)
       .maybeSingle();
 
@@ -93,17 +93,11 @@ Deno.serve(async (req: Request) => {
     const recipientUserId = String(outbox.metadata?.recipient_user_id ?? "");
     const notificationClass = String(outbox.metadata?.notification_class ?? "");
     const organizationId = Number(outbox.organization_id);
-    const allowedEventTypes = new Set([
-      "shipment.created",
-      "shipment.status_changed",
-      "partner.assignment_offered",
-      "partner.assignment_status_changed"
-    ]);
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipientUserId) ||
         outbox.recipient_reference !== recipientUserId ||
         !Number.isSafeInteger(organizationId) || organizationId <= 0 ||
         notificationClass !== "essential" ||
-        !allowedEventTypes.has(String(outbox.notification_type ?? ""))) {
+        !isSupportedEssentialEmailEvent(outbox.notification_type)) {
       const { data: cancelledResult } = await db.rpc("krim_cancel_email_notification_delivery", {
         p_delivery_id: deliveryId, p_worker_id: workerId,
         p_reason: "recipient_metadata_invalid"
