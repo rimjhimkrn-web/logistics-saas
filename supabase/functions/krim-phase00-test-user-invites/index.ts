@@ -109,9 +109,15 @@ Deno.serve(async (req: Request) => {
     const email = normalized[roleName];
     const existing = existingByEmail.get(email);
     if (existing) {
-      const meta = existing.user_metadata ?? {};
-      if (meta.krim_phase00_fixture !== true || meta.krim_fixture_run_id !== runId || meta.krim_fixture_role !== roleName) {
+      const appMeta = existing.app_metadata ?? {};
+      if (appMeta.krim_phase00_fixture !== true || appMeta.krim_fixture_run_id !== runId || appMeta.krim_fixture_role !== roleName) {
         return reply({ ok: false, error: "An address already belongs to a non-matching account; no account was adopted.", completed: results.length }, 409, origin);
+      }
+      if (appMeta.krim_phase00_fixture !== true || appMeta.krim_fixture_run_id !== runId || appMeta.krim_fixture_role !== roleName) {
+        const { error: tagError } = await admin.auth.admin.updateUserById(existing.id, { app_metadata: {
+          ...appMeta, krim_phase00_fixture: true, krim_fixture_run_id: runId, krim_fixture_role: roleName
+        }});
+        if (tagError) return reply({ ok: false, error: "Could not securely mark existing invite as a Staging fixture." }, 500, origin);
       }
       results.push({ role: roleName, user_id: existing.id, status: "already_invited" });
       continue;
@@ -127,6 +133,10 @@ Deno.serve(async (req: Request) => {
     if (error || !data.user) {
       return reply({ ok: false, error: "Invitation failed. Completed invitations are reported; resolve the issue before retrying.", completed: results.length }, 502, origin);
     }
+    const { error: tagError } = await admin.auth.admin.updateUserById(data.user.id, { app_metadata: {
+      krim_phase00_fixture: true, krim_fixture_run_id: runId, krim_fixture_role: roleName
+    }});
+    if (tagError) return reply({ ok: false, error: "Invitation was sent but secure fixture tagging failed; stop and reconcile this run." }, 500, origin);
     results.push({ role: roleName, user_id: data.user.id, status: "invited" });
   }
 
