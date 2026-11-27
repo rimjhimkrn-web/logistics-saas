@@ -24,7 +24,7 @@ async function loadAccount(){
  const client=w.KRIM_SUPABASE||w.supabaseClient;if(!client?.auth||!client.from)return;
  try{const {data:auth,error}=await client.auth.getSession();const user=auth?.session?.user;if(error||!user)return;
   const {data,error:readError}=await client.from('krim_user_app_preferences').select('preferences').eq('user_id',user.id).maybeSingle();if(readError)throw readError;
-  const v=data?.preferences?.customer_localization?.language_code;if(typeof v==='string'&&supported.has(v)){selected=v;localStorage.setItem(KEY,v);const s=d.getElementById('krim-language-select');if(s)s.value=v;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=v;apply(v);}
+  const v=data?.preferences?.customer_localization?.language_code;if(typeof v==='string'&&supported.has(v)){selected=v;localStorage.setItem(KEY,v);const s=d.getElementById('krim-language-select');if(s)s.value=v;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=v;apply(v);}else if(selected!=='en'){await saveAccount(selected);}
  }catch(e){console.warn('[KRIM language] Account preference unavailable; using device preference',e);}
 }
 function mount(){
