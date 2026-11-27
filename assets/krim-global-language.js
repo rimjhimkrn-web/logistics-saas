@@ -19,7 +19,7 @@ async function saveAccount(v){
   const {error:writeError}=await client.from('krim_user_app_preferences').upsert({user_id:user.id,preferences:prefs,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(writeError)throw writeError;
  }catch(e){console.warn('[KRIM language] Account preference save failed',e);note('Saved on this device; account sync unavailable');}
 }
-function choose(v,persist=true){selected=normalize(v);localStorage.setItem(KEY,selected);docLang(selected);cookie(selected);apply(selected);if(persist)saveAccount(selected);note(selected==='en'?'English selected':'Applying machine translation…');d.dispatchEvent(new CustomEvent('krim:language-changed',{detail:{language:selected}}));}
+function choose(v,persist=true){selected=normalize(v);localStorage.setItem(KEY,selected);docLang(selected);cookie(selected);apply(selected);const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;if(persist)saveAccount(selected);note(selected==='en'?'English selected':'Applying machine translation…');d.dispatchEvent(new CustomEvent('krim:language-changed',{detail:{language:selected}}));}
 async function loadAccount(){
  const client=w.KRIM_SUPABASE||w.supabaseClient;if(!client?.auth||!client.from)return;
  try{const {data:auth,error}=await client.auth.getSession();const user=auth?.session?.user;if(error||!user)return;
@@ -39,12 +39,12 @@ function mount(){
  toggle.addEventListener('click',()=>{const open=menu.hidden;menu.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)sel.focus();});
  d.addEventListener('click',e=>{if(!box.contains(e.target)){menu.hidden=true;toggle.setAttribute('aria-expanded','false');}});
  sel.addEventListener('change',()=>choose(sel.value,true));
- const pageSelect=d.getElementById('language');if(pageSelect){pageSelect.addEventListener('change',()=>choose(pageSelect.value,false));}
+ const pageSelect=d.getElementById('language');if(pageSelect){pageSelect.addEventListener('change',()=>choose(pageSelect.value,true));}
  w.krimGoogleTranslateReady=function(){if(!w.google?.translate?.TranslateElement)return;new w.google.translate.TranslateElement({pageLanguage:'en',includedLanguages:LANGS.map(x=>x[0]).filter(x=>x!=='en').join(','),autoDisplay:false},'google_translate_element');apply(selected);};
  const script=d.createElement('script');script.src='https://translate.google.com/translate_a/element.js?cb=krimGoogleTranslateReady';script.async=true;script.onerror=()=>note('Translation service unavailable on this page');d.head.appendChild(script);
 }
-function start(){docLang(selected);cookie(selected);mount();loadAccount();}
+async function start(){docLang(selected);cookie(selected);mount();await loadAccount();const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;apply(selected);}
 if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',start,{once:true});else start();
-w.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){selected=normalize(e.newValue);const s=d.getElementById('krim-language-select');if(s)s.value=selected;apply(selected);}});
+w.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue){selected=normalize(e.newValue);const s=d.getElementById('krim-language-select');if(s)s.value=selected;const pageSelect=d.getElementById('language');if(pageSelect)pageSelect.value=selected;apply(selected);}});
 w.KRIM_LANGUAGE={get current(){return selected;},set:choose,languages:LANGS.map(x=>({code:x[0],name:x[1]}))};
 })(window,document);
