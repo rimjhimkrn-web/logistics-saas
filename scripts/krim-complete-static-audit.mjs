@@ -84,7 +84,6 @@ for (const file of htmlFiles) {
   const hasSupabaseSignal = directSupabaseSignal || linkedScriptSignals.length > 0;
   const hasLanguageBootstrap = /krim-global-language\\.js/i.test(html) ||
     [...new Set(localScriptSources)].some(scriptPath => /krim-global-language\\.js/i.test(readFileSync(scriptPath, "utf8")));
-  if (!hasLanguageBootstrap && !compatibilityRedirect) missingLanguageBootstrap.push(file);
   const operational = /(?:dashboard|workspace|shipment|booking|quote|payment|invoice|tracking|warehouse|customs|finance|operations|partner|enterprise|driver|global-operations)/i.test(file);
   const visiblePageText = html
     .replace(/<!--[\s\S]*?-->/g, " ")
@@ -102,6 +101,7 @@ for (const file of htmlFiles) {
   const refreshTarget = (refreshTag.match(/content=["'][^"']*url=([^"']+)/i) || [])[1] || "";
   const headRedirect = /(?:window\.)?location\.replace\(/i.test(headMarkup) && /(?:redirect|continue|moved|replaced|consolidat)/i.test(titleText + " " + visiblePageText);
   const compatibilityRedirect = Boolean(refreshTag) || headRedirect;
+  if (!hasLanguageBootstrap && !compatibilityRedirect) missingLanguageBootstrap.push(file);
   const noindex = /\bnoindex\b/i.test(robotsContent);
   const isStaging = /(?:^|\/)staging(?:\/|$)/i.test(file);
   if (noindex) noindexPages.push(file);
