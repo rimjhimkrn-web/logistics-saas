@@ -1,0 +1,29 @@
+name: KRIM Notification Email Worker Policy Tests
+
+on:
+  push:
+    branches:
+      - staging/phase00-env-isolation
+    paths:
+      - "supabase/functions/krim-notification-email-worker/**"
+      - ".github/workflows/krim-notification-email-policy-tests.yml"
+  pull_request:
+    paths:
+      - "supabase/functions/krim-notification-email-worker/**"
+      - ".github/workflows/krim-notification-email-policy-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  policy-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run notification email policy tests
+        run: deno test --no-check supabase/functions/krim-notification-email-worker/policy_test.ts
