@@ -105,3 +105,12 @@
   w.KRIM_GLOBAL_CONTEXT = api;
   api.ready = api.refresh();
 })(window, document);
+
+/* Load the shared persistent language selector for customer pages that use
+   the customer global-context bundle but do not load config.js. */
+(function(){
+  if(window.KRIM_LANGUAGE_BOOTSTRAPPED||document.querySelector('script[data-krim-language-loader]'))return;
+  var current=document.currentScript;
+  var src=current&&current.src?new URL('../../../assets/krim-global-language.js',current.src).href:'../../../assets/krim-global-language.js';
+  var script=document.createElement('script');script.src=src;script.defer=true;script.dataset.krimLanguageLoader='1';document.head.appendChild(script);
+})();
