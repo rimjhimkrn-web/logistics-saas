@@ -92,9 +92,18 @@ Deno.serve(async (req: Request) => {
 
     const recipientUserId = String(outbox.metadata?.recipient_user_id ?? "");
     const notificationClass = String(outbox.metadata?.notification_class ?? "");
+    const organizationId = Number(outbox.organization_id);
+    const allowedEventTypes = new Set([
+      "shipment.created",
+      "shipment.status_changed",
+      "partner.assignment_offered",
+      "partner.assignment_status_changed"
+    ]);
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipientUserId) ||
         outbox.recipient_reference !== recipientUserId ||
-        !["essential", "marketing"].includes(notificationClass)) {
+        !Number.isSafeInteger(organizationId) || organizationId <= 0 ||
+        notificationClass !== "essential" ||
+        !allowedEventTypes.has(String(outbox.notification_type ?? ""))) {
       const { data: cancelledResult } = await db.rpc("krim_cancel_email_notification_delivery", {
         p_delivery_id: deliveryId, p_worker_id: workerId,
         p_reason: "recipient_metadata_invalid"
@@ -106,7 +115,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: eligible, error: eligibilityError } = await db.rpc("krim_check_notification_email_eligibility", {
       p_user_id: recipientUserId,
-      p_organization_id: outbox.organization_id,
+      p_organization_id: organizationId,
       p_notification_class: notificationClass
     });
     if (eligibilityError || eligible !== true) {
