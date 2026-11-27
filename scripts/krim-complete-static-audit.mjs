@@ -138,7 +138,7 @@ const lines = [
 "- HTML pages with direct backend/client signals: "+report.totals.htmlPagesWithDirectBackendSignals,
 "- HTML pages with backend-related signals in linked local scripts: "+report.totals.htmlPagesWithLinkedScriptBackendSignals,
 "- HTML pages with shared language bootstrap: "+report.totals.htmlPagesWithLanguageBootstrap,
-"- HTML pages missing language bootstrap (redirects excluded): "+report.totals.htmlPagesMissingLanguageBootstrap,"
+"- HTML pages missing language bootstrap (redirects excluded): "+report.totals.htmlPagesMissingLanguageBootstrap,
 "- Operational pages with at least one backend-related signal (requires runtime verification): "+report.totals.operationalPagesWithBackendSignals,"",
 "## Exact duplicate content","",
 ...(duplicateGroups.length ? duplicateGroups.map(g=>"- "+g.paths.join(" ↔ ")) : ["- None detected."]),"",
