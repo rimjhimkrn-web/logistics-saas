@@ -51,7 +51,7 @@
   /* Also bootstrap language on branded public pages that do not load config.js. */
   if(!window.KRIM_LANGUAGE_BOOTSTRAPPED&&!document.querySelector('script[data-krim-language-loader]')){
     var languageScript=document.createElement("script");
-    languageScript.src=new URL("krim-global-language.js",document.currentScript&&document.currentScript.src||location.href).href;
+    languageScript.src=new URL("krim-global-language.js?v=20261127-global-language-v1",document.currentScript&&document.currentScript.src||location.href).href;
     languageScript.defer=true;languageScript.dataset.krimLanguageLoader="1";document.head.appendChild(languageScript);
   }
   /* Also bootstrap language on branded public pages that do not load config.js. */
