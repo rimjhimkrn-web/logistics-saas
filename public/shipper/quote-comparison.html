@@ -34,6 +34,7 @@
 <div class="panel"><div class="panelhead"><div><h2>Partner offer comparison</h2><p id="list-caption">Eligible partner-submitted offers appear after secure verification.</p></div><span id="quote-count" class="pill violet">Not loaded</span></div><div id="quote-list" class="quote-list"><div class="empty"><div class="symbol">⇄</div><h3>Waiting for a shipment</h3>Open this page with a valid shipment reference to compare your quote records.</div></div></div>
 <aside class="sidebar-grid">
 <section class="panel"><div class="panelhead"><div><h2>Shipment context</h2><p>Verified route context for the selected shipment.</p></div><span id="shipment-status" class="pill warn">Not loaded</span></div><div class="sidebody"><div class="route"><div class="place"><small>Origin</small><b id="origin">—</b></div><div class="arrow">→</div><div class="place"><small>Destination</small><b id="destination">—</b></div></div><div class="summary"><div class="sumrow"><span>Shipment reference</span><b id="shipment-ref">—</b></div><div class="sumrow"><span>Transport</span><b id="transport">—</b></div><div class="sumrow"><span>Cargo</span><b id="cargo">—</b></div><div class="sumrow"><span>Quote selection</span><b id="selection-label">None selected</b></div></div><div class="feedback info show" id="detail-feedback">Your shipment details will load only after account and organization access checks succeed.</div></div></section>
+<section class="panel" aria-labelledby="response-evidence-title"><div class="panelhead"><div><h2 id="response-evidence-title">Partner response evidence</h2><p>Recorded acceptance and rejection events linked to your organisation’s quotes.</p></div><span class="pill violet" id="response-evidence-count">Not loaded</span></div><div class="sidebody"><div id="response-evidence-list" aria-live="polite"><p class="feedback info show">Evidence will load after your customer organisation is verified.</p></div><p style="font-size:12px;color:var(--muted)">These records document a partner response; they are not a signed service contract or proof of completed shipment.</p></div></section>
 <section class="panel"><div class="panelhead"><div><h2>Global decision checks</h2><p>Compare commercial terms without hiding important limitations.</p></div></div><div class="sidebody"><div class="rulelist"><div class="rule"><span class="ruleicon">✓</span><span><b>Price & currency</b>Compare only amounts returned by KRIM. Different currencies are not converted unless a verified FX source is configured.</span></div><div class="rule"><span class="ruleicon">✓</span><span><b>Validity window</b>Expired quotations cannot be accepted.</span></div><div class="rule"><span class="ruleicon">✓</span><span><b>Provider acceptance</b>A customer award sends an assignment offer. The provider must accept it before the shipment becomes assigned.</span></div><div class="rule"><span class="ruleicon">✓</span><span><b>Route & compliance</b>Customs, sanctions, cargo acceptance, capacity and lane coverage remain separate operational checks.</span></div></div><div class="sideactions"><button class="btn primary" id="accept-selected" type="button" disabled>Award selected partner offer →</button><a class="btn dark" id="checkout-link" href="#" aria-disabled="true">Review partner-direct payment guidance</a><a class="btn" id="refresh-button" href="">Refresh quotations ↻</a></div><p style="font-size:9px;line-height:1.7;color:var(--muted);margin:13px 0 0">Award is enabled only for an unexpired partner-submitted offer. KRIM verifies customer permissions, partner eligibility, capability and route coverage on the server.</p><div id="action-feedback" class="feedback"></div></div></section>
 </aside></section>
 </main>
@@ -116,6 +117,27 @@ if(!valid){actionFeedback('This offer is expired, expires too soon, or is not in
 if(!shipmentEligible){actionFeedback('This shipment is not in a state that can accept another partner offer. Current state: '+String(shipment.status||'unknown')+'.','error');return;}
 $('accept-selected').disabled=false;actionFeedback('Ready to request provider acceptance. KRIM will validate customer permissions, partner verification, compliance, capability, route coverage and offer validity on the server.','success');
 }
+async function loadPartnerResponseEvidence(){
+const host=$('response-evidence-list'),count=$('response-evidence-count');
+if(!client||!host)return;
+host.textContent='Loading organisation-scoped response evidence…';
+try{
+const {data,error}=await client.rpc('krim_get_partner_response_evidence',{p_quote_id:null,p_limit:100});
+if(error)throw error;
+const rows=Array.isArray(data)?data:[];
+count.textContent=rows.length+' record'+(rows.length===1?'':'s');
+host.replaceChildren();
+if(!rows.length){const empty=document.createElement('p');empty.className='feedback info show';empty.textContent='No partner acceptance or rejection events are recorded for your accessible organisation quotes yet.';host.appendChild(empty);return;}
+for(const row of rows){
+const item=document.createElement('article');item.className='quote';item.style.marginBottom='10px';
+const title=document.createElement('h3');title.textContent=String(row.event_type||'Partner response').replace(/[._]/g,' ');
+const detail=document.createElement('p');detail.textContent='Customer quote #'+row.quote_id+' · Partner quote #'+(row.partner_quote_id??'not recorded')+' · Assignment '+(row.assignment_number||row.assignment_id||'not recorded');
+const state=document.createElement('p');state.textContent='Previous: '+(row.previous_status||'not recorded')+' · Response: '+(row.new_status||'not recorded');
+const when=document.createElement('small');when.textContent=row.event_time?'Recorded '+new Date(row.event_time).toLocaleString():'Response time not recorded';
+item.append(title,detail,state,when);host.appendChild(item);
+}
+}catch(error){console.error('KRIM partner response evidence:',error);count.textContent='Unavailable';host.textContent='Response evidence could not be loaded. Your quote and shipment access remain unchanged. '+(error&&error.message?error.message:'Please retry.');}
+}
 async function loadRecords(){
 const [offerResult,quoteResult,assignmentResult]=await Promise.all([
 client.rpc('krim_customer_list_partner_quotes',{p_shipment_ids:[Number(shipment.id)]}),
@@ -147,7 +169,7 @@ if(!orgIds.length)throw new Error('This account has no active customer, shipper 
 const sr=await client.from('krim_shipments').select('id,shipment_number,status,customer_organization_id,origin_place_label,destination_place_label,requested_transport_mode,requested_route_type,goods_description').eq('id',Number(sid)).in('customer_organization_id',orgIds).maybeSingle();if(sr.error)throw sr.error;
 if(!sr.data){feedback('Shipment not found in your active customer organizations. No records outside your organization were displayed.','error');showEmpty('Shipment not accessible','Check the shipment reference or ask your organization administrator.');return;}
 shipment=sr.data;$('origin').textContent=shipment.origin_place_label||'Origin not recorded';$('destination').textContent=shipment.destination_place_label||'Destination not recorded';$('shipment-ref').textContent=shipment.shipment_number||('#'+shipment.id);$('transport').textContent=shipment.requested_transport_mode||'Not specified';$('cargo').textContent=shipment.goods_description||'Not specified';$('shipment-status').textContent=String(shipment.status||'unknown').replace(/_/g,' ');$('shipment-status').className='pill '+(['confirmed','assigned','dispatched','in_transit','delivered'].includes(String(shipment.status))?'good':'warn');$('session-label').textContent='Organization verified · live records';
-await loadRecords();feedback('Shipment access verified. Partner-submitted offers and any existing assignment are loaded from KRIM records.','info');detailFeedback('Customer organization, shipment ownership and partner offer visibility checks passed. An offer is not a booking until the partner accepts the assignment.','success');render();
+await loadRecords();await loadPartnerResponseEvidence();feedback('Shipment access verified. Partner-submitted offers and any existing assignment are loaded from KRIM records.','info');detailFeedback('Customer organization, shipment ownership and partner offer visibility checks passed. An offer is not a booking until the partner accepts the assignment.','success');render();
 }catch(e){console.error(e);feedback('KRIM could not load partner offers or shipment state. No award or payment action was performed. '+(e&&e.message?e.message:'Please retry later.'),'error');showEmpty('Unable to load partner offers','Check your session and shipment access, then refresh.');}
 };cfg.onerror=()=>feedback('KRIM public configuration could not be loaded. No records or actions are available.','error');document.head.appendChild(cfg);
 }
@@ -164,7 +186,7 @@ try{
 const {data,error}=await client.rpc('krim_accept_global_quote',{p_quote_id:Number(q.id)});if(error)throw error;
 const result=Array.isArray(data)?data[0]:data;
 if(!result||Number(result.id)!==Number(q.id)||String(result.status)!=='accepted')throw new Error('KRIM did not confirm acceptance of this exact quote.');
-await loadRecords();render();actionFeedback('Customer quote accepted. KRIM finalized the partner assignment and shipment status. Freight payment remains directly between customer and contracting provider.','success');
+await loadRecords();await loadPartnerResponseEvidence();render();actionFeedback('Customer quote accepted. KRIM finalized the partner assignment and shipment status. Freight payment remains directly between customer and contracting provider.','success');
 }catch(e){console.error(e);actionFeedback('Quote acceptance failed. '+(e&&e.message?e.message:'Server validation failed. Refresh and review the current state.'),'error');}
 finally{busy=false;updateSelection();}
 return;
@@ -176,7 +198,7 @@ try{
 const {data,error}=await client.rpc('krim_customer_prepare_partner_quote',{p_partner_quote_id:Number(selected.id)});if(error)throw error;
 const result=Array.isArray(data)?data[0]:data;
 if(!result||Number(result.shipment_id)!==Number(shipment.id)||Number(result.partner_quote_id)!==Number(selected.id)||String(result.status)!=='sent')throw new Error('KRIM did not confirm the exact prepared customer quote. Refresh and check the shipment before retrying.');
-selected=null;await loadRecords();render();actionFeedback('Customer quote prepared and provider assignment offer sent. Await provider acceptance, then accept the customer quote to finalize assignment.','success');
+selected=null;await loadRecords();await loadPartnerResponseEvidence();render();actionFeedback('Customer quote prepared and provider assignment offer sent. Await provider acceptance, then accept the customer quote to finalize assignment.','success');
 }catch(e){console.error(e);actionFeedback('Partner offer could not be prepared. '+(e&&e.message?e.message:'Server validation failed. Refresh and check the current shipment state.'),'error');}
 finally{busy=false;updateSelection();}
 });
