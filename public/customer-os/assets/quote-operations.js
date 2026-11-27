@@ -11,7 +11,8 @@ function path(p){return window.krimPath?window.krimPath(p):p}
 function say(text,kind){const el=$('feedback');el.textContent=text;el.className='notice'+(kind?' '+kind:'')}
 function money(amount,currency){const n=Number(amount);if(!Number.isFinite(n))return 'Price not recorded';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:String(currency||'INR').toUpperCase(),maximumFractionDigits:2}).format(n)}catch(_){return String(currency||'')+' '+n.toLocaleString()}}
 function taxTreatment(value){return value==='included_in_rate'?'Tax included in quoted rate':value==='not_applicable'?'Tax reviewed as not applicable':'Tax treatment not recorded';}
-function date(value){if(!value)return 'Not recorded';const d=new Date(value);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}\nfunction quoteStatusLabel(q){const status=String(q.status||'pending').toLowerCase();if(status==='accepted'&&!q.partner_quote_id)return 'legacy / provider unverified';return status.replace(/_/g,' ')}
+function date(value){if(!value)return 'Not recorded';const d=new Date(value);return Number.isNaN(d.getTime())?'Not recorded':d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})}
+function quoteStatusLabel(q){const status=String(q.status||'pending').toLowerCase();if(status==='accepted'&&!q.partner_quote_id)return 'legacy / provider unverified';return status.replace(/_/g,' ')}
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function renderList(rows){
  const root=$('quote-list');root.replaceChildren();
@@ -51,11 +52,13 @@ async function loadDetail(){
   const button=$('accept-button');button.disabled=accepted||!!expired||Number(q.amount)<=0||!shipment||!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED||!!partnerAssignmentError||!partnerAccepted;
   button.textContent=accepted?(partnerAccepted?'Quote accepted':'Acceptance unverified'):expired?'Quote expired':!partnerAccepted?'Awaiting partner acceptance':'Accept quote securely';
   if(!shipment)say('The linked shipment could not be verified inside your organization. Quote acceptance is blocked.','error');
-  else if(accepted&&!partnerAccepted)say('This record carries a historical accepted status, but KRIM cannot verify a matching accepted partner quote and assignment. Treat it as legacy/unverified, not as a confirmed carrier booking. No freight payment or dispatch is confirmed.','warn');\n  else if(accepted)say('The customer quote and matching partner assignment are accepted. Final operational booking readiness and dispatch remain separate. Freight payment is arranged directly with the contracting provider; KRIM does not collect or verify it.');
+  else if(accepted&&!partnerAccepted)say('This record carries a historical accepted status, but KRIM cannot verify a matching accepted partner quote and assignment. Treat it as legacy/unverified, not as a confirmed carrier booking. No freight payment or dispatch is confirmed.','warn');
+  else if(accepted)say('The customer quote and matching partner assignment are accepted. Final operational booking readiness and dispatch remain separate. Freight payment is arranged directly with the contracting provider; KRIM does not collect or verify it.');
   else if(expired)say('This quote has expired. KRIM will not attempt to accept an expired quote.','warn');
   else if(!PARTNER_DIRECT_BOOKING_ACCEPTANCE_ENABLED)say('Quote acceptance is paused pending the partner-direct launch gate.','warn');
   else if(partnerAssignmentError)say('KRIM could not verify the partner assignment. Quote acceptance remains locked. Refresh or contact support.','warn');
-  else if(!partnerAssignment||!['accepted','active'].includes(String(partnerAssignment.status||'').toLowerCase()))say('The matching logistics partner has not accepted this assignment yet. Quote acceptance remains locked until the partner response is recorded.','warn');\n   else if(Number(partnerAssignment.capacity_binding_id)<=0)say('The partner accepted, but verified capacity has not been reserved. Customer acceptance remains locked until a confirmed capacity binding is recorded.','warn');
+  else if(!partnerAssignment||!['accepted','active'].includes(String(partnerAssignment.status||'').toLowerCase()))say('The matching logistics partner has not accepted this assignment yet. Quote acceptance remains locked until the partner response is recorded.','warn');
+   else if(Number(partnerAssignment.capacity_binding_id)<=0)say('The partner accepted, but verified capacity has not been reserved. Customer acceptance remains locked until a confirmed capacity binding is recorded.','warn');
   else say('The partner assignment is accepted. KRIM will revalidate quote and shipment readiness on the server. Freight payment remains directly between the customer and provider.','')
  }else say('Quote and shipment records are scoped to your active customer organization. This view does not imply booking or payment completion.')
 }
