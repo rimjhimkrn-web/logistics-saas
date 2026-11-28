@@ -773,3 +773,44 @@ No driver invitation, vehicle registration, document upload, assignment, dispatc
 
 ### CI follow-up
 The ten previously pending checks all completed successfully: container-booking, transshipment, route-planning, cargo-details, forwarding-quote and partner-security-audit environment-isolation/static-link runs (`46133389809`, `46133393035`, `46133396403`, `46133396410`, `46133399211`, `46133399242`, `46133341012`, `46133341052`, `46133215482`, `46133215500`). Each job concluded `success`. These are repository static-link and environment-isolation checks only; they do not establish authenticated runtime, storage, or real dispatch readiness.
+
+
+## Notification outbox, in-app history and email worker audit — 2026-11-28
+
+Read-only inspection of Staging project `qrpcivhdxobiaofppbkl`, its deployed Edge Function source and notification-related database metadata. No function was invoked, no notification was enqueued, no email was sent and no database state was changed. Production was not accessed.
+
+### Notification data model present
+The Staging schema contains dedicated `krim_notification_outbox`, `krim_notification_deliveries`, `krim_notification_retry_events`, `krim_notification_preferences`, `krim_communication_delivery_events`, `krim_dead_letter_events` and `notifications` tables. The schema includes event/outbox linkage, recipient and organization references, notification type/channel/priority, status, scheduled and next-attempt times, attempt count, provider/message identifiers, delivery timestamps, error fields, idempotency key, retry history and dead-letter resolution metadata.
+
+This establishes that the data model supports delivery lifecycle tracking. It does not establish that all customer, partner, driver and operations events are enqueued, rendered in the in-app centre, delivered by providers or retried correctly.
+
+### Preference control
+- `public.krim_set_notification_preference(bigint,text,text,boolean)` is executable by authenticated and not anon.
+- Its function body references `auth.uid()`, essential and marketing classifications, row locking and invalid-input exception handling. This is positive evidence of an authenticated preference-control path and classification-aware safeguards.
+- A targeted source scan did not independently establish the exact branch behavior for every essential category/channel combination. Keep essential service/security alerts non-optional and marketing preferences separate; require isolated tests that attempt to disable every essential category and verify the request is rejected without changing stored preferences.
+- The in-app history synchronization and unread-count functions inspected are not executable by authenticated or anon. Internal service routines also have no direct authenticated/anon EXECUTE grants. Do not grant them without caller classification and migration recovery.
+
+### Active Resend worker — high-risk operational boundary
+- Staging currently has an ACTIVE `krim-resend-email-worker` Edge Function, version 2, with `verify_jwt=false`.
+- Its source independently requires a high-entropy `x-krim-cron-secret`, validates the exact Staging Supabase project URL, requires service-role/Resend/from-address configuration, claims a maximum batch of 10 through an internal RPC, checks recipient email confirmation, sends to the Resend API, uses a provider idempotency key, and records success/failure through a completion RPC.
+- The worker is not safe to test by invoking it: if its environment secrets are configured, it can send real external email. It was not invoked, and no secrets/configuration values were read.
+- The deployed source handles a narrow partner-application follow-up email payload; it is not evidence of complete multi-channel transactional notification coverage. There is no equivalent delivery evidence here for SMS, push, bounce webhooks or customer/driver event coverage.
+- Provider acceptance is not the same as recipient delivery. The schema has provider event and delivered-at fields, but actual provider callbacks, delivery/bounce reconciliation and end-to-end receipt evidence remain unverified.
+
+### Permission and reliability findings
+- Internal claim/finish and in-app sync routines are not directly executable by anon/authenticated, consistent with a service-only/internal caller model. The active worker uses service-role access. Verify only through isolated mocks and static/function tests; do not expose these routines to browser roles.
+- The batch-claim routine body contains row-locking and `SKIP LOCKED` signals; the finish routine includes row locking and retry handling. This is positive concurrency/retry design evidence, not proof of lease expiry, duplicate suppression, bounded backoff, maximum attempts or dead-letter transitions under failure.
+- Notification table schema includes the relevant status and retry fields, but no live queue rows were read or processed in this review. No conclusion is made about pending backlog, delivery success rate or whether the current worker schedule is active.
+- The public notification centre remains disconnected per the earlier page audit. The authenticated driver notification page's inbox UI does not prove email/SMS/push delivery.
+
+### Required acceptance tests before activation
+1. In-app event creation for booking-created, quote, assignment, shipment milestone, exception, POD and cancellation events, with recipient/organization scoping and durable history.
+2. Duplicate event replay and concurrent worker claims: one logical notification per idempotency key, no lost event, no double provider send.
+3. Essential service/security notification preference cannot be disabled; marketing opt-out is honored and scoped to the correct user/organization/channel.
+4. Retry matrix for provider timeout, 429, 5xx, permanent 4xx, unconfirmed recipient, worker crash after provider acceptance, finish-RPC failure and lease expiry.
+5. Provider webhook signature verification, duplicate/out-of-order events, delivered/bounced/complained states and dead-letter recovery.
+6. Four-role tenant isolation across customer, partner, driver and operations, plus revoked membership and changed email cases.
+7. Test-only provider adapter and isolated queue lane; do not use live Resend, SMS or push providers for acceptance tests.
+
+### Release disposition
+Notification infrastructure is partially implemented, but notification activation is NOT cleared. The active Staging worker is capable of external Resend delivery and must remain uninvoked during audit. The existing in-app/outbox/retry data model is not a substitute for full event coverage, role-scoped reads, essential-alert enforcement tests and provider delivery evidence. Do not broaden RPC grants, enable public notification pages or send real test messages. Migration provenance and isolated restore remain prerequisites for any database repair.
