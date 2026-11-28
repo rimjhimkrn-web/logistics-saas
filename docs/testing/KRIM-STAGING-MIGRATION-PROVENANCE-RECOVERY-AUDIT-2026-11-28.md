@@ -126,3 +126,9 @@ A controlled forward-only recovery path is:
 - Phase 01: NOT AUTHORISED.
 
 This report is an inventory and recovery design, not a migration repair or database certification.
+
+
+## Additional isolated test option discovered
+The connected Supabase project has no existing development branches. Supabase's native branch API is available in the connected integration. A fresh branch is data-less by default and provides an isolated Postgres/Auth/Storage environment; its schema is built from migrations (GitHub-connected workflow) or the base project's migration history (dashboard workflow). It is not a copy of live Staging's untracked schema/data. See current Supabase branching documentation.
+
+The connected cost estimator returned **USD 0.01344 per branch-hour** (about USD 0.32 per 24 hours, before any other usage). Supabase documentation also notes branching availability is plan-dependent and branch usage is billed. No branch was created because this creates recurring usage charges and requires explicit owner cost approval. If approved, a short-lived branch can be used to test migration replay and isolated SQL changes, then be deleted immediately after evidence capture. It does not replace the need to reconcile schema drift or to validate the exact deployed Staging state.
