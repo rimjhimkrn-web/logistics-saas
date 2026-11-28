@@ -195,7 +195,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     if(!client){showBox("lookup-feedback","Secure connection unavailable","KRIM Supabase configuration could not be initialized. Refresh and try again.","bad");return false}
     const {data,error}=await client.auth.getSession();
     if(error||!data.session){const next=encodeURIComponent(location.pathname+location.search);location.href="../auth/login.html?next="+next;return false}
-    user=data.session.user;
+    const {data:verified,error:verifyError}=await client.auth.getUser();
+    if(verifyError||!verified?.user){const next=encodeURIComponent(location.pathname+location.search);location.href="../auth/login.html?next="+next;return false}
+    user=verified.user;
     $("session-label").textContent="SIGNED IN · "+(user.email||"KRIM USER");
     return true;
   }
