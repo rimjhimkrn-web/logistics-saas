@@ -574,3 +574,16 @@ Inspected `public/customer-os/quotes-pricing/quote-list.html`.
 - Identity hardening: production previously relied on the locally stored session user ID. It now additionally calls `auth.getUser()`, requires a verified user and uses that verified user ID to load active memberships. Commit: `d1f2ce6419defb13d42cab544df08b1810902472`.
 - Source checks passed for verified identity, verified-user membership lookup, allowed customer organization types, organization-scoped quote retrieval and empty staging preview data. Runtime access and RLS still require isolated authenticated tests; the 200-record limit also needs a clear disclosure or server-side pagination before full-history claims.
 
+
+
+## Schema restore blocker diagnosis and revised isolation boundary — 28 Nov 2026
+
+The long-running schema validation run `46132020729` has now completed and failed at the isolated local restore step (job `140939052426`). Staging schema-only export itself succeeded:
+
+- Snapshot: 3,502,437 bytes; sanitized snapshot: 3,489,451 bytes.
+- Sanitizer: no credential-like patterns and no data statements detected; 49 managed-schema metadata lines removed; raw schema was not uploaded.
+- Sanitized SHA-256: `6d22c23263518db1045079fe32c3d437511bbf3779c012c4fdd6544441d49e14`.
+- Restore failed with `permission denied to set role "supabase_admin"`. The local stack's `graphql_public` schema is owned by a managed admin role that the restore connection cannot assume. No Staging schema changes were made; the disposable local stack was stopped and temporary SQL files removed.
+
+Corrective workflow revision commit: `b6e803486b67621046ebec830cbfbd0027a03b60`. The restore now excludes Supabase-managed `graphql_public` from the application schema dump, removes the invalid role-switch/grant workaround, and compares metrics only for application-owned schemas `public`, `private` and `krim_internal`. This isolates the application schema without trying to modify managed local ownership. New schema validation run `46132495689` is in progress; success is not yet established. If application migrations or objects are found to target `graphql_public`, that scope must be assessed separately rather than silently treated as restored.
+
