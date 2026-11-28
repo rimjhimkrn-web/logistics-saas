@@ -723,3 +723,26 @@ The Staging inspection confirms significant backend execution-permission gaps. T
 - Both checks for the final allocation commit completed successfully: environment isolation `46133821595`, static links `46133821616`.
 
 The hard blocks are temporary containment, not a warehouse feature completion. Do not re-enable actions until the exact RPC privilege design, authenticated regression tests and inventory/evidence lifecycle controls are approved and verified.
+
+
+## Goods receipt, quality, evidence and dispatch-handover permission audit — 2026-11-28
+
+Read-only Staging database privilege inspection (project `qrpcivhdxobiaofppbkl`; Production untouched):
+
+- Warehouse mutation/read RPCs checked in this pass are SECURITY DEFINER with an empty search_path and have no effective EXECUTE grant to either `anon` or `authenticated`. This includes `krim_warehouse_create_linked_goods_receipt_task`, `krim_warehouse_create_linked_handover_task`, `krim_warehouse_list_tasks`, `krim_warehouse_list_assigned_shipment_legs`, `krim_warehouse_transition_task`, `krim_warehouse_review_inventory_quality`, `krim_warehouse_register_evidence`, `krim_warehouse_list_evidence`, `krim_warehouse_dashboard`, transfer dispatch/receive/review and stock movement functions.
+- `krim_admin_list_warehouse_facilities`, `krim_admin_list_warehouse_operations` and `krim_admin_review_warehouse_facility` also lack authenticated EXECUTE. No `anon` EXECUTE grants were found in the inspected function set.
+- The quality-review page already explicitly blocks decisions because the review RPC is only executable by `postgres` and `service_role`. It correctly does not expose a service-role key.
+- The evidence page correctly keeps metadata listing and upload locked: authenticated metadata SELECT is not granted, and there is no dedicated warehouse evidence bucket. The partner verification bucket must not be repurposed.
+- The inventory ledger is read-only and reports authenticated reads only after its queries succeed; runtime read/RLS behavior still needs isolated role testing.
+- The reverse-logistics page correctly keeps transfer/return actions disabled and discloses that the transfer RPCs are not executable by authenticated users.
+
+### Additional UI containment implemented
+- `app/warehouse/staging/page-04-goods-receipt.html`: commit `06a693cc71f1aa330774a99131c198c447f0724f`. Receipt creation now returns before any RPC; task status mutation controls and listeners removed; submit remains disabled.
+- `app/warehouse/staging/page-11-dispatch-handover.html`: commit `db5f6643e9806f7d93ac88542c97ff6415e58a39`. Handover task creation returns before any RPC; status mutation controls and listeners removed; submit remains disabled.
+- Final source verification for both pages: 5/5 PASS each (permission disclosure, no active status actions, no mutation listeners, submit hard-block, disabled control cannot be re-enabled by page setup).
+- Existing quality review, evidence register and reverse transfer pages remain locked/read-only and no changes were required.
+
+No goods receipt, inventory movement, quality decision, evidence upload, transfer or handover record was created. No DDL, grants, RLS policies, storage policies or database records were changed.
+
+### Warehouse activation remains blocked
+The source and database agree that browser workflows cannot currently perform these actions with authenticated users. This is a backend authorization design and migration-recovery blocker, not a reason to grant every SECURITY DEFINER function to authenticated. Before activation: classify functions by intended caller, review every function body and tenant/facility authorization, reconcile migration history, test least-privilege grants in an isolated restored environment, provision a dedicated private evidence bucket, and verify inventory conservation, maker-checker independence, idempotency, audit events and custody lifecycle. Only then re-enable controls.
