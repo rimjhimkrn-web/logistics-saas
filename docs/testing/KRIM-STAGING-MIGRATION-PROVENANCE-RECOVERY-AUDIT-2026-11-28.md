@@ -197,3 +197,20 @@ The export step had remained in progress beyond the expected short snapshot oper
 - Exact historical migration provenance: BLOCKED.
 - Multi-category partner onboarding wrapper original CREATE source: NOT FOUND in the inspected current migration tree.
 - Disposable schema restore: NOT YET VERIFIED; bounded CI retry pending.
+
+
+## Follow-up — first schema snapshot reached restore; local managed-schema ownership blocker
+
+The two original workflow runs have now completed. Both successfully exported a schema-only Staging snapshot and passed the data/credential scanner:
+- Snapshot size: 3,502,437 bytes.
+- Sanitized snapshot size: 3,489,451 bytes.
+- Detected data statements: none.
+- Credential-like patterns: none.
+- Sanitizer removed 49 managed-schema metadata lines.
+- Sanitized SHA-256: 6d22c23263518db1045079fe32c3d437511bbf3779c012c4fdd6544441d49e14.
+
+Both then failed at the isolated local restore with the same local-only error: permission denied for schema graphql_public (line 69). This is a local disposable stack ownership/privilege mismatch, not evidence of a Staging database failure. The Staging export was read-only; the snapshot contained no data statements and was deleted during runner cleanup. No raw schema was uploaded.
+
+Corrective action committed: before restoring, the workflow now changes the owner of the pre-created graphql_public schema to the local postgres role in the disposable database only. This is not run against Staging. A fresh CI run is pending. Until it passes restore and metric comparison, snapshot restore validation remains NOT PASSED.
+
+The export timeout guard was also added (240-second command timeout; 8-minute step timeout). Earlier runs were allowed to finish; the corrected run is intended to prevent another unbounded wait.
