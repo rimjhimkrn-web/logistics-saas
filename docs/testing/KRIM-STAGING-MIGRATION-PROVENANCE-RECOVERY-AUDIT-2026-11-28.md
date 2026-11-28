@@ -335,3 +335,22 @@ Priority order for the remaining classification:
 4. Legacy/root routes and navigation shells — redirect to canonical routes or retain only when required for compatibility.
 
 The current branch's new static-link and environment-isolation workflows were queued after the report update; their result is pending at this checkpoint. The schema restore workflow is still in the Staging schema export step; its configured step timeout is 8 minutes. No restore or metrics comparison has yet been observed.
+
+
+## Latest schema snapshot restore attempt — failure and corrective action
+
+Workflow run `46130949112` (commit `a5a099c25a37bc3d7b74f922f7e5c20fccc9be02`) completed with failure at the local disposable restore step.
+
+Observed facts:
+- Local Supabase stack startup succeeded.
+- Staging schema-only export succeeded: 3,502,437 bytes.
+- Sanitization succeeded: 3,489,451 bytes; 49 managed-schema metadata lines removed.
+- No data statements or credential-like patterns detected.
+- The sanitized dump hash remained `6d22c23263518db1045079fe32c3d437511bbf3779c012c4fdd6544441d49e14`.
+- Restore failed before metrics comparison with `ERROR: must be owner of schema graphql_public`.
+- The attempted local-only `ALTER SCHEMA graphql_public OWNER TO postgres` was itself rejected because the local connection role was not the schema owner. No Staging DDL was executed; the Staging database was read only for schema export and metrics were not run.
+- Runner cleanup stopped the ephemeral stack and removed raw/sanitized SQL files.
+
+Corrective workflow revision committed as `567dbc17ddb9da7a81c8c4d0ded23e8b3ebb3d42`: instead of attempting to transfer schema ownership, the disposable restore now dynamically obtains the pre-created local `graphql_public` schema owner and attempts to grant USAGE/CREATE to the local restore role while acting as that owner. This preserves schema ownership. The next workflow run must prove that the local role can assume the owner role; if not, inspect local role membership and adjust only the disposable stack setup. Do not weaken Staging permissions or alter Staging schema.
+
+**Status:** schema snapshot export PASS; local isolated restore FAIL; schema metric comparison NOT RUN; restore validation remains BLOCKED. The next run is required before claiming schema restore success.
