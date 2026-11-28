@@ -489,3 +489,8 @@ Staging correction on the executive BI page:
 Latest static link audit and environment-isolation regression for commit `60b54d241a1bc60ad6e3ae3e112141d5cb298b5d`: environment-isolation PASS; static audit queued/in progress at last poll. The subsequent preview-banner commit triggers the same checks and remains pending.
 
 Schema restore run `46131552839` remains in progress with the Staging schema export step still running more than three minutes after start; local stack startup passed, but restore and metrics steps have not started. This exceeds the expected fast path but remains inside the configured 240-second command timeout. Continue polling; if it times out, inspect the export log and adjust the bounded export process only. Do not run any restore or DDL against Staging.
+
+
+Final CI poll for this batch: both static link audit (`46131908661`) and environment-isolation regression (`46131908572`) completed successfully on report commit `23c76fe9cc312fbbe389b37bc561ad4aa4317030`. These CI passes validate the repository's static-link and isolation checks, not live application workflows.
+
+Schema restore run `46131552839` remained in progress on the Staging schema-only export at the final poll. Its export step had not completed; restore, integrity comparison and evidence upload remain pending. This is a distinct migration-provenance gate and cannot be inferred from the successful static/environment workflows.
