@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isKrimStagingProjectUrl } from "../_shared/krim-staging-project-guard.ts";
 
 const PROJECT_ID = "qrpcivhdxobiaofppbkl";
 const roles = ["customer_a", "customer_b", "partner_a", "partner_b"] as const;
@@ -37,7 +38,7 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (url !== `https://${PROJECT_ID}.supabase.co` || !anon || !service) {
+  if (!isKrimStagingProjectUrl(url) || !anon || !service) {
     return response({ ok: false, error: "Exact Staging environment guard failed." }, 503, origin);
   }
   const token = auth.slice(7);
