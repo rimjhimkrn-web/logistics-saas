@@ -920,3 +920,16 @@ Read-only query of `supabase_migrations.schema_migrations` retrieved stored migr
 ### Safety disposition
 - No Staging DDL/DML, migration replay, migration-ledger repair, grant change, or Production access occurred.
 - Keep migration execution frozen. Next recovery work is a complete ledger-to-file body fingerprint map, duplicate timestamp ordering analysis, exact catalog/object comparison, and a documented forward-only reconciliation plan. Only after those checks pass may an isolated migration replay test be considered.
+
+
+## Full migration-ledger inventory and orphan-name triage — 2026-11-28
+
+- Re-read the complete Staging migration ledger (163 rows) and current branch migration tree (499 SQL files). The ledger has 163 unique version values; no duplicate version rows were returned.
+- Recomputed the current branch filename-to-ledger-name mapping. 129/163 ledger rows have a filename suffix/slug candidate; 34/163 do not have any corresponding filename candidate in the current branch tree. This is a naming inventory only, not proof that a migration is absent: the current branch may have renamed, squashed, or otherwise reorganized historical migration files.
+- The 34 unmatched rows comprise 32 older logical migration names whose original filename cannot be found by name in the current tree, plus the two country-pack entries `20261117144642` and `20261117144901`. The country-pack ledger entries contain distinct stored SQL bodies (10,227 and 4,289 normalized characters) and no same-name source file is present in the current tree. Their historical mapping remains unresolved.
+- Rechecked the 29 duplicate timestamp groups / 61 files. None of those duplicate timestamp values has a same-timestamp row in the current Staging migration ledger. Thus the present ledger does not identify which of those colliding repository files was historically applied; they remain a future replay/order risk, not evidence of duplicate applied versions.
+- The three later ambiguous logical-name groups already resolved by exact stored-body comparison remain mapped to the 16600, 16900 and 17100 candidates as recorded above.
+- GitHub repository search for representative unmatched old logical names returned no current-tree code matches; this does not recover deleted file history and is not sufficient to assert historical non-existence.
+
+### Updated recovery gate
+The isolated schema restore is successful, but migration provenance is still incomplete: 34 ledger rows have no direct filename candidate, two country-pack entries have different SQL bodies and no source file, and 29 duplicate timestamp groups remain unsequenced in the repository. The next safe step is historical commit/tree recovery for those 34 ledger rows and an explicit ordering/replay map for the 61 collision files. Do not edit the ledger, rename files, reorder timestamps, or apply migrations to Staging until every applied ledger row has a verified body/source mapping and a deterministic baseline replay has been proven in disposable infrastructure.
