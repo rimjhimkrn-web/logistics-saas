@@ -598,3 +598,19 @@ Inspected `public/customer-os/customer-services/shipment-details.html` and its s
 - Identity hardening: the module previously relied on the locally available Supabase session's user ID. It now additionally calls `auth.getUser()`, requires a verified user and uses that verified identity for membership lookup. Commit: `a9c8cbe86c7640cd562a0198532ef4c02f582a28`.
 - This is source-level verification only. Runtime RLS, route-plan/leg organization isolation, and browser behavior still require isolated authenticated tests.
 
+
+
+## Full static audit refresh — 28 Nov 2026 (run 46132568657)
+
+The complete static repository audit completed successfully on commit `35477fa23c1a3c6e4eb17401edecdd874bf740e9`.
+
+- Scope: 2,241 repository files; 1,017 HTML pages.
+- Local-reference integrity: 0 unresolved local references; 0 duplicate groups; 0 placeholder pages detected by the audit.
+- Routing/indexing: 343 redirect routes; 523 noindex pages; 103 Staging pages.
+- Backend-signal inventory: 302 HTML pages with direct backend signals; 356 with linked-script backend signals; 194 operational pages with backend signals.
+- Staging review queue: 48 of 103 Staging pages have no visible Supabase signals. This is a manual review queue, not proof of a broken feature.
+- Operational integration review queue: 67 pages without visible backend signals. These include public informational pages and workflow previews; they must be classified individually rather than wired indiscriminately to Supabase.
+- Global readiness: 432 HTML pages contain the detected language bootstrap; 250 do not. The missing-bootstrap list is distributed across public (146), app (60), auth (19), src (5), and 20 other root/domain/docs/platform paths. This is an internationalization consistency backlog, not proof all 250 pages require an interactive selector; some redirects, legal/static documents and authentication pages need different treatment.
+
+Audit artifacts were uploaded by CI: complete JSON, Markdown report and console summary. Static link audit and environment isolation regression both passed for this review sequence. This does not replace browser-level responsive, locale persistence, translated-content or authenticated workflow tests.
+
