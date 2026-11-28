@@ -152,3 +152,26 @@ The deployed `krim-resend-email-worker` was not present in the repository at the
 - Environment-isolation and static-link checks were triggered for the same commit; their final outcomes are tracked separately and must pass.
 
 This is an environment-targeting hardening only. It does not isolate the shared email queue, prove external scheduler configuration, or make this worker safe for synthetic workflow events. Real provider delivery remains prohibited during Package 1 tests.
+
+
+### Follow-up verification — full deployed Staging Edge Function inventory
+
+The deployed Staging project currently lists five functions. Each was inspected:
+- `global-admin-control`: ACTIVE v3, JWT verification on, exact Staging project guard present.
+- `owner-testing-authorize`: ACTIVE v6, JWT verification on, exact Staging project guard present.
+- `krim-resend-email-worker`: ACTIVE v2, JWT verification off by design, cron-secret gate retained, exact Staging project guard now present.
+- `krim-phase00-test-user-invites`: ACTIVE v3, JWT verification on, hard-coded exact Staging project ID guard present.
+- `krim-phase00-provision-test-organizations`: ACTIVE v2, JWT verification on, hard-coded exact Staging project ID guard present.
+
+No function was invoked. This inventory verifies project-target guards in deployed source, not runtime authorization or real provider side-effect safety.
+
+For commit `e007dcc24c32c439f669ff58011d208f3df2a5c1`:
+- Edge project-guard Deno tests: run `46128789222` — SUCCESS.
+- Environment-isolation regression: run `46128789230` — SUCCESS.
+- Static link audit: run `46128789198` — SUCCESS.
+
+For the subsequent report/worker documentation commit `cbb746dfe932c23c35ccb394ac44a463bb03221f`:
+- Environment-isolation regression: run `46128819676` — SUCCESS.
+- Static link audit: run `46128819707` — SUCCESS.
+
+These are CI/source checks only; they do not replace the pending database, tenant JWT, workflow-lane, notification, Auth-dashboard and recovery tests.
