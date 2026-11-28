@@ -108,8 +108,16 @@ jobs:
           # The disposable Supabase stack pre-creates graphql_public under a
           # managed owner. Grant the local restore role CREATE/USAGE by acting
           # as that schema owner; do not change schema ownership.
-          psql "$DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align \
-            --command="SELECT format('SET ROLE %I; GRANT USAGE, CREATE ON SCHEMA graphql_public TO %I; RESET ROLE;', pg_get_userbyid(nspowner), current_user) FROM pg_namespace WHERE nspname = 'graphql_public' \\gexec"
+          LOCAL_SCHEMA_OWNER="$(psql "$DB_URL" --no-psqlrc --tuples-only --no-align --set ON_ERROR_STOP=1 \
+            --command="SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname = 'graphql_public'")"
+          LOCAL_RESTORE_ROLE="$(psql "$DB_URL" --no-psqlrc --tuples-only --no-align --set ON_ERROR_STOP=1 \
+            --command="SELECT current_user")"
+          if [[ ! "$LOCAL_SCHEMA_OWNER" =~ ^[A-Za-z_][A-Za-z0-9_]*$ || ! "$LOCAL_RESTORE_ROLE" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            echo "::error::Could not safely identify the disposable local schema owner and restore role."
+            exit 1
+          fi
+          psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
+            --command="SET ROLE \"$LOCAL_SCHEMA_OWNER\"; GRANT USAGE, CREATE ON SCHEMA graphql_public TO \"$LOCAL_RESTORE_ROLE\"; RESET ROLE;"
           psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
             --single-transaction --file "$RUNNER_TEMP/krim-staging-schema-sanitized.sql"
           echo "Staging schema-only snapshot restored into the disposable local Supabase database."
