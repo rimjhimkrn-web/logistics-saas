@@ -711,3 +711,15 @@ Read-only Staging privilege inspection (project `qrpcivhdxobiaofppbkl`; Producti
 5. Re-enable UI controls only after the exact RPC grant and end-to-end test are independently verified.
 
 The Staging inspection confirms significant backend execution-permission gaps. These are not repaired by browser changes and are not permission to broaden grants. No warehouse inventory, inbound task, shipment allocation or dispatch action was created during this audit.
+
+
+### Warehouse UI containment verification follow-up
+
+- Final inbound receiving hard-block commit: `6aaf1c08a25671ab3bffb0f0c746d9268af3cc3b`.
+- Final shipment allocation hard-block commit: `e21020f73b257abf5b7d686f0d7a52d40fc33a13`.
+- Independent source checks on both final page versions: 5/5 PASS each (permission notice, no active mutation controls, no mutation click handlers, controls remain disabled, submit handler returns before RPC).
+- Earlier commits `73dcb180...` and `c14efccf...` were superseded by the final hard-block commits above.
+- Environment-isolation regression for the final inbound commit is running as `46133848838`; static-link audit is running as `46133848871`. Do not mark CI complete until both conclude.
+- Both checks for the final allocation commit completed successfully: environment isolation `46133821595`, static links `46133821616`.
+
+The hard blocks are temporary containment, not a warehouse feature completion. Do not re-enable actions until the exact RPC privilege design, authenticated regression tests and inventory/evidence lifecycle controls are approved and verified.
