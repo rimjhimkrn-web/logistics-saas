@@ -27,3 +27,25 @@ Deno.test("rejects Production and lookalike project URLs", () => {
     }
   }
 });
+
+
+Deno.test("all deployed Staging privileged workers use the shared project guard before clients", async () => {
+  const functions = [
+    "global-admin-control",
+    "owner-testing-authorize",
+    "krim-resend-email-worker",
+    "krim-phase00-test-user-invites",
+    "krim-phase00-provision-test-organizations",
+  ];
+  for (const name of functions) {
+    const source = await Deno.readTextFile(`supabase/functions/${name}/index.ts`);
+    if (!source.includes('import { isKrimStagingProjectUrl } from "../_shared/krim-staging-project-guard.ts";')) {
+      throw new Error(`${name} does not import the shared exact-project guard`);
+    }
+    const guardIndex = source.indexOf("isKrimStagingProjectUrl(url)");
+    const clientIndex = source.indexOf("createClient(url,");
+    if (guardIndex < 0 || clientIndex < 0 || guardIndex > clientIndex) {
+      throw new Error(`${name} does not validate the project URL before creating a Supabase client`);
+    }
+  }
+});
