@@ -34,7 +34,7 @@ A second review must confirm the exact response shape and whether the display st
 
 - The repository root has no `package.json` and the inspected `supabase/` directory contains `functions/` and `migrations/`, but no `config.toml`.
 - Therefore this branch does not currently provide a checked-in Supabase local project configuration or a reproducible local database test harness at the expected locations.
-- pgTAP extension availability was checked separately; see the live result recorded in the accompanying work log before choosing pgTAP versus a disposable local Postgres harness.
+- pgTAP is **not installed** in the Staging database (the extension inventory returned only pgcrypto and uuid-ossp). Do not assume pgTAP tests can run until it is deliberately installed in a local test environment.
 - No local CLI version was run because no local shell/CLI execution environment is available through the connected repository/database tools. Do not claim CLI validation or local tests.
 - No authenticated Partner A/B identities or partner organizations are present in Staging. Do not manufacture them in production or use service-role impersonation as a substitute for real JWT tests.
 
