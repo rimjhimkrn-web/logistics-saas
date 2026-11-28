@@ -285,3 +285,26 @@ Create one canonical, versioned eligibility policy shared by pre-qualification a
 The isolated test suite must include NULL max-weight, missing location coverage, country-only coverage, route-lane coverage, inactive service area, stale capability dates, insufficient capacity, reserved capacity, and time-boundary cases. At this audit snapshot, capabilities, match results, quotes and assignments were all empty; no operational records were affected.
 
 No database or runtime changes were made.
+
+
+## Quote acceptance and assignment-finalization revalidation audit (2026-11-28)
+
+Read-only inspection of the deployed Staging functions `krim_accept_global_quote(bigint)`, `private.krim_partner_capability_covers_shipment(bigint,bigint)`, and `krim_internal_finalize_partner_assignment(bigint)`, together with the downstream table schemas, adds these findings:
+
+1. `krim_partner_match_results` stores only match run, shipment, partner organisation, status, score, reasons and evaluation time. It has no capability ID, submission-version ID, service-area ID or capacity evidence reference.
+2. `krim_partner_opportunities`, `krim_partner_quotes`, and `krim_shipment_partner_assignments` likewise have no first-class capability or capability-version reference. Assignment has a capacity-binding ID, but that does not identify the qualification capability/evidence.
+3. Customer quote acceptance checks that the partner organisation has at least one currently active/verified capability, then calls a helper that separately finds verified capability rows covering origin and destination country and weight. It does not bind those checks to the capability row(s) that produced the original match or quote. The helper uses `now()` rather than the shipment's requested service timestamp.
+4. The helper's country/region capability checks and active service-area checks are independent predicates. They do not preserve which exact capability row or service-area row satisfied each predicate.
+5. Assignment finalization strongly validates confirmed capacity binding, reservation, commitment, shipment leg and accepted assignment state. It does not revalidate capability status/effective window or consume an immutable eligibility decision. This is a different gate from quote acceptance and can run later.
+
+### Required transaction-level correction
+
+- At match time, persist an immutable eligibility decision linked to the exact approved capability submission version(s), evidence digest, service-area/route rows and capacity resource/availability/reservation basis, evaluated against the shipment's requested service timestamp and a versioned policy.
+- Propagate the decision ID through match result, opportunity, partner quote and assignment using restrictive foreign keys. Enforce same shipment, partner organisation and route/leg consistency at every transition.
+- Quote acceptance must validate the referenced decision and current safety state, not search for an unrelated qualifying capability belonging to the same organisation.
+- Finalization must distinguish a decision that remains valid from a capability later suspended/revoked. A revoked capability must block new allocations and create an operations exception for accepted-but-not-finalized work; it must not silently cancel or reassign contracted/in-transit work.
+- Preserve the exact historical decision even if the capability is later amended; never rewrite old eligibility evidence to reflect current profile state.
+
+Regression cases must include capability A qualified match but capability B alone remains active at acceptance; capability revoked between match, partner acceptance, customer acceptance and finalization; capability effective window crossing requested service time; service-area approval withdrawn; capacity reservation retained while capability becomes suspended; and idempotent retries across each transition.
+
+No SQL, data or deployed functions were changed. This remains a design/audit finding pending migration provenance and isolated CLI testing.
