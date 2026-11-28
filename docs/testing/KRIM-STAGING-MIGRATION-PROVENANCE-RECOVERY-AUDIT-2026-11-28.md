@@ -529,3 +529,15 @@ Inspected `public/partner/api-webhooks.html`, `public/partner/integrations-autom
 CI for the preceding audit/report revision `e6f69bfac8c714920a1092afc22b6748ace5d51a`: static link audit run `46132117521` PASS; environment-isolation regression run `46132117510` PASS. These are repository checks, not live workflow delivery tests.
 
 Schema snapshot/restore validation run `46132020729`: ephemeral local Supabase stack creation passed, but Staging schema-only export remained in progress at the latest poll. Restore, schema integrity comparison and sanitized evidence upload are still pending. No Staging DDL/DML has been run by this validation workflow; do not mark recovery complete until successful restore and metric review.
+
+
+## Driver workspace and dispatch action safety review — 28 Nov 2026
+
+Inspected `src/driver/app.html`, `public/shipper/active-shipments.html` and `public/shipments/dispatch.html`.
+
+- `public/shipper/active-shipments.html` is a redirect to the customer-OS shipment list; it contains no independent shipment data or transaction handler. The destination route must be evaluated separately for live access and tenant authorization.
+- `public/shipments/dispatch.html` had sample shipment/dispatch IDs, a fictitious dispatcher and a submit button labelled as confirmation even though its handler only alerted that no record was saved and redirected. Staging correction adds a prominent demo-only disclosure, removes the fictitious dispatch/dispatcher values and false gate-clear default, and changes the button/handler to explicitly state that no dispatch, assignment or transit is created. Commit: `ce578b93dbc835ca684854a7be7c3b6deeeb625b`.
+- `src/driver/app.html` displayed a named driver, vehicle registration, assigned shipment, route, in-transit state and ₹14,500/advance figures without a live backend. Its POD handler falsely claimed evidence was timestamped and the shipment marked complete, despite no capture/upload/verification. Staging correction adds a demo-only notice, removes the identity/vehicle assertions, marks shipment details illustrative, removes fictitious payout/advance amounts, disables live POD submission and changes camera/POD handlers to state that nothing was captured, uploaded, verified or changed. Commit: `1bc639cf66551f0a26f3de3d852091c98302d19b`.
+- These are preview-safety remediations, not live driver workflow implementations. Real driver launch still requires authenticated assignment retrieval, driver/vehicle authorization, consent-gated tracking, secure evidence upload, server-side POD verification, immutable event history and audited shipment completion.
+
+Schema restore run `46132020729`: local ephemeral Supabase stack creation has now passed, but schema-only export from Staging remains in progress; restore, integrity metrics and sanitized evidence upload have not started. Earlier export run `46131552839` is not a successful restore. Do not infer migration recovery completion from static or environment CI.
