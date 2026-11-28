@@ -1093,3 +1093,20 @@ Disposition:
 - When migration provenance is resolved, classify each relation by intended access path, verify API grants and all function/Edge Function callers, and either document intentional server-only RLS-without-policy posture or design narrow tenant/role policies with negative cross-tenant tests.
 
 Query was SELECT-only. No DDL/DML, grants, revokes, migration-ledger edits, worker/provider calls, or Production access occurred.
+
+
+## Public authenticated SECURITY DEFINER function triage — read-only Staging review, 2026-11-28
+
+Catalog review of the 55 public SECURITY DEFINER functions executable by `authenticated` found:
+- 55/55 are not executable by `anon`.
+- 55/55 have an explicit function-level `search_path` setting.
+- 53/55 contain a direct `auth.uid()` or `auth.jwt()` reference in their source.
+- 2/55 do not directly reference auth context and were inspected through their delegated callees.
+
+Delegation review:
+1. `public.krim_admin_list_capacity_resources_lane_aware()` calls `public.krim_admin_list_capacity_resources()`. The callee checks a non-null `auth.uid()`, requires JWT AAL2, and requires `private.krim_has_permission(user, 1, 'admin.platform')` before reading pending capacity resources. The wrapper only enriches the returned items with lane/availability data. This is a delegated authorization path, not evidence of an unauthenticated public path. It still needs runtime denial tests for anon, ordinary authenticated users, and admin users.
+2. `public.krim_partner_submit_service_capability_v2(...)` calls `public.krim_partner_submit_service_capability(...)`. The callee requires a non-null `auth.uid()`, checks `private.krim_has_permission(user, organization_id, 'partner.manage')`, validates active registered-business partner status and current compliance, and verifies evidence ownership/path before inserting a pending capability. The wrapper only adds bounded submission-detail metadata to the capability ID returned by that callee. Runtime cross-tenant and evidence ownership tests remain required.
+
+This is static source/ACL triage, not a complete proof of safety for the 55 functions. The remaining 53 functions still require function-by-function review of authorization branch ordering, row scoping, caller-controlled identifiers, side effects, dynamic SQL, helper dependencies, and negative/positive runtime cases. The 31 functions containing `private.krim_has_permission` are not automatically safe; helper use must be checked in context.
+
+Disposition: no blanket revokes or function changes. Keep schema frozen until migration provenance is reconciled. No SQL writes, DDL/DML, grants/revokes, ledger changes, worker/provider calls, or Production access occurred.
