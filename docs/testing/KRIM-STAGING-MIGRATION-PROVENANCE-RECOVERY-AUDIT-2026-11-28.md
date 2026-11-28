@@ -494,3 +494,23 @@ Schema restore run `46131552839` remains in progress with the Staging schema exp
 Final CI poll for this batch: both static link audit (`46131908661`) and environment-isolation regression (`46131908572`) completed successfully on report commit `23c76fe9cc312fbbe389b37bc561ad4aa4317030`. These CI passes validate the repository's static-link and isolation checks, not live application workflows.
 
 Schema restore run `46131552839` remained in progress on the Staging schema-only export at the final poll. Its export step had not completed; restore, integrity comparison and evidence upload remain pending. This is a distinct migration-provenance gate and cannot be inferred from the successful static/environment workflows.
+
+
+## Partner self-service export and offboarding review — 28 Nov 2026
+
+Inspected `public/partner/offboarding.html` and `public/partner/export-center.html` at source level.
+
+- Offboarding is a local preparation form: checklist state is held in the page, the request is rendered as a local draft, and copy/download actions operate in the browser. There is no Supabase client, fetch/API submission or persistent request record. The page explicitly says no account, shipment, access or financial action has been performed. Treat as guidance/draft only; do not expose as a functioning account-closure workflow.
+- Export Center validates scope locally and generates a synthetic CSV explicitly marked DEMO DATA ONLY. It does not access partner records, query a backend, create an export job or provide private evidence. Treat as a demo-only export preview, not a live data export facility.
+- No source modification was needed because current page behavior and disclosures are explicitly local-only and avoid claiming that live account changes or data exports occurred. Actual production use requires authenticated organization-scoped authorization, server-side export job creation, audit logging, data minimization, secure download delivery and expiry; offboarding requires server-side impact enumeration, open-shipment safeguards, approval and auditable access closure.
+
+Staging-only visual consistency corrections:
+- Replaced orange warning styling with KRIM blue notice styling on `public/partner/settlements.html` and `public/shipper/payment-checkout.html`, preserving the partner-direct payment model and all payment restrictions.
+- Commits: `a25cd842686c38edece7212374feeb27a119850c` and `7c0bab7ef8dffd6e1befc22a3a58efb02bb18d36`.
+- Source recheck confirms no orange hex warning styling remains on either page, partner-direct payment disclosures remain present, and notices use the blue palette.
+- Static link audit and environment-isolation regression both passed on commit `7c0bab7ef8dffd6e1befc22a3a58efb02bb18d36` (runs `46132053884` and `46132053816`).
+
+Schema restore validation update:
+- The earlier schema restore run `46131552839` did not reach restore or integrity comparison before the last recorded poll; it is not a pass.
+- Increased the Staging schema-only export command bound from 240 to 900 seconds and its step timeout from 8 to 18 minutes in commit `bb96e667f3a495861a5808454b9809e2a7849c3a`. This affects only the CI workflow timeout; it does not change Staging schema or data.
+- New validation run `46132020729`: Staging secret validation, Supabase CLI installation and PostgreSQL client installation passed; ephemeral local Supabase stack creation is still running. Export, restore, schema metrics comparison and evidence upload have not started. Do not mark migration recovery complete until the run finishes successfully and its sanitized metrics are reviewed.
