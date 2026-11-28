@@ -45,6 +45,18 @@
     }
 
     function detectEnvironment() {
+        const hostname =
+            window.location.hostname.toLowerCase();
+
+        // Staging must always use the isolated staging backend, even if a
+        // page-level meta tag or an earlier script says production.
+        if (
+            hostname === "krim-staging.pages.dev" ||
+            hostname.endsWith(".krim-staging.pages.dev")
+        ) {
+            return "preview";
+        }
+
         const configured =
             window.KRIM_ENVIRONMENT ||
             document.querySelector(
@@ -59,9 +71,6 @@
         if (supported.includes(configured)) {
             return configured;
         }
-
-        const hostname =
-            window.location.hostname.toLowerCase();
 
         if (
             hostname === "localhost" ||
@@ -112,9 +121,12 @@
         }),
 
         supabase: Object.freeze({
-            url: "https://ebltviniygljwwseplph.supabase.co",
-            publishableKey:
-                "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+            url: ENVIRONMENT === "production"
+                ? "https://ebltviniygljwwseplph.supabase.co"
+                : "https://qrpcivhdxobiaofppbkl.supabase.co",
+            publishableKey: ENVIRONMENT === "production"
+                ? "sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"
+                : "sb_publishable_WYEwWxfNmMryQCu-mLAlQg_FRmn4_O3"
         }),
 
         routes: Object.freeze({
