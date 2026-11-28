@@ -871,3 +871,25 @@ Read-only Staging catalog inspection of function definitions, RLS policies, tabl
 
 ### Disposition
 Recipient resolution has substantive organization and assignment checks in the inspected function bodies, and in-app notifications have a self-only access model. Runtime security, recipient suitability, replay/concurrency behavior and external delivery semantics remain unverified. Notification activation remains blocked; do not widen grants or invoke workers before migration recovery and isolated test infrastructure are complete.
+
+
+## Notification frontend integration and count-semantics audit — 2026-11-28
+
+Read-only review of current staging frontend sources, followed by a small documentation/label correction in the driver notification UI. No authenticated session was used, no private notifications were queried, and no notification was marked read.
+
+### Frontend findings
+- `public/app/notifications.html` is explicitly a disconnected event-center preview. It has no live feed, WebSocket, preference integration, unread count or mark-read action; it correctly says records are not available and no read state was changed. Keep it non-operational until a real authenticated integration exists.
+- `public/visibility/customer-alert-preferences.html` is a legacy redirect to secure tracking, not a working customer notification-preference centre. Customer preference controls are not delivered by this page.
+- `public/partner/notifications-support.html` is an illustrative, local-only communications guide; it does not access live messages or persist preference changes. Essential-alert control is shown disabled in the preview.
+- Driver Notifications & Support (`app/driver/staging/page-16-notifications-support.html` and canonical `app/driver/module-15-notifications-support.html`) authenticates the session, requires exactly one active driver-role membership and an active organization, then reads `notifications` filtered to the authenticated user's ID. It shows no provider delivery claim. Mark-as-read updates are filtered by both notification ID and authenticated user ID; database RLS additionally enforces self-only ownership.
+- Driver inbox queries only the latest 100 records and calculates unread count from that returned subset. Before correction, the UI labels could be interpreted as total history/unread counts. No pagination or total count is implemented.
+
+### Safe UI correction committed
+- Updated both driver page copies to label the notification count as “latest 100” and unread as “shown records”.
+- Added visible explanatory text that older history and total unread count require pagination, and that in-app record availability does not prove email/SMS/push delivery.
+- Targeted source checks passed 7/7 on both copies: limit labels, unread scope, history caveat, external-delivery caveat, authenticated user filter, user-scoped mark-read update, and no external delivery inference.
+- Commits: staging page `79dd86421b5a737f788c7975e657d8bdc09add00`; canonical module `fdd7265c47651fe8ccae01f2dabc9549aea4a946`.
+- GitHub static-link and environment-isolation workflows were queued/in progress for these commits at last observation; no pass is claimed yet. Prior workflows for commit `aa37d9a31f0a2e51294a219e5fa3f0717b16a4ed` passed both checks.
+
+### Disposition
+Driver in-app inbox has a scoped read path but only a 100-record window. Customer central notifications and customer preference page remain non-operational previews/redirects; partner page is local-only. Do not describe the whole customer/partner/driver notification experience as live. Implement a shared authenticated notification centre, customer/partner preference management, history pagination and reliable delivery-state UI only after migration recovery and isolated runtime tests. Notification activation remains blocked.
