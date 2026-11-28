@@ -153,6 +153,121 @@ jobs:
               sys.exit(1)
           PY
 
+      - name: Compare canonical object definitions in Staging and isolated restore
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+        run: |
+          set -euo pipefail
+          set +x
+          set -a
+          source "$RUNNER_TEMP/krim-local-supabase.env"
+          set +a
+          cat > "$RUNNER_TEMP/krim-object-fingerprints.sql" <<'SQL'
+          WITH relation_defs AS (
+            SELECT n.nspname||'.'||c.relname AS object_key,
+              md5(coalesce(string_agg(
+                a.attnum||':'||a.attname||':'||format_type(a.atttypid,a.atttypmod)||':'||
+                a.attnotnull||':'||coalesce(pg_get_expr(ad.adbin,ad.adrelid),'')||':'||
+                coalesce(coll.collname,''), '|' ORDER BY a.attnum
+              ),'')) AS fingerprint
+            FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+            LEFT JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped
+            LEFT JOIN pg_attrdef ad ON ad.adrelid=c.oid AND ad.adnum=a.attnum
+            LEFT JOIN pg_collation coll ON coll.oid=a.attcollation AND a.attcollation<>0
+            WHERE n.nspname IN ('public','private','krim_internal') AND c.relkind IN ('r','p','v','m','f')
+            GROUP BY n.nspname,c.relname
+          ),
+          function_defs AS (
+            SELECT n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' AS object_key,
+              md5(pg_get_functiondef(p.oid)) AS fingerprint
+            FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+            WHERE n.nspname IN ('public','private','krim_internal')
+          ),
+          policy_defs AS (
+            SELECT n.nspname||'.'||c.relname||'.'||p.polname AS object_key,
+              md5(p.polcmd||'|'||p.polpermissive||'|'||p.polroles::text||'|'||
+                   coalesce(pg_get_expr(p.polqual,p.polrelid),'')||'|'||
+                   coalesce(pg_get_expr(p.polwithcheck,p.polrelid),'')) AS fingerprint
+            FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname IN ('public','private','krim_internal')
+          ),
+          trigger_defs AS (
+            SELECT n.nspname||'.'||c.relname||'.'||t.tgname AS object_key,
+              md5(pg_get_triggerdef(t.oid,true)) AS fingerprint
+            FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname IN ('public','private','krim_internal') AND NOT t.tgisinternal
+          ),
+          index_defs AS (
+            SELECT n.nspname||'.'||c.relname||'.'||i.relname AS object_key,
+              md5(pg_get_indexdef(i.oid)) AS fingerprint
+            FROM pg_index ix JOIN pg_class c ON c.oid=ix.indrelid
+            JOIN pg_class i ON i.oid=ix.indexrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname IN ('public','private','krim_internal')
+          ),
+          constraint_defs AS (
+            SELECT n.nspname||'.'||c.relname||'.'||co.conname AS object_key,
+              md5(pg_get_constraintdef(co.oid,true)||'|'||co.convalidated) AS fingerprint
+            FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid
+            JOIN pg_namespace n ON n.oid=c.relnamespace
+            WHERE n.nspname IN ('public','private','krim_internal')
+          ),
+          all_defs AS (
+            SELECT 'relation' category,object_key,fingerprint FROM relation_defs
+            UNION ALL SELECT 'function',object_key,fingerprint FROM function_defs
+            UNION ALL SELECT 'policy',object_key,fingerprint FROM policy_defs
+            UNION ALL SELECT 'trigger',object_key,fingerprint FROM trigger_defs
+            UNION ALL SELECT 'index',object_key,fingerprint FROM index_defs
+            UNION ALL SELECT 'constraint',object_key,fingerprint FROM constraint_defs
+          )
+          SELECT category||E'\t'||object_key||E'\t'||fingerprint
+          FROM all_defs ORDER BY category,object_key;
+          SQL
+          psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --file "$RUNNER_TEMP/krim-object-fingerprints.sql" > "$RUNNER_TEMP/staging-object-fingerprints.tsv"
+          psql "$DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align --file "$RUNNER_TEMP/krim-object-fingerprints.sql" > "$RUNNER_TEMP/local-object-fingerprints.tsv"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])
+          def load(name):
+              result={}
+              for line in (root/name).read_text().splitlines():
+                  parts=line.split("\t")
+                  if len(parts)==3:
+                      result[(parts[0],parts[1])]=parts[2]
+              return result
+          remote,local=load("staging-object-fingerprints.tsv"),load("local-object-fingerprints.tsv")
+          keys=sorted(set(remote)|set(local))
+          missing_local=[k for k in keys if k in remote and k not in local]
+          missing_remote=[k for k in keys if k in local and k not in remote]
+          changed=[k for k in keys if k in remote and k in local and remote[k]!=local[k]]
+          by_category={}
+          for category,_ in keys:
+              by_category.setdefault(category,{"staging":0,"local":0,"missing_local":0,"missing_staging":0,"definition_mismatch":0})
+              by_category[category]["staging"]+=1
+          for category,_ in local:
+              by_category.setdefault(category,{"staging":0,"local":0,"missing_local":0,"missing_staging":0,"definition_mismatch":0})
+              by_category[category]["local"]+=1
+          for k in missing_local: by_category[k[0]]["missing_local"]+=1
+          for k in missing_remote: by_category[k[0]]["missing_staging"]+=1
+          for k in changed: by_category[k[0]]["definition_mismatch"]+=1
+          report={
+            "comparison_scope":"public, private, krim_internal; relations, functions, policies, triggers, indexes, constraints",
+            "staging_object_count":len(remote),"isolated_restore_object_count":len(local),
+            "missing_from_isolated_restore":[list(k) for k in missing_local[:100]],
+            "missing_from_staging":[list(k) for k in missing_remote[:100]],
+            "definition_mismatch_samples":[list(k)+[remote[k],local[k]] for k in changed[:100]],
+            "truncated_samples":len(missing_local)>100 or len(missing_remote)>100 or len(changed)>100,
+            "by_category":by_category,
+            "object_level_match":not (missing_local or missing_remote or changed)
+          }
+          (root/"krim-object-fingerprint-comparison.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps({k:v for k,v in report.items() if k not in ("missing_from_isolated_restore","missing_from_staging","definition_mismatch_samples")},sort_keys=True))
+          print("Object-level differences are reported for review; this step does not authorize migrations.")
+          PY
+
       - name: Upload sanitized restore evidence
         uses: actions/upload-artifact@v4
         with:
@@ -160,6 +275,7 @@ jobs:
           path: |
             ${{ runner.temp }}/krim-schema-safety-report.json
             ${{ runner.temp }}/krim-schema-restore-report.json
+            ${{ runner.temp }}/krim-object-fingerprint-comparison.json
           if-no-files-found: error
           retention-days: 7
 
