@@ -279,11 +279,12 @@
 
   <!-- MAIN TELEMETRY CONTENT -->
   <main>
+    <div role="status" aria-live="polite" style="margin:0 0 24px;padding:14px 18px;border:1px solid #2563eb;border-radius:12px;background:#eff6ff;color:#123b70;font-weight:700;">PREVIEW DATA · NOT LIVE — This page uses illustrative shipment, location, sensor, milestone and document values. No live tracking feed or customs API is connected.</div>
     <div class="header-bar">
       <div>
         <div style="display: flex; align-items: center; gap: 12px;">
           <h1 id="manifest-id" style="font-size: 1.8rem; font-weight: 800;">Manifest: Loading...</h1>
-          <span id="status-pill" style="padding: 4px 12px; border-radius: 20px; font-family: var(--font-code); font-size: 0.75rem; font-weight: 700;">IN TRANSIT</span>
+          <span id="status-pill" style="padding: 4px 12px; border-radius: 20px; font-family: var(--font-code); font-size: 0.75rem; font-weight: 700;">PREVIEW ONLY</span>
         </div>
         <p id="manifest-route" style="color: var(--krim-text-muted); font-size: 0.88rem; margin-top: 4px;">Origin → Destination Corridor</p>
       </div>
@@ -296,22 +297,22 @@
       <div class="metric-card">
         <div class="metric-label">CURRENT COORDINATES</div>
         <div class="metric-value" id="telemetry-coords" style="font-size: 1.2rem; font-family: var(--font-code); color: var(--krim-cyan);">24.8607° N, 67.0011° E</div>
-        <div style="font-size: 0.72rem; color: var(--krim-emerald);">🟢 AIS Satellite Link Active</div>
+        <div style="font-size: 0.72rem; color: var(--krim-emerald);">Preview sample · no live AIS connection</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">CARGO TEMPERATURE</div>
         <div class="metric-value" id="telemetry-temp">4.2° C</div>
-        <div style="font-size: 0.72rem; color: var(--krim-emerald);">Cold Chain Target: 2.0° - 8.0° C</div>
+        <div style="font-size: 0.72rem; color: var(--krim-emerald);">Illustrative sample · no sensor feed</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">CONTAINER HUMIDITY</div>
         <div class="metric-value">48% RH</div>
-        <div style="font-size: 0.72rem; color: var(--krim-emerald);">Normal Climate Threshold</div>
+        <div style="font-size: 0.72rem; color: var(--krim-emerald);">Illustrative sample · no sensor feed</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">ESTIMATED ARRIVAL</div>
         <div class="metric-value" id="telemetry-eta" style="font-size: 1.3rem;">Oct 18, 2026</div>
-        <div style="font-size: 0.72rem; color: var(--krim-cyan);">On-Time SLA Guarantee</div>
+        <div style="font-size: 0.72rem; color: var(--krim-cyan);">Illustrative ETA · no SLA confirmation</div>
       </div>
     </div>
 
@@ -350,7 +351,7 @@
     <!-- TELEMETRY LOGS & ATTACHED DOCUMENTS -->
     <div class="two-col-grid">
       <div class="dashboard-card">
-        <h2 style="font-size: 1.1rem; font-weight: 800;">Real-Time Sensor Event Log</h2>
+        <h2 style="font-size: 1.1rem; font-weight: 800;">Illustrative Sensor Event Log</h2>
         <table class="data-table">
           <thead>
             <tr>
@@ -384,7 +385,7 @@
       </div>
 
       <div class="dashboard-card">
-        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Manifest Vault</h2>
+        <h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 12px;">Document List · Sample</h2>
         <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
           <li style="padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--krim-border); border-radius: 8px; display: flex; justify-content: space-between; font-size: 0.85rem;">
             <span>📄 Ocean Bill of Lading (BOL)</span>
@@ -410,22 +411,14 @@
 
       document.getElementById('manifest-id').textContent = `Manifest: ${manifestId}`;
 
-      // Mock data population based on Manifest ID
-      if (manifestId.includes('EX-9041')) {
-        document.getElementById('status-pill').textContent = 'CUSTOMS HOLD';
-        document.getElementById('status-pill').style.background = 'rgba(244, 63, 94, 0.2)';
-        document.getElementById('status-pill').style.color = 'var(--krim-rose)';
-        document.getElementById('manifest-route').textContent = 'Shanghai, CN → Port of Rotterdam, NL';
-      } else {
-        document.getElementById('status-pill').textContent = 'IN TRANSIT';
-        document.getElementById('status-pill').style.background = 'rgba(16, 185, 129, 0.2)';
-        document.getElementById('status-pill').style.color = 'var(--krim-emerald)';
-        document.getElementById('manifest-route').textContent = 'Hamburg, DE → Port of Singapore, SG';
-      }
+      document.getElementById('status-pill').textContent = 'PREVIEW ONLY';
+      document.getElementById('status-pill').style.background = 'rgba(37, 99, 235, 0.18)';
+      document.getElementById('status-pill').style.color = '#93c5fd';
+      document.getElementById('manifest-route').textContent = 'Illustrative origin → destination · not a live route';
     });
 
     function triggerCustomsOverride() {
-      alert('Customs Gate API re-sync initiated. Re-transmitting digital waybill and HS declarations.');
+      alert('Preview only: no customs API request was sent and no document was re-synced.');
     }
   </script>
 </body>
