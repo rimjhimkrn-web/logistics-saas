@@ -236,3 +236,14 @@ No Staging DDL/DML, partner RPC invocation, file upload/deletion or partner stat
 A complete filename audit of the 499 repository SQL migration files found 29 duplicate 14-digit migration version identifiers. Some collisions include four scripts sharing `20261104190000`, two scripts sharing `20261105153000`, and three scripts sharing `20261127190000`. This prevents treating the repository migration directory as a reliably ordered sequence for a new standard migration until reconciled against the 163-entry Staging migration ledger. No existing migration was renamed, reordered or replayed. The detailed preflight and forward-only reconciliation requirements are recorded in the versioned partner lifecycle correction design.
 
 **New hard gate:** reconcile all duplicate migration versions and verify a forward-only repair on a disposable schema before creating or applying the partner lifecycle migration. No ad hoc timestamp or direct DDL workaround is approved.
+
+
+### Exact Staging migration-ledger reconciliation (2026-11-28)
+
+Read-only comparison of 499 repository SQL migration filenames with 163 applied Staging ledger rows found:
+- 129 applied migration names can be matched to current repository migration basenames; 34 applied ledger names have no matching current migration filename.
+- In 14 duplicate-version groups, both migration names are present in the Staging ledger, but the ledger's applied version IDs differ from the current duplicate filename timestamps.
+- Two additional duplicate groups reuse the same migration basename `phase00_enforce_fresh_evidence_during_pod_review`; the ledger has one matching name and cannot distinguish the two repository file copies. Live Staging function behaviour confirms the resulting predicate, not which historical file was applied.
+- The 13 oldest duplicate groups are not represented by exact migration names in this ledger snapshot.
+
+This proves the repository migration filenames and remote applied-version history have diverged. No safe filename-only repair or migration push can be inferred. A trusted historical archive/schema snapshot and disposable CLI migration-plan verification are required. Connected tools cannot run that local CLI/clone workflow. No remote migration ledger edits, DDL or migration application were performed.
