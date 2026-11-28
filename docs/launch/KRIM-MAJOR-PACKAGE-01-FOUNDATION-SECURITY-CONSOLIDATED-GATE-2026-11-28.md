@@ -218,3 +218,14 @@ This is a critical pre-activation workflow defect. It is documented with exact s
 No live partner rows existed in the audited Staging snapshot. No RPC was invoked and no DDL/DML was applied. The correction remains a design gate pending a standard generated migration, isolated database tests and reviewed Staging deployment.
 
 Package 1 remains NOT COMPLETE. Phase 00 remains OPEN and Phase 01 remains NOT AUTHORIZED.
+
+
+### Further database-level lifecycle verification (2026-11-28)
+
+The live Staging trigger and ACL inventory confirms that the capability audit trigger fires only on INSERT; there is no capability UPDATE/DELETE transition trigger. The organisation document-owner trigger checks evidence ownership when onboarding document paths are submitted, but is not an organisation approval-state guard. Direct authenticated table writes remain unavailable for capabilities and audit events; the reviewed RPCs are postgres-owned SECURITY DEFINER functions with empty search_path and anon EXECUTE denied. These controls are retained in the correction design.
+
+The versioned lifecycle design now includes ten database-enforced invariants, a 17-case isolated regression matrix, and migration preflight requirements. It explicitly covers duplicate legacy category rows, concurrent/idempotent submissions, reviewer AAL2/self-review, Storage ownership, assignment impact on revocation, and no automatic cancellation of in-transit shipments.
+
+Latest CI for report commit `2fdcd164e62332b63c890cd81a2376385e60b197`: environment-isolation regression SUCCESS (`46129161846`) and static link audit SUCCESS (`46129161883`). This subsequent documentation-only update has not yet been independently CI-verified.
+
+No Staging DDL/DML, partner RPC invocation, file upload/deletion or partner state change was performed. Package 1 remains NOT COMPLETE; Phase 00 remains OPEN; Phase 01 remains NOT AUTHORIZED.
