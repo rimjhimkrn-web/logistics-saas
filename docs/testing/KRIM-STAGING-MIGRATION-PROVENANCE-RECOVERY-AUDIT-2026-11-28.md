@@ -514,3 +514,18 @@ Schema restore validation update:
 - The earlier schema restore run `46131552839` did not reach restore or integrity comparison before the last recorded poll; it is not a pass.
 - Increased the Staging schema-only export command bound from 240 to 900 seconds and its step timeout from 8 to 18 minutes in commit `bb96e667f3a495861a5808454b9809e2a7849c3a`. This affects only the CI workflow timeout; it does not change Staging schema or data.
 - New validation run `46132020729`: Staging secret validation, Supabase CLI installation and PostgreSQL client installation passed; ephemeral local Supabase stack creation is still running. Export, restore, schema metrics comparison and evidence upload have not started. Do not mark migration recovery complete until the run finishes successfully and its sanitized metrics are reviewed.
+
+
+## Partner integration, event catalogue and support controls review — 28 Nov 2026
+
+Inspected `public/partner/api-webhooks.html`, `public/partner/integrations-automation.html` and `public/partner/notifications-support.html`.
+
+- API & Webhooks: integration review form prepares an on-screen draft only; endpoint validation checks URL syntax and HTTPS scheme locally, does not connect to or register the endpoint. No API request, secret issuance, webhook subscription or delivery test is performed. This is a discovery/requirements preview, not a functioning integration console.
+- Integrations & Automation: displays a static illustrative event catalogue (quote, shipment, delivery, finance, membership and warehouse event names). Search/filter is local. It does not prove those events are emitted, subscribed, delivered, signed, retried or tenant-isolated in production.
+- Notifications & Support: alert catalogue and notification preferences are local previews; support case summary is prepared locally and copied, not submitted. No account preference changes, support ticket creation, email, SMS, WhatsApp or push delivery occurs.
+- No direct Supabase client, fetch/API submission or POST form was found in these page handlers. No source change was made because the local-only behavior is explicit and avoids claiming live integration or ticket delivery.
+- Production readiness requires server-side org-scoped integration records, endpoint ownership and SSRF validation, encrypted secret storage, signed webhook payloads, replay protection, retry/backoff/dead-letter handling, delivery logs, idempotency, and authenticated test/live separation. Notifications need persistent in-app events and delivery state; essential security/service alerts must not be suppressible, with marketing consent kept separate. Support requires durable ticket records, assignment, status history and controlled evidence handling.
+
+CI for the preceding audit/report revision `e6f69bfac8c714920a1092afc22b6748ace5d51a`: static link audit run `46132117521` PASS; environment-isolation regression run `46132117510` PASS. These are repository checks, not live workflow delivery tests.
+
+Schema snapshot/restore validation run `46132020729`: ephemeral local Supabase stack creation passed, but Staging schema-only export remained in progress at the latest poll. Restore, schema integrity comparison and sanitized evidence upload are still pending. No Staging DDL/DML has been run by this validation workflow; do not mark recovery complete until successful restore and metric review.
