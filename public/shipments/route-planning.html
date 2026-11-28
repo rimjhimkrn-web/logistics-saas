@@ -43,10 +43,10 @@
     </header>
 
     <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2 text-center">
+        <div role="note" class="rounded-2xl border border-blue-300 bg-blue-50 p-5 text-left text-sm text-blue-900"><strong>Preview only — no route is calculated, assigned or saved.</strong><p class="mt-1">The form does not query schedules, weather, carrier lanes or live transit data. Any route or transit time entered is unverified and must be confirmed with the contracting provider before operational use.</p></div>\n        <div class="space-y-2 text-center">
             <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Shipment Core Module • Step 7 of 23</span>
             <h1 class="text-3xl font-extrabold text-white tracking-tight">Route Planning & Trade Lanes</h1>
-            <p class="text-slate-400 text-xs font-mono">Map out ports of loading/discharge, transit waypoints, and estimated transit times for SHP-2026-OCT-9901.</p>
+            <p class="text-slate-400 text-xs font-mono">Review route-planning fields. No shipment route, carrier schedule or transit estimate is validated or saved.</p>
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
@@ -54,18 +54,18 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Port of Loading (POL)</label>
-                        <input type="text" required value="USNYC (New York Seaport)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Enter verified origin location" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Port of Discharge (POD)</label>
-                        <input type="text" required value="NLRTM (Port of Rotterdam)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Enter verified destination location" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Estimated Transit Time</label>
-                        <input type="text" required value="12 Days" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Provider-confirmed estimate only" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Routing Strategy</label>
@@ -83,7 +83,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25 cursor-pointer">
-                    Save Route Plan & Proceed →
+                    Preview route plan — no route saved
                 </button>
             </form>
         </div>
@@ -94,11 +94,7 @@
     </footer>
 
     <script>
-        function handleRouteSubmit(e) {
-            e.preventDefault();
-            alert('Preview only: no route plan is saved or assigned.');
-            window.location.href = '/public/shipments/transport-legs.html';
-        }
+        function handleRouteSubmit(e) {\n            e.preventDefault();\n            alert('Preview only: no route plan, carrier assignment or shipment schedule was created.');\n        }
     </script>
 </body>
 </html>
