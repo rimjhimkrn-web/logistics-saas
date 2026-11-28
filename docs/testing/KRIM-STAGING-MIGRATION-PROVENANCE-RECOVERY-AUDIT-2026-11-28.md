@@ -620,3 +620,9 @@ Audit artifacts were uploaded by CI: complete JSON, Markdown report and console 
 
 Three public freight workflow forms were confirmed to be non-persistent previews: carrier booking, container equipment/slot booking, and transshipment planning. Their handlers already prevented persistence, but their primary buttons used confirmation/save language that could be mistaken for a real operational action. Updated each page to show an explicit preview-only disclosure before the form and changed the primary button labels to preview language. Existing no-save handlers remain in place. Source-level re-fetch verification recorded below; this is not a browser or live booking test.
 
+
+
+## Partner demo export CSV formula-injection hardening — 28 Nov 2026
+
+Reviewed `public/partner/export-center.html`. The export is explicitly synthetic/local-only, but the user-controlled export name was serialized into a CSV cell using quote escaping alone. Spreadsheet formula-leading values can still be interpreted despite CSV quoting. Added a cell serializer that prefixes an apostrophe when a cell begins (after whitespace/control characters) with `=`, `+`, `-` or `@`, then applies standard quote escaping. The sample remains synthetic and local-only; no partner data or production export is enabled.
+
