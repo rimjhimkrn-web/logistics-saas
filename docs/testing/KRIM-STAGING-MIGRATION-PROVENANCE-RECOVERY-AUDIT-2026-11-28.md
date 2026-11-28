@@ -956,3 +956,10 @@ The remaining authoritative options are: (1) enumerate the full repository branc
 
 ### Interpretation
 These results further narrow the accessible GitHub history, but are not proof that the SQL never existed: it may have been applied from an untracked local file, external deployment bundle, another inaccessible repository/ref, or a deleted source history not exposed by these path queries. Preserve the 34 entries as unresolved/source-unavailable pending trusted external artifact or backup evidence. Do not synthesize SQL from the live database or apply any migration.
+
+
+## Correction — notification migration candidate found under a different version
+
+A subsequent full current-Staging-tree comparison refined the prior path-fragment statement. The ledger row `20261127042335 / phase00_idempotent_notification_delivery_validation` does have one filename-suffix candidate in the current Staging branch: `20261127065000_phase00_idempotent_notification_delivery_validation.sql`. This is a different migration version. Exact normalized SQL body comparison does **not** match (ledger body 3,123 characters; repository file 3,484 characters). The exact current filename's path-specific commit-history query returned no commits. Therefore this is a candidate with divergent body/version provenance, not a verified source mapping. It must remain unresolved until the historical body is recovered or the difference is fully explained by trusted deployment records.
+
+The 34-entry count remains the count of ledger rows with no filename candidate in the current Staging migration directory; the notification row is not one of those 34. The prior sentence claiming no current-tree path for all representative name fragments is superseded by this correction: one name fragment was found under a different version as described above. The other four tested name fragments had no current-tree candidate.
