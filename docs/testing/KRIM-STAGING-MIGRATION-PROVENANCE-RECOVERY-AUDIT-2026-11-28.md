@@ -463,3 +463,29 @@ No source change was needed for these 10 pages because their current disclosures
 
 - Static link audit and environment-isolation regression passed for commits `937aa0de1e27919b00144360ffbd409cfa718b9b`, `144e2cf37e5a4b8eb6cda037fff81913791f15ca`, `126b5f91b748bb82ec6038b4ed761ed3861ff1e6`, and latest report commit `d7b957b5acd924472f7c329711c9d3976c141dbd`.
 - Schema restore run `46131552839` remained in progress at the last poll. Local ephemeral stack startup passed; Staging schema export remained in progress; restore and metrics comparison had not begun. The run is not a pass and must be monitored to its configured timeout/completion.
+
+
+## Partner growth, compliance and executive BI review — 28 Nov 2026
+
+Inspected 12 additional public/growth/compliance/enterprise routes.
+
+- `public/growth/partner-activation.html`: local checklist progress only; no partner activation or approval is written.
+- `public/growth/partner-intelligence.html`: six illustrative signal types; UI explicitly says no live partner records are displayed.
+- `public/growth/partner-network.html` and `domains/partners.html`: searchable static partner-domain catalogues; no partner application/activation transaction.
+- `public/growth/partner-outreach.html`: creates/copies a local outreach message draft; does not send outreach.
+- `partner-agreement.html` and `partner-standards.html`: public informational/legal framework content, not an executed agreement or partner verification.
+- `public/compliance/customs-audit-ledger.html`: export action explicitly says no customs audit packet is exported.
+- `public/compliance/single-window-customs.html`: explicitly states external customs integrations are not connected.
+- `public/enterprise.html`: public marketing page, not the enterprise tenant workspace.
+- `public/operations/index.html`: loader for shared operations workbench via `platform/krim-config.js` and `public/operations/operations-pages.js`; the shell itself is not proof of backend workflow readiness. The shared implementation requires separate inspection.
+- `public/analytics/executive-bi-dashboard.html`: contained a button whose alert claimed an Executive Board PDF was being exported, without any PDF generation or data integration. It also had no visible live data backend.
+
+Staging correction on the executive BI page:
+- Added a prominent DEMO PREVIEW / NOT LIVE notice stating all executive metrics, partner performance, spend, carbon and exception indicators are illustrative.
+- Disabled the PDF export control and removed the false "Exporting ... PDF" success implication.
+- Commits: `60b54d241a1bc60ad6e3ae3e112141d5cb298b5d` (disabled false export) and `d2fdf585e6f99bdebc26e7028ca278cea23db798` (preview disclosure).
+- Post-write source verification: preview notice present; export control disabled; fake export alert string absent.
+
+Latest static link audit and environment-isolation regression for commit `60b54d241a1bc60ad6e3ae3e112141d5cb298b5d`: environment-isolation PASS; static audit queued/in progress at last poll. The subsequent preview-banner commit triggers the same checks and remains pending.
+
+Schema restore run `46131552839` remains in progress with the Staging schema export step still running more than three minutes after start; local stack startup passed, but restore and metrics steps have not started. This exceeds the expected fast path but remains inside the configured 240-second command timeout. Continue polling; if it times out, inspect the export log and adjust the bounded export process only. Do not run any restore or DDL against Staging.
