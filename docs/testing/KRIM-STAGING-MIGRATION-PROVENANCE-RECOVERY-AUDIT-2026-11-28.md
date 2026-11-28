@@ -214,3 +214,16 @@ Both then failed at the isolated local restore with the same local-only error: p
 Corrective action committed: before restoring, the workflow now changes the owner of the pre-created graphql_public schema to the local postgres role in the disposable database only. This is not run against Staging. A fresh CI run is pending. Until it passes restore and metric comparison, snapshot restore validation remains NOT PASSED.
 
 The export timeout guard was also added (240-second command timeout; 8-minute step timeout). Earlier runs were allowed to finish; the corrected run is intended to prevent another unbounded wait.
+
+
+## Follow-up — live onboarding wrapper security metadata
+
+A read-only catalog inspection of the deployed multi-category onboarding RPC confirms:
+- Function is SECURITY DEFINER, owned by postgres.
+- It pins an empty search_path (search_path="").
+- Explicit EXECUTE ACL entries are postgres, service_role, and authenticated.
+- No anon EXECUTE entry is present in the function ACL.
+- Function signature is 15 parameters, ending in p_category_coverage jsonb.
+- Deployed function-definition MD5 remains b2924b0dba721767a87f296956907b73.
+
+This is a positive authorization-hardening signal, but does not resolve the functional lifecycle defects documented earlier: the wrapper still calls the base onboarding routine and rewrites existing matching capabilities to inactive/pending, without immutable submission/evidence version lineage. No live rows were modified and no function was invoked during this inspection.
