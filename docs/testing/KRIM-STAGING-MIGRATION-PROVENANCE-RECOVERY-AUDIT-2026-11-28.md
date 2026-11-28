@@ -172,3 +172,28 @@ Both had passed checkout, Staging URI-format validation, Supabase CLI installati
 - No migration was applied, no schema/data write occurred, no worker/provider was invoked.
 - Production was not accessed.
 - Migration provenance and Package 1 remain OPEN/BLOCKED.
+
+
+## Follow-up — migration slug reconciliation and bounded export
+
+### Applied ledger versus current repository names
+A fresh automated comparison of all 163 Staging ledger rows against the 499 migration filenames at branch HEAD found:
+- 129/163 ledger names have a matching normalized migration slug somewhere in the repository.
+- 34/163 ledger names have no matching slug in the current repository tree.
+- Only 3/163 have an exact version + slug filename match. Most candidate SQL files use different timestamps from their Staging applied ledger versions.
+- Three of the 129 slug matches are ambiguous because multiple repository files share the same normalized slug:
+  - phase00_require_fresh_evidence_after_pod_rejection: three candidate files (timestamps 20261127164000, 20261127165000, 20261127166000).
+  - phase00_enforce_fresh_evidence_during_pod_review: two candidates (20261127168000, 20261127169000).
+  - phase00_require_exact_multileg_plan_completion: two candidates (20261127170000, 20261127171000).
+- The 34 unmatched rows remain listed above. The 34 are not assumed to be missing SQL: they require body/object fingerprint comparison, historical Git history recovery where available, and inspection of deployed schema effects.
+- Same-slug matching is only a candidate association, not proof that the exact applied SQL body matches. Never repair migration history based only on a slug.
+
+### Schema export runtime guard
+The export step had remained in progress beyond the expected short snapshot operation in both observed runs. To prevent an indefinite wait, the workflow was updated to bound the schema-export command to 240 seconds and the step to 8 minutes. The change is committed on the Staging working branch; its push triggers a fresh CI run. The two earlier runs are not counted as passes. This workflow still performs a schema-only read and local disposable restore; no Staging writes and no Production access.
+
+### Current state
+- Ledger structural integrity: PASS (163 unique versions and names; no missing values).
+- Repository slug coverage: PARTIAL (129 candidate slug matches; 34 unmatched; 3 ambiguous slug groups).
+- Exact historical migration provenance: BLOCKED.
+- Multi-category partner onboarding wrapper original CREATE source: NOT FOUND in the inspected current migration tree.
+- Disposable schema restore: NOT YET VERIFIED; bounded CI retry pending.
