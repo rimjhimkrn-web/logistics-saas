@@ -963,3 +963,13 @@ These results further narrow the accessible GitHub history, but are not proof th
 A subsequent full current-Staging-tree comparison refined the prior path-fragment statement. The ledger row `20261127042335 / phase00_idempotent_notification_delivery_validation` does have one filename-suffix candidate in the current Staging branch: `20261127065000_phase00_idempotent_notification_delivery_validation.sql`. This is a different migration version. Exact normalized SQL body comparison does **not** match (ledger body 3,123 characters; repository file 3,484 characters). The exact current filename's path-specific commit-history query returned no commits. Therefore this is a candidate with divergent body/version provenance, not a verified source mapping. It must remain unresolved until the historical body is recovered or the difference is fully explained by trusted deployment records.
 
 The 34-entry count remains the count of ledger rows with no filename candidate in the current Staging migration directory; the notification row is not one of those 34. The prior sentence claiming no current-tree path for all representative name fragments is superseded by this correction: one name fragment was found under a different version as described above. The other four tested name fragments had no current-tree candidate.
+
+
+## Migration-ledger metadata and CI closeout — 2026-11-28
+
+- Both checks for commit `0199d11a5ca53e6e08c7521fe7794de659528fbb` completed successfully: static link audit run `46134903911` and environment-isolation regression run `46134904257`.
+- Read-only inspection of ledger metadata for the unmatched 17 November batch and the notification migration batch shows `created_by` is the same operator email on every inspected row, `idempotency_key` is NULL on every inspected row, each row stores one statement, and rollback arrays are NULL. This metadata does not identify the originating repository commit, source file hash, deploy bundle, or replay order; it cannot resolve provenance.
+- No migration-ledger metadata repair was attempted. No SQL statements were executed from the ledger.
+
+### Recovery disposition
+The accessible Git history and ledger metadata do not provide sufficient source provenance for a safe replay. Maintain the migration freeze. A deterministic baseline still requires authoritative SQL-body recovery or a formally documented source-unavailable baseline procedure, followed by exact object-level comparison and a disposable replay test.
