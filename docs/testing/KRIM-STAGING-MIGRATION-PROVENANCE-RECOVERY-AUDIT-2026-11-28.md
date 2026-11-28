@@ -541,3 +541,14 @@ Inspected `src/driver/app.html`, `public/shipper/active-shipments.html` and `pub
 - These are preview-safety remediations, not live driver workflow implementations. Real driver launch still requires authenticated assignment retrieval, driver/vehicle authorization, consent-gated tracking, secure evidence upload, server-side POD verification, immutable event history and audited shipment completion.
 
 Schema restore run `46132020729`: local ephemeral Supabase stack creation has now passed, but schema-only export from Staging remains in progress; restore, integrity metrics and sanitized evidence upload have not started. Earlier export run `46131552839` is not a successful restore. Do not infer migration recovery completion from static or environment CI.
+
+
+## Customer shipment register data export review — 28 Nov 2026
+
+Inspected canonical route `public/customer-os/customer-services/shipment-list.html` (legacy `public/shipper/active-shipments.html` redirects here).
+
+- Positive source controls: requires a Supabase session and verified user; derives active organization memberships for the authenticated user; restricts organization type to customer/shipper/enterprise; queries shipments by those organization IDs; loads location labels separately; uses escaped HTML for displayed record fields; CSV is generated from the already authorized in-memory result set.
+- Data completeness limitation: shipment query has a hard `limit(100)` and the interface had not disclosed this. Staging UI now states that only up to the 100 most recently created authorized records are loaded and that export follows current filters. Full history pagination/server-side export remains required before representing this as a complete register.
+- CSV security issue: prior CSV quoting escaped double quotes but did not neutralize spreadsheet formula prefixes. Attacker-controlled fields beginning with `=`, `+`, `-` or `@` could be interpreted as formulas when opened in spreadsheet software. Staging now prefixes an apostrophe when a cell begins with optional whitespace/control characters followed by a formula prefix, before applying CSV quote escaping. Commits: `43a1c274e71ac0c7361b8e9941d712d2897fbd69` (initial patch and cap disclosure), `cff59286dfcd3699f2ac16fef1ba87175726dd1d` (correct regex escaping).
+- Independent source verification confirms the corrected formula guard, cap disclosure, authenticated membership lookup, customer organization type filter and organization-scoped shipment query are present. Runtime role/RLS and CSV behavior still require isolated browser tests.
+
