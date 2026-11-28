@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isKrimStagingProjectUrl } from "../_shared/krim-staging-project-guard.ts";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(b:unknown,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{...cors,"Content-Type":"application/json"}});
@@ -7,7 +8,7 @@ Deno.serve(async(req)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  const rid=req.headers.get("x-request-id")??crypto.randomUUID(), ah=req.headers.get("Authorization");
  if(!ah?.startsWith("Bearer "))return json({error:"Authentication required",request_id:rid},401);
- const url=Deno.env.get("SUPABASE_URL")!, anon=Deno.env.get("SUPABASE_ANON_KEY")!, service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+ const url=Deno.env.get("SUPABASE_URL")??""; if(!isKrimStagingProjectUrl(url))return json({error:"Project environment mismatch",request_id:rid},503); const anon=Deno.env.get("SUPABASE_ANON_KEY")??"", service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??""; if(!anon||!service)return json({error:"Admin function configuration is incomplete",request_id:rid},503);
  const uc=createClient(url,anon,{global:{headers:{Authorization:ah}}});
  const {data:ud,error:ue}=await uc.auth.getUser();
  if(ue||!ud.user)return json({error:"Invalid authentication",request_id:rid},401);
@@ -39,6 +40,40 @@ Deno.serve(async(req)=>{
     break;
    }
    case"customer_ecosystem_inventory":{const inventory=[["Customer Services","Address Book","address-book.html"],["Customer Services","Analytics","analytics.html"],["Customer Services","Approval Workflows","approval-workflows.html"],["Customer Services","Booking Confirmation","booking-confirmation.html"],["Customer Services","Cargo Profiles","cargo-profiles.html"],["Customer Services","Claims","claims.html"],["Customer Services","Company Profile","company-profile.html"],["Customer Services","Contract Management","contract-management.html"],["Customer Services","Credit Notes","credit-notes.html"],["Customer Services","Delivery Confirmation","delivery-confirmation.html"],["Customer Services","Dispute","dispute.html"],["Customer Services","Service Centre","index.html"],["Customer Services","Invoices","invoices.html"],["Customer Services","Locations","locations.html"],["Customer Services","Onboarding","onboarding.html"],["Customer Services","Payment History","payment-history.html"],["Customer Services","Proof of Delivery Capture","pod-capture.html"],["Customer Services","Proof of Delivery Download","pod-download.html"],["Customer Services","Portal Overview","portal-overview.html"],["Customer Services","Ratings & Reviews","ratings-reviews.html"],["Customer Services","Recurring Shipments","recurring-shipments.html"],["Customer Services","Refunds","refunds.html"],["Customer Services","Reorder","reorder.html"],["Customer Services","Reports","reports.html"],["Customer Services","Returns","returns.html"],["Customer Services","Saved Routes","saved-routes.html"],["Customer Services","Settlement","settlement.html"],["Customer Services","Shipment Create","shipment-create.html"],["Customer Services","Shipment Details","shipment-details.html"],["Customer Services","Shipment List","shipment-list.html"],["Customer Services","Shipment Timeline","shipment-timeline.html"],["Customer Services","Shipping Preferences","shipping-preferences.html"],["Customer Services","Support","support.html"],["Customer Services","Team Members","team-members.html"],["Customer Services","Tracking Map","tracking-map.html"],["Customer Services","Verification","verification.html"],["Customer Services","Customer Workspace Tools","workspace.html"],["Quotes & Pricing","Contract Rates","contract-rates.html"],["Quotes & Pricing","Currency Conversion","currency-conversion.html"],["Quotes & Pricing","Price Audit","price-audit.html"],["Quotes & Pricing","Pricing Explanation","pricing-explanation.html"],["Quotes & Pricing","Quote Acceptance","quote-acceptance.html"],["Quotes & Pricing","Quote Approval","quote-approval.html"],["Quotes & Pricing","Quote Details","quote-details.html"],["Quotes & Pricing","Quote Expiry","quote-expiry.html"],["Quotes & Pricing","Quote List","quote-list.html"],["Quotes & Pricing","Quote Rejection","quote-rejection.html"],["Quotes & Pricing","Quote Revision","quote-revision.html"],["Quotes & Pricing","Spot Pricing","spot-pricing.html"],["Shipper Services","Booking Request","booking-request.html"],["Shipper Services","ePOD Vault","epod-vault.html"],["Shipper Services","Rate Calculator","rate-calculator.html"],["Shipper Services","Spot Approvals","spot-approvals.html"]];data={pages:inventory.map(([group,title,file])=>({group,title,path:"public/customer-os/"+(group==="Customer Services"?"customer-services/":group==="Quotes & Pricing"?"quotes-pricing/":"shipper-services/")+file}))};break}
+   case"partner_pending_capabilities":{
+    const {data:capabilities,error}=await db.from("krim_partner_capabilities")
+      .select("id,organization_id,transport_mode_id,service_type,coverage_country_id,coverage_region,max_weight_kg,refrigerated,hazardous_goods_capable,active,verification_status,effective_from,effective_until,metadata,created_at")
+      .eq("verification_status","pending")
+      .order("created_at",{ascending:false})
+      .limit(limit);
+    if(error)throw error;
+    const orgIds=[...new Set((capabilities??[]).map((x:any)=>x.organization_id).filter(Boolean))];
+    const modeIds=[...new Set((capabilities??[]).map((x:any)=>x.transport_mode_id).filter(Boolean))];
+    const countryIds=[...new Set((capabilities??[]).map((x:any)=>x.coverage_country_id).filter(Boolean))];
+    const [orgResult,modeResult,countryResult]=await Promise.all([
+      orgIds.length?db.from("krim_organizations").select("id,legal_name,partner_account_mode,partner_verification_status,partner_compliance_status,partner_lifecycle_status,status").in("id",orgIds):Promise.resolve({data:[],error:null}),
+      modeIds.length?db.from("krim_transport_modes").select("id,code,name").in("id",modeIds):Promise.resolve({data:[],error:null}),
+      countryIds.length?db.from("krim_countries").select("id,code,iso2_code,name").in("id",countryIds):Promise.resolve({data:[],error:null})
+    ]);
+    if(orgResult.error)throw orgResult.error;
+    if(modeResult.error)throw modeResult.error;
+    if(countryResult.error)throw countryResult.error;
+    const orgs=new Map((orgResult.data??[]).map((x:any)=>[x.id,x]));
+    const modes=new Map((modeResult.data??[]).map((x:any)=>[x.id,x]));
+    const countries=new Map((countryResult.data??[]).map((x:any)=>[x.id,x]));
+    data={items:(capabilities??[]).map((x:any)=>({...x,organization:orgs.get(x.organization_id)??null,transport_mode:modes.get(x.transport_mode_id)??null,coverage_country:countries.get(x.coverage_country_id)??null}))};
+    break;
+   }
+   case"partner_individual_interests":{
+    const {data:items,error}=await db.from("krim_organizations")
+      .select("id,legal_name,display_name,organization_type,organization_type_code,status,partner_account_mode,partner_verification_status,partner_lifecycle_status,partner_compliance_status,partner_metadata,updated_at")
+      .eq("partner_account_mode","individual_interest")
+      .order("updated_at",{ascending:false})
+      .limit(limit);
+    if(error)throw error;
+    data={items:items??[]};
+    break;
+   }
    case"overview":{const ts=["krim_organizations","krim_shipments","krim_quotes","krim_booking_requests","krim_invoices","payments","krim_partner_payables","krim_settlements","krim_security_alerts","krim_system_incidents"];const counts:any={};for(const t of ts){const{count,error}=await db.from(t).select("*",{count:"exact",head:true});if(error){console.error("global-admin-control count unavailable",t,error.message);counts[t]=null;}else{counts[t]=count??0;}}data={roles,counts};break}
    case"inquiries":{const {data:items,error}=await db.from("krim_public_contact_inquiries").select("id,full_name,email,organization,message,status,source_page,created_at,privacy_consent,privacy_consent_at,privacy_notice_version").order("created_at",{ascending:false}).limit(limit);if(error)throw error;data={items:items??[]};break;}
    case"update_inquiry_status":{const inquiryId=String(body.inquiry_id??"");const next=String(body.status??"");const allowed=["new","in_review","responded","closed","spam"];if(!/^[0-9a-f-]{36}$/i.test(inquiryId))return json({error:"Valid inquiry ID required",request_id:rid},400);if(!allowed.includes(next))return json({error:"Unsupported inquiry status",request_id:rid},400);const {data:item,error}=await db.from("krim_public_contact_inquiries").update({status:next}).eq("id",inquiryId).select("id,status,source_page").single();if(error)throw error;await audit("public_inquiry_status_updated","krim_public_contact_inquiry",inquiryId,{status:next,source_page:item.source_page??null});data={inquiry:item};break;}
