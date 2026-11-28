@@ -43,10 +43,10 @@
     </header>
 
     <main class="flex-grow max-w-xl mx-auto px-6 py-12 w-full space-y-8">
-        <div class="space-y-2 text-center">
+        <div role="note" class="rounded-2xl border border-blue-300 bg-blue-50 p-5 text-left text-sm text-blue-900"><strong>Preview only — no shipment record is loaded or changed.</strong><p class="mt-1">This page is not connected to an authenticated shipment amendment endpoint. It does not verify ownership, check shipment state, preserve amendment history or save changes. Use the authorised workspace for real shipment changes.</p></div>\n        <div class="space-y-2 text-center">
             <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Shipment Core Module • Step 4 of 23</span>
             <h1 class="text-3xl font-extrabold text-white tracking-tight">Edit Shipment Record</h1>
-            <p class="text-slate-400 text-xs font-mono">Update active routing instructions, transport mode specifications, and operational parameters for SHP-2026-OCT-9901.</p>
+            <p class="text-slate-400 text-xs font-mono">Review shipment amendment fields. No authenticated shipment record is loaded or updated.</p>
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
@@ -54,7 +54,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Shipment Reference</label>
-                        <input type="text" required value="SHP-2026-OCT-9901" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="An authorised shipment reference is required" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Transport Mode</label>
@@ -70,21 +70,21 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Origin Facility / Port</label>
-                        <input type="text" required value="USNYC (New York Seaport)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Enter verified origin only after authorised record selection" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Destination Facility / Port</label>
-                        <input type="text" required value="NLRTM (Port of Rotterdam)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Enter verified destination only after authorised record selection" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-400 uppercase tracking-wider">Revision & Handling Amendments</label>
-                    <textarea rows="3" required placeholder="Updated vessel schedule confirmed. Container transferred to secondary feeder berth..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition">Updated vessel schedule confirmed. Container transferred to secondary feeder berth.</textarea>
+                    <textarea rows="3" required placeholder="Updated vessel schedule confirmed. Container transferred to secondary feeder berth..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-slate-500 transition" placeholder="Describe a proposed amendment for review; do not enter unverified operational instructions."></textarea>
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25 cursor-pointer">
-                    Save Shipment Edits & Proceed →
+                    Preview proposed amendment — no record saved
                 </button>
             </form>
         </div>
@@ -95,11 +95,7 @@
     </footer>
 
     <script>
-        function handleShipmentEditSubmit(e) {
-            e.preventDefault();
-            alert('Preview only: no shipment record is updated.');
-            window.location.href = '/public/shipments/shipment-parties.html';
-        }
+        function handleShipmentEditSubmit(e) {\n            e.preventDefault();\n            alert('Preview only: no shipment record or amendment was saved.');\n        }
     </script>
 </body>
 </html>
