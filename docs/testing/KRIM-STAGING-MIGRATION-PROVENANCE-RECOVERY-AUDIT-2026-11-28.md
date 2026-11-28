@@ -746,3 +746,30 @@ No goods receipt, inventory movement, quality decision, evidence upload, transfe
 
 ### Warehouse activation remains blocked
 The source and database agree that browser workflows cannot currently perform these actions with authenticated users. This is a backend authorization design and migration-recovery blocker, not a reason to grant every SECURITY DEFINER function to authenticated. Before activation: classify functions by intended caller, review every function body and tenant/facility authorization, reconcile migration history, test least-privilege grants in an isolated restored environment, provision a dedicated private evidence bucket, and verify inventory conservation, maker-checker independence, idempotency, audit events and custody lifecycle. Only then re-enable controls.
+
+
+## Driver, vehicle and dispatch RPC privilege review — 2026-11-28
+
+Read-only privilege and function-body metadata inspection against Staging project `qrpcivhdxobiaofppbkl`; Production untouched. The review covered public/private driver, vehicle, dispatch and fleet functions. No RPC was invoked and no data or schema was changed.
+
+### Effective EXECUTE privilege findings
+- The following user-facing RPCs are executable by `authenticated` and not `anon`: driver-to-partner-shipment assignment, leg dispatch authorization, driver assignment acceptance, driver trip-event recording, driver POD submission, dispatchable-driver listing, partner shipment dispatch, partner driver-exception resolution, and leg-dispatch authorization revocation.
+- Most vehicle registration, vehicle-document registration/listing, driver/vehicle binding, vehicle verification/review, driver invitation, and admin driver-verification RPCs in the inspected set are not executable by `authenticated` or `anon`. This means those screens cannot be treated as fully operational merely because UI forms exist.
+- A private driver-licence expiry admin routine is executable by `authenticated` and its body references `auth.uid()`, JWT/AAL2 and organization context. A same-named public invoker wrapper is also executable by authenticated; it does not itself contain those checks, so its delegation chain must be confirmed before release.
+- No inspected function was executable by `anon`. Several privileged functions are SECURITY DEFINER; their existence and EXECUTE grant alone do not certify the authorization logic.
+
+### Body-level review signals and remaining verification
+- Driver assignment, trip-event and POD routines reference authenticated identity and organization/driver context. The trip-event and POD paths also reference shipment-leg context. This is positive source evidence, but does not prove tenant isolation, assignment ownership, current assignment state, evidence integrity or idempotency under concurrent requests.
+- Leg dispatch authorization and dispatchable-driver listing reference authenticated identity and organization membership context. The dispatch authorization path includes an idempotency signal and shipment-leg context.
+- Partner shipment dispatch and driver-exception resolution reference authenticated identity and organization context, but the lightweight body scan did not find the explicit organization-membership table reference in those function bodies. This is a targeted review flag, not proof of an authorization bypass; inspect delegated helpers and permission checks before enabling.
+- The public invoker licence-expiry wrapper delegates to a separately named private SECURITY DEFINER routine. Confirm the private routine's platform-admin permission check, AAL2 enforcement, active admin membership and target profile scope as a single call chain.
+- Vehicle registration, document upload/metadata registration, binding, review and invitation flows are currently blocked by missing authenticated EXECUTE on the inspected RPCs. Keep related UI actions disabled until the exact function caller model and grants are recovered and tested.
+- Dispatch functions that have authenticated EXECUTE remain gated by partner assignment, leg authorization, capacity and custody triggers described in earlier sections. Those guards require isolated positive/negative role tests, tenant-crossing tests, duplicate/retry tests, race tests and immutable audit verification.
+
+### Release disposition
+Driver and vehicle onboarding/verification are not cleared for real operation. POD and trip-event RPC grants do not replace the paused driver POD UI or prove correct shipment-leg evidence binding. Do not grant the currently blocked vehicle/admin functions broadly, and do not enable the authenticated dispatch functions solely because they are executable. Migration provenance and the disposable schema-restore workflow must be resolved first; then validate exact function bodies, delegated helpers, AAL, active membership, organization/assignment/leg scope, evidence storage ownership, idempotency, concurrency and audit history in an isolated environment.
+
+No driver invitation, vehicle registration, document upload, assignment, dispatch, POD, trip event or exception resolution was performed. No grants, RLS policies, migrations, triggers or database records were changed.
+
+### CI follow-up
+The ten previously pending checks all completed successfully: container-booking, transshipment, route-planning, cargo-details, forwarding-quote and partner-security-audit environment-isolation/static-link runs (`46133389809`, `46133393035`, `46133396403`, `46133396410`, `46133399211`, `46133399242`, `46133341012`, `46133341052`, `46133215482`, `46133215500`). Each job concluded `success`. These are repository static-link and environment-isolation checks only; they do not establish authenticated runtime, storage, or real dispatch readiness.
