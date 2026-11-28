@@ -206,3 +206,15 @@ Re-run on commit `02e9d11325695c78a05f8bbbb05ee9c893f72d85`:
 - Static link audit `46129020691`: SUCCESS.
 
 The earlier failed run `46128987113` is retained as a failed historical run; it was not hidden or treated as a pass. The corrected run is the passing verification.
+
+
+## 12. Partner capability lifecycle regression confirmed — Package 1 exit blocker (2026-11-28)
+
+A fresh read-only inspection of the exact deployed Staging RPC definitions and capability schema confirmed that repeat multi-category onboarding can reset a previously verified/compliant organisation to pending and can update a previously verified/active capability to inactive/pending. The same wrapper creates category declarations without the submitter/evidence metadata required by the independent capability-review RPC. The capability table has no immutable submission-version history or unique organisation/category index; its insert audit trigger does not cover generic updates.
+
+This is a critical pre-activation workflow defect. It is documented with exact state transitions, existing controls, and the corrective design in:
+`docs/testing/KRIM-FAST-TRACK-DAY-01-VERSIONED-PARTNER-ONBOARDING-CORRECTION-DESIGN-2026-11-28.md`.
+
+No live partner rows existed in the audited Staging snapshot. No RPC was invoked and no DDL/DML was applied. The correction remains a design gate pending a standard generated migration, isolated database tests and reviewed Staging deployment.
+
+Package 1 remains NOT COMPLETE. Phase 00 remains OPEN and Phase 01 remains NOT AUTHORIZED.
