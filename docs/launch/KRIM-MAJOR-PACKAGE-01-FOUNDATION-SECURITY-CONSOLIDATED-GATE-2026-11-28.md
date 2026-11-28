@@ -192,3 +192,17 @@ The final two deployed Staging functions were rechecked. The identity-invitation
 No invitations were sent, no organizations were provisioned, no fixture function was invoked, and no email/provider was called. The four test identities remain uncreated.
 
 This closes the source-level exact-project-target guard review for all five functions currently deployed in Staging. It does not prove authenticated owner authorization, fixture isolation, workflow queue isolation or notification side-effect safety.
+
+
+### Test harness correction and verified source-level coverage (2026-11-28)
+
+A new Deno source-inspection test was added to ensure all five deployed privileged Staging functions import and invoke the shared exact-project guard before constructing a Supabase client. Its first CI execution correctly failed because Deno had no filesystem read permission. The workflow was corrected to grant only `--allow-read=supabase/functions`; no broad read permission was added.
+
+Re-run on commit `02e9d11325695c78a05f8bbbb05ee9c893f72d85`:
+- Exact URL acceptance/rejection tests: PASS.
+- Five-function shared-guard source checks: PASS.
+- Complete Deno project-guard test job `46129020717`: SUCCESS.
+- Environment-isolation regression `46129020731`: SUCCESS.
+- Static link audit `46129020691`: SUCCESS.
+
+The earlier failed run `46128987113` is retained as a failed historical run; it was not hidden or treated as a pass. The corrected run is the passing verification.
