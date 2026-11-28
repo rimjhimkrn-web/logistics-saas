@@ -21,11 +21,11 @@ The frontend's 10 MiB and MIME checks match the bucket configuration.
 Relevant Storage policies currently found:
 
 ### INSERT
-Two authenticated INSERT policies apply:
+Two authenticated INSERT policies apply, with different PostgreSQL policy modes:
 - krim_partner_verification_upload_own_org: requires the target bucket, path shape with caller UUID in segment 2, active membership and active organization, and an organization type from the policy's six-value allowlist.
 - krim_partner_verification_upload_require_aal2: requires JWT AAL2.
 
-PostgreSQL combines permissive policies with OR semantics, so the exact combined policy behavior must be checked carefully: the membership/path policy and the AAL2 policy are separate permissive policies. As currently written, either matching INSERT policy can authorize an insert. Therefore the AAL2 requirement is not proven to be mandatory merely because the second policy exists. This is a potential security gap: AAL2 should be a condition in the same effective authorization predicate (or enforced by a restrictive policy/verified storage function), not an independent permissive policy that can be satisfied separately.
+The catalog confirms the policies are not both permissive: the organization/path policy is PERMISSIVE, while the AAL2 policy is RESTRICTIVE. PostgreSQL OR-combines permissive policies and AND-combines restrictive policies. Therefore, for authenticated INSERTs matching this bucket, the restrictive AAL2 condition is ANDed with the permissive organization/path condition. The policy composition is structurally correct for enforcing both conditions. A runtime AAL1/AAL2 test is still required to prove actual Storage API behavior.
 
 ### SELECT
 The authenticated SELECT policy allows the object owner in their own active organization path; a user with partner.manage for that organization; or an AAL2 platform admin. The bucket remains private, but authenticated reads are intentionally possible under this policy. This should remain limited to the evidence review workflow and should be tested with Partner A/B and platform-admin sessions.
@@ -71,7 +71,7 @@ The audit table has structured actor, organization, event/entity identifiers, re
 - Bucket privacy, size and MIME limits: verified from Staging catalog.
 - INSERT/SELECT policy definitions and DELETE-policy absence: verified read-only.
 - Underlying authenticated DELETE privilege: verified present; policy still denies row access absent another applicable policy.
-- Storage AAL2 enforcement: not proven; policy composition indicates a likely bypass.
+- Storage AAL2 policy composition: verified PERMISSIVE + RESTRICTIVE, structurally AND-enforced; runtime AAL1/AAL2 test not run.
 - Actual object owner/owner_id parity: unverified; bucket empty.
 - Actual browser cleanup request: not invoked.
 - Submission/review E2E: not run; no partner fixtures or capability rows.
