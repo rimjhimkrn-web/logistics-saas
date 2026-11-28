@@ -46,20 +46,20 @@
         <div class="space-y-2 text-center">
             <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Shipment Core Module • Step 10 of 23</span>
             <h1 class="text-3xl font-extrabold text-white tracking-tight">Dispatch Management</h1>
-            <p class="text-slate-400 text-xs font-mono">Coordinate gate-out clearances, dispatch orders to drivers/carriers, and initiate transit for SHP-2026-OCT-9901.</p>
+            <p class="text-slate-400 text-xs font-mono">Preview dispatch workflow fields. No shipment or dispatch assignment is connected.</p>
         </div>
 
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
+        <div class="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900 text-xs"><strong>DEMO PREVIEW · NOT LIVE</strong><p class="mt-2">Sample fields only. This page does not save dispatch orders, assign drivers or carriers, clear gates, or start transit.</p></div>\n        <div class="bg-white text-slate-800 border border-slate-200 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
             <form onsubmit="handleDispatchSubmit(event)" class="space-y-5">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Dispatch Order ID</label>
-                        <input type="text" required value="DSP-2026-OCT-1102" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Generated after authorized dispatch" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Gate Clearance Status</label>
                         <select required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
-                            <option value="cleared">Gate-Out Cleared ✓</option>
+                            <option value="">Select actual clearance state</option>
                             <option value="pending_doc">Pending Documentation</option>
                             <option value="hold">Customs Hold / Security Check</option>
                         </select>
@@ -69,11 +69,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Scheduled Departure Time</label>
-                        <input type="text" required value="2026-10-18 08:30 UTC" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="No departure scheduled" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Dispatcher Assigned</label>
-                        <input type="text" required value="Marcus Vance (Terminal Dispatch)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="No dispatcher assigned" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25 cursor-pointer">
-                    Confirm Dispatch & Proceed →
+                    Preview dispatch form (no save) →
                 </button>
             </form>
         </div>
@@ -96,8 +96,7 @@
     <script>
         function handleDispatchSubmit(e) {
             e.preventDefault();
-            alert('Preview only: no dispatch record is saved or assigned.');
-            window.location.href = '/public/shipments/pickup.html';
+            alert('Preview only: no dispatch record is saved, no driver or carrier is assigned, and no transit is initiated.');
         }
     </script>
 </body>
