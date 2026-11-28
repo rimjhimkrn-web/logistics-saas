@@ -210,3 +210,22 @@ Before any Staging DDL:
 - Generate the migration with the supported Supabase CLI workflow, pin the CLI version, and run the complete isolated suite before asking for Staging deployment approval.
 
 No migration was created or applied in this step.
+
+
+## Migration-history preflight blocker discovered (2026-11-28)
+
+A repository-wide filename audit of all 499 SQL files under `supabase/migrations/` found **29 duplicated 14-digit migration version identifiers**. This is not a partner-specific issue; it affects the ability to safely generate, order, validate and apply any new migration through the standard Supabase migration workflow.
+
+Examples include:
+- `20261104190000`: four different driver/partner migrations.
+- `20261105153000`: capability evidence submission and partner quote permission migrations.
+- `20261127027000` through `20261127029000`: multiple independent Phase 00 changes share versions.
+- `20261127190000`: three separate migrations share the same version.
+
+The full duplicate set is present in the repository tree audit. Do not arbitrarily rename or reorder already-applied migrations: the Staging migration ledger has 163 applied entries and the repo contains 499 files, so a filename-only change could create drift or replay an already-applied change. Before creating the capability lifecycle migration, reconcile:
+1. Every duplicate version against the actual Staging `supabase_migrations.schema_migrations` ledger and repository SQL content.
+2. Which duplicate files are already applied, missing, or unapplied.
+3. Whether any same-version scripts depend on a specific execution order.
+4. A safe forward-only migration-history repair plan accepted by the Supabase CLI and verified on a disposable copy of the current Staging schema.
+
+No migration files were renamed and no migration was applied. This issue further blocks a standard migration-based capability lifecycle implementation until resolved.
