@@ -229,3 +229,10 @@ The versioned lifecycle design now includes ten database-enforced invariants, a 
 Latest CI for report commit `2fdcd164e62332b63c890cd81a2376385e60b197`: environment-isolation regression SUCCESS (`46129161846`) and static link audit SUCCESS (`46129161883`). This subsequent documentation-only update has not yet been independently CI-verified.
 
 No Staging DDL/DML, partner RPC invocation, file upload/deletion or partner state change was performed. Package 1 remains NOT COMPLETE; Phase 00 remains OPEN; Phase 01 remains NOT AUTHORIZED.
+
+
+### Migration version collision audit — new critical implementation blocker (2026-11-28)
+
+A complete filename audit of the 499 repository SQL migration files found 29 duplicate 14-digit migration version identifiers. Some collisions include four scripts sharing `20261104190000`, two scripts sharing `20261105153000`, and three scripts sharing `20261127190000`. This prevents treating the repository migration directory as a reliably ordered sequence for a new standard migration until reconciled against the 163-entry Staging migration ledger. No existing migration was renamed, reordered or replayed. The detailed preflight and forward-only reconciliation requirements are recorded in the versioned partner lifecycle correction design.
+
+**New hard gate:** reconcile all duplicate migration versions and verify a forward-only repair on a disposable schema before creating or applying the partner lifecycle migration. No ad hoc timestamp or direct DDL workaround is approved.
