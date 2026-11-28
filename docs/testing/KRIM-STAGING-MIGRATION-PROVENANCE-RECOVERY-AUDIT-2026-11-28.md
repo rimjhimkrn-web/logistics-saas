@@ -1014,3 +1014,32 @@ Schema-level details:
 The relation total of 399 (398 tables + 1 view) is consistent with the earlier isolated schema restore's aggregate relation count. The extension inventory and grant breakdown add useful catalog dimensions, but they do **not** establish object-by-object equality with the isolated restore: no per-object canonical definition hashes, owners, ACL fingerprints, extension dependency comparison, managed auth/storage objects, or default-privilege comparison has yet been completed.
 
 All queries were SELECT-only. No DDL/DML, migration-ledger changes, grants, or production access occurred. Migration execution remains frozen pending complete provenance and object-level comparison.
+
+
+## Canonical object fingerprint baseline — read-only, 2026-11-28
+
+A second read-only Staging catalog pass computed deterministic aggregate MD5 fingerprints over sorted object identities and normalized catalog definitions. These are **Staging baseline fingerprints only**; no corresponding isolated-restore fingerprints have yet been generated, so they do not prove parity.
+
+| Object family | Objects | Aggregate fingerprint |
+|---|---:|---|
+| Relations (tables/views/materialized/foreign) | 399 | `6143e0cc9cfc4a12141d0c5125620ecf` |
+| Functions | 568 | `3c8dd38fe7a1b5de44636e207832ad01` |
+| Policies | 412 | `9da73e84c18706588ec043c58a9b5538` |
+| Non-internal triggers | 160 | `ebada5d0676221d59535caed065b447f` |
+
+Fingerprint inputs:
+- Relations: ordered column names, ordinal positions, formatted data types, NOT NULL flags, default expressions and collation names. View definitions, indexes, constraints, ownership and relation options are not included in this relation fingerprint.
+- Functions: `pg_get_functiondef` keyed by schema, name and identity arguments.
+- Policies: command, permissiveness, roles, USING and WITH CHECK expressions.
+- Triggers: `pg_get_triggerdef` keyed by schema, table and trigger name.
+
+A separate ACL fingerprint pass returned:
+| ACL family | Entries | Aggregate fingerprint |
+|---|---:|---|
+| Functions | 1,155 | `6b794852f2f3791e13751815497b8732` |
+| Schemas | 14 | `1428154c6df0d63a2fb65ee282c14f99` |
+| Tables/sequences/views | 8,426 | `209ed54922c71bd9b4a10af2ae1ef067` |
+
+ACL fingerprints include explicit ACLs or PostgreSQL default ACL expansions, keyed by object, grantee, privilege and grantability. They are not a complete security certification: role membership, ownership, default privileges, column ACLs, function language/configuration and managed-schema ACLs require separate review. A follow-up default-privilege query was abandoned after a catalog type-cast error; no state was changed.
+
+**Next comparison step:** run the same canonical extraction against the isolated restore artifact or a newly disposable restore, compare per-object keys and fingerprints (not just aggregate hashes), then classify every difference. No DDL/DML, grants, migration-ledger changes or Production access occurred.
