@@ -86,7 +86,7 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/krim-schema-restore"
           timeout --signal=TERM --kill-after=30s 900s supabase db dump \
-            --schema public,private,krim_internal,graphql_public \
+            --schema public,private,krim_internal \
             --file "$RUNNER_TEMP/krim-staging-schema.sql" \
             --remote="$STAGING_DB_URL"
           test -s "$RUNNER_TEMP/krim-staging-schema.sql"
@@ -105,19 +105,9 @@ jobs:
           source "$RUNNER_TEMP/krim-local-supabase.env"
           set +a
           test -n "${DB_URL:-}"
-          # The disposable Supabase stack pre-creates graphql_public under a
-          # managed owner. Grant the local restore role CREATE/USAGE by acting
-          # as that schema owner; do not change schema ownership.
-          LOCAL_SCHEMA_OWNER="$(psql "$DB_URL" --no-psqlrc --tuples-only --no-align --set ON_ERROR_STOP=1 \
-            --command="SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname = 'graphql_public'")"
-          LOCAL_RESTORE_ROLE="$(psql "$DB_URL" --no-psqlrc --tuples-only --no-align --set ON_ERROR_STOP=1 \
-            --command="SELECT current_user")"
-          if [[ ! "$LOCAL_SCHEMA_OWNER" =~ ^[A-Za-z_][A-Za-z0-9_]*$ || ! "$LOCAL_RESTORE_ROLE" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-            echo "::error::Could not safely identify the disposable local schema owner and restore role."
-            exit 1
-          fi
-          psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
-            --command="SET ROLE \"$LOCAL_SCHEMA_OWNER\"; GRANT USAGE, CREATE ON SCHEMA graphql_public TO \"$LOCAL_RESTORE_ROLE\"; RESET ROLE;"
+          # graphql_public is a Supabase-managed schema owned by the local
+          # stack's admin role. It is deliberately excluded from this application
+          # schema restore; compare application-owned schemas only below.
           psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
             --single-transaction --file "$RUNNER_TEMP/krim-staging-schema-sanitized.sql"
           echo "Staging schema-only snapshot restored into the disposable local Supabase database."
@@ -134,16 +124,16 @@ jobs:
           set +a
           cat > "$RUNNER_TEMP/krim-schema-metrics.sql" <<'SQL'
           SELECT jsonb_build_object(
-            'tables', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p')),
-            'views', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('v','m')),
-            'functions', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
-            'triggers', (SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND NOT t.tgisinternal),
-            'policies', (SELECT count(*) FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
-            'indexes', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind='i'),
-            'constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
-            'rls_enabled_without_policy', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p') AND c.relrowsecurity AND NOT EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid)),
-            'security_definer_without_search_path', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND p.prosecdef AND (p.proconfig IS NULL OR NOT EXISTS (SELECT 1 FROM unnest(p.proconfig) cfg WHERE cfg LIKE 'search_path=%'))),
-            'unvalidated_constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND NOT co.convalidated)
+            'tables', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND c.relkind IN ('r','p')),
+            'views', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND c.relkind IN ('v','m')),
+            'functions', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal')),
+            'triggers', (SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND NOT t.tgisinternal),
+            'policies', (SELECT count(*) FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal')),
+            'indexes', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND c.relkind='i'),
+            'constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal')),
+            'rls_enabled_without_policy', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND c.relkind IN ('r','p') AND c.relrowsecurity AND NOT EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid)),
+            'security_definer_without_search_path', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal') AND p.prosecdef AND (p.proconfig IS NULL OR NOT EXISTS (SELECT 1 FROM unnest(p.proconfig) cfg WHERE cfg LIKE 'search_path=%'))),
+            'unvalidated_constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal') AND NOT co.convalidated)
           )::text;
           SQL
           psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align \
