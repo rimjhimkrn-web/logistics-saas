@@ -89,3 +89,57 @@ Supabase published a breaking CLI v3 change on 2026-11-04: database commands now
 
 ## Decision
 DESIGN ONLY. No migration file created, no SQL mutation, no RPC invocation, no fixture provisioning, no upload, no notification, no deployment, no Production access. Phase 00 remains OPEN; Phase 01 remains unauthorized.
+
+
+## 2026-11-28 live Staging function and schema recheck — critical lifecycle defect confirmed
+
+Read-only catalog inspection retrieved the exact deployed definitions of the multi-category onboarding RPC, its delegated base RPC, capability review and revocation RPCs, together with table columns, constraints, indexes, triggers and execute ACLs.
+
+### Confirmed defect A — repeat onboarding can downgrade a reviewed organisation
+
+The public multi-category RPC calls `krim_submit_partner_onboarding_global_v2` on every submission. The delegated base function unconditionally updates the organisation to:
+- `partner_lifecycle_status='verification_pending'`
+- `partner_verification_status='pending'`
+- `partner_compliance_status='pending'`
+- `partner_onboarding_status='submitted'`
+
+It also reopens/rewrites an existing open verification case. There is no guard in the multi-category wrapper that rejects an already verified/compliant organisation or routes a material change into a separately reviewed amendment. A repeat submission can therefore regress an already approved organisation's status. This must be corrected before partner onboarding is enabled for real applicants.
+
+### Confirmed defect B — category declaration update can silently deactivate an approved capability
+
+For each selected category, the multi-category RPC updates any existing row matching `organization_id` plus `metadata.operational_category`. That UPDATE unconditionally sets `active=false` and `verification_status='pending'`, and overwrites coverage fields. It does not restrict the row to a draft/pending/rejected state and does not create a new evidence version. A previously verified capability can therefore be silently downgraded by submitting onboarding again. The existing table has only a primary-key index on id and no unique constraint for organisation/category, so duplicate legacy rows are also possible; the current UPDATE can affect multiple matching rows.
+
+### Confirmed defect C — onboarding-created capability declarations lack review evidence lineage
+
+The multi-category wrapper inserts declarations with category and coverage metadata only. It does not set `metadata.submitted_by` or `metadata.evidence_paths`. The independent capability-review RPC requires a submitter and one to five existing private evidence objects under the exact organisation/user/capability path before approval. Therefore these onboarding-created declaration rows cannot pass the existing approval evidence gate until a separate evidence submission creates a distinct reviewable row or a proper evidence-attachment/version workflow is implemented.
+
+### Existing controls that must be preserved
+
+- Multi-category onboarding is authenticated-only (anon EXECUTE false) and requires AAL2 plus an active registered-business partner membership.
+- Delegated base onboarding v2 is not executable by anon or authenticated directly; service_role only. The wrapper is the exposed entry point.
+- Capability review and revocation require authenticated AAL2 platform-admin permission; anon EXECUTE false.
+- Capability approval checks submitter/reviewer independence, current organisation compliance, active country and mode, evidence object ownership/path, and blocks hazardous-goods and refrigerated capabilities through the standard workflow.
+- Revocation marks a verified active capability suspended/inactive and explicitly does not cancel existing assignments. This is a separate operational-impact workflow gap; do not auto-cancel assignments.
+
+### Schema and lineage findings
+
+- `krim_partner_capabilities` currently has no first-class submitter/evidence/version columns. Evidence lineage lives in mutable JSONB metadata.
+- No unique index exists on `(organization_id, metadata->>'operational_category')`; multiple category rows can be updated by one wrapper invocation.
+- Existing audit trigger records capability INSERT only, not arbitrary UPDATE. Review/revoke RPCs separately write audit events, but generic category UPDATEs have no equivalent immutable submission-version record.
+- Existing organisation onboarding document-owner trigger verifies that the submitted business documents belong to the authenticated submitter; it does not protect previously approved organisation state from regression.
+- The current Staging capability table is empty at the audited snapshot; no live rows were changed and no regression could be safely reproduced using production-like records.
+
+### Required corrective design before DDL
+
+1. Separate first-time organisation verification from capability portfolio amendments. A verified/compliant organisation must not be reset by a service-category edit. Changes to legal identity or compliance-critical fields must enter a separately versioned re-verification case with explicit impact and review.
+2. In the multi-category RPC, never UPDATE a verified, suspended, expired or otherwise reviewed capability in place. Either reject the operation with a clear message or create a new pending version linked to the prior capability/version. Do not change the currently approved row until an independent reviewer approves the new version.
+3. Persist every capability submission in an append-only version/history table with submitter, timestamp, request/idempotency key, submitted details, evidence object paths, evidence ownership and review decision linkage. Enforce unique version numbers and idempotency keys; deny direct client DML.
+4. Bind reviewer approval to the exact immutable submission version and evidence snapshot. Approval/rejection must record reviewer, timestamp, reason, previous state and resulting state. A later submission must not rewrite historical evidence or review.
+5. Add a database-level invariant or transition guard so no exposed RPC or future code path can silently change `verified/active` to `pending/inactive` without an explicit audited amendment/revocation transition.
+6. Resolve legacy duplicate category rows safely before adding uniqueness; inventory and reconcile duplicates rather than selecting an arbitrary row.
+7. Define revocation impact handling: enumerate affected queued/accepted/in-progress assignments, stop new matching allocations immediately, create operations exceptions for existing assignments, and require an authorised human decision for reassignment/cancellation. Preserve shipment and customer evidence.
+8. Test first submission, repeat same submission, coverage amendment, evidence replacement, approved capability amendment, rejected resubmission, suspended capability, duplicate category rows, concurrent submissions, idempotent retries, cross-tenant access, AAL1/AAL2 and reviewer self-approval.
+
+### Execution boundary
+
+This is a confirmed source/catalog defect report, not a deployed fix. No SQL DDL/DML, RPC invocation, storage upload/deletion, onboarding submission, partner state change or production access was performed. A standard Supabase migration must be generated using the supported CLI workflow and tested in an isolated local stack before any reviewed Staging migration is applied. The connected session currently lacks that local CLI/Docker migration-generation and isolated database-test capability. Do not bypass that gate with an ad hoc migration filename or unreviewed direct DDL.
