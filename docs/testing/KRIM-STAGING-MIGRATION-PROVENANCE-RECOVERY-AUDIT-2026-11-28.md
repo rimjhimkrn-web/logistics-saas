@@ -393,3 +393,6 @@ Commits:
 Post-write source verification confirmed all three pages contain the preview notice; the known false "Live Feed Active", "AIS Satellite Link Active", "On-Time SLA Guarantee", "Invoiced to Consignee", "Healthy Margin" and fake Customs API-success strings are absent from the inspected sources. CI static-link and environment-isolation runs triggered for these commits and are pending at report time.
 
 This is a staging-only safety-label correction, not implementation of shipment telemetry, billing, tracking, audit, or operational APIs. The 67-route review queue remains open.
+
+
+Workflow correction follow-up: the first grant-based revision (`567dbc17ddb9da7a81c8c4d0ded23e8b3ebb3d42`) used a psql meta-command form that is not valid for `psql --command`. It was corrected before treating that approach as verified. Commit `db03693c75f6839db2142fbdf3819f641c775f39` now reads the local schema owner and restore role from the disposable database, validates both identifiers, then issues ordinary SQL statements (`SET ROLE`, `GRANT`, `RESET ROLE`) in one psql command. This remains unproven until run `46131552839` completes the isolated restore step.
