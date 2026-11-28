@@ -256,3 +256,10 @@ The live Staging schema has no foreign key from operational records to a capabil
 At the read-only snapshot, all seven related Staging tables (capabilities, match results, quotes, opportunities, partner assignments, capacity commitments and execution events) had zero rows. No live partner or shipment data was modified.
 
 The lifecycle correction therefore must include an immutable eligibility decision snapshot and propagate its capability/submission-version reference through match → quote → assignment. Revocation must block new allocations, enumerate affected work using those references, and create operations exceptions without silently cancelling accepted or in-transit shipments. Existing records without lineage must be treated as legacy/unattributed. This is an additional cross-module schema/test requirement, not a profile-only fix.
+
+
+### Matching and network-qualification policy drift (2026-11-28)
+
+The deployed Staging `krim_internal_check_network_capability` and `krim_internal_create_partner_matching_run` functions implement materially different partner eligibility rules. Pre-qualification accepts NULL maximum weight and country-level/global capability coverage, while matching requires a non-NULL sufficient maximum weight and location-level coverage or an active route lane plus active service areas. Capacity is also evaluated through separate helper paths; equivalence is not proven. Consequently, a network may be reported available even though downstream matching returns no eligible partner.
+
+The correction design now requires one shared versioned eligibility policy, structured decisions bound to exact capability/evidence/service-area/capacity versions, and tests for NULL weight, country-only coverage, location coverage, route lanes, inactive service areas, stale dates and reserved capacity. No live data was changed.
