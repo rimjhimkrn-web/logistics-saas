@@ -243,3 +243,27 @@ Findings:
 - The 13 older collision groups (versions `20261025150000` through `20261115151000`) have no exact basename entry in this Staging ledger snapshot. They may belong to the pre-existing schema baseline, but the current evidence does not prove their original application order or status.
 
 **Conclusion:** this is not simply 29 pairs that can be safely renamed. Repository filenames, migration names and remote applied-version identifiers have diverged. Do not rename files, edit remote history, run `db push`, or generate/apply a new migration against this state. A proper reconciliation needs a trusted historical migration archive (or an authoritative schema snapshot plus migration provenance), a disposable clone of the current Staging schema, and a CLI-based dry-run showing the exact proposed migration plan. The connected tools cannot run that local CLI/clone workflow. No remote ledger edits or DDL were made.
+
+
+## Capability-to-operations lineage audit (2026-11-28)
+
+A further read-only schema and function audit establishes that capability versioning cannot be safely implemented as a standalone profile-table change.
+
+### Current relationship gaps
+
+- `krim_partner_capabilities` has a primary key, foreign keys to organisation/country/transport mode, and basic status/date/service-type checks. It has **no unique logical service key**, no submitter/evidence/version columns, and no referencing foreign keys from operational tables.
+- No table has a first-class `capability_id` or capability-submission-version column in the inspected operational schema.
+- `krim_partner_match_results`, `krim_partner_quotes`, `krim_partner_opportunities`, `krim_shipment_partner_assignments`, capacity commitments and execution events record the partner organisation, shipment/assignment and operational state, but do not bind the decision to the exact capability row/version that qualified the partner.
+- The matching routine filters transport candidates using `service_type='transport'`, active/verified capability, mode, dates, weight, organisation compliance, verified capacity and service-area coverage. It records the eligible organisation and score/reasons, not the capability row IDs or evidence version.
+- Capability coverage helper functions query matching capability rows with `EXISTS`; they return only a boolean, not the row/version that satisfied the check.
+- The admin revocation RPC locks the capability and organisation, changes the capability to inactive/suspended, and records an audit event with `existing_assignments_cancelled=false`. It does not create an operations exception or enumerate quotes, opportunities, assignments, capacity commitments or shipments that depended on that capability.
+- The capability audit trigger records INSERT only. It does not record updates/review transitions.
+- Current Staging counts at this audit: 0 capabilities, 0 match results, 0 quotes, 0 opportunities, 0 partner assignments, 0 capacity commitments and 0 partner execution events. No existing operational row was altered.
+
+### Design consequence
+
+The corrected lifecycle must capture an **eligibility decision snapshot** at partner matching/qualification time, including the exact approved capability ID, immutable submission-version ID, capability attributes used, effective window, evidence reference digest, service-area/capacity basis and policy version. That snapshot must be propagated through match result → opportunity/quote → accepted assignment and retained for audit.
+
+Revocation/suspension then needs a deterministic impact query against those exact references. It should immediately block new matching/allocations, create an operations exception for affected queued/accepted/in-progress work, and preserve the accepted contract, assignment and shipment history until an authorised operator resolves each case. If legacy assignments have no capability reference, they must be classified as **legacy/unattributed** and handled conservatively; do not infer a capability from the current organisation profile.
+
+This lineage requirement is now part of the migration/test preflight. No schema or runtime changes were made.
