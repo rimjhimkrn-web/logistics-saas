@@ -104,3 +104,14 @@ RLS advisor also reports 31 RLS-enabled/no-policy tables across public and priva
 Do not mark Package 1 complete until all P0 blockers above have reproducible evidence and all P1 issues affecting launch workflows are closed or explicitly disabled. Static CI success does not substitute for database, JWT, Storage, workflow, notification, backup/restore and recovery tests.
 
 **Production remains untouched.**
+
+## 8. Partner capability lifecycle — additional package review (2026-11-28)
+
+A further deployed-function and trigger review was completed after this consolidated gate was first committed. It identified a P0 source-level defect: the multi-category onboarding RPC can reset an existing capability—including a verified/suspended row—to inactive/pending, and the capability audit trigger only fires on INSERT, not UPDATE. The declaration/evidence workflow also lacks immutable submission-version linkage.
+
+The revocation RPC correctly disables the capability and records the reason, but explicitly does not cancel existing assignments. Key quote/award/invitation-acceptance paths require an active verified capability, so new sourcing/acceptance is blocked after revocation; already accepted/active assignments and driver execution need an explicit operational exception workflow. No current assignment data existed to test this.
+
+Detailed evidence and required correction/test matrix:
+`docs/testing/KRIM-PARTNER-CAPABILITY-FULL-LIFECYCLE-REVOCATION-IMPACT-GATE-2026-11-28.md`
+
+**Package 1 remains NOT COMPLETE.** This additional review is not a substitute for implementing the versioned evidence lifecycle, safe downgrade protection, revocation impact handling, isolated JWT tests and database harness.
