@@ -322,3 +322,16 @@ These representative findings are not evidence of a broken live transaction, bec
 Action: classify the remaining 55 routes individually into (a) public informational/acquisition, (b) redirect/navigation shell, (c) staging/preview, (d) canonical authenticated workflow, or (e) obsolete/duplicate legacy. For categories (c) and (e), prevent production access or route to canonical flows. For (d), require API/RPC integration and role/tenant/E2E verification. Do not mass-add Supabase clients to these pages; integration must be implemented at the canonical workflow layer.
 
 Source review scope: 12 representative HTML files on `staging/phase00-env-isolation`; no files changed and no runtime actions were invoked.
+
+
+### Full 67-route queue composition
+
+The static review queue consists of 52 `public/` routes, 6 `src/` routes, 7 repository-root routes, 1 `auth/` route, and 1 `domains/` route. This distribution reinforces that the queue mixes public informational/marketing pages, mock preview pages, navigation shells, and canonical-workspace candidates; it is not a list of 67 confirmed backend defects.
+
+Priority order for the remaining classification:
+1. Shipment/quote/dispatch and customer/partner/driver workspaces — verify every visible action is either wired to the canonical authenticated workflow or explicitly marked preview-only.
+2. Partner acquisition, agreements, and public partner information — confirm they route to the canonical partner onboarding and contract process.
+3. Public analytics, compliance, operations, developer, and enterprise capability pages — classify as explanatory product pages versus real operational controls; disable unsupported action affordances.
+4. Legacy/root routes and navigation shells — redirect to canonical routes or retain only when required for compatibility.
+
+The current branch's new static-link and environment-isolation workflows were queued after the report update; their result is pending at this checkpoint. The schema restore workflow is still in the Staging schema export step; its configured step timeout is 8 minutes. No restore or metrics comparison has yet been observed.
