@@ -396,3 +396,46 @@ This is a staging-only safety-label correction, not implementation of shipment t
 
 
 Workflow correction follow-up: the first grant-based revision (`567dbc17ddb9da7a81c8c4d0ded23e8b3ebb3d42`) used a psql meta-command form that is not valid for `psql --command`. It was corrected before treating that approach as verified. Commit `db03693c75f6839db2142fbdf3819f641c775f39` now reads the local schema owner and restore role from the disposable database, validates both identifiers, then issues ordinary SQL statements (`SET ROLE`, `GRANT`, `RESET ROLE`) in one psql command. This remains unproven until run `46131552839` completes the isolated restore step.
+
+
+## Carrier, shipper and enterprise workspace preview-safety remediation — 28 Nov 2026
+
+Source review identified additional operational-looking pages with fabricated tenant records and actions that only produced browser alerts:
+
+- `public/app/carrier/dashboard.html`: fictitious carrier identity, load rows, route/rate values, fleet counts, pending settlement and escrow payout claims; two Accept Load buttons falsely claimed a driver assignment or refrigerated vehicle dispatch despite no server write.
+- `public/app/shipper/dashboard.html`: fictitious shipper identity, shipment rows, GPS/AIS telemetry, route status, ETA, invoices and freight spend; booking and tracking controls were not connected to a backend.
+- `src/enterprise/portal.html`: fictitious enterprise tenant and subsidiaries, financial/approval/ERP metrics, plus browser alerts that implied subsidiary registration and RLS/budget configuration.
+
+Staging-only corrections:
+1. Added prominent DEMO PREVIEW / NOT LIVE notices to all three pages.
+2. Replaced fictional customer/carrier/enterprise identities with sample tenant labels.
+3. Carrier Accept Load buttons now say Preview only; their alerts explicitly state no load acceptance, driver assignment or vehicle dispatch occurred.
+4. Removed the false escrow auto-payout and live telematics claims.
+5. Shipper booking and shipment statuses are clearly marked as examples; booking button explicitly says no booking is created.
+6. Enterprise wizard/RLS controls now explicitly state that no organization, policy or budget cap is created or changed; sample audit/approval states are no longer represented as verified/enforced.
+
+Commits:
+- `937aa0de1e27919b00144360ffbd409cfa718b9b`
+- `144e2cf37e5a4b8eb6cda037fff81913791f15ca`
+- `126b5f91b748bb82ec6038b4ed761ed3861ff1e6`
+
+Post-write source verification on all three pages: preview notice present; known fake carrier acceptance/dispatch claims absent; fictitious tenant names absent; known live settlement/GPS/ERP claims absent. Environment-isolation regression passed on the carrier commit; environment/static audits for later commits were running at the time of inspection.
+
+### Remaining integration-candidate classification from the 67-route queue
+
+The remaining queue also contains genuine informational or preparation pages, not just missing backend workflows:
+- Partner acquisition/standards/agreement pages are public documentation and should link to canonical onboarding/contracts.
+- Growth partner network, outreach and activation pages are acquisition/intelligence content, not proof of an operational CRM.
+- Partner API/webhook, export, notifications, offboarding, performance, security, settlement and team-permission pages are product guides or workspace preparation pages; live organization-scoped actions and evidence must be verified before release.
+- Customs single-window content explicitly says external integrations are not connected; customs audit export explicitly says no audit packet is exported.
+- Autonomous reroute planner explicitly keeps review state local to the browser and says no backend record is changed.
+- Partner settlements page correctly explains the current partner-direct payment model; it must not imply KRIM collects or settles freight.
+- Shipment audit log explicitly labels its contents illustrative and not live.
+- Quote surcharge/tax pages and claims/preparation/tracking-policy pages are explanatory product content; no live tariff, tax, shipment, claim or tracking authority was verified in this source inspection.
+- Partner complaints and export center contain forms but no direct backend signal in the inspected HTML; classify as preparation-only until authenticated API/RPC, storage and delivery handling are proven.
+
+No mass Supabase client injection was performed. Any production operational control must route through canonical authenticated workflows with tenant/RBAC enforcement, durable server writes, audit history, idempotency and E2E verification.
+
+### Schema restore run state
+
+Run `46131552839` (commit `db03693c75f6839db2142fbdf3819f641c775f39`) successfully created the disposable local Supabase stack. At the latest poll, schema-only export from Staging was still in progress; local restore, schema metrics, sanitized evidence upload and cleanup had not yet completed. Do not treat the schema restore as passed until all required steps complete.
