@@ -1,0 +1,95 @@
+name: KRIM Android APK internal builds
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/krim-customer/**'
+      - 'mobile/krim-partner/**'
+      - 'mobile/krim-driver/**'
+      - 'assets/krim-primary.svg'
+      - 'assets/krim-icon.svg'
+      - '.github/workflows/krim-android-apk-artifacts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: krim-android-apk-artifacts
+  cancel-in-progress: false
+
+jobs:
+  build-apk:
+    name: Build ${{ matrix.app }} APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: krim-customer
+            artifact: KRIM-Customer-APK-internal
+          - app: krim-partner
+            artifact: KRIM-Partner-APK-internal
+          - app: krim-driver
+            artifact: KRIM-Driver-APK-internal
+
+    defaults:
+      run:
+        working-directory: mobile/${{ matrix.app }}
+
+    steps:
+      - name: Check out KRIM source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/${{ matrix.app }}/package-lock.json
+
+      - name: Set up Java for Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install locked app dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate official KRIM logo and app icons
+        run: |
+          npx --yes sharp-cli -i ../../assets/krim-primary.svg -o assets/krim-master-logo.png -f png resize 720 216 --fit contain --background '#FFFFFF'
+          npx --yes sharp-cli -i assets/icon.svg -o assets/icon.png -f png resize 1024 1024
+          npx --yes sharp-cli -i assets/adaptive-icon.svg -o assets/adaptive-icon.png -f png resize 1024 1024
+
+      - name: Validate Expo package compatibility
+        run: npx expo install --check
+
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --no-install --clean
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://ebltviniygljwwseplph.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa
+
+      - name: Build installable Android APK
+        working-directory: mobile/${{ matrix.app }}/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://ebltviniygljwwseplph.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa
+
+      - name: Publish downloadable APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: mobile/${{ matrix.app }}/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
