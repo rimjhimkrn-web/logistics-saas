@@ -563,3 +563,14 @@ Inspected `public/pickup-tracking.html`.
 - This is client-side identity verification and does not replace server-side RPC authorization. Runtime RPC role/assignment checks, tenant isolation, milestone idempotency and audit-event persistence still require isolated authenticated tests.
 - Customer shipment CSV formula-guard unit checks were executed against the exact source function: 7/7 passed, covering formula prefixes (=, +, -, @), leading whitespace/control characters, ordinary text, apostrophes and embedded double quotes.
 
+
+
+## Customer quote list identity and organization scope review — 28 Nov 2026
+
+Inspected `public/customer-os/quotes-pricing/quote-list.html`.
+
+- Staging behavior is read-only and intentionally renders no quote prices, partner offers, customer records or writes.
+- Production source derives active organization memberships, restricts organization types to customer/shipper/enterprise, scopes quote retrieval by `customer_organization_id`, and fetches linked shipments only when their IDs and customer organization IDs match the authorized set. The query is limited to the latest 200 quotes.
+- Identity hardening: production previously relied on the locally stored session user ID. It now additionally calls `auth.getUser()`, requires a verified user and uses that verified user ID to load active memberships. Commit: `d1f2ce6419defb13d42cab544df08b1810902472`.
+- Source checks passed for verified identity, verified-user membership lookup, allowed customer organization types, organization-scoped quote retrieval and empty staging preview data. Runtime access and RLS still require isolated authenticated tests; the 200-record limit also needs a clear disclosure or server-side pagination before full-history claims.
+
