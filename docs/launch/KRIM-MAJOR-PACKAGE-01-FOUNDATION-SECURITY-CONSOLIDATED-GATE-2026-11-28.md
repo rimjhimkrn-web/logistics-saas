@@ -137,3 +137,18 @@ Verified deployment:
 - The static link audit on the latest commit was still running at the time of this report update.
 
 Limit: the function code was verified after deployment, but no authenticated owner/admin request was invoked. Runtime authorization still requires the independent JWT/AAL2 test identities and owner-controlled test session. This change does not certify the full privileged admin control plane.
+
+
+## 10. Legacy Resend worker project isolation — implemented and deployed (2026-11-28)
+
+The deployed `krim-resend-email-worker` was not present in the repository at the same path and had no exact project-ID guard. Its deployed source was inspected in full, preserved in the Staging branch, and updated to import the shared exact Staging-project validator.
+
+- Repository source added at `supabase/functions/krim-resend-email-worker/index.ts` (reconciles deployed worker implementation).
+- Guard executes after cron-secret authentication and before Supabase service-role client construction.
+- Deployed only to Staging project `qrpcivhdxobiaofppbkl`: ACTIVE version 2.
+- `verify_jwt=false` remains unchanged; existing POST-only and 32-character minimum cron-secret constant-time comparison remain present.
+- Resend provider endpoint remains in the function. **No function invocation occurred and no email was sent.**
+- CI project-guard test workflow now includes changes to this legacy worker. Run `46128789222` for commit `e007dcc24c32c439f669ff58011d208f3df2a5c1` completed SUCCESS.
+- Environment-isolation and static-link checks were triggered for the same commit; their final outcomes are tracked separately and must pass.
+
+This is an environment-targeting hardening only. It does not isolate the shared email queue, prove external scheduler configuration, or make this worker safe for synthetic workflow events. Real provider delivery remains prohibited during Package 1 tests.
