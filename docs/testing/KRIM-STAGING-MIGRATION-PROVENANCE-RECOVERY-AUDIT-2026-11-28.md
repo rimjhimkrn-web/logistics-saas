@@ -984,3 +984,33 @@ This is useful historical evidence but is **not a Staging ledger/source map**: i
 PR #238 also records that the live general notification outbox subsystem was separate from the deployed founder Telegram retry worker; Resend sending was not implemented in the captured adapter, and provider acceptance was incorrectly represented as delivered in inspected routines. These are historical Production findings, not proof of current Staging state. The current Staging notification audit remains the controlling evidence for Staging.
 
 **Recovery decision:** retain the Production reconciliation report as a separate provenance source; do not use its 368-file inventory to close any of the 34 Staging unmatched entries. Continue exact Staging statement-body fingerprinting and object-catalog comparison. No database writes, ledger edits, migration replay, or Production access were performed in this review.
+
+
+## Staging catalog inventory — read-only follow-up, 2026-11-28
+
+Read-only catalog queries against Staging project `qrpcivhdxobiaofppbkl` returned the following current inventory:
+
+| Catalog item | Count / value |
+|---|---:|
+| Migration ledger rows | 163 |
+| Rows without exactly one stored statement | 0 |
+| Extensions | 7 |
+| Non-managed schemas reported by information_schema | 19 |
+| Tables/partitioned tables in public + private + krim_internal | 398 |
+| Views in those schemas | 1 |
+| Functions in those schemas | 568 |
+| Non-internal triggers | 160 |
+| Policies | 412 |
+| Non-owner table grants in those schemas | 2,778 |
+
+Extension versions observed: pg_cron 1.6.4; pg_net 0.20.4; pg_stat_statements 1.11; pgcrypto 1.3; plpgsql 1.0; supabase_vault 0.3.1; uuid-ossp 1.1.
+
+Schema-level details:
+- Functions: public 401, private 80, krim_internal 87.
+- Table relations: public 391, private 7, krim_internal 0.
+- View relations: public 1.
+- Non-owner table grants: public authenticated 15, public service_role 2,721, private service_role 42. This count is table-level grants, not a full function/schema/sequence ACL review.
+
+The relation total of 399 (398 tables + 1 view) is consistent with the earlier isolated schema restore's aggregate relation count. The extension inventory and grant breakdown add useful catalog dimensions, but they do **not** establish object-by-object equality with the isolated restore: no per-object canonical definition hashes, owners, ACL fingerprints, extension dependency comparison, managed auth/storage objects, or default-privilege comparison has yet been completed.
+
+All queries were SELECT-only. No DDL/DML, migration-ledger changes, grants, or production access occurred. Migration execution remains frozen pending complete provenance and object-level comparison.
