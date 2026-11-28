@@ -933,3 +933,15 @@ Read-only query of `supabase_migrations.schema_migrations` retrieved stored migr
 
 ### Updated recovery gate
 The isolated schema restore is successful, but migration provenance is still incomplete: 34 ledger rows have no direct filename candidate, two country-pack entries have different SQL bodies and no source file, and 29 duplicate timestamp groups remain unsequenced in the repository. The next safe step is historical commit/tree recovery for those 34 ledger rows and an explicit ordering/replay map for the 61 collision files. Do not edit the ledger, rename files, reorder timestamps, or apply migrations to Staging until every applied ledger row has a verified body/source mapping and a deterministic baseline replay has been proven in disposable infrastructure.
+
+
+## Historical branch source-recovery pass — 2026-11-28
+
+- Confirmed both CI workflows for commit `2d8b4839b3cb409113989b6f05ea672185342abc` completed successfully: environment isolation regression run `46134659023`; static link audit run `46134658935`.
+- Inspected retained branch `audit/migration-baseline-collision-inventory-2026-11-24`, which contains 368 SQL migration files and historical migration audit documents/crosswalks. Its migration filename inventory yielded no direct filename candidate for any of the currently unmatched 34 Staging ledger rows.
+- The branch's historical audit records document earlier, separate production migration-history divergence and partial historical source availability. Those older production crosswalks are not proof of the present Staging ledger's SQL provenance and were not substituted as evidence.
+- Inspected the retained collision-review branch as well. It contains useful duplicate-timestamp content reviews and historical production name crosswalks, but does not supply direct source files for the current 34 unmatched Staging ledger names.
+- This is a bounded negative result: the inspected retained branch does not recover these 34 source files. It does not prove the files never existed in another commit, branch, artifact, or deployment bundle.
+
+### Next recovery route
+The remaining authoritative options are: (1) enumerate the full repository branch/ref history and inspect candidate historical commit trees for the exact SQL bodies; (2) retrieve trusted CI/deployment artifacts or backup bundles from the dates of application; and (3) where source cannot be recovered, classify the ledger row as source-unavailable and use an independently reviewed schema/object manifest only for forward-only baseline reconstruction. Do not synthesize an assumed historical migration file or change the live ledger.
