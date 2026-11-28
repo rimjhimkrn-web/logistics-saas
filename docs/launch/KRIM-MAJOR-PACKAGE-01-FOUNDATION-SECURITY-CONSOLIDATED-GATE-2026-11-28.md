@@ -115,3 +115,25 @@ Detailed evidence and required correction/test matrix:
 `docs/testing/KRIM-PARTNER-CAPABILITY-FULL-LIFECYCLE-REVOCATION-IMPACT-GATE-2026-11-28.md`
 
 **Package 1 remains NOT COMPLETE.** This additional review is not a substitute for implementing the versioned evidence lifecycle, safe downgrade protection, revocation impact handling, isolated JWT tests and database harness.
+
+
+## 9. Staging privileged Edge Function project guards — implemented and deployed (2026-11-28)
+
+The deployed Staging versions of `global-admin-control` and `owner-testing-authorize` were inspected before changing either. The repository copy of `global-admin-control` was missing several deployed admin actions, so the deployed source was first reconciled into the Staging branch rather than deploying the incomplete repository copy.
+
+Implemented:
+- Added shared exact-project validator `supabase/functions/_shared/krim-staging-project-guard.ts`.
+- Added Deno tests that accept only `https://qrpcivhdxobiaofppbkl.supabase.co` and reject the Production URL, lookalike hostnames, HTTP, extra paths, credentials and invalid values.
+- Added CI workflow `.github/workflows/krim-staging-edge-project-guard-tests.yml`.
+- Reconciled the full deployed `global-admin-control` source into the branch and added the exact Staging URL guard before any Supabase client is constructed; preserved existing admin actions and JWT verification.
+- Added the deployed `owner-testing-authorize` source to the branch and added the same exact Staging URL guard; preserved origin, email confirmation, AAL2 and single-owner checks.
+- Deployed only to Staging project `qrpcivhdxobiaofppbkl`.
+
+Verified deployment:
+- `global-admin-control`: ACTIVE version 3, `verify_jwt=true`, deployed source fetched and exact-project guard confirmed; existing role/session admin actions still present.
+- `owner-testing-authorize`: ACTIVE version 6, `verify_jwt=true`, deployed source fetched and exact-project guard confirmed.
+- Deno project-guard CI run `46128583131`: SUCCESS.
+- Environment-isolation regression run `46128583089`: SUCCESS.
+- The static link audit on the latest commit was still running at the time of this report update.
+
+Limit: the function code was verified after deployment, but no authenticated owner/admin request was invoked. Runtime authorization still requires the independent JWT/AAL2 test identities and owner-controlled test session. This change does not certify the full privileged admin control plane.
