@@ -195,7 +195,7 @@ jobs:
           ),
           policy_defs AS (
             SELECT n.nspname||'.'||c.relname||'.'||p.polname AS object_key,
-              md5(p.polcmd||'|'||p.polpermissive||'|'||coalesce((SELECT string_agg(coalesce(r.rolname,'PUBLIC'),',' ORDER BY coalesce(r.rolname,'PUBLIC')) FROM unnest(p.polroles) AS pr(role_oid) LEFT JOIN pg_roles r ON r.oid=pr.role_oid),'')||'|'||
+              md5(p.polcmd::text||'|'||p.polpermissive::text||'|'||coalesce((SELECT string_agg(coalesce(r.rolname,'PUBLIC'),',' ORDER BY coalesce(r.rolname,'PUBLIC')) FROM unnest(p.polroles) AS pr(role_oid) LEFT JOIN pg_roles r ON r.oid=pr.role_oid),'')||'|'||
                    coalesce(pg_get_expr(p.polqual,p.polrelid),'')||'|'||
                    coalesce(pg_get_expr(p.polwithcheck,p.polrelid),'')) AS fingerprint
             FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid
