@@ -104,6 +104,11 @@ jobs:
           source "$RUNNER_TEMP/krim-local-supabase.env"
           set +a
           test -n "${DB_URL:-}"
+          # The disposable Supabase stack pre-creates graphql_public under a
+          # managed owner. Transfer only this local throwaway schema to postgres
+          # so the schema-only restore can create its objects.
+          psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
+            --command='ALTER SCHEMA graphql_public OWNER TO postgres;'
           psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
             --single-transaction --file "$RUNNER_TEMP/krim-staging-schema-sanitized.sql"
           echo "Staging schema-only snapshot restored into the disposable local Supabase database."
