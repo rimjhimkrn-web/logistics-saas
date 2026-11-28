@@ -236,3 +236,33 @@ The corrected local-restore workflow did not yet reach the export stage in the l
 The environment-isolation regression and static-link audit workflows completed successfully on the latest code commits observed in this sequence (including commits 7ee424f, c6b8f6b, 8102aef). These are separate CI checks and do not substitute for schema snapshot restore validation.
 
 Current gate remains unchanged: migration provenance and isolated restore validation are still open; no schema migration has been applied to Staging; Production remains untouched.
+
+
+## Follow-up — RLS no-policy exposure recheck (read-only, Staging)
+
+A fresh catalog check confirms 31 application tables with RLS enabled but no policies: 24 in public and 7 in private. The complete table inventory was captured in the audit work session. The 24 public tables are:
+- krim_corridor_compliance_controls, krim_corridor_compliance_dossiers, krim_corridor_compliance_events, krim_corridor_compliance_legs
+- krim_country_operating_packs, krim_country_pack_control_events, krim_country_pack_controls, krim_country_pack_events
+- krim_inquiry_followups
+- krim_market_activation_controls, krim_market_activation_events, krim_market_readiness_assessments, krim_market_readiness_events, krim_market_readiness_requirements, krim_market_regulatory_source_events, krim_market_regulatory_sources
+- krim_partner_compliance_evidence, krim_partner_compliance_reviews, krim_partner_shipment_capacity_commitments, krim_pricing_rate_cards
+- krim_shipment_leg_custody_transfer_events, krim_shipment_leg_custody_transfers, krim_shipment_leg_dispatch_authorizations, shipment_pod_documents
+
+The 7 private tables are:
+- krim_ai_rate_limits, krim_driver_invitations, krim_payment_capabilities, krim_payment_providers, krim_payment_transactions, krim_phase00_fixture_organizations, krim_public_inquiry_ip_limits
+
+Effective privilege checks on this exact 31-table set returned:
+- anon: schema USAGE on 24 (public) tables, but SELECT/INSERT/UPDATE/DELETE on zero.
+- authenticated: schema USAGE on all 31, but SELECT/INSERT/UPDATE/DELETE on zero.
+- Table ACLs for the inspected rows grant only postgres/service_role (and one private fixture table only postgres); no direct anon/authenticated table grants were present.
+
+Interpretation: these 31 no-policy tables are still a Phase 00 RLS configuration gap and must be reviewed/closed with least-privilege policies or deliberate privilege/schema isolation. The privilege recheck found no direct Data API table access for anon/authenticated on these rows at the time of inspection, so this specific finding is not evidence of current direct table exposure. Keep this distinction explicit; SECURITY DEFINER functions and service_role pathways require separate caller/authorization review.
+
+No DDL or data changes were made. This is a read-only Staging inspection.
+
+## Current CI state at this checkpoint
+
+- Environment-isolation regression and static-link audit workflows have completed successfully on recent commits.
+- Latest bounded schema snapshot workflow remains in progress during ephemeral local Supabase startup; export, restore, and metric comparison have not yet run in that workflow.
+- The previous run that reached Staging export remains in progress; its export step has not completed in the observed status checks.
+- Schema snapshot restore validation is therefore still NOT PASSED.
