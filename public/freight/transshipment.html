@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRIM OS — Transshipment & Hub Routing Management</title>
-    <meta name="description" content="Manage multi-leg transshipments, hub transfers, and connecting vessel schedules inside KRIM OS Logistics Portal.">
+    <meta name="description" content="Review multi-leg routing information. No live carrier schedule, hub transfer or transshipment route is connected.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -46,7 +46,7 @@
         <div class="space-y-2 text-center">
             <span class="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">Freight Forwarding Module • Step 12 of 14</span>
             <h1 class="text-3xl font-extrabold text-white tracking-tight">Transshipment & Hub Routing</h1>
-            <p class="text-slate-400 text-xs font-mono">Coordinate multi-leg vessel connections, intermediate port transfers, and yard dwell times.</p>
+            <p class="text-slate-400 text-xs font-mono">Preview transshipment planning fields. Confirm all vessel connections, hub handling and transfer windows directly with the contracting providers.</p>
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-xl space-y-6 font-mono text-xs">
@@ -56,7 +56,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Transshipment ID</label>
-                        <input type="text" required value="TR-2026-HUB-409" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" required placeholder="Assigned only after an authorised provider confirms the transfer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div class="space-y-2">
                         <label class="block text-slate-400 uppercase tracking-wider">Intermediate Hub Port</label>
@@ -86,7 +86,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-wider text-center transition shadow-lg shadow-blue-600/25 cursor-pointer">
-                    Preview transshipment plan — no route is saved
+                    Preview transshipment details — no route saved
                 </button>
             </form>
         </div>
@@ -97,11 +97,7 @@
     </footer>
 
     <script>
-        function handleTransshipmentSubmit(e) {
-            e.preventDefault();
-            alert('Preview only: no transshipment route is saved.');
-            window.location.href = '/public/freight/demurrage-detention.html';
-        }
+        function handleTransshipmentSubmit(e) {\n            e.preventDefault();\n            alert('Preview only: no transshipment plan, carrier connection or hub transfer was created.');\n        }
     </script>
 </body>
 </html>
