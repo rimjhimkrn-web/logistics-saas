@@ -132,3 +132,43 @@ This report is an inventory and recovery design, not a migration repair or datab
 The connected Supabase project has no existing development branches. Its organization plan is confirmed as Free. Current Supabase documentation says preview branching requires Pro; the connected cost estimator returned **USD 0.01344 per branch-hour** (about USD 0.32 per 24 hours, before other usage). No branch was created and no plan upgrade was made. Even if upgraded, a branch is data-less by default and rebuilds schema from migration history; it would not preserve untracked Staging schema changes. Therefore, branching is not the chosen recovery path.
 
 A no-extra-project-cost alternative was implemented: a GitHub Actions workflow now creates a disposable local Supabase stack on the hosted runner, exports only the Staging schema (no rows), restores it locally, and compares sanitized integrity metrics. It uses the existing KRIM_STAGING_DB_URL repository secret, keeps the raw schema dump inside the ephemeral runner, uploads only sanitized metrics, and always removes local database files. Workflow execution is now being verified. This provides a reproducible Staging schema snapshot test without creating a paid Supabase branch.
+
+
+## Follow-up evidence — 2026-11-28 09:30 UTC
+
+### Fresh Staging ledger recheck
+A new read-only query against Staging project `qrpcivhdxobiaofppbkl` confirms:
+- 163 migration rows.
+- 163 distinct version values.
+- 163 distinct names.
+- 0 repeated names, 0 repeated version values, and 0 missing version/name fields.
+- Earliest applied version: `20261117135137`; latest: `20261127093019`.
+
+This confirms ledger uniqueness only. It does not establish that the repository migration files reproduce the deployed schema or that every ledger row has a recoverable source file.
+
+### Partner multi-category onboarding migration provenance
+Fresh repository-tree inspection at branch HEAD `baa28b30c5b7ebb7abf65e70f5bf51efa0483bb0` confirms the complete tree is not truncated (2,632 entries) and contains 499 SQL migration files.
+
+The deployed Staging definition of `public.krim_submit_partner_onboarding_global_multi_v1(text,text,text,text[],text[],text,text,text,text,text,text,text,text,text,jsonb)` was read without executing it. Its definition MD5 is `b2924b0dba721767a87f296956907b73`.
+
+The source candidates were rechecked:
+- `20261020074510_global_partner_onboarding_location_hardening.sql` creates the base `krim_submit_partner_onboarding_global_v2`; it does not define the multi-category wrapper.
+- `20261104133000_secure_partner_business_verification.sql` contains references to both onboarding function names, but its SQL is a `DO` block that reads the already-existing multi-category function using `pg_get_functiondef` and performs targeted text replacement. It does not create the original wrapper.
+- `20261105153000_add_evidence_backed_partner_capability_submission.sql` and `20261105153200_persist_partner_capability_submission_details.sql` define separate capability-submission RPCs, not the multi-category onboarding wrapper.
+
+Therefore, the original CREATE source for the deployed multi-category wrapper remains unrecovered from the connected repository history inspected so far. The deployed definition itself is captured as a fingerprint only; do not use it as an automatic migration or replay it without full review and isolated testing.
+
+### Disposable schema restore workflow — execution status
+The new Staging-only GitHub Actions workflow exists at `.github/workflows/krim-staging-schema-restore.yml`, with scanner `scripts/krim_staging_schema_restore_check.py`. The workflow validates the Staging URI format, starts a disposable local Supabase stack, then exports schema-only SQL from Staging and is designed to restore/compare it locally. It does not access Production or write to Staging.
+
+At the latest status check, both runs remained in progress at the schema-export step:
+- Run `46130433169`, job `140934139127`.
+- Run `46130453596`, job `140934201929`.
+
+Both had passed checkout, Staging URI-format validation, Supabase CLI installation, PostgreSQL client installation, and disposable local-stack startup. Neither had reached restore, schema comparison, or sanitized artifact upload. Job logs were not yet available through the connected log retrieval route. **The workflow is not counted as passed.** The first run was triggered before the working-directory correction; the second uses the corrected workflow. Do not treat either as proof of restore success until the job completes and the sanitized evidence is inspected.
+
+### Safety and disposition
+- All Staging database queries in this follow-up were read-only.
+- No migration was applied, no schema/data write occurred, no worker/provider was invoked.
+- Production was not accessed.
+- Migration provenance and Package 1 remain OPEN/BLOCKED.
