@@ -552,3 +552,14 @@ Inspected canonical route `public/customer-os/customer-services/shipment-list.ht
 - CSV security issue: prior CSV quoting escaped double quotes but did not neutralize spreadsheet formula prefixes. Attacker-controlled fields beginning with `=`, `+`, `-` or `@` could be interpreted as formulas when opened in spreadsheet software. Staging now prefixes an apostrophe when a cell begins with optional whitespace/control characters followed by a formula prefix, before applying CSV quote escaping. Commits: `43a1c274e71ac0c7361b8e9941d712d2897fbd69` (initial patch and cap disclosure), `cff59286dfcd3699f2ac16fef1ba87175726dd1d` (correct regex escaping).
 - Independent source verification confirms the corrected formula guard, cap disclosure, authenticated membership lookup, customer organization type filter and organization-scoped shipment query are present. Runtime role/RLS and CSV behavior still require isolated browser tests.
 
+
+
+## Pickup and custody tracking identity verification review — 28 Nov 2026
+
+Inspected `public/pickup-tracking.html`.
+
+- Positive controls: tracking lookup uses the `krim_get_shipment_tracking` RPC rather than direct browser table reads; milestone recording uses `krim_record_operational_milestone`; UI only reveals the milestone form when the server response sets `can_record`; the page handles duplicate retry responses; event and milestone content is escaped before HTML rendering; GPS coordinates are optional and requested only after the user presses the location control.
+- Identity hardening: the page previously checked only the locally available Supabase session before calling the RPC. Staging now additionally calls `auth.getUser()` and requires a verified user before accepting the session as valid; missing/invalid identity redirects to login with the current route preserved. Commit: `f76c352b34bcab9e959fd2a81086f5b0791585c1`.
+- This is client-side identity verification and does not replace server-side RPC authorization. Runtime RPC role/assignment checks, tenant isolation, milestone idempotency and audit-event persistence still require isolated authenticated tests.
+- Customer shipment CSV formula-guard unit checks were executed against the exact source function: 7/7 passed, covering formula prefixes (=, +, -, @), leading whitespace/control characters, ordinary text, apostrophes and embedded double quotes.
+
