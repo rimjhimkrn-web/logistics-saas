@@ -1062,3 +1062,15 @@ Disposition:
 - Confirm each callable function's intended caller, tenant/role checks, input scope, and side effects.
 - For private trigger-only functions, explicitly revoke unnecessary direct EXECUTE from PUBLIC/anon/authenticated where dependency-safe, and verify trigger operation remains functional.
 - Keep schema changes frozen until Staging migration provenance is resolved and a reviewed migration can be safely prepared.
+
+
+## Corrected isolated Staging schema restore — verified evidence, 2026-11-28
+
+Workflow run: 46135726706 (commit db066cdce494509c37eb16c7c9c988aa24d96a66). Job `schema-snapshot-restore` completed with conclusion `success`. Sanitized artifact: `krim-staging-schema-restore-evidence` (artifact ID 15260090551; 1,230-byte ZIP).
+
+The artifact was downloaded and all three JSON evidence files inspected:
+- `krim-schema-restore-report.json`: aggregate metrics match exactly. Staging and isolated restore each report 398 tables, 1 view, 568 functions, 160 triggers, 412 policies, 1,600 indexes, 1,869 constraints, 31 RLS-enabled tables without policies, 0 SECURITY DEFINER functions without explicit search_path, and 0 unvalidated constraints.
+- `krim-object-fingerprint-comparison.json`: object-level comparison reports 5,008 objects on each side; zero missing objects in either direction; zero definition mismatches across relations (399), functions (568), policies (412), triggers (160), indexes (1,600), and constraints (1,869). `object_level_match=true`; samples are not truncated.
+- `krim-schema-safety-report.json`: credential patterns not detected; data statements not detected; 50 managed-schema metadata lines removed; raw schema not uploaded. Raw dump size 3,706,391 bytes; sanitized dump size 3,693,867 bytes; sanitized dump SHA-256 `95f5c470f9e631ed66ca1125a26520eb28f74e337debd03a4b17cad5940052e9`.
+
+This proves current Staging schema-only export/restore parity within the stated comparison scope (public, private, krim_internal; relations, functions, policies, triggers, indexes, constraints). It does not prove migration-history completeness/replayability, data/Auth/Storage parity, full ACL/ownership/default-privilege parity, runtime authorization safety, or production readiness. Migration freeze remains in force. No Staging writes, DDL/DML, grants, ledger edits, migration replay, worker/provider calls, or Production access were performed by this workflow.
