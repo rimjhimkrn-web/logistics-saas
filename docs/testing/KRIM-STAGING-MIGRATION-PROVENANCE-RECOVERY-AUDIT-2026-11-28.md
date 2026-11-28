@@ -945,3 +945,14 @@ The isolated schema restore is successful, but migration provenance is still inc
 
 ### Next recovery route
 The remaining authoritative options are: (1) enumerate the full repository branch/ref history and inspect candidate historical commit trees for the exact SQL bodies; (2) retrieve trusted CI/deployment artifacts or backup bundles from the dates of application; and (3) where source cannot be recovered, classify the ledger row as source-unavailable and use an independently reviewed schema/object manifest only for forward-only baseline reconstruction. Do not synthesize an assumed historical migration file or change the live ledger.
+
+
+## Path-specific Git history recovery — 2026-11-28
+
+- Confirmed the two workflows for commit `ab5542f98c0a8df2d7064e2e0f30a5363e368d27` passed: static link audit run `46134772491`; environment isolation regression run `46134772489`.
+- Queried GitHub's complete path-specific commit history for five representative missing migration filenames (two partner-admin grant migrations, both country-pack alignment filename variants, and a Phase 00 notification migration). All five exact-path history queries returned zero commits.
+- Checked the complete current Staging Git tree for those representative migration-name fragments; no source path was found.
+- Inspected the migration-directory commit history across five API pages (466 commits total). The only commit in the 17–19 November window that directly modified this directory was `a1e50f9c62d260dabf2ee1f7d2f848a05d43a846`, adding `20261117017000_restore_driver_trip_event_rpc_access.sql`. This does not recover the unmatched entries.
+
+### Interpretation
+These results further narrow the accessible GitHub history, but are not proof that the SQL never existed: it may have been applied from an untracked local file, external deployment bundle, another inaccessible repository/ref, or a deleted source history not exposed by these path queries. Preserve the 34 entries as unresolved/source-unavailable pending trusted external artifact or backup evidence. Do not synthesize SQL from the live database or apply any migration.
