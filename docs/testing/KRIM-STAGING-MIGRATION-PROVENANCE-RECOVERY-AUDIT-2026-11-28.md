@@ -973,3 +973,14 @@ The 34-entry count remains the count of ledger rows with no filename candidate i
 
 ### Recovery disposition
 The accessible Git history and ledger metadata do not provide sufficient source provenance for a safe replay. Maintain the migration freeze. A deterministic baseline still requires authoritative SQL-body recovery or a formally documented source-unavailable baseline procedure, followed by exact object-level comparison and a disposable replay test.
+
+
+## Historical cross-environment evidence review — 2026-11-28
+
+Reviewed merged PR #238 (merge commit `1f0854c0875158a77e4cd28932b1f1db4c5cd519`) and its complete diff. It contains a separate **Production** migration-history reconciliation snapshot dated 2026-11-24. That snapshot records 561 Production ledger rows, 368 repository migration files on `main` at that time, 82 exact version matches, 479 Production versions without same-version files, and 13 duplicate repository version groups. It explicitly warns that version/name counts are not replay authorization and requires content-hash plus resulting-object comparisons.
+
+This is useful historical evidence but is **not a Staging ledger/source map**: it describes project `ebltviniygljwwseplph` and branch `main`, whereas this recovery targets Staging project `qrpcivhdxobiaofppbkl` and branch `staging/phase00-env-isolation`. The Production counts must not be merged into the Staging inventory or used to infer missing Staging SQL.
+
+PR #238 also records that the live general notification outbox subsystem was separate from the deployed founder Telegram retry worker; Resend sending was not implemented in the captured adapter, and provider acceptance was incorrectly represented as delivered in inspected routines. These are historical Production findings, not proof of current Staging state. The current Staging notification audit remains the controlling evidence for Staging.
+
+**Recovery decision:** retain the Production reconciliation report as a separate provenance source; do not use its 368-file inventory to close any of the 34 Staging unmatched entries. Continue exact Staging statement-body fingerprinting and object-catalog comparison. No database writes, ledger edits, migration replay, or Production access were performed in this review.
