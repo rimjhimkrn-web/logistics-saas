@@ -266,3 +266,33 @@ No DDL or data changes were made. This is a read-only Staging inspection.
 - Latest bounded schema snapshot workflow remains in progress during ephemeral local Supabase startup; export, restore, and metric comparison have not yet run in that workflow.
 - The previous run that reached Staging export remains in progress; its export step has not completed in the observed status checks.
 - Schema snapshot restore validation is therefore still NOT PASSED.
+
+
+## Automated static repository audit — 2026-11-28 09:34 UTC
+
+The complete static audit artifact from workflow run 46131057776 was downloaded and inspected. It scanned 2,241 files and 1,017 HTML pages. The audit itself explicitly states that these are static signals, not proof of deployed HTTP status, runtime authorization, or live transactions.
+
+### Positive static results
+- Exact duplicate-content groups: 0.
+- Unresolved local/root link references: 0.
+- Placeholder/demo/TODO wording signals: 0.
+- Compatibility redirect routes identified separately: 343.
+
+### Integration and global-readiness review queue
+- 302 HTML pages have direct backend/client signals in their own markup.
+- 356 pages have backend-related signals in linked local scripts.
+- 194 operational-looking pages have at least one backend-related signal; runtime verification is still required.
+- 67 operational-looking pages have no visible Supabase signal in their own HTML. This is a review queue, not proof of missing backend integration; linked scripts, redirects, server-side behavior, or alternate APIs may account for the difference.
+- 103 staging pages were identified; 48 of those have no visible backend signal. Staging pages are not counted as production integration gaps by this audit.
+- Shared language bootstrap is detected on 432 pages; 250 non-redirect HTML pages are missing the shared language bootstrap. This is a global-language readiness remediation queue; prioritize public/customer/partner/driver operational routes and avoid mechanically editing redirects or intentionally isolated pages.
+- 523 routes carry noindex.
+
+### Interpretation and next actions
+1. Preserve the successful zero-unresolved-link and zero-placeholder result as a static baseline; do not describe it as live browser/E2E validation.
+2. Triage the 250 missing language-bootstrap pages by ecosystem and route criticality; identify existing page-specific locale handling before adding a shared bootstrap.
+3. Review the 67 operational-looking pages without visible Supabase signals against their linked scripts and intended architecture; classify each as intentionally static, redirect, server/API-backed, or missing integration.
+4. Keep the 48 staging pages without visible backend signals in a separate owner-review queue.
+5. Validate redirects and noindex behavior against intended public/review/legacy route policy before changing them.
+6. Continue to require browser/device, auth/RLS, and workflow E2E checks before release.
+
+Artifact: `krim-complete-static-audit` from workflow run `46131057776` (commit `afe9bcf6026cc2a8b3b5c7fe4e34b069adb19651`).
