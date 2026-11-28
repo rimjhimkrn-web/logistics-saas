@@ -165,7 +165,8 @@
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
   </style>
 <!-- This page uses its own layout system; the generic public polish layer caused text wrapping and spacing conflicts. -->
-<script src="/logistics-saas/assets/krim-global-language.js?v=20261111-nav" defer></script>
+<script defer src="./platform/krim-config.js"></script>
+  <script src="/logistics-saas/assets/krim-global-language.js?v=20261111-nav" defer></script>
 
 <!-- KRIM_GLOBAL_BRAND_ROLLOUT -->
 <link rel="stylesheet" href="/logistics-saas/assets/krim-global-brand.css?v=20261111-global-brand-v1">
@@ -700,9 +701,9 @@ html,body{margin-bottom:0!important;padding-bottom:0!important}
         var controller=new AbortController();
         var timeout=setTimeout(function(){controller.abort();},20000);
         try{
-          var response=await fetch("https://ebltviniygljwwseplph.supabase.co/functions/v1/krim-public-contact-inquiry",{
+          var response=await fetch(window.KRIM_CONFIG.supabase.url+"/functions/v1/krim-public-contact-inquiry",{
             method:"POST",
-            headers:{"Content-Type":"application/json","apikey":"sb_publishable_8xzZUeubYp_nIxVRWEQdiw_2H4RkHAa"},
+            headers:{"Content-Type":"application/json","apikey":window.KRIM_CONFIG.supabase.publishableKey},
             body:JSON.stringify(payload),
             signal:controller.signal
           });
