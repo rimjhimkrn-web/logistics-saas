@@ -354,3 +354,42 @@ Observed facts:
 Corrective workflow revision committed as `567dbc17ddb9da7a81c8c4d0ded23e8b3ebb3d42`: instead of attempting to transfer schema ownership, the disposable restore now dynamically obtains the pre-created local `graphql_public` schema owner and attempts to grant USAGE/CREATE to the local restore role while acting as that owner. This preserves schema ownership. The next workflow run must prove that the local role can assume the owner role; if not, inspect local role membership and adjust only the disposable stack setup. Do not weaken Staging permissions or alter Staging schema.
 
 **Status:** schema snapshot export PASS; local isolated restore FAIL; schema metric comparison NOT RUN; restore validation remains BLOCKED. The next run is required before claiming schema restore success.
+
+
+## Shipment operations preview-safety remediation — 28 Nov 2026
+
+A further source inspection covered 19 high-priority shipment/freight routes from the 67-page backend-signal review queue.
+
+Confirmed explicit preview-only handlers:
+- Carrier bookings: no carrier booking is confirmed or created.
+- Container bookings: no equipment is booked or reserved.
+- Forwarder dashboard: no live forwarder records are connected.
+- Transshipment: no route is saved.
+- Cargo details: no cargo record is saved; no verified save endpoint is connected.
+- Route planning: no route plan is saved or assigned.
+- Shipment edit: no shipment record is updated.
+- Shipment export: no export package is generated or stored.
+- Shipment parties: no parties are saved.
+- Shipment settings: no settings are saved.
+
+Confirmed non-live content needing clear labeling:
+- `src/shipments/details.html` contained hard-coded shipment status, route, coordinates, temperature/humidity, ETA, milestone and sensor events, plus a button claiming a Customs Gate API re-sync had started. It had no backend integration signal.
+- `public/shipments/tracking-events.html` displayed a "Live Feed Active" indicator and fabricated historical shipment events without a live event source.
+- `public/shipments/shipment-financials.html` displayed freight revenue, carrier costs, margin, invoice and approval states as if they were live ledger data.
+- `public/shipments/shipment-audit-log.html` already labels its content illustrative and not a live verification result.
+- `public/shipments/cancellation.html` already clearly states the cancellation control is not enabled and cannot cancel/release resources.
+- `public/shipper/payment-checkout.html` correctly states partner-direct payment only: it does not accept payment details or launch a gateway. This matches the current KRIM launch model.
+
+### Changes made on Staging branch
+1. `src/shipments/details.html` — added a prominent preview-only notice, removed simulated live status selection, relabeled telemetry/ETA/sample document content, and changed the Customs Sync action to explicitly state no API request is sent.
+2. `public/shipments/tracking-events.html` — added a preview-only notice and changed the live-feed indicator to sample timeline/not live.
+3. `public/shipments/shipment-financials.html` — added a preview-only notice and relabeled amounts, margin, invoice, carrier and approval labels as illustrative examples, not live ledger/invoice data.
+
+Commits:
+- `36dd883bcb95f6191194c342ee4a152a5a8573ec`
+- `1add68ff084c9eab539663f9b5976598a0b79b30`
+- `ff3b89702b11fab7cbaf019eab7437f0301055e7`
+
+Post-write source verification confirmed all three pages contain the preview notice; the known false "Live Feed Active", "AIS Satellite Link Active", "On-Time SLA Guarantee", "Invoiced to Consignee", "Healthy Margin" and fake Customs API-success strings are absent from the inspected sources. CI static-link and environment-isolation runs triggered for these commits and are pending at report time.
+
+This is a staging-only safety-label correction, not implementation of shipment telemetry, billing, tracking, audit, or operational APIs. The 67-route review queue remains open.
