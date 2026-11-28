@@ -814,3 +814,27 @@ This establishes that the data model supports delivery lifecycle tracking. It do
 
 ### Release disposition
 Notification infrastructure is partially implemented, but notification activation is NOT cleared. The active Staging worker is capable of external Resend delivery and must remain uninvoked during audit. The existing in-app/outbox/retry data model is not a substitute for full event coverage, role-scoped reads, essential-alert enforcement tests and provider delivery evidence. Do not broaden RPC grants, enable public notification pages or send real test messages. Migration provenance and isolated restore remain prerequisites for any database repair.
+
+
+## Operational event-to-notification trigger coverage audit — 2026-11-28
+
+Read-only inspection of Staging trigger metadata and function-body indicators. No events were inserted, no triggers or functions were invoked manually, and no database or production changes were made.
+
+### Confirmed trigger chain components
+- `krim_shipments` has an AFTER INSERT trigger that emits a shipment-created event and an AFTER UPDATE trigger that emits shipment-status events.
+- `krim_shipment_partner_assignments` has AFTER INSERT/UPDATE trigger coverage that emits partner-assignment events.
+- `krim_driver_assignments` has AFTER INSERT and AFTER UPDATE status-event trigger coverage.
+- `krim_events` has AFTER INSERT triggers for customer shipment in-app notification creation and essential email enqueueing.
+- `notifications` has BEFORE INSERT/UPDATE synchronization trigger for in-app notification history.
+- The event notification creator body contains shipment-created/status and partner-assignment classification signals and organization context. The essential email enqueue function contains shipment-created/status, partner-assignment, email-channel and essential-classification signals. These are static function-body indicators, not proof of correct recipient resolution, all event mapping or actual delivery.
+
+### Coverage gaps / unproven paths
+- No booking-request or booking-conversion event-to-notification trigger was found in the inspected trigger inventory. Booking creation must not be assumed to generate an in-app or email notification from the existing shipment trigger chain.
+- No direct shipment-milestone event-emission trigger was found in the inspected inventory. Shipment milestone audit triggers exist, but that is not the same as emitting a customer/partner/driver notification event.
+- Driver assignment events are emitted, but the downstream `krim_events` notification creator's body scan did not establish driver-recipient notification handling. Driver notification coverage remains unproven.
+- Shipment creation/status and partner-assignment event triggers are present; event recipients, organization/user resolution, deduplication and event-specific templates still require isolated tests.
+- The notification sync trigger on `notifications` does not prove every event inserts a notification or that the authenticated user can read the resulting history.
+- Two active pg_cron jobs were observed at a one-minute schedule. Their command text was intentionally not exposed; neither command was identified by a notification-specific marker. This does not establish that notification delivery is scheduled or that an external scheduler is active.
+
+### Release disposition
+The backend has a partial event-to-notification trigger chain for shipment creation/status, partner assignment and driver assignment event emission. It is not a complete end-to-end notification system. Booking-created, milestone and driver-recipient notification coverage are explicit acceptance gaps. Do not patch trigger coverage or create test events until migration provenance is reconciled and the disposable local restore succeeds. Add isolated test-only event fixtures and mocked provider transport, then verify recipient/org scoping, durable in-app history, idempotency, essential-alert enforcement and retries before activation.
