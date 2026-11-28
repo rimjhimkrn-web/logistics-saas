@@ -1043,3 +1043,22 @@ A separate ACL fingerprint pass returned:
 ACL fingerprints include explicit ACLs or PostgreSQL default ACL expansions, keyed by object, grantee, privilege and grantability. They are not a complete security certification: role membership, ownership, default privileges, column ACLs, function language/configuration and managed-schema ACLs require separate review. A follow-up default-privilege query was abandoned after a catalog type-cast error; no state was changed.
 
 **Next comparison step:** run the same canonical extraction against the isolated restore artifact or a newly disposable restore, compare per-object keys and fingerprints (not just aggregate hashes), then classify every difference. No DDL/DML, grants, migration-ledger changes or Production access occurred.
+
+
+## 2026-11-28 read-only SECURITY DEFINER ACL follow-up
+
+Additional read-only catalog inspection was performed against Staging project `qrpcivhdxobiaofppbkl`. No SQL writes, grants, revokes, migrations, or Production access were performed.
+
+Observed catalog counts:
+- `public`: 367 SECURITY DEFINER functions; 55 executable by `authenticated`; 0 executable by `anon`; all have an explicit `search_path` setting.
+- `private`: 76 SECURITY DEFINER functions; 11 executable by `authenticated`; 2 report EXECUTE for `anon`, but `anon` has no USAGE on the `private` schema, so the current schema ACL prevents direct name-based invocation. Both should still receive explicit ACL review and least-privilege cleanup after migration provenance is reconciled.
+- `krim_internal`: 87 SECURITY DEFINER functions; 0 executable by `authenticated` or `anon`; all have an explicit `search_path` setting.
+- 159 public SECURITY DEFINER functions do not contain literal `auth.uid` or `auth.jwt` references. This is a review queue, not a vulnerability count: trigger functions, internal helpers, and functions with other authorization paths must be distinguished by call surface and body review.
+
+The 55 public authenticated-executable functions and 11 private authenticated-executable functions require function-by-function authorization review. The earlier advisor result of 55 authenticated SECURITY DEFINER findings corresponds to the public executable set; private-schema ACL findings are tracked separately.
+
+Disposition:
+- Do not blanket revoke or modify functions before dependency and caller analysis.
+- Confirm each callable function's intended caller, tenant/role checks, input scope, and side effects.
+- For private trigger-only functions, explicitly revoke unnecessary direct EXECUTE from PUBLIC/anon/authenticated where dependency-safe, and verify trigger operation remains functional.
+- Keep schema changes frozen until Staging migration provenance is resolved and a reviewed migration can be safely prepared.
