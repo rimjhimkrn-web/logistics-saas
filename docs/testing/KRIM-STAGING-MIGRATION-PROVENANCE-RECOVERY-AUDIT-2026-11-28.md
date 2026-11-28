@@ -296,3 +296,29 @@ The complete static audit artifact from workflow run 46131057776 was downloaded 
 6. Continue to require browser/device, auth/RLS, and workflow E2E checks before release.
 
 Artifact: `krim-complete-static-audit` from workflow run `46131057776` (commit `afe9bcf6026cc2a8b3b5c7fe4e34b069adb19651`).
+
+
+## Triage of critical operational-looking pages with no visible backend integration
+
+A targeted source inspection was performed on 12 representative routes from the 67-page static review queue. This confirms the static signal is useful for triage but cannot be interpreted as a single category of missing integration.
+
+### Confirmed preview/mock behavior in inspected pages
+- `public/freight/booking-management.html`: form handler explicitly alerts that no booking or space allocation is created, then navigates onward.
+- `public/freight/forwarding-quote.html`: form handler explicitly alerts that no quotation is issued and no rate is offered.
+- `public/shipments/dispatch.html`: form handler explicitly alerts that no dispatch record is saved or assigned.
+- `src/customer/workspace.html`: quote calculation uses hard-coded mock arithmetic (weight × 3.85 + 4500); POD and invoice controls show alerts rather than retrieving or generating real documents.
+- `src/partner/workspace.html`: quote submission, dispatch, and vehicle-registration actions show alert messages; no server write is implemented in the inspected inline code.
+- `src/driver/app.html`: camera and POD actions are alert-only; POD handler claims completion in the UI without a server-side shipment update.
+- `public/quote-result.html`: explicitly states KRIM freight checkout is disabled; this aligns with the current partner-direct/no-freight-collection launch model.
+
+### Routes requiring intended-purpose classification
+- `partner-with-us.html` is a public acquisition/marketing page with no application data form in the inspected source; it should route into the canonical onboarding flow rather than be judged as an operational backend page.
+- `auth/driver-access.html` is a navigation gateway to sign-in/sign-up, not itself the authenticated driver workspace.
+- `dashboard.html` contains a workspace shell and links into canonical workspaces; its own HTML has no verified data integration from this inspection.
+
+### Severity and action
+These representative findings are not evidence of a broken live transaction, because these pages explicitly implement preview/mock interactions. They are, however, release blockers if exposed as production operational controls without a clear preview label and canonical route to a real authenticated workflow. In particular, a driver POD action must never tell a user that a shipment was completed unless the server confirms the authenticated POD workflow and persists the event.
+
+Action: classify the remaining 55 routes individually into (a) public informational/acquisition, (b) redirect/navigation shell, (c) staging/preview, (d) canonical authenticated workflow, or (e) obsolete/duplicate legacy. For categories (c) and (e), prevent production access or route to canonical flows. For (d), require API/RPC integration and role/tenant/E2E verification. Do not mass-add Supabase clients to these pages; integration must be implemented at the canonical workflow layer.
+
+Source review scope: 12 representative HTML files on `staging/phase00-env-isolation`; no files changed and no runtime actions were invoked.
