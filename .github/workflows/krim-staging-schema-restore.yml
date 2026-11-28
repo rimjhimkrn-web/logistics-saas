@@ -1,0 +1,175 @@
+name: KRIM Staging schema snapshot restore validation
+
+on:
+  push:
+    branches:
+      - staging/phase00-env-isolation
+    paths:
+      - .github/workflows/krim-staging-schema-restore.yml
+      - scripts/krim_staging_schema_restore_check.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema-snapshot-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out Staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: staging/phase00-env-isolation
+
+      - name: Validate Staging connection secret
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$STAGING_DB_URL" ]]; then
+            echo "::error::KRIM_STAGING_DB_URL is not configured. No database was contacted."
+            exit 1
+          fi
+          python - <<'PY'
+          import os, re, sys
+          from urllib.parse import urlsplit
+          value=os.environ["STAGING_DB_URL"]
+          try:
+              parsed=urlsplit(value)
+              valid=(parsed.scheme in ("postgres","postgresql") and bool(parsed.hostname)
+                     and bool(parsed.username) and parsed.password is not None
+                     and bool(parsed.path.strip("/")) and "[YOUR-PASSWORD]" not in value
+                     and not re.search(r"%(?![0-9A-Fa-f]{2})", value)
+                     and not any(ch.isspace() for ch in value))
+          except Exception:
+              valid=False
+          if not valid:
+              print("::error::KRIM_STAGING_DB_URL is not a valid PostgreSQL URI; value was not displayed.")
+              sys.exit(1)
+          print("Staging connection URI format validated; credentials were not displayed.")
+          PY
+
+      - name: Install Supabase CLI v3.4.0
+        uses: supabase/setup-cli@v3
+        with:
+          version: 3.4.0
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Create ephemeral local Supabase stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/krim-schema-restore"
+          cd "$RUNNER_TEMP/krim-schema-restore"
+          supabase init
+          supabase start --exclude studio,imgproxy,logflare,vector,supavisor,mailpit
+          supabase status -o env > "$RUNNER_TEMP/krim-local-supabase.env"
+          chmod 600 "$RUNNER_TEMP/krim-local-supabase.env"
+          if ! grep -q '^DB_URL=' "$RUNNER_TEMP/krim-local-supabase.env"; then
+            echo "::error::Local Supabase DB_URL was not emitted."
+            exit 1
+          fi
+
+      - name: Export schema-only snapshot from Staging
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+        run: |
+          set -euo pipefail
+          supabase db dump \
+            --schema public,private,krim_internal,graphql_public \
+            --file "$RUNNER_TEMP/krim-staging-schema.sql" \
+            --remote="$STAGING_DB_URL"
+          test -s "$RUNNER_TEMP/krim-staging-schema.sql"
+          python scripts/krim_staging_schema_restore_check.py \
+            "$RUNNER_TEMP/krim-staging-schema.sql" \
+            "$RUNNER_TEMP/krim-staging-schema-sanitized.sql" \
+            | tee "$RUNNER_TEMP/krim-schema-safety-report.json"
+          chmod 600 "$RUNNER_TEMP/krim-staging-schema.sql" "$RUNNER_TEMP/krim-staging-schema-sanitized.sql"
+
+      - name: Restore schema into isolated local Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +x
+          set -a
+          source "$RUNNER_TEMP/krim-local-supabase.env"
+          set +a
+          test -n "${DB_URL:-}"
+          psql "$DB_URL" --no-psqlrc --quiet --set ON_ERROR_STOP=1 \
+            --single-transaction --file "$RUNNER_TEMP/krim-staging-schema-sanitized.sql"
+          echo "Staging schema-only snapshot restored into the disposable local Supabase database."
+
+      - name: Compare schema integrity metrics
+        shell: bash
+        env:
+          STAGING_DB_URL: ${{ secrets.KRIM_STAGING_DB_URL }}
+        run: |
+          set -euo pipefail
+          set +x
+          set -a
+          source "$RUNNER_TEMP/krim-local-supabase.env"
+          set +a
+          cat > "$RUNNER_TEMP/krim-schema-metrics.sql" <<'SQL'
+          SELECT jsonb_build_object(
+            'tables', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p')),
+            'views', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('v','m')),
+            'functions', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
+            'triggers', (SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND NOT t.tgisinternal),
+            'policies', (SELECT count(*) FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
+            'indexes', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind='i'),
+            'constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public')),
+            'rls_enabled_without_policy', (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND c.relkind IN ('r','p') AND c.relrowsecurity AND NOT EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid)),
+            'security_definer_without_search_path', (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND p.prosecdef AND (p.proconfig IS NULL OR NOT EXISTS (SELECT 1 FROM unnest(p.proconfig) cfg WHERE cfg LIKE 'search_path=%'))),
+            'unvalidated_constraints', (SELECT count(*) FROM pg_constraint co JOIN pg_class c ON c.oid=co.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private','krim_internal','graphql_public') AND NOT co.convalidated)
+          )::text;
+          SQL
+          psql "$STAGING_DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align \
+            --file "$RUNNER_TEMP/krim-schema-metrics.sql" > "$RUNNER_TEMP/staging-metrics.json"
+          psql "$DB_URL" --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align \
+            --file "$RUNNER_TEMP/krim-schema-metrics.sql" > "$RUNNER_TEMP/local-metrics.json"
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          remote=json.loads(Path("".join([__import__("os").environ["RUNNER_TEMP"],"/staging-metrics.json"])).read_text())
+          local=json.loads(Path("".join([__import__("os").environ["RUNNER_TEMP"],"/local-metrics.json"])).read_text())
+          report={"staging_metrics":remote,"restored_local_metrics":local,"metrics_match":remote==local}
+          Path(__import__("os").environ["RUNNER_TEMP"]+"/krim-schema-restore-report.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(report,sort_keys=True))
+          if remote!=local:
+              print("::error::Restored local schema metrics do not match Staging.")
+              sys.exit(1)
+          PY
+
+      - name: Upload sanitized restore evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: krim-staging-schema-restore-evidence
+          path: |
+            ${{ runner.temp }}/krim-schema-safety-report.json
+            ${{ runner.temp }}/krim-schema-restore-report.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop ephemeral Supabase stack and remove schema files
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f "$RUNNER_TEMP/krim-local-supabase.env" ]]; then
+            cd "$RUNNER_TEMP/krim-schema-restore"
+            supabase stop --no-backup
+          fi
+          rm -rf "$RUNNER_TEMP/krim-schema-restore"
+          rm -f "$RUNNER_TEMP/krim-local-supabase.env" \
+            "$RUNNER_TEMP/krim-staging-schema.sql" \
+            "$RUNNER_TEMP/krim-staging-schema-sanitized.sql" \
+            "$RUNNER_TEMP/krim-schema-metrics.sql" \
+            "$RUNNER_TEMP/staging-metrics.json" \
+            "$RUNNER_TEMP/local-metrics.json"
