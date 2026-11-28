@@ -227,3 +227,12 @@ A read-only catalog inspection of the deployed multi-category onboarding RPC con
 - Deployed function-definition MD5 remains b2924b0dba721767a87f296956907b73.
 
 This is a positive authorization-hardening signal, but does not resolve the functional lifecycle defects documented earlier: the wrapper still calls the base onboarding routine and rewrites existing matching capabilities to inactive/pending, without immutable submission/evidence version lineage. No live rows were modified and no function was invoked during this inspection.
+
+
+## Follow-up — environment CI and bounded local-stack startup
+
+The corrected local-restore workflow did not yet reach the export stage in the latest run: it remained in ephemeral local Supabase stack startup after CLI and PostgreSQL client installation. To avoid another indefinite wait, startup now has both a 600-second command timeout and a 15-minute step timeout, with CI non-interactive initialization. This update triggers another isolated CI run.
+
+The environment-isolation regression and static-link audit workflows completed successfully on the latest code commits observed in this sequence (including commits 7ee424f, c6b8f6b, 8102aef). These are separate CI checks and do not substitute for schema snapshot restore validation.
+
+Current gate remains unchanged: migration provenance and isolated restore validation are still open; no schema migration has been applied to Staging; Production remains untouched.
