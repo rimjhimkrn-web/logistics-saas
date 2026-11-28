@@ -229,3 +229,17 @@ The full duplicate set is present in the repository tree audit. Do not arbitrari
 4. A safe forward-only migration-history repair plan accepted by the Supabase CLI and verified on a disposable copy of the current Staging schema.
 
 No migration files were renamed and no migration was applied. This issue further blocks a standard migration-based capability lifecycle implementation until resolved.
+
+
+## Migration ledger reconciliation — exact Staging comparison (2026-11-28)
+
+A read-only comparison was performed between all 499 repository migration filenames and all 163 rows in Staging's `supabase_migrations.schema_migrations` table.
+
+Findings:
+- The Staging ledger contains 163 applied entries, beginning at version `20261117135137`; it does not represent the complete historical migration lineage for the repository.
+- 129 ledger migration names can be matched to a current repository migration filename by migration basename. **34 applied ledger names do not match any current repository migration filename.**
+- For 14 of the 29 duplicate-version groups, both distinct migration basenames appear in the Staging ledger, but their recorded applied version IDs differ from the duplicate timestamp currently used in the repository filenames. Thus the filename timestamp is not a reliable applied-version identifier.
+- Two further collision groups (`20261127168000` and `20261127169000`) contain the same basename `phase00_enforce_fresh_evidence_during_pod_review`. The ledger contains one record for that basename, so the current ledger cannot uniquely identify which of the two same-basename repository files is its historical source. The two SQL files differ in whitespace/dollar-quote delimiter formatting, and both express the same intended function-definition replacement. The live Staging function contains the resulting fresh-evidence predicate, confirming the effect, but not the exact historical file identity.
+- The 13 older collision groups (versions `20261025150000` through `20261115151000`) have no exact basename entry in this Staging ledger snapshot. They may belong to the pre-existing schema baseline, but the current evidence does not prove their original application order or status.
+
+**Conclusion:** this is not simply 29 pairs that can be safely renamed. Repository filenames, migration names and remote applied-version identifiers have diverged. Do not rename files, edit remote history, run `db push`, or generate/apply a new migration against this state. A proper reconciliation needs a trusted historical migration archive (or an authoritative schema snapshot plus migration provenance), a disposable clone of the current Staging schema, and a CLI-based dry-run showing the exact proposed migration plan. The connected tools cannot run that local CLI/clone workflow. No remote ledger edits or DDL were made.
