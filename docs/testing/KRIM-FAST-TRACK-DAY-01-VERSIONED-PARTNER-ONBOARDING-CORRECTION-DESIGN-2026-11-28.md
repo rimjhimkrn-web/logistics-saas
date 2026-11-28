@@ -267,3 +267,21 @@ The corrected lifecycle must capture an **eligibility decision snapshot** at par
 Revocation/suspension then needs a deterministic impact query against those exact references. It should immediately block new matching/allocations, create an operations exception for affected queued/accepted/in-progress work, and preserve the accepted contract, assignment and shipment history until an authorised operator resolves each case. If legacy assignments have no capability reference, they must be classified as **legacy/unattributed** and handled conservatively; do not infer a capability from the current organisation profile.
 
 This lineage requirement is now part of the migration/test preflight. No schema or runtime changes were made.
+
+
+## Matching versus network-qualification policy consistency (2026-11-28)
+
+A read-only comparison of the deployed Staging SQL definitions for `krim_internal_check_network_capability(bigint)` and `krim_internal_create_partner_matching_run(bigint,bigint)` found material eligibility-policy differences:
+
+1. **Weight qualification differs.** Network qualification accepts a verified transport capability when `max_weight_kg` is NULL (or the requested weight is NULL), while matching requires `max_weight_kg IS NOT NULL` and at least the requested cargo weight. A partner can therefore contribute to an "available" network count but be excluded from actual matching.
+2. **Coverage model differs.** Network qualification uses country-level coverage, including a global row with NULL country or matching origin and destination country rows. Matching uses location coverage scores and/or an active route/corridor lane, plus active service-area checks at both locations. Country-level qualification alone is not sufficient to ensure matching eligibility.
+3. **Capacity predicates are implemented separately.** Network qualification explicitly counts verified vehicle/weight availability and resource records with unreserved capacity for the requested time. Matching calls a separate verified-capacity helper and separately checks service areas. Their equivalence has not been demonstrated by shared policy code or a common test suite.
+4. **The policy is not versioned or snapshotted.** The network qualification result stores aggregate counts, while matching stores criteria and reasons but not a single canonical eligibility-policy version or the exact capability/capacity rows used.
+
+### Required correction
+
+Create one canonical, versioned eligibility policy shared by pre-qualification and matching. It must return structured, explainable decisions and exact references to the approved capability version, service area/route lane, capacity availability/resource and time window. The matching run must consume those decisions rather than independently re-implementing a similar filter. The network status must not say "available" unless at least one candidate can pass the same downstream matching policy for the same request snapshot.
+
+The isolated test suite must include NULL max-weight, missing location coverage, country-only coverage, route-lane coverage, inactive service area, stale capability dates, insufficient capacity, reserved capacity, and time-boundary cases. At this audit snapshot, capabilities, match results, quotes and assignments were all empty; no operational records were affected.
+
+No database or runtime changes were made.
