@@ -5,6 +5,8 @@ import { join, dirname, resolve as pathResolve } from "node:path";
 import { runInNewContext } from "node:vm";
 
 const required = [
+  "public/app/notifications.html",
+  "public/app/app-store.js",
   "public/quote-result.html",
   "public/payment-verification.html",
   "public/shipment-confirmation.html",
@@ -115,6 +117,62 @@ const required = [
 ];
 
 const failures = [];
+
+// Authenticated notification centre regression: it must read the signed-in
+// user's durable feed and never render fabricated/sample notification records.
+const notificationCentrePath = "public/app/notifications.html";
+const notificationStorePath = "public/app/app-store.js";
+const notificationCentre = existsSync(notificationCentrePath) ? readFileSync(notificationCentrePath, "utf8") : "";
+const notificationStore = existsSync(notificationStorePath) ? readFileSync(notificationStorePath, "utf8") : "";
+for (const token of [
+  "from('notifications')",
+  ".eq('user_id',currentUser.id)",
+  ".order('created_at',{ascending:false})",
+  ".update({is_read:true})",
+  ".eq('user_id',currentUser.id)",
+  "No notifications yet",
+]) {
+  if (!notificationCentre.includes(token)) failures.push("Authenticated notification centre is missing required feed behavior: " + token);
+}
+if (!notificationStore.includes("export const supabase = window.KRIM_SUPABASE || window.supabaseClient || createClient(") ||
+    !notificationStore.includes("hostname.endsWith(\".krim-staging.pages.dev\")") ||
+    !notificationStore.includes("https://qrpcivhdxobiaofppbkl.supabase.co") ||
+    !notificationStore.includes("https://ebltviniygljwwseplph.supabase.co") ||
+    !notificationStore.includes("window.KRIM_SUPABASE = supabase")) {
+  failures.push("Shared app Supabase client must be exported and isolate all staging hosts from production.");
+}
+if (notificationCentre.includes("TKT-2026-9912") || notificationCentre.includes("sample alert") || notificationCentre.includes("Demo notification")) {
+  failures.push("Notification centre must not contain fabricated notification content.");
+}
+
+// Execute the actual app-store Supabase bootstrap against synthetic hostnames.
+// This prevents a preview page from accidentally opening a production session.
+const bootstrapStart = notificationStore.indexOf("// Match the repository-wide environment isolation contract:");
+const bootstrapEnd = notificationStore.indexOf("\nclass AppStore", bootstrapStart);
+if (bootstrapStart < 0 || bootstrapEnd < 0) {
+  failures.push("App-store environment bootstrap boundaries are missing.");
+} else {
+  const bootstrap = notificationStore.slice(bootstrapStart, bootstrapEnd)
+    .replace("export const supabase =", "const supabase =");
+  for (const testCase of [
+    { host: "feat-notification-recipient.krim-staging.pages.dev", environment: "production", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "krim-staging.pages.dev", environment: "preview", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "localhost", environment: "development", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+    { host: "rimjhimkrn-web.github.io", environment: "production", expected: "https://ebltviniygljwwseplph.supabase.co" },
+    { host: "other-preview.example.net", environment: "preview", expected: "https://qrpcivhdxobiaofppbkl.supabase.co" },
+  ]) {
+    let connectedUrl = "";
+    const sandbox = {
+      window: { location: { hostname: testCase.host }, KRIM_ENVIRONMENT: testCase.environment },
+      createClient: (url) => { connectedUrl = url; return { url }; },
+    };
+    runInNewContext(bootstrap, sandbox);
+    if (connectedUrl !== testCase.expected) {
+      failures.push("App-store Supabase environment isolation mismatch for " + testCase.host + ": " + connectedUrl);
+    }
+  }
+}
+
 
  // Environment isolation regression: production hosts use production Supabase;
  // every development/preview host must use the isolated staging project.

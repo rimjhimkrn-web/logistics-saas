@@ -52,3 +52,16 @@ The remaining 141 functions still require review of tenant scoping, delegated au
 ## Next review batch
 
 Continue by reviewing the mutating functions with the weakest source markers and their complete call graph. Confirm tenant ownership checks at the data access boundary, not merely the presence of an organization identifier. Do not bulk revoke execute privileges or alter function definitions based on regex screening alone.
+
+## Additional direct-identity functions reviewed
+A second pass examined selected SECURITY DEFINER functions that contain `auth.uid()` but do not contain the literal `krim_has_permission` marker. Absence of that helper marker was not treated as a finding by itself; the functions were checked for object ownership, membership and facility scope.
+
+- `krim_accept_driver_invitation(text)`: requires a 64-character token, authenticated and email-confirmed user, SHA-256 token match, exact invited email, unexpired/unrevoked/unaccepted invitation, and currently eligible partner organization. Creates/updates only the authenticated user's driver profile/membership and marks invitation accepted. Driver verification remains pending.
+- `krim_vehicle_register(...)`: requires active owner/manager membership in the exact organization; legacy fleet ID must belong to that organization. Vehicle is created pending verification.
+- `krim_warehouse_dispatch_transfer(...)`: requires operator authorization at both exact facilities in the same organization, locks source inventory, requires released quality state and sufficient stock, checks both facilities active/approved, enforces idempotency payload equality, and records movements/audit.
+- `krim_warehouse_receive_transfer(...)`: derives organization/destination from locked transfer row, requires destination-facility operator, only receives dispatched transfer, requires a different user from dispatcher, enforces idempotency and blocks merging into inventory whose quality status is not hold. Received stock remains on hold.
+- `krim_warehouse_review_inventory_quality(...)`: requires operator access to task facility, completed eligible task, different user from task creator/completer, independent private inspection evidence uploaded by another user, exact SKU/lot/facility match, and validates every contributing receipt before changing quality state.
+- `krim_set_partner_account_mode(...)`: derives the single active partner organization from the caller's own active membership; rejects zero/multiple orgs and prevents approved/active partner organizations switching to non-commercial modes.
+- `krim_provision_customer_organization(text)` and `krim_provision_partner_organization(text)`: derive actor from `auth.uid()`, serialize repeat provisioning with per-user advisory locks, reuse only the caller's existing eligible membership, and create owner membership/role/audit rows for the new organization. Partner provisioning starts in verification/compliance pending state.
+
+No direct cross-tenant defect was identified in these reviewed bodies. This remains a source-level review, not a two-user runtime test. The 151-function inventory is not fully reviewed; 141 direct-`auth.uid()` functions remain subject to the broader review plan.

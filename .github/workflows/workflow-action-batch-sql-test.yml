@@ -1,0 +1,40 @@
+name: KRIM workflow action batch isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_fence_workflow_action_batch_executor.sql'
+      - 'tests/sql/workflow-action-batch-*.sql'
+      - '.github/workflows/workflow-action-batch-sql-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  batch-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: krim_batch_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_batch_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare isolated workflow fixture
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_batch_test -v ON_ERROR_STOP=1 -f tests/sql/workflow-action-batch-fixture.sql
+      - name: Compile proposed batch replacement
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_batch_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_fence_workflow_action_batch_executor.sql
+      - name: Exercise success, retry, dead-letter and stale-worker paths
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_batch_test -v ON_ERROR_STOP=1 -f tests/sql/workflow-action-batch-assertions.sql

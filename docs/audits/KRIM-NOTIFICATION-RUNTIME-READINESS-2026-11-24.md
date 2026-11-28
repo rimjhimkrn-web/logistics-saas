@@ -91,3 +91,19 @@ Because intent, route, provider, and recipient tables currently have zero rows, 
 This is a verified readiness gap, not a claim that every notification-related database object is absent. The production objects and helper functions exist, but the configuration tables are empty and the currently deployed retry worker is not the generic outbox worker.
 
 No paid infrastructure was created or used for this audit.
+
+## Production recipient/provider snapshot rechecked — 2026-11-24
+A fresh read-only count query reconfirmed zero rows in each of:
+- `krim_customer_identity_links`
+- `krim_customer_acquisition_profiles`
+- `krim_customer_workspace_profiles`
+- `krim_shipment_partner_assignments`
+- `krim_capacity_leg_bindings`
+- `krim_communication_recipients`
+- `krim_notification_outbox`
+- `krim_notification_deliveries`
+- `krim_notification_preferences`
+- `krim_communication_routes`
+- `krim_communication_providers`
+
+This means production currently has no provisioned customer identity links, shipment-partner assignment recipients, notification recipients, communication routes/providers, or queued delivery history in these tables. Do not fabricate recipient rows or send test messages to arbitrary contacts. Before live service notifications can be verified, create a genuine test customer and partner through the approved onboarding flow, verify their identities and organization membership, create an accepted real test assignment, then configure a consent-aware communication route/provider and send an explicitly approved test to those verified test accounts. Essential transactional service updates must remain mandatory; marketing preferences must not suppress them.

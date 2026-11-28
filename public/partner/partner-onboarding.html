@@ -583,7 +583,7 @@ small,.eyebrow,.tag,.badge,.pill,.state,.num,.section-tag{letter-spacing:.045em}
         if (organizationError) throw organizationError;
         const acceptedPartnerTypes = ["partner", "carrier", "forwarder", "logistics_provider", "warehouse", "warehouse_operator"];
         const partnerOrganizations = (organizations || []).filter(org =>
-          acceptedPartnerTypes.includes(String(org.organization_type_code || org.organization_type || "").toLowerCase())
+          (acceptedPartnerTypes.includes(String(org.organization_type_code || "").toLowerCase()) || acceptedPartnerTypes.includes(String(org.organization_type || "").toLowerCase()))
         );
         if (partnerOrganizations.length > 1) {
           throw new Error("Your account has multiple partner organizations. Onboarding is paused to prevent documents or verification details being attached to the wrong organization. Contact KRIM support to establish the correct organization context.");

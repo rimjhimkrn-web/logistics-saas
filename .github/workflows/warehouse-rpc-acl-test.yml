@@ -1,0 +1,45 @@
+name: KRIM warehouse RPC ACL isolated SQL test
+on:
+  pull_request:
+    paths:
+      - 'docs/proposed-migrations/20261124_warehouse_authenticated_rpc_acl.sql'
+      - 'docs/proposed-migrations/20261124_warehouse_browser_table_read_acl.sql'
+      - 'tests/sql/warehouse-rpc-acl-*.sql'
+      - '.github/workflows/warehouse-rpc-acl-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  warehouse-rpc-acl-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: krim_warehouse_acl_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d krim_warehouse_acl_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create intentionally over-permissive fixture
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_warehouse_acl_test -v ON_ERROR_STOP=1 -f tests/sql/warehouse-rpc-acl-fixture.sql
+      - name: Apply proposed least-privilege grants
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_warehouse_acl_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_warehouse_authenticated_rpc_acl.sql
+      - name: Apply least-privilege browser table read grants
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_warehouse_acl_test -v ON_ERROR_STOP=1 -f docs/proposed-migrations/20261124_warehouse_browser_table_read_acl.sql
+      - name: Assert authenticated access and anonymous denial
+        env:
+          PGPASSWORD: test-only
+        run: psql -h localhost -U postgres -d krim_warehouse_acl_test -v ON_ERROR_STOP=1 -f tests/sql/warehouse-rpc-acl-assertions.sql
