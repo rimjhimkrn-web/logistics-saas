@@ -143,3 +143,70 @@ The multi-category wrapper inserts declarations with category and coverage metad
 ### Execution boundary
 
 This is a confirmed source/catalog defect report, not a deployed fix. No SQL DDL/DML, RPC invocation, storage upload/deletion, onboarding submission, partner state change or production access was performed. A standard Supabase migration must be generated using the supported CLI workflow and tested in an isolated local stack before any reviewed Staging migration is applied. The connected session currently lacks that local CLI/Docker migration-generation and isolated database-test capability. Do not bypass that gate with an ad hoc migration filename or unreviewed direct DDL.
+
+
+## Additional live Staging recheck — trigger coverage, ACLs and transition invariants (2026-11-28)
+
+### Trigger coverage is narrower than the lifecycle requires
+
+A direct catalog query found:
+- `krim_partner_capabilities` has only `trg_krim_partner_capability_audit`, an AFTER INSERT trigger. There is no UPDATE or DELETE audit/transition trigger.
+- `krim_organizations` has an INSERT creation-audit trigger and a BEFORE UPDATE trigger that checks ownership of submitted onboarding document paths. The document trigger is not a lifecycle transition guard; it does not prevent approved organisation status from being reset.
+- Both organisation and capability trigger functions must be reviewed in the isolated migration test before replacement or extension. Preserve the existing document-owner enforcement.
+
+### Database privilege boundary
+
+- `krim_partner_capabilities`: authenticated has no direct table grants in the inspected grant snapshot; RLS has one authenticated SELECT policy. service_role has full table privileges.
+- `krim_organizations`: authenticated has SELECT only, scoped by active membership or platform-admin AAL2 RLS; service_role has full table privileges.
+- `krim_audit_events`: no anon/authenticated direct grants; service_role has full table privileges.
+- The four reviewed onboarding/review/revocation RPCs are SECURITY DEFINER, owned by postgres, and have an empty search_path. EXECUTE is not granted to anon. The exposed multi-category wrapper and admin review/revoke RPCs are executable by authenticated; the delegated base onboarding v2 is not executable by authenticated.
+- The corrective design must retain this least-privilege model. Do not grant direct authenticated writes to capability, organisation lifecycle or audit tables.
+
+### Required invariants (must be database-enforced, not UI-only)
+
+1. **Approval preservation:** once a capability is `verified AND active`, a partner submission cannot mutate its approved service, coverage, hazardous/refrigerated flags, effective dates, verification state or evidence snapshot in place.
+2. **Version identity:** each submitted amendment has a monotonically increasing version scoped to the logical capability; a unique idempotency key prevents duplicate versions after retry.
+3. **Evidence immutability:** each version's evidence list is immutable after submission; object ownership and exact bucket/path are validated at submission and again when the reviewer opens/reviews that version.
+4. **Review binding:** reviewer decision references one immutable submission-version ID; decision records reviewer UUID, decision timestamp, reason and a digest/snapshot of the submitted fields/evidence references.
+5. **No self-review:** submitter and reviewer must differ; retain AAL2 and current platform-admin permission checks at decision time.
+6. **No approval by resubmission:** resubmission never changes the current approved capability; only explicit reviewer approval may activate a new version and supersede the old one.
+7. **Organisation state preservation:** capability-only changes cannot modify legal identity, compliance or organisation verification state. Legal/compliance changes use a distinct re-verification workflow with explicit review and operational impact.
+8. **Concurrency:** lock the logical capability/organisation row while assigning version numbers and making review decisions; enforce uniqueness in the database, not only by checking before insert.
+9. **Audit completeness:** INSERT, UPDATE, status transition, review, rejection, supersession, suspension and revocation are all recorded. Audit rows must not be editable/deletable by client roles.
+10. **Revocation safety:** disable new allocations immediately, enumerate existing reservations/assignments/shipments, and create operations exceptions. Do not silently cancel or reassign work already accepted or in transit.
+
+### Isolated regression test matrix
+
+The migration/test runner must build a disposable local database with synthetic auth users, orgs, memberships, role assignments, private Storage object metadata and capability fixtures. It must not use live customer or partner records.
+
+| Scenario | Expected result |
+|---|---|
+| First capability submission with valid 1–5 evidence objects | Version 1 pending; inactive until approval |
+| Same idempotency key retried | Same version/result returned; no duplicate history |
+| New key with changed coverage | New pending version; old approved version unchanged |
+| Repeat organisation onboarding after verified/compliant state | Capability amendment does not reset organisation lifecycle |
+| Attempt to alter verified capability in place | Rejected by database invariant |
+| Rejected version resubmitted with new evidence | New version; old rejected evidence and decision preserved |
+| Submitter attempts own review | Rejected |
+| Reviewer loses admin role/AAL2 before decision | Rejected at decision time |
+| Evidence path belongs to another user/org or wrong bucket | Rejected |
+| Evidence object removed/replaced after submission | Review blocked; immutable submission record retained |
+| Two concurrent submissions for same logical capability | Unique sequential versions; no duplicate version |
+| Duplicate legacy category rows | Migration stops with diagnostic; no arbitrary row selected |
+| Capability revoked with queued assignments | New allocation blocked; existing work surfaced for operations review |
+| Capability revoked with in-transit shipment | Shipment preserved; no automatic cancellation/reassignment |
+| Direct anon/authenticated INSERT/UPDATE/DELETE on history | Denied |
+| Direct anon/authenticated read of another org's evidence metadata | Denied |
+
+### Migration preflight requirements
+
+Before any Staging DDL:
+- Determine the canonical logical capability key and reconcile duplicate legacy rows (currently no unique organisation/category key).
+- Verify whether service_type and transport_mode_id semantics permit non-transport services; do not introduce an incorrect uniqueness key.
+- Confirm Storage ownership semantics consistently use the canonical `storage.objects.owner_id` field and test legacy owner-column compatibility.
+- Inspect every trigger, RPC overload and caller again against the exact migration diff.
+- Test both fresh install and upgrade from the current Staging schema.
+- Verify rollback/forward-repair plan and preservation of existing approved rows.
+- Generate the migration with the supported Supabase CLI workflow, pin the CLI version, and run the complete isolated suite before asking for Staging deployment approval.
+
+No migration was created or applied in this step.
