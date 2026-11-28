@@ -658,3 +658,29 @@ All eight queried workflow runs completed successfully:
 - Environment-isolation regression: `46133528887`, `46133525500`, `46133521865`, `46133519383`.
 
 These workflow results verify repository-level static link and environment-isolation checks for the referenced commits. They do not verify authenticated browser flows, Supabase RLS behavior, storage access, provider delivery, or real shipment operations.
+
+
+## Operations workflow permission verification — 2026-11-28
+
+Read-only Staging Supabase inspection (project `qrpcivhdxobiaofppbkl`; Production untouched):
+
+- `public.krim_create_shipment_leg_plan(bigint,jsonb,text,jsonb)`: SECURITY DEFINER, empty search_path, executable by authenticated; not executable by anon.
+- `public.krim_evaluate_shipment_leg_plan(bigint)`: SECURITY DEFINER, empty search_path, executable by authenticated; not executable by anon.
+- `public.krim_acknowledge_exception_escalation(bigint,text)`: SECURITY DEFINER, empty search_path, but **not executable by authenticated or anon** according to effective privilege checks. Its body requires auth.uid(), locks escalation and exception, checks `private.krim_has_permission(...,'compliance.manage')`, updates acknowledgement state and writes an audit event. The intended authorization checks exist inside the function, but the authenticated role currently cannot invoke it through the Data API.
+
+### Containment change
+- Updated `app/operations/exception-management.html` at commit `3185b7bad30cab5b02c4c78dd9f3d5200aed23c1`.
+- Removed the active Acknowledge button and its RPC handler.
+- Open escalations now explicitly show: acknowledgement unavailable pending backend EXECUTE privilege review.
+- Resolution remains paused; no database grants, function definitions or operational records were changed.
+- Source verification: disabled notice present; active ack control absent; RPC handler absent; resolution pause retained; operations membership check retained; live integration remains unverified.
+
+### Route planning source workflow
+- `app/operations/route-planning.html` reads authorized pre-execution shipments, active locations and transport modes; draft creation calls `krim_create_shipment_leg_plan` with an idempotency key; evaluation calls `krim_evaluate_shipment_leg_plan`.
+- Route-plan activation is disabled in the UI and remains blocked pending market/corridor/customs/compliance controls. Saving a draft does not create shipment legs or dispatch cargo.
+- Authenticated execute privilege exists for create/evaluate RPCs in Staging, but function-body authorization, row-level tenant isolation, concurrency, idempotency and full lifecycle behavior still require isolated authenticated tests. No draft was created and no RPC was invoked during this audit.
+- Shipment control tower and tracking activity are read-only source-register views; no GPS/AIS/flight/sensor feed or dispatch action is claimed.
+- Dispatch control explicitly remains read-only; backend readiness RPC is a precondition view, not dispatch authorization or execution.
+- Carrier coordination, warehouse coordination and capacity planning are review/preparation screens; browser forms do not persist operational actions.
+
+This finding is a concrete backend privilege blocker, not a static page issue alone. Do not issue a grant or alter the function until migration history is reconciled and the isolated schema-restore/forward-migration workflow is verified. After that, add a narrowly scoped authenticated grant only if approved by the permission design, then test AAL, organization permission, tenant isolation, audit and concurrency behavior in isolation.
