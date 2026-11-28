@@ -175,3 +175,20 @@ For the subsequent report/worker documentation commit `cbb746dfe932c23c35ccb394a
 - Static link audit: run `46128819707` — SUCCESS.
 
 These are CI/source checks only; they do not replace the pending database, tenant JWT, workflow-lane, notification, Auth-dashboard and recovery tests.
+
+
+## 11. Test-fixture Edge Function exact URL guard correction — implemented and deployed (2026-11-28)
+
+The final two deployed Staging functions were rechecked. The identity-invitation function used a `startsWith("https://<project-id>.supabase.co")` check, which could accept a lookalike hostname with a malicious suffix. This was corrected to the shared exact URL validator. The organization provisioner already used exact string equality; it now uses the same shared validator for consistent behavior.
+
+- `krim-phase00-test-user-invites`: deployed ACTIVE v4, `verify_jwt=true`; shared guard imported and used; vulnerable prefix check absent.
+- `krim-phase00-provision-test-organizations`: deployed ACTIVE v3, `verify_jwt=true`; shared guard imported and used.
+- CI workflow now includes both fixture functions and the legacy Resend worker in both push and pull-request path filters.
+- Deno exact-project guard test: run `46128928700` — SUCCESS.
+- Environment isolation regression: run `46128928689` — SUCCESS.
+- Static link audit: run `46128928696` — SUCCESS.
+- Both fixture functions were fetched after deployment and verified to import and invoke the shared validator.
+
+No invitations were sent, no organizations were provisioned, no fixture function was invoked, and no email/provider was called. The four test identities remain uncreated.
+
+This closes the source-level exact-project-target guard review for all five functions currently deployed in Staging. It does not prove authenticated owner authorization, fixture isolation, workflow queue isolation or notification side-effect safety.
