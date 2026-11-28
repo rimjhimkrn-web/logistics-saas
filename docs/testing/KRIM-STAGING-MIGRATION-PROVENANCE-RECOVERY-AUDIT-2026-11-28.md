@@ -1074,3 +1074,22 @@ The artifact was downloaded and all three JSON evidence files inspected:
 - `krim-schema-safety-report.json`: credential patterns not detected; data statements not detected; 50 managed-schema metadata lines removed; raw schema not uploaded. Raw dump size 3,706,391 bytes; sanitized dump size 3,693,867 bytes; sanitized dump SHA-256 `95f5c470f9e631ed66ca1125a26520eb28f74e337debd03a4b17cad5940052e9`.
 
 This proves current Staging schema-only export/restore parity within the stated comparison scope (public, private, krim_internal; relations, functions, policies, triggers, indexes, constraints). It does not prove migration-history completeness/replayability, data/Auth/Storage parity, full ACL/ownership/default-privilege parity, runtime authorization safety, or production readiness. Migration freeze remains in force. No Staging writes, DDL/DML, grants, ledger edits, migration replay, worker/provider calls, or Production access were performed by this workflow.
+
+
+## RLS-without-policy exposure classification — read-only Staging follow-up, 2026-11-28
+
+Requeried all 31 advisor findings against PostgreSQL catalogs and `information_schema.role_table_grants` in Staging project `qrpcivhdxobiaofppbkl`. All 31 tables still have zero policies and are owned by `postgres`.
+
+Observed effective table-grant posture:
+- None of the 31 tables has a direct table-level grant to `anon` or `authenticated`.
+- 30 of 31 tables have table privileges granted to `service_role` (SELECT/INSERT/UPDATE/DELETE plus associated table privileges). The exception is `private.krim_phase00_fixture_organizations`, which has no matching anon/authenticated/service_role table grant in the inspected grant view.
+- The seven `private` tables have no `anon` schema USAGE; `authenticated` has schema USAGE but no direct table grants on these targets. `public` schema USAGE exists for anon/authenticated, but these 24 target tables still have no direct table grants to either role.
+
+Security interpretation: this read-only evidence does **not** establish direct PostgREST table exposure for these 31 relations under the inspected role grants. The advisor finding remains valid as a configuration gap, but it should not be represented as 31 confirmed publicly readable tables. The 30 service-role-only tables appear intentionally server-side from the current grant posture; verify all Edge Function/RPC call paths and least-privilege service-role use. The fixture table's absence of direct API grants is consistent with restricted test infrastructure, but confirm its lifecycle and ensure it contains no production data.
+
+Disposition:
+- Do not add blanket policies to service-role-only or fixture tables merely to silence the advisor; that could broaden access.
+- Do not change RLS, grants, or schema state during migration freeze.
+- When migration provenance is resolved, classify each relation by intended access path, verify API grants and all function/Edge Function callers, and either document intentional server-only RLS-without-policy posture or design narrow tenant/role policies with negative cross-tenant tests.
+
+Query was SELECT-only. No DDL/DML, grants, revokes, migration-ledger edits, worker/provider calls, or Production access occurred.
