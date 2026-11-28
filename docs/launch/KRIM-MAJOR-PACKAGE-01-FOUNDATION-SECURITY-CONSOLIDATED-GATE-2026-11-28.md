@@ -247,3 +247,12 @@ Read-only comparison of 499 repository SQL migration filenames with 163 applied 
 - The 13 oldest duplicate groups are not represented by exact migration names in this ledger snapshot.
 
 This proves the repository migration filenames and remote applied-version history have diverged. No safe filename-only repair or migration push can be inferred. A trusted historical archive/schema snapshot and disposable CLI migration-plan verification are required. Connected tools cannot run that local CLI/clone workflow. No remote migration ledger edits, DDL or migration application were performed.
+
+
+### Capability-to-operations lineage gap (2026-11-28)
+
+The live Staging schema has no foreign key from operational records to a capability, and no first-class capability ID/version reference in partner match results, quotes, opportunities, assignments, capacity commitments or execution events. Matching stores partner organisation and eligibility reasons, while capability coverage helpers return boolean results without identifying the exact row/version used. The revocation RPC suspends the selected capability and explicitly leaves existing assignments uncancelled, but does not enumerate affected work or create operations exceptions. The INSERT-only capability audit trigger also misses update/review transitions.
+
+At the read-only snapshot, all seven related Staging tables (capabilities, match results, quotes, opportunities, partner assignments, capacity commitments and execution events) had zero rows. No live partner or shipment data was modified.
+
+The lifecycle correction therefore must include an immutable eligibility decision snapshot and propagate its capability/submission-version reference through match → quote → assignment. Revocation must block new allocations, enumerate affected work using those references, and create operations exceptions without silently cancelling accepted or in-transit shipments. Existing records without lineage must be treated as legacy/unattributed. This is an additional cross-module schema/test requirement, not a profile-only fix.
