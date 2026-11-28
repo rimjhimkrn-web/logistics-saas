@@ -838,3 +838,36 @@ Read-only inspection of Staging trigger metadata and function-body indicators. N
 
 ### Release disposition
 The backend has a partial event-to-notification trigger chain for shipment creation/status, partner assignment and driver assignment event emission. It is not a complete end-to-end notification system. Booking-created, milestone and driver-recipient notification coverage are explicit acceptance gaps. Do not patch trigger coverage or create test events until migration provenance is reconciled and the disposable local restore succeeds. Add isolated test-only event fixtures and mocked provider transport, then verify recipient/org scoping, durable in-app history, idempotency, essential-alert enforcement and retries before activation.
+
+
+## Notification recipient resolution, tenant isolation and in-app history audit — 2026-11-28
+
+Read-only Staging catalog inspection of function definitions, RLS policies, table grants and column metadata. No user notification rows or personal payload data were queried; no RPC, trigger, worker or provider was invoked.
+
+### Positive findings
+- Shipment-created/status notifications resolve the shipment's customer organization by matching the event organization to `krim_shipments.customer_organization_id`, require an active customer/enterprise organization, then target active members of that organization.
+- Partner assignment notifications resolve the assignment by ID and matching `partner_organization_id` to the event organization, then target active members of that partner organization.
+- Driver assignment created/status notifications validate the assignment UUID, organization, driver user, partner assignment, shipment and shipment leg against the persisted driver assignment before inserting for the assigned driver user.
+- In-app inserts use `ON CONFLICT(source_event_id,user_id) ... DO NOTHING`, providing a deduplication guard for repeated processing of the same event/user pair.
+- `notifications` has RLS enabled, authenticated SELECT/UPDATE grants only, and self-only SELECT/UPDATE policies on `user_id = auth.uid()`. No anon access or authenticated INSERT/DELETE grant was found. Its BEFORE INSERT/UPDATE trigger fills history timestamps/status and prevents authenticated mutation of notification content, recipient, shipment and source-event fields while permitting read-state changes.
+- Outbox, delivery, retry, communication-delivery-event and event tables have RLS enabled and no direct anon/authenticated table privileges in the inspected ACL check. Their policies are not presently exposed through direct table grants.
+
+### Important semantic and policy caveats
+- The history synchronization trigger sets `notifications.delivery_status='delivered'` and `delivered_at=now()` on INSERT. This represents creation/availability of an in-app notification row; it is not evidence that an email, SMS, push or external provider delivered anything. UI labels must not conflate these states.
+- The delivery and communication-event SELECT policies contain an `organization_id IS NULL OR organization-access` branch. The outbox SELECT policy instead requires a non-null organization ID. Direct authenticated table SELECT is currently not granted, so this is not an observed exploitable access path; if grants are ever added, null-organization rows need explicit restricted handling before exposure.
+- `krim_events` policy allows organization members or platform admins, but direct authenticated SELECT is not granted in the inspected ACL. Do not add grants merely to make the UI work.
+- Customer/partner recipient resolution targets all active organization members, not a separately validated role-specific notification recipient set. Confirm whether every active member should receive each operational event and whether user notification preferences should filter only optional channels, never essential in-app alerts.
+- The driver recipient path is specifically assignment-user scoped; no independent test has yet proven revoked membership, reassignment races, deleted/disabled user, cross-tenant forged event, or event replay behavior.
+- No four-user authenticated RLS test, cross-tenant negative test, read-state concurrency test or notification creation runtime test was run. Catalog policy inspection is not runtime isolation proof.
+
+### Required acceptance tests before activation
+1. Four independent customer/partner/driver/operations identities; verify own notifications visible and all cross-user/cross-organization reads and updates denied.
+2. Event spoofing and mismatched organization/entity IDs; confirm no notification is generated for an unrelated recipient.
+3. Driver assignment reassignment/revocation and membership termination between event creation and processing.
+4. Duplicate event replay and concurrent trigger processing; exactly one row per source event and recipient.
+5. Read/unread toggles preserve immutable notification content and recipient ownership.
+6. Distinguish in-app row availability from external provider sent/accepted/delivered/bounced states in schema consumers and UI.
+7. If direct SELECT grants are ever considered for delivery tables, first close null-organization policy semantics and prove tenant isolation.
+
+### Disposition
+Recipient resolution has substantive organization and assignment checks in the inspected function bodies, and in-app notifications have a self-only access model. Runtime security, recipient suitability, replay/concurrency behavior and external delivery semantics remain unverified. Notification activation remains blocked; do not widen grants or invoke workers before migration recovery and isolated test infrastructure are complete.
