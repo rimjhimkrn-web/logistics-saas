@@ -439,3 +439,27 @@ No mass Supabase client injection was performed. Any production operational cont
 ### Schema restore run state
 
 Run `46131552839` (commit `db03693c75f6839db2142fbdf3819f641c775f39`) successfully created the disposable local Supabase stack. At the latest poll, schema-only export from Staging was still in progress; local restore, schema metrics, sanitized evidence upload and cleanup had not yet completed. Do not treat the schema restore as passed until all required steps complete.
+
+
+## Partner governance, support and data-administration route review — 28 Nov 2026
+
+A further 10 route inspection was completed. These pages were inspected for hidden live-operation claims, browser-only actions and consistency with the no-GST/partner-direct launch model.
+
+### Findings — safely disclosed local previews
+- `public/partner/export-center.html`: explicitly preview-only; does not access partner accounts or private records. Export request is prepared locally; generated CSV is synthetic demo data.
+- `public/support/partner-complaints.html`: explicitly states no complaint is submitted or ticket created. It prepares a local draft, with copy/download only.
+- `public/partner/notifications-support.html`: explicitly states no live messages/support records are accessed; preference changes are local-only; no email/SMS/WhatsApp/push is sent and no support ticket is created.
+- `public/partner/offboarding.html`: request is prepared locally and not submitted; formal contact route is separate. It correctly explains partner-direct freight reconciliation and KRIM fee separation.
+- `public/partner/security-audit.html`: explicitly labels the control register illustrative and states no live account/audit records are accessed, no permissions are changed and no production system is connected. CSV export contains sample rows.
+- `public/partner/performance-quality.html`: metrics and shipment outcomes explicitly labelled illustrative; export generates a local synthetic sample CSV.
+- `public/partner/team-permissions.html`: access profiles are explanatory governance guidance, not a live permission editor.
+- `public/partner/settlements.html`: correctly describes customer freight payments directly to the contracting provider and separate KRIM coordination/referral economics; no KRIM freight custody or partner settlement is implied.
+- `public/operations/autonomous-reroute.html`: review markers stay in browser memory; no backend task is submitted and no reroute is executed.
+- `public/operations/partner-selection-assignment.html`: offers/assignments are sample records; selection and partner response controls are explicitly disabled. A backend-signal string exists in source, but no write or live assignment capability was observed in the inspected handlers.
+
+No source change was needed for these 10 pages because their current disclosures and disabled/local-only behavior already prevent the inspected controls from claiming live completion. This is source inspection only; it does not establish that every linked destination is safe or that production runtime authorization is correct.
+
+### Current CI verification
+
+- Static link audit and environment-isolation regression passed for commits `937aa0de1e27919b00144360ffbd409cfa718b9b`, `144e2cf37e5a4b8eb6cda037fff81913791f15ca`, `126b5f91b748bb82ec6038b4ed761ed3861ff1e6`, and latest report commit `d7b957b5acd924472f7c329711c9d3976c141dbd`.
+- Schema restore run `46131552839` remained in progress at the last poll. Local ephemeral stack startup passed; Staging schema export remained in progress; restore and metrics comparison had not begun. The run is not a pass and must be monitored to its configured timeout/completion.
