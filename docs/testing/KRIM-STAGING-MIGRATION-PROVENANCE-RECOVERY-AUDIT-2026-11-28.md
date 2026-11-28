@@ -614,3 +614,9 @@ The complete static repository audit completed successfully on commit `35477fa23
 
 Audit artifacts were uploaded by CI: complete JSON, Markdown report and console summary. Static link audit and environment isolation regression both passed for this review sequence. This does not replace browser-level responsive, locale persistence, translated-content or authenticated workflow tests.
 
+
+
+## Freight preview disclosure hardening — 28 Nov 2026
+
+Three public freight workflow forms were confirmed to be non-persistent previews: carrier booking, container equipment/slot booking, and transshipment planning. Their handlers already prevented persistence, but their primary buttons used confirmation/save language that could be mistaken for a real operational action. Updated each page to show an explicit preview-only disclosure before the form and changed the primary button labels to preview language. Existing no-save handlers remain in place. Source-level re-fetch verification recorded below; this is not a browser or live booking test.
+
