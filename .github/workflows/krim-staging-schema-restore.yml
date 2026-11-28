@@ -62,13 +62,14 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Create ephemeral local Supabase stack
+        timeout-minutes: 15
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/krim-schema-restore"
           cd "$RUNNER_TEMP/krim-schema-restore"
-          supabase init
-          supabase start --exclude studio,imgproxy,logflare,vector,supavisor,mailpit
+          CI=true supabase init
+          timeout --signal=TERM --kill-after=30s 600s supabase start --exclude studio,imgproxy,logflare,vector,supavisor,mailpit
           supabase status -o env > "$RUNNER_TEMP/krim-local-supabase.env"
           chmod 600 "$RUNNER_TEMP/krim-local-supabase.env"
           if ! grep -q '^DB_URL=' "$RUNNER_TEMP/krim-local-supabase.env"; then
