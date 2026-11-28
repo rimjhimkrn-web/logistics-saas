@@ -15,8 +15,11 @@ function place(label){return label||'Location not recorded'}
 async function access(){
  if(!client)throw new Error('KRIM configuration did not load. Refresh and retry.');
  const {data:auth,error:ae}=await client.auth.getSession();if(ae)throw ae;
- if(!auth?.session){location.replace(path('auth/login.html')+'?role=customer&next='+encodeURIComponent(location.pathname+location.search));return false}currentUserId=auth.session.user.id;
- const {data:members,error:me}=await client.from('krim_organization_members').select('organization_id').eq('user_id',auth.session.user.id).eq('status','active');if(me)throw me;
+ if(!auth?.session){location.replace(path('auth/login.html')+'?role=customer&next='+encodeURIComponent(location.pathname+location.search));return false}
+ const {data:verified,error:ve}=await client.auth.getUser();if(ve)throw ve;
+ if(!verified?.user){location.replace(path('auth/login.html')+'?role=customer&next='+encodeURIComponent(location.pathname+location.search));return false}
+ currentUserId=verified.user.id;
+ const {data:members,error:me}=await client.from('krim_organization_members').select('organization_id').eq('user_id',verified.user.id).eq('status','active');if(me)throw me;
  const ids=[...new Set((members||[]).map(m=>Number(m.organization_id)).filter(Number.isSafeInteger))];if(!ids.length)throw new Error('No active KRIM organization membership was found.');
  const {data:orgs,error:oe}=await client.from('krim_organizations').select('id,organization_type,status').in('id',ids).eq('status','active');if(oe)throw oe;
  orgIds=(orgs||[]).filter(o=>['customer','shipper','enterprise'].includes(String(o.organization_type||'').toLowerCase())).map(o=>Number(o.id));if(!orgIds.length)throw new Error('This account has no active customer, shipper or enterprise organization.');
