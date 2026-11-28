@@ -626,3 +626,35 @@ Three public freight workflow forms were confirmed to be non-persistent previews
 
 Reviewed `public/partner/export-center.html`. The export is explicitly synthetic/local-only, but the user-controlled export name was serialized into a CSV cell using quote escaping alone. Spreadsheet formula-leading values can still be interpreted despite CSV quoting. Added a cell serializer that prefixes an apostrophe when a cell begins (after whitespace/control characters) with `=`, `+`, `-` or `@`, then applies standard quote escaping. The sample remains synthetic and local-only; no partner data or production export is enabled.
 
+
+
+## Shipment evidence, exception and notification review — 2026-11-28
+
+Additional Staging source review (read-only; no production access):
+
+- `public/shipments/shipment-documents.html`: legacy route explicitly directs users to the authenticated Customs & Trade workspace; it disclaims its fixed sample shipment as non-authoritative. No change required.
+- `public/shipments/proof-of-delivery.html`: legacy route redirects to the canonical driver POD workflow and states that sample data/false delivery confirmations are prevented.
+- `app/driver/module-10-proof-of-delivery.html`: driver-scoped assignment reads are present; POD write/upload is explicitly paused pending exact shipment-leg evidence-binding correction and independent staging verification. No upload or delivery confirmation is performed by this page. This remains a release blocker, not a completed POD workflow.
+- `public/customer-os/customer-services/pod-capture.html` and `pod-download.html`: public staging, read-only guidance; no camera/signature/upload, persistent writes, file links or customer documents. Customer cannot self-submit or self-verify driver POD.
+- `public/customer-os/customer-services/epod-vault.html`: guidance only; no documents, shipment records or download links displayed. It correctly distinguishes submitted, pending, rejected, expired and independently verified evidence.
+- `public/shipments/shipment-exceptions.html`: legacy sample screen routes to authenticated Operations workspace; no authoritative live exception feed on the legacy route.
+- `app/operations/exception-management.html`: authenticated operations membership is checked; exception and escalation registers are read from the database; escalation acknowledgement is permission-checked. Resolution is explicitly paused pending evidence/corrective-action/timer controls. Browser preparation form does not write records.
+- `app/driver/module-09-exceptions-incidents.html`: reads assignments scoped to the signed-in driver and records exception events through the driver trip-event RPC. Emergency guidance says not to wait for the website. Runtime RPC authorization, audit, idempotency and tenant-isolation tests remain required.
+- `public/app/notifications.html`: explicitly not connected; no live feed, WebSocket, delivery receipts or notification preference state. No sample alerts are shown.
+- `app/driver/module-15-notifications-support.html`: authenticated notification inbox and support request UI are present; external email/SMS/push delivery is not inferred from inbox records. Essential service/safety alerts are explicitly non-optional and marketing preferences are separate. Provider delivery/retry and end-to-end evidence remain unverified.
+
+### Release blockers confirmed by this review
+1. POD upload/record creation remains paused until exact shipment + leg + driver + organization evidence binding and independent verification are proven.
+2. Customer ePOD access requires server-side authorization on every request, private storage and short-lived signed URLs; this public guidance page does not implement that access.
+3. Exception resolution remains paused until evidence, corrective actions and escalation timers are enforced.
+4. Notification centre is not connected; inbox record existence is not proof of email/SMS/push delivery. Provider configuration, delivery state, retries, bounce/failure handling and end-to-end verification remain open.
+5. Driver incident RPC and operations acknowledgement paths require isolated authenticated regression tests (ownership, role, AAL, tenant scope, idempotency, audit history and concurrent state changes).
+
+No source changes were necessary in this review batch because the inspected routes already disclose their limitations and do not claim successful POD, document export, live notification delivery or exception resolution. This is a source review, not a runtime acceptance test.
+
+### CI evidence for preceding shipment-page hardening commits
+All eight queried workflow runs completed successfully:
+- Static link audits: `46133528942`, `46133525530`, `46133521862`, `46133519422`.
+- Environment-isolation regression: `46133528887`, `46133525500`, `46133521865`, `46133519383`.
+
+These workflow results verify repository-level static link and environment-isolation checks for the referenced commits. They do not verify authenticated browser flows, Supabase RLS behavior, storage access, provider delivery, or real shipment operations.
