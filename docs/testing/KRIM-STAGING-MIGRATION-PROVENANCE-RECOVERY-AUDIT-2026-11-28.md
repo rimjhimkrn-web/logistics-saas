@@ -893,3 +893,30 @@ Read-only review of current staging frontend sources, followed by a small docume
 
 ### Disposition
 Driver in-app inbox has a scoped read path but only a 100-record window. Customer central notifications and customer preference page remain non-operational previews/redirects; partner page is local-only. Do not describe the whole customer/partner/driver notification experience as live. Implement a shared authenticated notification centre, customer/partner preference management, history pagination and reliable delivery-state UI only after migration recovery and isolated runtime tests. Notification activation remains blocked.
+
+
+## Isolated Staging schema restore and migration-body provenance progress — 2026-11-28
+
+### Schema restore validation: PASS (isolated only)
+- Previously pending workflow `KRIM Staging schema snapshot restore validation` run `46132495689` has now completed successfully on branch `staging/phase00-env-isolation`, commit `b6e803486b67621046ebec830cbfbd0027a03b60`.
+- The job exported a schema-only snapshot for `public, private, krim_internal`, sanitized it, restored it into a disposable local Supabase stack in a single transaction, compared selected integrity metrics, uploaded sanitized evidence, then stopped and removed the local stack and temporary schema files.
+- Sanitizer report: 3,500,359 raw schema bytes; 3,487,373 sanitized bytes; 49 managed-schema metadata lines removed; SHA-256 `d0d1f3ab7e546679673b16aa4274b0c332ae2961d6817ae6075d00121e692c7c`; no data statements or credential-pattern matches; raw dump not uploaded.
+- Staging and isolated restore metrics matched exactly: 398 tables, 1 view, 568 functions, 160 triggers, 412 policies, 1,600 indexes, 1,869 constraints, 31 RLS-enabled tables without policies, 0 SECURITY DEFINER functions without explicit search_path, and 0 unvalidated constraints.
+- Sanitized evidence artifact: `krim-staging-schema-restore-evidence`, artifact ID `15258338952`, SHA-256 digest `76dcc4bd3f295aae461e5f84a8578aef83ff0719c7fcecba89f013a9b4723bd8`.
+- This proves the current Staging application schemas can be exported and restored into an isolated disposable local database with matching aggregate metrics. It does NOT prove object-by-object equivalence, migration ledger completeness, migration replay safety, or permission to apply migrations to Staging.
+
+### Migration body provenance: 3 ambiguous groups resolved by exact body comparison
+Read-only query of `supabase_migrations.schema_migrations` retrieved stored migration statement bodies for the three ambiguous logical names. Exact normalized full-text comparisons against candidate repository SQL files found:
+- Ledger `20261127065250` / `phase00_require_fresh_evidence_after_pod_rejection` exactly matches file `20261127166000_phase00_require_fresh_evidence_after_pod_rejection.sql` (1,849 normalized characters). The 16400 and 16500 candidates do not match.
+- Ledger `20261127065542` / `phase00_enforce_fresh_evidence_during_pod_review` exactly matches file `20261127169000_phase00_enforce_fresh_evidence_during_pod_review.sql` (923 normalized characters). The 16800 candidate does not match.
+- Ledger `20261127065813` / `phase00_require_exact_multileg_plan_completion` exactly matches file `20261127171000_phase00_require_exact_multileg_plan_completion.sql` (1,300 normalized characters). The 17000 candidate does not match.
+- This is stronger than slug matching: the complete stored statement text matched the candidate file after UTF-8/newline normalization and trimming. No migration was replayed or edited.
+
+### Remaining provenance gap
+- Two ledger entries `20261117144642` and `20261117144901` still share logical name `20261117240000_align_country_pack_readiness_gates`, but their stored statement bodies differ (10,227 vs 4,289 normalized characters). No file with that logical name currently exists in the Staging branch migration tree. Their historical source mapping and ordering remain unresolved.
+- The 29 duplicate timestamp groups / 61 collision-group files have not all been reconciled. Three of the previously identified ambiguous logical-name groups are now resolved; do not extrapolate this result to the remaining groups.
+- Aggregate metric parity is not a catalog fingerprint. Exact object definitions, ownership, grants, extension state, auth/storage-managed objects and migration replay behavior still need a deterministic object-level comparison and migration-body map.
+
+### Safety disposition
+- No Staging DDL/DML, migration replay, migration-ledger repair, grant change, or Production access occurred.
+- Keep migration execution frozen. Next recovery work is a complete ledger-to-file body fingerprint map, duplicate timestamp ordering analysis, exact catalog/object comparison, and a documented forward-only reconciliation plan. Only after those checks pass may an isolated migration replay test be considered.
