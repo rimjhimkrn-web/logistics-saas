@@ -684,3 +684,30 @@ Read-only Staging Supabase inspection (project `qrpcivhdxobiaofppbkl`; Productio
 - Carrier coordination, warehouse coordination and capacity planning are review/preparation screens; browser forms do not persist operational actions.
 
 This finding is a concrete backend privilege blocker, not a static page issue alone. Do not issue a grant or alter the function until migration history is reconciled and the isolated schema-restore/forward-migration workflow is verified. After that, add a narrowly scoped authenticated grant only if approved by the permission design, then test AAL, organization permission, tenant isolation, audit and concurrency behavior in isolation.
+
+
+## Warehouse and dispatch RPC permission audit — 2026-11-28
+
+Read-only Staging privilege inspection (project `qrpcivhdxobiaofppbkl`; Production untouched):
+
+- The inspected warehouse mutation and task-list RPCs are not executable by either `anon` or `authenticated`: `krim_warehouse_create_linked_inbound_task`, `krim_warehouse_transition_task`, `krim_warehouse_list_tasks`, `krim_warehouse_list_assigned_shipment_legs`, `krim_warehouse_reserve_shipment_inventory`, `krim_warehouse_pick_shipment_allocation`, and `krim_warehouse_release_shipment_allocation`.
+- Additional warehouse facility, task, evidence, inventory, transfer and quality functions in the inspected inventory are also not executable by `anon` or `authenticated`. They may be internal/service or trigger-only functions; do not grant access merely because a name looks like a UI action.
+- Platform-admin warehouse review: `krim_admin_list_warehouse_facilities` and `krim_admin_review_warehouse_facility` are not executable by authenticated users. The current admin page's queue/review RPCs therefore cannot complete through the Data API under current effective privileges.
+- Platform-admin warehouse operations read: `krim_admin_list_warehouse_operations` is not executable by authenticated users.
+- Capacity resources differ: lane-aware list and review RPCs are executable by authenticated users; admin list without lane-aware variant is not. Existing page uses lane-aware read and guarded review.
+- Dispatch readiness RPC is not executable by authenticated users; dispatch itself is not enabled by the operations UI. The partner dispatch path and driver listing have distinct authenticated EXECUTE grants, but still require function-body/role and lifecycle verification.
+- All listed functions in this query had no effective `anon` EXECUTE privilege. Several use SECURITY DEFINER; empty search_path is present on many. This is a privilege inventory, not a complete body-level security approval.
+
+### Safe UI containment
+- `app/warehouse/staging/page-03-inbound-receiving.html`, commit `5e8cbd8ad14ecd3ed4581dce808eb9f92b207183`: disabled inbound task creation and removed active task-transition controls while the relevant RPC execute permissions are absent.
+- `app/warehouse/staging/page-08-shipment-allocation.html`, commit `c14efccf167fe999d5e87d989904bc03b3c6c02b`: disabled reservation submission and removed active pick/release controls while the relevant RPC execute permissions are absent.
+- No database grants, policies, function bodies, storage policies or operational records were changed.
+
+### Required before warehouse activation
+1. Reconcile migration history and prove isolated restore/forward migration workflow first.
+2. Classify each warehouse function as user-facing RPC, internal trigger helper or service-only operation; review body-level auth, membership, role, AAL, facility/organization scope, shipment-leg binding and state transition.
+3. Add only least-privilege grants through a reviewed forward migration, if intended by the authorization design.
+4. Test each role and tenant boundary, idempotency, concurrent stock reservation, inventory conservation, audit trail, evidence access and failure rollback in isolated authenticated sessions.
+5. Re-enable UI controls only after the exact RPC grant and end-to-end test are independently verified.
+
+The Staging inspection confirms significant backend execution-permission gaps. These are not repaired by browser changes and are not permission to broaden grants. No warehouse inventory, inbound task, shipment allocation or dispatch action was created during this audit.
