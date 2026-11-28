@@ -587,3 +587,14 @@ The long-running schema validation run `46132020729` has now completed and faile
 
 Corrective workflow revision commit: `b6e803486b67621046ebec830cbfbd0027a03b60`. The restore now excludes Supabase-managed `graphql_public` from the application schema dump, removes the invalid role-switch/grant workaround, and compares metrics only for application-owned schemas `public`, `private` and `krim_internal`. This isolates the application schema without trying to modify managed local ownership. New schema validation run `46132495689` is in progress; success is not yet established. If application migrations or objects are found to target `graphql_public`, that scope must be assessed separately rather than silently treated as restored.
 
+
+
+## Customer shipment details identity hardening — 28 Nov 2026
+
+Inspected `public/customer-os/customer-services/shipment-details.html` and its shared data module `public/customer-os/assets/shipment-operations.js`.
+
+- The Staging-hosted details page renders no shipment data and explicitly asks the user to sign in and select an authorized shipment.
+- The production data module already scopes shipment lookup to active customer/shipper/enterprise organization memberships, filters the shipment by `customer_organization_id`, and avoids revealing records outside those organizations. Route-plan and leg reads are keyed to the authorized shipment ID; display values are assigned through text nodes/textContent.
+- Identity hardening: the module previously relied on the locally available Supabase session's user ID. It now additionally calls `auth.getUser()`, requires a verified user and uses that verified identity for membership lookup. Commit: `a9c8cbe86c7640cd562a0198532ef4c02f582a28`.
+- This is source-level verification only. Runtime RLS, route-plan/leg organization isolation, and browser behavior still require isolated authenticated tests.
+
